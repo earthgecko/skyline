@@ -125,6 +125,48 @@ if skyline_external_settings:
                 external_flux_keys[flux_token] = skyline_external_settings[settings_key]['namespace']
 
 
+# @added 20220117 - Feature #4324: flux - reload external_settings
+#                   Feature #4376: webapp - update_external_settings
+def check_validate_key_update(caller):
+
+    updated_valid_keys = []
+    try:
+        UPDATED_FLUX_SELF_API_KEY = settings.FLUX_SELF_API_KEY
+        updated_valid_keys.append(UPDATED_FLUX_SELF_API_KEY)
+    except:
+        pass
+    UPDATED_FLUX_API_KEYS = {}
+    try:
+        UPDATED_FLUX_API_KEYS = settings.FLUX_API_KEYS.copy()
+    except:
+        pass
+    if UPDATED_FLUX_API_KEYS:
+        for flux_api_key in UPDATED_FLUX_API_KEYS:
+            try:
+                updated_valid_keys.append(str(flux_api_key))
+            except:
+                pass
+    updated_external_flux_keys = {}
+    updated_skyline_external_settings = {}
+    if not redis_conn_decoded:
+        redis_conn_decoded = get_redis_conn_decoded('flux')
+    try:
+        updated_skyline_external_settings_raw = redis_conn_decoded.get('skyline.external_settings')
+        if updated_skyline_external_settings_raw:
+            updated_skyline_external_settings = literal_eval(updated_skyline_external_settings_raw)
+    except Exception as e:
+        logger.error('error :: listen :: could get Redis set skyline.external_settings - %s' % str(e))
+        updated_skyline_external_settings = {}
+    if updated_skyline_external_settings:
+        for settings_key in list(updated_skyline_external_settings.keys()):
+            if 'flux_token' in list(updated_skyline_external_settings[settings_key].keys()):
+                flux_token = updated_skyline_external_settings[settings_key]['flux_token']
+                if flux_token:
+                    updated_valid_keys.append(str(flux_token))
+                    updated_external_flux_keys[flux_token] = skyline_external_settings[settings_key]['namespace']
+    return (updated_valid_keys, updated_external_flux_keys)
+
+
 def validate_key(caller, apikey):
 
     # @added 20200818 - Feature #3694: flux - POST multiple metrics
@@ -150,12 +192,73 @@ def validate_key(caller, apikey):
                     caller))
         # @added 20200818 - Feature #3694: flux - POST multiple metrics
         # Added validation of FLUX_API_KEYS
-        if valid_keys:
+        if valid_keys and keyValid:
             if apikey not in valid_keys:
                 # @modified 20210421 - Task #4030: refactoring
                 # semgrep - python-logger-credential-disclosure
                 logger.error('error :: %s :: invalid api key - not known' % (
                     # caller, str(keyLength), str(apikey)))
+                    caller))
+                keyValid = False
+            if keyValid:
+                try:
+                    metric_namespace_prefix = settings.FLUX_API_KEYS[apikey]
+                except:
+                    metric_namespace_prefix = None
+            if apikey in list(external_flux_keys.keys()):
+                try:
+                    metric_namespace_prefix = external_flux_keys[apikey]
+                except:
+                    metric_namespace_prefix = None
+
+        # @added 20220117 - Feature #4324: flux - reload external_settings
+        #                   Feature #4376: webapp - update_external_settings
+        update_keys = False
+        if not keyValid:
+            last_valid_keys_update = None
+            update_external_settings_key = None
+            try:
+                last_valid_keys_update = redis_conn_decoded.get('flux.last_valid_keys_update')
+            except Exception as err:
+                if LOCAL_DEBUG:
+                    logger.error('error :: listen :: could get flux.last_valid_keys_update from Redis - %s' % str(err))
+                last_valid_keys_update = None
+            if last_valid_keys_update:
+                if int(last_valid_keys_update) < (int(time()) - 60):
+                    logger.info('%s :: last valid key update check was more than 30 seconds ago, checking update' % (
+                        caller))
+                    update_keys = True
+            if not update_keys:
+                try:
+                    update_external_settings_key = redis_conn_decoded.get('skyline.external_settings.update.flux')
+                except Exception as err:
+                    if LOCAL_DEBUG:
+                        logger.error('error :: listen :: could get skyline.external_settings.update.flux from Redis - %s' % str(err))
+                    last_valid_keys_update = None
+                if update_external_settings_key:
+                    if int(update_external_settings_key):
+                        logger.info('%s :: skyline.external_settings.update.flux, updating keys' % (
+                            caller))
+                        update_keys = True
+        updated_valid_keys = []
+        updated_external_flux_keys = []
+        if update_keys:
+            try:
+                updated_valid_keys, updated_external_flux_keys = check_validate_key_update(caller)
+            except Exception as err:
+                if LOCAL_DEBUG:
+                    logger.error('error :: listen :: check_validate_key_update failed - %s' % str(err))
+                updated_valid_keys = []
+                updated_external_flux_keys = []
+        if updated_valid_keys:
+            for uv_key in updated_valid_keys:
+                valid_keys.append(uv_key)
+        if updated_external_flux_keys:
+            for uv_key in updated_external_flux_keys:
+                valid_keys.append(uv_key)
+        if update_keys and valid_keys:
+            if apikey not in valid_keys:
+                logger.error('error :: %s :: invalid api key - not known' % (
                     caller))
                 keyValid = False
             if keyValid:
@@ -414,6 +517,12 @@ class MetricData(object):
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
 
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'Invalid parameter received - %s' % str(request_param_key)
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
+
                     resp.status = falcon.HTTP_400
                     return
             except:
@@ -429,6 +538,12 @@ class MetricData(object):
                         logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'Invalid parameters'
+                body = {"code": 400, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
                 return
@@ -472,6 +587,12 @@ class MetricData(object):
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        message = 'invalid key'
+                        body = {"code": 401, "message": message}
+                        resp.body = json.dumps(body)
+                        logger.info('listen :: %s, returning 400' % message)
+
                         # @modified 20210909
                         # Return 401 if bad key
                         # resp.status = falcon.HTTP_400
@@ -489,6 +610,12 @@ class MetricData(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'invalid key'
+                body = {"code": 401, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
+
                 # @modified 20210909
                 # Return 401 if bad key
                 # resp.status = falcon.HTTP_400
@@ -500,7 +627,10 @@ class MetricData(object):
                     # @modified 20200206 - Feature #3444: Allow flux to backfill
                     # Only valid_timestamp is this is not a backfill request
                     if not backfill:
-                        valid_timestamp = validate_timestamp('listen :: MetricData GET - parameter - %s', str(request_param_value))
+                        # @modified 20220114 - lint message
+                        valid_timestamp_message = 'listen :: MetricData GET - parameter - %s' % str(request_param_value)
+                        # valid_timestamp = validate_timestamp('listen :: MetricData GET - parameter - %s', str(request_param_value))
+                        valid_timestamp = validate_timestamp(valid_timestamp_message, str(request_param_value))
                     else:
                         valid_timestamp = True
                     if valid_timestamp:
@@ -520,6 +650,12 @@ class MetricData(object):
                                 logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        message = 'invalid timestamp - %s' % str(request_param_value)
+                        body = {"code": 400, "message": message}
+                        resp.body = json.dumps(body)
+                        logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
                         return
@@ -542,6 +678,12 @@ class MetricData(object):
                         logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'invalid timestamp'
+                body = {"code": 400, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
                 return
@@ -568,6 +710,12 @@ class MetricData(object):
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid metric - %s' % str(request_param_value)
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -592,6 +740,12 @@ class MetricData(object):
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
 
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid value - %s' % str(request_param_value)
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -611,6 +765,12 @@ class MetricData(object):
             except Exception as e:
                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'no key parameter passed'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
+
             resp.status = falcon.HTTP_400
             return
         if not metric:
@@ -625,6 +785,12 @@ class MetricData(object):
                     logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
             except Exception as e:
                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'no metric parameter passed'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
             return
@@ -642,6 +808,12 @@ class MetricData(object):
                     logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
             except Exception as e:
                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'no value parameter passed'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
             return
@@ -807,6 +979,16 @@ class MetricDataPost(object):
             # @added 20210512 - Feature #4060: skyline.flux.worker.discarded metrics
             # postData = json.loads(req.stream.read())
             postData = json.loads(postData_obj)
+        except json.decoder.JSONDecodeError:
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'invalid json data'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
+
+            resp.status = falcon.HTTP_400
+            return
+
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: listen :: invalid post data - %s' % e)
@@ -831,6 +1013,12 @@ class MetricDataPost(object):
                 redis_conn.set('flux.listen.discarded.invalid_post_data', str(postData_obj))
             except Exception as e:
                 logger.error('error :: listen :: failed to data to Redis set flux.listen.discarded.invalid_post_data - %s' % e)
+
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'no POST date recieved'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
             return
@@ -891,6 +1079,16 @@ class MetricDataPost(object):
             key = None
             try:
                 key = str(postData['key'])
+            except KeyError:
+                key = None
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'no key passed'
+                body = {"code": 400, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
+                resp.status = falcon.HTTP_400
+                return
+
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: could not determine the key from POST data - %s - %s' % (
@@ -917,12 +1115,18 @@ class MetricDataPost(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'invalid key'
+                body = {"code": 401, "message": message}
+                resp.body = json.dumps(body)
+                logger.warning('warning :: listen :: %s, returning 401' % message)
+
                 # @modified 20210909
                 # Return 401 if bad key
                 # resp.status = falcon.HTTP_400
                 resp.status = falcon.HTTP_401
-
                 return
+
             if LOCAL_DEBUG:
                 logger.debug('debug :: listen :: valid key, metric_namespace_prefix set to %s' % str(metric_namespace_prefix))
         except Exception as e:
@@ -938,6 +1142,12 @@ class MetricDataPost(object):
                     logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
             except Exception as e:
                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'invalid key'
+            body = {"code": 401, "message": message}
+            resp.body = json.dumps(body)
+            logger.warning('warning :: listen :: %s, returning 401' % message)
 
             # @modified 20210909
             # Return 401 if bad key
@@ -990,6 +1200,12 @@ class MetricDataPost(object):
                     logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
             except Exception as e:
                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+
+            # @added 20220118 - Feature #4380: flux - return reason with 400
+            message = 'invalid metrics element'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
             return
@@ -1051,6 +1267,12 @@ class MetricDataPost(object):
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        message = 'invalid metric - %s' % str(request_param_value)
+                        body = {"code": 400, "message": message}
+                        resp.body = json.dumps(body)
+                        logger.info('listen :: %s, returning 400' % message)
+
                         resp.status = falcon.HTTP_400
                         return
 
@@ -1068,6 +1290,12 @@ class MetricDataPost(object):
                             logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid metric'
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
                     return
@@ -1102,11 +1330,17 @@ class MetricDataPost(object):
                             except Exception as e:
                                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
 
+                            # @added 20220118 - Feature #4380: flux - return reason with 400
+                            message = 'invalid timestamp - %s' % str(timestamp_present)
+                            body = {"code": 400, "message": message}
+                            resp.body = json.dumps(body)
+                            logger.info('listen :: %s, returning 400' % message)
+
                             resp.status = falcon.HTTP_400
                             return
                     except:
-                        logger.error('error :: listen :: invalid timestamp value found in POST data - %s' % (
-                            str(postData)))
+                        logger.warning('warning :: listen :: invalid timestamp value found in POST data - %s' % (
+                            str(timestamp_present)))
 
                         # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
                         if not metric:
@@ -1118,6 +1352,12 @@ class MetricDataPost(object):
                                 logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        message = 'invalid timestamp'
+                        body = {"code": 400, "message": message}
+                        resp.body = json.dumps(body)
+                        logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
                         return
@@ -1146,6 +1386,12 @@ class MetricDataPost(object):
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
 
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        message = 'invalid value - %s' % str(metric_data['value'])
+                        body = {"code": 400, "message": message}
+                        resp.body = json.dumps(body)
+                        logger.info('listen :: %s, returning 400' % message)
+
                         resp.status = falcon.HTTP_400
                         return
                 if not metric:
@@ -1160,6 +1406,12 @@ class MetricDataPost(object):
                             logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid metric'
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
                     return
@@ -1177,6 +1429,15 @@ class MetricDataPost(object):
                             logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    if not value_present:
+                        message = 'no value parameter present'
+                    else:
+                        message = 'invalid value'
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
                     return
@@ -1254,6 +1515,12 @@ class MetricDataPost(object):
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid metric'
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -1276,6 +1543,12 @@ class MetricDataPost(object):
                         logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'invalid metric'
+                body = {"code": 400, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
                 return
@@ -1307,7 +1580,10 @@ class MetricDataPost(object):
                     # @modified 20200206 - Feature #3444: Allow flux to backfill
                     # Only valid_timestamp is this is not a backfill request
                     if not backfill:
-                        valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST - timestamp - %s', str(postData['timestamp']))
+                        # @modified 20220114 - lint message
+                        valid_timestamp_message = 'listen :: MetricDataPOST POST - timestamp - %s' % str(postData['timestamp'])
+                        # valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST - timestamp - %s', str(postData['timestamp']))
+                        valid_timestamp = validate_timestamp(valid_timestamp_message, str(postData['timestamp']))
                     else:
                         valid_timestamp = True
                     if valid_timestamp:
@@ -1320,6 +1596,15 @@ class MetricDataPost(object):
                                 logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(metric))
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        try:
+                            message = 'invalid timestamp - %s' % str(postData['timestamp'])
+                        except Exception as err:
+                            message = 'invalid timestamp'
+                        body = {"code": 400, "message": message}
+                        resp.body = json.dumps(body)
+                        logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
                         return
@@ -1334,6 +1619,12 @@ class MetricDataPost(object):
                             logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(metric))
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid timestamp'
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
                     return
@@ -1369,6 +1660,12 @@ class MetricDataPost(object):
                     except Exception as e:
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
 
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'invalid value'
+                    body = {"code": 400, "message": message}
+                    resp.body = json.dumps(body)
+                    logger.info('listen :: %s, returning 400' % message)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -1384,6 +1681,12 @@ class MetricDataPost(object):
                         logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'no key parameter passed'
+                body = {"code": 401, "message": message}
+                resp.body = json.dumps(body)
+                logger.warning('warning :: listen :: %s, returning 401' % message)
 
                 # @modified 20210909
                 # Return 401 if bad key
@@ -1403,6 +1706,12 @@ class MetricDataPost(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'no metric data passed'
+                body = {"code": 400, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
+
                 resp.status = falcon.HTTP_400
                 return
             if not valid_value:
@@ -1417,6 +1726,12 @@ class MetricDataPost(object):
                         logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'invalid value data passed'
+                body = {"code": 400, "message": message}
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
                 return

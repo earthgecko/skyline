@@ -928,6 +928,26 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
         logger.info('get_cluster_data :: querying all remote hosts as only_host set to %s' % (
             str(only_host)))
 
+    # @added 20220115 - Feature #4376: webapp - update_external_settings
+    # Now determined based on endpoint_params if passed and handle GET
+    # and POST
+    normal_api = True
+    method = 'GET'
+    post_data = None
+    if endpoint_params:
+        if 'api_endpoint' in list(endpoint_params.keys()):
+            api_endpoint = endpoint_params['api_endpoint']
+            normal_api = False
+            logger.info('get_cluster_data :: overriding api_endpoint with %s' % (
+                str(api_endpoint)))
+        if 'method' in list(endpoint_params.keys()):
+            method = endpoint_params['method']
+            logger.info('get_cluster_data :: overriding method with %s' % (
+                str(method)))
+        if 'post_data' in list(endpoint_params.keys()):
+            post_data = endpoint_params['post_data']
+            logger.info('get_cluster_data :: post_data was passed')
+
     for item in settings.REMOTE_SKYLINE_INSTANCES:
         r = None
         user = None
@@ -943,9 +963,8 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                 logger.info('get_cluster_data :: not querying %s as only_host set to %s' % (
                     str(item[0]), str(only_host)))
                 continue
-            else:
-                logger.info('get_cluster_data :: querying %s as only_host set to %s' % (
-                    str(item[0]), str(only_host)))
+            logger.info('get_cluster_data :: querying %s as only_host set to %s' % (
+                str(item[0]), str(only_host)))
 
         try:
             user = str(item[1])
@@ -956,15 +975,36 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             password = None
         logger.info('get_cluster_data :: querying %s for %s on %s' % (
             str(item[0]), str(data_required), str(api_endpoint)))
+
+        # @added 20220115 - Feature #4376: webapp - update_external_settings
+        # Now determined based on endpoint_params if passed and handle GET
+        # and POST
+        url = '%s/api?%s' % (str(item[0]), api_endpoint)
+        if not normal_api:
+            url = '%s/%s' % (str(item[0]), str(api_endpoint))
+        r = None
+
         try:
-            url = '%s/api?%s' % (str(item[0]), api_endpoint)
-            if use_auth:
-                r = requests.get(url, timeout=use_timeout, auth=(user, password))
-            else:
-                r = requests.get(url, timeout=use_timeout)
+            # @modified 20220115 - Feature #4376: webapp - update_external_settings
+            # Now determined based on endpoint_params if passed and handle GET
+            # and POST
+            # url = '%s/api?%s' % (str(item[0]), api_endpoint)
+            if method == 'GET':
+                if use_auth:
+                    r = requests.get(url, timeout=use_timeout, auth=(user, password))
+                else:
+                    r = requests.get(url, timeout=use_timeout)
+            if method == 'POST':
+                connect_timeout = 5
+                read_timeout = 10
+                use_timeout = (int(connect_timeout), int(read_timeout))
+                if use_auth:
+                    r = requests.post(url, auth=(user, password), json=post_data, timeout=use_timeout, verify=settings.VERIFY_SSL)
+                else:
+                    r = requests.post(url, json=post_data, timeout=use_timeout, verify=settings.VERIFY_SSL)
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: get_cluster_data :: failed to %s from %s' % (
+            logger.error('error :: get_cluster_data :: failed to get %s from %s' % (
                 api_endpoint, str(item)))
         if r:
             if r.status_code != 200:
@@ -998,6 +1038,14 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                     logger.info('get_cluster_data :: got %s %s from %s' % (
                         str(len(remote_data)), str(data_required), str(item[0])))
                     data.append(remote_data)
+                if isinstance(remote_data, bool):
+                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                        str(remote_data), str(data_required), str(item[0])))
+                    data.append(remote_data)
+        else:
+            logger.error('error :: get_cluster_data :: failed to get response from %s on %s' % (
+                api_endpoint, str(item)))
+
     return data
 
 

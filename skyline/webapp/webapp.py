@@ -31,7 +31,9 @@ import os
 import base64
 
 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-import urllib.parse
+# @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+# Roll back change - breaking existing metrics with colons
+# import urllib.parse
 
 # @added 20210415 - Feature #4014: Ionosphere - inference
 from shutil import rmtree
@@ -100,7 +102,9 @@ from flask import escape as flask_escape
 import codecs
 
 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-from werkzeug.urls import iri_to_uri
+# @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+# Roll back change - breaking existing metrics with colons
+# from werkzeug.urls import iri_to_uri
 
 if True:
     sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -276,6 +280,13 @@ if True:
 
     # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies
     from panorama_plot_anomalies import panorama_plot_anomalies
+
+    # @added 20220114 - Feature #4376: webapp - update_external_settings
+    from functions.settings.manage_external_settings import manage_external_settings
+
+    # @added 20220117 - Feature #4324: flux - reload external_settings
+    #                   Feature #4376: webapp - update_external_settings
+    from functions.flux.reload_flux import reload_flux
 
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
@@ -591,6 +602,9 @@ def gzipped(f):
 
 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
 def url_encode_metric_name(metric_name):
+    """
+    URL Encode a metric name
+    """
     url_encoded_metric_name = False
     if ':' in metric_name:
         url_encoded_metric_name = True
@@ -1566,7 +1580,9 @@ def api():
             redis_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
             redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric)
             # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-            redis_metric_name = url_encode_metric_name(redis_metric_name)
+            # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+            # Roll back change - breaking existing metrics with colons
+            # redis_metric_name = url_encode_metric_name(redis_metric_name)
             try:
                 last_analyzed_timestamp = REDIS_CONN.hget(redis_hash_key, redis_metric_name)
             except Exception as e:
@@ -2905,7 +2921,9 @@ def api():
             if not raw_series:
                 metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric)
                 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                metric_name = url_encode_metric_name(metric_name)
+                # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                # Roll back change - breaking existing metrics with colons
+                # metric_name = url_encode_metric_name(metric_name)
 
                 raw_series = REDIS_CONN_UNDECODE.get(metric_name)
             if not raw_series:
@@ -3676,7 +3694,9 @@ def panorama():
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + value
                     # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                    metric_name = url_encode_metric_name(metric_name)
+                    # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                    # Roll back change - breaking existing metrics with colons
+                    # metric_name = url_encode_metric_name(metric_name)
 
                     # @added 20180423 - Feature #2034: analyse_derivatives
                     #                   Branch #2270: luminosity
@@ -4846,7 +4866,9 @@ def ionosphere():
                 if not metric_found:
                     metric_name = settings.FULL_NAMESPACE + base_name
                     # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                    metric_name = url_encode_metric_name(metric_name)
+                    # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                    # Roll back change - breaking existing metrics with colons
+                    # metric_name = url_encode_metric_name(metric_name)
 
                     try:
                         unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
@@ -5430,7 +5452,9 @@ def ionosphere():
                     return 'Internal Server Error', 500
                 metric_name = settings.FULL_NAMESPACE + str(value)
                 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                metric_name = url_encode_metric_name(metric_name)
+                # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                # Roll back change - breaking existing metrics with colons
+                # metric_name = url_encode_metric_name(metric_name)
 
                 # @added 20180423 - Feature #2034: analyse_derivatives
                 #                   Branch #2270: luminosity
@@ -6369,7 +6393,9 @@ def ionosphere():
                                     base_name = request.args.get('metric', 0)
                                     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
                                     # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                                    redis_metric_name = url_encode_metric_name(redis_metric_name)
+                                    # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                                    # Roll back change - breaking existing metrics with colons
+                                    # redis_metric_name = url_encode_metric_name(redis_metric_name)
 
                                     metric_assigned_to = None
                                     logger.info('checking which remote Skyline instance is assigned - %s' % str(base_name))
@@ -6483,7 +6509,9 @@ def ionosphere():
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + str(value)
                     # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                    metric_name = url_encode_metric_name(metric_name)
+                    # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                    # Roll back change - breaking existing metrics with colons
+                    # metric_name = url_encode_metric_name(metric_name)
 
                     metric_found = False
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
@@ -6558,7 +6586,9 @@ def ionosphere():
                     if key == 'metric' or key == 'metric_td':
                         base_name = str(value)
                         # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                        base_name = url_encode_metric_name(base_name)
+                        # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                        # Roll back change - breaking existing metrics with colons
+                        # base_name = url_encode_metric_name(base_name)
 
                 # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
                 if timestamp_arg and metric_arg:
@@ -6639,7 +6669,9 @@ def ionosphere():
                             base_name = request.args.get('metric', 0)
                             redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
                             # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                            redis_metric_name = url_encode_metric_name(redis_metric_name)
+                            # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                            # Roll back change - breaking existing metrics with colons
+                            # redis_metric_name = url_encode_metric_name(redis_metric_name)
 
                             metric_assigned_to = None
                             logger.info('checking which remote Skyline instance is assigned - %s' % str(base_name))
@@ -6903,7 +6935,9 @@ def ionosphere():
             derivative_metrics = []
         redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
         # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-        redis_metric_name = url_encode_metric_name(redis_metric_name)
+        # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+        # Roll back change - breaking existing metrics with colons
+        # redis_metric_name = url_encode_metric_name(redis_metric_name)
 
         if redis_metric_name in derivative_metrics:
             known_derivative_metric = True
@@ -7364,7 +7398,9 @@ def ionosphere():
                     logger.warning('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
                 metric_name = settings.FULL_NAMESPACE + str(base_name)
                 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                metric_name = url_encode_metric_name(metric_name)
+                # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
+                # Roll back change - breaking existing metrics with colons
+                # metric_name = url_encode_metric_name(metric_name)
 
                 if metric_name in ionosphere_metrics:
                     iono_metric = True
@@ -9081,6 +9117,130 @@ def thunder_test():
             logger.error(trace)
             logger.error('error :: %s' % message)
             return internal_error(message, trace)
+
+
+# @added 20220114 - Feature #4376: webapp - update_external_settings
+@app.route('/update_external_settings', methods=['POST'])
+@requires_auth
+def update_external_settings():
+    start = time.time()
+    start_timer = timer()
+    logger.info('/update_external_settings')
+    key = None
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 405')
+        return 'Method Not Allowed', 405
+    cluster_data = False
+    if request.method == 'POST':
+        post_data = {}
+        try:
+            post_data = request.get_json()
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_external_settings - no POST data - %s' % (
+                err))
+            logger.info('update_external_settings, return 400 no POST data')
+            return 'Bad request', 400
+        try:
+            cluster_data = post_data['data']['cluster_data']
+        except KeyError:
+            cluster_data = False
+        try:
+            key = post_data['data']['key']
+        except KeyError:
+            key = None
+        if not key:
+            logger.info('update_external_settings, return 400 no key')
+            return 'Bad request', 400
+        if key != settings.FLUX_SELF_API_KEY:
+            bad_key = str(key)
+            logger.info('update_external_settings, return 401 bad key - %s' % bad_key)
+            return 'Unauthorized', 401
+    external_settings = {}
+    external_from_cache = False
+    remote_external_settings = {}
+    if key:
+        if settings.EXTERNAL_SETTINGS:
+            logger.info('update_external_settings - managing external_settings')
+            try:
+                external_settings, external_from_cache = manage_external_settings(skyline_app)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_external_settings - fetch_external_settings failed - %s' % (
+                    err))
+            if external_settings:
+                logger.info('update_external_settings - %s external_settings from cache %s' % (
+                    str(len(list(external_settings.keys()))), str(external_from_cache)))
+                try:
+                    REDIS_CONN.set('skyline.external_settings.update.flux', int(start))
+                    logger.info('added Redis key skyline.external_settings.update.flux')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_external_settings - failed to create Redis key skyline.external_settings.update.flux')
+                # @added 20220117 - Feature #4324: flux - reload external_settings
+                #                   Feature #4376: webapp - update_external_settings
+                flux_pid_file = '%s/flux.pid' % settings.PID_PATH
+                if os.path.isfile(flux_pid_file):
+                    # logger.info('restarting flux')
+                    # try:
+                    #     restart_flux = subprocess.getstatusoutput('/usr/bin/systemctl restart flux')
+                    #     if restart_flux:
+                    #         if restart_flux[0] == 0:
+                    #             logger.info('restarted flux OK -  exit code and output - %s' % str(restart_flux))
+                    #         else:
+                    #             logger.error('error :: failed to restart flux -  exit code and output - %s' % str(restart_flux))
+                    # except Exception as err:
+                    #     logger.error(traceback.format_exc())
+                    #     logger.error('error :: update_external_settings - fetch_external_settings failed - %s' % (
+                    #         err))
+                    logger.info('initiating reload_flux')
+                    try:
+                        flux_pids = reload_flux(skyline_app, flux_pid_file)
+                        if flux_pids:
+                            logger.info('update_external_settings - reload_flux reports %s flux pids' % str(len(flux_pids)))
+                    except Exception as err:
+                        logger.error('error :: update_external_settings - reload_flux error - %s' % err)
+
+        if not settings.REMOTE_SKYLINE_INSTANCES:
+            cluster_data = False
+
+        if cluster_data:
+            endpoint_params = {
+                'api_endpoint': '/update_external_settings',
+                'data_required': 'updated',
+                'only_host': 'all',
+                'method': 'POST',
+                'post_data': {
+                    'data': {
+                        'key': key,
+                        'cluster_data': False,
+                    }
+                }
+            }
+            try:
+                remote_external_settings = get_cluster_data('update_external_settings', 'updated', only_host='all', endpoint_params=endpoint_params)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: webapp could not get update_external_settings from the remote Skyline instances')
+
+    end = timer()
+    request_time = (end - start_timer)
+
+    if not cluster_data:
+        if external_settings:
+            status_code = 200
+            data_dict = {"status": {"update_external_settings": "success", "response": 200, "request_time": request_time}, "data": {"updated": True}}
+        else:
+            status_code = 500
+            data_dict = {"status": {"update_external_settings": "failed", "response": 500, "request_time": request_time}, "data": {"updated": False, "external_settings": external_settings}}
+        return jsonify(data_dict), status_code
+    if external_settings and remote_external_settings:
+        status_code = 200
+        data_dict = {"status": {"update_external_settings": "success", "response": 200, "request_time": request_time}, "data": {"updated": True, "remote_external_settings": remote_external_settings}}
+    else:
+        status_code = 500
+        data_dict = {"status": {"update_external_settings": "failed", "response": 500, "request_time": request_time}, "data": {"updated": False, "remote_external_settings": remote_external_settings}}
+    return jsonify(data_dict), status_code
 
 
 # @added 20210316 - Feature #3978: luminosity - classify_metrics

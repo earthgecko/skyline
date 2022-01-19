@@ -1538,15 +1538,15 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>yhat_values=[true | boolean | <font color=red>required</font>]</br>
-                  metric=[metric name | str | <font color=red>required</font>]</br>
-                  from=[unix timestamp | str | <font color=red>required</font>]</br>
-                  until=[unix timestamp | str | <font color=red>required</font>]</br>
-                  include_value=[false | boolean | optional defaults to false]</br>
-                  include_mean=[false | boolean | optional defaults to false]</br>
-                  include_yhat_real_lower=[false | boolean | optional defaults to false]</br>
-                  include_anomalous_periods=[false | boolean | optional defaults to false]</br>
-                  remove_prefix=[str | optional] - prefix string to remove (do not pass a trailing dot)</br>
+  		        <td>yhat_values=[true | boolean | <font color=red>required</font>]<br>
+                  metric=[metric name | str | <font color=red>required</font>]<br>
+                  from=[unix timestamp | str | <font color=red>required</font>]<br>
+                  until=[unix timestamp | str | <font color=red>required</font>]<br>
+                  include_value=[false | boolean | optional defaults to false]<br>
+                  include_mean=[false | boolean | optional defaults to false]<br>
+                  include_yhat_real_lower=[false | boolean | optional defaults to false]<br>
+                  include_anomalous_periods=[false | boolean | optional defaults to false]<br>
+                  remove_prefix=[str | optional] - prefix string to remove (do not pass a trailing dot)<br>
               </td>
   		      </tr>
   		      <tr>
@@ -1619,6 +1619,60 @@ With value, mean and yhat_real_lower passed
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">Admin method ::</span> <span class="re">/update_external_settings</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Updates Skyline external settings Redis data from EXTERNAL_SETTINGS endpoints and reloads flux processes.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/update_external_settings</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>POST</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Authentication:</td>
+  		        <td><font color=red>required</font>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>key=[FLUX_SELF_API_KEY | str | <font color=red>required</font>]<br>
+                  cluster_data=[true | boolean | optional]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example with POST data:</td>
+              <td>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY"}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/update_external_settings</code><br>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY"},"cluster_data":true}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/update_external_settings</code> [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json responses, examples:<br>
+Single response:<br>
+                  <code>
+{"data":{"updated":true},"status":{"request_time":9.607258634001482,"response":200,"update_external_settings":"success"}}
+</code><br>
+cluster_data response:<br>
+<code>
+{"data":{"remote_external_settings":[true,true],"updated":true},"status":{"request_time":13.784328731002376,"response":200,"update_external_settings":"success"}}
+</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
 
 <!-- END /api block -->
 {% endblock %}
