@@ -14,9 +14,12 @@ version info
 # __version_info__ = ('2', '1', '0-4309')
 # __branch__ = 'SNAB'
 # __version_tag__ = 'trigger_history_override'
-__version_info__ = ('2', '1', '0-4328')
+# __version_info__ = ('2', '1', '0-4328')
+# __branch__ = 'SNAB'
+# __version_tag__ = 'BATCH_METRICS_CUSTOM_FULL_DURATIONS'
+__version_info__ = ('2', '1', '0-4376')
 __branch__ = 'SNAB'
-__version_tag__ = 'BATCH_METRICS_CUSTOM_FULL_DURATIONS'
+__version_tag__ = 'update_external_settings'
 
 __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11
