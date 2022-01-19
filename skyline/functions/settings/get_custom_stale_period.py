@@ -48,7 +48,7 @@ def custom_stale_period(
         current_logger.error('error :: %s :: failed to parse STALE_PERIOD from settings - %s' % (
             function_str, e))
         stale_period = 500
-    custom_stale_period = int(stale_period)
+    custom_stale_period_int = int(stale_period)
 
     custom_stale_period_dict = {}
     try:
@@ -127,7 +127,7 @@ def custom_stale_period(
     if pattern_match:
         try:
             matched_namespace = matched_by['matched_namespace']
-            custom_stale_period = int(float(custom_stale_period_dict[matched_namespace]))
+            custom_stale_period_int = int(float(custom_stale_period_dict[matched_namespace]))
             if log:
                 if current_skyline_app == 'analyzer':
                     current_logger.info('metrics_manager :: %s :: custom_stale_period found for %s: %s' % (
@@ -136,7 +136,7 @@ def custom_stale_period(
                     current_logger.info('%s :: custom_stale_period found for %s: %s' % (
                         function_str, base_name, str(custom_stale_period)))
         except ValueError:
-            custom_stale_period = stale_period
+            custom_stale_period_int = stale_period
         except Exception as e:
             if not log:
                 current_skyline_app_logger = current_skyline_app + 'Log'
@@ -144,6 +144,6 @@ def custom_stale_period(
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s :: failed to parse CUSTOM_STALE_PERIOD from settings - %s' % (
                 function_str, e))
-            custom_stale_period = stale_period
+            custom_stale_period_int = stale_period
 
-    return custom_stale_period
+    return custom_stale_period_int
