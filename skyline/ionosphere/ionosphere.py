@@ -2280,6 +2280,75 @@ class Ionosphere(Thread):
                     # @added 20200908 - Feature #3734: waterfall alerts
                     # Return to sender to alert
                     if added_by != 'ionosphere_learn':
+
+                        # @added 20220121 - Bug #4394: ionosphere - handle edge case of no fps of same duration
+                        # If a metric has fps but has no fps of the same duration
+                        # then ionosphere should send this as an anomaly to
+                        # Panorama.  Below is duplicated code from the send to
+                        # at the end after deemed anomalous as no fps or layers
+                        # matched.
+                        logger.info('anomalous - handling edge case on %s which has fps, is enabled, but has no fps of the required duration' % (base_name))
+                        redis_set = 'ionosphere.anomalous_metrics'
+                        data = base_name
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+                        # Send to panorama as Analyzer and Mirage will only alert on the
+                        # anomaly, they will not push it to Panorama
+                        if settings.PANORAMA_ENABLED:
+                            logger.info('handling edge case on %s of no same duration fps, sending to panorama.' % (base_name))
+                            if not os.path.exists(settings.PANORAMA_CHECK_PATH):
+                                mkdir_p(settings.PANORAMA_CHECK_PATH)
+                            # Note:
+                            # The values are enclosed is single quoted intentionally
+                            # as the imp.load_source used results in a shift in the
+                            # decimal position when double quoted, e.g.
+                            # value = "5622.0" gets imported as
+                            # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+                            # single quoting results in the desired,
+                            # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+                            added_at = str(int(time()))
+                            source = 'graphite'
+                            panorama_anomaly_data = 'metric = \'%s\'\n' \
+                                                    'value = \'%s\'\n' \
+                                                    'from_timestamp = \'%s\'\n' \
+                                                    'metric_timestamp = \'%s\'\n' \
+                                                    'algorithms = %s\n' \
+                                                    'triggered_algorithms = %s\n' \
+                                                    'app = \'%s\'\n' \
+                                                    'source = \'%s\'\n' \
+                                                    'added_by = \'%s\'\n' \
+                                                    'added_at = \'%s\'\n' \
+                                % (base_name, str(anomalous_value), str(int(from_timestamp)),
+                                   str(int(metric_timestamp)), str(settings.ALGORITHMS),
+                                   str(triggered_algorithms), skyline_app, source,
+                                   this_host, added_at)
+                            # Create an anomaly file with details about the anomaly
+                            panorama_anomaly_file = '%s/%s.%s.txt' % (
+                                settings.PANORAMA_CHECK_PATH, added_at,
+                                base_name)
+                            try:
+                                write_data_to_file(
+                                    skyline_app, panorama_anomaly_file, 'w',
+                                    panorama_anomaly_data)
+                                logger.info('added panorama anomaly file :: %s' % (panorama_anomaly_file))
+                            except:
+                                logger.error('error :: failed to add panorama anomaly file :: %s' % (panorama_anomaly_file))
+                                logger.info(traceback.format_exc())
+                            redis_set = 'ionosphere.sent_to_panorama'
+                            data = base_name
+                            try:
+                                self.redis_conn.sadd(redis_set, data)
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                    str(data), str(redis_set)))
+
+                        # @added 20200908 - Feature #3734: waterfall alerts
+                        # Return to sender to alert
                         remove_waterfall_alert(added_by, metric_timestamp, base_name)
                         logger.info('sending %s back to %s to alert' % (base_name, added_by))
                         # @added 20200930 - Feature #3734: waterfall alerts
