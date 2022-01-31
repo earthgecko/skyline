@@ -286,7 +286,10 @@ if True:
 
     # @added 20220117 - Feature #4324: flux - reload external_settings
     #                   Feature #4376: webapp - update_external_settings
-    from functions.flux.reload_flux import reload_flux
+    # from functions.flux.reload_flux import reload_flux
+
+    # @added 20220128 - Feature #4376: webapp - update_external_settings
+    from functions.settings.get_external_settings import get_external_settings
 
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
@@ -850,8 +853,37 @@ def api():
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
 
+    # @added 20220128 - Feature #4376: webapp - update_external_settings
+    if 'external_settings' in request.args:
+        logger.info('/api?external_settings')
+        external_settings = {}
+        start_external_settings = timer()
+        namespace = None
+        try:
+            namespace = request.args.get('namespace', 'false')
+            if str(namespace) == 'false':
+                namespace = None
+        except:
+            logger.error('error :: /api?external_settings request falied to query namespace')
+        if namespace:
+            logger.info('/api?external_settings - namespace: %s' % str(namespace))
+        else:
+            logger.info('/api?external_settings - namespace parameter not passed')
+        try:
+            external_settings = get_external_settings(skyline_app, namespace, True)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?external_settings - get_external_settings failed - %s' % (
+                err))
+        end_external_settings = timer()
+        external_settings_time = (end_external_settings - start_external_settings)
+        if not external_settings:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": external_settings_time, "response": 404}, "data": external_settings}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": external_settings_time, "response": 200}, "data": external_settings}
+        return jsonify(data_dict), 200
+
     # @added 20211006 - Feature #4264: luminosity - cross_correlation_relationships
-    related_to_metrics_request = False
     if 'related_to_metrics' in request.args:
         logger.info('/api?related_to_metrics')
         related_to_metrics_dict = {}
@@ -3224,6 +3256,24 @@ def mock_api():
                 'enabled': True,
                 'stale_period': 900,
                 'expiry': 0,
+            },
+            # @added 20220128 - Feature #4404: flux - external_settings - aggregation
+            'metric_limit': 1000,
+            'aggregate': {
+                'skyline-test-external-settings.1': {
+                    'method': ['avg'],
+                    'interval': 60,
+                    'zero_fill': False,
+                    'last_known_value': False,
+                    'method_suffix': False,
+                },
+                'skyline-test-external-settings.2': {
+                    'method': ['avg', 'sum', 'max', 'min'],
+                    'interval': 60,
+                    'zero_fill': False,
+                    'last_known_value': False,
+                    'method_suffix': True,
+                },
             },
         }
         namespaces = [settings_dict]
@@ -9145,83 +9195,102 @@ def update_external_settings():
             cluster_data = post_data['data']['cluster_data']
         except KeyError:
             cluster_data = False
+        except Exception as err:
+            cluster_data = False
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_external_settings - evaluation of  post_data[\'data\'][\'cluster_data\'] failed - %s' % (
+                err))
         try:
             key = post_data['data']['key']
         except KeyError:
             key = None
-        if not key:
-            logger.info('update_external_settings, return 400 no key')
-            return 'Bad request', 400
-        if key != settings.FLUX_SELF_API_KEY:
-            bad_key = str(key)
-            logger.info('update_external_settings, return 401 bad key - %s' % bad_key)
-            return 'Unauthorized', 401
+    if not key:
+        logger.info('update_external_settings, return 400 no key')
+        return 'Bad request', 400
+    if key != settings.FLUX_SELF_API_KEY:
+        bad_key = str(key)
+        logger.info('update_external_settings, return 401 bad key - %s' % bad_key)
+        return 'Unauthorized', 401
+
+    if not settings.EXTERNAL_SETTINGS:
+        end = timer()
+        request_time = (end - start_timer)
+        status_code = 200
+        data_dict = {"status": {"update_external_settings": "success", "response": 200, "request_time": request_time}, "data": {"updated": True, "external_settings": 'no EXTERNAL_SETTINGS configured nothing to update'}}
+        return jsonify(data_dict), status_code
+
     external_settings = {}
     external_from_cache = False
     remote_external_settings = {}
-    if key:
-        if settings.EXTERNAL_SETTINGS:
-            logger.info('update_external_settings - managing external_settings')
+    # if key:
+    #     if settings.EXTERNAL_SETTINGS:
+    logger.info('update_external_settings - managing external_settings')
+    try:
+        external_settings, external_from_cache = manage_external_settings(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: update_external_settings - fetch_external_settings failed - %s' % (
+            err))
+    if external_settings:
+        logger.info('update_external_settings - %s external_settings from cache %s' % (
+            str(len(list(external_settings.keys()))), str(external_from_cache)))
+        # @added 20220117 - Feature #4324: flux - reload external_settings
+        #                   Feature #4376: webapp - update_external_settings
+        flux_pid_file = '%s/flux.pid' % settings.PID_PATH
+        if os.path.isfile(flux_pid_file):
             try:
-                external_settings, external_from_cache = manage_external_settings(skyline_app)
-            except Exception as err:
-                logger.error(traceback.format_exc())
-                logger.error('error :: update_external_settings - fetch_external_settings failed - %s' % (
-                    err))
-            if external_settings:
-                logger.info('update_external_settings - %s external_settings from cache %s' % (
-                    str(len(list(external_settings.keys()))), str(external_from_cache)))
-                try:
-                    REDIS_CONN.set('skyline.external_settings.update.flux', int(start))
-                    logger.info('added Redis key skyline.external_settings.update.flux')
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: update_external_settings - failed to create Redis key skyline.external_settings.update.flux')
-                # @added 20220117 - Feature #4324: flux - reload external_settings
-                #                   Feature #4376: webapp - update_external_settings
-                flux_pid_file = '%s/flux.pid' % settings.PID_PATH
-                if os.path.isfile(flux_pid_file):
-                    # logger.info('restarting flux')
-                    # try:
-                    #     restart_flux = subprocess.getstatusoutput('/usr/bin/systemctl restart flux')
-                    #     if restart_flux:
-                    #         if restart_flux[0] == 0:
-                    #             logger.info('restarted flux OK -  exit code and output - %s' % str(restart_flux))
-                    #         else:
-                    #             logger.error('error :: failed to restart flux -  exit code and output - %s' % str(restart_flux))
-                    # except Exception as err:
-                    #     logger.error(traceback.format_exc())
-                    #     logger.error('error :: update_external_settings - fetch_external_settings failed - %s' % (
-                    #         err))
-                    logger.info('initiating reload_flux')
-                    try:
-                        flux_pids = reload_flux(skyline_app, flux_pid_file)
-                        if flux_pids:
-                            logger.info('update_external_settings - reload_flux reports %s flux pids' % str(len(flux_pids)))
-                    except Exception as err:
-                        logger.error('error :: update_external_settings - reload_flux error - %s' % err)
-
-        if not settings.REMOTE_SKYLINE_INSTANCES:
-            cluster_data = False
-
-        if cluster_data:
-            endpoint_params = {
-                'api_endpoint': '/update_external_settings',
-                'data_required': 'updated',
-                'only_host': 'all',
-                'method': 'POST',
-                'post_data': {
-                    'data': {
-                        'key': key,
-                        'cluster_data': False,
-                    }
-                }
-            }
-            try:
-                remote_external_settings = get_cluster_data('update_external_settings', 'updated', only_host='all', endpoint_params=endpoint_params)
+                REDIS_CONN.set('skyline.external_settings.update.flux', int(start))
+                logger.info('added Redis key skyline.external_settings.update.flux')
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: webapp could not get update_external_settings from the remote Skyline instances')
+                logger.error('error :: update_external_settings - failed to create Redis key skyline.external_settings.update.flux')
+
+
+            # @modified 20220128 - Feature #4400: flux - quota
+            #                      Feature #4324: flux - reload external_settings
+            #                      Feature #4376: webapp - update_external_settings
+            # Reload flux from metrics_manager as the flux aggregation and quota
+            # keys need to be updated.
+            # logger.info('initiating reload_flux')
+            # try:
+            #     flux_pids = reload_flux(skyline_app, flux_pid_file)
+            #     if flux_pids:
+            #         logger.info('update_external_settings - reload_flux reports %s flux pids' % str(len(flux_pids)))
+            # except Exception as err:
+            #     logger.error('error :: update_external_settings - reload_flux error - %s' % err)
+
+            # @added 20220128 - Feature #4400: flux - quota
+            #                   Feature #4324: flux - reload external_settings
+            #                   Feature #4376: webapp - update_external_settings
+            # Set key to inform metrics_manager to update
+            try:
+                REDIS_CONN.set('skyline.external_settings.update.metrics_manager', int(start))
+                logger.info('added Redis key skyline.external_settings.update.metrics_manager')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_external_settings - failed to create Redis key skyline.external_settings.update.flux')
+
+    if not settings.REMOTE_SKYLINE_INSTANCES:
+        cluster_data = False
+
+    if cluster_data:
+        endpoint_params = {
+            'api_endpoint': '/update_external_settings',
+            'data_required': 'updated',
+            'only_host': 'all',
+            'method': 'POST',
+            'post_data': {
+                'data': {
+                    'key': key,
+                    'cluster_data': False,
+                }
+            }
+        }
+        try:
+            remote_external_settings = get_cluster_data('update_external_settings', 'updated', only_host='all', endpoint_params=endpoint_params)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: webapp could not get update_external_settings from the remote Skyline instances')
 
     end = timer()
     request_time = (end - start_timer)

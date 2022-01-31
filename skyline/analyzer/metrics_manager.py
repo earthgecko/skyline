@@ -1,3 +1,6 @@
+"""
+metrics_manager.py
+"""
 from __future__ import division
 import logging
 from time import time, sleep
@@ -7,7 +10,6 @@ import os
 from os import kill, getpid
 import traceback
 from sys import version_info
-import os.path
 from ast import literal_eval
 from timeit import default_timer as timer
 
@@ -55,6 +57,14 @@ from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 # @added 20220110 - Bug #4364: Prune old thunder.events
 #                   Branch #1444: thunder
 from functions.redis.update_set import update_redis_set
+
+# @added 20220128 - Feature #4404: flux - external_settings - aggregation
+from functions.settings.external_settings_aggregation import external_settings_aggregation
+
+# @added 20220128 - Feature #4404: flux - external_settings - aggregation
+#                   Feature #4324: flux - reload external_settings
+#                   Feature #4376: webapp - update_external_settings
+from functions.flux.reload_flux import reload_flux
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -493,9 +503,8 @@ class Metrics_Manager(Thread):
                     if remote_training_data_item in training_data:
                         training_data_already_present += 1
                         continue
-                    else:
-                        training_data_to_fetch += 1
-                        remote_training_data_to_fetch.append(remote_training_data_item)
+                    training_data_to_fetch += 1
+                    remote_training_data_to_fetch.append(remote_training_data_item)
             logger.info('metrics_manager :: sync_cluster_files - %s training_data dirs from %s already present locally' % (
                 str(training_data_already_present), str(remote_skyline_instance[0])))
             logger.info('metrics_manager :: sync_cluster_files - %s training_data dirs to fetch from %s' % (
@@ -551,10 +560,9 @@ class Metrics_Manager(Thread):
                                         logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                                             data_file, str(remote_skyline_instance[0])))
                                         continue
-                                    else:
-                                        logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
-                                            data_file, str(remote_skyline_instance[0])))
-                                        files_fetched += 1
+                                    logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
+                                        data_file, str(remote_skyline_instance[0])))
+                                    files_fetched += 1
                                 else:
                                     if LOCAL_DEBUG:
                                         logger.info('metrics_manager :: sync_cluster_files - file exists locally nothing to do %s' % (
@@ -772,7 +780,8 @@ class Metrics_Manager(Thread):
                         try:
                             self.redis_conn.hset(
                                 'analyzer.metrics_manager.local_features_profile_dirs',
-                                expected_features_profile_dir, expected_dir)
+                                # expected_features_profile_dir, expected_dir)
+                                features_profile_dir, expected_dir)
                             logger.info('metrics_manager :: %s exists locally, added to analyzer.metrics_manager.local_features_profile_dirs' % expected_dir)
                             continue
                         except:
@@ -808,10 +817,9 @@ class Metrics_Manager(Thread):
                                         logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                                             data_file, str(remote_skyline_instance[0])))
                                         continue
-                                    else:
-                                        logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
-                                            data_file, str(remote_skyline_instance[0])))
-                                        files_fetched += 1
+                                    logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
+                                        data_file, str(remote_skyline_instance[0])))
+                                    files_fetched += 1
                                 else:
                                     files_present += 1
                             except:
@@ -825,7 +833,8 @@ class Metrics_Manager(Thread):
                             try:
                                 self.redis_conn.hset(
                                     'analyzer.metrics_manager.local_features_profile_dirs',
-                                    expected_features_profile_dir, expected_dir)
+                                    # expected_features_profile_dir, expected_dir)
+                                    features_profile_dir, expected_dir)
                                 logger.info('metrics_manager :: %s features profile dir exists locally, added to analyzer.metrics_manager.local_features_profile_dirs' % str(expected_dir))
                                 continue
                             except:
@@ -834,7 +843,8 @@ class Metrics_Manager(Thread):
                             try:
                                 self.redis_conn.hset(
                                     'analyzer.metrics_manager.local_features_profile_dirs.to_update',
-                                    expected_features_profile_dir, expected_dir)
+                                    # expected_features_profile_dir, expected_dir)
+                                    features_profile_dir, expected_dir)
                                 logger.info('metrics_manager :: %s features profile, added to analyzer.metrics_manager.local_features_profile_dirs.to_update' % str(expected_dir))
                                 continue
                             except:
@@ -843,12 +853,14 @@ class Metrics_Manager(Thread):
                             in_local_features_profile_dirs_to_update = False
                             try:
                                 for local_features_profile_dir_to_update in local_features_profile_dirs_to_update:
-                                    if local_features_profile_dir_to_update == expected_features_profile_dir:
+                                    # if local_features_profile_dir_to_update == expected_features_profile_dir:
+                                    if local_features_profile_dir_to_update == features_profile_dir:
                                         in_local_features_profile_dirs_to_update = True
                                         try:
                                             self.redis_conn.hdel(
                                                 'analyzer.metrics_manager.local_features_profile_dirs.to_update',
-                                                expected_features_profile_dir, expected_dir)
+                                                # expected_features_profile_dir, expected_dir)
+                                                features_profile_dir, expected_dir)
                                             logger.info('metrics_manager :: %s features profile, removed from analyzer.metrics_manager.local_features_profile_dirs.to_update' % str(expected_dir))
                                             continue
                                         except:
@@ -861,7 +873,8 @@ class Metrics_Manager(Thread):
                                 try:
                                     self.redis_conn.hset(
                                         'analyzer.metrics_manager.local_features_profile_dirs.to_update',
-                                        expected_features_profile_dir, expected_dir)
+                                        # expected_features_profile_dir, expected_dir)
+                                        features_profile_dir, expected_dir)
                                     logger.info('metrics_manager :: %s features profile, added to analyzer.metrics_manager.local_features_profile_dirs.to_update' % str(expected_dir))
                                     continue
                                 except:
@@ -975,6 +988,27 @@ class Metrics_Manager(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to copy Redis set analyzer.unique_base_names to aet.analyzer.unique_base_names via sunion')
+
+        manage_flux_aggregate_namespaces_redis_key = 'metrics_manager.manage_flux_aggregate_namespaces'
+        # @added 20220128 - Feature #4404: flux - external_settings - aggregation
+        #                   Feature #4324: flux - reload external_settings
+        #                   Feature #4376: webapp - update_external_settings
+        external_settings_updated = None
+        do_reload_flux = False
+        try:
+            external_settings_updated = self.redis_conn_decoded.get('skyline.external_settings.update.metrics_manager')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager ::: could not get skyline.external_settings.update.metrics_manager from Redis, err: %s' % err)
+        if external_settings_updated:
+            do_reload_flux = True
+            logger.info('metrics_manager :: set to reload_flux as skyline.external_settings.update.metrics_manager is present')
+            logger.info('metrics_manager :: removing Redis key metrics_manager.manage_flux_aggregate_namespaces to refresh')
+            try:
+                self.redis_conn.delete(manage_flux_aggregate_namespaces_redis_key)
+            except Exception as err:
+                if LOCAL_DEBUG:
+                    logger.error('error :: metrics_manager :: could not delete Redis key metrics_manager.manage_flux_aggregate_namespaces: %s' % str(err))
 
         #####
         # Check whether any internal or external alert settings have been changed
@@ -1532,6 +1566,77 @@ class Metrics_Manager(Thread):
                 logger.info('metrics_manager :: %s external_settings from cache %s' % (
                     str(len(list(external_settings.keys()))), str(external_from_cache)))
 
+        # @added 20220126 - Feature #4400: flux - quota
+        namespaces_with_quotas = []
+        namespace_quotas_settings = {}
+        try:
+            namespace_quotas_settings = settings.FLUX_NAMESPACE_QUOTAS
+        except AttributeError:
+            namespace_quotas_settings = {}
+        except:
+            namespace_quotas_settings = {}
+        if namespace_quotas_settings:
+            for namespace in namespace_quotas_settings:
+                quota = 0
+                try:
+                    quota = namespace_quotas_settings[namespace]
+                except KeyError:
+                    continue
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: determining quota for %s, err: %s' % (
+                        str(namespace), err))
+                if quota:
+                    namespaces_with_quotas.append(namespace)
+                    try:
+                        self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager.flux.namespace_quotas, err: %s' % (
+                            namespace, str(quota), err))
+        del namespace_quotas_settings
+        if external_settings:
+            for external_setting in external_settings:
+                quota = 0
+                try:
+                    namespace = external_settings[external_setting]['namespace']
+                    quota = external_settings[external_setting]['metric_limit']
+                except KeyError:
+                    continue
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: determining quota from external_setting - %s, err: %s' % (
+                        str(external_setting), err))
+                if quota:
+                    namespaces_with_quotas.append(namespace)
+                    try:
+                        self.redis_conn.hset('metrics_manager.flux.namespace_quotas', namespace, quota)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager.flux.namespace_quotas, err: %s' % (
+                            namespace, str(quota), err))
+        namespace_quotas_dict = {}
+        if namespaces_with_quotas:
+            try:
+                namespace_quotas_dict = self.redis_conn_decoded.hgetall('metrics_manager.flux.namespace_quotas')
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to hgetall metrics_manager.flux.namespace_quotas Redis hash key - %s' % (
+                    err))
+        # Remove entries which no longer have a quota
+        for namespace in namespace_quotas_dict:
+            if namespace not in namespaces_with_quotas:
+                logger.info('metrics_manager :: removing %s from metrics_manager.flux.namespace_quotas Redis hash' % (
+                    namespace))
+                try:
+                    self.redis_conn.hdel('metrics_manager.flux.namespace_quotas', namespace)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to set quota for %s to %s in metrics_manager.flux.namespace_quotas, err: %s' % (
+                        namespace, str(quota), err))
+        del namespace_quotas_dict
+        del namespaces_with_quotas
+
         # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
         # Analyzer determines what metrics flux should aggregate by creating the
         # the flux.aggregate_metrics Redis set, which flux/listen and flux/aggregate
@@ -1541,6 +1646,10 @@ class Metrics_Manager(Thread):
         flux_aggregate_metrics = []
         flux_aggregate_zerofill_metrics = []
         flux_aggregate_lkv_metrics = []
+
+        # @added 20220128 - Feature #4404: flux - external_settings - aggregation
+        external_settings_aggregations = {}
+
         if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
             if FLUX_AGGREGATE_NAMESPACES:
                 aggregate_namespaces = list(FLUX_AGGREGATE_NAMESPACES.keys())
@@ -1550,9 +1659,38 @@ class Metrics_Manager(Thread):
                 # flux_external_aggregate_namespaces_dict = self.redis_conn_decoded.hgetall(...
                 # for i_metric in ...:
                 #      aggregate_namespaces.append(i_metric)
+
+            # @added 20220128 - Feature #4404: flux - external_settings - aggregation
+            if external_settings:
+                external_settings_aggregations = external_settings_aggregation(skyline_app, external_settings, True)
+            if external_settings_aggregations:
+                for namespace_key in list(external_settings_aggregations.keys()):
+                    aggregate_namespaces.append(namespace_key)
+                    FLUX_AGGREGATE_NAMESPACES[namespace_key] = external_settings_aggregations[namespace_key]
+                aggregate_namespaces = list(set(aggregate_namespaces))
+                logger.info('metrics_manager :: aggregate_namespaces: %s' % str(aggregate_namespaces))
+            if FLUX_AGGREGATE_NAMESPACES:
+                for namespace_key in list(FLUX_AGGREGATE_NAMESPACES.keys()):
+                    try:
+                        self.redis_conn.hset('metrics_manager.new.flux.aggregate_namespaces', namespace_key, str(FLUX_AGGREGATE_NAMESPACES[namespace_key]))
+                    except Exception as err:
+                        if LOCAL_DEBUG:
+                            logger.error('error :: metrics_manager :: could not add to metrics_manager.new.flux.aggregate_namespaces Redis hash key: %s' % str(err))
+                try:
+                    self.redis_conn.rename('metrics_manager.new.flux.aggregate_namespaces', 'metrics_manager.flux.aggregate_namespaces')
+                except Exception as err:
+                    if LOCAL_DEBUG:
+                        logger.error('error :: metrics_manager :: failed to rename Redis hash metrics_manager.new.flux.aggregate_namespaces to metrics_manager.flux.aggregate_namespaces, %s' % str(err))
+
             manage_flux_aggregate_namespaces = False
             # Only manage every 5 mins
-            manage_flux_aggregate_namespaces_redis_key = 'metrics_manager.manage_flux_aggregate_namespaces'
+
+            # @modified 20220128 - Feature #4404: flux - external_settings - aggregation
+            #                      Feature #4324: flux - reload external_settings
+            #                      Feature #4376: webapp - update_external_settings
+            # Moved variable definition to above
+            # manage_flux_aggregate_namespaces_redis_key = 'metrics_manager.manage_flux_aggregate_namespaces'
+
             try:
                 manage_flux_aggregate_namespaces = self.redis_conn.get(manage_flux_aggregate_namespaces_redis_key)
             except Exception as e:
@@ -3313,6 +3451,32 @@ class Metrics_Manager(Thread):
                     logger.error('error :: metrics_manager :: failed to set Redis key %s - %s' % (
                         roomba_cache_key, e))
 
+        # @added 20220128 - Feature #4404: flux - external_settings - aggregation
+        #                   Feature #4324: flux - reload external_settings
+        #                   Feature #4376: webapp - update_external_settings
+        if do_reload_flux:
+            try:
+                self.redis_conn.delete('skyline.external_settings.update.metrics_manager')
+                logger.info('metrics_manager ::: deleted skyline.external_settings.update.metrics_manager from Redis')
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager ::: failed to delete skyline.external_settings.update.metrics_manager from Redis, err: %s' % err)
+            flux_pid_file = '%s/flux.pid' % settings.PID_PATH
+            if os.path.isfile(flux_pid_file):
+                logger.info('metrics_manager :: initiating reload_flux')
+                try:
+                    flux_pids = reload_flux(skyline_app, flux_pid_file)
+                    if flux_pids:
+                        logger.info('metrics_manager :: reload_flux reports %s flux pids' % str(len(flux_pids)))
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: reload_flux error - %s' % err)
+            try:
+                self.redis_conn.delete('skyline.external_settings.update.flux')
+                logger.info('metrics_manager ::: deleted skyline.external_settings.update.flux from Redis')
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager ::: failed to delete skyline.external_settings.update.flux from Redis, err: %s' % err)
+
         spin_end = time() - spin_start
 
         # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
@@ -3549,7 +3713,23 @@ class Metrics_Manager(Thread):
                 sleep_for = (RUN_EVERY - process_runtime_now)
 
                 logger.info('metrics_manager :: sleeping for %.2f seconds due to low run time...' % sleep_for)
-                sleep(sleep_for)
+                # @modified 20220128 - Feature #4404: flux - external_settings - aggregation
+                #                      Feature #4324: flux - reload external_settings
+                #                      Feature #4376: webapp - update_external_settings
+                # sleep(sleep_for)
+                sleep_start = int(time())
+                while int(time()) < (sleep_start + sleep_for):
+                    external_settings_updated = None
+                    try:
+                        external_settings_updated = self.redis_conn_decoded.get('skyline.external_settings.update.metrics_manager')
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager ::: could not get skyline.external_settings.update.metrics_manager from Redis, err: %s' % err)
+                    if external_settings_updated:
+                        logger.info('metrics_manager :: breaking sleep as skyline.external_settings.update.metrics_manager Redis was found')
+                        break
+                    sleep(1)
+
                 try:
                     del sleep_for
                 except:

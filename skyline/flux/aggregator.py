@@ -279,6 +279,15 @@ class Aggregator(Process):
                                 metric_namespace = metric
                                 if metric_aggregation_settings['method_suffix']:
                                     metric_namespace = '%s.%s' % (metric, method)
+                                else:
+                                    # @added 20220126 - Feature #4400: flux - quota
+                                    # If method_suffix is not set but multiple
+                                    # methods are being used, method_suffix
+                                    # must be applied, otherwise the metric will
+                                    # have all the method values submitted to a
+                                    # single metric name.
+                                    if len(methods) > 1:
+                                        metric_namespace = '%s.%s' % (metric, method)
                                 aggregate_value = None
                                 if method == 'avg':
                                     if len(metric_values) > 1:

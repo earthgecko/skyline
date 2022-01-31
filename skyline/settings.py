@@ -3739,6 +3739,27 @@ FLUX_AGGREGATE_NAMESPACES = {}
     flux will submit a metric per method defined.
 :vartype FLUX_AGGREGATE_NAMESPACES: dict
 
+Each namespace is defined in a dict with the following keys:
+method: a list of methods to apply to the metric aggregation, valid methods are
+avg, sum, min and max.  More than one method can be applied which will result a
+metric being submitted for each method. If multiple methods are applied
+method_suffix must be set to True and if not is automatically set.
+interval: the interval in seconds at which to aggregate the metric data.  If a
+datapoint is received for a metric every 5 seconds and the interval is set to
+60, flux will submit the aggregated value/s for the metric to Graphite every
+60 seconds.
+zero_fill: if this is set to True flux will submit a 0 to Graphite every
+interval seconds if no data is received for the metric in the interval period.
+Note a namespace can either be set to zero_fill or last_known_value, not both.
+last_known_value: if this is set to True, if flux does not receive data for a
+metric in the interval period, flux will submit the last value that it submitted
+to Graphite for the current interval period.  This is like a gauge metric.
+Note a namespace can either be set to zero_fill or last_known_value, not both.
+method_suffix: if set to True, flux will suffix the metric name with the method,
+for example, mysite.events.pageloads.avg, if mulitple methods are declared this
+must be set to True and if not set will be automatically added otherwise the
+metric will have all the method values submitted to a single metric name.
+
 - **Example**::
 
     FLUX_AGGREGATE_NAMESPACES = {
@@ -3749,7 +3770,7 @@ FLUX_AGGREGATE_NAMESPACES = {}
             'last_known_value': False,
             'method_suffix': False},
         'mysite.events.pageloads': {
-            'method': ['avg', 'sum', 'high'],
+            'method': ['avg', 'sum', 'max', 'min'],
             'interval': 60,
             'zero_fill': False,
             'last_known_value': False,
@@ -3772,6 +3793,22 @@ FLUX_EXTERNAL_AGGREGATE_NAMESPACES = False
 :vartype FLUX_EXTERNAL_AGGREGATE_NAMESPACES: boolean
 """
 
+FLUX_NAMESPACE_QUOTAS = {}
+"""
+:var FLUX_NAMESPACE_QUOTAS: ADVANCED FEATURE.  A top level namespace can be
+    limited in terms of how many metrics flux will accept for the namespace.
+    This only applies to metrics sent to flux with a FLUX_API_KEYS namespace.
+    It cannot be applied to metrics sent to flux using the FLUX_SELF_API_KEY and
+    currently only applies to POSTs with multiple metrics.
+:vartype FLUX_NAMESPACE_QUOTAS: dict
+
+- **Example**::
+
+    FLUX_NAMESPACE_QUOTAS = {
+        'warehouse-1': 300,
+        'warehouse-2': 30,
+    }
+"""
 
 FLUX_SEND_TO_STATSD = False
 """

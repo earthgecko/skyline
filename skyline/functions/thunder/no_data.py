@@ -1,3 +1,6 @@
+"""
+no_data.py
+"""
 import logging
 import traceback
 from time import time
@@ -181,13 +184,13 @@ def thunder_no_data(current_skyline_app, log=True):
     external_settings = {}
     try:
         external_settings = get_external_settings(current_skyline_app)
-    except Exception as e:
+    except Exception as err:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: get_external_settings failed - %s' % (
-            function_str, e))
+            function_str, err))
     external_parent_namespaces_stale_periods = {}
     if external_settings:
         for config_id in list(external_settings.keys()):
@@ -196,7 +199,12 @@ def thunder_no_data(current_skyline_app, log=True):
                 alert_on_no_data = external_settings[config_id]['alert_on_no_data']['enabled']
             except KeyError:
                 alert_on_no_data = False
-            if alert_on_no_data:
+            # @modified 20220128 - Feature #4376: webapp - update_external_settings
+            # Even if ['alert_on_no_data']['enabled'] is False still determine
+            # if the namespace has a defined stale_period
+            no_data_stale_period = False
+            # if alert_on_no_data:
+            if config_id:
                 try:
                     no_data_stale_period = external_settings[config_id]['alert_on_no_data']['stale_period']
                 except KeyError:
@@ -207,18 +215,22 @@ def thunder_no_data(current_skyline_app, log=True):
                     namespace = external_settings[config_id]['namespace']
                 except KeyError:
                     namespace = False
+            expiry = 1800
             try:
                 expiry = external_settings[config_id]['alert_on_no_data']['expiry']
             except KeyError:
                 expiry = 1800
             if namespace and no_data_stale_period and expiry:
-                external_parent_namespaces_stale_periods[parent_namespace] = {}
-                external_parent_namespaces_stale_periods[parent_namespace]['stale_period'] = int(no_data_stale_period)
-                external_parent_namespaces_stale_periods[parent_namespace]['expiry'] = int(expiry)
+                external_parent_namespaces_stale_periods[namespace] = {}
+                external_parent_namespaces_stale_periods[namespace]['stale_period'] = int(no_data_stale_period)
+                external_parent_namespaces_stale_periods[namespace]['expiry'] = int(expiry)
 
     external_parent_namespaces = []
-    if external_parent_namespaces:
-        external_parent_namespaces = list(external_parent_namespaces.keys())
+    if external_parent_namespaces_stale_periods:
+        external_parent_namespaces = list(external_parent_namespaces_stale_periods.keys())
+        if log:
+            current_logger.info('%s :: external_parent_namespaces_stale_periods: %s' % (
+                function_str, str(external_parent_namespaces_stale_periods)))
 
     parent_namespaces = list(set(parent_namespaces))
 
@@ -273,13 +285,14 @@ def thunder_no_data(current_skyline_app, log=True):
         # stale_period and expiry
         if parent_namespace in external_parent_namespaces:
             try:
-                stale_period = external_parent_namespaces[parent_namespace]['stale_period']
+                # stale_period = external_parent_namespaces[parent_namespace]['stale_period']
+                stale_period = external_parent_namespaces_stale_periods[parent_namespace]['stale_period']
             except KeyError:
                 stale_period = int(settings.STALE_PERIOD)
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
                     current_logger = logging.getLogger(current_skyline_app_logger)
-                current_logger.warn('warning :: %s :: failed to get the stale_period for %s from external_settings, using default' % (
+                current_logger.warning('warning :: %s :: failed to get the stale_period for %s from external_settings, using default' % (
                     function_str, parent_namespace))
             except Exception as e:
                 if not log:
@@ -289,13 +302,14 @@ def thunder_no_data(current_skyline_app, log=True):
                 current_logger.error('error :: %s :: failed to get stale_period for %s from external_settings - %s' % (
                     function_str, parent_namespace, e))
             try:
-                expiry = external_parent_namespaces[parent_namespace]['expiry']
+                # expiry = external_parent_namespaces[parent_namespace]['expiry']
+                expiry = external_parent_namespaces_stale_periods[parent_namespace]['expiry']
             except KeyError:
                 expiry = 1800
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
                     current_logger = logging.getLogger(current_skyline_app_logger)
-                current_logger.warn('warning :: %s :: failed to get the expiry for %s from external_settings, using default' % (
+                current_logger.warning('warning :: %s :: failed to get the expiry for %s from external_settings, using default' % (
                     function_str, str(expiry)))
             except Exception as e:
                 if not log:
@@ -374,7 +388,7 @@ def thunder_no_data(current_skyline_app, log=True):
                     else:
                         namespaces_no_data_dict[parent_namespace]['test'] = False
                     if log:
-                        current_logger.warn('warning :: %s :: %s \'%s.\' namespace metrics not receiving data, last data received %s seconds ago' % (
+                        current_logger.warning('warning :: %s :: %s \'%s.\' namespace metrics not receiving data, last data received %s seconds ago' % (
                             function_str, str(total_metrics),
                             parent_namespace, str(last_received_seconds_ago)))
                 else:
@@ -398,7 +412,7 @@ def thunder_no_data(current_skyline_app, log=True):
                         stale_timestamps = [ts for ts in parent_namespace_metrics_timestamps if int(ts) < (now - stale_period)]
                         total_stale_metrics = len(stale_timestamps)
                         total_recent_metrics = total_metrics - total_stale_metrics
-                        parent_namespace_metrics
+                        # parent_namespace_metrics
                         if log:
                             current_logger.info('%s :: recovery of no_data on namespace %s after %s seconds, with total_recent_metrics: %s, total_stale_metrics: %s, total_metrics: %s' % (
                                 function_str, parent_namespace,

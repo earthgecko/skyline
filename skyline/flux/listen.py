@@ -1,12 +1,15 @@
+"""
+listen.py
+"""
 import sys
 import os
 from time import time
 import json
 import traceback
-from multiprocessing import Queue
-from logger import set_up_logging
+# from multiprocessing import Queue
 import string
 from ast import literal_eval
+from logger import set_up_logging
 
 import falcon
 
@@ -91,12 +94,12 @@ for char in string.digits:
 
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 redis_conn = get_redis_conn('flux')
-redis_conn_decoded = None
+redis_conn_decoded = get_redis_conn_decoded('flux')
 
 # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
 aggregate_metrics = []
 if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
-    redis_conn_decoded = get_redis_conn_decoded('flux')
+    # redis_conn_decoded = get_redis_conn_decoded('flux')
     try:
         aggregate_metrics = list(redis_conn_decoded.smembers('metrics_manager.flux.aggregate_metrics'))
         logger.info('listen :: there are %s metrics in the metrics_manager.flux.aggregate_metrics Redis set' % (
@@ -124,6 +127,34 @@ if skyline_external_settings:
                 valid_keys.append(str(flux_token))
                 external_flux_keys[flux_token] = skyline_external_settings[settings_key]['namespace']
 
+# @added 20220126 - Feature #4400: flux - quota
+namespace_quotas_dict = {}
+try:
+    namespace_quotas_dict = redis_conn_decoded.hgetall('metrics_manager.flux.namespace_quotas')
+except Exception as err:
+    logger.error(traceback.format_exc())
+    logger.error('error :: listen :: failed to hgetall metrics_manager.flux.namespace_quotas Redis hash key - %s' % (
+        err))
+    namespace_quotas_dict = {}
+namespaces_with_quotas = []
+for namespace in list(namespace_quotas_dict.keys()):
+    namespaces_with_quotas.append(namespace)
+
+# @added 20220128 - Feature #4404: flux - external_settings - aggregation
+#                   Feature #4324: flux - reload external_settings
+#                   Feature #4376: webapp - update_external_settings
+aggregate_namespaces_dict = {}
+try:
+    aggregate_namespaces_dict = redis_conn_decoded.hgetall('metrics_manager.flux.aggregate_namespaces')
+except Exception as err:
+    logger.error(traceback.format_exc())
+    logger.error('error :: listen :: failed to hgetall metrics_manager.flux.aggregate_namespaces Redis hash key - %s' % (
+        err))
+    aggregate_namespaces_dict = {}
+aggregate_namespaces_list = []
+for namespace in list(aggregate_namespaces_dict.keys()):
+    aggregate_namespaces_list.append(namespace)
+
 
 # @added 20220117 - Feature #4324: flux - reload external_settings
 #                   Feature #4376: webapp - update_external_settings
@@ -141,29 +172,29 @@ def check_validate_key_update(caller):
     except:
         pass
     if UPDATED_FLUX_API_KEYS:
-        for flux_api_key in UPDATED_FLUX_API_KEYS:
+        for updated_flux_api_key in UPDATED_FLUX_API_KEYS:
             try:
-                updated_valid_keys.append(str(flux_api_key))
+                updated_valid_keys.append(str(updated_flux_api_key))
             except:
                 pass
     updated_external_flux_keys = {}
     updated_skyline_external_settings = {}
-    if not redis_conn_decoded:
-        redis_conn_decoded = get_redis_conn_decoded('flux')
+#    if not redis_conn_decoded:
+#        redis_conn_decoded = get_redis_conn_decoded('flux')
     try:
         updated_skyline_external_settings_raw = redis_conn_decoded.get('skyline.external_settings')
         if updated_skyline_external_settings_raw:
             updated_skyline_external_settings = literal_eval(updated_skyline_external_settings_raw)
     except Exception as e:
-        logger.error('error :: listen :: could get Redis set skyline.external_settings - %s' % str(e))
+        logger.error('error :: listen :: %s - could get Redis set skyline.external_settings - %s' % (caller, str(e)))
         updated_skyline_external_settings = {}
     if updated_skyline_external_settings:
-        for settings_key in list(updated_skyline_external_settings.keys()):
-            if 'flux_token' in list(updated_skyline_external_settings[settings_key].keys()):
-                flux_token = updated_skyline_external_settings[settings_key]['flux_token']
-                if flux_token:
-                    updated_valid_keys.append(str(flux_token))
-                    updated_external_flux_keys[flux_token] = skyline_external_settings[settings_key]['namespace']
+        for updated_setting in list(updated_skyline_external_settings.keys()):
+            if 'flux_token' in list(updated_skyline_external_settings[updated_setting].keys()):
+                new_flux_token = updated_skyline_external_settings[updated_setting]['flux_token']
+                if new_flux_token:
+                    updated_valid_keys.append(str(new_flux_token))
+                    updated_external_flux_keys[new_flux_token] = skyline_external_settings[updated_setting]['namespace']
     return (updated_valid_keys, updated_external_flux_keys)
 
 
@@ -224,7 +255,7 @@ def validate_key(caller, apikey):
                     logger.error('error :: listen :: could get flux.last_valid_keys_update from Redis - %s' % str(err))
                 last_valid_keys_update = None
             if last_valid_keys_update:
-                if int(last_valid_keys_update) < (int(time()) - 60):
+                if int(last_valid_keys_update) < (int(time()) - 30):
                     logger.info('%s :: last valid key update check was more than 30 seconds ago, checking update' % (
                         caller))
                     update_keys = True
@@ -236,10 +267,9 @@ def validate_key(caller, apikey):
                         logger.error('error :: listen :: could get skyline.external_settings.update.flux from Redis - %s' % str(err))
                     last_valid_keys_update = None
                 if update_external_settings_key:
-                    if int(update_external_settings_key):
-                        logger.info('%s :: skyline.external_settings.update.flux, updating keys' % (
-                            caller))
-                        update_keys = True
+                    logger.info('%s :: skyline.external_settings.update.flux, updating keys' % (
+                        caller))
+                    update_keys = True
         updated_valid_keys = []
         updated_external_flux_keys = []
         if update_keys:
@@ -388,18 +418,40 @@ def validate_metric_name(caller, metric):
 # aggregate_metrics list, if not found in there then the elements of the
 # metric name are checked to see if element could any possible match an
 # aggregation namespace, only then is Redis queried.
-def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics):
+# @modified 20220128 - Feature #4404: flux - external_settings - aggregation
+#                      Feature #4324: flux - reload external_settings
+#                     Feature #4376: webapp - update_external_settings
+# def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics_list):
+def add_to_aggregate_metric_queue(
+    metric, metric_data, aggregate_metrics_list, aggregate_namespaces_lst):
     added_to_aggregation_queue = False
     return_status_code = 204
     aggregate_metric = False
     # First check the list of aggregate_metrics created at startup from
     # the analyzer/metrics_manager metrics_manager.flux.aggregate_metrics Redis
     # set and if not in there try the Redis metrics_manager.flux.aggregate_metrics.hash
-    if aggregate_metrics:
-        if metric in aggregate_metrics:
+    if aggregate_metrics_list:
+        if metric in aggregate_metrics_list:
             aggregate_metric = True
+
+    # @modified 20220128 - Feature #4404: flux - external_settings - aggregation
+    #                      Feature #4324: flux - reload external_settings
+    #                     Feature #4376: webapp - update_external_settings
+    # Do not use query Redis, use lists
+    if not aggregate_metric and aggregate_namespaces_lst:
+        for namespace in aggregate_namespaces_lst:
+            if metric.startswith(namespace):
+                aggregate_metric = True
+                break
+
     aggregate_metric_timestamp = None
-    if not aggregate_metric:
+
+    # @modified 20220128 - Feature #4404: flux - external_settings - aggregation
+    #                      Feature #4324: flux - reload external_settings
+    #                     Feature #4376: webapp - update_external_settings
+    # Do not use query Redis, use lists
+    # if not aggregate_metric:
+    if aggregate_metric_timestamp:
         try:
             # current_redis_conn_decoded = get_redis_conn_decoded('flux')
             aggregate_metric_timestamp = int(redis_conn_decoded.hget('metrics_manager.flux.aggregate_metrics.hash', metric))
@@ -418,7 +470,7 @@ def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics):
                         logger.info('listen :: deleted metric %s from Redis hash metrics_manager.flux.aggregate_metrics.hash as entry is 12 hours old' % metric)
                     except Exception as e:
                         if LOCAL_DEBUG:
-                            logger.error('error :: listen :: could delete metric %s from Redis hash metrics_manager.flux.aggregate_metrics.hash - %s' % (metric, str(e)))
+                            logger.error('error :: listen :: could not delete metric %s from Redis hash metrics_manager.flux.aggregate_metrics.hash - %s' % (metric, str(e)))
                         aggregate_metric_timestamp = None
         except:
             pass
@@ -444,14 +496,27 @@ def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics):
             added_to_aggregation_queue = True
             return_status_code = 204
             if FLUX_VERBOSE_LOGGING:
-                logger.debug('debug :: listen :: data added to flux.aggregator.queue Redis set - %s' % str(metric_data))
-            logger.info('listen :: data added to flux.aggregator.queue Redis set - %s' % str(metric_data))
+                logger.info('listen :: data added to flux.aggregator.queue Redis set - %s' % str(metric_data))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: listen :: failed to add data to flux.aggregator.queue Redis set - %s' % str(metric_data))
             return_status_code = 500
             return added_to_aggregation_queue, return_status_code
     return added_to_aggregation_queue, return_status_code
+
+
+# @added 20220126 - Feature #4400: flux - quota
+def get_namespace_quota(metric_namespace_prefix):
+    quota = 0
+    try:
+        quota_str = namespace_quotas_dict[metric_namespace_prefix]
+        if quota_str:
+            quota = int(quota_str)
+    except KeyError:
+        quota = 0
+    except:
+        quota = 0
+    return quota
 
 
 class MetricData(object):
@@ -828,12 +893,100 @@ class MetricData(object):
             # token = redis_conn.get(key)
             token = False
         except:
-            # TODO
-            # for now pass
-            pass
+            token = False
 
         if not timestamp:
             timestamp = int(time())
+
+        # @added 20220128 - Feature #4400: flux - quota
+        namespace_quota = 0
+        current_namespace_metric_count = 0
+        namespace_metrics = []
+        namespace_metrics_count = 0
+        rejected_metric_over_quota = None
+        check_namespace_quota = None
+        try:
+            if metric_namespace_prefix:
+                check_namespace_quota = str(metric_namespace_prefix)
+            else:
+                check_namespace_quota = metric.split('.')[0]
+            if check_namespace_quota in namespaces_with_quotas:
+                namespace_quota = get_namespace_quota(check_namespace_quota)
+            if namespace_quota:
+                namespace_quota_key_reference_timestamp = (int(time()) // 60 * 60)
+                namespace_quota_redis_key = 'flux.namespace_quota.%s.%s' % (
+                    check_namespace_quota, str(namespace_quota_key_reference_timestamp))
+                current_namespace_metric_count = 0
+                try:
+                    current_namespace_metric_count = redis_conn_decoded.scard(namespace_quota_redis_key)
+                except:
+                    current_namespace_metric_count = 0
+                namespace_metrics_redis_key = 'flux.namespace_metrics.%s' % check_namespace_quota
+                try:
+                    namespace_metrics = list(redis_conn_decoded.smembers(namespace_metrics_redis_key))
+                except:
+                    namespace_metrics = []
+                namespace_metrics_count = len(namespace_metrics)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: error determining namespace_quota, %s' % err)
+        if namespace_quota:
+            if current_namespace_metric_count >= namespace_quota:
+                logger.info('listen :: will not accept new metric in this minute, over quota')
+                rejected_metric_over_quota = metric
+            if not rejected_metric_over_quota:
+                try:
+                    if metric in namespace_metrics:
+                        new_metric_count = namespace_metrics_count + 0
+                    else:
+                        new_metric_count = namespace_metrics_count + 1
+                    if new_metric_count > namespace_quota:
+                        logger.info('listen :: will not accept new metric, over quota')
+                        rejected_metric_over_quota = metric
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: error determining new metric for namespace_quota, %s' % err)
+        if rejected_metric_over_quota:
+            body = {
+                'code': 400,
+                'error': 'over metric quota',
+                'rejected metric': rejected_metric_over_quota
+            }
+            try:
+                message = 'over quota - this account is allowed %s metrics and an additional metric was posted that has been rejected' % (
+                    str(namespace_quota))
+                body = {
+                    'code': 400,
+                    'error': message,
+                    'rejected metric': rejected_metric_over_quota
+                }
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: error building 400 body, %s' % err)
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400 on metric_namespace_prefix: %s' % (
+                message, str(check_namespace_quota)))
+            resp.status = falcon.HTTP_400
+            return
+
+        # @added 20220128 - Feature #4400: flux - quota
+        if namespace_quota:
+            try:
+                if metric not in namespace_metrics:
+                    try:
+                        redis_conn.sadd(namespace_metrics_redis_key, metric)
+                    except Exception as err:
+                        logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
+                            metric, namespace_metrics_redis_key, err))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: error adding metric to namespace_metrics_redis_key, %s' % err)
+            try:
+                redis_conn.sadd(namespace_quota_redis_key, metric)
+                redis_conn.expire(namespace_quota_redis_key, 60)
+            except Exception as err:
+                logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
+                    metric, namespace_quota_redis_key, err))
 
         # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
         # If metrics are being submitted to flux internally (vista) using
@@ -874,8 +1027,8 @@ class MetricData(object):
         # aggregate_metrics list, if not found in there then the elements of the
         # metric name are checked to see if element could any possible match an
         # aggregation namespace, only then is Redis queried.
-        if aggregate_metrics:
-            added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
+        if aggregate_metrics or aggregate_namespaces_list:
+            added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics, aggregate_namespaces_list)
             if added_to_aggregation_queue:
                 if return_status_code == 500:
                     resp.status = falcon.HTTP_500
@@ -1015,7 +1168,7 @@ class MetricDataPost(object):
                 logger.error('error :: listen :: failed to data to Redis set flux.listen.discarded.invalid_post_data - %s' % e)
 
             # @added 20220118 - Feature #4380: flux - return reason with 400
-            message = 'no POST date recieved'
+            message = 'no POST data received'
             body = {"code": 400, "message": message}
             resp.body = json.dumps(body)
             logger.info('listen :: %s, returning 400' % message)
@@ -1233,6 +1386,51 @@ class MetricDataPost(object):
                 metric = None
                 telegraf_metrics.append(metric)
 
+        # @added 20220126 - Feature #4400: flux - quota
+        namespace_quota = 0
+        current_namespace_metric_count = 0
+        namespace_metrics = []
+        namespace_metrics_count = 0
+        over_quota = 0
+        rejected_metrics_over_quota = []
+        processed_metrics = []
+        newly_added_metrics = []
+        check_namespace_quota = None
+        try:
+            if metric_namespace_prefix:
+                check_namespace_quota = str(metric_namespace_prefix)
+            else:
+                received_namespaces = []
+                for metric_data in metrics:
+                    try:
+                        metric = str(metric_data['metric'])
+                        received_namespaces.append(metric.split('.')[0])
+                    except:
+                        continue
+                received_namespaces = list(set(received_namespaces))
+                if len(received_namespaces) == 1:
+                    check_namespace_quota = received_namespaces[0]
+            if check_namespace_quota in namespaces_with_quotas:
+                namespace_quota = get_namespace_quota(check_namespace_quota)
+            if namespace_quota:
+                namespace_quota_key_reference_timestamp = (int(time()) // 60 * 60)
+                namespace_quota_redis_key = 'flux.namespace_quota.%s.%s' % (
+                    check_namespace_quota, str(namespace_quota_key_reference_timestamp))
+                current_namespace_metric_count = 0
+                try:
+                    current_namespace_metric_count = redis_conn_decoded.scard(namespace_quota_redis_key)
+                except:
+                    current_namespace_metric_count = 0
+                namespace_metrics_redis_key = 'flux.namespace_metrics.%s' % check_namespace_quota
+                try:
+                    namespace_metrics = list(redis_conn_decoded.smembers(namespace_metrics_redis_key))
+                except:
+                    namespace_metrics = []
+                namespace_metrics_count = len(namespace_metrics)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: error determining namespace_quota, %s' % err)
+
         if metrics:
             # added 20201211 - Feature #3694: flux - POST multiple metrics
             # Added metric count
@@ -1242,6 +1440,35 @@ class MetricDataPost(object):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: could not report number of entries submitted in POST mulitple metric data')
+
+            # @added 20220126 - Feature #4400: flux - quota
+            if namespace_quota:
+                try:
+                    metrics_in_post = []
+                    for metric_data in metrics:
+                        try:
+                            metric = str(metric_data['metric'])
+                            if metric_namespace_prefix:
+                                metric_name = '%s.%s' % (metric_namespace_prefix, metric)
+                            else:
+                                metric_name = str(metric)
+                            metrics_in_post.append(metric_name)
+                        except:
+                            continue
+                    known_metrics = []
+                    new_metrics = []
+                    for metric_name in metrics_in_post:
+                        if metric_name in namespace_metrics:
+                            known_metrics.append(metric_name)
+                        else:
+                            new_metrics.append(metric_name)
+                    new_metric_count = namespace_metrics_count + len(new_metrics)
+                    if new_metric_count > namespace_quota:
+                        over_quota = new_metric_count - namespace_quota
+                        logger.info('listen :: will not accept some new metrics, over quota by %s' % str(over_quota))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: error determining known and new metrics for namespace_quota, %s' % err)
 
             for metric_data in metrics:
                 # Add metric to add to queue
@@ -1268,7 +1495,7 @@ class MetricDataPost(object):
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
                         # @added 20220118 - Feature #4380: flux - return reason with 400
-                        message = 'invalid metric - %s' % str(request_param_value)
+                        message = 'invalid metric - %s' % str(metric_data['metric'])
                         body = {"code": 400, "message": message}
                         resp.body = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
@@ -1299,6 +1526,39 @@ class MetricDataPost(object):
 
                     resp.status = falcon.HTTP_400
                     return
+
+                original_metric = str(metric)
+
+                # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
+                # If metrics are being submitted to flux internally (vista) using
+                # the FLUX_SELF_API_KEY for a namespace if that namespace is added
+                # to FLUX_API_KEYS, flux will begin to also append the namespace
+                # prefix from the FLUX_API_KEYS for metrics submitted with the
+                # FLUX_SELF_API_KEY
+                if metric_namespace_prefix:
+                    if metric.startswith(metric_namespace_prefix):
+                        metric_namespace_prefix = None
+
+                # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
+                if metric_namespace_prefix:
+                    metric = '%s.%s' % (str(metric_namespace_prefix), metric)
+
+                # @added 20220126 - Feature #4400: flux - quota
+                if over_quota:
+                    try:
+                        new_namespace_metrics_count = len(namespace_metrics)
+                        if new_namespace_metrics_count >= namespace_quota:
+                            if metric not in namespace_metrics:
+                                rejected_metrics_over_quota.append(original_metric)
+                                continue
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: listen :: error adding to rejected_metrics_over_quota, %s' % err)
+
+                if namespace_quota:
+                    if metric not in namespace_metrics:
+                        newly_added_metrics.append(metric)
+
                 try:
                     fill = str(metric_data['fill'])
                     if fill == 'true':
@@ -1444,20 +1704,6 @@ class MetricDataPost(object):
                 if not timestamp:
                     timestamp = int(time())
 
-                # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
-                # If metrics are being submitted to flux internally (vista) using
-                # the FLUX_SELF_API_KEY for a namespace if that namespace is added
-                # to FLUX_API_KEYS, flux will begin to also append the namespace
-                # prefix from the FLUX_API_KEYS for metrics submitted with the
-                # FLUX_SELF_API_KEY
-                if metric_namespace_prefix:
-                    if metric.startswith(metric_namespace_prefix):
-                        metric_namespace_prefix = None
-
-                # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
-                if metric_namespace_prefix:
-                    metric = '%s.%s' % (str(metric_namespace_prefix), metric)
-
                 # Queue the metric
                 try:
                     metric_data = [metric, value, timestamp, backfill]
@@ -1469,18 +1715,43 @@ class MetricDataPost(object):
                         except Exception as e:
                             logger.error('error :: listen :: failed adding data to Redis set flux.queue - %s' % e)
 
+                    # @added 20220126 - Feature #4400: flux - quota
+                    if namespace_quota:
+                        try:
+                            if metric not in namespace_metrics:
+                                namespace_metrics.append(metric)
+                                try:
+                                    redis_conn.sadd(namespace_metrics_redis_key, metric)
+                                except Exception as err:
+                                    logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
+                                        metric, namespace_metrics_redis_key, err))
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: error adding metric to namespace_metrics_redis_key, %s' % err)
+
+                        try:
+                            redis_conn.sadd(namespace_quota_redis_key, metric)
+                            redis_conn.expire(namespace_quota_redis_key, 60)
+                        except Exception as err:
+                            logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
+                                metric, namespace_quota_redis_key, err))
+
                     # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
-                    if aggregate_metrics:
-                        added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
+                    if aggregate_metrics or aggregate_namespaces_list:
+                        added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics, aggregate_namespaces_list)
                         if added_to_aggregation_queue:
                             if return_status_code == 500:
                                 resp.status = falcon.HTTP_500
                                 return
                             if return_status_code == 204:
                                 resp.status = falcon.HTTP_204
+                                processed_metrics.append(original_metric)
                             continue
 
                     flux.httpMetricDataQueue.put(metric_data, block=False)
+
+                    processed_metrics.append(original_metric)
+
                     # modified 20201016 - Feature #3788: snab_flux_load_test
                     if FLUX_VERBOSE_LOGGING:
                         logger.info('listen :: POST mulitple metric data added to flux.httpMetricDataQueue - %s' % str(metric_data))
@@ -1496,6 +1767,47 @@ class MetricDataPost(object):
                     logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
                     resp.status = falcon.HTTP_500
                     return
+
+        if rejected_metrics_over_quota:
+            try:
+                message = 'over quota - this account is allowed %s metrics and an additional %s new metrics were posted that have been rejected' % (
+                    str(namespace_quota), str(len(rejected_metrics_over_quota)))
+                notice_msg = '%s metrics were processed and %s metrics were rejected' % (
+                    str(len(processed_metrics)), str(len(rejected_metrics_over_quota)))
+                data = []
+                for metric in rejected_metrics_over_quota:
+                    data.append({'metric': metric, 'status': 400})
+                for metric in processed_metrics:
+                    data.append({'metric': metric, 'status': 204})
+                return_code = 207
+                if len(metrics) == 1:
+                    return_code = 400
+
+                body = {
+                    'code': return_code,
+                    'data': data,
+                    'error': message,
+                    'message': notice_msg,
+                    'rejected metrics': rejected_metrics_over_quota,
+                    'rejected metrics count': len(rejected_metrics_over_quota),
+                    'processed metrics': processed_metrics,
+                    'processed metrics count': len(processed_metrics),
+                    'submitted metrics count': len(metrics)
+                }
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning %s on metric_namespace_prefix: %s' % (
+                    message, str(return_code), str(check_namespace_quota)))
+                # logger.debug('debug :: listen :: %s' % str(body))
+                if return_code == 207:
+                    resp.status = falcon.HTTP_207
+                else:
+                    resp.status = falcon.HTTP_400
+                return
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: error building 207 body, %s' % err)
+                resp.status = falcon.HTTP_500
+                return
 
         if not metrics:
             try:
@@ -1739,6 +2051,94 @@ class MetricDataPost(object):
             if not timestamp:
                 timestamp = int(time())
 
+            # @added 20220128 - Feature #4400: flux - quota
+            namespace_quota = 0
+            current_namespace_metric_count = 0
+            namespace_metrics = []
+            namespace_metrics_count = 0
+            rejected_metric_over_quota = None
+            check_namespace_quota = None
+            try:
+                if metric_namespace_prefix:
+                    check_namespace_quota = str(metric_namespace_prefix)
+                else:
+                    check_namespace_quota = metric.split('.')[0]
+                if check_namespace_quota in namespaces_with_quotas:
+                    namespace_quota = get_namespace_quota(check_namespace_quota)
+                if namespace_quota:
+                    namespace_quota_key_reference_timestamp = (int(time()) // 60 * 60)
+                    namespace_quota_redis_key = 'flux.namespace_quota.%s.%s' % (
+                        check_namespace_quota, str(namespace_quota_key_reference_timestamp))
+                    current_namespace_metric_count = 0
+                    try:
+                        current_namespace_metric_count = redis_conn_decoded.scard(namespace_quota_redis_key)
+                    except:
+                        current_namespace_metric_count = 0
+                    namespace_metrics_redis_key = 'flux.namespace_metrics.%s' % check_namespace_quota
+                    try:
+                        namespace_metrics = list(redis_conn_decoded.smembers(namespace_metrics_redis_key))
+                    except:
+                        namespace_metrics = []
+                    namespace_metrics_count = len(namespace_metrics)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: error determining namespace_quota, %s' % err)
+            if namespace_quota:
+                if current_namespace_metric_count >= namespace_quota:
+                    logger.info('listen :: will not accept new metric in this minute, over quota')
+                    rejected_metric_over_quota = metric
+                if not rejected_metric_over_quota:
+                    try:
+                        if metric in namespace_metrics:
+                            new_metric_count = namespace_metrics_count + 0
+                        else:
+                            new_metric_count = namespace_metrics_count + 1
+                        if new_metric_count > namespace_quota:
+                            logger.info('listen :: will not accept new metric, over quota')
+                            rejected_metric_over_quota = metric
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: listen :: error determining new metric for namespace_quota, %s' % err)
+            if rejected_metric_over_quota:
+                body = {
+                    'code': 400,
+                    'error': 'over metric quota',
+                    'rejected metric': rejected_metric_over_quota
+                }
+                try:
+                    message = 'over quota - this account is allowed %s metrics and an additional metric was posted that has been rejected' % (
+                        str(namespace_quota))
+                    body = {
+                        'code': 400,
+                        'error': message,
+                        'rejected metric': rejected_metric_over_quota
+                    }
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: error building 400 body, %s' % err)
+                resp.body = json.dumps(body)
+                logger.info('listen :: %s, returning 400 on metric_namespace_prefix: %s' % (
+                    message, str(check_namespace_quota)))
+                resp.status = falcon.HTTP_400
+                return
+            if namespace_quota:
+                try:
+                    if metric not in namespace_metrics:
+                        try:
+                            redis_conn.sadd(namespace_metrics_redis_key, metric)
+                        except Exception as err:
+                            logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
+                                metric, namespace_metrics_redis_key, err))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: error adding metric to namespace_metrics_redis_key, %s' % err)
+                try:
+                    redis_conn.sadd(namespace_quota_redis_key, metric)
+                    redis_conn.expire(namespace_quota_redis_key, 60)
+                except Exception as err:
+                    logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
+                        metric, namespace_quota_redis_key, err))
+
             # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
             # If metrics are being submitted to flux internally (vista) using
             # the FLUX_SELF_API_KEY for a namespace if that namespace is added
@@ -1778,8 +2178,8 @@ class MetricDataPost(object):
                 # @modified 20210718
                 # Added aggregate
                 # if aggregate_metrics:
-                if aggregate_metrics or aggregate:
-                    added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
+                if aggregate_metrics or aggregate or aggregate_namespaces_list:
+                    added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics, aggregate_namespaces_list)
                     if added_to_aggregation_queue:
                         if return_status_code == 500:
                             resp.status = falcon.HTTP_500
