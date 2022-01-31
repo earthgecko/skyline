@@ -431,7 +431,7 @@ class Analyzer(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
     # @added 20200213 - Bug #3448: Repeated airgapped_metrics
@@ -587,6 +587,15 @@ class Analyzer(Thread):
                 analyzer_skip_metrics_skipped = len(set(analyzer_skip_metrics))
             else:
                 logger.info('did not determine any ANALYZER_SKIP metrics from from analyzer.metrics_manager.analyzer_skip Redis set, will check dynamically')
+
+        # @added 20220119 - Bug #4386: analyzer - do not do monotonic_count on batch metrics
+        last_known_batch_metrics = []
+        try:
+            last_known_batch_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to generate a list from aet.analyzer.batch_processing_metrics Redis set - %s' % err)
+            last_known_batch_metrics = []
 
         # Discover assigned metrics
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.ANALYZER_PROCESSES)))
@@ -1315,7 +1324,7 @@ class Analyzer(Thread):
                         str(len(metrics_last_timestamp_dict)),
                         metrics_last_timestamp_hash_key))
                 else:
-                    logger.warn('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
+                    logger.warning('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
                         metrics_last_timestamp_hash_key))
             except:
                 logger.error(traceback.format_exc())
@@ -2103,7 +2112,11 @@ class Analyzer(Thread):
                         # seconds the metric has to be monotonic in the last
                         # 15 data points.
                         if monotonic_count < 3:
-                            is_strictly_increasing_monotonically = False
+                            # @modified 20220119 - Bug #4386: analyzer - do not do monotonic_count on batch metrics
+                            # Do not handle batch metrics
+                            # is_strictly_increasing_monotonically = False
+                            if base_name not in last_known_batch_metrics:
+                                is_strictly_increasing_monotonically = False
                 else:
                     is_strictly_increasing_monotonically = False
 
@@ -2587,6 +2600,20 @@ class Analyzer(Thread):
 
                 del metric_airgaps
                 del metric_airgaps_filled
+
+                # @added 20220119 - Bug #4386: analyzer - do not do monotonic_count on batch metrics
+                #                   Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                # Reset the state of any batch metrics sent through analyzer to
+                # be checked for airgaps or stale as not anomalous.
+                if BATCH_PROCESSING:
+                    if batch_metric and anomalous:
+                        # Low priority metric not analysed
+                        anomalous = False
+                        ensemble = [False]
+                        datapoint = timeseries[-1][1]
+                        negatives_found = False
 
                 # @added 20191016 - Branch #3262: py3
                 if LOCAL_DEBUG:
@@ -5546,7 +5573,7 @@ class Analyzer(Thread):
                                     analyzer_batch_anomaly = None
                                     analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
                                         # str(metric_timestamp), metric)
-                                        str(int(metric[2])), metric)
+                                        str(int(metric[2])), metric[1])
                                     try:
                                         analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
                                     except Exception as e:
