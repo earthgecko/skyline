@@ -63,6 +63,9 @@ except ImportError:
 
 from requests.utils import quote
 
+# @added 20220120 - Bug #4366: Fix boundary slack channels match
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+
 python_version = int(sys.version_info[0])
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -895,6 +898,15 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 # @modified 20220114 - Bug #4366: Fix boundary slack channels match
                 # Handle multiple channels in the tuple
                 # matched_channels.append(channel)
+                for i_channel in settings.BOUNDARY_SLACK_OPTS['channels'][channel]:
+                    matched_channels.append(i_channel)
+
+    # @added 20220120 - Bug #4366: Fix boundary slack channels match
+    # Check namespace elements as well
+    if not matched_channels:
+        for channel in settings.BOUNDARY_SLACK_OPTS['channels']:
+            pattern_match, metric_matched_by = matched_or_regexed_in_list('boundary', metric_name, [channel])
+            if pattern_match:
                 for i_channel in settings.BOUNDARY_SLACK_OPTS['channels'][channel]:
                     matched_channels.append(i_channel)
 
