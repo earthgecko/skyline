@@ -85,4 +85,18 @@ def get_external_settings(current_skyline_app, namespace=None, log=False):
                     config_id, e))
         external_settings = namespace_external_settings
 
+    # @added 20220128 - Feature #4376: webapp - update_external_settings
+    if external_settings and current_skyline_app == 'webapp':
+        redacted_tokens_external_settings = {}
+        for config_id in list(external_settings.keys()):
+            if log:
+                current_logger.info('get_external_settings :: redacting tokens for webapp API request')
+            redacted_tokens_external_settings[config_id] = {}
+            for key in list(external_settings[config_id].keys()):
+                if 'token' in key:
+                    redacted_tokens_external_settings[config_id][key] = 'REDACTED'
+                else:
+                    redacted_tokens_external_settings[config_id][key] = external_settings[config_id][key]
+        external_settings = redacted_tokens_external_settings
+
     return external_settings

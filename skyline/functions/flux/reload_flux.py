@@ -61,7 +61,7 @@ def reload_flux(current_skyline_app, flux_pid_file):
     current_logger.info('%s :: flux_pid: %s, kill_winch_main_pid: %s' % (function_str, str(flux_pid), str(kill_winch_main_pid)))
     kill_quit_main_pid = subprocess.getstatusoutput('/usr/bin/kill -s QUIT %s' % str(flux_pid))
     current_logger.info('%s :: flux_pid: %s, kill_quit_main_pid: %s' % (function_str, str(flux_pid), str(kill_quit_main_pid)))
-    sleep(3)
+    sleep(10)
     current_pids = subprocess.getoutput("ps aux | grep flux | grep gunicorn | tr -s ' ' ',' | cut -d',' -f2").split('\n')
     for pid in original_pids:
         if pid in current_pids:

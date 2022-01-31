@@ -473,6 +473,70 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?external_settings</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a dictionary of external_settings as a json object. Optionally you can filter on namepsace. Tokens are REDACTED</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?external_settings">/api?external_settings</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?external_settings</code><br>
+              <code>/api?external_settingss&cluster_data=true</code> [optional for clustered Skyline]<br>
+              <code>/api?external_settings&namespace=[namespace]</code> [optional]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+      "alert_on_no_data": {
+        "enabled": true,
+        "expiry": 1800,
+        "stale_period": 300
+      },
+      "alert_on_stale_metrics": {
+        "enabled": true,
+        "expiry": 0,
+        "stale_period": 900
+      },
+      "flux_token": "REDACTED",
+      "full_duration": 86400,
+      "id": "test_external_settings",
+      "learn_full_duration_seconds": 2592000,
+      "namespace": "skyline-test-external-settings",
+      "retention_1_period_seconds": 604800,
+      "retention_1_resolution_seconds": 60,
+      "retention_2_period_seconds": 63072000,
+      "retention_2_resolution_seconds": 600,
+      "second_order_resolution_seconds": 604800,
+      "thunder_alert_endpoint": "http://127.0.0.1:1500/mock_api?alert_reciever",
+      "thunder_alert_token": "REDACTED"
+  },
+  "status": {"cluster_data": false, "request_time": 0.0032482019159942865, "response": 200}
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/flux/metric_data</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -496,11 +560,11 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
-                  timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
-                  value=[value | float | <font color=red>required</font>]</br>
-                  key=[API key | str | <font color=red>required</font>]</br>
-                  fill=[whether this is backfill | boolean | optional]</br>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]<br>
+                  timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  value=[value | float | <font color=red>required</font>]<br>
+                  key=[API key | str | <font color=red>required</font>]<br>
+                  fill=[whether this is backfill | boolean | optional]<br>
               </td>
   		      </tr>
   		      <tr>
