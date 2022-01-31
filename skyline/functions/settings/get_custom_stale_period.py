@@ -55,6 +55,7 @@ def custom_stale_period(
         custom_stale_period_dict = settings.CUSTOM_STALE_PERIOD.copy()
     except AttributeError:
         stale_period = 500
+        custom_stale_period_dict = {}
     except Exception as e:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'
@@ -63,6 +64,7 @@ def custom_stale_period(
         current_logger.error('error :: %s :: failed to parse CUSTOM_STALE_PERIOD from settings - %s' % (
             function_str, e))
         stale_period = 500
+        custom_stale_period_dict = {}
 
     # @added 20210602 - Feature #4000: EXTERNAL_SETTINGS
     # Add any custom stale periods for any namespaces declared in external
@@ -84,6 +86,10 @@ def custom_stale_period(
                         use_custom_stale_period = None
                     if use_custom_stale_period:
                         custom_stale_period_dict[namespace] = use_custom_stale_period
+                        if log:
+                            if current_skyline_app == 'analyzer':
+                                current_logger.info('metrics_manager :: %s :: external_settings stale_period found for %s: %s' % (
+                                    function_str, base_name, str(use_custom_stale_period)))
             except Exception as e:
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
@@ -131,10 +137,10 @@ def custom_stale_period(
             if log:
                 if current_skyline_app == 'analyzer':
                     current_logger.info('metrics_manager :: %s :: custom_stale_period found for %s: %s' % (
-                        function_str, base_name, str(custom_stale_period)))
+                        function_str, base_name, str(custom_stale_period_int)))
                 else:
                     current_logger.info('%s :: custom_stale_period found for %s: %s' % (
-                        function_str, base_name, str(custom_stale_period)))
+                        function_str, base_name, str(custom_stale_period_int)))
         except ValueError:
             custom_stale_period_int = stale_period
         except Exception as e:
