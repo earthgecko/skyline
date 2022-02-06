@@ -19,6 +19,8 @@ from functions.filesystem.remove_file import remove_file
 from functions.thunder.check_thunder_failover_key import check_thunder_failover_key
 from functions.thunder.alert_on_stale_metrics import alert_on_stale_metrics
 from functions.thunder.alert_on_no_data import alert_on_no_data
+# @added 20220202 - Feature #4412: flux - quota - thunder alert
+from functions.thunder.alert_on_quota_exceeded import alert_on_quota_exceeded
 
 skyline_app = 'thunder'
 skyline_app_logger = '%sLog' % skyline_app
@@ -315,6 +317,33 @@ class Thunder(Thread):
                         str(alerts_sent_dict)))
                 if all_sent:
                     remove_event(redis_item, event_file)
+
+        # @added 20220202 - Feature #4412: flux - quota - thunder alert
+        # metrics over quota alerts
+        if source == 'flux' and event_type == 'metric_quota_exceeded':
+            alerts_sent_dict = {}
+            try:
+                parent_namespace = data['namespace']
+                rejected_metrics = data['rejected_metrics']
+                alerts_sent_dict = alert_on_quota_exceeded(self, level, message, parent_namespace, expiry, rejected_metrics, data)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_on_quota_exceeded failed for %s - %s' % (
+                    parent_namespace, err))
+            all_sent = False
+            if alerts_sent_dict:
+                all_sent = alerts_sent_dict['all_sent']
+                logger.info('%s alerts of %s sent for metric_quota_exceeded on %s' % (
+                    str(alerts_sent_dict['to_send']),
+                    str(alerts_sent_dict['sent']), parent_namespace))
+            if not all_sent:
+                logger.warning('warning :: all alerts were not sent - %s' % (
+                    str(alerts_sent_dict)))
+            if all_sent:
+                cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (
+                    app, event_type, level, parent_namespace, str(timestamp))
+                create_alert_cache_key(cache_key, expiry, str(validated_event_details))
+                remove_event(redis_item, event_file)
 
         spin_end = time() - spin_start
         logger.info('spin_thunder_process took %.2f seconds' % spin_end)
