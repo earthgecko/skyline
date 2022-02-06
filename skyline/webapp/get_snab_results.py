@@ -379,7 +379,10 @@ def get_snab_results(filter_on):
         try:
             anomaly_id = results_data[snab_id]['anomaly_id']
             metric = results_data[snab_id]['metric']
-            algorithm_group = results_data[snab_id]['algorithm_group']
+            try:
+                algorithm_group = results_data[snab_id]['algorithm_group']
+            except KeyError:
+                algorithm_group = None
             anomaly_timestamp = anomalies[anomaly_id]['anomaly_timestamp']
             full_duration = anomalies[anomaly_id]['full_duration']
             graphite_from_timestamp = anomaly_timestamp - full_duration

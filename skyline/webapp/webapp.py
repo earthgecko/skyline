@@ -1536,6 +1536,38 @@ def api():
             data_dict = {"status": {"request_time": thunder_no_data_remove_namespace_time, "response": 500}, "data": {'namespace': namespace, 'remove_namespace_from_no_data_check': False, 'reason': 'failed to add key'}}
             return jsonify(data_dict), 500
 
+    # @added 20220202 - Feature #4412: flux - quota - thunder alert
+    if 'thunder_metric_quota_exceeded' in request.args:
+        logger.info('/api?thunder_metric_quota_exceeded')
+        start_thunder_metric_quota_exceeded = timer()
+        try:
+            timestamp = request.args.get('timestamp')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?thunder_metric_quota_exceeded request with no timestamp argument')
+            timestamp = None
+        if not timestamp:
+            data_dict = {"status": {"error": "no timestamp passed"}}
+            return jsonify(data_dict), 400
+        redis_key = 'thunder.metric_quota_exceeded.alert.%s' % str(timestamp)
+        metric_quota_exceeded_dict = {}
+        try:
+            metric_quota_exceeded_raw = REDIS_CONN.get(redis_key)
+            if metric_quota_exceeded_raw:
+                metric_quota_exceeded_dict = literal_eval(metric_quota_exceeded_raw)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?thunder_metric_quota_exceeded fail to query Redis key %s  %s' % (redis_key, e))
+            metric_quota_exceeded_dict = {}
+        end_thunder_metric_quota_exceeded = timer()
+        thunder_metric_quota_exceeded_time = (end_thunder_metric_quota_exceeded - start_thunder_metric_quota_exceeded)
+        if metric_quota_exceeded_dict:
+            data_dict = {"status": {"request_time": thunder_metric_quota_exceeded_time, "response": 200}, "data": metric_quota_exceeded_dict}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"request_time": thunder_metric_quota_exceeded_time, "response": 404}, "data": {"metrics": 'null'}}
+            return jsonify(data_dict), 404
+
     # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
     if 'boundary_metrics' in request.args:
         logger.info('/api?boundary_metrics')
@@ -9872,8 +9904,8 @@ def snab():
 
     plot = False
     if 'plot' in request.args:
-        plot = request.args.get('plot', 'false')
-        if plot == 'true':
+        plot_str = request.args.get('plot', 'false')
+        if plot_str == 'true':
             plot = True
     filter_on['plot'] = plot
 
