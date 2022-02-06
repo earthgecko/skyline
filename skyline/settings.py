@@ -1215,6 +1215,18 @@ SMTP_OPTS = {
     # that do not have a matching namespace defined in recipients
     'default_recipient': ['you@your_domain.com'],
     'embed-images': True,
+    # You can specify the address of an SMTP server if you do not want to or
+    # cannot use a local SMTP server on 127.0.0.1
+    'smtp_server': {
+        'host': '127.0.0.1',
+        'port': 25,
+        # Whether to use SSL, not required, optional
+        'ssl': False,
+        # A SMTP username, not required, optional
+        'user': None,
+        # A SMTP password, not required, optional
+        'password': None,
+    },
 }
 """
 :var SMTP_OPTS: Your SMTP settings. [USER_DEFINED]
@@ -2352,6 +2364,7 @@ BOUNDARY_SMTP_OPTS = {
     # FULL_DURATION
     'graphite_previous_hours': 7,
     'graphite_graph_line_color': 'pink',
+    # Boundary will use the same 'smtp_server' as defined in SMTP_OPTS
 }
 """
 :var BOUNDARY_SMTP_OPTS: Your SMTP settings. [USER_DEFINED]

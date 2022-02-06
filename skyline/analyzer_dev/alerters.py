@@ -3,6 +3,9 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEImage import MIMEImage
 from smtplib import SMTP
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from smtplib import SMTP_SSL
+
 import alerters
 import urllib2
 
@@ -11,6 +14,9 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from functions.smtp.determine_smtp_server import determine_smtp_server
 
 """
 Create any alerter you want here. The function will be invoked from trigger_alert.
@@ -98,6 +104,13 @@ def alert_smtp(alert, metric):
 
     body = 'skyline analyzer alert <br> Anomalous value: %s <br> Next alert in: %s seconds <br> <a href="%s">%s</a>' % (metric[0], alert[2], link, img_tag)
 
+    # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+    smtp_server = None
+    try:
+        smtp_server = determine_smtp_server()
+    except:
+        return
+
     for recipient in recipients:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = '[skyline alert] ' + metric[1]
@@ -110,7 +123,15 @@ def alert_smtp(alert, metric):
             msg_attachment.add_header('Content-ID', '<%s>' % content_id)
             msg.attach(msg_attachment)
 
-        s = SMTP('127.0.0.1')
+        # @modified 20220203 - Feature #4416: settings - additional SMTP_OPTS
+        # s = SMTP('127.0.0.1')
+        if not smtp_server['ssl']:
+            s = SMTP(smtp_server['host'], smtp_server['port'])
+        else:
+            s = SMTP_SSL(smtp_server['host'], smtp_server['port'])
+        if smtp_server['user']:
+            s.login(smtp_server['user'], smtp_server['password'])
+
         s.sendmail(sender, recipient, msg.as_string())
         s.quit()
 

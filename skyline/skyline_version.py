@@ -20,9 +20,9 @@ version info
 # __version_info__ = ('2', '1', '0-4376')
 # __branch__ = 'SNAB'
 # __version_tag__ = 'update_external_settings'
-__version_info__ = ('2', '1', '0-4400')
+__version_info__ = ('2', '1', '0-4416')
 __branch__ = 'SNAB'
-__version_tag__ = 'flux - quota'
+__version_tag__ = 'additional SMTP_OPTS'
 
 __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11

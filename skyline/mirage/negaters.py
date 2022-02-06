@@ -1,5 +1,8 @@
 from __future__ import division
 from smtplib import SMTP
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from smtplib import SMTP_SSL
+
 import sys
 python_version = int(sys.version_info[0])
 if python_version == 2:
@@ -21,6 +24,8 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from functions.smtp.determine_smtp_server import determine_smtp_server
 
 # from skyline import settings
 
@@ -119,6 +124,13 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
     else:
         body = mirage_body
 
+    # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+    smtp_server = None
+    try:
+        smtp_server = determine_smtp_server()
+    except:
+        return
+
     for recipient in recipients:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = 'mirage alert NEGATION - ' + metric[1]
@@ -135,7 +147,15 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
             analyzer_msg_attachment.add_header('Content-ID', '<%s>' % analyzer_content_id)
             msg.attach(analyzer_msg_attachment)
 
-        s = SMTP('127.0.0.1')
+        # @modified 20220203 - Feature #4416: settings - additional SMTP_OPTS
+        # s = SMTP('127.0.0.1')
+        if not smtp_server['ssl']:
+            s = SMTP(smtp_server['host'], smtp_server['port'])
+        else:
+            s = SMTP_SSL(smtp_server['host'], smtp_server['port'])
+        if smtp_server['user']:
+            s.login(smtp_server['user'], smtp_server['password'])
+
         s.sendmail(sender, recipient, msg.as_string())
         s.quit()
 

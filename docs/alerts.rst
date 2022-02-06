@@ -62,6 +62,18 @@ and :mod:`settings.SMTP_OPTS` would need to look like this.
       # that do not have a matching namespace defined in recipients
       'default_recipient': ['no_email'],
       'embed-images': True,
+    # You can specify the address of an SMTP server if you do not want to or
+    # cannot use a local SMTP server on 127.0.0.1
+    'smtp_server': {
+        'host': '127.0.0.1',
+        'port': 25,
+        # Whether to use SSL, not required, optional
+        'ssl': False,
+        # A SMTP username, not required, optional
+        'user': None,
+        # A SMTP password, not required, optional
+        'password': None,
+    },
   }
 
 Smart alerting
@@ -129,7 +141,8 @@ Boundary related alert settings (static and dynamic thresholds) are:
 - :mod:`settings.BOUNDARY_ALERTER_OPTS` - can be used to change the Boundary
   alert rate limits
 - :mod:`settings.BOUNDARY_SMTP_OPTS` - must be defined if you want to send SMTP
-  alerts
+  alerts. Note that Boundary will use the same `smtp_server` as defined in
+  :mod:`settings.SMTP_OPTS`
 - :mod:`settings.BOUNDARY_PAGERDUTY_OPTS` - must be defined if you want to alert
   via Pagerduty
 - :mod:`settings.BOUNDARY_SLACK_OPTS` - must be defined if you want to alert via
