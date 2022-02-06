@@ -140,6 +140,13 @@ namespaces_with_quotas = []
 for namespace in list(namespace_quotas_dict.keys()):
     namespaces_with_quotas.append(namespace)
 
+# @added 20220202 - Feature #4412: flux - quota - thunder alert
+skyline_app = 'flux'
+if namespaces_with_quotas:
+    from functions.thunder.send_event import thunder_send_event
+else:
+    thunder_send_event = None
+
 # @added 20220128 - Feature #4404: flux - external_settings - aggregation
 #                   Feature #4324: flux - reload external_settings
 #                   Feature #4376: webapp - update_external_settings
@@ -423,7 +430,7 @@ def validate_metric_name(caller, metric):
 #                     Feature #4376: webapp - update_external_settings
 # def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics_list):
 def add_to_aggregate_metric_queue(
-    metric, metric_data, aggregate_metrics_list, aggregate_namespaces_lst):
+        metric, metric_data, aggregate_metrics_list, aggregate_namespaces_lst):
     added_to_aggregation_queue = False
     return_status_code = 204
     aggregate_metric = False
@@ -439,8 +446,8 @@ def add_to_aggregate_metric_queue(
     #                     Feature #4376: webapp - update_external_settings
     # Do not use query Redis, use lists
     if not aggregate_metric and aggregate_namespaces_lst:
-        for namespace in aggregate_namespaces_lst:
-            if metric.startswith(namespace):
+        for agg_namespace in aggregate_namespaces_lst:
+            if metric.startswith(agg_namespace):
                 aggregate_metric = True
                 break
 
@@ -1207,6 +1214,59 @@ class MetricDataPost(object):
         except KeyError:
             status = False
         if status:
+
+            status_code = None
+            try:
+                status_code = postData['status_code']
+                logger.info('listen :: status status_code test, %s' % (
+                    str(status_code)))
+            except KeyError:
+                status_code = None
+            if status_code:
+                status_code = int(status_code)
+                data = 'Status code test - %s' % str(status_code)
+                if status_code == 207:
+                    rejected_metrics_over_quota = ['server-1.unknown.metric', 'server-1.some-other-unknown.metric']
+                    processed_metrics = ['server-1.known.metric', 'server-1.some-other-known.metric']
+                    data = []
+                    for metric in rejected_metrics_over_quota:
+                        data.append({'metric': metric, 'status': 400})
+                    for metric in processed_metrics:
+                        data.append({'metric': metric, 'status': 204})
+                    message = 'TEST - over quota - this account is allowed x metrics and an additional y new metrics were posted that have been rejected'
+                    notice_msg = 'TEST - 2 metrics were processed and 2 metrics were rejected'
+                    body = {
+                        'code': status_code,
+                        'data': data,
+                        'error': message,
+                        'message': notice_msg,
+                        'rejected metrics': rejected_metrics_over_quota,
+                        'rejected metrics count': 2,
+                        'processed metrics': processed_metrics,
+                        'processed metrics count': 2,
+                        'submitted metrics count': 4
+                    }
+                else:
+                    body = {
+                        'code': status_code,
+                        'data': data,
+                    }
+                resp.body = json.dumps(body)
+                logger.info('listen :: status - status_code test: %s' % (
+                    str(body)))
+                # logger.debug('debug :: listen :: %s' % str(body))
+                if status_code == 207:
+                    resp.status = falcon.HTTP_207
+                elif status_code == 400:
+                    resp.status = falcon.HTTP_400
+                elif status_code == 401:
+                    resp.status = falcon.HTTP_401
+                elif status_code == 200:
+                    resp.status = falcon.HTTP_200
+                else:
+                    resp.status = falcon.HTTP_204
+                return
+
             try:
                 logger.info('listen :: POST status - ok')
                 body = {"status": "ok"}
@@ -1386,6 +1446,9 @@ class MetricDataPost(object):
                 metric = None
                 telegraf_metrics.append(metric)
 
+        # @added 20220202 - Feature #4412: flux - quota - thunder alert
+        test_metric_quota_exceeded_alert = False
+
         # @added 20220126 - Feature #4400: flux - quota
         namespace_quota = 0
         current_namespace_metric_count = 0
@@ -1427,6 +1490,21 @@ class MetricDataPost(object):
                 except:
                     namespace_metrics = []
                 namespace_metrics_count = len(namespace_metrics)
+
+                # @added 20220202 - Feature #4412: flux - quota - thunder alert
+                try:
+                    test_metric_quota_exceeded_alert = postData['metric_quota_exceeded_test']
+                    if LOCAL_DEBUG:
+                        if test_metric_quota_exceeded_alert:
+                            logger.debug('debug :: listen :: metric_quota_exceeded_test is set in the POST data')
+                except KeyError:
+                    test_metric_quota_exceeded_alert = False
+                except Exception as err:
+                    if LOCAL_DEBUG:
+                        logger.error('error :: listen :: checking metric_quota_exceeded_test in the POST data - %s' % (
+                            err))
+                    test_metric_quota_exceeded_alert = False
+
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: listen :: error determining namespace_quota, %s' % err)
@@ -1462,6 +1540,16 @@ class MetricDataPost(object):
                             known_metrics.append(metric_name)
                         else:
                             new_metrics.append(metric_name)
+
+                    # @added 20220202 - Feature #4412: flux - quota - thunder alert
+                    if test_metric_quota_exceeded_alert:
+                        logger.info('listen :: TEST - test_metric_quota_exceeded_alert set, not accepting data testing')
+                        original_namespace_quota = int(namespace_quota)
+                        namespace_quota = 0
+                        known_metrics = []
+                        new_metrics = list(metrics_in_post)
+                        namespace_metrics = []
+
                     new_metric_count = namespace_metrics_count + len(new_metrics)
                     if new_metric_count > namespace_quota:
                         over_quota = new_metric_count - namespace_quota
@@ -1774,6 +1862,14 @@ class MetricDataPost(object):
                     str(namespace_quota), str(len(rejected_metrics_over_quota)))
                 notice_msg = '%s metrics were processed and %s metrics were rejected' % (
                     str(len(processed_metrics)), str(len(rejected_metrics_over_quota)))
+
+                # @added 20220202 - Feature #4412: flux - quota - thunder alert
+                if test_metric_quota_exceeded_alert:
+                    message = 'TEST - over quota - this account is allowed %s metrics and an additional %s new metrics were posted that have been rejected' % (
+                        str(namespace_quota), str(len(rejected_metrics_over_quota)))
+                    notice_msg = 'TEST - %s metrics were processed and %s metrics were rejected' % (
+                        str(len(processed_metrics)), str(len(rejected_metrics_over_quota)))
+
                 data = []
                 for metric in rejected_metrics_over_quota:
                     data.append({'metric': metric, 'status': 400})
@@ -1794,6 +1890,51 @@ class MetricDataPost(object):
                     'processed metrics count': len(processed_metrics),
                     'submitted metrics count': len(metrics)
                 }
+
+                # @added 20220202 - Feature #4412: flux - quota - thunder alert
+                if settings.THUNDER_ENABLED:
+                    # Note expiry is hardcoded here but thunder will override it
+                    # if there is an expiry declared in an external_settings
+                    # context
+                    expiry = 3600
+                    level = 'alert'
+                    event_type = 'metric_quota_exceeded'
+                    message = '%s - %s - %s metrics rejected as over quota' % (
+                        level, check_namespace_quota, str(len(rejected_metrics_over_quota)))
+                    status = 'metric quota exceeded'
+                    if test_metric_quota_exceeded_alert:
+                        message = '%s - %s - rejected %s metrics rejected as over quota - TEST' % (
+                            level, check_namespace_quota, str(len(rejected_metrics_over_quota)))
+                        status = 'metric quota exceeded - TEST'
+                    thunder_event = {
+                        'level': level,
+                        'event_type': event_type,
+                        'message': message,
+                        'app': skyline_app,
+                        'metric': None,
+                        'source': skyline_app,
+                        'timestamp': time(),
+                        'expiry': expiry,
+                        'data': {
+                            'namespace': check_namespace_quota,
+                            'rejected_metrics': rejected_metrics_over_quota,
+                            'rejected_metrics_count': len(rejected_metrics_over_quota),
+                            'processed_metrics': processed_metrics,
+                            'processed_metrics_count': len(processed_metrics),
+                            'submitted_metrics_count': len(metrics),
+                            'status': 'over quota'
+                        },
+                    }
+                    submitted = False
+                    try:
+                        submitted = thunder_send_event(skyline_app, thunder_event, log=True)
+                    except Exception as err:
+                        logger.error('error :: listen :: error encounterd with thunder_send_event - %s' % (
+                            err))
+                    if submitted:
+                        logger.info('listen :: send thunder event metrics_qouta_exceeded for %s metrics on namespace %s' % (
+                            str(len(rejected_metrics_over_quota)), check_namespace_quota))
+
                 resp.body = json.dumps(body)
                 logger.info('listen :: %s, returning %s on metric_namespace_prefix: %s' % (
                     message, str(return_code), str(check_namespace_quota)))
