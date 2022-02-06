@@ -8,6 +8,7 @@
 #                      Task #3960: SNYK-PYTHON-JINJA2-1012994
 # @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
+# @modified 20220206 - Feature #4416: settings - additional SMTP_OPTS
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -71,7 +72,10 @@ mock==4.0.3
 #numpy==1.19.4
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #numpy==1.21.5
-numpy==1.22.0
+# @modified 20220206 - Feature #4416: settings - additional SMTP_OPTS
+# numpy 1.22.0 not available on readthedocs
+#numpy==1.22.0
+numpy==1.21.5
 # @modified 20211220 - Task #4344: Update dependencies
 #scipy==1.5.4
 scipy==1.7.3

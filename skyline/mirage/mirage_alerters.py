@@ -2,6 +2,8 @@ from __future__ import division, print_function
 import logging
 import hashlib
 from smtplib import SMTP
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from smtplib import SMTP_SSL
 
 # @added 20200116: Feature #3396: http_alerter
 import requests
@@ -119,6 +121,8 @@ if True:
     # @added 20210724 - Feature #4196: functions.aws.send_sms
     from functions.aws.send_sms import send_sms
     from functions.settings.get_sms_recipients import get_sms_recipients
+    # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+    from functions.smtp.determine_smtp_server import determine_smtp_server
 
 # @added 20200929 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
@@ -1134,8 +1138,28 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         # This allows for all the steps to be processed in the testing or docker
         # context without actually sending the email.
         if send_email_alert:
+
+            # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+            smtp_server = None
             try:
-                s = SMTP('127.0.0.1')
+                smtp_server = determine_smtp_server()
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: determine_smtp_server failed' % err)
+            if not smtp_server:
+                logger.error('error :: no smtp_server, cannot send mail')
+                return
+
+            try:
+                # @modified 20220203 - Feature #4416: settings - additional SMTP_OPTS
+                # s = SMTP('127.0.0.1')
+                if not smtp_server['ssl']:
+                    s = SMTP(smtp_server['host'], smtp_server['port'])
+                else:
+                    s = SMTP_SSL(smtp_server['host'], smtp_server['port'])
+                if smtp_server['user']:
+                    s.login(smtp_server['user'], smtp_server['password'])
+
                 # @modified 20180524 - Task #2384: Change alerters to cc other recipients
                 # Send to primary_recipient and cc_recipients
                 # s.sendmail(sender, recipient, msg.as_string())
@@ -1149,7 +1173,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                         'debug :: alert_smtp - message sent OK to primary_recipient :: %s, cc_recipients :: %s' %
                         (str(primary_recipient), str(cc_recipients)))
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 # logger.error('error :: alert_smtp - could not send email to %s' % str(recipient))
                 logger.error(
                     'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %

@@ -1000,12 +1000,10 @@ class Boundary(Thread):
                         trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()), 0)
                     except:
                         logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
-                        logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
                 try:
                     os.remove(alert_test_file)
                 except OSError:
                     logger.error('error - failed to remove %s, continuing' % alert_test_file)
-                    pass
 
             if len(boundary_metrics) == 0:
                 logger.info('no Boundary metrics in redis. try adding some - see README')

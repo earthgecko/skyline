@@ -1,11 +1,16 @@
 import logging
 import traceback
 from smtplib import SMTP
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from smtplib import SMTP_SSL
+
 from email import charset
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import settings
+# @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+from functions.smtp.determine_smtp_server import determine_smtp_server
 
 
 # @added 20210524 - Branch #1444: thunder
@@ -92,8 +97,28 @@ def send_email(current_skyline_app, to, cc, subject, body, log=True):
             send_email_alert = False
 
     if send_email_alert:
+
+        # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
+        smtp_server = None
         try:
-            s = SMTP('127.0.0.1')
+            smtp_server = determine_smtp_server()
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: determine_smtp_server failed' % err)
+        if not smtp_server:
+            current_logger.error('error :: no smtp_server mail cannot be sent')
+            return
+
+        try:
+            # @modified 20220203 - Feature #4416: settings - additional SMTP_OPTS
+            # s = SMTP('127.0.0.1')
+            if not smtp_server['ssl']:
+                s = SMTP(smtp_server['host'], smtp_server['port'])
+            else:
+                s = SMTP_SSL(smtp_server['host'], smtp_server['port'])
+            if smtp_server['user']:
+                s.login(smtp_server['user'], smtp_server['password'])
+
             if cc_recipients:
                 s.sendmail(sender, [primary_recipient, cc_recipients], msg.as_string())
             else:
