@@ -226,6 +226,34 @@ def alert_on_no_data(self, level, message, parent_namespace, data):
         alerts_sent_dict['all_sent'] = False
         all_sent = False
 
+    # @added 20220207 - Task #4430: Limit thunder alert retries
+    # Only try and alert 5 times
+    if not all_sent:
+        times_alerted_key = 'thunder.no_data.alert.times_attempted.%s.%s' % (
+            parent_namespace, data['status'])
+        number_of_times_alerted = 0
+        try:
+            number_of_times_alerted = self.redis_conn_decoded.get(times_alerted_key)
+            if not number_of_times_alerted:
+                number_of_times_alerted = 0
+        except Exception as e:
+            logger.error('error :: %s :: failed to set key %s - %s' % (
+                function_str, times_alerted_key, e))
+        number_of_times_alerted = int(float(number_of_times_alerted)) + 1
+        if number_of_times_alerted == 5:
+            logger.warning('warning :: %s :: attempted to alert 5 times and an alert_via has failed for %s on %s, setting all_sent to True to delete hash key' % (
+                function_str, data['status'], parent_namespace))
+            all_sent = True
+        else:
+            try:
+                self.redis_conn_decoded.setex(times_alerted_key, 1600, number_of_times_alerted)
+                logger.info('%s :: attempted to alert %s times for %s on %s' % (
+                    function_str, str(number_of_times_alerted), data['status'],
+                    parent_namespace))
+            except Exception as e:
+                logger.error('error :: %s :: failed to set key %s - %s' % (
+                    function_str, times_alerted_key, e))
+
     if all_sent and level == 'alert':
         try:
             self.redis_conn_decoded.setex(thunder_alert_key, expiry, alert_sent_at)
