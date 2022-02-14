@@ -191,6 +191,12 @@ def thunder_no_data(current_skyline_app, log=True):
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: get_external_settings failed - %s' % (
             function_str, err))
+
+    # @added 20220208 - Feature #4376: webapp - update_external_settings
+    # If alert_on_no_data is not enabled for an external_settings namespace
+    # do not alert
+    do_not_alert_on_namespaces = []
+
     external_parent_namespaces_stale_periods = {}
     if external_settings:
         for config_id in list(external_settings.keys()):
@@ -220,6 +226,13 @@ def thunder_no_data(current_skyline_app, log=True):
                 expiry = external_settings[config_id]['alert_on_no_data']['expiry']
             except KeyError:
                 expiry = 1800
+
+            # @added 20220208 - Feature #4376: webapp - update_external_settings
+            # If alert_on_no_data is not enabled do not alert
+            if not alert_on_no_data:
+                do_not_alert_on_namespaces.append(namespace)
+                namespace = None
+
             if namespace and no_data_stale_period and expiry:
                 external_parent_namespaces_stale_periods[namespace] = {}
                 external_parent_namespaces_stale_periods[namespace]['stale_period'] = int(no_data_stale_period)
@@ -254,6 +267,12 @@ def thunder_no_data(current_skyline_app, log=True):
     parent_namespaces = external_parent_namespaces + custom_stale_period_namespaces + parent_namespaces
 
     for parent_namespace in parent_namespaces:
+
+        # @added 20220208 - Feature #4376: webapp - update_external_settings
+        # If alert_on_no_data is not enabled do not alert
+        if parent_namespace in do_not_alert_on_namespaces:
+            continue
+
         stale_period = int(settings.STALE_PERIOD)
 
         # Determine if there is a CUSTOM_STALE_PERIOD for the namespace

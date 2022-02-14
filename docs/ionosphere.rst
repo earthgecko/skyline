@@ -747,6 +747,9 @@ programmatic decisions based on the data it is provided with, things a human
 operator tells it are not anomalous.  Ionosphere is an attempt to give Skyline
 an Apollo Program refit.  Enabling the pilots to take control, have inputs.
 
+A benefit here is that the method does not suffer from underspecification that
+is prevalent in machine learning models.
+
 For Humans
 ----------
 

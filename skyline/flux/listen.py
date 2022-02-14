@@ -9,6 +9,11 @@ import traceback
 # from multiprocessing import Queue
 import string
 from ast import literal_eval
+
+# @added 20220209 - Feature #4284: flux - telegraf
+from timeit import default_timer as timer
+import gzip
+
 from logger import set_up_logging
 
 import falcon
@@ -25,6 +30,8 @@ if True:
     # @modified 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
     # Added get_redis_conn_decoded
     from skyline_functions import get_redis_conn, get_redis_conn_decoded
+    # @added 20220208 - Feature #4432: functions.metrics.skip_metric
+    from functions.metrics.skip_metric import skip_metric
 
 # @added 20200818 - Feature #3694: flux - POST multiple metrics
 # Added validation of FLUX_API_KEYS
@@ -83,8 +90,15 @@ except:
 logger = set_up_logging(None)
 
 LOCAL_DEBUG = False
+# @added 20220210 - Feature #4284: flux - telegraf
+# This is a debug feature that allows to enable timing of functions to ensure
+# performance is maintained as much as possible
+TIMINGS = False
 
-ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=']
+# @modified 20220209 - Feature #4284: flux - telegraf
+# Allow :
+# ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=']
+ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=', ':']
 for char in string.ascii_lowercase:
     ALLOWED_CHARS.append(char)
 for char in string.ascii_uppercase:
@@ -95,6 +109,10 @@ for char in string.digits:
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 redis_conn = get_redis_conn('flux')
 redis_conn_decoded = get_redis_conn_decoded('flux')
+
+# @added 20220208 - Feature #4432: functions.metrics.skip_metric
+#                   Feature #4400: flux - quota
+external_settings_namespaces = []
 
 # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
 aggregate_metrics = []
@@ -110,22 +128,82 @@ if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
 
 external_flux_keys = {}
 skyline_external_settings = {}
-if not redis_conn_decoded:
-    redis_conn_decoded = get_redis_conn_decoded('flux')
+
 try:
     skyline_external_settings_raw = redis_conn_decoded.get('skyline.external_settings')
     if skyline_external_settings_raw:
         skyline_external_settings = literal_eval(skyline_external_settings_raw)
-except Exception as e:
-    logger.error('error :: listen :: could get Redis set skyline.external_settings - %s' % str(e))
+except Exception as err:
+    logger.error('error :: listen :: could get Redis set skyline.external_settings - %s' % str(err))
     skyline_external_settings = {}
 if skyline_external_settings:
     for settings_key in list(skyline_external_settings.keys()):
-        if 'flux_token' in list(skyline_external_settings[settings_key].keys()):
+        external_setting_keys = list(skyline_external_settings[settings_key].keys())
+        if 'flux_token' in external_setting_keys:
             flux_token = skyline_external_settings[settings_key]['flux_token']
             if flux_token:
                 valid_keys.append(str(flux_token))
                 external_flux_keys[flux_token] = skyline_external_settings[settings_key]['namespace']
+        # @added 20220208 - Feature #4432: functions.metrics.skip_metric
+        #                   Feature #4400: flux - quota
+        if 'namespace' in external_setting_keys:
+            try:
+                external_settings_namespaces.append(skyline_external_settings[settings_key]['namespace'])
+            except Exception as err:
+                logger.error('error :: listen :: could append skyline_external_settings[\'%s\'][\'namespace\'] to external_settings_namespaces - %s' % (
+                    str(settings_key), str(err)))
+
+# @added 20220208 - Feature #4432: functions.metrics.skip_metric
+ALL_SKIP_LIST = []
+try:
+    ALL_SKIP_LIST = list(settings.SKIP_LIST)
+except AttributeError:
+    ALL_SKIP_LIST = []
+except:
+    ALL_SKIP_LIST = []
+ALL_DO_NOT_SKIP_LIST = []
+try:
+    ALL_DO_NOT_SKIP_LIST = list(settings.DO_NOT_SKIP_LIST)
+except AttributeError:
+    ALL_DO_NOT_SKIP_LIST = []
+except:
+    ALL_DO_NOT_SKIP_LIST = []
+if skyline_external_settings:
+    for settings_key in list(skyline_external_settings.keys()):
+        external_setting_keys = list(skyline_external_settings[settings_key].keys())
+        skip_metrics = []
+        external_namespace = None
+        try:
+            external_namespace = skyline_external_settings[settings_key]['namespace']
+        except KeyError:
+            external_namespace = None
+        except:
+            external_namespace = None
+        if 'skip_metrics' in external_setting_keys:
+            skip_metrics = skyline_external_settings[settings_key]['skip_metrics']
+            if skip_metrics:
+                if isinstance(skip_metrics, list):
+                    if external_namespace:
+                        for namespace in skip_metrics:
+                            metric_namespaces = '%s.%s' % (external_namespace, namespace)
+                            ALL_SKIP_LIST.append(metric_namespaces)
+                    else:
+                        ALL_SKIP_LIST = ALL_SKIP_LIST + skip_metrics
+        else:
+            skyline_external_settings[settings_key]['skip_metrics'] = []
+        do_not_skip_metrics = []
+        if 'do_not_skip_metrics' in external_setting_keys:
+            do_not_skip_metrics = skyline_external_settings[settings_key]['do_not_skip_metrics']
+            if do_not_skip_metrics:
+                if isinstance(do_not_skip_metrics, list):
+                    if external_namespace:
+                        for namespace in do_not_skip_metrics:
+                            metric_namespaces = '%s.%s' % (external_namespace, namespace)
+                            ALL_DO_NOT_SKIP_LIST.append(metric_namespaces)
+                    else:
+                        ALL_DO_NOT_SKIP_LIST = ALL_DO_NOT_SKIP_LIST + do_not_skip_metrics
+        else:
+            skyline_external_settings[settings_key]['do_not_skip_metrics'] = []
 
 # @added 20220126 - Feature #4400: flux - quota
 namespace_quotas_dict = {}
@@ -186,8 +264,6 @@ def check_validate_key_update(caller):
                 pass
     updated_external_flux_keys = {}
     updated_skyline_external_settings = {}
-#    if not redis_conn_decoded:
-#        redis_conn_decoded = get_redis_conn_decoded('flux')
     try:
         updated_skyline_external_settings_raw = redis_conn_decoded.get('skyline.external_settings')
         if updated_skyline_external_settings_raw:
@@ -339,17 +415,22 @@ def validate_key(caller, apikey):
 
 
 def validate_timestamp(caller, timestamp):
+
+    timestampInvalidReason = None
+
     try:
         timestamp = int(timestamp)
     except:
         logger.error('error :: %s :: the timestamp is not an int - %s' % (
             caller, str(timestamp)))
-        return False
+        timestampInvalidReason = 'timestamp is not an int'
+        return False, timestampInvalidReason
     try:
         if len(str(timestamp)) != 10:
             logger.error('error :: %s :: the timestamp value is not 10 digits - %s' % (
                 caller, str(timestamp)))
-            return False
+            timestampInvalidReason = 'timestamp is not a valid current unix timestamp'
+            return False, timestampInvalidReason
         now = int(time())
 
         # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
@@ -367,7 +448,7 @@ def validate_timestamp(caller, timestamp):
         timestampValid = True
         timestampInvalidReason = 'None'
         if timestamp < tooOld:
-            timestampInvalidReason = 'timestamp is too old'
+            timestampInvalidReason = 'timestamp is too old, older than %s seconds' % str(flux_max_age)
             timestampValid = False
         # @modified 20200828 - Task #3718: Allow flux to handle timestamp in the same minute period
         # if timestamp > now:
@@ -379,21 +460,29 @@ def validate_timestamp(caller, timestamp):
         if not timestampValid:
             logger.error('error :: %s :: timestamp in request data is not a valid timestamp - %s - %s' % (
                 caller, str(timestampInvalidReason), str(timestamp)))
-            return False
+            return False, timestampInvalidReason
     except:
         logger.error('error :: %s :: validating timestamp argument value - %s' % (
             caller, str(timestamp)))
-        return False
-    return True
+        return False, timestampInvalidReason
+    return True, timestampInvalidReason
 
 
 # @added 20201006 - Feature #3764: flux validate metric name
 def validate_metric_name(caller, metric):
+
+    # @modified 20220211 - Feature #4380: flux - return reason with 400
+    # Added reason
+    reason = None
+
     for vchar in metric:
         if vchar not in ALLOWED_CHARS:
             logger.error('error :: %s :: invalid char in metric - %s' % (
                 caller, str(metric)))
-            return False
+            # @modified 20220211 - Feature #4380: flux - return reason with 400
+            # Added reason
+            reason = 'invalid characters in name'
+            return False, reason
     # Check for prohibited chars
     # prohibitedTagChars = ';!^='
     # for char in metric:
@@ -409,14 +498,20 @@ def validate_metric_name(caller, metric):
     if (len(metric_elements[-1]) + 4) > 255:
         logger.error('error :: %s :: metric longer than 255 chars - %s' % (
             caller, str(metric)))
-        return False
+        # @modified 20220211 - Feature #4380: flux - return reason with 400
+        # Added reason
+        reason = 'longer than 255 characters'
+        return False, reason
     metric_dir = metric.replace('.', '/')
     full_whisper_path = '%s/%s.wsp' % (FLUX_GRAPHITE_WHISPER_PATH, metric_dir)
     if len(full_whisper_path) > 4096:
         logger.error('error :: %s :: metric path longer than 4096 chars - %s' % (
             caller, str(full_whisper_path)))
-        return False
-    return True
+        # @modified 20220211 - Feature #4380: flux - return reason with 400
+        # Added reason
+        reason = 'name too long'
+        return False, reason
+    return True, reason
 
 
 # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
@@ -541,6 +636,9 @@ class MetricData(object):
 
         if LOCAL_DEBUG:
             logger.info('listen :: GET request - %s' % str(req.query_string))
+
+        # @added 20220210 - Feature #4284: flux - telegraf
+        start_request_timer = timer()
 
         # @modified 20200115 - Feature #3394: flux health check
         # Added status parameter so that the flux listen process can be monitored
@@ -688,7 +786,7 @@ class MetricData(object):
                 resp.body = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
-                # @modified 20210909
+                # @modified 20210909 - Feature #4380: flux - return reason with 400
                 # Return 401 if bad key
                 # resp.status = falcon.HTTP_400
                 resp.status = falcon.HTTP_401
@@ -702,7 +800,9 @@ class MetricData(object):
                         # @modified 20220114 - lint message
                         valid_timestamp_message = 'listen :: MetricData GET - parameter - %s' % str(request_param_value)
                         # valid_timestamp = validate_timestamp('listen :: MetricData GET - parameter - %s', str(request_param_value))
-                        valid_timestamp = validate_timestamp(valid_timestamp_message, str(request_param_value))
+                        # @modified 20220211 - Feature #4380: flux - return reason with 400
+                        # Added reason
+                        valid_timestamp, reason = validate_timestamp(valid_timestamp_message, str(request_param_value))
                     else:
                         valid_timestamp = True
                     if valid_timestamp:
@@ -724,7 +824,9 @@ class MetricData(object):
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
 
                         # @added 20220118 - Feature #4380: flux - return reason with 400
-                        message = 'invalid timestamp - %s' % str(request_param_value)
+                        # @modified 20220211 - Feature #4380: flux - return reason with 400
+                        # Added reason
+                        message = 'invalid timestamp - %s - %s' % (str(request_param_value), str(reason))
                         body = {"code": 400, "message": message}
                         resp.body = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
@@ -765,7 +867,9 @@ class MetricData(object):
                 # @added 20201006 - Feature #3764: flux validate metric name
                 # @modified 20201207 - Task #3864: flux - try except everything
                 try:
-                    valid_metric_name = validate_metric_name('listen :: MetricData GET', str(request_param_key))
+                    # @modified 20220211 - Feature #4380: flux - return reason with 400
+                    # Added reason
+                    valid_metric_name, reason = validate_metric_name('listen :: MetricData GET', str(request_param_key))
                 except Exception as e:
                     logger.error('error :: listen :: could validate_metric_name - %s - %s' % (str(request_param_key), str(e)))
                     valid_metric_name = False
@@ -783,7 +887,9 @@ class MetricData(object):
                         logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
                     # @added 20220118 - Feature #4380: flux - return reason with 400
-                    message = 'invalid metric - %s' % str(request_param_value)
+                    # @modified 20220211 - Feature #4380: flux - return reason with 400
+                    # Added reason
+                    message = 'invalid metric - %s - %s' % (str(request_param_value), str(reason))
                     body = {"code": 400, "message": message}
                     resp.body = json.dumps(body)
                     logger.info('listen :: %s, returning 400' % message)
@@ -1075,6 +1181,15 @@ class MetricData(object):
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: failed to determine flux.httpMetricDataQueue.qsize')
 
+        # @added 20220210 - Feature #4284: flux - telegraf
+        end_request_timer = timer()
+        if FLUX_VERBOSE_LOGGING:
+            try:
+                logger.info('listen :: GET request took %.6f seconds to process' % (
+                    (end_request_timer - start_request_timer)))
+            except Exception as err:
+                logger.error('error :: listen :: failed to calculate request time - %s' % err)
+
         if LOCAL_DEBUG:
 
             # @modified 20201207 - Task #3864: flux - try except everything
@@ -1127,13 +1242,49 @@ class MetricDataPost(object):
         """
         postData = None
 
+        post_req_start = int(time())
+
+        # @added 20220210 - Feature #4284: flux - telegraf
+        start_request_timer = timer()
+
         # @added 20210512 - Feature #4060: skyline.flux.worker.discarded metrics
         # Preserve the request for debugging
         postData_obj = None
         try:
             postData_obj = req.stream.read()
-        except Exception as e:
-            logger.error('error :: listen :: req.stream.read() falied - %s' % e)
+        except Exception as err:
+            logger.error('error :: listen :: req.stream.read() failed - %s' % err)
+
+        # @added 20220208 - Feature #4284: flux - telegraf
+        # Allow for gzip data
+        # DEBUG
+        # all_headers = None
+        # try:
+        #     all_headers = str(req.headers)
+        # except Exception as err:
+        #     logger.error('listen :: req.headers() error - %s' % str(err))
+        # logger.info('debug :: listen :: headers - %s' % str(all_headers))
+        content_encoding = None
+        try:
+            content_encoding = req.get_header('content-encoding')
+        except Exception as err:
+            logger.error('listen :: get_header(\'content-encoding\') error - %s' % str(err))
+        # if content_encoding:
+        #     logger.info('debug :: listen :: content_encoding: %s' % str(content_encoding))
+        # else:
+        #     logger.info('debug :: listen :: no content_encoding: %s' % str(content_encoding))
+        if content_encoding == 'gzip':
+            if TIMINGS:
+                logger.info('debug :: listen :: content_encoding: %s, decompressing' % str(content_encoding))
+                start_gzip_timer = timer()
+            try:
+                postData_obj = gzip.decompress(postData_obj)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: gzip.decompress(postData_obj) failed - %s' % err)
+            if TIMINGS:
+                end_gzip_timer = timer()
+                logger.debug('debug :: listen :: gzip decompression took %.6f seconds' % (end_gzip_timer - start_gzip_timer))
 
         try:
             # @added 20210512 - Feature #4060: skyline.flux.worker.discarded metrics
@@ -1195,16 +1346,34 @@ class MetricDataPost(object):
         # @added 20210718
         aggregate = False
 
+        # @added 20220208 - Feature #4284: flux - telegraf
+        telegraf = False
+        telegraf_metric_prefix = None
+
         # @added 20211018 - Feature #4284: flux - telegraf
         # Allow the key to be passed as a HTTP header rather than in the json
         # payload
         header_apikey = None
         try:
-            header_apikey = req.get_header('apikey')
+            header_apikey = req.get_header('key')
         except Exception as err:
-            logger.error('listen :: get_header(\'apikey\') error - %s' % str(err))
+            logger.error('listen :: get_header(\'key\') error - %s' % str(err))
         if header_apikey:
-            logger.info('debug :: listen :: get_header(\'apikey\') - %s' % str(header_apikey))
+            # FOR DEBUG
+            # logger.info('debug :: listen :: get_header(\'key\') - %s' % str(header_apikey))
+            # @added 20220208 - Feature #4284: flux - telegraf
+            try:
+                telegraf = req.get_header('telegraf')
+            except Exception as err:
+                logger.error('listen :: get_header(\'telegraf\') error - %s' % str(err))
+            if telegraf:
+                logger.debug('debug :: listen :: get_header(\'telegraf\') - %s' % str(telegraf))
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: listen :: get_header(\'telegraf\') - %s' % str(telegraf))
+            try:
+                telegraf_metric_prefix = req.get_header('prefix')
+            except Exception as err:
+                logger.error('listen :: get_header(\'prefix\') error - %s' % str(err))
 
         # @added 20200115 - Feature #3394: flux health check
         # Added status parameter so that the flux listen process can be monitored
@@ -1372,7 +1541,7 @@ class MetricDataPost(object):
         validated_key = False
         try:
             validated_key = postData['validate_key']
-            logger.info('debug :: listen :: validate_key: %s' % str(validated_key))
+            logger.info('listen :: validate_key: %s' % str(validated_key))
         except KeyError:
             validated_key = False
         except Exception as err:
@@ -1382,7 +1551,7 @@ class MetricDataPost(object):
             try:
                 body = {"status": "key valid"}
                 resp.body = json.dumps(body)
-                logger.info('debug :: listen :: validate_key returning 200')
+                logger.info('listen :: validate_key returning 200')
                 resp.status = falcon.HTTP_200
                 return
             except Exception as err:
@@ -1391,7 +1560,7 @@ class MetricDataPost(object):
 
         # @added 20200818 - Feature #3694: flux - POST multiple metrics
         # Determine if the POST data is for a single metric or multiple metrics
-        metrics = {}
+        metrics = []
         try:
             metrics = postData['metrics']
             if LOCAL_DEBUG:
@@ -1400,7 +1569,7 @@ class MetricDataPost(object):
                     logger.debug('debug :: listen :: metrics item - %s' % str(item))
                     logger.debug('debug :: listen :: metrics item - metric - %s' % str(item['metric']))
         except KeyError:
-            metrics = {}
+            metrics = []
         except Exception as e:
             logger.error('error :: listen :: metrics was passed in the request POST data but an error was encountered - returned 400 - %s - %s' % (
                 str(postData), e))
@@ -1411,8 +1580,8 @@ class MetricDataPost(object):
                 redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
                 if FLUX_VERBOSE_LOGGING:
                     logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
-            except Exception as e:
-                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+            except Exception as err:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % err)
 
             # @added 20220118 - Feature #4380: flux - return reason with 400
             message = 'invalid metrics element'
@@ -1423,31 +1592,171 @@ class MetricDataPost(object):
             resp.status = falcon.HTTP_400
             return
 
+        # @added 20220208 - Feature #4284: flux - telegraf
+        # Convert a single metric post to a multiple metric post.  This
+        # replaces and deprecates the handling of a single metric POST format in
+        # duplicated code.
+        if not metrics:
+            try:
+                metric_data = {
+                    'metric': str(postData['metric']),
+                    'timestamp': postData['timestamp'],
+                    'value': postData['value']
+                }
+                metrics.append(metric_data)
+            except Exception as err:
+                logger.error('error :: listen :: failed to get metric data from POST to create metric_data and add to metrics - %s' % err)
+
         # @added 20211018 - Feature #4284: flux - telegraf
         # Allow the key to be passed as a HTTP header rather than in the json
         # payload
         telegraf_payload = False
         telegraf_keys_list = ['fields', 'name', 'tags', 'timestamp']
-        if metrics:
+        if metrics and telegraf:
             if isinstance(metrics, list):
                 if len(metrics) > 0:
                     if isinstance(metrics[0], dict):
                         if sorted(list(metrics[0].keys())) == telegraf_keys_list:
                             telegraf_payload = True
         telegraf_metrics = []
+        telegraf_metrics_list = []
         if telegraf_payload:
-            for telegraf_metric_dict in metrics:
-                # Create metric name
-                # TODO
-                # metric = '%s.'  % (
-                #     telegraf_metric_dict['tags']['host'],
-                #     telegraf_metric_dict['tags']['host'],
-                # )
-                metric = None
-                telegraf_metrics.append(metric)
+
+            # @added 20220210 - Feature #4284: flux - telegraf
+            # Added TIMINGS
+            if TIMINGS:
+                start_telegraf_conversion_timer = timer()
+
+            for metric_dict in metrics:
+                # {'fields': {'accepts': 17819,
+                #    'active': 4,
+                #    'handled': 17819,
+                #    'reading': 0,
+                #    'requests': 218369,
+                #    'waiting': 3,
+                #    'writing': 1},
+                #   'name': 'nginx',
+                #   'tags': {'a_0_tag': 'nginx',
+                #    'host': 'nginx-server-1',
+                #    'port': '81',
+                #    'server': '127.0.0.1'},
+                #   'timestamp': 1644320940}
+                # Using the same as the telegraf Graphite template pattern
+                # template = "host.tags.measurement.field"
+                try:
+                    if telegraf_metric_prefix:
+                        metric_parent_namespace = '%s.%s' % (
+                            str(telegraf_metric_prefix), metric_dict['tags']['host'])
+                    else:
+                        metric_parent_namespace = '%s' % metric_dict['tags']['host']
+                    for key in list(metric_dict['tags'].keys()):
+                        if key == 'host':
+                            continue
+                        value = metric_dict['tags'][key].replace('.', '_')
+                        value = value.replace('/', '-')
+                        metric_parent_namespace = '%s.%s' % (metric_parent_namespace, str(value))
+                    metric_parent_namespace = '%s.%s' % (metric_parent_namespace, str(metric_dict['name']))
+                    for key in list(metric_dict['fields'].keys()):
+                        key_str = key.replace('.', '_')
+                        key_str = key_str.replace('/', '-')
+                        metric = '%s.%s' % (metric_parent_namespace, str(key_str))
+                        telegraf_metrics.append(metric)
+                        value = metric_dict['fields'][key]
+                        timestamp = metric_dict['timestamp']
+                        telegraf_metrics_list.append({'metric': metric, 'value': value, 'timestamp': timestamp})
+                except Exception as err:
+                    logger.error('error :: listen :: failed to determine metric from telegraf data - %s' % err)
+            # redis_conn.set('test.flux.telegraf.metrics_data', str(metrics))
+            if TIMINGS:
+                end_telegraf_conversion_timer = timer()
+                logger.debug('debug :: listen :: telegraf conversion took %.6f seconds' % (end_telegraf_conversion_timer - start_telegraf_conversion_timer))
+
+        if telegraf_metrics_list and telegraf_payload:
+            metrics = list(telegraf_metrics_list)
+
+        # @added 20220208 - Feature #4284: flux - telegraf
+        # After convert a single metric post to a multiple metric post, if there
+        # are no metrics in the POST data return a 400
+        if not metrics:
+            message = 'no metric data passed'
+            body = {"code": 400, "message": message}
+            resp.body = json.dumps(body)
+            logger.info('listen :: %s, returning 400' % message)
+            resp.status = falcon.HTTP_400
+            return
 
         # @added 20220202 - Feature #4412: flux - quota - thunder alert
         test_metric_quota_exceeded_alert = False
+
+        # @added 20220208 - Feature #4432: functions.metrics.skip_metric
+        #                   Feature #4400: flux - quota
+        not_skipped_metrics_dict = {}
+        original_redis_not_skipped_metrics_dict = {}
+        skipped_metrics_dict = None
+        original_redis_skipped_metrics_dict = {}
+        skipped_metrics_query_redis = False
+        original_base_names_in_post = []
+        metrics_in_post = []
+        skipped_metrics = []
+        not_skipped_metrics = []
+        received_namespaces = []
+        try:
+            for metric_data in metrics:
+                try:
+                    metric = str(metric_data['metric'])
+                    original_base_names_in_post.append(metric)
+                    if metric_namespace_prefix:
+                        metric_name = '%s.%s' % (metric_namespace_prefix, metric)
+                    else:
+                        metric_name = str(metric)
+                    metrics_in_post.append(metric_name)
+                    try:
+                        received_namespaces.append(metric_name.split('.')[0])
+                    except:
+                        continue
+                except:
+                    continue
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: could not determine metrics in post - %s' % err)
+        received_namespaces = list(set(received_namespaces))
+
+        if ALL_SKIP_LIST:
+            if len(metrics) == 1:
+                skipped_metrics_query_redis = True
+            if not skipped_metrics_query_redis:
+                # @added 20220210 - Feature #4284: flux - telegraf
+                # Added TIMINGS
+                if TIMINGS:
+                    start_not_skipped_metrics_dict_timer = timer()
+                for received_namespace in received_namespaces:
+                    flux_not_skipped_metrics_key = 'flux.not_skipped_metrics.%s' % str(received_namespace)
+                    try:
+                        namespace_not_skipped_metrics_dict = redis_conn_decoded.hgetall(flux_not_skipped_metrics_key)
+                        if namespace_not_skipped_metrics_dict:
+                            for metric in list(namespace_not_skipped_metrics_dict.keys()):
+                                not_skipped_metrics_dict[metric] = namespace_not_skipped_metrics_dict[metric]
+                                original_redis_not_skipped_metrics_dict[metric] = namespace_not_skipped_metrics_dict[metric]
+                                not_skipped_metrics.append(metric)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: listen :: could not hgetall %s from Redis - %s' % (
+                            flux_not_skipped_metrics_key, err))
+                if TIMINGS:
+                    end_not_skipped_metrics_dict_timer = timer()
+                    logger.debug('debug :: listen :: not_skipped_metrics_dict from Redis took %.6f seconds' % (end_not_skipped_metrics_dict_timer - start_not_skipped_metrics_dict_timer))
+            if skipped_metrics_query_redis:
+                flux_not_skipped_metrics_key = 'flux.not_skipped_metrics.%s' % str(received_namespaces[0])
+                metric = metrics_in_post[0]
+                try:
+                    not_skipped_metric = redis_conn_decoded.hget(flux_not_skipped_metrics_key, metric)
+                    if not_skipped_metric:
+                        not_skipped_metrics_dict[metric] = not_skipped_metric
+                        original_redis_not_skipped_metrics_dict[metric] = not_skipped_metric
+                        not_skipped_metrics.append(metric)
+                except Exception as err:
+                    logger.error('error :: listen :: could not check %s in %s Redis hash - %s' % (
+                        metric, flux_not_skipped_metrics_key, err))
 
         # @added 20220126 - Feature #4400: flux - quota
         namespace_quota = 0
@@ -1463,14 +1772,6 @@ class MetricDataPost(object):
             if metric_namespace_prefix:
                 check_namespace_quota = str(metric_namespace_prefix)
             else:
-                received_namespaces = []
-                for metric_data in metrics:
-                    try:
-                        metric = str(metric_data['metric'])
-                        received_namespaces.append(metric.split('.')[0])
-                    except:
-                        continue
-                received_namespaces = list(set(received_namespaces))
                 if len(received_namespaces) == 1:
                     check_namespace_quota = received_namespaces[0]
             if check_namespace_quota in namespaces_with_quotas:
@@ -1504,7 +1805,6 @@ class MetricDataPost(object):
                         logger.error('error :: listen :: checking metric_quota_exceeded_test in the POST data - %s' % (
                             err))
                     test_metric_quota_exceeded_alert = False
-
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: listen :: error determining namespace_quota, %s' % err)
@@ -1519,23 +1819,197 @@ class MetricDataPost(object):
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: could not report number of entries submitted in POST mulitple metric data')
 
+            # @added 20220209 - Feature #4432: functions.metrics.skip_metric
+            metrics_found_in_redis = {}
+            if ALL_SKIP_LIST:
+
+                not_found_in_not_skipped = []
+                # @added 20220210 - Feature #4284: flux - telegraf
+                # Added TIMINGS
+                if TIMINGS:
+                    start_skip_metrics_redis_resources_timer = timer()
+
+                for base_name in list(set(metrics_in_post)):
+                    not_skipped_metric = False
+                    if not_skipped_metrics_dict:
+                        try:
+                            not_skipped_metric = not_skipped_metrics_dict[base_name]
+                        except KeyError:
+                            not_skipped_metric = False
+                    if not_skipped_metric:
+                        metrics_found_in_redis[base_name] = 'do_not_skip'
+                        not_skipped_metrics.append(base_name)
+                    else:
+                        not_found_in_not_skipped.append(base_name)
+                if TIMINGS:
+                    logger.debug('debug :: listen :: metrics_found_in_redis count after not_skipped_metrics: %s' % str(len(metrics_found_in_redis)))
+                    logger.debug('debug :: listen :: not_found_in_not_skipped count after not_skipped_metrics: %s' % str(len(not_found_in_not_skipped)))
+
+                if not_found_in_not_skipped:
+                    if not skipped_metrics_query_redis:
+                        if TIMINGS:
+                            start_skipped_metrics_dict_redis_resources_timer = timer()
+                        for received_namespace in received_namespaces:
+                            flux_skipped_metrics_key = 'flux.skipped_metrics.%s' % str(received_namespace)
+                            try:
+                                namespace_skipped_metrics_dict = redis_conn_decoded.hgetall(flux_skipped_metrics_key)
+                                if namespace_skipped_metrics_dict:
+                                    # This is used to only update the flux.skipped_metrics
+                                    # periodically and not every time, otherwise
+                                    # updating all the skipped metrics key every
+                                    # submission would incur unnecessary Redis
+                                    # overhead
+                                    original_redis_skipped_metrics_dict[received_namespace] = namespace_skipped_metrics_dict.copy()
+                                    if not skipped_metrics_dict:
+                                        skipped_metrics_dict = {}
+                                    for metric in list(namespace_skipped_metrics_dict.keys()):
+                                        skipped_metrics_dict[metric] = namespace_skipped_metrics_dict[metric]
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: listen :: could not hgetall flux.skipped_metrics from Redis - %s' % err)
+                                skipped_metrics_dict = None
+                        if TIMINGS:
+                            end_skipped_metrics_dict_redis_resources_timer = timer()
+                            if skipped_metrics_dict:
+                                logger.debug('debug :: listen :: skipped_metrics_dict with %s metrics from Redis took %.6f seconds' % (
+                                    str(len(skipped_metrics_dict)), (end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer)))
+                            else:
+                                logger.debug('debug :: listen :: no skipped_metrics_dict from Redis took %.6f seconds' % (
+                                    (end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer)))
+                    else:
+                        received_namespace = received_namespaces[0]
+                        base_name = metrics_in_post[0]
+                        flux_skipped_metrics_key = 'flux.not_skipped_metrics.%s' % str(received_namespace)
+                        try:
+                            namespace_skipped_metric = redis_conn_decoded.hget(flux_skipped_metrics_key, base_name)
+                            if namespace_skipped_metric:
+                                if not skipped_metrics_dict:
+                                    skipped_metrics_dict = {}
+                                skipped_metrics_dict[base_name] = namespace_skipped_metric
+                                if skipped_metrics_dict:
+                                    # This is used to only update the flux.skipped_metrics
+                                    # periodically and not every time, otherwise
+                                    # updating all the skipped metrics key every
+                                    # submission would incur unnecessary Redis
+                                    # overhead
+                                    original_redis_skipped_metrics_dict[received_namespace] = skipped_metrics_dict.copy()
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: could not hget flux.skipped_metrics from Redis - %s' % err)
+                            skipped_metrics_dict = None
+                    if skipped_metrics_dict:
+                        for base_name in not_found_in_not_skipped:
+                            skipped = False
+                            try:
+                                skipped = skipped_metrics_dict[base_name]
+                            except KeyError:
+                                skipped = False
+                            if skipped:
+                                metrics_found_in_redis[base_name] = 'skip'
+                                skipped_metrics.append(base_name)
+                if TIMINGS:
+                    end_skip_metrics_redis_resources_timer = timer()
+                    logger.debug('debug :: listen :: skip_metrics_redis_resources took %.6f seconds' % (end_skip_metrics_redis_resources_timer - start_skip_metrics_redis_resources_timer))
+                    logger.debug('debug :: listen :: metrics_found_in_redis count after skipped_metrics: %s' % str(len(metrics_found_in_redis)))
+
+            # @added 20220208 - Feature #4432: functions.metrics.skip_metric
+            # Performance of functions.metrics.skip_metric on a POST with
+            # 932 metrics and substantial SKIP_LIST and DO_NOT_SKIP_LIST
+            # took 0.322734 seconds
+            # metrics:  932 , skipped:  681 , not_skipped:  251 , SKIP_LIST:  83 , DO_NOT_SKIP_LIST: 32
+            if not skipped_metrics_dict:
+                skipped_metrics_dict = {}
+
+            if ALL_SKIP_LIST:
+
+                # @added 20220210 - Feature #4284: flux - telegraf
+                # Added TIMINGS
+                if TIMINGS:
+                    start_skip_metrics_lists_timer = timer()
+
+                # Minimise the SKIP_LIST and DO_NOT_SKIP_LIST lengths to reduce
+                # runtime, only use the appropriate skip lists
+                try:
+                    SKIP_LIST = list(settings.SKIP_LIST)
+                    DO_NOT_SKIP_LIST = list(settings.DO_NOT_SKIP_LIST)
+                    if check_namespace_quota in external_settings_namespaces:
+                        for conf_id in list(skyline_external_settings.keys()):
+                            try:
+                                if skyline_external_settings[conf_id]['namespace'] == check_namespace_quota:
+                                    SKIP_LIST = skyline_external_settings[conf_id]['skip_metrics']
+                                    DO_NOT_SKIP_LIST = skyline_external_settings[conf_id]['do_not_skip_metrics']
+                            except:
+                                continue
+                    skip_exceptions = []
+                    if SKIP_LIST:
+                        metrics_found_in_redis_count = 0
+                        metrics_not_found_in_redis_count = 0
+                        if TIMINGS:
+                            metrics_in_post_count = len(list(set(metrics_in_post)))
+                        for base_name in list(set(metrics_in_post)):
+                            found_in_redis = False
+                            try:
+                                found_in_redis = metrics_found_in_redis[base_name]
+                            except KeyError:
+                                found_in_redis = False
+                            if found_in_redis:
+                                metrics_found_in_redis_count += 1
+                                continue
+                            # Now do the performance heavy check
+                            metrics_not_found_in_redis_count += 1
+                            skip = False
+                            try:
+                                skip = skip_metric(base_name, SKIP_LIST, DO_NOT_SKIP_LIST)
+                            except:
+                                skip = False
+                            if skip:
+                                skipped_metrics.append(base_name)
+                                try:
+                                    skipped_metrics_dict[base_name] = post_req_start
+                                except Exception as err:
+                                    skip_exceptions = ['skipped_metrics_dict', err, traceback.format_exc()]
+                                # If it is Explicitly skipped remove it from the
+                                # flux.not_skipped_metrics if it exists
+                                try:
+                                    received_namespace = base_name.split('.')[0]
+                                    flux_not_skipped_metrics_key = 'flux.not_skipped_metrics.%s' % str(received_namespace)
+                                    redis_conn_decoded.hdel(flux_not_skipped_metrics_key, base_name)
+                                except Exception as err:
+                                    skip_exceptions = ['skipped_metrics_dict', err, traceback.format_exc()]
+                            else:
+                                not_skipped_metrics_dict[base_name] = post_req_start
+                                not_skipped_metrics.append(base_name)
+                        if not_skipped_metrics:
+                            try:
+                                metrics_in_post = list(set(not_skipped_metrics))
+                            except Exception as err:
+                                skip_exceptions = ['metrics_in_post', err, traceback.format_exc()]
+                    if skip_exceptions:
+                        logger.error('error :: listen :: if ALL_SKIP_LIST skip_exceptions: %s' % str(skip_exceptions))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: could not determine metrics to skip - %s' % err)
+                if TIMINGS:
+                    end_skip_metrics_lists_timer = timer()
+                    logger.debug('debug :: listen :: skip_metrics_lists took %.6f seconds' % (end_skip_metrics_lists_timer - start_skip_metrics_lists_timer))
+                    logger.debug('debug :: listen :: skip_metrics_lists total unique metrics in post: %s, found_in_redis: %s, skip_checked: %s, not_skipped_metrics: %s' % (
+                        str(metrics_in_post_count),
+                        str(metrics_found_in_redis_count),
+                        str(metrics_not_found_in_redis_count),
+                        str(len(not_skipped_metrics))))
+
             # @added 20220126 - Feature #4400: flux - quota
             if namespace_quota:
+
+                # @added 20220210 - Feature #4284: flux - telegraf
+                # Added TIMINGS
+                if TIMINGS:
+                    start_namespace_quota_timer = timer()
+
                 try:
-                    metrics_in_post = []
-                    for metric_data in metrics:
-                        try:
-                            metric = str(metric_data['metric'])
-                            if metric_namespace_prefix:
-                                metric_name = '%s.%s' % (metric_namespace_prefix, metric)
-                            else:
-                                metric_name = str(metric)
-                            metrics_in_post.append(metric_name)
-                        except:
-                            continue
                     known_metrics = []
                     new_metrics = []
-                    for metric_name in metrics_in_post:
+                    for base_name in list(set(metrics_in_post)):
                         if metric_name in namespace_metrics:
                             known_metrics.append(metric_name)
                         else:
@@ -1544,7 +2018,6 @@ class MetricDataPost(object):
                     # @added 20220202 - Feature #4412: flux - quota - thunder alert
                     if test_metric_quota_exceeded_alert:
                         logger.info('listen :: TEST - test_metric_quota_exceeded_alert set, not accepting data testing')
-                        original_namespace_quota = int(namespace_quota)
                         namespace_quota = 0
                         known_metrics = []
                         new_metrics = list(metrics_in_post)
@@ -1558,7 +2031,17 @@ class MetricDataPost(object):
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: error determining known and new metrics for namespace_quota, %s' % err)
 
+                if TIMINGS:
+                    end_namespace_quota_timer = timer()
+                    logger.debug('debug :: listen :: namespace_quota checks per metric took %.6f seconds' % (end_namespace_quota_timer - start_namespace_quota_timer))
+
+            # @added 20220210 - Feature #4284: flux - telegraf
+            # Added TIMINGS
+            if TIMINGS:
+                start_metrics_processing_timer = timer()
+
             for metric_data in metrics:
+
                 # Add metric to add to queue
                 metric = None
                 timestamp = None
@@ -1569,7 +2052,9 @@ class MetricDataPost(object):
                     metric = str(metric_data['metric'])
 
                     # @added 20201006 - Feature #3764: flux validate metric name
-                    valid_metric_name = validate_metric_name('listen :: MetricDataPOST POST multiple metrics', str(metric))
+                    # @modified 20220211 - Feature #4380: flux - return reason with 400
+                    # Added reason
+                    valid_metric_name, reason = validate_metric_name('listen :: MetricDataPOST POST multiple metrics', str(metric))
                     if not valid_metric_name:
 
                         # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
@@ -1583,7 +2068,9 @@ class MetricDataPost(object):
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
 
                         # @added 20220118 - Feature #4380: flux - return reason with 400
-                        message = 'invalid metric - %s' % str(metric_data['metric'])
+                        # @modified 20220211 - Feature #4380: flux - return reason with 400
+                        # Added reason
+                        message = 'invalid metric - %s - %s' % (str(metric_data['metric']), str(reason))
                         body = {"code": 400, "message": message}
                         resp.body = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
@@ -1615,7 +2102,7 @@ class MetricDataPost(object):
                     resp.status = falcon.HTTP_400
                     return
 
-                original_metric = str(metric)
+                original_base_name = str(metric)
 
                 # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
                 # If metrics are being submitted to flux internally (vista) using
@@ -1631,13 +2118,28 @@ class MetricDataPost(object):
                 if metric_namespace_prefix:
                     metric = '%s.%s' % (str(metric_namespace_prefix), metric)
 
+                # @added 20220208 - Feature #4432: functions.metrics.skip_metric
+                skip_base_name = False
+                try:
+                    skip_base_name = skipped_metrics_dict[metric]
+                except KeyError:
+                    skip_base_name = False
+                if skip_base_name:
+                    try:
+                        skipped_metrics_dict[metric] = post_req_start
+                        skipped_metrics.append(metric)
+                        continue
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: listen :: error updating metric in skipped_metrics_dict - %s' % err)
+
                 # @added 20220126 - Feature #4400: flux - quota
                 if over_quota:
                     try:
                         new_namespace_metrics_count = len(namespace_metrics)
                         if new_namespace_metrics_count >= namespace_quota:
                             if metric not in namespace_metrics:
-                                rejected_metrics_over_quota.append(original_metric)
+                                rejected_metrics_over_quota.append(original_base_name)
                                 continue
                     except Exception as err:
                         logger.error(traceback.format_exc())
@@ -1660,7 +2162,9 @@ class MetricDataPost(object):
                 if timestamp_present:
                     try:
                         if not backfill:
-                            valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST multiple metrics', str(timestamp_present))
+                            # @modified 20220211 - Feature #4380: flux - return reason with 400
+                            # Added reason
+                            valid_timestamp, reason = validate_timestamp('listen :: MetricDataPOST POST multiple metrics', str(timestamp_present))
                         else:
                             valid_timestamp = True
                         if valid_timestamp:
@@ -1679,7 +2183,7 @@ class MetricDataPost(object):
                                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
 
                             # @added 20220118 - Feature #4380: flux - return reason with 400
-                            message = 'invalid timestamp - %s' % str(timestamp_present)
+                            message = 'invalid timestamp - %s - %s' % (str(timestamp_present), str(reason))
                             body = {"code": 400, "message": message}
                             resp.body = json.dumps(body)
                             logger.info('listen :: %s, returning 400' % message)
@@ -1826,19 +2330,25 @@ class MetricDataPost(object):
 
                     # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                     if aggregate_metrics or aggregate_namespaces_list:
-                        added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics, aggregate_namespaces_list)
-                        if added_to_aggregation_queue:
-                            if return_status_code == 500:
-                                resp.status = falcon.HTTP_500
-                                return
-                            if return_status_code == 204:
-                                resp.status = falcon.HTTP_204
-                                processed_metrics.append(original_metric)
-                            continue
+                        try:
+                            added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics, aggregate_namespaces_list)
+                            if added_to_aggregation_queue:
+                                if return_status_code == 500:
+                                    resp.status = falcon.HTTP_500
+                                    return
+                                if return_status_code == 204:
+                                    resp.status = falcon.HTTP_204
+                                    processed_metrics.append(original_base_name)
+                                continue
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: error add_to_aggregate_metric_queue failed, returning 500 - %s' % err)
+                            resp.status = falcon.HTTP_500
+                            return
 
                     flux.httpMetricDataQueue.put(metric_data, block=False)
 
-                    processed_metrics.append(original_metric)
+                    processed_metrics.append(original_base_name)
 
                     # modified 20201016 - Feature #3788: snab_flux_load_test
                     if FLUX_VERBOSE_LOGGING:
@@ -1850,11 +2360,18 @@ class MetricDataPost(object):
                     except Exception as e:
                         logger.error('error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s' % e)
 
-                except:
+                except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
+                    logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s - %s' % (
+                        str(metric_data), err))
                     resp.status = falcon.HTTP_500
                     return
+
+            # @added 20220210 - Feature #4284: flux - telegraf
+            # Added TIMINGS
+            if TIMINGS:
+                end_metrics_processing_timer = timer()
+                logger.debug('debug :: listen :: metrics_processing took %.6f seconds' % (end_metrics_processing_timer - start_metrics_processing_timer))
 
         if rejected_metrics_over_quota:
             try:
@@ -1888,7 +2405,9 @@ class MetricDataPost(object):
                     'rejected metrics count': len(rejected_metrics_over_quota),
                     'processed metrics': processed_metrics,
                     'processed metrics count': len(processed_metrics),
-                    'submitted metrics count': len(metrics)
+                    'submitted metrics count': len(metrics),
+                    'skipped_metrics': skipped_metrics,
+                    'skipped_metrics_count': len(skipped_metrics)
                 }
 
                 # @added 20220202 - Feature #4412: flux - quota - thunder alert
@@ -1917,10 +2436,12 @@ class MetricDataPost(object):
                         'expiry': expiry,
                         'data': {
                             'namespace': check_namespace_quota,
-                            'rejected_metrics': rejected_metrics_over_quota,
-                            'rejected_metrics_count': len(rejected_metrics_over_quota),
                             'processed_metrics': processed_metrics,
                             'processed_metrics_count': len(processed_metrics),
+                            'rejected_metrics': rejected_metrics_over_quota,
+                            'rejected_metrics_count': len(rejected_metrics_over_quota),
+                            'skipped_metrics': skipped_metrics,
+                            'skipped_metrics_count': len(skipped_metrics),
                             'submitted_metrics_count': len(metrics),
                             'status': 'over quota'
                         },
@@ -1950,403 +2471,135 @@ class MetricDataPost(object):
                 resp.status = falcon.HTTP_500
                 return
 
-        if not metrics:
-            try:
-                metric = str(postData['metric'])
+        # @modified 20220208 - Feature #4284: flux - telegraf
+        # Converted a single metric post to a multiple metric post.  Removed the
+        # handling of a single metric POST format.
+        # if not metrics:
 
-                # @added 20201006 - Feature #3764: flux validate metric name
-                valid_metric_name = validate_metric_name('listen :: MetricDataPOST POST', str(metric))
-                if not valid_metric_name:
-
-                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                    if not metric:
-                        metric = str(time())
-                    try:
-                        redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
-                        if FLUX_VERBOSE_LOGGING:
-                            logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
-                    except Exception as e:
-                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
-
-                    # @added 20220118 - Feature #4380: flux - return reason with 400
-                    message = 'invalid metric'
-                    body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
-                    logger.info('listen :: %s, returning 400' % message)
-
-                    resp.status = falcon.HTTP_400
-                    return
-
-                if LOCAL_DEBUG:
-                    logger.debug('debug :: listen :: metric from postData set to %s' % metric)
-            except:
-                logger.error('error :: listen :: no valid metric in request POST data - returned 400 - %s' % (
-                    str(postData)))
-
-                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+        # @added 20220209 - Feature #4432: functions.metrics.skip_metric
+        if not_skipped_metrics:
+            # @added 20220210 - Feature #4284: flux - telegraf
+            for received_namespace in received_namespaces:
                 try:
-                    metric = str(postData['metric'])
-                except KeyError:
-                    if FLUX_VERBOSE_LOGGING:
-                        logger.info('listen :: no metric key in POST data using time() for flux.listen.discarded.metric_name entry')
-                    metric = str(time())
-                try:
-                    redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
-                    if FLUX_VERBOSE_LOGGING:
-                        logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
-                except Exception as e:
-                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
-
-                # @added 20220118 - Feature #4380: flux - return reason with 400
-                message = 'invalid metric'
-                body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
-                logger.info('listen :: %s, returning 400' % message)
-
-                resp.status = falcon.HTTP_400
-                return
-
-            # @added 20200206 - Feature #3444: Allow flux to backfill
-            try:
-                fill = str(postData['fill'])
-                if fill == 'true':
-                    backfill = True
-            except:
-                backfill = False
-
-            # @added 20210718
-            try:
-                aggregate = postData['aggregate']
-                if aggregate == 'true':
-                    aggregate = True
-            except KeyError:
-                aggregate = False
-            except:
-                aggregate = False
-
-            try:
-                timestamp_present = str(postData['timestamp'])
-            except:
-                timestamp_present = False
-            if timestamp_present:
-                try:
-                    # @modified 20200206 - Feature #3444: Allow flux to backfill
-                    # Only valid_timestamp is this is not a backfill request
-                    if not backfill:
-                        # @modified 20220114 - lint message
-                        valid_timestamp_message = 'listen :: MetricDataPOST POST - timestamp - %s' % str(postData['timestamp'])
-                        # valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST - timestamp - %s', str(postData['timestamp']))
-                        valid_timestamp = validate_timestamp(valid_timestamp_message, str(postData['timestamp']))
-                    else:
-                        valid_timestamp = True
-                    if valid_timestamp:
-                        timestamp = int(postData['timestamp'])
-                    else:
-                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    if TIMINGS:
+                        start_flux_not_skipped_metrics_timer = timer()
+                        logger.debug('debug :: listen :: checking %s not_skipped_metrics to update flux.not_skipped_metrics keys for %s received_namespaces, checking %s' % (
+                            str(len(not_skipped_metrics)),
+                            str(len(received_namespaces)),
+                            received_namespace))
+                        logger.debug('debug :: listen :: not_skipped_metrics sample: %s' % (
+                            str(not_skipped_metrics[0:3])))
+                        logger.debug('debug :: listen :: not_skipped_metrics_dict count: %s' % (
+                            str(len(not_skipped_metrics_dict))))
+                    update_not_skipped_metrics = {}
+                    for metric in list(set(not_skipped_metrics)):
+                        if metric.startswith(received_namespace):
+                            update_entry = True
+                            if original_redis_not_skipped_metrics_dict:
+                                try:
+                                    # Only update not_skipped metrics every hour to save on
+                                    # Redis overhead
+                                    last_update_timestamp_str = original_redis_not_skipped_metrics_dict[metric]
+                                    if last_update_timestamp_str:
+                                        last_update_timestamp = int(float(last_update_timestamp_str))
+                                        if (post_req_start - last_update_timestamp) >= 3600:
+                                            update_entry = True
+                                        else:
+                                            update_entry = False
+                                except KeyError:
+                                    update_entry = True
+                                except:
+                                    update_entry = True
+                            else:
+                                update_entry = True
+                            if update_entry:
+                                update_not_skipped_metrics[metric] = post_req_start
+                    if update_not_skipped_metrics:
+                        flux_not_skipped_metrics_key = 'flux.not_skipped_metrics.%s' % received_namespace
                         try:
-                            redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(metric))
-                            if FLUX_VERBOSE_LOGGING:
-                                logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(metric))
-                        except Exception as e:
-                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
-
-                        # @added 20220118 - Feature #4380: flux - return reason with 400
-                        try:
-                            message = 'invalid timestamp - %s' % str(postData['timestamp'])
+                            redis_conn_decoded.hset(flux_not_skipped_metrics_key, mapping=update_not_skipped_metrics)
                         except Exception as err:
-                            message = 'invalid timestamp'
-                        body = {"code": 400, "message": message}
-                        resp.body = json.dumps(body)
-                        logger.info('listen :: %s, returning 400' % message)
-
-                        resp.status = falcon.HTTP_400
-                        return
-                except:
-                    logger.error('error :: listen :: invalid timestamp value in POST data - %s' % (
-                        str(postData)))
-
-                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                    try:
-                        redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(metric))
-                        if FLUX_VERBOSE_LOGGING:
-                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(metric))
-                    except Exception as e:
-                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
-
-                    # @added 20220118 - Feature #4380: flux - return reason with 400
-                    message = 'invalid timestamp'
-                    body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
-                    logger.info('listen :: %s, returning 400' % message)
-
-                    resp.status = falcon.HTTP_400
-                    return
-
-            value_present = None
-            try:
-                value_present = str(postData['value'])
-            except KeyError:
-                value_present = False
-            if value_present:
-                try:
-                    value = float(postData['value'])
-                    # valid_value is used as in terms of Python if value evalatuion
-                    # if value was 0.0 (or 0) they evaluate as False
-                    valid_value = True
-                except:
-                    logger.error('error :: listen :: invalid value from POST data - %s' % (
-                        str(postData)))
-
-                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                    if not metric:
-                        try:
-                            metric = str(postData['metric'])
-                        except KeyError:
-                            if FLUX_VERBOSE_LOGGING:
-                                logger.info('listen :: no metric key in POST data using time() for flux.listen.discarded.invalid_value entry')
-                            metric = str(time())
-                    unique_value = '%s.%s.%s' % (str(metric), str(timestamp_present), str(value_present))
-                    try:
-                        redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
-                        if FLUX_VERBOSE_LOGGING:
-                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
-                    except Exception as e:
-                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
-
-                    # @added 20220118 - Feature #4380: flux - return reason with 400
-                    message = 'invalid value'
-                    body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
-                    logger.info('listen :: %s, returning 400' % message)
-
-                    resp.status = falcon.HTTP_400
-                    return
-
-            if not key:
-                logger.error('error :: listen :: no key in the POST data - %s - returning 401' % (
-                    str(postData)))
-
-                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                unique_value = '%s' % str(time())
-                try:
-                    redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
-                    if FLUX_VERBOSE_LOGGING:
-                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
-                except Exception as e:
-                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
-
-                # @added 20220118 - Feature #4380: flux - return reason with 400
-                message = 'no key parameter passed'
-                body = {"code": 401, "message": message}
-                resp.body = json.dumps(body)
-                logger.warning('warning :: listen :: %s, returning 401' % message)
-
-                # @modified 20210909
-                # Return 401 if bad key
-                # resp.status = falcon.HTTP_400
-                resp.status = falcon.HTTP_401
-                return
-            if not metric:
-                logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
-                    str(postData)))
-
-                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                unique_value = str(time())
-                try:
-                    redis_conn.sadd('flux.listen.discarded.metric_name', str(unique_value))
-                    if FLUX_VERBOSE_LOGGING:
-                        logger.info('listen :: added %s (no metric passed) to Redis set flux.listen.discarded.metric_name' % str(unique_value))
-                except Exception as e:
-                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
-
-                # @added 20220118 - Feature #4380: flux - return reason with 400
-                message = 'no metric data passed'
-                body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
-                logger.info('listen :: %s, returning 400' % message)
-
-                resp.status = falcon.HTTP_400
-                return
-            if not valid_value:
-                logger.error('error :: listen :: no valid value in the POST data - %s - returning 400' % (
-                    str(postData)))
-
-                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                unique_value = '%s.%s.%s' % (str(metric), str(timestamp_present), str(value_present))
-                try:
-                    redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
-                    if FLUX_VERBOSE_LOGGING:
-                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
-                except Exception as e:
-                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
-
-                # @added 20220118 - Feature #4380: flux - return reason with 400
-                message = 'invalid value data passed'
-                body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
-                logger.info('listen :: %s, returning 400' % message)
-
-                resp.status = falcon.HTTP_400
-                return
-
-            if not timestamp:
-                timestamp = int(time())
-
-            # @added 20220128 - Feature #4400: flux - quota
-            namespace_quota = 0
-            current_namespace_metric_count = 0
-            namespace_metrics = []
-            namespace_metrics_count = 0
-            rejected_metric_over_quota = None
-            check_namespace_quota = None
-            try:
-                if metric_namespace_prefix:
-                    check_namespace_quota = str(metric_namespace_prefix)
-                else:
-                    check_namespace_quota = metric.split('.')[0]
-                if check_namespace_quota in namespaces_with_quotas:
-                    namespace_quota = get_namespace_quota(check_namespace_quota)
-                if namespace_quota:
-                    namespace_quota_key_reference_timestamp = (int(time()) // 60 * 60)
-                    namespace_quota_redis_key = 'flux.namespace_quota.%s.%s' % (
-                        check_namespace_quota, str(namespace_quota_key_reference_timestamp))
-                    current_namespace_metric_count = 0
-                    try:
-                        current_namespace_metric_count = redis_conn_decoded.scard(namespace_quota_redis_key)
-                    except:
-                        current_namespace_metric_count = 0
-                    namespace_metrics_redis_key = 'flux.namespace_metrics.%s' % check_namespace_quota
-                    try:
-                        namespace_metrics = list(redis_conn_decoded.smembers(namespace_metrics_redis_key))
-                    except:
-                        namespace_metrics = []
-                    namespace_metrics_count = len(namespace_metrics)
-            except Exception as err:
-                logger.error(traceback.format_exc())
-                logger.error('error :: listen :: error determining namespace_quota, %s' % err)
-            if namespace_quota:
-                if current_namespace_metric_count >= namespace_quota:
-                    logger.info('listen :: will not accept new metric in this minute, over quota')
-                    rejected_metric_over_quota = metric
-                if not rejected_metric_over_quota:
-                    try:
-                        if metric in namespace_metrics:
-                            new_metric_count = namespace_metrics_count + 0
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: failed to update %s Redis hash - %s' % (
+                                flux_not_skipped_metrics_key, err))
+                    if TIMINGS:
+                        end_flux_not_skipped_metrics_timer = timer()
+                        if update_not_skipped_metrics:
+                            logger.debug('debug :: listen :: updating %s took %.6f seconds to update with %s metrics' % (
+                                flux_not_skipped_metrics_key,
+                                (end_flux_not_skipped_metrics_timer - start_flux_not_skipped_metrics_timer),
+                                str(len(update_not_skipped_metrics))))
                         else:
-                            new_metric_count = namespace_metrics_count + 1
-                        if new_metric_count > namespace_quota:
-                            logger.info('listen :: will not accept new metric, over quota')
-                            rejected_metric_over_quota = metric
-                    except Exception as err:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: listen :: error determining new metric for namespace_quota, %s' % err)
-            if rejected_metric_over_quota:
-                body = {
-                    'code': 400,
-                    'error': 'over metric quota',
-                    'rejected metric': rejected_metric_over_quota
-                }
-                try:
-                    message = 'over quota - this account is allowed %s metrics and an additional metric was posted that has been rejected' % (
-                        str(namespace_quota))
-                    body = {
-                        'code': 400,
-                        'error': message,
-                        'rejected metric': rejected_metric_over_quota
-                    }
+                            logger.debug('debug :: listen :: no metrics to update in %s check took %.6f seconds' % (
+                                flux_not_skipped_metrics_key, (end_flux_not_skipped_metrics_timer - start_flux_not_skipped_metrics_timer)))
                 except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: listen :: error building 400 body, %s' % err)
-                resp.body = json.dumps(body)
-                logger.info('listen :: %s, returning 400 on metric_namespace_prefix: %s' % (
-                    message, str(check_namespace_quota)))
-                resp.status = falcon.HTTP_400
-                return
-            if namespace_quota:
+                    logger.error('error :: listen :: an error occurred check flux.not_skipped_metrics to update - %s' % (
+                        err))
+
+        if skipped_metrics:
+            # @added 20220210 - Feature #4284: flux - telegraf
+            for received_namespace in received_namespaces:
                 try:
-                    if metric not in namespace_metrics:
+                    flux_skipped_metrics_key = 'flux.skipped_metrics.%s' % received_namespace
+                    if TIMINGS:
+                        start_flux_skipped_metrics_timer = timer()
+                        skipped_metrics_count = len(list(set(skipped_metrics)))
+                        logger.debug('debug :: listen :: checking which of the %s skipped metrics need updating in %s' % (
+                            str(skipped_metrics_count), flux_skipped_metrics_key))
+                    update_skipped_metrics = {}
+                    for metric in list(set(skipped_metrics)):
+                        if metric.startswith(received_namespace):
+                            update_entry = False
+                            if original_redis_skipped_metrics_dict:
+                                try:
+                                    # Only update skipped metrics every hour to save on
+                                    # Redis overhead
+                                    last_update_timestamp_str = original_redis_skipped_metrics_dict[received_namespace][metric]
+                                    if last_update_timestamp_str:
+                                        last_update_timestamp = int(float(last_update_timestamp_str))
+                                        if (post_req_start - last_update_timestamp) >= 3600:
+                                            update_entry = True
+                                except KeyError:
+                                    update_entry = True
+                                except:
+                                    update_entry = True
+                            else:
+                                update_entry = True
+                            if update_entry:
+                                update_skipped_metrics[metric] = post_req_start
+                    if update_skipped_metrics:
+                        if TIMINGS:
+                            logger.debug('debug :: listen :: %s skipped metrics need updating in %s' % (
+                                str(len(update_skipped_metrics)), flux_skipped_metrics_key))
                         try:
-                            redis_conn.sadd(namespace_metrics_redis_key, metric)
+                            redis_conn_decoded.hset(flux_skipped_metrics_key, mapping=update_skipped_metrics)
                         except Exception as err:
-                            logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
-                                metric, namespace_metrics_redis_key, err))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: failed to update %s Redis hash - %s' % (
+                                flux_skipped_metrics_key, err))
+                    else:
+                        if TIMINGS:
+                            logger.debug('debug :: listen :: no skipped metrics need updating in %s' % flux_skipped_metrics_key)
+                    if TIMINGS:
+                        end_flux_skipped_metrics_timer = timer()
+                        logger.debug('debug :: listen :: updating %s took %.6f seconds to update with %s metrics' % (
+                            flux_skipped_metrics_key,
+                            (end_flux_skipped_metrics_timer - start_flux_skipped_metrics_timer),
+                            str(len(update_skipped_metrics))))
                 except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: listen :: error adding metric to namespace_metrics_redis_key, %s' % err)
-                try:
-                    redis_conn.sadd(namespace_quota_redis_key, metric)
-                    redis_conn.expire(namespace_quota_redis_key, 60)
-                except Exception as err:
-                    logger.error('error :: listen :: failed to add %s to Redis set %s, %s' % (
-                        metric, namespace_quota_redis_key, err))
+                    logger.error('error :: listen :: an error occurred check flux.skipped_metrics to update - %s' % (
+                        err))
 
-            # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
-            # If metrics are being submitted to flux internally (vista) using
-            # the FLUX_SELF_API_KEY for a namespace if that namespace is added
-            # to FLUX_API_KEYS, flux will begin to also append the namespace
-            # prefix from the FLUX_API_KEYS for metrics submitted with the
-            # FLUX_SELF_API_KEY
-            if metric_namespace_prefix:
-                if metric.startswith(metric_namespace_prefix):
-                    metric_namespace_prefix = None
-
-            # @added 20200818 - Feature #3694: flux - POST multiple metrics
-            # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
-            if metric_namespace_prefix:
-                metric = '%s.%s' % (str(metric_namespace_prefix), metric)
-
-            # Queue the metric
+        # @added 20220210 - Feature #4284: flux - telegraf
+        end_request_timer = timer()
+        if FLUX_VERBOSE_LOGGING:
             try:
-                # @modified 20200206 - Feature #3444: Allow flux to backfill
-                # Added backfill
-                # @modified 20210718
-                # Added aggregate
-                metric_data = [metric, value, timestamp, backfill, aggregate]
-                # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
-                # Add to data to the flux.queue Redis set
-                if FLUX_PERSIST_QUEUE and metric_data:
-                    try:
-                        redis_conn.sadd('flux.queue', str(metric_data))
-                    except Exception as e:
-                        logger.error('error :: listen :: failed adding data to Redis set flux.queue - %s' % e)
-
-                # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
-                # To reduce the overhead of making a redis query for every metric
-                # submitted, the metric name is checked against the initial loaded
-                # aggregate_metrics list, if not found in there then the elements of the
-                # metric name are checked to see if element could any possible match an
-                # aggregation namespace, only then is Redis queried.
-                # @modified 20210718
-                # Added aggregate
-                # if aggregate_metrics:
-                if aggregate_metrics or aggregate or aggregate_namespaces_list:
-                    added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics, aggregate_namespaces_list)
-                    if added_to_aggregation_queue:
-                        if return_status_code == 500:
-                            resp.status = falcon.HTTP_500
-                        if return_status_code == 204:
-                            resp.status = falcon.HTTP_204
-                        return
-
-                flux.httpMetricDataQueue.put(metric_data, block=False)
-                # modified 20201016 - Feature #3788: snab_flux_load_test
-                if FLUX_VERBOSE_LOGGING:
-                    logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
-
-                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                try:
-                    redis_conn.incr('flux.listen.added_to_queue')
-                except Exception as e:
-                    logger.error('error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s' % e)
-
+                logger.info('listen :: POST request took %.6f seconds to process %s metrics' % (
+                    (end_request_timer - start_request_timer), str(len(metrics))))
             except Exception as err:
-                logger.error(traceback.format_exc())
-                # logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
-                logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - [%s, %s, %s, %s, %s] - %s' % (
-                    str(metric), str(value), str(timestamp), str(backfill),
-                    str(aggregate), err))
-                resp.status = falcon.HTTP_500
-                return
+                logger.error('error :: listen :: failed to calculate request time - %s' % err)
 
         if LOCAL_DEBUG:
             try:

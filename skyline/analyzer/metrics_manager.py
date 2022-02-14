@@ -13,6 +13,7 @@ from sys import version_info
 from ast import literal_eval
 from timeit import default_timer as timer
 
+
 # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
 from msgpack import Unpacker
 # from collections import Counter
@@ -929,6 +930,10 @@ class Metrics_Manager(Thread):
         ####
         refresh_redis_alert_sets = False
 
+        # @added 20220211 - Feature #4284: flux - telegraf
+        # Create a list of parent_namespaces
+        all_parent_namespaces = []
+
         ####
         # Create a list of base_names from the unique_metrics
         ####
@@ -953,7 +958,17 @@ class Metrics_Manager(Thread):
             # Speed this up only check alerters if not already in the set
             # metric_in_smtp_alerters_set = False
             unique_base_names.append(base_name)
+
+            # @added 20220211 - Feature #4284: flux - telegraf
+            # Create a list of parent_namespaces
+            all_parent_namespaces.append(base_name.split('.')[0])
+
         logger.info('metrics_manager :: created unique_base_names list of %s metrics' % str(len(unique_base_names)))
+
+        # @added 20220211 - Feature #4284: flux - telegraf
+        # Create a list of parent_namespaces
+        all_parent_namespaces = list(set(all_parent_namespaces))
+        logger.info('metrics_manager :: created all_parent_namespaces list of %s top level namespaces' % str(len(all_parent_namespaces)))
 
         # @added 20210308 - Feature #3978: luminosity - classify_metrics
         #                  Feature #3642: Anomaly type classification
@@ -1977,6 +1992,56 @@ class Metrics_Manager(Thread):
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to sunionstore flux.last_known_value_metrics from analyzer.flux_last_known_value_metrics Redis sets - %s' % e)
+
+        # @added 20220210 - Feature #4284: flux - telegraf
+        # Manage the flux.skipped_metrics and flux.not_skipped_metrics Redis hashes
+        for redis_hash in ['flux.skipped_metrics', 'flux.not_skipped_metrics']:
+            refresh_after = 86700
+            if redis_hash == 'flux.skipped_metrics':
+                refresh_after = 3900
+
+            # @modified 20220211 - Feature #4284: flux - telegraf
+            # By parent_namespaces
+            for namespace in all_parent_namespaces:
+                flux_redis_metrics_dict = {}
+                redis_key = '%s.%s' % (redis_hash, namespace)
+                try:
+                    flux_redis_metrics_dict = self.redis_conn_decoded.hgetall(redis_key)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to hgetall %s Redis hash key - %s' % (
+                        redis_key, err))
+                if flux_redis_metrics_dict:
+                    removed_entries = 0
+                    for metric in list(flux_redis_metrics_dict.keys()):
+                        remove_entry = False
+                        last_updated_timestamp = 0
+                        try:
+                            last_updated_timestamp_str = flux_redis_metrics_dict[metric]
+                            if last_updated_timestamp_str:
+                                last_updated_timestamp = int(float(last_updated_timestamp_str))
+                        except KeyError:
+                            remove_entry = True
+                        except Exception as err:
+                            logger.error('error :: metrics_manager :: failed to determine last_updated_timestamp for %s from %s - %s' % (
+                                metric, redis_key, err))
+                        if last_updated_timestamp:
+                            if (int(spin_start) - last_updated_timestamp) >= refresh_after:
+                                # Remove to refresh
+                                remove_entry = True
+                        else:
+                            remove_entry = True
+                        if remove_entry:
+                            try:
+                                self.redis_conn_decoded.hdel(redis_key, metric)
+                                removed_entries += 1
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metrics_manager :: failed to hdel %s from %s Redis hash key - %s' % (
+                                    metric, redis_key, err))
+                    if removed_entries:
+                        logger.info('metrics_manager :: removing %s metrics from %s Redis hash to be refreshed' % (
+                            redis_key, str(removed_entries)))
 
         # @added 20210513 - Feature #4068: ANALYZER_SKIP
         analyzer_skip_metrics = []
