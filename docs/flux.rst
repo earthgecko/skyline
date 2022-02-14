@@ -236,17 +236,17 @@ telegraf
 --------
 
 Flux can accept metrics from directly from telegraf in the telegraf json format.
-To configure telegraf to send metrics to Flux you can enable the `outputs.http`
-plugin in telegraf as shown below.
+To configure telegraf to send metrics to Flux you can enable the
+`[[outputs.http]]` plugin in telegraf as shown below.
 
 Firstly a few things must be pointed out:
 
 - Flux applies the same logic that is used by the telegraf Graphite template
   pattern e.g. `template = "host.tags.measurement.field"` - https://github.com/influxdata/telegraf/tree/master/plugins/serializers/graphite
-- Flux replaces  `.` for `_` and `/` for `-` in any tags, measurement or fields
+- Flux replaces  ``.` for ``_`` and ``/`` for ``-`` in any tags, measurement or fields
   in which these characters are found.
 - The additional `outputs.http.headers` **must** be specified.
-- `content_encoding` must be set to gzip
+- ``content_encoding`` must be set to gzip
 - There are a number of status codes that telegraf should not resubmit data on
   these are to ensure telegraf does not attempt to send the same bad data or
   too much data over and over again.
@@ -255,26 +255,25 @@ Firstly a few things must be pointed out:
   thundering herd swamping I/O
 
 To use the telegraf Graphite template pattern the following options in the
-telegraf `[agent]` configuration section are required for telegraf to add the
+telegraf ``[agent]`` configuration section are required for telegraf to add the
 host to the tags:
 
-.. code-block::
+.. code-block:: ini
 
   ## Maximum number of unwritten metrics per output.
   # Ideally change this from 10000 to 1000 to minimise thundering herd issues
   # metric_buffer_limit = 10000
   metric_buffer_limit = 1000
-
   ## Override default hostname, if empty use os.Hostname()
   hostname = ""
   ## If set to true, do no set the "host" tag in the telegraf agent.
   omit_hostname = false
 
 
-Also add the `[[outputs.http]]` to the telegraf config as below replacing
-`<YOUR_SKYLINE_HOST>` and `<settings.FLUX_SELF_API_KEY>`:
+Also add the ``[[outputs.http]]`` to the telegraf config as below replacing
+``<YOUR_SKYLINE_HOST>`` and ``<settings.FLUX_SELF_API_KEY>``:
 
-.. code-block::
+.. code-block:: ini
 
   [[outputs.http]]
     ## URL is the Skyline flux address to send metrics to
