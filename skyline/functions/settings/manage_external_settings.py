@@ -48,6 +48,9 @@ def manage_external_settings(current_skyline_app):
         'flux_token', 'thunder_alert_endpoint', 'thunder_alert_token',
         'alert_on_no_data', 'alert_on_stale_metrics',
         'do_not_alert_on_stale_metrics',
+        # @added 20220210 - Feature #4412: flux - quota - thunder alert
+        #                   Feature #4404: flux - external_settings - aggregation
+        'aggregate', 'alert_on_metric_quota_exceeded',
     )
 
     try:
@@ -77,6 +80,19 @@ def manage_external_settings(current_skyline_app):
                 function_str, str(external_settings_item), e))
         if not post_data:
             continue
+
+        # @added 20220210 - Feature #4404: flux - external_settings - aggregation
+        # Added missing enabled check
+        enabled = True
+        try:
+            enabled = EXTERNAL_SETTINGS[external_settings_item]['enabled']
+        except Exception as e:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: failed to determine enabled for EXTERNAL_SETTINGS[\'%s\'] - %s' % (
+                function_str, str(external_settings_item), e))
+        if not enabled:
+            continue
+
         external_settings_dict = {}
         current_logger.info('%s :: fetching external settings from %s' % (
             function_str, str(endpoint)))

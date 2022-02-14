@@ -20,7 +20,7 @@ and considerations relating to the following components:
 - Graphite
 - Redis
 - MySQL
-- Apache/nginx
+- nginx
 - memcached
 
 However, these types of assumptions even if stated are not useful or helpful to
@@ -64,9 +64,9 @@ What the components do
   fingerprints for matching and learning things that are not anomalous.  mariadb
   can run on the same host as Skyline or it can be remote.  Running the DB
   remotely will make the Skyline a little bit slower.
-- Apache/nginx - Skyline serves the webapp via gunicorn and Apache/nginx
-  handles endpoint routing, SSL termination and basic http auth.  Ideally the
-  reverse proxy should be run on the same host as Skyline.
+- nginx - Skyline serves the webapp via gunicorn and nginx handles endpoint
+  routing, SSL termination and basic http auth.  Ideally the reverse proxy
+  should be run on the same host as Skyline.
 - memcached - caches Ionosphere MySQL data, memcached should ideally be run on
   the same host as Skyline.
 
@@ -291,47 +291,36 @@ Skyline and dependencies install
     cp /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
     vi /etc/skyline/skyline.conf  # Set USE_PYTHON as appropriate to your setup
 
-Apache reverse proxy
-~~~~~~~~~~~~~~~~~~~~
+nginx reverse proxy
+~~~~~~~~~~~~~~~~~~~
 
-- OPTIONAL but **recommended**, serving the Webapp via gunicorn with Apache or
-  nginx reverse proxy.  Below highlights Apache but similar steps are required
-  with nginx.
+Serving the Webapp via gunicorn with nginx as a reverse proxy.  Below highlights
+the nginx resources and set up the is required.
 
-  - Setup Apache (httpd) and see the example configuration file in your cloned
-    directory ``/opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example``
-    for nginx see ``/opt/skyline/github/skyline/etc/skyline.nginx.conf.d.example``
-    modify all the ``<YOUR_`` variables as appropriate for you environment - see
-    `Apache and gunicorn <webapp.html#apache-and-gunicorn>`__
-  - Create a SSL certificate and update the SSL configurations in the Skyline
-    Apache config (or your reverse proxy)
-
-::
-
-    SSLCertificateFile "<YOUR_PATH_TO_YOUR_CERTIFICATE_FILE>"
-    SSLCertificateKeyFile "<YOUR_PATH_TO_YOUR_KEY_FILE>"
-    SSLCertificateChainFile "<YOUR_PATH_TO_YOUR_CHAIN_FILE_IF_YOU_HAVE_ONE_OTHERWISE_COMMENT_THIS_LINE_OUT>"
-
-- Update your reverse proxy config with the X-Forwarded-Proto header.
-
-::
-
-    RequestHeader set X-Forwarded-Proto "https"
-
+- Install and set up nginx.  You will need also need the `htpasswd` program as
+  well, depending on your distribution that may be provided by `httpd-tools`
+  for rpm based distributions or `apache2-utils` on deb based distributions.
+- Create the htpasswd password file, modify the path/name here and in the
+  nginx config if you wish to use a different path or name
 - Add a user and password for HTTP authentication, the user does not have to
   be admin it can be anything, e.g.
 
 .. code-block:: bash
 
-    htpasswd -c /etc/httpd/conf.d/.skyline_htpasswd admin
+    htpasswd -c /etc/nginx/conf.d/.skyline_htpasswd admin
 
 .. note:: Ensure that the user and password for Apache match the user and
   password that you provide in `settings.py` for
   :mod:`settings.WEBAPP_AUTH_USER` and :mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
 
-- Deploy your Skyline Apache or nginx configuration file and restart httpd or
-  nginx
-
+- Create a SSL certificate to use in the SSL configuration in the nginx
+  configuration file.
+- See the example configuration file in your cloned directory
+  ``/opt/skyline/github/skyline/etc/skyline.nginx.conf.d.example`` modify all
+  the ``<YOUR_`` variables as appropriate for you environment - see
+  `nginx and gunicorn <webapp.html#nginx-and-gunicorn>`__
+- Deploy your Skyline nginx configuration file ready to restart nginx later
+  when the Skyline services are started.
 
 Skyline database
 ~~~~~~~~~~~~~~~~
@@ -534,6 +523,7 @@ Starting and testing the Skyline installation
     "bin/python${PYTHON_MAJOR_VERSION}" /opt/skyline/github/skyline/utils/seed_data.py
     deactivate
 
+- Restart nginx with the new config.
 - Check the Skyline Webapp frontend on the Skyline machine's IP address and the
   appropriate port depending whether you are serving it proxied or direct, e.g
   ``https://YOUR_SKYLINE_IP``.  The ``horizon.test.pickle`` metric anomaly should

@@ -204,6 +204,11 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     total_recovered_metrics_count = 0
     test_stale_metrics_namespaces = []
 
+    # @added 20220208 - Feature #4376: webapp - update_external_settings
+    # If alert_on_stale_metrics is not enabled for an external_settings namespace
+    # do not alert
+    do_not_alert_on_namespaces = []
+
     parent_namespaces = list(set(parent_namespaces))
 
     # @added 20210620 - Branch #1444: thunder
@@ -222,29 +227,37 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     external_parent_namespaces_stale_periods = {}
     if external_settings:
         for config_id in list(external_settings.keys()):
-            no_data_stale_period = None
+            alert_on_stale_metrics = False
             try:
-                alert_on_no_data = external_settings[config_id]['alert_on_no_data']['enabled']
+                alert_on_stale_metrics = external_settings[config_id]['alert_on_stale_metrics']['enabled']
             except KeyError:
-                alert_on_no_data = False
-            if alert_on_no_data:
+                alert_on_stale_metrics = False
+            stale_metrics_stale_period = settings.STALE_PERIOD
+            if alert_on_stale_metrics:
                 try:
-                    no_data_stale_period = external_settings[config_id]['alert_on_no_data']['stale_period']
+                    stale_metrics_stale_period = external_settings[config_id]['alert_on_stale_metrics']['stale_period']
                 except KeyError:
-                    no_data_stale_period = False
+                    stale_metrics_stale_period = settings.STALE_PERIOD
             namespace = None
-            if no_data_stale_period:
+            if stale_metrics_stale_period:
                 try:
                     namespace = external_settings[config_id]['namespace']
                 except KeyError:
                     namespace = False
+
+            # @added 20220208 - Feature #4376: webapp - update_external_settings
+            # If alert_on_stale_metrics is not enabled do not alert
+            if not alert_on_stale_metrics:
+                do_not_alert_on_namespaces.append(namespace)
+                namespace = None
+
             try:
-                expiry = external_settings[config_id]['alert_on_no_data']['expiry']
+                expiry = external_settings[config_id]['alert_on_stale_metrics']['expiry']
             except KeyError:
                 expiry = 1800
-            if namespace and no_data_stale_period and expiry:
+            if namespace and alert_on_stale_metrics and expiry:
                 external_parent_namespaces_stale_periods[parent_namespace] = {}
-                external_parent_namespaces_stale_periods[parent_namespace]['stale_period'] = int(no_data_stale_period)
+                external_parent_namespaces_stale_periods[parent_namespace]['stale_period'] = int(stale_metrics_stale_period)
                 external_parent_namespaces_stale_periods[parent_namespace]['expiry'] = int(expiry)
     external_parent_namespaces = []
     if external_parent_namespaces:
@@ -268,6 +281,12 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     parent_namespaces = external_parent_namespaces + custom_stale_period_namespaces + parent_namespaces
 
     for parent_namespace in parent_namespaces:
+
+        # @added 20220208 - Feature #4376: webapp - update_external_settings
+        # If alert_on_stale_metrics is not enabled do not alert
+        if parent_namespace in do_not_alert_on_namespaces:
+            continue
+
         parent_namespace_stale_metrics_count = 0
         namespace_stale_metrics_dict[parent_namespace] = {}
         namespace_stale_metrics_dict[parent_namespace]['metrics'] = {}

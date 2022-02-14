@@ -9,8 +9,8 @@ submits them to Graphite, so they can be pickled to Skyline for analysis in near
 real time via the normal Skyline pipeline.
 
 Flux uses falcon the bare-metal web API framework for Python to serve the API
-via gunicorn.  The normal Apache/nginx reverse proxy Skyline vhost is used to
-serve the /flux endpoint and proxy requests to flux.
+via gunicorn.  The normal nginx reverse proxy Skyline vhost is used to serve the
+/flux endpoint and proxy requests to flux.
 
 It is preferable to use the POST Flux endpoint to submit metrics so that the
 Skyline flux API key can be encrypted via SSL in the POST data.
@@ -99,7 +99,7 @@ As below.
 
 .. code-block:: python
 
-  ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=']
+  ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=', ':']
   for char in string.ascii_lowercase:
       ALLOWED_CHARS.append(char)
   for char in string.ascii_uppercase:
@@ -125,6 +125,8 @@ POST requests which submit multiple metrics **should be limited** to a maximum
 of **450 metrics per request**.
 
 A successful POST will respond with no content and a 204 HTTP response code.
+Unsuccessful requests will respond with a 4xx code and a json body with
+additional information about why the request failed.
 
 Here is an example of the data a single metric POST requires and an example POST
 request.
@@ -229,6 +231,75 @@ parameters as defined below:
   # /flux/metric_data?metric=<metric|str>&timestamp=<timestamp|int>&value=<value|float>&key=<key|str>
   # For example:
   curl -v -u username:password "https://skyline.example.org/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret"
+
+telegraf
+--------
+
+Flux can accept metrics from directly from telegraf in the telegraf json format.
+To configure telegraf to send metrics to Flux you can enable the `outputs.http`
+plugin in telegraf as shown below.
+
+Firstly a few things must be pointed out:
+
+- Flux applies the same logic that is used by the telegraf Graphite template
+  pattern e.g. `template = "host.tags.measurement.field"` - https://github.com/influxdata/telegraf/tree/master/plugins/serializers/graphite
+- Flux replaces  `.` for `_` and `/` for `-` in any tags, measurement or fields
+  in which these characters are found.
+- The additional `outputs.http.headers` **must** be specified.
+- `content_encoding` must be set to gzip
+- There are a number of status codes that telegraf should not resubmit data on
+  these are to ensure telegraf does not attempt to send the same bad data or
+  too much data over and over again.
+- If there is a long network partition between telegraf agents and Flux,
+  sometimes some data may be dropped, but this can often be preferable to the
+  thundering herd swamping I/O
+
+To use the telegraf Graphite template pattern the following options in the
+telegraf `[agent]` configuration section are required for telegraf to add the
+host to the tags:
+
+.. code-block::
+
+  ## Maximum number of unwritten metrics per output.
+  # Ideally change this from 10000 to 1000 to minimise thundering herd issues
+  # metric_buffer_limit = 10000
+  metric_buffer_limit = 1000
+
+  ## Override default hostname, if empty use os.Hostname()
+  hostname = ""
+  ## If set to true, do no set the "host" tag in the telegraf agent.
+  omit_hostname = false
+
+
+Also add the `[[outputs.http]]` to the telegraf config as below replacing
+`<YOUR_SKYLINE_HOST>` and `<settings.FLUX_SELF_API_KEY>`:
+
+.. code-block::
+
+  [[outputs.http]]
+    ## URL is the Skyline flux address to send metrics to
+    url = "https://<YOUR_SKYLINE_HOST>/flux/metric_data_post"
+    ## Set a long timeout because if a network partition occurs between telegraf
+    ## and the flux, telegraf will keep and batch the metrics to send through AND
+    ## 10s of 1000s of metrics can then be sent when the network partition is
+    ## resolved, these can take a while to process as often many other telegraf
+    ## instances may have been partitioned at the same time, so a thundering herd
+    ## is sent to flux.
+    timeout = "120s"
+    method = "POST"
+    data_format = "json"
+    use_batch_format = true
+    json_timestamp_units = "1s"
+    content_encoding = "gzip"
+    ## A list of statuscodes (<200 or >300) upon which requests should not be retried
+    non_retryable_statuscodes = [400, 403, 409, 413, 499, 500, 502, 503]
+    [outputs.http.headers]
+      Content-Type = "application/json"
+      key = "<settings.FLUX_SELF_API_KEY>"
+      telegraf = "true"
+      ## Optionally you can pass a prefix e.g.
+      # prefix = "telegraf"
+
 
 populate_metric endpoint
 ------------------------

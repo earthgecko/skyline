@@ -3,8 +3,8 @@
 #
 #  THIS IS AN EXAMPLE
 #  User variables are all prefixed with <YOUR_
-#  This example assumes you have this Skyline host binding to port 443
-#  and serving SSL on the machine
+#  This example assumes you only have this Skyline host binding to port 443
+#  and serving SSL on the machine and no other nginx sites being served.
 #
 
   upstream skyline-webapp {
@@ -32,7 +32,7 @@
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
-    # nginx requires the certificate  plus_intermediates be in the same single
+    # nginx requires the certificate plus intermediates be in the same single
     # file with all certificates included.
     ssl_certificate <YOUR_PATH_TO_YOUR_SIGNED_CERTIFICATE_PLUS_INTERMEDIATES_FILE>;
     ssl_certificate_key <YOUR_PATH_TO_YOUR_KEY_FILE>;
@@ -80,6 +80,14 @@
     gzip_proxied    no-cache no-store private expired auth;
     gzip_min_length 1000;
 
+    ## A long timeout is set specifically for flux if it needs to ingest 1000s
+    ## of metrics from any network partitioned telegraf collectors AND if the
+    ## user makes any long queries, very large plots or many image renders via
+    ## the webapp.
+    proxy_read_timeout 120s;
+    proxy_connect_timeout 120s;
+    proxy_send_timeout 120s;
+
     # Allow authorized IPs to access /api without auth
     location /api {
       satisfy any;
@@ -95,14 +103,17 @@
       proxy_pass http://skyline-webapp;
     }
 
-# Only required if you are posting metrics to Skyline via HTTP
+## Only required if you are posting metrics to Skyline flux via HTTP
 #    location /flux/ {
-#      # You can uncomment this in order to turn authentication off
+#      ## You can uncomment this in order to turn authentication off
 #      # auth_basic "off";
 #      # allow all;
-#      # Limit the max body size as falcon does not, the json for 450 metrics
-#      # with LONG names and LONG values was 92K
-#      client_max_body_size 120K;
+#      ## Limit the max body size as falcon does not, the ungzipped json for 450
+#      ## metrics with LONG names and LONG values was 92K.  However a partitioned
+#      ## telegraf collector can send 10s of 1000s of metrics in a single payload
+#      ## when the network partition is resolved so very large payloads can be
+#      ## expected.
+#      client_max_body_size 1024K;
 #
 #      proxy_set_header Host $host;
 #      proxy_set_header Forwarded $proxy_add_forwarded;
@@ -110,6 +121,11 @@
 #      proxy_set_header X-Forwarded-Proto $scheme";
 #      proxy_pass http://skyline-flux/;
 #    }
+
+
+## To create the htpasswd password file
+## htpasswd -c /etc/nginx/conf.d/.skyline_htpasswd <YOUR_WEBAPP_AUTH_USER>
+## Enter <YOUR_WEBAPP_AUTH_USER_PASSWORD>
 
     auth_basic "Authorization required";
     auth_basic_user_file /etc/nginx/conf.d/.skyline_htpasswd;

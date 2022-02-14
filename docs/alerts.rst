@@ -218,15 +218,30 @@ an example of the alert json POST data:
     "data": {
       "alert": {
         "timestamp": "1579638755",
-        "metric": "stats.sites.graphite_access_log.httpd.rpm.total",
-        "value": "75.0",
-        "expiry": "30",
+        "metric": "stats.statsd.processing_time",
+        "value": "6.25",
+        "expiry": "3600",
         "source": "ionosphere",
         "token": "None",
-        "full_duration": "604800"
+        "full_duration": "604800",
+        "id": "None",
+        "anomaly_id": "359355",
+        "anomalyScore": "0.8",
+        "3sigma_upper": 1.1540154218897731,
+        "3sigma_lower": -1.0334135700379212,
+        "3sigma_real_lower": 0,
+        "yhat_upper": 1.1540154218897731,
+        "yhat_lower": -1.0334135700379212,
+        "yhat_real_lower": 0
       }
     }
   }
+
+
+The above `id` field would be populated with the `external_alerter_id` if the
+alert was related to a metric that was part of a :mod:`settings.EXTERNAL_ALERTS`
+alert group.
+
 
 Failures
 --------
