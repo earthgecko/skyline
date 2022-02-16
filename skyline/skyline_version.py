@@ -23,9 +23,13 @@ version info
 # __version_info__ = ('2', '1', '0-4416')
 # __branch__ = 'SNAB'
 # __version_tag__ = 'additional SMTP_OPTS'
-__version_info__ = ('2', '1', '0-4432')
+# __version_info__ = ('2', '1', '0-4432')
+# __branch__ = 'SNAB'
+# __version_tag__ = 'flux - telegraf'
+# __version_info__ = ('2', '1', '0-4432')
 __branch__ = 'SNAB'
-__version_tag__ = 'flux - telegraf'
+__version_tag__ = 'webapp - inactive_metrics'
+__version_info__ = ('2', '1', '0-4448')
 
 __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11

@@ -4105,6 +4105,34 @@ EXTERNAL_SETTINGS = {
 :vartype EXTERNAL_SETTINGS: dict
 """
 
+LOCAL_EXTERNAL_SETTINGS = {}
+"""
+:var LOCAL_EXTERNAL_SETTINGS: ADVANCED FEATURE.  You can declare local external
+    settings in a dict which will override or inject the values the are
+    retrieved from EXTERNAL_SETTINGS endpoint.  This functionality is for
+    testing and is only documented in the code.
+:vartype LOCAL_EXTERNAL_SETTINGS: dict
+
+- **Example**::
+
+    LOCAL_EXTERNAL_SETTINGS = {
+        "external-test_external_settings": {
+          "skip_metrics": ['skyline-test-external-settings.1.cpu[0-9]'],
+          "override": False,
+        }
+    }
+
+In the above example if the external-test_external_settings from
+EXTERNAL_SETTINGS did not have a skip_metrics defined, the skip_metrics defined
+in LOCAL_EXTERNAL_SETTINGS would be added to the external-test_external_settings
+dict.  With the above example, if skip_metrics was defined in EXTERNAL_SETTINGS
+then the skip_metrics in the LOCAL_EXTERNAL_SETTINGS would be ignored because
+override is set to False.  However if override was set to True then the key
+values defined in LOCAL_EXTERNAL_SETTINGS for external-test_external_settings
+would override the EXTERNAL_SETTINGS values for external-test_external_settings.
+
+"""
+
 """
 Prometheus settings
 """
