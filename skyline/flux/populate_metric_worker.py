@@ -512,6 +512,13 @@ class PopulateMetricWorker(Process):
                     datapoints_fetched = len(datapoints)
                     logger.info('populate_metric_worker :: retrieved %s data points from %s' % (
                         str(datapoints_fetched), str(fetch_url)))
+                # @added 20220214 -  Task #3864: flux - try except everything
+                # Handle list index out of range as a warning
+                except IndexError:
+                    # File "/opt/skyline/github/skyline/skyline/flux/populate_metric_worker.py", line 509, in run
+                    #   datapoints = js[0]['datapoints']
+                    # IndexError: list index out of range
+                    logger.warning('warning :: populate_metric_worker :: failed to get any datapoints from %s' % str(fetch_url))
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: populate_metric_worker :: failed to get data from %s' % str(fetch_url))
