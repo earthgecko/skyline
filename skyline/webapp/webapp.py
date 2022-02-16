@@ -291,6 +291,9 @@ if True:
     # @added 20220128 - Feature #4376: webapp - update_external_settings
     from functions.settings.get_external_settings import get_external_settings
 
+    # @added 20220216 - Feature #4444: webapp - inactive_metrics
+    from functions.metrics.get_inactive_metrics import get_inactive_metrics
+
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
 try:
@@ -852,6 +855,55 @@ def api():
 
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
+
+    # @added 20220216 - Feature #4444: webapp - inactive_metrics
+    if 'inactive_metrics' in request.args:
+        logger.info('/api?inactive_metrics')
+        inactive_metrics = {}
+        start_inactive_metrics = timer()
+        namespace = None
+        try:
+            namespace = request.args.get('namespace', 'false')
+            if str(namespace) == 'false':
+                namespace = None
+        except:
+            logger.error('error :: /api?inactive_metrics request falied to query namespace')
+        if namespace:
+            logger.info('/api?inactive_metrics - namespace: %s' % str(namespace))
+        else:
+            logger.info('/api?inactive_metrics - namespace parameter not passed')
+        try:
+            inactive_metrics = get_inactive_metrics(skyline_app, namespace)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?inactive_metrics - get_inactive_metrics failed - %s' % (
+                err))
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            inactive_metrics_lists = []
+            inactive_metrics_uri = 'inactive_metrics'
+            if namespace:
+                inactive_metrics_uri = 'inactive_metrics?namespace=%s' % str(namespace)
+            try:
+                inactive_metrics_lists = get_cluster_data(inactive_metrics_uri, 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get inactive_metrics from the remote Skyline instances')
+            if inactive_metrics_lists:
+                for inactive_metrics_list in inactive_metrics_lists:
+                    logger.info('got inactive_metrics_list of length %s from a remote Skyline instances' % str(len(inactive_metrics_list)))
+                    new_inactive_metrics_list = inactive_metrics + inactive_metrics_list
+                    inactive_metrics = list(set(new_inactive_metrics_list))
+                    del new_inactive_metrics_list
+            else:
+                logger.warning('warning :: failed to get inactive_metrics_dicts from the remote Skyline instances')
+        end_inactive_metrics = timer()
+        inactive_metrics_time = (end_inactive_metrics - start_inactive_metrics)
+        if not inactive_metrics:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": inactive_metrics_time, "response": 404}, "data": inactive_metrics}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": inactive_metrics_time, "response": 200}, "data": inactive_metrics}
+        return jsonify(data_dict), 200
 
     # @added 20220128 - Feature #4376: webapp - update_external_settings
     if 'external_settings' in request.args:
