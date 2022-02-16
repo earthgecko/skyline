@@ -23,7 +23,9 @@ from os import remove as os_remove
 from sys import version_info
 
 import settings
-from skyline_functions import send_graphite_metric
+# @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+# Added get_redis_conn_decoded
+from skyline_functions import send_graphite_metric, get_redis_conn_decoded
 
 parent_skyline_app = 'horizon'
 child_skyline_app = 'worker'
@@ -104,6 +106,9 @@ class Worker(Process):
         #                   Feature #3680: horizon.worker.datapoints_sent_to_redis
         # Added worker_number
         self.worker_number = worker_number
+        # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+        # Added get_redis_conn_decoded
+        self.redis_conn_decoded = get_redis_conn_decoded(parent_skyline_app)
 
     def check_if_parent_is_alive(self):
         """
@@ -230,6 +235,13 @@ class Worker(Process):
 
         logger.info('%s :: started worker %s' % (skyline_app, str(self.worker_number)))
 
+        # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+        skip_metrics_dict = {}
+        do_not_skip_metrics_dict = {}
+        skip_metrics_list = []
+        do_not_skip_metrics_list = []
+        checked_for_skip_count = 0
+
         # @added 20201103 - Feature #3820: HORIZON_SHARDS
         if HORIZON_SHARDS:
             logger.info('%s :: HORIZON_SHARDS declared, this horizon instance is assigned shard %s' % (skyline_app, str(HORIZON_SHARD)))
@@ -281,6 +293,22 @@ class Worker(Process):
                 pipe = self.redis_conn.pipeline()
                 continue
 
+            # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+            if not skip_metrics_dict:
+                try:
+                    skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.skip_metrics')
+                    logger.info('%s :: got %s metrics from horizon.skip_metrics from Redis hash as not set' % (
+                        skyline_app, str(len(skip_metrics_dict))))
+                except Exception as err:
+                    logger.error('%s :: error on hgetall horizon.skip_metrics: %s' % (skyline_app, str(err)))
+            if not do_not_skip_metrics_dict:
+                try:
+                    do_not_skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.do_not_skip_metrics')
+                    logger.info('%s :: got %s metrics from horizon.do_not_skip_metrics from Redis hash as not set' % (
+                        skyline_app, str(len(do_not_skip_metrics_dict))))
+                except Exception as err:
+                    logger.error('%s :: error on hgetall horizon.do_not_skip_metrics: %s' % (skyline_app, str(err)))
+
             try:
                 # Get a chunk from the queue with a 15 second timeout
                 chunk = self.q.get(True, 15)
@@ -306,9 +334,40 @@ class Worker(Process):
                         else:
                             horizon_shard_assigned_metrics.append(metric[0])
 
-                    # Check if we should skip it
-                    if self.in_skip_list(metric[0]):
-                        continue
+                    # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+                    found_in_do_not_skip_dict = False
+                    if do_not_skip_metrics_dict:
+                        try:
+                            found_in_do_not_skip_dict = do_not_skip_metrics_dict[metric[0]]
+                        except KeyError:
+                            found_in_do_not_skip_dict = False
+                        if found_in_do_not_skip_dict:
+                            do_not_skip_metrics_list.append(metric[0])
+                    found_in_skip_dict = False
+                    if not found_in_do_not_skip_dict and skip_metrics_dict:
+                        try:
+                            found_in_skip_dict = skip_metrics_dict[metric[0]]
+                        except KeyError:
+                            found_in_skip_dict = False
+                        if found_in_skip_dict:
+                            skip_metrics_list.append(metric[0])
+                            continue
+
+                    # @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+                    if not found_in_do_not_skip_dict:
+                        checked_for_skip_count += 1
+
+                        # Check if we should skip it
+                        if self.in_skip_list(metric[0]):
+
+                            # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+                            skip_metrics_list.append(metric[0])
+
+                            continue
+
+                    # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+                    if not found_in_do_not_skip_dict:
+                        do_not_skip_metrics_list.append(metric[0])
 
                     # Bad data coming in
                     # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
@@ -546,3 +605,77 @@ class Worker(Process):
                     send_graphite_metric(skyline_app, send_metric_name, metrics_received_count)
 
                 metrics_received = []
+
+                # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
+                if skip_metrics_list:
+                    update_skip_metrics = {}
+                    for metric in list(set(skip_metrics_list)):
+                        update_entry = False
+                        if skip_metrics_dict:
+                            try:
+                                # Only update skip metrics every hour to save on
+                                # Redis overhead
+                                last_update_timestamp_str = skip_metrics_dict[metric]
+                                if last_update_timestamp_str:
+                                    last_update_timestamp = int(float(last_update_timestamp_str))
+                                    if (now - last_update_timestamp) >= 3600:
+                                        update_entry = True
+                            except KeyError:
+                                update_entry = True
+                            except:
+                                update_entry = True
+                        else:
+                            update_entry = True
+                        if update_entry:
+                            update_skip_metrics[metric] = int(now)
+                    if update_skip_metrics:
+                        try:
+                            self.redis_conn_decoded.hset('horizon.skip_metrics', mapping=update_skip_metrics)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: failed to update horizon.skip_metrics Redis hash - %s' % (
+                                err))
+                if do_not_skip_metrics_list:
+                    update_metrics = {}
+                    for metric in list(set(do_not_skip_metrics_list)):
+                        update_entry = False
+                        if do_not_skip_metrics_dict:
+                            try:
+                                # Only update skip metrics every hour to save on
+                                # Redis overhead
+                                last_update_timestamp_str = skip_metrics_dict[metric]
+                                if last_update_timestamp_str:
+                                    last_update_timestamp = int(float(last_update_timestamp_str))
+                                    if (now - last_update_timestamp) >= 3600:
+                                        update_entry = True
+                            except KeyError:
+                                update_entry = True
+                            except:
+                                update_entry = True
+                        else:
+                            update_entry = True
+                        if update_entry:
+                            update_metrics[metric] = int(now)
+                    if update_metrics:
+                        try:
+                            self.redis_conn_decoded.hset('horizon.do_not_skip_metrics', mapping=update_metrics)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: listen :: failed to update horizon.do_not_skip_metrics Redis hash - %s' % (
+                                err))
+                try:
+                    skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.skip_metrics')
+                    logger.info('%s :: got %s metrics from horizon.skip_metrics from Redis hash on minutely run' % (
+                        skyline_app, str(len(skip_metrics_dict))))
+                except Exception as err:
+                    logger.error('%s :: error on hgetall horizon.skip_metrics: %s' % (skyline_app, str(err)))
+                try:
+                    do_not_skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.do_not_skip_metrics')
+                    logger.info('%s :: got %s metrics from horizon.do_not_skip_metrics from Redis hash on minutely run' % (
+                        skyline_app, str(len(do_not_skip_metrics_dict))))
+                except Exception as err:
+                    logger.error('%s :: error on hgetall horizon.do_not_skip_metrics: %s' % (skyline_app, str(err)))
+                logger.info('%s :: checked %s metrics through in_skip_list' % (
+                    skyline_app, str(checked_for_skip_count)))
+                skip_metrics_list = []
+                do_not_skip_metrics_list = []
