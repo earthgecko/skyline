@@ -87,11 +87,11 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
-                  resolution=[resolution/frequency in seconds | int | <font color=red>required</font>]</br>
-                  start=[unix timestamp | int | <font color=red>required</font>]</br>
-                  end=[unix timestamp | int | <font color=red>required</font>]</br>
-                  attempts=[number of attempts in fill the metric | int | <font color=red>required</font>]</br>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]<br>
+                  resolution=[resolution/frequency in seconds | int | <font color=red>required</font>]<br>
+                  start=[unix timestamp | int | <font color=red>required</font>]<br>
+                  end=[unix timestamp | int | <font color=red>required</font>]<br>
+                  attempts=[number of attempts in fill the metric | int | <font color=red>required</font>]<br>
                   <code>NOTE: the number of attempts must match the number of attempts that were returned in the airgapped_metrics</code><br>
                   <code>for the airgap, it must not be incremented as it is used to match the airgap item in the Redis set for removal.</code><br>
               </td>
@@ -179,7 +179,7 @@ Or if no metrics of no metrics are set to alert <code>{"data":{"metrics":[]},"st
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Returns the last timestamp that Analyzer ran as a json object.  The Redis analyzer key is set every run with a TTL of 120 seconds</br>
+  		        <td>Returns the last timestamp that Analyzer ran as a json object.  The Redis analyzer key is set every run with a TTL of 120 seconds<br>
                   If the Redis key does not exist the request is responded to with HTTP status code <code>410 GONE</code>
               </td>
   		      </tr>
@@ -232,8 +232,8 @@ Or if Analyzer has not run in 120 seconds <code>{"data":{"timestamp":null},"stat
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>anomaly=[true | boolean | <font color=red>required</font>]</br>
-                  id=[anomaly id | int | <font color=red>required</font>]</br>
+  		        <td>anomaly=[true | boolean | <font color=red>required</font>]<br>
+                  id=[anomaly id | int | <font color=red>required</font>]<br>
               </td>
   		      </tr>
   		      <tr>
@@ -649,11 +649,11 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>get_json=[true | boolean | <font color=red>required</font>]</br>
-                  metric=[metric_name | str | <font color=red>required</font>]</br>
-                  timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
-                  source=[features_profile|training_data | str | <font color=red>required</font>]</br>
-                  full_duration_data=[whether to return FULL_DURATION time series | boolean | optional]</br>
+  		        <td>get_json=[true | boolean | <font color=red>required</font>]<br>
+                  metric=[metric_name | str | <font color=red>required</font>]<br>
+                  timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  source=[features_profile|training_data | str | <font color=red>required</font>]<br>
+                  full_duration_data=[whether to return FULL_DURATION time series | boolean | optional]<br>
               </td>
   		      </tr>
   		      <tr>
@@ -712,9 +712,9 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
-                  from_timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
-                  until_timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]<br>
+                  from_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  until_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
               </td>
   		      </tr>
   		      <tr>
@@ -726,6 +726,52 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		        <td>Responses:</td>
   		        <td>200 with json response<br>
 <code>{"results": [[1580998730.0, 0.0], [1580998790.0, 0.0], ..., [1580999690.0, 0.0]]}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?inactive_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a dictionary of inactive_metrics as a json object. Optionally you can filter on namepsace.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?inactive_metrics">/api?inactive_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?inactive_metrics</code><br>
+              <code>/api?inactive_metricss&cluster_data=true</code> [optional for clustered Skyline]<br>
+              <code>/api?inactive_metrics&namespace=[namespace]</code> [optional]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+      "metrics": [
+        "server-1.cpu.total",
+        "server-1.cpu.user"
+      ]
+  },
+  "status": {"cluster_data": false, "request_time": 0.0032482019159942865, "response": 200}
+}</code><br>
               </td>
   		      </tr>
 		    </tbody>
@@ -746,7 +792,7 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
-  		        <td><a target='_blank' href="/api?ionosphere_learn_work">/api?ionosphere_learn_work</a></br>
+  		        <td><a target='_blank' href="/api?ionosphere_learn_work">/api?ionosphere_learn_work</a><br>
               <a target='_blank' href="/api?ionosphere_learn_work&format=json">/api?ionosphere_learn_work&format=json</a>
               </td>
   		      </tr>
@@ -874,7 +920,7 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Returns the last timestamp that Analyzer analysed for a metric.</br>
+  		        <td>Returns the last timestamp that Analyzer analysed for a metric.<br>
                   If a timestamp for the metric does not exist the request is responded to with HTTP status code <code>400</code>
               </td>
   		      </tr>
@@ -888,12 +934,12 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]<br>
               </td>
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime</code></br>
+		          <td><code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime</code><br>
 		          <code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime&cluster_data=true</code> [optional for clustered Skyline]<br>
               </td>
   		      </tr>
@@ -931,8 +977,8 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[FULL_NAMESPACE + metric_name OR metric name (without FULL_NAMESPACE)| str | <font color=red>required</font>]</br>
-  		        format=[json | str | optional]</br>
+  		        <td>metric=[FULL_NAMESPACE + metric_name OR metric name (without FULL_NAMESPACE)| str | <font color=red>required</font>]<br>
+  		        format=[json | str | optional]<br>
               </td>
   		      </tr>
   		      <tr>
