@@ -51,6 +51,8 @@ def manage_external_settings(current_skyline_app):
         # @added 20220210 - Feature #4412: flux - quota - thunder alert
         #                   Feature #4404: flux - external_settings - aggregation
         'aggregate', 'alert_on_metric_quota_exceeded',
+        # @added 20220215 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+        'skip_metrics', 'do_not_skip_metrics', 'override',
     )
 
     try:
@@ -140,6 +142,62 @@ def manage_external_settings(current_skyline_app):
                     current_logger.error(traceback.format_exc())
                     current_logger.error('error :: get_external_settings :: could not parse namespace element from json from url - %s - %s - %s' % (
                         str(endpoint), str(item), e))
+
+    # @added 20220215 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+    LOCAL_EXTERNAL_SETTINGS = {}
+    try:
+        LOCAL_EXTERNAL_SETTINGS = settings.LOCAL_EXTERNAL_SETTINGS.copy()
+    except AttributeError:
+        LOCAL_EXTERNAL_SETTINGS = {}
+    except Exception as e:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: failed to determine LOCAL_EXTERNAL_SETTINGS - %s' % (
+            function_str, e))
+        LOCAL_EXTERNAL_SETTINGS = {}
+    if LOCAL_EXTERNAL_SETTINGS:
+        external_settings_config_ids = list(external_settings.keys())
+        for config_id in list(LOCAL_EXTERNAL_SETTINGS.keys()):
+            local_external_settings_used = False
+            if config_id in external_settings_config_ids:
+                external_settings_config_id_present = True
+            else:
+                external_settings_config_id_present = False
+                current_logger.info('%s :: LOCAL_EXTERNAL_SETTINGS exist for %s but it is not present in EXTERNAL_SETTINGS' % (
+                    function_str, str(config_id)))
+            override = False
+            try:
+                override = LOCAL_EXTERNAL_SETTINGS[config_id]['override']
+            except KeyError:
+                override = False
+            except:
+                override = False
+            if not external_settings_config_id_present and override:
+                current_logger.info('%s :: adding %s to external settings from LOCAL_EXTERNAL_SETTINGS' % (
+                    function_str, str(config_id)))
+                external_settings[config_id] = LOCAL_EXTERNAL_SETTINGS[config_id]
+                external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id]
+                continue
+            for key in list(LOCAL_EXTERNAL_SETTINGS[config_id].keys()):
+                key_present = False
+                try:
+                    key_value = external_settings[config_id][key]
+                    key_value_str = str(key_value)
+                    if isinstance(key_value_str, str):
+                        key_present = True
+                except KeyError:
+                    key_present = False
+                if not key_present and external_settings_config_id_present:
+                    current_logger.info('%s :: adding %s to external settings %s with value from LOCAL_EXTERNAL_SETTINGS' % (
+                        function_str, str(key), config_id))
+                    external_settings[config_id][key] = LOCAL_EXTERNAL_SETTINGS[config_id][key]
+                    local_external_settings_used = True
+                if key_present and override:
+                    current_logger.info('%s :: overriding %s in external settings %s with value from LOCAL_EXTERNAL_SETTINGS' % (
+                        function_str, str(key), config_id))
+                    external_settings[config_id][key] = LOCAL_EXTERNAL_SETTINGS[config_id][key]
+                    local_external_settings_used = True
+                if local_external_settings_used:
+                    external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id]
 
     redis_conn_decoded = None
     try:

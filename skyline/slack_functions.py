@@ -222,7 +222,16 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
         # return False
         return slack_response
     if not slack_response['ok']:
-        if str(slack_response['error']) == 'already_reacted':
+        # @modified 20220214 - Bug #4448: Handle missing slack response
+        # if str(slack_response['error']) == 'already_reacted':
+        slack_response_error = None
+        try:
+            slack_response_error = slack_response['error']
+        except KeyError:
+            slack_response_error = slack_response['error']
+            fail_msg = 'error :: create_features_profile :: no slack response'
+            current_logger.error('%s' % fail_msg)
+        if slack_response_error == 'already_reacted':
             current_logger.info(
                 'slack_post_reaction :: already_reacted to channel %s, thread %s, ok' % (
                     channel, str(thread_ts)))
