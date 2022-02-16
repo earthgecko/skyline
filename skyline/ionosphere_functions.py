@@ -1376,7 +1376,16 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                             str(slack_response)))
 
                 if not slack_response['ok']:
-                    if str(slack_response['error']) == 'already_reacted':
+                    # @modified 20220214 - Bug #4448: Handle missing slack response
+                    # if str(slack_response['error']) == 'already_reacted':
+                    slack_response_error = None
+                    try:
+                        slack_response_error = slack_response['error']
+                    except KeyError:
+                        slack_response_error = slack_response['error']
+                        fail_msg = 'error :: create_features_profile :: no slack response'
+                        current_logger.error('%s' % fail_msg)
+                    if slack_response_error == 'already_reacted':
                         current_logger.info(
                             'slack_post_reaction :: already_reacted to channel %s, thread %s, ok' % (
                                 channel, str(slack_thread_ts)))
@@ -1398,7 +1407,16 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
                         current_logger.error('%s' % fail_msg)
                     if not slack_response['ok']:
-                        if str(slack_response['error']) == 'already_reacted':
+                        # @modified 20220214 - Bug #4448: Handle missing slack response
+                        # if str(slack_response['error']) == 'already_reacted':
+                        slack_response_error = None
+                        try:
+                            slack_response_error = slack_response['error']
+                        except KeyError:
+                            slack_response_error = slack_response['error']
+                            fail_msg = 'error :: create_features_profile :: no slack response'
+                            current_logger.error('%s' % fail_msg)
+                        if slack_response_error == 'already_reacted':
                             current_logger.info(
                                 'slack_post_reaction :: already_reacted to channel %s, thread %s, ok' % (
                                     channel, str(slack_thread_ts)))
