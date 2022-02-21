@@ -175,8 +175,16 @@ def manage_external_settings(current_skyline_app):
                 current_logger.info('%s :: adding %s to external settings from LOCAL_EXTERNAL_SETTINGS' % (
                     function_str, str(config_id)))
                 external_settings[config_id] = LOCAL_EXTERNAL_SETTINGS[config_id]
-                external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id]
+                external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id].copy()
+                # @added 20220221 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+                # Add what was overriden
+                external_settings[config_id]['overridden'] = {}
                 continue
+            # @added 20220221 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+            # Add what was overriden
+            if override:
+                external_settings[config_id]['overridden'] = {}
+
             for key in list(LOCAL_EXTERNAL_SETTINGS[config_id].keys()):
                 key_present = False
                 try:
@@ -192,12 +200,19 @@ def manage_external_settings(current_skyline_app):
                     external_settings[config_id][key] = LOCAL_EXTERNAL_SETTINGS[config_id][key]
                     local_external_settings_used = True
                 if key_present and override:
+                    # @added 20220221 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+                    # Add what was overriden
+                    if isinstance(external_settings[config_id][key], dict):
+                        external_settings[config_id]['overridden'][key] = external_settings[config_id][key].copy()
+                    else:
+                        external_settings[config_id]['overridden'][key] = external_settings[config_id][key]
+
                     current_logger.info('%s :: overriding %s in external settings %s with value from LOCAL_EXTERNAL_SETTINGS' % (
                         function_str, str(key), config_id))
                     external_settings[config_id][key] = LOCAL_EXTERNAL_SETTINGS[config_id][key]
                     local_external_settings_used = True
                 if local_external_settings_used:
-                    external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id]
+                    external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id].copy()
 
     redis_conn_decoded = None
     try:

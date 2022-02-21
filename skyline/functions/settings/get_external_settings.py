@@ -89,14 +89,24 @@ def get_external_settings(current_skyline_app, namespace=None, log=False):
     if external_settings and current_skyline_app == 'webapp':
         redacted_tokens_external_settings = {}
         for config_id in list(external_settings.keys()):
-            if log:
-                current_logger.info('get_external_settings :: redacting tokens for webapp API request')
-            redacted_tokens_external_settings[config_id] = {}
-            for key in list(external_settings[config_id].keys()):
-                if 'token' in key:
-                    redacted_tokens_external_settings[config_id][key] = 'REDACTED'
-                else:
-                    redacted_tokens_external_settings[config_id][key] = external_settings[config_id][key]
+            # @modified 20220221 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+            # Wrapped in try
+            try:
+                if log:
+                    current_logger.info('get_external_settings :: redacting tokens for webapp API request')
+                redacted_tokens_external_settings[config_id] = {}
+                for key in list(external_settings[config_id].keys()):
+                    if 'token' in key:
+                        redacted_tokens_external_settings[config_id][key] = 'REDACTED'
+                    else:
+                        redacted_tokens_external_settings[config_id][key] = external_settings[config_id][key]
+            except Exception as err:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_external_settings :: failed to check namespace for external_settings[\'%s\'] - %s' % (
+                    config_id, err))
         external_settings = redacted_tokens_external_settings
 
     return external_settings
