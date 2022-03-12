@@ -100,7 +100,7 @@ pyparsing==3.0.6
 #Pillow==8.3.2
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #Pillow==8.4.0
-Pillow==9.0.0
+Pillow==9.0.1
 matplotlib==3.3.3
 # @modified 20211220 - Task #4344: Update dependencies
 #pandas==1.2.0
