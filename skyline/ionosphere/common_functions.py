@@ -38,8 +38,21 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: layers :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: layers :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings')
     ENABLE_IONOSPHERE_DEBUG = False
+
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+OTEL_ENABLED = False
+try:
+    OTEL_ENABLED = settings.OTEL_ENABLED
+except AttributeError:
+    OTEL_ENABLED = False
+except:
+    OTEL_ENABLED = False
+if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
+    from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
+    PymemcacheInstrumentor().instrument()
 
 if settings.MEMCACHE_ENABLED:
     memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)

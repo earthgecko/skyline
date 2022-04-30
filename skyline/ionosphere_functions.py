@@ -1336,24 +1336,49 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             fail_msg = 'error :: create_features_profile :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
             current_logger.error('%s' % fail_msg)
 
+        # @added 20220328 - Bug #4448: Handle missing slack response
+        # Handle slack SSL errors which occur more than one would expect
+        slack_ssl_error = False
+
         slack_response = {'ok': False}
         if channel:
-            try:
-                slack_response = slack_post_message(current_skyline_app, channel, str(slack_thread_ts), message)
-            except:
-                trace = traceback.format_exc()
-                current_logger.error(trace)
-                fail_msg = 'error :: create_features_profile :: failed to slack_post_message'
-                current_logger.error('%s' % fail_msg)
-            if not slack_response['ok']:
-                fail_msg = 'error :: create_features_profile :: failed to slack_post_message, slack dict output follows'
-                current_logger.error('%s' % fail_msg)
-                current_logger.error('%s' % str(slack_response))
-            else:
-                current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
-                    channel, str(slack_thread_ts)))
+            if slack_thread_ts:
+                try:
+                    slack_response = slack_post_message(current_skyline_app, channel, str(slack_thread_ts), message)
+                except Exception as err:
+                    if 'CERTIFICATE_VERIFY_FAILED' in str(err):
+                        slack_ssl_error = True
+                        fail_msg = 'warning :: create_features_profile :: failed to slack_post_message - %s' % err
+                        current_logger.warning('%s' % fail_msg)
+                    else:
+                        trace = traceback.format_exc()
+                        current_logger.error(trace)
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_message'
+                        current_logger.error('%s' % fail_msg)
+
+                # @added 20220422 - Bug #4448: Handle missing slack response
+                # Handle slack SSL errors which occur more than one would expect
+                if not slack_response['ok']:
+                    try:
+                        slack_ssl_error = slack_response['slack_ssl_error']
+                    except:
+                        pass
+                    if not slack_ssl_error:
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_message, slack dict output follows'
+                        current_logger.error('%s' % fail_msg)
+                        current_logger.error('%s' % str(slack_response))
+                    else:
+                        fail_msg = 'warning :: create_features_profile :: failed to slack_post_message due to slack SSL issue'
+                        current_logger.warning('%s' % fail_msg)
+
+                else:
+                    current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
+                        channel, str(slack_thread_ts)))
         if channel_id:
             if slack_thread_ts:
+                # @added 20220328 - Bug #4448: Handle missing slack response
+                # Handle slack SSL errors which occur more than one would expect
+                slack_ssl_error = False
                 try:
                     reaction_emoji = settings.SLACK_OPTS['message_on_features_profile_created_reaction_emoji']
                 except:
@@ -1364,18 +1389,35 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     if LOCAL_DEBUG:
                         current_logger.info('create_features_profile :: slack_response - %s' % (
                             str(slack_response)))
-                except:
-                    trace = traceback.format_exc()
-                    current_logger.error(trace)
-                    fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
-                    current_logger.error('%s' % fail_msg)
+                except Exception as err:
+                    if 'CERTIFICATE_VERIFY_FAILED' in str(err):
+                        slack_ssl_error = True
+                        fail_msg = 'warning :: create_features_profile :: failed to slack_post_reaction - %s' % err
+                        current_logger.warning('%s' % fail_msg)
+                    else:
+                        trace = traceback.format_exc()
+                        current_logger.error(trace)
+                        fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction - %s' % err
+                        current_logger.error('%s' % fail_msg)
 
                 if LOCAL_DEBUG:
                     if slack_response:
                         current_logger.info('create_features_profile :: slack_response - %s' % (
                             str(slack_response)))
 
-                if not slack_response['ok']:
+                # @added 20220422 - Bug #4448: Handle missing slack response
+                # Handle slack SSL errors which occur more than one would expect
+                if not slack_response['ok'] and not slack_ssl_error:
+                    try:
+                        slack_ssl_error = slack_response['slack_ssl_error']
+                        if slack_ssl_error:
+                            fail_msg = 'warning :: create_features_profile :: failed to slack_post_message due to slack SSL issue'
+                            current_logger.warning('%s' % fail_msg)
+                    except:
+                        pass
+
+                if not slack_response['ok'] and not slack_ssl_error:
+
                     # @modified 20220214 - Bug #4448: Handle missing slack response
                     # if str(slack_response['error']) == 'already_reacted':
                     slack_response_error = None
@@ -1399,21 +1441,40 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     except:
                         reaction_emoji = 'heavy_check_mark'
                     slack_response = {'ok': False}
+                    # @added 20220328 - Bug #4448: Handle missing slack response
+                    # Handle slack SSL errors which occur more than one would expect
+                    slack_ssl_error = False
                     try:
                         slack_response = slack_post_reaction(current_skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
-                    except:
-                        trace = traceback.format_exc()
-                        current_logger.error(trace)
-                        fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
-                        current_logger.error('%s' % fail_msg)
-                    if not slack_response['ok']:
+                    except Exception as err:
+                        if 'CERTIFICATE_VERIFY_FAILED' in str(err):
+                            slack_ssl_error = True
+                            fail_msg = 'warning :: create_features_profile :: failed to slack_post_reaction - %s' % err
+                            current_logger.warning('%s' % fail_msg)
+                        else:
+                            trace = traceback.format_exc()
+                            current_logger.error(trace)
+                            fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
+                            current_logger.error('%s' % fail_msg)
+
+                    # @added 20220422 - Bug #4448: Handle missing slack response
+                    # Handle slack SSL errors which occur more than one would expect
+                    if not slack_response['ok'] and not slack_ssl_error:
+                        try:
+                            slack_ssl_error = slack_response['slack_ssl_error']
+                            if slack_ssl_error:
+                                fail_msg = 'warning :: create_features_profile :: failed to slack_post_message due to slack SSL issue'
+                                current_logger.warning('%s' % fail_msg)
+                        except:
+                            pass
+
+                    if not slack_response['ok'] and not slack_ssl_error:
                         # @modified 20220214 - Bug #4448: Handle missing slack response
                         # if str(slack_response['error']) == 'already_reacted':
                         slack_response_error = None
                         try:
                             slack_response_error = slack_response['error']
                         except KeyError:
-                            slack_response_error = slack_response['error']
                             fail_msg = 'error :: create_features_profile :: no slack response'
                             current_logger.error('%s' % fail_msg)
                         if slack_response_error == 'already_reacted':
@@ -1458,7 +1519,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         if engine:
             fp_create_engine_disposal(current_skyline_app, engine)
         else:
-            current_logger.info('create_features_profile :: no engine to dispose of' % (str(new_fp_id), ts_features_profile_dir))
+            current_logger.info('create_features_profile :: no engine to dispose of')
     except:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)

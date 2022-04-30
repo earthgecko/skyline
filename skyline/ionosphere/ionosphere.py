@@ -338,14 +338,11 @@ class Ionosphere(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
-    """
-    These are the ionosphere mysql functions used to surface and input
-    ionosphere data for timeseries.
-    """
-
+    # These are the ionosphere mysql functions used to surface and input
+    # ionosphere data for timeseries.
     def mysql_insert(self, insert):
         """
         Insert data into mysql table
@@ -584,18 +581,16 @@ class Ionosphere(Thread):
                                 if ifile.endswith('.txt'):
                                     if ifile.endswith('.fp.details.txt'):
                                         continue
-                                    elif ifile.endswith('.fp.created.txt'):
+                                    if ifile.endswith('.fp.created.txt'):
                                         continue
                                     # @added 20210329 - Feature #3978: luminosity - classify_metrics
                                     #                   Feature #3642: Anomaly type classification
-                                    elif ifile.startswith('adtk_'):
+                                    if ifile.startswith('adtk_'):
                                         continue
-                                    elif ifile == 'data.txt':
+                                    if ifile == 'data.txt':
                                         continue
-
-                                    else:
-                                        metric_file = ifile
-                                        metric_file_path = path
+                                    metric_file = ifile
+                                    metric_file_path = path
                             if add_folder:
                                 if metric_file and metric_file_path:
                                     metric = metric_file.replace('.txt', '', 1)
@@ -676,9 +671,8 @@ class Ionosphere(Thread):
                                         continue
                                     if ifile.endswith('.fp.created.txt'):
                                         continue
-                                    else:
-                                        metric_file = ifile
-                                        metric_file_path = path
+                                    metric_file = ifile
+                                    metric_file_path = path
                             if add_folder:
                                 if metric_file and metric_file_path:
                                     metric = metric_file.replace('.txt', '', 1)
@@ -701,7 +695,7 @@ class Ionosphere(Thread):
                                     historical_training_data_added += 1
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to evaluate training_dir - %s' % str(training_data_dir))
+                        logger.error('error :: failed to evaluate historical training_dir - %s' % str(path))
                 logger.info('added %s historical training data instances' % (str(historical_training_data_added)))
 
             if training_data_instances:
@@ -830,6 +824,7 @@ class Ionosphere(Thread):
         try:
             engine, log_msg, trace = get_an_engine()
             logger.info(log_msg)
+            del trace
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: could not get a MySQL engine for ionosphere_enabled_metrics')
@@ -1039,7 +1034,7 @@ class Ionosphere(Thread):
 
             if len(metric_vars_array) == 0:
                 logger.error(
-                    'error :: loading metric variables - none found' % (
+                    'error :: loading metric variables - none found in %s' % (
                         str(metric_vars_file)))
                 return False
 
@@ -1216,7 +1211,6 @@ class Ionosphere(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: calling engine.dispose()')
-            return
 
         # @added 20200904 - Feature #3734: waterfall alerts
         # Remove the metric from the waterfall_alerts Redis set
@@ -1256,7 +1250,6 @@ class Ionosphere(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
                                 base_name, str(metric_timestamp), redis_waterfall_alert_set))
-            return
 
         # @added 20200908 - Feature #3734: waterfall alerts
         # Added a common return_to_sender_to_alert function
@@ -1277,7 +1270,6 @@ class Ionosphere(Thread):
                     'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s, %s]' %
                     (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
                         str(triggered_algorithms), str(full_duration), str(algorithms_run)))
-            return
 
         # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
         # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
@@ -1803,7 +1795,8 @@ class Ionosphere(Thread):
 
             # @added 20210702 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
             if feedback_metric:
-                for do_not_skip in DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES:
+                # for do_not_skip in DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES:
+                if DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES:
                     pattern_match = False
                     try:
                         pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES)
@@ -1880,17 +1873,16 @@ class Ionosphere(Thread):
                 if engine:
                     engine_disposal(engine)
                 return
-            else:
-                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                # self.training_metrics.append(base_name)
-                redis_set = 'ionosphere.training_metrics'
-                data = str(base_name)
-                try:
-                    self.redis_conn.sadd(redis_set, data)
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: failed to add %s to Redis set %s' % (
-                        str(data), str(redis_set)))
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # self.training_metrics.append(base_name)
+            redis_set = 'ionosphere.training_metrics'
+            data = str(base_name)
+            try:
+                self.redis_conn.sadd(redis_set, data)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(data), str(redis_set)))
 
         logger.info(
             'ionosphere_enabled is %s for metric id %s - %s' % (
@@ -2022,6 +2014,7 @@ class Ionosphere(Thread):
                 try:
                     engine, log_msg, trace = get_an_engine()
                     logger.info(log_msg)
+                    del trace
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not get a MySQL engine to get fp_ids')
@@ -2412,8 +2405,7 @@ class Ionosphere(Thread):
                     if engine:
                         engine_disposal(engine)
                     return
-                else:
-                    logger.info('anomaly Graphite alert resources found in %s' % (metric_training_data_dir))
+                logger.info('anomaly Graphite alert resources found in %s' % (metric_training_data_dir))
 
         # @added 20210412 - Feature #4014: Ionosphere - inference
         #                   Branch #3590: inference
@@ -2773,8 +2765,7 @@ class Ionosphere(Thread):
             if engine:
                 engine_disposal(engine)
             return
-        else:
-            logger.info('%s calculated features determined' % (str(len(calculated_feature_file))))
+        logger.info('%s calculated features determined' % (str(len(calculated_feature_file))))
 
         # @added 2018075 - Task #2446: Optimize Ionosphere
         #                  Branch #2270: luminosity
@@ -3129,8 +3120,7 @@ class Ionosphere(Thread):
                     logger.error('error :: relevant_fp_feature_values_count - %s' % str(relevant_fp_feature_values_count))
                     logger.error('error :: relevant_calc_feature_values_count - %s' % str(relevant_calc_feature_values_count))
                     continue
-                else:
-                    logger.info('comparing on %s common features' % str(relevant_fp_feature_values_count))
+                logger.info('comparing on %s common features' % str(relevant_fp_feature_values_count))
 
                 if relevant_fp_feature_values_count == 0:
                     logger.error('error :: relevant_fp_feature_values_count is zero')
@@ -4023,8 +4013,7 @@ class Ionosphere(Thread):
                         if engine:
                             engine_disposal(engine)
                         return
-                    else:
-                        logger.info('learning is not currently rate limited on %s' % str(base_name))
+                    logger.info('learning is not currently rate limited on %s' % str(base_name))
 
                     # @added 20170605 - Bug #2038: Ionosphere learn parent generation incorrect
                     # Determine generation of the matched fp not the last in the
@@ -4394,7 +4383,6 @@ class Ionosphere(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -4413,7 +4401,6 @@ class Ionosphere(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -4605,9 +4592,7 @@ class Ionosphere(Thread):
                 sleep(30)
                 continue
 
-            """
-            Determine if any metric has been added to add
-            """
+            # Determine if any metric has been added to add
             # while True:
             while 1:
                 metric_var_files = False
@@ -4639,7 +4624,8 @@ class Ionosphere(Thread):
                             echo_job = True
                             logger.info('processing a ionosphere.echo.work item')
                 if echo_job:
-                    for index, ionosphere_echo_work in enumerate(ionosphere_echo_work):
+                    # for index, ionosphere_echo_work in enumerate(ionosphere_echo_work):
+                    for ionosphere_echo_work in ionosphere_echo_work:
                         try:
                             echo_metric_list = literal_eval(ionosphere_echo_work)
                             echo_metric_timestamp = int(echo_metric_list[2])
@@ -4662,7 +4648,9 @@ class Ionosphere(Thread):
                         str(echo_metric_timestamp), echo_base_name)
                     echo_create_fp_metric_count = 1
                     try:
-                        echo_create_fp_metric_count = self.redis_conn.get(echo_create_fp_metric_key)
+                        echo_create_fp_metric_count_str = self.redis_conn_decoded.get(echo_create_fp_metric_key)
+                        if echo_create_fp_metric_count_str:
+                            echo_create_fp_metric_count = int(float(echo_create_fp_metric_count_str))
                     except Exception as e:
                         logger.error('error :: could not query Redis for %s: %s' % (echo_metric_check_file, e))
                     if not echo_create_fp_metric_count:
@@ -5157,8 +5145,8 @@ class Ionosphere(Thread):
                                 for metric_var_file in metric_var_files_sorted:
                                     if metric_var_file in remove_batch_anomalies_check_files:
                                         logger.info('removing batch anomaly check file to prioritise realtime metric checks - %s' % str(metric_var_file))
-                                else:
-                                    realtime_metric_var_files.append(metric_var_file)
+                                    else:
+                                        realtime_metric_var_files.append(metric_var_file)
                             if realtime_metric_var_files:
                                 realtime_metric_var_files_count = len(realtime_metric_var_files)
                                 metric_var_files = realtime_metric_var_files
