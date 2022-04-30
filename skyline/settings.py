@@ -656,7 +656,11 @@ CHECK_DATA_SPARSITY = True
 :vartype CHECK_DATA_SPARSITY: boolen
 """
 
-SKIP_CHECK_DATA_SPARSITY_NAMESPACES = []
+SKIP_CHECK_DATA_SPARSITY_NAMESPACES = [
+    'otel.traces',
+    'skyline.ionosphere.feature_calculation_time',
+    'skyline.mirage.run_time',
+]
 """
 :var SKIP_CHECK_DATA_SPARSITY_NAMESPACES: ADVANCED FEATURE - if there are
     metrics in population that you expect to not send data all the time you can
@@ -697,11 +701,11 @@ ANALYZER_CHECK_LAST_TIMESTAMP = False
     high frequency metrics are used, this is generally not required, however it
     is useful and can substantially reduce the amount of analysis run if you
     have lots of lower frequency metrics.
-:vartype BATCH_PROCESSING: boolen
+:vartype ANALYZER_CHECK_LAST_TIMESTAMP: boolen
 """
 
 # @added 20200411 - Feature #3480: batch_processing
-BATCH_PROCESSING = None
+BATCH_PROCESSING = False
 """
 :var BATCH_PROCESSING: Whether to apply batch processing to metrics which are
     recieved in batches.  In general this should not be enabled for all metrics
@@ -727,7 +731,7 @@ BATCH_PROCESSING_STALE_PERIOD = 86400
 :vartype BATCH_PROCESSING_STALE_PERIOD: int
 """
 
-BATCH_PROCESSING_DEBUG = None
+BATCH_PROCESSING_DEBUG = False
 """
 :var BATCH_PROCESSING_DEBUG: Whether to log batch processing info from Analyzer.
 :vartype BATCH_PROCESSING_DEBUG: boolen
@@ -841,7 +845,8 @@ ANALYZER_SKIP = []
 CUSTOM_ALGORITHMS = {}
 """
 :var CUSTOM_ALGORITHMS: Custom algorithms to run.  An empty dict {} disables
-    this feature. ADVANCED FEATURE.
+    this feature. Only available with analyzer, analyzer_batch and mirage.
+    ADVANCED FEATURE.
 :vartype CUSTOM_ALGORITHMS: dict
 
 - For full documentation see https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html
@@ -859,7 +864,7 @@ CUSTOM_ALGORITHMS = {}
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
             'trigger_history_override': 0,
-            'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
+            'use_with': ['analyzer', 'analyzer_batch', 'mirage'],
             'debug_logging': False,
         },
         'last_same_hours': {
@@ -879,7 +884,7 @@ CUSTOM_ALGORITHMS = {}
             'run_only_if_consensus': False,
             'trigger_history_override': 0,
             # This does not run on analyzer as it is weekly data
-            'use_with': ['mirage', 'crucible'],
+            'use_with': ['mirage'],
             'debug_logging': False,
         },
         'detect_significant_change': {
@@ -1068,7 +1073,7 @@ ALERTS = (
     ('horizon.test.udp', 'smtp|http_alerter-mock_api_alerter_receiver', 1),
     ('horizon.test.pickle', 'smtp|http_alerter-mock_api_alerter_receiver', 1),
     ('skyline_test.alerters.test', 'slack', 1),  # slack alerts MUST be declared afer smtp
-    ('skyline_test.alerters.test', 'pagerduty', 1),
+    # ('skyline_test.alerters.test', 'pagerduty', 1),
     # ('stats', 'http_alerter-external_endpoint', 30),
     # ('carbon', 'http_alerter-otherapp', 60),
 )
@@ -1078,7 +1083,9 @@ ALERTS = (
 
 This is the config for which metrics to alert on and which strategy to use for
 each.  Alerts will not fire twice within ``EXPIRATION_TIME``, even if they
-trigger again.
+trigger again. NOTE smtp alerts must be declared first, all other alert tuples
+MUST be declared AFTER smtp alert tuples.
+
 
 - **Tuple schema example**::
 
@@ -1149,7 +1156,9 @@ json alert config and how external alerts are applied.
 
 DO_NOT_ALERT_ON_STALE_METRICS = [
     # DO NOT alert if these metrics go stale
-    'donot_alert_on_stale.metric_known_to_go_stale',
+    'skyline.ionosphere.feature_calculation_time',
+    'skyline.mirage.run_time',
+    'otel.traces',
 ]
 """
 :var DO_NOT_ALERT_ON_STALE_METRICS: Metrics to not digest alert on if they
@@ -1180,12 +1189,40 @@ PLOT_REDIS_DATA = True
 
 """
 
+MONOTONIC_METRIC_NAMESPACES = [
+    # 'the.namespace.elements.of.metrics.that.are.always.monotonic',
+]
+"""
+:var MONOTONIC_METRIC_NAMESPACES: You can declare any metric namespaces as
+    strictly increasing monotonically metrics and always force analysis to
+    always calculate the derivative values for matched metrics.
+    Strictly increasing monotonicity is a metric that has a count value that
+    always increases and sometimes resets to 0, for example when a service is
+    restarted.
+:vartype MONOTONIC_METRIC_NAMESPACES: list
+
+Skyline by default automatically converts strictly increasingly monotonically
+metric values to their derivative values by calculating the delta between
+subsequent datapoints.  The function ignores datapoints that trend down.  This
+is useful for metrics that increase over time and then reset.
+
+Although strictly increasing monotonically metrics are automatically determined
+sometimes these metrics do not change very often and remain static for long
+periods which means that they may not be automatically classified as monotonic
+when a change occurs.  You can specifically declare any namespaces that you know
+to have strictly increasingly monotonicity so that they are always analysed at
+their derivative values.  This list is used with the matched_or_regexed_in_list
+and it matches in the string, dotted namespace elements or a regex pattern.
+
+"""
+
 NON_DERIVATIVE_MONOTONIC_METRICS = [
-    'the_namespace_of_the_monotonic_metric_to_not_calculate_the_derivative_for',
+    # 'metric.to.NOT.calculate.the.derivative.for',
 ]
 """
 :var NON_DERIVATIVE_MONOTONIC_METRICS: Strictly increasing monotonically metrics
-    to **not** calculate the derivative values for
+    to **not** calculate the derivative values for OR metrics that may at times
+    exhibit strictly increasing monotonicity but are not.
 :vartype NON_DERIVATIVE_MONOTONIC_METRICS: list
 
 Skyline by default automatically converts strictly increasingly monotonically
@@ -1194,9 +1231,71 @@ subsequent datapoints.  The function ignores datapoints that trend down.  This
 is useful for metrics that increase over time and then reset.
 
 Any strictly increasing monotonically metrics that you do not want Skyline to
-convert to the derivative values are declared here.  This list works in the same
-way that Horizon SKIP_LIST does, it matches in the string or dotted namespace
-elements.
+convert to the derivative values are declared here.  Complete metric names are
+required.
+
+"""
+
+ZERO_FILL_NAMESPACES = []
+"""
+:var ZERO_FILL_NAMESPACES: A list of metric namespaces that should be analysed
+    with 0s filling missing data points.
+:vartype ZERO_FILL_NAMESPACES: list
+
+This is similar to :mod:`settings.LAST_KNOWN_VALUE_NAMESPACES` below and the
+following description of problems related to sparsely populated metrics is
+applicable to both.
+
+Some metrics are very sparsely populated and only send data infrequently.
+Sparsely populated metrics are more difficult to use because the amount of data
+points present in any given period can vary significantly.  This can limit
+certain functions in the analysis process, so where appropriate Skyline can 0
+fill missing data points.
+
+An example of a type of metric that would be suited being 0 filled would be a
+page view metric that was only submitted when the page was viewed and if the
+page in question is only viewed 1 or 2 times per day or a few times a week,
+this would result in a metric that had say 5 data points for an entire week.  In
+terms of training and analysis there is not sufficient data there, however if
+that metric was 0 filled at runtime there would be a fully populated data set.
+There are many cases where instrumentation or telemetry is only sent if an event
+occurs, this allows Skyline to handle and work with very sparsely populated
+data.
+
+In Graphite the raw data for these metrics will still display sparsely populated,
+but within Skyline contexts the data and graphs shown will be filled as Skyline
+will use the Graphite transformNull and a similar function in analysis.
+
+Metrics that are declared in :mod:`settings.MONOTONIC_METRIC_NAMESPACES`
+should not be declared in ZERO_FILL_NAMESPACES.
+
+Always look at your metrics and apply the transforms in Graphite to determine
+the desired outcomes will be achieved.
+
+"""
+
+LAST_KNOWN_VALUE_NAMESPACES = [
+    'otel.traces',  # this is the namespace for any opentelemetry traces
+]
+"""
+:var LAST_KNOWN_VALUE_NAMESPACES: A list of metric namespaces that should be
+    analysed filling missing data points with the value of the last data point.
+:vartype LAST_KNOWN_VALUE_NAMESPACES: list
+
+This is similar to :mod:`settings.ZERO_FILL_NAMESPACES` above and the same
+description of the problems with sparsely populated metrics described above
+applies here.  Please read the entire above docstring for the above
+:mod:`settings.ZERO_FILL_NAMESPACES`
+
+An example of a type of metric that would be suited to last known value filling
+would be a monotonically increasing metric that did not submit a data point at
+every interval.  For example laptop or desktop metrics where the machine is
+suspended and count metrics are paused for a night or weekend, then resume at
+the same incrementing count without being reset to 0 as they would if a reboot
+occurred.
+
+Metrics that are declared in :mod:`settings.MONOTONIC_METRIC_NAMESPACES`
+can be declared in LAST_KNOWN_VALUE_NAMESPACES.
 
 """
 
@@ -1730,6 +1829,9 @@ DO_NOT_SKIP_LIST = [
     'skyline.analyzer.metrics_sparsity',
     'skyline.exceptions',
     'skyline.mirage.checks',
+    'skyline.logged_errors',
+    'skyline.mirage.run_time',
+    'skyline.ionosphere.features_calculation_time',
 ]
 """
 :var DO_NOT_SKIP_LIST: Metrics to skip
@@ -1797,6 +1899,9 @@ THUNDER_CHECKS = {
         #     'times_in_a_row': 10, 'alert_via_smtp': True,
         #     'alert_via_slack': False, 'alert_via_pagerduty': False,
         # },
+        'worker.metrics_received': {
+            'run': False,
+        },
     },
     'mirage': {
         'up': {
@@ -1825,6 +1930,44 @@ THUNDER_CHECKS = {
     'webapp': {
         'up': {
             'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'analyzer_batch': {
+        'up': {
+            'run': False, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'boundary': {
+        'up': {
+            'run': False, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    # flux.listen check relies on the flux /metric_data?status=true or the
+    # flux /metric_data_post status endpoint/s being tested every minute
+    'flux.listen': {
+        'up': {
+            'run': False, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'flux.worker': {
+        'up': {
+            'run': False, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'vista.fetcher': {
+        'up': {
+            'run': False, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'vista.worker': {
+        'up': {
+            'run': False, 'expiry': 900, 'alert_via_smtp': True,
             'alert_via_slack': False, 'alert_via_pagerduty': False,
         },
     },
@@ -1860,7 +2003,7 @@ THUNDER_OPTS = {
     Thunder alerts are meant for the Skyline administrator/s whereas Analyzer
     and Boundary related alerts can be routed to many different parties.
     [USER_DEFINED]
-:vartype THUNDER_ENABLED: boolean
+:vartype THUNDER_OPTS: dict
 """
 
 """
@@ -2230,19 +2373,32 @@ different ranges to pre-filter some noise.
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
 :param MIN_AVERAGE: the minimum average value to evaluate for
-    :func:`.boundary_algorithms.detect_drop_off_cliff`, in the
-    :func:`.boundary_algorithms.less_than` and
-    :func:`.boundary_algorithms.greater_than` algorithm contexts set
-    this to 0.
+    :func:`.boundary_algorithms.detect_drop_off_cliff`, this allows for tuning
+    the algorithm to only check when certain conditions are present.  When a
+    drop_off_cliff event happens it is often sustained for a period and it is
+    also possible for a metric to recover slightly and then drop again. In real
+    world situations this could be something like a network partition that
+    happens, everything drops and then it recovers for a very brief period.
+    During that brief recover the metric could receive 10% of it's normal
+    expected data and drop again, thus firing again and again. These drop off
+    cliff events often evolve like this. So the algorithm tuning allows to only
+    check if a metric has dropped off a cliff if it is behaving in an expected
+    manner. To disable the tuning simply set ``MIN_AVERAGE`` and
+    ``MIN_AVERAGE_SECONDS`` to 0 on in :func:`.boundary_algorithms.detect_drop_off_cliff`.
+    The in the :func:`.boundary_algorithms.greater_than` and
+    :func:`.boundary_algorithms.less_than` algorithm contexts set this to 0.
 :param MIN_AVERAGE_SECONDS: the seconds to calculate the minimum average value
     over in :func:`.boundary_algorithms.detect_drop_off_cliff`.  So if
     ``MIN_AVERAGE`` set to 100 and ``MIN_AVERAGE_SECONDS`` to 3600 a metric will
     only be analysed if the average value of the metric over 3600 seconds is
     greater than 100.  For the :func:`.boundary_algorithms.less_than`
     and :func:`.boundary_algorithms.greater_than` algorithms set this
-    to 0.
-:param TRIGGER_VALUE: then less_than or greater_than trigger value set to 0 for
-    :func:`.boundary_algorithms.detect_drop_off_cliff`
+    to 0.  To disable the tuning in :func:`.boundary_algorithms.detect_drop_off_cliff`
+    you can set both ``MIN_AVERAGE`` and ``MIN_AVERAGE_SECONDS`` to 0.
+    The in the :func:`.boundary_algorithms.greater_than` and
+    :func:`.boundary_algorithms.less_than` algorithm contexts set this to 0.
+:param TRIGGER_VALUE: the less_than or greater_than trigger value.  Set this to
+    0 for :func:`.boundary_algorithms.detect_drop_off_cliff`
 :param ALERT_THRESHOLD: alert after detected x times.  This allows you to set
     how many times a timeseries has to be detected by the algorithm as anomalous
     before alerting on it.  The nature of distributed metric collection, storage
@@ -3493,7 +3649,7 @@ LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT = 3
 """
 
 """
-Docker settings
+Docker settings - DEPRECATED
 """
 
 DOCKER = False
@@ -3537,7 +3693,13 @@ FLUX_PORT = 8000
 
 FLUX_WORKERS = 1
 """
-:var FLUX_WORKERS: The number of gunicorn flux workers
+:var FLUX_WORKERS: The number of gunicorn flux workers.  There are 2 processes
+    spawned per gunicorn process, FLUX_WORKERS = 1 will result in two active
+    flux workers and one primary workers which manages counts and flux worker
+    sets, one active flux aggregator and x standby aggregator processes.
+    FLUX_WORKERS = 2 will result in 4 active flux workers again with one primary
+    worker for flux worker set management, etc.  Should the primary worker or
+    aggregator die one of the other processes will become the primary.
 :vartype FLUX_WORKERS: int
 """
 
@@ -3624,7 +3786,7 @@ FLUX_CHECK_LAST_TIMESTAMP = True
 :vartype FLUX_CHECK_LAST_TIMESTAMP: boolean
 """
 
-FLUX_SEND_TO_CARBON = False
+FLUX_SEND_TO_CARBON = True
 """
 :var FLUX_SEND_TO_CARBON: Whether to send metrics recieved by flux to
     Graphite.
@@ -3743,7 +3905,14 @@ FLUX_LAST_KNOWN_VALUE_NAMESPACES = []
 
 """
 
-FLUX_AGGREGATE_NAMESPACES = {}
+FLUX_AGGREGATE_NAMESPACES = {
+    'otel.traces': {
+        'method': ['avg'],
+        'interval': 60,
+        'zero_fill': False,
+        'last_known_value': False,
+        'method_suffix': False},
+}
 """
 :var FLUX_AGGREGATE_NAMESPACES: For each namespace or namespace elements
     declared in this dict, flux/listen will send data points received to
@@ -3776,6 +3945,12 @@ metric will have all the method values submitted to a single metric name.
 - **Example**::
 
     FLUX_AGGREGATE_NAMESPACES = {
+        'otel.traces': {
+            'method': ['avg'],
+            'interval': 60,
+            'zero_fill': False,
+            'last_known_value': False,
+            'method_suffix': False},
         'mysite.events.loadtime': {
             'method': ['avg'],
             'interval': 60,
@@ -3829,7 +4004,7 @@ FLUX_SEND_TO_STATSD = False
 :vartype FLUX_SEND_TO_STATSD: boolean
 """
 
-FLUX_STATSD_HOST = None
+FLUX_STATSD_HOST = ''
 """
 :var FLUX_STATSD_HOST: The statsd host that flux should send metrics to if
     FLUX_SEND_TO_STATSD is enabled.
@@ -3841,6 +4016,13 @@ FLUX_STATSD_PORT = 8125
 :var FLUX_STATSD_PORT: The statsd host port that flux should send metrics via
     FLUX_SEND_TO_STATSD is enabled.
 :vartype FLUX_STATSD_PORT: int
+"""
+
+FLUX_OTEL_ENABLED = False
+"""
+:var FLUX_OTEL_ENABLED: EXPERIMENTAL FEATURE.  Whether to accept opentelemetry
+    OTLP traces and convert them into metrics.
+:vartype FLUX_OTEL_ENABLED: boolean
 """
 
 """
@@ -4116,9 +4298,34 @@ LOCAL_EXTERNAL_SETTINGS = {}
 - **Example**::
 
     LOCAL_EXTERNAL_SETTINGS = {
-        "external-test_external_settings": {
-          "skip_metrics": ['skyline-test-external-settings.1.cpu[0-9]'],
-          "override": False,
+        '_global': {
+            'correlate_alerts_only': {
+                'use_key': None,
+                'override': True,
+                'type': 'boolean',
+                'value': True,
+            },
+            'correlate_namespaces_only': {
+                'use_key': 'namespace',
+                'override': False,
+                'type': 'list',
+                'value': None,
+            },
+        },
+        'external-test_external_settings': {
+            'skip_metrics': ['skyline-test-external-settings.1.cpu[0-9]'],
+            'correlation_maps': {
+                'aws.webservers.nginx': [
+                    'aws.euw1.webserver-1.nginx.apm.mainsite.avg_request_timing',
+                    'aws.euw1.webserver-2.nginx.apm.mainsite.avg_request_timing',
+                    'aws.use1.webserver-6.nginx.apm.mainsite.avg_request_timing',
+                    'aws.use1.webserver-8.nginx.apm.mainsite.avg_request_timing',
+                ],
+                'aws.euw1.webservers': [
+                    'aws.euw1.webserver-1', 'aws.euw1.webserver-2',
+                ]
+            },
+            'override': False,
         }
     }
 
@@ -4167,4 +4374,37 @@ PROMETHEUS_SETTINGS = {}
         }
     }
 
+"""
+
+"""
+opentelemetry settings - EXPERIMENTAL and for DEVELOPMENT
+"""
+
+OTEL_ENABLED = False
+"""
+:var OTEL_ENABLED: EXPERIMENTAL FEATURE.  Whether to enabled opentelemetry
+    traces on Skyline apps.
+:vartype OTEL_ENABLED: boolean
+"""
+
+OTEL_JAEGEREXPORTER_AGENT_HOST_NAME = '127.0.0.1'
+"""
+:var OTEL_JAEGEREXPORTER_AGENT_HOST_NAME: EXPERIMENTAL FEATURE.  The IP address
+    or FQDN of Jaeger (or an opentelemetry collector - otelcol).
+:vartype OTEL_JAEGEREXPORTER_AGENT_HOST_NAME: str
+"""
+
+OTEL_JAEGEREXPORTER_AGENT_PORT = 26831
+"""
+:var OTEL_JAEGEREXPORTER_AGENT_PORT: EXPERIMENTAL FEATURE.  The port for Jaeger
+    or an opentelemetry collector (otelcol).
+:vartype OTEL_JAEGEREXPORTER_AGENT_HOST_NAME: int
+"""
+
+WEBAPP_SERVE_JAEGER = False
+"""
+:var WEBAPP_SERVE_JAEGER: Whether to serve Jaeger via the webapp.  This requires
+    nginx configuration, see:
+    https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example
+:vartype WEBAPP_SERVE_JAEGER: boolean
 """

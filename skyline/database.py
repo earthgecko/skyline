@@ -7,6 +7,16 @@ from sqlalchemy.dialects.mysql import DOUBLE, FLOAT, TINYINT, VARCHAR, SMALLINT
 
 import settings
 
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+OTEL_ENABLED = True
+try:
+    OTEL_ENABLED = settings.OTEL_ENABLED
+except AttributeError:
+    OTEL_ENABLED = False
+except Exception as err:
+    OTEL_ENABLED = False
+
 
 def get_engine(current_skyline_app):
     '''
@@ -17,11 +27,25 @@ def get_engine(current_skyline_app):
     # work
     '''
     try:
+
+        # @added 20220405 - Task #4514: Integrate opentelemetry
+        #                   Feature #4516: flux - opentelemetry traces
+        if OTEL_ENABLED and current_skyline_app == 'webapp':
+            from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
         engine = create_engine(
             'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (
                 settings.PANORAMA_DBUSER, settings.PANORAMA_DBUSERPASS,
                 settings.PANORAMA_DBHOST, str(settings.PANORAMA_DBPORT),
                 settings.PANORAMA_DATABASE))
+
+        # @added 20220405 - Task #4514: Integrate opentelemetry
+        #                   Feature #4516: flux - opentelemetry traces
+        if OTEL_ENABLED and current_skyline_app == 'webapp':
+            SQLAlchemyInstrumentor().instrument(
+                engine=engine,
+            )
+
         return engine, 'got MySQL engine', 'none'
     except:
         trace = traceback.format_exc()
