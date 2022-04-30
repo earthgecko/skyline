@@ -21,6 +21,9 @@ The Ionosphere echo analysis is run between the normal Mirage features profiles
 analysis and the layers analysis, so the analysis pipeline with Ionosphere echo
 enabled is as follows:
 
+- Ionosphere finding similar matching motifs for existing
+  ``SECOND_ORDER_RESOLUTION_SECONDS`` features profiles time series and
+  :mod:`settings.FULL_DURATION` features profiles
 - Ionosphere comparison to Mirage ``SECOND_ORDER_RESOLUTION_SECONDS`` features
   profiles and minmax scaled features profiles
 - Ionosphere echo comparison to Mirage :mod:`settings.FULL_DURATION` features

@@ -3,7 +3,7 @@ Getting data into Skyline
 =========================
 
 Firstly a note on time snyc
-===========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Although it may seems obvious, it is important to note that any metrics
 coming into Graphite and Skyline should come from synchronised sources.
@@ -15,7 +15,7 @@ algorithms. In terms of machine related metrics, normal production grade
 time synchronisation will suffice.
 
 Secondly a note on the reliability of metric data
-=================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are many ways to get data to Graphite and Skyline, however some are better
 than others.  The first and most important point is that your metric pipeline
@@ -34,13 +34,13 @@ your metric pipeline is fully TCP transported.  statsd now has a TCP listener,
 there is telegraf, sensu, etc there are lots of options.
 
 Now getting the data in
-=======================
+~~~~~~~~~~~~~~~~~~~~~~~
 
 You currently have a number of options to get data into Skyline, via the
 Horizon, Vista and Flux services and via file upload:
 
 Horizon - TCP pickles
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 Horizon was designed to support a stream of pickles from the Graphite
 carbon-relay service, over port 2024 by default. Carbon relay is a
@@ -101,7 +101,7 @@ pack and pickle your data correctly (you'll need to look at the source
 code for the exact protocol), you'll be able to stream to this listener.
 
 Horizon - UDP messagepack
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 Generally do not use this.  It is UDP, but has not been removed.
 
@@ -113,8 +113,14 @@ as messagepack and send them on their way.
 However a quick note, on the transport any metrics data over UDP....
 sorry if did you not get that.
 
+Telegraf
+========
+
+Skyline Flux can ingest data from the influxdata Telegraf collector, see Flux
+below, see the `Flux <flux.html>`__ page
+
 Flux
-~~~~
+====
 
 Metrics can be submitted to Flux via HTTP/S which feeds Graphite with pickles to
 Skyline, see the `Flux <flux.html>`__ page.
@@ -125,7 +131,7 @@ upload_data to Flux
 See the `upload_data to Flux <upload-data-to-flux.html>`__ page.
 
 Vista
-~~~~~
+=====
 
 Metrics to be fetched by Vista which submits to Flux, see the
 `Vista <vista.html>`__ page.

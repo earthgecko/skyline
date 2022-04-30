@@ -8,7 +8,7 @@ alert settings.  This is due to the two classes of alerts being different,
 with Analyzer, Mirage and Ionosphere alerts being related to anomalies and
 Boundary alerts being related to breaches of the static and dynamic thresholds
 defined for Boundary metrics.  Further to this there are alert related settings
-for each alert output route, namely smtp, slack, pagerduty and sms.
+for each alert output route, namely smtp, slack, pagerduty, http and sms.
 
 Required smtp alerter for Analyzer and Mirage metrics
 =====================================================
@@ -24,15 +24,17 @@ analysis of metrics that have no alerts configured for them makes no sense as no
 one wants to know.  Therefore only metrics in namespaces that are defined with a
 stmp alerter in :mod:`settings.ALERTS` get analysed by Mirage and Ionosphere.
 It is via the smtp alert tuple that metrics get configured to be Mirage metrics
-by declaring the SECOND_ORDER_RESOLUTION_HOURS in the tuple.
+by declaring the ``SECOND_ORDER_RESOLUTION_HOURS`` in the tuple.
 
-However if you do not want to be SMTP alerted, you can set the
-:mod:`settings.SMTP_OPTS` to `'no_email'` as shown in an example below, but you
-must still declare the namespace with a SMTP alert tuple in
+However if you do not want emails from the SMTP alerts, you can set the
+:mod:`settings.SMTP_OPTS` to ``'no_email'`` as shown in an example below, but you
+still **must declare** the namespace with a SMTP alert tuple in
 :mod:`settings.ALERTS`
 
-The following example, we want to alert via Slack, your :mod:`settings.ALERTS`
-and :mod:`settings.SMTP_OPTS` would need to look like this.
+The following example, we want to alert via Slack only and not receive email
+alerts, your :mod:`settings.ALERTS` and :mod:`settings.SMTP_OPTS` would need to
+look like this.  It is important to note that all smtp alerts **must** be
+defined before other alerts, e.g. slack.
 
 .. code-block:: python
 
@@ -97,7 +99,7 @@ Alert settings
 ==============
 
 For each 3rd party alert service e.g. Slack, PagerDuty, http_alerters, there is
-a setting to enable the specific alerter which must be set to `True` to enable
+a setting to enable the specific alerter which must be set to ``True`` to enable
 the alerter:
 
 - :mod:`settings.SYSLOG_ENABLED`
@@ -109,8 +111,8 @@ the alerter:
 
 Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:
 
-- :mod:`settings.ENABLE_ALERTS` - must be set to `True` to enable alerting
-- :mod:`settings.ENABLE_FULL_DURATION_ALERTS` - should be set to `False` if
+- :mod:`settings.ENABLE_ALERTS` - must be set to ``True`` to enable alerting
+- :mod:`settings.ENABLE_FULL_DURATION_ALERTS` - should be set to ``False`` if
   enable Mirage is enabled.  If this is set to ``True`` Analyzer will alert
   on all checks sent to Mirage, even if Mirage does not find them anomalous,
   this is mainly for testing.
@@ -123,9 +125,9 @@ Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:
 - :mod:`settings.SYSLOG_OPTS` - can be used to change syslog settings
 - :mod:`settings.HTTP_ALERTERS_OPTS` - must be defined if you want to push
   alerts to a http endpoint
-- :mod:`settings.MIRAGE_ENABLE_ALERTS` - must be set to `True` to enable alerts
+- :mod:`settings.MIRAGE_ENABLE_ALERTS` - must be set to ``True`` to enable alerts
   from Mirage
-- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` - must be set to `True` if you want
+- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` - must be set to ``True`` if you want
   to send alerts via SMS.  boto3 also needs to be set up and AWS/IAM resource
   that boto3 uses needs permissions to publish to AWS SNS.  See boto3
   documentation - https://github.com/boto/boto3)
@@ -134,7 +136,7 @@ Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:
 
 Boundary related alert settings (static and dynamic thresholds) are:
 
-- :mod:`settings.BOUNDARY_ENABLE_ALERTS` - must be set to `True` to enable
+- :mod:`settings.BOUNDARY_ENABLE_ALERTS` - must be set to ``True`` to enable
   alerting
 - :mod:`settings.BOUNDARY_METRICS` - must be defined to enable checks and alerts
   for Boundary
@@ -149,7 +151,7 @@ Boundary related alert settings (static and dynamic thresholds) are:
   Slack
 - :mod:`settings.BOUNDARY_HTTP_ALERTERS_OPTS` - must be defined if you want to
   push alerts to a http endpoint
-- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` - must be set to `True` if you want
+- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` - must be set to ``True`` if you want
   to send alerts via SMS.  boto3 also needs to be set up and AWS/IAM resource
   that boto3 uses needs permissions to publish to AWS SNS.  See boto3
   documentation - https://github.com/boto/boto3)
