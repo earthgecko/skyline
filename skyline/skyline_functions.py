@@ -77,6 +77,19 @@ try:
 except:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
 
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+OTEL_ENABLED = False
+try:
+    OTEL_ENABLED = settings.OTEL_ENABLED
+except AttributeError:
+    OTEL_ENABLED = False
+except:
+    OTEL_ENABLED = False
+if OTEL_ENABLED:
+    # from opentelemetry import trace
+    from opentelemetry.instrumentation.redis import RedisInstrumentor
+
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
           'host': settings.PANORAMA_DBHOST,
@@ -102,6 +115,12 @@ def get_redis_conn(current_skyline_app):
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20220405 - Task #4514: Integrate opentelemetry
+    #                   Feature #4516: flux - opentelemetry traces
+    # Instrument redis
+    if current_skyline_app == 'webapp':
+        RedisInstrumentor().instrument()
+
     REDIS_CONN = None
     try:
         if settings.REDIS_PASSWORD:
@@ -110,8 +129,8 @@ def get_redis_conn(current_skyline_app):
                 unix_socket_path=settings.REDIS_SOCKET_PATH)
         else:
             REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-    except:
-        from redis import StrictRedis
+    except Exception as err:
+        current_logger.error('error :: %s - get_redis_conn failed - %s' % (current_skyline_app, err))
     if not REDIS_CONN:
         try:
             if settings.REDIS_PASSWORD:
@@ -122,7 +141,7 @@ def get_redis_conn(current_skyline_app):
                 REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         except:
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s - redis connection failed' % current_skyline_app)
+            current_logger.error('error :: %s - get_redis_conn failed' % current_skyline_app)
             return None
     return REDIS_CONN
 
@@ -146,6 +165,12 @@ def get_redis_conn_decoded(current_skyline_app):
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20220405 - Task #4514: Integrate opentelemetry
+    #                   Feature #4516: flux - opentelemetry traces
+    # Instrument redis
+    if current_skyline_app == 'webapp':
+        RedisInstrumentor().instrument()
+
     REDIS_CONN_DECODED = None
     try:
         if settings.REDIS_PASSWORD:
@@ -165,8 +190,8 @@ def get_redis_conn_decoded(current_skyline_app):
                 REDIS_CONN_DECODED = StrictRedis(
                     unix_socket_path=settings.REDIS_SOCKET_PATH,
                     charset='utf-8', decode_responses=True)
-    except:
-        from redis import StrictRedis
+    except Exception as err:
+        current_logger.error('error :: %s - get_redis_conn_decoded failed - %s' % (current_skyline_app, err))
     if not REDIS_CONN_DECODED:
         try:
             if settings.REDIS_PASSWORD:
@@ -188,7 +213,7 @@ def get_redis_conn_decoded(current_skyline_app):
                         charset='utf-8', decode_responses=True)
         except:
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s - redis decoded connection failed' % current_skyline_app)
+            current_logger.error('error :: %s - get_redis_conn_decoded failed' % current_skyline_app)
             return None
     return REDIS_CONN_DECODED
 
@@ -289,7 +314,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
     return False
 
 
-def mkdir_p(path):
+def mkdir_p(make_path):
     """
     Create nested directories.
 
@@ -298,16 +323,16 @@ def mkdir_p(path):
     :return: returns True
 
     """
+    # try:
+    #     os.getpid()
+    # except:
+    #     import os
     try:
-        os.getpid()
-    except:
-        import os
-    try:
-        os.makedirs(path, mode=0o755)
+        os.makedirs(make_path, mode=0o755)
         return True
     # Python >2.5
     except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
+        if exc.errno == errno.EEXIST and os.path.isdir(make_path):
             pass
         else:
             raise
@@ -568,14 +593,14 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
         current_logger.error(traceback.format_exc())
         msg = 'failed to move check file to -%s' % failed_check_file
         current_logger.error('error :: %s' % msg)
-        pass
 
     return False
 
 
+# @modified 20220419 -
 def get_graphite_metric(
     current_skyline_app, metric, from_timestamp, until_timestamp, data_type,
-        output_object):
+        output_object, check_for_derivative=True):
     """
     Fetch data from graphite and return it as object or save it as file
 
@@ -586,12 +611,15 @@ def get_graphite_metric(
     :param data_type: image, json or list
     :param output_object: object or path and filename to save data as, if set to
                           object, the object is returned
+    :param check_for_derivative: check if the metric is a derivative and apply
+        the nonNegativeDerivative Graphite function if it is
     :type current_skyline_app: str
     :type metric: str
     :type from_timestamp: str
     :type until_timestamp: str
     :type data_type: str
     :type output_object: str
+    :type check_for_derivative: boolean
     :return: timeseries string, ``True``, ``False``
     :rtype: str or boolean
 
@@ -621,6 +649,11 @@ def get_graphite_metric(
         re
     except:
         import re
+
+    # @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+    from functions.metrics.last_known_value_metrics_list import last_known_value_metrics_list
+    from functions.metrics.zero_fill_metrics_list import zero_fill_metrics_list
 
     # @added 20191025 - Task #3290: Handle urllib2 in py3
     #                   Branch #3262: py3
@@ -752,8 +785,40 @@ def get_graphite_metric(
                         current_logger.info('get_graphite_metric :: %s found in derivative_metrics in Redis at %s on port %s' % (redis_metric_name, str(redis_ip), str(redis_port)))
 
     target_metric = metric
+
+    # @added 20220419 - Feature #4528: metrics_manager - derivative_metric_check
+    #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    if not check_for_derivative:
+        known_derivative_metric = False
+
     if known_derivative_metric:
         target_metric = 'nonNegativeDerivative(%s)' % str(metric)
+
+    # @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+    last_known_value_metrics = []
+    try:
+        last_known_value_metrics = last_known_value_metrics_list(current_skyline_app)
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: get_graphite_metric :: last_known_value_metrics_list failed - %s' % err)
+    zero_fill_metrics = []
+    try:
+        zero_fill_metrics = zero_fill_metrics_list(current_skyline_app)
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: get_graphite_metric :: zero_fill_metrics_list failed - %s' % err)
+    # Do not zero fill derivative metrics, if the use has defined a metric as a
+    # zero fill metric and it is a derivative metric do not break the metric
+    # by applying zero filling, rather correct it and apply last_known_value
+    if metric in zero_fill_metrics:
+        if not known_derivative_metric:
+            target_metric = 'transformNull(%s,0)' % str(target_metric)
+        else:
+            # Fix the badly defined metric
+            target_metric = 'keepLastValue(%s)' % str(target_metric)
+    if metric in last_known_value_metrics:
+        target_metric = 'keepLastValue(%s)' % str(target_metric)
 
     # graphite URL
     graphite_port = '80'
@@ -772,7 +837,7 @@ def get_graphite_metric(
     # @modified 20201125 - Feature #3850: webapp - yhat_values API endoint
     # Added list as data_type
     # if data_type == 'json':
-    if data_type == 'json' or data_type == 'list':
+    if data_type in ['json', 'list']:
         url = image_url + '&format=json'
     else:
         url = image_url + '&format=' + output_format
@@ -986,6 +1051,25 @@ def get_graphite_metric(
                 continue
 
         if output_object != 'object':
+
+            # @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+            #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+            # Add the mkdir_p function to mimic self.surface_graphite_metric_data
+            # in mirage so that the same function can be used for all graphite
+            # requests
+            output_object_path = os.path.dirname(output_object)
+            if not os.path.isdir(output_object_path):
+                try:
+                    mkdir_p(output_object_path)
+                    current_logger.info(
+                        'output_object_path - %s' % str(output_object_path))
+                except Exception as err:
+                    current_logger.error(traceback.format_exc())
+                    current_logger.error(
+                        'error :: failed to create output_object_path - %s - %s' %
+                        str(output_object_path))
+                    return False
+
             with open(output_object, 'w') as f:
                 f.write(json.dumps(converted))
             if python_version == 2:
@@ -1486,6 +1570,12 @@ def get_memcache_metric_object(current_skyline_app, base_name):
 
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # @added 20220405 - Task #4514: Integrate opentelemetry
+    #                   Feature #4516: flux - opentelemetry traces
+    if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
+        from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
+        PymemcacheInstrumentor().instrument()
 
     if settings.MEMCACHE_ENABLED:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
