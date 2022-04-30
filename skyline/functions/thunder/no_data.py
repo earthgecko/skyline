@@ -76,9 +76,23 @@ def thunder_no_data(current_skyline_app, log=True):
         current_logger.error('error :: %s :: failed to get Redis key %s - %s' % (
             function_str, remove_namespace_key, e))
     if remove_namespace:
+
+        # @added 20220222 -Branch #1444: thunder
+        # Use the specified TTL for expiry
+        remove_namespace_expiry = 3600
+        try:
+            remove_namespace_expiry = redis_conn_decoded.ttl(remove_namespace_key)
+        except Exception as err:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: failed to get Redis key TTL %s - %s' % (
+                function_str, remove_namespace_key, err))
+
         if log:
-            current_logger.info('%s :: for removal of no_data on namespace %s requested' % (
-                function_str, remove_namespace))
+            current_logger.info('%s :: for removal of no_data on namespace %s requested with expiry of %s' % (
+                function_str, remove_namespace, str(remove_namespace_expiry)))
         try:
             redis_conn_decoded.delete(remove_namespace_key)
         except Exception as e:
@@ -108,8 +122,9 @@ def thunder_no_data(current_skyline_app, log=True):
         if len(metrics_removed_from_key) > 0:
             level = 'notice'
             event_type = 'no_data'
-            message = '%s - %s - was removed from the no_data check' % (
-                level, remove_namespace)
+            message = '%s - %s - was removed from the no_data check and silenced for %s seconds' % (
+                level, remove_namespace, str(remove_namespace_expiry))
+            add_to_body = 'and silenced for %s seconds' % str(remove_namespace_expiry)
             status = 'removed'
             thunder_event = {
                 'level': level,
@@ -128,21 +143,57 @@ def thunder_no_data(current_skyline_app, log=True):
                     'total_stale_metrics': 0,
                     'total_metrics': len(metrics_removed_from_key),
                     'status': status,
+                    'add_to_body': add_to_body,
                 },
             }
-            submitted = False
+
+            # @added 20220222 -Branch #1444: thunder
+            # Check key made with TTL
+            silence_namespace_key = 'thunder.no_data.silence.%s' % remove_namespace
+            silence_namespace_key_exists = False
             try:
-                submitted = thunder_send_event(current_skyline_app, thunder_event, log=True)
+                silence_namespace_key_exists = redis_conn_decoded.get(silence_namespace_key)
+                if silence_namespace_key_exists and log:
+                    current_logger.info('%s :: %s key exists' % (
+                        function_str, silence_namespace_key))
             except Exception as e:
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
                     current_logger = logging.getLogger(current_skyline_app_logger)
-                current_logger.error('error :: %s :: error encountered with thunder_send_event - %s' % (
-                    function_str, e))
-            if submitted:
-                if log:
-                    current_logger.info('%s :: send thunder event for removal of no_data on namespace %s' % (
-                        function_str, remove_namespace))
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: failed to get Redis key %s - %s' % (
+                    function_str, silence_namespace_key, e))
+
+            submitted = False
+            if not silence_namespace_key_exists:
+                try:
+                    submitted = thunder_send_event(current_skyline_app, thunder_event, log=True)
+                except Exception as e:
+                    if not log:
+                        current_skyline_app_logger = current_skyline_app + 'Log'
+                        current_logger = logging.getLogger(current_skyline_app_logger)
+                    current_logger.error('error :: %s :: error encountered with thunder_send_event - %s' % (
+                        function_str, e))
+                if submitted:
+                    if log:
+                        current_logger.info('%s :: send thunder event for removal of no_data on namespace %s' % (
+                            function_str, remove_namespace))
+
+                # @added 20220222 -Branch #1444: thunder
+                # Create silence no_data alert key made with TTL
+                try:
+                    redis_conn_decoded.setex(silence_namespace_key, remove_namespace_expiry, int(time()))
+                    if log:
+                        current_logger.info('%s :: created %s Redis key with a TTL of %s' % (
+                            function_str, silence_namespace_key, str(remove_namespace_expiry)))
+                except Exception as err:
+                    if not log:
+                        current_skyline_app_logger = current_skyline_app + 'Log'
+                        current_logger = logging.getLogger(current_skyline_app_logger)
+                    current_logger.error(traceback.format_exc())
+                    current_logger.error('error :: %s :: failed to setex Redis key %s - %s' % (
+                        function_str, silence_namespace_key, err))
+
             # Update with the new data
             metrics_last_timestamp_dict = {}
             try:
@@ -511,18 +562,37 @@ def thunder_no_data(current_skyline_app, log=True):
                     'status': status,
                 },
             }
-            submitted = False
+
+            # @added 20220222 -Branch #1444: thunder
+            # Check key made with TTL
+            silence_namespace_key = 'thunder.no_data.silence.%s' % parent_namespace
+            silence_namespace_key_exists = False
             try:
-                submitted = thunder_send_event(current_skyline_app, thunder_event, log=True)
+                silence_namespace_key_exists = redis_conn_decoded.get(silence_namespace_key)
+                if silence_namespace_key_exists and log:
+                    current_logger.info('%s :: %s key exists' % (
+                        function_str, silence_namespace_key))
             except Exception as e:
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
                     current_logger = logging.getLogger(current_skyline_app_logger)
-                current_logger.error('error :: %s :: error encounterd with thunder_send_event - %s' % (
-                    function_str, e))
-            if submitted:
-                if log:
-                    current_logger.info('%s :: send thunder event for no_data on namespace %s' % (
-                        function_str, parent_namespace))
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: failed to get Redis key %s - %s' % (
+                    function_str, silence_namespace_key, e))
+
+            if not silence_namespace_key_exists:
+                submitted = False
+                try:
+                    submitted = thunder_send_event(current_skyline_app, thunder_event, log=True)
+                except Exception as e:
+                    if not log:
+                        current_skyline_app_logger = current_skyline_app + 'Log'
+                        current_logger = logging.getLogger(current_skyline_app_logger)
+                    current_logger.error('error :: %s :: error encounterd with thunder_send_event - %s' % (
+                        function_str, e))
+                if submitted:
+                    if log:
+                        current_logger.info('%s :: send thunder event for no_data on namespace %s' % (
+                            function_str, parent_namespace))
 
     return namespaces_no_data_dict

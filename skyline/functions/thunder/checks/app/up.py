@@ -39,6 +39,56 @@ def thunder_check_app(self, check_app):
     success = True
     event_type = 'up'
 
+    # @added 20220414 - Branch #1444: thunder
+    # Only check optional apps if enabled or have been running based on best
+    # efforts by checking relevant settings or Redis resources that are expected
+    # to exist for an app and do not expire.
+    do_not_check = False
+    if check_app == 'analyzer_batch':
+        if not settings.BATCH_PROCESSING and not settings.BATCH_PROCESSING_NAMESPACES:
+            do_not_check = True
+    if check_app.startswith('vista'):
+        if not settings.VISTA_ENABLED:
+            do_not_check = True
+    if check_app == 'mirage':
+        mirage_metrics_count = 0
+        try:
+            mirage_metrics_count = self.redis_conn_decoded.scard('mirage.unique_metrics')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: failed to scard mirage.unique_metrics Redis key - %s' % (
+                function_str, err))
+        if not mirage_metrics_count:
+            do_not_check = True
+    if check_app == 'boundary':
+        if not settings.BOUNDARY_METRICS:
+            do_not_check = True
+    if check_app == 'ionosphere':
+        if not settings.IONOSPHERE_ENABLED:
+            do_not_check = True
+    if check_app == 'luminosity':
+        luminosity_enabled = 1
+        try:
+            luminosity_enabled = self.redis_conn_decoded.exists('luminosity.enabled')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: failed to get luminosity.enabled Redis key - %s' % (
+                function_str, err))
+        if not luminosity_enabled:
+            do_not_check = True
+    if check_app.startswith('flux'):
+        flux_enabled = 1
+        try:
+            flux_enabled = self.redis_conn_decoded.exists('flux.workers.metrics_sent')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: failed to exists flux.workers.metrics_sent Redis key - %s' % (
+                function_str, err))
+        if not flux_enabled:
+            do_not_check = True
+    if do_not_check:
+        return success
+
     # Hit the webapp_up endpoint to update the webapp Redis key
     if check_app == 'webapp':
         try:
@@ -66,7 +116,7 @@ def thunder_check_app(self, check_app):
     if not app_last_timestamp:
         success = False
         send_event = True
-        logger.warn('warning :: %s :: failed to get app_last_timestamp from %s Redis key' % (
+        logger.warning('warning :: %s :: failed to get app_last_timestamp from %s Redis key' % (
             function_str, cache_key))
 
     # Determine what to last known app run timestamp was
@@ -79,7 +129,7 @@ def thunder_check_app(self, check_app):
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error('error :: %s :: failed to get %s Redis key - %s' % (
-            function_str, cache_key, e))
+            function_str, thunder_app_last_timestamp_cache_key, e))
 
     # Determine if a DOWN thunder alert has been sent for the app
     check_down_alert = None
@@ -95,7 +145,7 @@ def thunder_check_app(self, check_app):
 
     # The app has not recovered yet still down, return
     if not app_last_timestamp and check_down_alert:
-        logger.warn('warning :: %s :: %s still down but alert key exists so not alerting' % (
+        logger.warning('warning :: %s :: %s still down but alert key exists so not alerting' % (
             function_str, check_app))
         return False
 
