@@ -7,6 +7,7 @@ from settings import SKYLINE_TMP_DIR
 from skyline_functions import get_redis_conn
 
 
+# @added 20220328 - Feature #4018: thunder - skyline.errors
 class RedisErrorLogHandler(logging.StreamHandler):
     """
     For every error logged add an increment to the app Redis errors key which is
