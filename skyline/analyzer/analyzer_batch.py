@@ -1,10 +1,13 @@
+"""
+analyzer_batch.py
+"""
 from __future__ import division
 import logging
 try:
     from Queue import Empty
 except:
     from queue import Empty
-from time import time, sleep
+from time import time, sleep, strftime, gmtime
 from threading import Thread
 from collections import defaultdict
 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -12,21 +15,23 @@ from collections import defaultdict
 # processes
 # from multiprocessing import Process, Manager, Queue
 from multiprocessing import Process, Queue
-from msgpack import Unpacker
 import os
 from os import kill, getpid
 import traceback
 import re
 from sys import version_info
-import os.path
+from sys import exit as sys_exit
+# import os.path
 from ast import literal_eval
+
+from msgpack import Unpacker
 
 import settings
 from skyline_functions import (
     write_data_to_file, send_anomalous_metric_to, mkdir_p,
     filesafe_metricname,
     # @added 20170602 - Feature #2034: analyse_derivatives
-    nonNegativeDerivative, strictly_increasing_monotonicity, in_list,
+    nonNegativeDerivative, in_list,
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
@@ -35,10 +40,28 @@ from skyline_functions import (
     # @added 20200506 - Feature #3532: Sort all time series
     sort_timeseries)
 
+# @added 20170602 - Feature #2034: analyse_derivatives
+# @modified 20220419 - Feature #4528: metrics_manager - derivative_metric_check
+#                      Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+# Use strictly_increasing_monotonicity shared function
+from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
+
 # @added 20200425 - Feature #3512: matched_or_regexed_in_list function
 #                   Feature #3508: ionosphere_untrainable_metrics
 #                   Feature #3486: analyzer_batch
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+
+# @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+#                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+from functions.metrics.last_known_value_metrics_list import last_known_value_metrics_list
+from functions.metrics.zero_fill_metrics_list import zero_fill_metrics_list
+# @added 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+#                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+from functions.timeseries.full_duration_timeseries_fill import full_duration_timeseries_fill
+# @added 20220421 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+#                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+from functions.metrics.non_derivative_metrics_list import non_derivative_metrics_list
+
 
 # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
 #                      Feature #3480: batch_processing
@@ -199,7 +222,7 @@ class AnalyzerBatch(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            exit(0)
+            sys_exit(0)
 
     def spin_batch_process(self, i, run_timestamp, metric_name, last_analyzed_timestamp, batch=[]):
         """
@@ -217,6 +240,8 @@ class AnalyzerBatch(Thread):
 
         spin_start = time()
         child_batch_process_pid = os.getpid()
+
+        LOCAL_DEBUG = False
 
         metrics_processed = 0
         if not batch:
@@ -254,20 +279,79 @@ class AnalyzerBatch(Thread):
             derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
         except:
             derivative_metrics = []
+
+        # @added 20220323 - Feature #4502: settings - MONOTONIC_METRIC_NAMESPACES
+        always_derivative_metrics = []
+        try:
+            always_derivative_metrics = list(self.redis_conn_decoded.smembers('metrics_manager.always_derivative_metrics'))
+        except Exception as err:
+            logger.error('error :: failed to get metrics_manager.always_derivative_metrics Redis set - %s' % str(err))
+        if always_derivative_metrics:
+            all_derivative_metrics = derivative_metrics + always_derivative_metrics
+            derivative_metrics = list(set(all_derivative_metrics))
+
         try:
             non_derivative_metrics = list(self.redis_conn_decoded.smembers('non_derivative_metrics'))
         except:
             non_derivative_metrics = []
+
+        # @added 20220419 - Feature #4528: metrics_manager - derivative_metric_check
+        #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        longterm_non_derivative_metrics = []
+        try:
+            longterm_non_derivative_metrics_dict = self.redis_conn_decoded.hgetall('metrics_manager.longterm_non_derivative_metrics')
+            longterm_non_derivative_metrics = list(longterm_non_derivative_metrics_dict.keys())
+            non_derivative_metrics = list(set(non_derivative_metrics + longterm_non_derivative_metrics))
+        except Exception as err:
+            logger.error('error :: metrics_manager :: derivative_metric_check :: failed to hgetall metrics_manager.longterm_non_derivative_metrics - %s' % str(err))
+
         try:
             # @modified 20200606 - Bug #3572: Apply list to settings import
             non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
         except:
             non_derivative_monotonic_metrics = []
+
+        # @added 20220421 - Feature #4528: metrics_manager - derivative_metric_check
+        #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        for longterm_non_derivative_metric in longterm_non_derivative_metrics:
+            if longterm_non_derivative_metric.startswith(settings.FULL_NAMESPACE):
+                longterm_non_derivative_base_name = longterm_non_derivative_metric.replace(settings.FULL_NAMESPACE, '', 1)
+            else:
+                longterm_non_derivative_base_name = str(longterm_non_derivative_metric)
+            non_derivative_monotonic_metrics.append(longterm_non_derivative_base_name)
+
         non_smtp_alerter_metrics = []
         try:
             non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
         except:
             non_smtp_alerter_metrics = []
+
+        # @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+        #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+        last_known_value_metrics = []
+        try:
+            last_known_value_metrics = last_known_value_metrics_list(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: last_known_value_metrics_list failed - %s' % err)
+        zero_fill_metrics = []
+        try:
+            zero_fill_metrics = zero_fill_metrics_list(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: zero_fill_metrics_list failed - %s' % err)
+        # @added 20220421 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        user_non_derivative_metrics = []
+        try:
+            user_non_derivative_metrics = non_derivative_metrics_list(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: non_derivative_metrics_list failed - %s' % err)
+        all_non_derivative_metrics = list(set(user_non_derivative_metrics + non_derivative_monotonic_metrics))
+
+        # @added 20220420 - Feature #4530: namespace.analysed_events
+        analysed_metrics = []
 
         for item in metrics:
             metric_name = item[0]
@@ -311,7 +395,7 @@ class AnalyzerBatch(Thread):
                         str(last_analyzed_timestamp)))
 
             if LOCAL_DEBUG:
-                logger.debug('debug :: getting Redis time series data for %s' % (base_name))
+                logger.debug('debug :: getting Redis time series data for %s, last_analyzed_timestamp: %s' % (base_name, str(last_analyzed_timestamp)))
 
             raw_series = None
             # @modified 20200728 - Feature #3480: batch_processing
@@ -341,8 +425,7 @@ class AnalyzerBatch(Thread):
 
                 if batch_mode:
                     continue
-                else:
-                    return
+                return
 
             try:
                 unpacker = Unpacker(use_list=False)
@@ -365,8 +448,17 @@ class AnalyzerBatch(Thread):
             except:
                 pass
 
+            try:
+                first_timeseries_timestamp = timeseries[0][0]
+                last_timeseries_timestamp = [-1][0]
+            except:
+                first_timeseries_timestamp = None
+                last_timeseries_timestamp = None
+
             if LOCAL_DEBUG:
-                logger.debug('debug :: got Redis time series data for %s' % (base_name))
+                logger.debug('debug :: got Redis time series data for %s, from: %s, until: %s' % (
+                    base_name, str(first_timeseries_timestamp),
+                    str(last_timeseries_timestamp)))
 
             # @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
             #                   Feature #3480: batch_processing
@@ -445,6 +537,8 @@ class AnalyzerBatch(Thread):
 
                     logger.info('batch_processing :: doing roomba on %s with %s data points' % (key, str(len(timeseries))))
                     roombaed = True
+                    # Delete the key if it is not a list of tuples and the
+                    # last timestamp is old, e.g. bad data
                     try:
                         if python_version == 2:
                             if not isinstance(timeseries[0], TupleType):
@@ -532,8 +626,7 @@ class AnalyzerBatch(Thread):
                         logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
                     if batch_mode:
                         continue
-                    else:
-                        return
+                    return
 
                 try:
                     unpacker = Unpacker(use_list=False)
@@ -556,6 +649,18 @@ class AnalyzerBatch(Thread):
                     del raw_series
                 except:
                     pass
+
+                try:
+                    first_timeseries_timestamp_after_roomba = timeseries[0][0]
+                    last_timeseries_timestamp_after_roomba = timeseries[-1][0]
+                except:
+                    first_timeseries_timestamp_after_roomba = None
+                    last_timeseries_timestamp_after_roomba = None
+
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: got Redis time series data for %s after roomba, from: %s, until: %s' % (
+                        base_name, str(first_timeseries_timestamp_after_roomba),
+                        str(last_timeseries_timestamp_after_roomba)))
 
             # @added 20211124 - Task #4322: Handle historical batch metrics full duration
             # first_last_duration_timestamp = timeseries[-1][0] - settings.FULL_DURATION
@@ -633,37 +738,40 @@ class AnalyzerBatch(Thread):
                     pass
                 if batch_mode:
                     continue
-                else:
-                    try:
-                        del mirage_unique_metrics
-                    except:
-                        pass
-                    try:
-                        del ionosphere_unique_metrics
-                    except:
-                        pass
-                    try:
-                        del derivative_metrics
-                    except:
-                        pass
-                    try:
-                        del non_derivative_metrics
-                    except:
-                        pass
-                    try:
-                        del non_derivative_monotonic_metrics
-                    except:
-                        pass
-                    try:
-                        del non_smtp_alerter_metrics
-                    except:
-                        pass
-                    return
-            else:
-                last_redis_data_timestamp = timestamps_to_analyse[-1]
-                logger.info('%s timestamps were found to analyze for %s from %s to %s' % (
-                    str(number_of_timestamps_to_analyze), metric_name,
-                    str(last_analyzed_timestamp), str(last_redis_data_timestamp)))
+                try:
+                    del mirage_unique_metrics
+                except:
+                    pass
+                try:
+                    del ionosphere_unique_metrics
+                except:
+                    pass
+                try:
+                    del derivative_metrics
+                except:
+                    pass
+                try:
+                    del non_derivative_metrics
+                except:
+                    pass
+                try:
+                    del non_derivative_monotonic_metrics
+                except:
+                    pass
+                try:
+                    del non_smtp_alerter_metrics
+                except:
+                    pass
+                return
+
+            last_redis_data_timestamp = timestamps_to_analyse[-1]
+            logger.info('%s timestamps were found to analyze for %s from %s to %s' % (
+                str(number_of_timestamps_to_analyze), metric_name,
+                str(last_analyzed_timestamp), str(last_redis_data_timestamp)))
+
+            if LOCAL_DEBUG:
+                logger.debug('debug :: %s - timestamps_to_analyse: %s' % (
+                    base_name, str(timestamps_to_analyse)))
 
             # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
             # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
@@ -679,8 +787,8 @@ class AnalyzerBatch(Thread):
             if settings.IONOSPHERE_ENABLED:
                 run_negatives_present = True
                 try:
-                    known_negative_metric_matched_by = None
                     known_negative_metric, known_negative_metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, KNOWN_NEGATIVE_METRICS)
+                    del known_negative_metric_matched_by
                     if known_negative_metric:
                         run_negatives_present = False
                 except:
@@ -708,6 +816,12 @@ class AnalyzerBatch(Thread):
             if unknown_deriv_status:
                 if metric_name in non_derivative_metrics:
                     unknown_deriv_status = False
+                # @added 20220421 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                if metric_name in all_non_derivative_metrics:
+                    unknown_deriv_status = False
+                if base_name in all_non_derivative_metrics:
+                    unknown_deriv_status = False
 
             # First check if it has its own Redis z.derivative_metric key
             # that has not expired
@@ -727,6 +841,24 @@ class AnalyzerBatch(Thread):
             if last_derivative_metric_key:
                 known_derivative_metric = True
 
+            # @added 20220421 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+            #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+            identified_non_derivative_metric = False
+            if base_name in all_non_derivative_metrics:
+                identified_non_derivative_metric = True
+            if metric_name in all_non_derivative_metrics:
+                identified_non_derivative_metric = True
+            if metric_name in longterm_non_derivative_metrics:
+                identified_non_derivative_metric = True
+            if identified_non_derivative_metric:
+                try:
+                    del derivative_metrics[metric_name]
+                except:
+                    pass
+                unknown_deriv_status = False
+                is_strictly_increasing_monotonically = False
+                known_derivative_metric = False
+
             if unknown_deriv_status:
                 # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
                 # @modified 20200601 - Feature #3480: batch_processing
@@ -745,7 +877,14 @@ class AnalyzerBatch(Thread):
                 is_strictly_increasing_monotonically = False
 
                 if not skip_derivative:
-                    is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+
+                    # @added 20220323 - Feature #4502: settings - MONOTONIC_METRIC_NAMESPACES
+                    if metric_name in always_derivative_metrics:
+                        is_strictly_increasing_monotonically = True
+
+                    if not is_strictly_increasing_monotonically:
+                        is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+
                     if is_strictly_increasing_monotonically:
                         try:
                             last_expire_set = int(time())
@@ -842,6 +981,10 @@ class AnalyzerBatch(Thread):
             except:
                 test_anomaly = False
 
+            if LOCAL_DEBUG:
+                logger.debug('debug :: %s - timeseries sample (last 4): %s' % (
+                    base_name, str(timeseries[-4:])))
+
             # @added 20220113 - Feature #3566: custom_algorithms
             #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
             timestamps_processed = 0
@@ -879,6 +1022,33 @@ class AnalyzerBatch(Thread):
                     except Exception as err:
                         logger.error('error :: nonNegativeDerivative failed - %s' % err)
                         batch_timeseries = []
+
+                # @added 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+                #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+                if base_name in zero_fill_metrics:
+                    if not known_derivative_metric:
+                        try:
+                            timeseries = full_duration_timeseries_fill(self, skyline_app, base_name, timeseries, 'zero')
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: full_duration_timeseries_fill failed - %s' % err)
+                    else:
+                        # Fix the badly defined metric if a metric has been defined
+                        # as a zero_fill metric but is a derivative_metric apply
+                        # last_known_value AFTER nonNegativeDerivative because
+                        # zero filling derivative metrics does not have the desired
+                        # effect
+                        last_known_value_metrics.append(base_name)
+                if base_name in last_known_value_metrics:
+                    try:
+                        timeseries = full_duration_timeseries_fill(self, skyline_app, base_name, timeseries, 'last_known_value')
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: full_duration_timeseries_fill failed - %s' % err)
+
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: %s - batch_timestamp: %s, batch_timeseries sample (last 2): %s' % (
+                        base_name, str(batch_timestamp), str(batch_timeseries[-2:])))
 
                 try:
                     # Allow for testing.  If you want to test a metric and then stop
@@ -940,6 +1110,15 @@ class AnalyzerBatch(Thread):
                     # @modified 20200815 - Feature #3678: SNAB - anomalyScore
                     # Added the number_of_algorithms to calculate anomalyScore from
                     anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
+
+                    # @added 20220420 - Feature #4530: namespace.analysed_events
+                    analysed_metrics.append(base_name)
+
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: %s - anomalous: %s, datapoint: %s, timestamp: %s, ensemble: %s, algorithms_run: %s, len(batch_timeseries): %s' % (
+                            base_name, str(anomalous), str(datapoint),
+                            str(batch_timeseries[-1][0]), str(ensemble),
+                            str(algorithms_run), str(len(batch_timeseries))))
 
                     if anomalous:
                         logger.info('anomalous: %s, ensemble: %s' % (
@@ -1051,6 +1230,11 @@ class AnalyzerBatch(Thread):
                     else:
                         if redis_key_set:
                             not_anomalous_count += 1
+
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: not anomalous :: %s at %s with %s' % (
+                                    base_name, str(int_metric_timestamp), str(datapoint)))
+
                             # @modified 20200728 - Feature #3480: batch_processing
                             #                      Feature #3486: analyzer_batch
                             # Only log on the last data point, not on all
@@ -1528,6 +1712,30 @@ class AnalyzerBatch(Thread):
         for key, value in exceptions.items():
             self.batch_exceptions_q.put((key, value))
 
+        # @added 20220420 - Feature #4530: namespace.analysed_events
+        namespace_analysed = defaultdict(int)
+        for base_name in analysed_metrics:
+            parent_namespace = base_name.split('.')[0]
+            namespace_analysed[parent_namespace] += 1
+        date_string = str(strftime('%Y-%m-%d', gmtime()))
+        namespace_analysed_events_hash = 'namespace.analysed_events.%s.%s' % (skyline_app, date_string)
+        for namespace in list(namespace_analysed.keys()):
+            try:
+                self.redis_conn.hincrby(namespace_analysed_events_hash, namespace, namespace_analysed[namespace])
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to increment %s Redis hash - %s' % (
+                    namespace_analysed_events_hash, err))
+        try:
+            self.redis_conn.expire(namespace_analysed_events_hash, (86400 * 15))
+            logger.info('updated %s Redis hash' % namespace_analysed_events_hash)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to set expire %s Redis hash - %s' % (
+                namespace_analysed_events_hash, err))
+
+        LOCAL_DEBUG = False
+
         spin_end = time() - spin_start
         logger.info('spin_batch_process took %.2f seconds' % spin_end)
         return
@@ -1563,7 +1771,6 @@ class AnalyzerBatch(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -1582,7 +1789,6 @@ class AnalyzerBatch(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -1643,9 +1849,7 @@ class AnalyzerBatch(Thread):
                     logger.error('error :: Analyzer batch cannot connect to get_redis_conn')
                 continue
 
-            """
-            Determine if any metric has been added to process
-            """
+            # Determine if any metric has been added to process
             while True:
 
                 # Report app up
@@ -1675,7 +1879,7 @@ class AnalyzerBatch(Thread):
             metric_name = None
             last_analyzed_timestamp = None
 
-            for index, analyzer_batch in enumerate(analyzer_batch_work):
+            for analyzer_batch in analyzer_batch_work:
                 try:
                     batch_processing_metric = literal_eval(analyzer_batch)
                     metric_name = str(batch_processing_metric[0])
@@ -1695,7 +1899,7 @@ class AnalyzerBatch(Thread):
             # process the item with the oldest timestamp first
             if analyzer_batch_work:
                 unsorted_analyzer_batch_work = []
-                for index, analyzer_batch in enumerate(analyzer_batch_work):
+                for analyzer_batch in analyzer_batch_work:
                     try:
                         batch_processing_metric = literal_eval(analyzer_batch)
                         metric_name = str(batch_processing_metric[0])
@@ -1824,8 +2028,8 @@ class AnalyzerBatch(Thread):
                     p.join()
 
             # Grab data from the queue and populate dictionaries
-            exceptions = dict()
-            anomaly_breakdown = dict()
+            exceptions = {}
+            anomaly_breakdown = {}
             while 1:
                 try:
                     key, value = self.batch_anomaly_breakdown_q.get_nowait()
@@ -1926,12 +2130,28 @@ class AnalyzerBatch(Thread):
             except:
                 pass
             try:
-                with self.batch_exceptions_q.mutex:
-                    self.batch_exceptions_q.queue.clear()
-            except:
-                pass
+                # with self.batch_exceptions_q.mutex:
+                #     self.batch_exceptions_q.queue.clear()
+                logger.info('clearing self.batch_exceptions_q of %s items' % str(self.batch_exceptions_q.qsize()))
+                while not self.batch_exceptions_q.empty():
+                    try:
+                        drop_value = self.batch_exceptions_q.get()
+                        del drop_value
+                    except:
+                        pass
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: clearing self.batch_exceptions_q failed - %s' % err)
             try:
-                with self.batch_anomaly_breakdown_q.mutex:
-                    self.batch_anomaly_breakdown_q.queue.clear()
+                # with self.batch_anomaly_breakdown_q.mutex:
+                #    self.batch_anomaly_breakdown_q.queue.clear()
+                logger.info('clearing self.batch_anomaly_breakdown_q of %s items' % str(self.batch_anomaly_breakdown_q.qsize()))
+                while not self.batch_anomaly_breakdown_q.empty():
+                    try:
+                        drop_value = self.batch_anomaly_breakdown_q.get()
+                        del drop_value
+                    except:
+                        pass
             except:
-                pass
+                logger.error(traceback.format_exc())
+                logger.error('error :: clearing self.batch_anomaly_breakdown_q failed - %s' % err)
