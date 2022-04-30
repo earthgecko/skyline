@@ -37,15 +37,22 @@ if True:
         CONSENSUS,
     )
 
-    # @added 20200603 - Feature #3566: custom_algorithms
+    # @added 20220430 - Feature #4118: crucible - custom_algorithms
+    #                   Feature #3566: custom_algorithms
     try:
-        CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS.copy()
+        from settings import CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS
     except:
-        CUSTOM_ALGORITHMS = None
-    try:
-        DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
-    except:
+        CUSTOM_ALGORITHMS = {}
         DEBUG_CUSTOM_ALGORITHMS = False
+    if CUSTOM_ALGORITHMS:
+        try:
+            from custom_algorithms_to_run import get_custom_algorithms_to_run
+        except:
+            get_custom_algorithms_to_run = None
+        try:
+            from custom_algorithms import run_custom_algorithm_on_timeseries
+        except:
+            run_custom_algorithm_on_timeseries = None
 
     from skyline_functions import write_data_to_file
 
@@ -559,6 +566,29 @@ def run_algorithms(
         check_algorithms = ALGORITHMS
         logger.info('check_algorithms - %s' % (str(check_algorithms)))
 
+    # @added 20220430 - Feature #4118: crucible - custom_algorithms
+    #                   Feature #3566: custom_algorithms
+    custom_algorithms_to_check = []
+    custom_algorithms_to_remove = []
+    for algorithm in check_algorithms:
+        if algorithm not in ALGORITHMS:
+            try:
+                if algorithm in list(CUSTOM_ALGORITHMS.keys()):
+                    custom_algorithms_to_check.append(algorithm)
+                else:
+                    custom_algorithms_to_remove.append(algorithm)
+            except Exception as err:
+                logger.error('error :: failed to check if %s in is in CUSTOM_ALGORITHMS - %s' % (
+                    str(algorithm), err))
+                custom_algorithms_to_remove.append(algorithm)
+    if custom_algorithms_to_remove:
+        logger.warning('warning :: removing unknown custom algorithms - %s' % (
+            str(custom_algorithms_to_remove)))
+        for algorithm in custom_algorithms_to_remove:
+            check_algorithms.remove(algorithm)
+    if custom_algorithms_to_check:
+        logger.info('CUSTOM_ALGORITHMS to check - %s' % str(custom_algorithms_to_check))
+
     logger.info('checking algorithms - %s on %s' % (str(check_algorithms), str(timeseries_file)))
 
     # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
@@ -581,6 +611,11 @@ def run_algorithms(
         logger.info('padded_timeseries - default range set to %s to %s' % (str(default_range), str(timeseries_file)))
 
     for algorithm in check_algorithms:
+
+        # @added 20220430 - Feature #4118: crucible - custom_algorithms
+        #                   Feature #3566: custom_algorithms
+        custom_algorithm_errors = []
+
         detected = ''
         try:
             x_vals = np.arange(len(timeseries))
@@ -597,7 +632,22 @@ def run_algorithms(
             # for index in range(10, len(timeseries)):
             for index in range(default_range, len(timeseries)):
                 sliced = timeseries[:index]
-                anomaly = globals()[algorithm](sliced, end_timestamp, full_duration)
+                # @modified 20220430 - Feature #4118: crucible - custom_algorithms
+                #                      Feature #3566: custom_algorithms
+                anomaly = None
+                if algorithm in ALGORITHMS:
+                    anomaly = globals()[algorithm](sliced, end_timestamp, full_duration)
+
+                if algorithm in custom_algorithms_to_check:
+                    result = None
+                    anomalyScore = None
+                    try:
+                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, os.getpid(), timeseries_name, sliced, algorithm, CUSTOM_ALGORITHMS[algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                        if result:
+                            anomaly = True
+                        del anomalyScore
+                    except Exception as err:
+                        custom_algorithm_errors.append(err)
 
                 # Point out the datapoint if it's anomalous
                 if anomaly:
@@ -628,6 +678,14 @@ def run_algorithms(
             except:
                 logger.error('error :: %s' % (traceback.format_exc()))
                 logger.error('error :: failed to save %s for %s' % (str(results_filename), str(timeseries_file)))
+
+            # @added 20220430 - Feature #4118: crucible - custom_algorithms
+            #                   Feature #3566: custom_algorithms
+            if custom_algorithm_errors:
+                logger.error('error :: %s custom algorithm errors encountered with %s, last error - %s' % (
+                    str(len(custom_algorithm_errors)), str(algorithm),
+                    str(custom_algorithm_errors[-1])))
+
         except:
             logger.error('error :: %s' % (traceback.format_exc()))
             logger.error('error :: error thrown in algorithm running and plotting - %s on %s' % (str(algorithm), str(timeseries_file)))

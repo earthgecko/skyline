@@ -36,9 +36,9 @@ function validate_to_process_submission()
     <span class="icon-bar"></span>
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></span></a></li>
-		  <li class="active"><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></span></a></li>
-		  <li><a href="?crucible_job"><span class="logo"><span class="sky">Crucible</span> <span class="re">job</span></span></span></a></li>
+		  <li><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></a></li>
+		  <li class="active"><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></a></li>
+		  <li><a href="?crucible_job"><span class="logo"><span class="sky">Crucible</span> <span class="re">job</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -58,7 +58,7 @@ function validate_to_process_submission()
     <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">NOT ENABLED ::</span></span> jobs will not be processed</h4>
     {% endif %}
 
-  		  <h4><span class="logo"><span class="sky">Process ::</span> <span class="re">metrics</span></span></span></h4>
+  		  <h4><span class="logo"><span class="sky">Process ::</span> <span class="re">metrics</span></span></h4>
 
   {% if job_submitted %}
 	  <div class="alert alert-success">
@@ -159,9 +159,18 @@ function validate_to_process_submission()
             # Allow the user to pass algorithms to run -->
   		      <tr>
               <td>run_algorithms</td>
-  		        <td><input type="text" name="run_algorithms" value="true" /> a list of comma separated algorithms to run e.g, the default when set to true<br>
+  		        <td><input type="text" name="run_algorithms" value="true" /> a list of comma separated algorithms to run e.g, the default when set to <code>true</code> is <code>settings.ALGORITHMS</code><br>
+              You can also specify custom algorithms in this field as long as they are defined in <code>CUSTOM_ALGORITHMS</code> in settings.py<br>
+              Crucible does not use the <code>namespace</code> or <code>use_with</code> keys in the custom algorithm definition in <code>CUSTOM_ALGORITHMS</code>
+              so custom algortihm/s can be tested with any metric with Crucible.<br>
+              Just be advised that your custom algorithm/s should be as close to O(n) in time complexity as possible. Crucible has a defualt 1800 second timeout and<br>
+              if you throw 10000 data points at crucible with a non O(n) algorithm it is probably going to time out and fail. If you want to use it to test more time complex<br>
+              algorithms, just ensure you use a small/reasonable size data set.<br>
+              Example:<br>
 <code>histogram_bins,first_hour_average,stddev_from_average,grubbs,ks_test,mean_subtraction_cumulation,median_absolute_deviation,stddev_from_moving_average,least_squares</code><br>
-or <code>detect_drop_off_cliff</code> or <code>ks_test,detect_drop_off_cliff</code>, etc</td>
+or <code>detect_drop_off_cliff</code> or <code>ks_test,detect_drop_off_cliff</code>, etc<br>
+With a custom algorithm <code>ks_test,my_cool_algorithm</code><br>
+            </td>
   		      </tr>
   		    </tbody>
   		  </table>
