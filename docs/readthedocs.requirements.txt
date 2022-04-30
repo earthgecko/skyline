@@ -135,7 +135,9 @@ matplotlib==3.5.1
 #pandas==1.2.0
 # @modified 20220422 - Task #4452: Update dependencies
 #pandas==1.3.5
-pandas==1.4.2
+# pandas 1.4.2 not available on readthedocs
+#pandas==1.4.2
+pandas==1.3.5
 # @modified 20211220 - Task #4344: Update dependencies
 #patsy==0.5.1
 patsy==0.5.2
