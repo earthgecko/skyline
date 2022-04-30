@@ -15,6 +15,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     import settings
     from validate_settings import validate_settings_variables
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
     from snab_flux_load_test import SNAB_flux_load_test
 
 skyline_app = 'snab_flux_load_test'

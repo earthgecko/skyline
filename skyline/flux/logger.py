@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 # This prevents flake8 E402 - module level import not at top of file
 if True:
     import settings
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
 
 skyline_app = 'flux'
 skyline_app_logger = '%sLog' % skyline_app
@@ -62,5 +64,14 @@ def set_up_logging(app):
         # logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s')
         # To print only
         # logging.basicConfig(format=format, level=logging.DEBUG)
+
+        # @added 20220328 - Feature #4018: thunder - skyline.errors
+        # For every error logged set a count in the app Redis key which is consumed
+        # by thunder and creates the sskyline.<hostname>.<skyline_app>.logged_errors
+        # metric
+        redis_error_log_handler = RedisErrorLogHandler(skyline_app)
+        redis_error_log_handler.setLevel(logging.ERROR)
+        redis_error_log_handler.setFormatter(formatter)
+        logger.addHandler(redis_error_log_handler)
 
     return logger

@@ -23,6 +23,8 @@ if True:
     import settings
     from panorama import Panorama
     from validate_settings import validate_settings_variables
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
 
 skyline_app = 'panorama'
 skyline_app_logger = skyline_app + 'Log'
@@ -89,6 +91,15 @@ if __name__ == "__main__":
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    # For every error logged set a count in the app Redis key which is consumed
+    # by thunder and creates the sskyline.<hostname>.<skyline_app>.logged_errors
+    # metric
+    redis_error_log_handler = RedisErrorLogHandler(skyline_app)
+    redis_error_log_handler.setLevel(logging.ERROR)
+    redis_error_log_handler.setFormatter(formatter)
+    logger.addHandler(redis_error_log_handler)
 
     # Validate settings variables
     valid_settings = validate_settings_variables(skyline_app)
