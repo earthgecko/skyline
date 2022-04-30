@@ -28,6 +28,8 @@ from skyline_functions import (
     # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     get_redis_conn, get_redis_conn_decoded)
+# @added 20220429 - Feature #4536: Handle Redis failure
+from functions.flux.get_last_metric_data import get_last_metric_data
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'worker'
@@ -251,31 +253,56 @@ class Worker(Process):
                 have_data = False
                 if not delete_set_record:
                     last_flux_metric_data = None
-                    cache_key = 'flux.last.%s' % (metric)
-                    try:
-                        if python_version == 3:
-                            redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('UTF-8')
-                        else:
-                            redis_last_flux_metric_data = self.redis_conn.get(cache_key)
-                        redis_last_flux_metric_data = redis_last_flux_metric_data
-                        last_flux_metric_data = literal_eval(redis_last_flux_metric_data)
-                        if LOCAL_DEBUG:
-                            logger.info('worker :: got last_flux_metric_data from Redis')
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: retrieving Redis key %s data' % str(cache_key))
-                        last_flux_metric_data = False
 
+                    # @added 20220429 - Feature #4536: Handle Redis failure
+                    # Swap to using a Redis hash instead of the
+                    # flux.last.<metric> keys
                     last_flux_timestamp = None
-                    if last_flux_metric_data:
+                    use_old_timestamp_keys = True
+                    redis_last_metric_data_dict = {}
+                    try:
+                        redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
+                    except Exception as err:
+                        logger.error('error :: worker :: get_last_metric_data failed - %s' % (
+                            err))
+                    if redis_last_metric_data_dict:
                         try:
-                            last_flux_timestamp = int(last_flux_metric_data[0])
+                            last_flux_timestamp = redis_last_metric_data_dict['timestamp']
+                            use_old_timestamp_keys = False
+                        except KeyError:
+                            last_flux_timestamp = None
+                        except Exception as err:
+                            logger.error('error :: worker :: failed to get timestamp from - %s - %s' % (
+                                str(redis_last_metric_data_dict), err))
+                            last_flux_timestamp = None
+
+                    # @modified 20220429 - Feature #4536: Handle Redis failure
+                    if use_old_timestamp_keys:
+                        cache_key = 'flux.last.%s' % (metric)
+                        try:
+                            if python_version == 3:
+                                redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('UTF-8')
+                            else:
+                                redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+                            redis_last_flux_metric_data_str = str(redis_last_flux_metric_data)
+                            last_flux_metric_data = literal_eval(redis_last_flux_metric_data_str)
                             if LOCAL_DEBUG:
-                                logger.info('worker :: got last_flux_timestamp - %s' % str(last_flux_timestamp))
+                                logger.info('worker :: got last_flux_metric_data from Redis')
                         except:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: worker :: failed determining last_flux_timestamp')
-                            last_flux_timestamp = False
+                            logger.error('error :: worker :: retrieving Redis key %s data' % str(cache_key))
+                            last_flux_metric_data = False
+
+                        last_flux_timestamp = None
+                        if last_flux_metric_data:
+                            try:
+                                last_flux_timestamp = int(last_flux_metric_data[0])
+                                if LOCAL_DEBUG:
+                                    logger.info('worker :: got last_flux_timestamp - %s' % str(last_flux_timestamp))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: worker :: failed determining last_flux_timestamp')
+                                last_flux_timestamp = False
 
                     # Determine the timestamp of the current minute to apply
                     # VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE
@@ -573,3 +600,11 @@ class Worker(Process):
                     logger.error(traceback.format_exc())
                     logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
                         send_metric_name, str(metrics_sent_to_flux)))
+
+                # @added 20220329 - Feature #4018: thunder - skyline.errors
+                # Report app up
+                try:
+                    self.redis_conn.setex('vista.worker', 120, time_now)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: worker :: could not update the Redis vista.worker key - %s' % err)

@@ -1,54 +1,75 @@
+"""
+webapp.py
+"""
 from __future__ import division
-import redis
-import logging
-import simplejson as json
 import sys
 import re
 import csv
 import traceback
-from msgpack import Unpacker
+import logging
 from functools import wraps
-from flask import (
-    Flask, request, render_template, redirect, Response, abort, flash,
-    send_file, jsonify)
-from daemon import runner
+import os
+import base64
 from os.path import isdir
 from os import path
 import string
 from os import remove as os_remove
 from time import sleep
-
 # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
 from timeit import default_timer as timer
-
 # @added 20160703 - Feature #1464: Webapp Redis browser
 import time
 # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
 # from datetime import datetime, timedelta
 from datetime import timedelta
+# @added 20210415 - Feature #4014: Ionosphere - inference
+from shutil import rmtree
+# For secret_key
+import uuid
+# @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
+# Determine the features profile dir path for a fp_id
+import datetime
+# @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
+import hashlib
+from sys import version_info
+from ast import literal_eval
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Use a gzipped response as the response as raw preprocessed time series
+# added cStringIO, gzip and functools to implement Gzip for particular views
+# http://flask.pocoo.org/snippets/122/
+# from cStringIO import StringIO as IO
+import gzip
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Use a gzipped response as the response as raw preprocessed time series
+# added cStringIO to implement Gzip for particular views
+# http://flask.pocoo.org/snippets/122/
+import io as IO
+import functools
+import os.path
+# @added 20191029 - Task #3302: Handle csv.reader in py3
+#                   Branch #3262: py3
+import codecs
 
-import os
-import base64
+import redis
+import simplejson as json
+from msgpack import Unpacker
+from flask import (
+    Flask, request, render_template, redirect, Response, abort, flash,
+    send_file, jsonify)
+from daemon import runner
 
 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
 # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
 # Roll back change - breaking existing metrics with colons
 # import urllib.parse
 
-# @added 20210415 - Feature #4014: Ionosphere - inference
-from shutil import rmtree
-
 # flask things for rebrow
 # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
 # from flask import session, g, url_for, flash, Markup, json
 from flask import url_for, Markup
 
-# For secret_key
-import uuid
-
 # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
 # Determine the features profile dir path for a fp_id
-import datetime
 # from pytz import timezone
 import pytz
 
@@ -69,10 +90,6 @@ from tsfresh_feature_names import TSFRESH_VERSION
 # import base64
 # @added 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
 import jwt
-# @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
-import hashlib
-from sys import version_info
-from ast import literal_eval
 
 # @added 20180721 - Feature #2464: luminosity_remote_data
 # Use a gzipped response as the response as raw preprocessed time series
@@ -80,26 +97,13 @@ from ast import literal_eval
 # http://flask.pocoo.org/snippets/122/
 from flask import after_this_request
 # from cStringIO import StringIO as IO
-import gzip
-# @added 20180721 - Feature #2464: luminosity_remote_data
-# Use a gzipped response as the response as raw preprocessed time series
-# added cStringIO to implement Gzip for particular views
-# http://flask.pocoo.org/snippets/122/
-import io as IO
-
-import functools
 
 # @modified 20210421 - Task #4030: refactoring
 # from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
-import os.path
 # @added 20190116 - Cross-Site Scripting Security Vulnerability #85
 #                   Bug #2816: Cross-Site Scripting Security Vulnerability
 from flask import escape as flask_escape
-
-# @added 20191029 - Task #3302: Handle csv.reader in py3
-#                   Branch #3262: py3
-import codecs
 
 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
 # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
@@ -294,6 +298,29 @@ if True:
     # @added 20220216 - Feature #4444: webapp - inactive_metrics
     from functions.metrics.get_inactive_metrics import get_inactive_metrics
 
+    # @added 20220224 - Feature #4468: flux - remove_namespace_quota_metrics
+    #                   Feature #4464: flux - quota - cluster_sync
+    from functions.flux.remove_namespace_quota_metrics import remove_namespace_quota_metrics
+
+    # @added 20220317 - Feature #4540: Plot matched timeseries
+    #                   Feature #4014: Ionosphere - inference
+    from functions.ionosphere.get_matched_timeseries import get_matched_timeseries
+    from fp_match_plots import plot_fp_match
+
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+    OTEL_ENABLED = False
+    try:
+        OTEL_ENABLED = settings.OTEL_ENABLED
+    except AttributeError:
+        OTEL_ENABLED = False
+    except Exception as err:
+        OTEL_ENABLED = False
+    if OTEL_ENABLED:
+        from opentelemetry import trace
+        from opentelemetry.instrumentation.flask import FlaskInstrumentor
+        from opentelemetry.instrumentation.redis import RedisInstrumentor
+
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
 try:
@@ -396,6 +423,12 @@ python_version = int(version_info[0])
 #    #                   Branch #3262: py3
 #    # REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+if OTEL_ENABLED:
+    # Instrument redis
+    RedisInstrumentor().instrument()
+
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
 # Added a single functions to deal with Redis connection and the
@@ -406,6 +439,12 @@ REDIS_CONN = get_redis_conn_decoded(skyline_app)
 ENABLE_WEBAPP_DEBUG = False
 
 app = Flask(__name__)
+
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+if OTEL_ENABLED:
+    FlaskInstrumentor().instrument_app(app)
+    tracer = trace.get_tracer(__name__)
 
 # @modified 20190502 - Branch #2646: slack
 # Reduce logging, removed gunicorn
@@ -485,6 +524,14 @@ try:
     luminosity_data_folder = settings.LUMINOSITY_DATA_FOLDER
 except:
     luminosity_data_folder = '/opt/skyline/luminosity'
+
+# @added 20220408 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+WEBAPP_SERVE_JAEGER = False
+try:
+    WEBAPP_SERVE_JAEGER = settings.WEBAPP_SERVE_JAEGER
+except AttributeError:
+    WEBAPP_SERVE_JAEGER = False
 
 
 @app.before_request
@@ -654,7 +701,7 @@ def internal_error(message, traceback_format_exc):
 #    return(resp), 500
     server_name = settings.SERVER_METRICS_NAME
     return render_template(
-        'traceback.html', version=skyline_version,
+        'traceback.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
         message=fail_msg, traceback=trace, bad_machine=server_name), 500
 
 
@@ -666,7 +713,7 @@ def index():
     if 'uh_oh' in request.args:
         try:
             return render_template(
-                'uh_oh.html', version=skyline_version,
+                'uh_oh.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 message="Testing uh_oh"), 200
         except:
             error_string = traceback.format_exc()
@@ -675,7 +722,7 @@ def index():
 
     try:
         return render_template(
-            'now.html', version=skyline_version,
+            'now.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start)), 200
     except:
         error_string = traceback.format_exc()
@@ -718,7 +765,7 @@ def now():
     start = time.time()
     try:
         return render_template(
-            'now.html', version=skyline_version, duration=(time.time() - start)), 200
+            'now.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except:
         error_string = traceback.format_exc()
         logger.error('error :: failed to render now.html: %s' % str(error_string))
@@ -856,6 +903,257 @@ def api():
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
 
+    # @added 20220318 - Feature #4540: Plot matched timeseries
+    #                   Feature #4014: Ionosphere - inference
+    if 'get_matched_timeseries' in request.args:
+        start_get_matched_timeseries = timer()
+        match_id = 0
+        try:
+            match_id = int(request.args.get('match_id', '0'))
+            logger.info('/api?get_matched_timeseries with match_id: %s' % match_id)
+        except Exception as err:
+            logger.error('error :: api get_matched_timeseries - %s' % err)
+            return 'Internal Server Error', 500
+        layers_match_id = 0
+        try:
+            layers_match_id = int(request.args.get('layers_match_id', '0'))
+            logger.info('/api?get_matched_timeseries with layers_match_id: %s' % layers_match_id)
+        except Exception as err:
+            logger.error('error :: api get_matched_timeseries - %s' % err)
+            return 'Internal Server Error', 500
+        plot = False
+        strip_prefix = False
+        try:
+            plot_str = request.args.get('plot', 'false')
+            if plot_str == 'true':
+                plot = True
+                logger.info('/api?get_matched_timeseries with plot: %s' % plot_str)
+                strip_prefix = request.args.get('strip_prefix', 'false')
+                if strip_prefix == 'true':
+                    strip_prefix = True
+        except Exception as err:
+            logger.error('error :: api get_matched_timeseries - %s' % err)
+            return 'Internal Server Error', 500
+
+        try:
+            matched_timeseries = get_matched_timeseries(
+                skyline_app, match_id, layers_match_id)
+        except Exception as err:
+            logger.error('error :: api get_matched_timeseries - %s' % err)
+            return 'Internal Server Error', 500
+
+        if plot:
+            plotted_comparsion_image = None
+            output_file = '%s/%s.%s.macth_plot.png' % (
+                settings.SKYLINE_TMP_DIR, str(matched_timeseries['match']['metric_timestamp']),
+                matched_timeseries['metric'])
+            try:
+                plotted_comparsion_image, plotted_match_comparison_image_file = plot_fp_match(
+                    skyline_app, matched_timeseries['metric'],
+                    matched_timeseries['match']['fp_id'],
+                    [value for ts, value in matched_timeseries['matched_fp_timeseries']],
+                    matched_timeseries['timeseries'], output_file, strip_prefix)
+            except Exception as err:
+                logger.error('error :: api plot_fp_match - %s' % err)
+                return 'Internal Server Error', 500
+            if plotted_comparsion_image:
+                redirect_url = '%s/ionosphere_images?image=%s' % (
+                    settings.SKYLINE_URL, str(plotted_match_comparison_image_file))
+                logger.info('returning redirect to image url - %s' % str(redirect_url))
+                return redirect(redirect_url, code=302)
+
+        end_get_matched_timeseries = timer()
+        get_matched_timeseries_time = (end_get_matched_timeseries - start_get_matched_timeseries)
+        if not matched_timeseries:
+            data_dict = {"status": {"request_time": get_matched_timeseries_time, "response": 404}, "data": matched_timeseries}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"request_time": get_matched_timeseries_time, "response": 200}, "data": matched_timeseries}
+        return jsonify(data_dict), 200
+
+    # @added 20220301 - Feature #4482: Test alerts
+    if 'test_alert' in request.args:
+        start_test_alert = timer()
+        metric = None
+        try:
+            metric = request.args.get('metric')
+            logger.info('/api?test_alert with metric: %s' % metric)
+        except Exception as err:
+            logger.error('error :: api test_alert request no metric argument - %s' % err)
+            return 'Bad Request', 400
+        alerter_app = None
+        try:
+            alerter_app = request.args.get('app')
+            logger.info('/api?test_alert with app: %s' % alerter_app)
+        except Exception as err:
+            logger.error('error :: api test_alert request no app argument - %s' % err)
+            return 'Bad Request', 400
+        alerter = None
+        try:
+            alerter = request.args.get('alerter')
+            logger.info('/api?test_alert with alerter: %s' % alerter)
+        except Exception as err:
+            logger.error('error :: api test_alert request no alerter argument - %s' % err)
+            return 'Bad Request', 400
+        alerter_id = 0
+        try:
+            alerter_id_str = request.args.get('alerter_id', 0)
+            if alerter_id_str:
+                alerter_id = int(alerter_id_str)
+                logger.info('/api?test_alert with alerter_id: %s' % str(alerter_id))
+        except Exception as err:
+            logger.error('error :: api test_alert error - %s' % err)
+            return 'Bad Request', 400
+        test_alert_added = False
+        trigger_anomaly = False
+        try:
+            trigger_anomaly_str = request.args.get('trigger_anomaly', 'false')
+            if trigger_anomaly_str == 'true':
+                trigger_anomaly = True
+                logger.info('/api?test_alert with trigger_anomaly: %s' % str(trigger_anomaly_str))
+        except Exception as err:
+            logger.error('error :: api test_alert error - %s' % err)
+            return 'Bad Request', 400
+        # @added 20220315 - Feature #4482: Test alerts
+        # Allow for full testing with the injection of an anomaly on a
+        # metric
+        if trigger_anomaly:
+            if alerter_app != 'mirage':
+                trigger_anomaly = False
+                logger.info('/api?test_alert trigger_anomaly set to False only available for Mirage')
+        if trigger_anomaly:
+            key_data = {
+                'metric': metric, 'alerter': alerter,
+                'alerter_app': alerter_app, 'alerter_id': alerter_id,
+                'trigger_anomaly': trigger_anomaly
+            }
+            try:
+                test_alert_redis_key = '%s.test_alerts' % alerter_app
+                REDIS_CONN.hset(test_alert_redis_key, time.time(), str(key_data))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to save test_alert dict to Redis key - %s' % err)
+                return 'Internal Server Error', 500
+        else:
+            alert_test_file = '%s/%s_alert_test.txt' % (settings.SKYLINE_TMP_DIR, alerter_app)
+            if alerter_id:
+                test_alert_data = '[\'%s\', \'%s\', \'%s\']' % (str(metric), str(alerter), str(alerter_id))
+            else:
+                test_alert_data = '[\'%s\', \'%s\']' % (str(metric), str(alerter))
+            try:
+                write_data_to_file(skyline_app, alert_test_file, 'w', test_alert_data)
+                logger.info('/api?test_alert - created test alert file - %s' % alert_test_file)
+                test_alert_added = True
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to save test alert file - %s' % alert_test_file)
+                return 'Internal Server Error', 500
+        data = {'test alert added': test_alert_added, 'metric': metric, 'app': alerter_app, "alerter": alerter, "trigger_anomaly": trigger_anomaly}
+        if alerter_id:
+            data['id'] = alerter_id
+        end_test_alert = timer()
+        test_alert_time = (end_test_alert - start_test_alert)
+        data_dict = {"status": {"request_time": test_alert_time, "response": 200}, "data": data}
+        return jsonify(data_dict), 200
+
+    # @added 20220223 - Feature #4466: webapp - api - redis_data
+    if 'redis_data' in request.args:
+        allowed_redis_data_keys = [
+            'flux.namespace_metrics',
+            'flux.quota.namespace_metrics', 'aet.analyzer.unique_base_names',
+            'metrics_manager.flux.aggregate_namespaces',
+            # @added 20220302 - Feature #4400: flux - quota
+            'flux.quota.namespace_rejected_metrics',
+        ]
+        start_redis_data = timer()
+        logger.info('/api?redis_data')
+        key = None
+        try:
+            key = request.args.get('key', 'false')
+            if str(key) == 'false':
+                key = None
+        except Exception as err:
+            logger.error('error :: /api?redis_data request failed to query key - %s' % err)
+        if not key:
+            return 'Bad Request', 400
+        key_allowed = False
+        for allowed_redis_data_key in allowed_redis_data_keys:
+            if allowed_redis_data_key in key:
+                key_allowed = True
+                break
+        if not key_allowed:
+            logger.error('error :: /api?redis_data key not allowed - %s' % key)
+            return 'Bad Request', 400
+        key_type = None
+        try:
+            key_type = request.args.get('type', 'false')
+            if key_type not in ['hash', 'set', 'key']:
+                key_type = None
+                logger.error('error :: /api?redis_data type not allowed - %s' % key_type)
+        except Exception as err:
+            logger.error('error :: /api?redis_data request failed to query type - %s' % err)
+        if not key_type:
+            return 'Bad Request', 400
+        data = []
+        if key_type == 'hash':
+            data = {}
+        try:
+            if key_type == 'set':
+                data = list(REDIS_CONN.smembers(key))
+                logger.info('/api?redis_data - got list of length %s from Redis for %s' % (str(len(data)), key))
+            if key_type == 'hash':
+                data = REDIS_CONN.hgetall(key)
+                logger.info('/api?redis_data - got dict of length %s from Redis for %s' % (str(len(data)), key))
+            if key_type == 'key':
+                key_data = REDIS_CONN.get(key)
+                data = [key_data]
+                logger.info('/api?redis_data - got data from Redis for %s' % (key))
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?redis_data - failed - %s' % (
+                err))
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            redis_data_lists = []
+            redis_data_uri = 'redis_data&type=%s&key=%s' % (key_type, key)
+            try:
+                redis_data_lists = get_cluster_data(redis_data_uri, key)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: /api?redis_data could not get redis_data from the remote Skyline instances - %s' % err)
+            if redis_data_lists:
+                try:
+                    if key_type == 'set':
+                        logger.info('/api?redis_data - got list of length %s from a remote Skyline instances' % str(len(redis_data_lists)))
+                        if isinstance(redis_data_lists, list):
+                            all_data = data + redis_data_lists
+                            data = list(set(all_data))
+                        else:
+                            logger.warning('warning :: /api?redis_data - got data from a remote Skyline instance for %s but not a list' % key)
+                    if key_type == 'hash':
+                        logger.info('/api?redis_data - got list of dicts of length %s from a remote Skyline instance' % str(len(redis_data_lists)))
+                        for data_dict in redis_data_lists:
+                            for hash_key in list(data_dict.keys()):
+                                data[hash_key] = data_dict[hash_key]
+                    if key_type == 'key':
+                        logger.info('/api?redis_data - got data from a remote Skyline instances')
+                        for redis_data_list in redis_data_lists:
+                            data.append(redis_data_list)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: /api?redis_data failed to build data from remote data - %s - %s' % (
+                        str(redis_data_list), err))
+            else:
+                logger.warning('warning :: failed to get redis_data_lists from the remote Skyline instances')
+        if key_type == 'key' and len(data) == 1:
+            data = data[0]
+        data = {key: data}
+        end_redis_data = timer()
+        redis_data_time = (end_redis_data - start_redis_data)
+        if not data:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": redis_data_time, "response": 404}, "data": data}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": redis_data_time, "response": 200}, "data": data}
+        return jsonify(data_dict), 200
+
     # @added 20220216 - Feature #4444: webapp - inactive_metrics
     if 'inactive_metrics' in request.args:
         logger.info('/api?inactive_metrics')
@@ -890,19 +1188,19 @@ def api():
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get inactive_metrics from the remote Skyline instances')
             if inactive_metrics_lists:
-                for inactive_metrics_list in inactive_metrics_lists:
-                    logger.info('got inactive_metrics_list of length %s from a remote Skyline instances' % str(len(inactive_metrics_list)))
-                    new_inactive_metrics_list = inactive_metrics + inactive_metrics_list
-                    inactive_metrics = list(set(new_inactive_metrics_list))
-                    del new_inactive_metrics_list
+                for inactive_metrics_dict in inactive_metrics_lists:
+                    logger.info('got inactive_metrics_list of length %s from a remote Skyline instances' % str(len(inactive_metrics_dict)))
+                    for base_name in list(inactive_metrics_dict.keys()):
+                        inactive_metrics[base_name] = inactive_metrics_dict[base_name]
             else:
                 logger.warning('warning :: failed to get inactive_metrics_dicts from the remote Skyline instances')
         end_inactive_metrics = timer()
         inactive_metrics_time = (end_inactive_metrics - start_inactive_metrics)
+        data = {"metrics": inactive_metrics, "metrics_count": len(inactive_metrics), "metrics_properties": {"key": "metric", "value": "id"}}
         if not inactive_metrics:
-            data_dict = {"status": {"cluster_data": cluster_data, "request_time": inactive_metrics_time, "response": 404}, "data": inactive_metrics}
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": inactive_metrics_time, "response": 404}, "data": data}
             return jsonify(data_dict), 404
-        data_dict = {"status": {"cluster_data": cluster_data, "request_time": inactive_metrics_time, "response": 200}, "data": inactive_metrics}
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": inactive_metrics_time, "response": 200}, "data": data}
         return jsonify(data_dict), 200
 
     # @added 20220128 - Feature #4376: webapp - update_external_settings
@@ -1571,10 +1869,27 @@ def api():
         if not namespace:
             data_dict = {"status": {"error": "no namespace passed"}}
             return jsonify(data_dict), 400
+
+        # @added 20220222 - Branch #1444: thunder
+        # Add expiry to allow to pass a specific expiry time
+        expiry = 3600
+        try:
+            expiry_str = request.args.get('expiry', 3600)
+            if expiry_str:
+                expiry = int(expiry_str)
+        except KeyError:
+            expiry = 3600
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp error with api?metrics_timestamp_resolutions - %s' % err)
+
         redis_key = 'webapp.thunder.remove.namespace.metrics.last_timeseries_timestamp'
         key_set = False
         try:
-            REDIS_CONN.set(redis_key, str(namespace))
+            # @modified 20220222 - Branch #1444: thunder
+            # Change to setex to set a specific expiry
+            # REDIS_CONN.set(redis_key, str(namespace))
+            REDIS_CONN.setex(redis_key, expiry, str(namespace))
             key_set = True
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -1584,9 +1899,8 @@ def api():
         if key_set:
             data_dict = {"status": {"request_time": thunder_no_data_remove_namespace_time, "response": 200}, "data": {'namespace': namespace, 'remove_namespace_from_no_data_check': True}}
             return jsonify(data_dict), 200
-        else:
-            data_dict = {"status": {"request_time": thunder_no_data_remove_namespace_time, "response": 500}, "data": {'namespace': namespace, 'remove_namespace_from_no_data_check': False, 'reason': 'failed to add key'}}
-            return jsonify(data_dict), 500
+        data_dict = {"status": {"request_time": thunder_no_data_remove_namespace_time, "response": 500}, "data": {'namespace': namespace, 'remove_namespace_from_no_data_check': False, 'reason': 'failed to add key'}}
+        return jsonify(data_dict), 500
 
     # @added 20220202 - Feature #4412: flux - quota - thunder alert
     if 'thunder_metric_quota_exceeded' in request.args:
@@ -3167,7 +3481,7 @@ def api():
     try:
         start = time.time()
         return render_template(
-            'api.html', version=skyline_version, duration=(time.time() - start)), 200
+            'api.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except:
         return 'Uh oh ... a Skyline 500 :(', 500
 
@@ -3179,7 +3493,23 @@ def mock_api():
         if request.method == 'POST':
             try:
                 # post_data = request.form.to_dict()
-                post_data = request.get_json()
+
+                # TESTING
+                raw_data = request.get_data()
+                logger.info('mock_api :: /alert_reciever POST raw_data: %s' % str(raw_data))
+                try:
+                    post_data = request.get_json()
+                except:
+                    logger.warning('warning :: mock_api :: /alert_reciever request.get_json() failed trying request.json() to see if data is cached')
+                    try:
+                        post_data = request.json()
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: Webapp could not get alert details from the alert_reciever POST request - %s' % str(err))
+                        resp = json.dumps(
+                            {'error': 'malformed or missing data in the POST request'})
+                        return resp, 400
+
                 logger.info('mock_api :: /alert_reciever recieved %s' % str(post_data))
                 metric = str(post_data['data']['alert']['metric'])
                 # timestamp = int(request.form['timestamp'])
@@ -3403,7 +3733,7 @@ def docs():
     start = time.time()
     try:
         return render_template(
-            'docs.html', version=skyline_version, duration=(time.time() - start)), 200
+            'docs.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except:
         return 'Uh oh ... a Skyline 500 :(', 500
 
@@ -3414,7 +3744,7 @@ def panorama():
     if not settings.PANORAMA_ENABLED:
         try:
             return render_template(
-                'uh_oh.html', version=skyline_version,
+                'uh_oh.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 message="Panorama is not enabled, please see the Panorama section in the docs and settings.py"), 200
         except:
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -3468,7 +3798,7 @@ def panorama():
         return render_template(
             'panorama.html', plot_metric_anomalies=True, metric=metric,
             anomalies_dict=anomalies_dict, plot_file=plot_file,
-            version=skyline_version,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20210326 - Feature #3994: Panorama - mirage not anomalous
@@ -3481,19 +3811,19 @@ def panorama():
             trace = traceback.format_exc()
             message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
             return internal_error(message, trace)
-        format = None
+        output_format = None
         if 'format' in request.args:
-            format = request.args.get('format', 'normal')
-        anomalies = False
+            output_format = request.args.get('format', 'normal')
+        anomalies_param = False
         if 'anomalies' in request.args:
             anomalies_str = request.args.get('anomalies', 'false')
             if anomalies_str == 'true':
-                anomalies = True
-        if format == 'json':
+                anomalies_param = True
+        if output_format == 'json':
             if not not_anomalous_dict and not anomalies_dict:
                 data_dict = {"status": {"response": 204, "request_time": (time.time() - start), "message": "no data"}, "data": {"not anomalous": {}, "anomalies": {}}}
             else:
-                if anomalies:
+                if anomalies_param:
                     data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict, "anomalies": anomalies_dict}}
                 else:
                     data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict}}
@@ -3521,13 +3851,13 @@ def panorama():
             not_anomalous_metrics_dict=not_anomalous_metrics_dict,
             anomalies_dict=anomalies_dict,
             anomalies_metrics_dict=anomalies_metrics_dict,
-            version=skyline_version,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
     if 'not_anomalous_metric' in request.args:
         base_name = None
-        anomalies = False
+        anomalies_param = False
         if 'metric' in request.args:
             base_name = request.args.get('metric', None)
             if base_name == 'all':
@@ -3550,7 +3880,7 @@ def panorama():
         if 'anomalies' in request.args:
             anomalies_arg = request.args.get('anomalies', 'false')
             if anomalies_arg == 'true':
-                anomalies = True
+                anomalies_param = True
 
         def get_cache_dict(plot_type, base_name, from_timestamp, until_timestamp):
             data_dict_key = 'panorama.%s_dict.%s.%s.%s' % (
@@ -3609,7 +3939,7 @@ def panorama():
             message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
             return internal_error(message, trace)
         anomalies_dict = {}
-        if anomalies:
+        if anomalies_param:
             try:
                 anomalies_dict = get_cache_dict('anomalies', base_name, from_timestamp, until_timestamp)
             except:
@@ -3621,18 +3951,18 @@ def panorama():
             logger.info('not_anomalous_dict data not found in Redis')
             logger.info('calling get_mirage_not_anomalous_metrics(%s, %s, %s, %s)' % (
                 str(base_name), str(from_timestamp), str(until_timestamp),
-                str(anomalies)))
+                str(anomalies_param)))
             try:
-                not_anomalous_dict, anomalies_dict = get_mirage_not_anomalous_metrics(base_name, from_timestamp, until_timestamp, anomalies)
+                not_anomalous_dict, anomalies_dict = get_mirage_not_anomalous_metrics(base_name, from_timestamp, until_timestamp, anomalies_param)
             except:
                 trace = traceback.format_exc()
                 message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
                 return internal_error(message, trace)
-        format = None
+        output_format = None
         if 'format' in request.args:
-            format = request.args.get('format', 'normal')
-        if format == 'json':
-            if anomalies:
+            output_format = request.args.get('format', 'normal')
+        if output_format == 'json':
+            if anomalies_param:
                 data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict, "anomalies": anomalies_dict}}
             else:
                 data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict}}
@@ -3640,12 +3970,12 @@ def panorama():
                 not_anomalous_count = len(not_anomalous_dict[base_name]['timestamps'])
             except:
                 not_anomalous_count = 0
-            if anomalies:
+            if anomalies_param:
                 try:
                     anomalies_count = len(anomalies_dict[base_name]['timestamps'])
                 except:
                     anomalies_count = 0
-            if anomalies:
+            if anomalies_param:
                 logger.info('mirage_not_anomalous returned json with %s not_anomalous events and %s anomalies for %s' % (
                     str(not_anomalous_count), str(anomalies_count), base_name))
             else:
@@ -3653,21 +3983,28 @@ def panorama():
                     str(not_anomalous_count), base_name))
             return jsonify(data_dict), 200
 
-        try:
-            not_anomalous_plot = plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, 'not_anomalous')
-        except:
-            trace = traceback.format_exc()
-            message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
-            return internal_error(message, trace)
-
-        anomalies_plot = False
-        if anomalies:
+        not_anomalous_plot = None
+        if not_anomalous_dict or anomalies_dict:
             try:
-                anomalies_plot = plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, 'anomalies')
+                not_anomalous_plot = plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, 'not_anomalous')
             except:
                 trace = traceback.format_exc()
                 message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
                 return internal_error(message, trace)
+        else:
+            logger.warning('warning :: no not_anomalous_dict or anomalies_dict to plot for %s' % base_name)
+
+        anomalies_plot = False
+        if anomalies_param:
+            if anomalies_dict:
+                try:
+                    anomalies_plot = plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, 'anomalies')
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+                    return internal_error(message, trace)
+            else:
+                logger.warning('warning :: no anomalies_dict to plot for %s' % base_name)
 
         return render_template(
             'panorama.html', not_anomalous_metric=True, metric=base_name,
@@ -3675,7 +4012,7 @@ def panorama():
             from_timestamp=from_timestamp, until_timestamp=until_timestamp,
             not_anomalous_plot=not_anomalous_plot,
             anomalies_plot=anomalies_plot,
-            version=skyline_version,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start), print_debug=False), 200
 
     try:
@@ -3748,7 +4085,7 @@ def panorama():
             anomalies_labelled=anomalies_labelled,
             start_timestamp=int(start_timestamp), end_timestamp=int(end_timestamp),
             metrics=metrics_list, namespaces=namespaces_list, label=label,
-            version=skyline_version,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20160803 - Sanitize request.args
@@ -4026,10 +4363,10 @@ def panorama():
                     valid_value = new_value + 1
                 except:
                     valid_value = None
-                if valid_value and new_value < 101:
+                if valid_value and new_value < 501:
                     limit_invalid = False
                 if limit_invalid:
-                    error_string = 'error :: %s must be < 100 - requested %s' % (key, value)
+                    error_string = 'error :: %s must be < 500 - requested %s' % (key, value)
                     logger.error(error_string)
                     resp = json.dumps(
                         {'results': error_string})
@@ -4080,7 +4417,7 @@ def panorama():
                 'panorama.html', anomalies=panorama_data, app_list=apps,
                 source_list=sources, algorithm_list=algorithms,
                 host_list=hosts, results='Latest anomalies',
-                version=skyline_version, duration=(time.time() - start)), 200
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
         except:
             logger.error('error :: failed to get panorama: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -4113,7 +4450,7 @@ def panorama():
                 'panorama.html', anomalies=panorama_data, app_list=apps,
                 source_list=sources, algorithm_list=algorithms,
                 host_list=hosts, results=results_string, count_request=count_request,
-                version=skyline_version, duration=(time.time() - start)), 200
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
         except:
             logger.error('error :: failed to render panorama.html: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -4131,11 +4468,11 @@ def crucible():
     if crucible_web_ui_implemented:
         try:
             return render_template(
-                'uh_oh.html', version=skyline_version,
+                'uh_oh.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 message="Sorry the Crucible web UI is not completed yet"), 200
         except:
             return render_template(
-                'uh_oh.html', version=skyline_version,
+                'uh_oh.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 message="Sorry the Crucible web UI is not completed yet"), 200
     # @added 20200420 - Feature #1448: Crucible web UI
     #                   Branch #868: crucible
@@ -4359,6 +4696,10 @@ def crucible():
             known_algorithms = ['detect_drop_off_cliff']
             for s_algorithm in settings.ALGORITHMS:
                 known_algorithms.append(s_algorithm)
+            # @added 20220430 - Feature #4118: crucible - custom_algorithms
+            #                   Feature #3566: custom_algorithms
+            for s_algorithm in list(settings.CUSTOM_ALGORITHMS.keys()):
+                known_algorithms.append(s_algorithm)
             run_algorithms_str = request.args.get(str('run_algorithms'), settings.ALGORITHMS)
             run_algorithms = []
             if run_algorithms_str == 'true':
@@ -4506,7 +4847,7 @@ def crucible():
         pagination_start=pagination_start, offset=offset,
         pagination_end=pagination_end,
         total_crucible_jobs=total_crucible_jobs,
-        version=skyline_version,
+        version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
         duration=(time.time() - start), print_debug=False), 200
 
 
@@ -4517,7 +4858,7 @@ def ionosphere():
     if not settings.IONOSPHERE_ENABLED:
         try:
             return render_template(
-                'uh_oh.html', version=skyline_version,
+                'uh_oh.html', version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 message="Ionosphere is not enabled, please see the Ionosphere section in the docs and settings.py"), 200
         except:
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -4589,7 +4930,7 @@ def ionosphere():
     if request_args_len:
         for i in request.args:
             key = str(i)
-            value = request.args.get(key, None)
+            value = request.args.get(key, 'None')
             logger.info('request argument - %s=%s' % (key, str(value)))
 
     # @added 20180419 - Feature #1996: Ionosphere - matches page
@@ -4910,7 +5251,7 @@ def ionosphere():
             'ionosphere.html', motif_matches=motif_matches_req,
             matched_motifs=matched_motifs, for_metric=metric,
             matched_from_datetime=matched_from_datetime,
-            version=skyline_version, user=user,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
@@ -5127,7 +5468,7 @@ def ionosphere():
                 matched_from_datetime=matched_from_datetime,
                 validate_all=validate_all, all_validated=all_validated,
                 validated_count=validated_count,
-                version=skyline_version,
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 # @added 20190919 - Feature #3230: users DB table
                 #                   Feature #2516: Add label to features profile
                 user=user,
@@ -5216,7 +5557,7 @@ def ionosphere():
             'ionosphere.html', saved_training_data_page=True,
             saved_training_data_dict=saved_training_data_dict,
             saved_training_data_metrics=saved_training_data_metrics,
-            version=skyline_version, duration=(time.time() - start),
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
             print_debug=False), 200
 
 ###
@@ -5356,6 +5697,11 @@ def ionosphere():
                 logger.error(fail_msg)
                 return internal_error(fail_msg, trace)
             if not ionosphere_performance_data:
+                if format == 'json':
+                    performance_json_dict = {}
+                    data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict, "success": False, "reason": "no data for query"}}
+                    logger.info('ionosphere performance returned json with with no data from query')
+                    return jsonify(data_dict), 200
                 trace = ionosphere_performance_data
                 fail_msg = 'error :: Webapp no ionosphere_performance_data'
                 return internal_error(fail_msg, trace)
@@ -5419,7 +5765,7 @@ def ionosphere():
             # @added 20210202 - Feature #3934: ionosphere_performance
             # Handle user timezone
             pytz_timezones=pytz_timezones,
-            version=skyline_version, user=user,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
             duration=(time.time() - start), print_debug=False), 200
 
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
@@ -5699,7 +6045,7 @@ def ionosphere():
                 features_profiles_count=fps_count, order=ordered_by,
                 limit=limited_by, matched_count=mc, checked_count=cc,
                 generation_count=gc, matched_from_datetime=matched_from_datetime,
-                version=skyline_version,
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
                 duration=(time.time() - start), print_debug=False), 200
 
         # @added 20180917 - Feature #2602: Graphs in search_features_profiles
@@ -5820,7 +6166,7 @@ def ionosphere():
                 # @added 20180917 - Feature #2602: Graphs in search_features_profiles
                 features_profiles_with_images=features_profiles_with_images,
                 show_graphs=show_graphs,
-                version=skyline_version, duration=(time.time() - start),
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=False), 200
 
     # @added 20170916 - Feature #1996: Ionosphere - matches page
@@ -5920,7 +6266,7 @@ def ionosphere():
             'ionosphere.html', fp_matches=fp_matches_req, for_metric=metric,
             fp_matches_results=matches, order=ordered_by, limit=limited_by,
             matched_from_datetime=matched_from_datetime,
-            version=skyline_version, duration=(time.time() - start),
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
             print_debug=False), 200
 
     # @modified 20170118 - Feature #1862: Ionosphere features profiles search page
@@ -6018,6 +6364,11 @@ def ionosphere():
 
     # @added 20170917 - Feature #1996: Ionosphere - matches page
     matched_fp_id = False
+
+    # @added 20220317 - Feature #4540: Plot matched timeseries
+    #                   Feature #4014: Ionosphere - inference
+    matched_fp_plot = None
+
     matched_layer_id = False
 
     # @added 20210413 - Feature #4014: Ionosphere - inference
@@ -6204,7 +6555,7 @@ def ionosphere():
                                     'ionosphere.html', display_message=message,
                                     alternative_urls=alternative_urls,
                                     fp_view=True,
-                                    version=skyline_version, duration=(time.time() - start),
+                                    version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                                     print_debug=True), 200
                             except:
                                 message = 'Uh oh ... a Skyline 500 :('
@@ -6606,7 +6957,7 @@ def ionosphere():
                                             'ionosphere.html', display_message=message,
                                             alternative_urls=alternative_urls,
                                             fp_view=True,
-                                            version=skyline_version, duration=(time.time() - start),
+                                            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                                             print_debug=True), 200
                                     except:
                                         message = 'Uh oh ... a Skyline 500 :('
@@ -6902,7 +7253,7 @@ def ionosphere():
                                         'ionosphere.html', display_message=message,
                                         alternative_urls=alternative_urls,
                                         fp_view=True,
-                                        version=skyline_version, duration=(time.time() - start),
+                                        version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                                         print_debug=True), 200
                                 except:
                                     message = 'Uh oh ... a Skyline 500 :('
@@ -6961,7 +7312,7 @@ def ionosphere():
                 metric_td_dirs=zip(unique_ts, hdates), td_files=mpaths,
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
                 matched_from_datetime=matched_from_datetime,
-                version=skyline_version, duration=(time.time() - start),
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -6999,7 +7350,7 @@ def ionosphere():
                     full_duration_list=fd_list, enabled_list=en_list,
                     tsfresh_version_list=tsfresh_list, generation_list=gen_list,
                     matched_from_datetime=matched_from_datetime,
-                    version=skyline_version, duration=(time.time() - start),
+                    version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                     print_debug=debug_on), 200
             except:
                 message = 'Uh oh ... a Skyline 500 :('
@@ -7015,7 +7366,7 @@ def ionosphere():
                 list_by=listed_by, for_metric=base_name, td_files=mpaths,
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
                 matched_from_datetime=matched_from_datetime,
-                version=skyline_version, duration=(time.time() - start),
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -7034,7 +7385,7 @@ def ionosphere():
                 metric_td_dirs=zip(unique_ts, hdates),
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
                 matched_from_datetime=matched_from_datetime,
-                version=skyline_version, duration=(time.time() - start),
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -7477,7 +7828,6 @@ def ionosphere():
                         trace = traceback.format_exc()
                         fail_msg = 'error :: Webapp failed to determine the echo_hdate from the fp_anomaly_timestamp'
                         logger.error(fail_msg)
-                        pass
 
                     # @added 20190619 - Feature #2990: Add metrics id to relevant web pages
                     # Determine the metric_id from the fp_details_object
@@ -7654,6 +8004,26 @@ def ionosphere():
             if matched_fp_id:
                 if matched_fp_id != 'False':
                     matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_fp_id), 'features_profile', base_name, requested_timestamp)
+                    # @added 20220317 - Feature #4540: Plot matched timeseries
+                    #                   Feature #4014: Ionosphere - inference
+                    if not matched_motif_id:
+                        matched_fp_plot_file = matched_graph_image_file.replace('matched', 'match_compare')
+                        if not os.path.isfile(matched_fp_plot_file):
+                            output_file = matched_fp_plot_file
+                            layers_match_id = 0
+                            matched_timeseries = get_matched_timeseries(
+                                skyline_app, matched_fp_id, layers_match_id)
+                            logger.info('calling plot_fp_match with matched_timeseries dict')
+                            plotted_comparsion_image, plotted_match_comparison_image_file = plot_fp_match(
+                                skyline_app, matched_timeseries['metric'],
+                                matched_timeseries['match']['fp_id'],
+                                [value for ts, value in matched_timeseries['matched_fp_timeseries']],
+                                matched_timeseries['timeseries'], output_file)
+                            if plotted_comparsion_image:
+                                matched_fp_plot = plotted_match_comparison_image_file
+                        else:
+                            matched_fp_plot = matched_fp_plot_file
+
             if matched_layer_id:
                 if matched_layer_id != 'False':
                     matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_layer_id), 'layers', base_name, requested_timestamp)
@@ -7966,6 +8336,7 @@ def ionosphere():
                     plotted_motif_image = False
                     if not path.isfile(motif_graph_image_file):
                         use_on_demand_motif_analysis = False
+                        logger.info('calling plot_motif_match to create inference_match_motif_image')
                         plotted_motif_image, inference_match_motif_image = plot_motif_match(
                             skyline_app, base_name, matched_motif_timestamp, matched_motif_fp_id,
                             matched_motif_full_duration,
@@ -8137,7 +8508,10 @@ def ionosphere():
                 # Allow user to specify the difference between the areas under the
                 # curve
                 motif_max_area_percent_diff=motif_max_area_percent_diff,
-                version=skyline_version, duration=(time.time() - start),
+                # @added 20220317 - Feature #4540: Plot matched timeseries
+                #                   Feature #4014: Ionosphere - inference
+                matched_fp_plot=matched_fp_plot,
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -8148,7 +8522,7 @@ def ionosphere():
         message = 'Unknown request'
         return render_template(
             'ionosphere.html', display_message=message,
-            version=skyline_version, duration=(time.time() - start),
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
             print_debug=debug_on), 200
     except:
         message = 'Uh oh ... a Skyline 500 :('
@@ -8199,6 +8573,9 @@ def ionosphere_images():
 
             if key == 'image':
                 filename = str(value)
+
+                if filename == 'None':
+                    return 'No content', 204
 
                 # @added 20201214 - Feature #3890: metrics_manager - sync_cluster_files
                 # Even though authenticated only allow specific paths
@@ -8498,12 +8875,26 @@ def utilities():
 
     # @added 20210604 - Branch #1444: thunder
     metrics_match = True
+    match_metric = False
     thunder_testing = False
     thunder_no_data_test = False
     thunder_no_data_test_key_added = False
 
     thunder_stale_metrics_test = False
     thunder_stale_metrics_test_key_added = False
+
+    # @added 20220228 - Feature #4468: flux - remove_namespace_quota_metrics
+    remove_flux_namespace_quota_metrics = False
+    dry_run = False
+    removed_quota_metrics_key = None
+    removed_quota_metrics = []
+
+    # @added 20220301 - Feature #4482: Test alerts
+    test_alert = False
+    alert_on_metric = None
+    alerter_app = None
+    alerter = None
+    http_alerters = []
 
     parent_namespaces = []
     try:
@@ -8514,7 +8905,14 @@ def utilities():
         'metric', 'settings_list', 'match_with', 'thunder_testing',
         'thunder_no_data_test', 'namespace', 'stale_period', 'expiry',
         'thunder_no_data_test_key_added', 'thunder_stale_metrics_test',
-        'thunder_stale_metrics_test_key_added',
+        'thunder_stale_metrics_test_key_added', 'match_metric',
+        # @added 20220228 - Feature #4468: flux - remove_namespace_quota_metrics
+        'remove_flux_namespace_quota_metrics', 'dry_run',
+        'removed_quota_metrics_key',
+        # @added 20220301 - Feature #4482: Test alerts
+        'test_alert', 'app', 'alerter',
+        # @added 20220315 - Feature #4482: Test alerts
+        'alerter_id', 'trigger_anomaly',
     ]
     if request_args_len:
         for i in request.args:
@@ -8526,7 +8924,7 @@ def utilities():
                 resp = json.dumps(
                     {'400 Bad Request': error_string})
                 return flask_escape(resp), 400
-            value = request.args.get(key, None)
+            value = request.args.get(key, 0)
             logger.info('request argument - %s=%s' % (key, str(value)))
             if key == 'thunder_testing':
                 thunder_testing = True
@@ -8558,17 +8956,46 @@ def utilities():
                     message = 'get_top_level_namespaces failed: %s' % e
                     trace = traceback.format_exc()
                     return internal_error(message, trace)
+            # @added 20220228 - Feature #4468: flux - remove_namespace_quota_metrics
+            if key == 'match_metric':
+                match_metric = True
+            if key == 'remove_flux_namespace_quota_metrics':
+                remove_flux_namespace_quota_metrics = True
+                metrics_match = False
+                logger.info('remove_flux_namespace_quota_metrics request')
+            if key == 'dry_run':
+                logger.info('remove_flux_namespace_quota_metrics request dry_run: %s' % str(dry_run))
+                if value == 'true':
+                    dry_run = True
+                if value is True:
+                    dry_run = True
+            if key == 'removed_quota_metrics_key':
+                try:
+                    removed_quota_metrics = list(REDIS_CONN.smembers(value))
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    message = 'remove_flux_namespace_quota_metrics :: failed to get Redis set %s: %s' % str(err)
+                    return internal_error(message, trace)
+            # @added 20220301 - Feature #4482: Test alerts
+            if key == 'test_alert':
+                test_alert = True
+                http_alerters = list(settings.HTTP_ALERTERS_OPTS.keys())
+                metrics_match = False
 
     try:
         return render_template(
-            'utilities.html', metrics_match=metrics_match,
+            'utilities.html', metrics_match=metrics_match, match_metric=match_metric,
             thunder_testing=thunder_testing,
             thunder_no_data_test=thunder_no_data_test,
             parent_namespaces=parent_namespaces,
             thunder_no_data_test_key_added=thunder_no_data_test_key_added,
             thunder_stale_metrics_test=thunder_stale_metrics_test,
             thunder_stale_metrics_test_key_added=thunder_stale_metrics_test_key_added,
-            version=skyline_version, duration=(time.time() - start)), 200
+            remove_flux_namespace_quota_metrics=remove_flux_namespace_quota_metrics,
+            dry_run=dry_run, removed_quota_metrics=removed_quota_metrics,
+            test_alert=test_alert, metric=alert_on_metric, alerter_app=alerter_app,
+            alerter=alerter, http_alerters=http_alerters,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except Exception as e:
         trace = traceback.format_exc()
         message = 'failed to render utilities.html: %s' % e
@@ -8654,7 +9081,7 @@ def flux_frontend():
             upload_id=upload_id, upload_id_key=upload_id_key,
             temporary_upload_key=temporary_key,
             flux_identifier=temporary_key,
-            version=skyline_version, duration=(time.time() - start),
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
             print_debug=debug_on), 200
     except:
         message = 'Uh oh ... a Skyline 500 :('
@@ -9074,6 +9501,59 @@ def upload_data():
     return 'Bad Request', 400
 
 
+# @added 20220403 - otlp data
+@app.route('/otel_trace', methods=['POST'])
+def otel_trace():
+    from opentelemetry.proto.trace.v1 import trace_pb2
+    from google.protobuf import json_format as _json_format
+    logger.info('/otel_trace request')
+    all_headers = None
+    try:
+        all_headers = str(request.headers)
+    except Exception as err:
+        logger.error('error :: /otel_trace :: req.headers() error - %s' % str(err))
+    logger.info('debug :: /otel_trace :: headers - %s' % str(all_headers))
+
+    # TESTING
+    # raw_data = request.get_data()
+    try:
+        traceP = trace_pb2.TracesData()
+        traceP.ParseFromString(request.get_data())
+        trace_dict = _json_format.MessageToDict(traceP)
+        # write_data_to_file(skyline_app, '/tmp/test.otel_trace', 'wb', raw_data)
+        REDIS_CONN.hset('test.otel.traces', time.time(), str(trace_dict))
+        REDIS_CONN.expire('test.otel.traces', 900)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not write otel_trace data to file - %s' % str(e))
+    # logger.info('otel_trace :: /otel_trace POST raw_data: %s' % str(raw_data))
+    logger.info('otel_trace :: /otel_trace POST done')
+
+    return 'OK', 200
+
+# @added 20220413 - Feature #4526: flux - logstash
+@app.route('/logstash_test', methods=['POST'])
+def logstash_test():
+    logger.info('/logstash_test request')
+    all_headers = None
+    try:
+        all_headers = str(request.headers)
+    except Exception as err:
+        logger.error('error :: /logstash_test :: req.headers() error - %s' % str(err))
+    logger.info('debug :: /logstash_test :: headers - %s' % str(all_headers))
+
+    try:
+        # raw_data = request.get_data()
+        post_data = request.get_json()
+        REDIS_CONN.hset('test.logstash', time.time(), str(post_data))
+        REDIS_CONN.expire('test.logstash', 900)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not write logstash_test data to Redis hash test.logstash - %s' % str(err))
+    logger.info('/logstash_test POST done')
+    return 'OK', 200
+
+
 # @added 20201212 - Feature #3880: webapp - utilities - match_metric
 @app.route("/match_metric", methods=['POST'])
 def match_metric():
@@ -9092,8 +9572,8 @@ def match_metric():
     if request.method == 'POST':
         logger.info('handling match_metric POST request')
 
-        def get_settings(str):
-            return getattr(sys.modules['settings'], str)
+        def get_settings(settings_string):
+            return getattr(sys.modules['settings'], settings_string)
 
         if 'metric' in request.form:
             metric = request.form['metric']
@@ -9145,7 +9625,7 @@ def match_metric():
                 'utilities.html', match_metric=True, metric=metric,
                 settings_list=settings_list, match_with=match_with,
                 pattern_match=pattern_match, matched_by=matched_by,
-                version=skyline_version, duration=(time.time() - start),
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=False), 200
         except Exception as e:
             trace = traceback.format_exc()
@@ -9243,7 +9723,7 @@ def thunder_test():
                 thunder_no_data_test_key_added=thunder_no_data_test_key_added,
                 thunder_stale_metrics_test=thunder_stale_metrics_test,
                 thunder_stale_metrics_test_key_added=thunder_stale_metrics_test_key_added,
-                version=skyline_version, duration=(time.time() - start),
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=False), 200
         except Exception as e:
             trace = traceback.format_exc()
@@ -9329,7 +9809,6 @@ def update_external_settings():
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_external_settings - failed to create Redis key skyline.external_settings.update.flux')
 
-
             # @modified 20220128 - Feature #4400: flux - quota
             #                      Feature #4324: flux - reload external_settings
             #                      Feature #4376: webapp - update_external_settings
@@ -9393,6 +9872,245 @@ def update_external_settings():
     else:
         status_code = 500
         data_dict = {"status": {"update_external_settings": "failed", "response": 500, "request_time": request_time}, "data": {"updated": False, "remote_external_settings": remote_external_settings}}
+    return jsonify(data_dict), status_code
+
+
+# @added 20220224 - Feature #4468: flux - remove_namespace_quota_metrics
+#                   Feature #4464: flux - quota - cluster_sync
+@app.route('/remove_namespace_quota_metrics', methods=['POST'])
+@requires_auth
+def remove_namespace_quota():
+    start_timer = timer()
+    start = time.time()
+    logger.info('/remove_namespace_quota_metrics')
+    key = None
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 405')
+        return 'Method Not Allowed', 405
+
+    cluster_data = False
+    dry_run = True
+
+    # Test whether form or json POST
+    form_data = False
+    try:
+        cluster_data_str = request.form['cluster_data']
+        if cluster_data_str == 'true':
+            cluster_data = True
+        dry_run_str = request.form['dry_run']
+        if dry_run_str == 'false':
+            dry_run = False
+        if dry_run_str == 'true':
+            dry_run = True
+        form_data = True
+        logger.info('remove_namespace_quota_metrics, form POST')
+        logger.info('remove_namespace_quota_metrics, cluster_data: %s' % cluster_data)
+        logger.info('remove_namespace_quota_metrics, dry_run: %s' % str(dry_run))
+    except:
+        logger.info('/remove_namespace_quota_metrics no form data trying json')
+
+    post_data = {}
+    if not form_data:
+        try:
+            post_data = request.get_json()
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: remove_namespace_quota_metrics - no POST data - %s' % (
+                err))
+            logger.info('remove_namespace_quota_metrics, return 400 no POST data')
+            return 'Bad request', 400
+        try:
+            cluster_data = post_data['data']['cluster_data']
+            if cluster_data:
+                logger.info('remove_namespace_quota_metrics - cluster_data passed: %s' % str(cluster_data))
+        except KeyError:
+            cluster_data = False
+        except Exception as err:
+            cluster_data = False
+            logger.error(traceback.format_exc())
+            logger.error('error :: remove_namespace_quota_metrics - evaluation of  post_data[\'data\'][\'cluster_data\'] failed - %s' % (
+                err))
+        try:
+            key = post_data['data']['key']
+        except KeyError:
+            key = None
+        if not key:
+            logger.info('remove_namespace_quota_metrics, return 400 no key')
+            return 'Bad request', 400
+        if key != settings.FLUX_SELF_API_KEY:
+            bad_key = str(key)
+            logger.info('remove_namespace_quota_metrics, return 401 bad key - %s' % bad_key)
+            return 'Unauthorized', 401
+
+    try:
+        if form_data:
+            parent_namespace = request.form['parent_namespace']
+            key = settings.FLUX_SELF_API_KEY
+        else:
+            parent_namespace = str(post_data['data']['parent_namespace'])
+        if parent_namespace:
+            logger.info('remove_namespace_quota_metrics - parent_namespace: %s' % parent_namespace)
+    except KeyError:
+        parent_namespace = None
+    if not parent_namespace:
+        logger.info('remove_namespace_quota_metrics, return 400 no parent_namespace')
+        return 'Bad request', 400
+    # This prevents the removal of metrics arbitarily, 400 if not flux quota
+    flux_quota = 0
+    try:
+        flux_quota_str = REDIS_CONN.hget('metrics_manager.flux.namespace_quotas', parent_namespace)
+        if flux_quota_str:
+            flux_quota = int(float(flux_quota_str))
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: remove_namespace_quota_metrics :: failed to hget %s from metrics_manager.flux.namespace_quotas Redis hash key - %s' % (
+            parent_namespace, err))
+    if not flux_quota:
+        logger.info('remove_namespace_quota_metrics, return 400 because there is no flux quota for %s' % parent_namespace)
+        return 'Bad request', 400
+
+    metrics = []
+    try:
+        if form_data:
+            metrics_str = request.form['metrics']
+            metrics = metrics_str.split(',')
+        else:
+            metrics = post_data['data']['metrics']
+        if metrics:
+            if not isinstance(metrics, list):
+                logger.error('error :: remove_namespace_quota_metrics - metrics is not a list for parent_namespace - %s' % (
+                    parent_namespace))
+                return 'Bad request', 400
+            logger.info('remove_namespace_quota_metrics - %s metrics passed' % str(len(metrics)))
+    except KeyError:
+        metrics = []
+    except Exception as err:
+        metrics = []
+        logger.error(traceback.format_exc())
+        logger.error('error :: remove_namespace_quota_metrics - evaluation of  post_data[\'data\'][\'metrics\'] failed for parent_namespace %s - %s' % (
+            parent_namespace, err))
+        return 'Bad request', 400
+    patterns = []
+    try:
+        if form_data:
+            patterns_str = request.form['patterns']
+            logger.info('remove_namespace_quota_metrics, form_data patterns_str: %s' % patterns_str)
+            patterns = patterns_str.split(',')
+            if patterns == ['']:
+                patterns = []
+        else:
+            patterns = post_data['data']['patterns']
+        if patterns:
+            if not isinstance(patterns, list):
+                logger.error('error :: remove_namespace_quota_metrics - patterns is not a list for parent_namespace - %s' % (
+                    parent_namespace))
+                return 'Bad request', 400
+            logger.info('remove_namespace_quota_metrics - %s patterns passed' % str(len(patterns)))
+    except KeyError:
+        patterns = []
+    except Exception as err:
+        patterns = []
+        logger.error(traceback.format_exc())
+        logger.error('error :: remove_namespace_quota_metrics - evaluation of  post_data[\'data\'][\'patterns\'] failed for parent_namespace %s - %s' % (
+            parent_namespace, err))
+        return 'Bad request', 400
+    if not metrics and not patterns:
+        logger.error('error :: remove_namespace_quota_metrics - no metrics or patterns for parent_namespace - %s' % (
+            parent_namespace))
+        return 'Bad request', 400
+
+    try:
+        if not form_data:
+            dry_run = post_data['data']['dry_run']
+            if dry_run:
+                logger.info('remove_namespace_quota_metrics - DRY RUN - dry_run passed, %s' % str(dry_run))
+                dry_run = True
+    except KeyError:
+        dry_run = False
+    logger.info('remove_namespace_quota_metrics, parent_namespace: %s' % str(parent_namespace))
+    logger.info('remove_namespace_quota_metrics, metrics: %s' % str(metrics))
+    logger.info('remove_namespace_quota_metrics, patterns: %s' % str(patterns))
+    logger.info('remove_namespace_quota_metrics, dry_run: %s' % str(dry_run))
+
+    removed_metrics = []
+    try:
+        removed_metrics = remove_namespace_quota_metrics(skyline_app, parent_namespace, metrics, patterns, dry_run)
+        logger.info('remove_namespace_quota_metrics - got %s removed metrics from remove_namespace_quota_metrics' % str(len(removed_metrics)))
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: remove_namespace_quota_metrics - remove_namespace_quota_metrics failed - %s' % (
+            err))
+        return 'Internal Server Error', 500
+    if not settings.REMOTE_SKYLINE_INSTANCES:
+        cluster_data = False
+    if cluster_data:
+        endpoint_params = {
+            'api_endpoint': '/remove_namespace_quota_metrics',
+            'data_required': 'metrics',
+            'only_host': 'all',
+            'method': 'POST',
+            'post_data': {
+                'data': {
+                    'cluster_data': False,
+                    'key': key,
+                    'metrics': metrics,
+                    'parent_namespace': parent_namespace,
+                    'patterns': patterns,
+                    'dry_run': dry_run,
+                }
+            }
+        }
+        try:
+            remote_removed_metrics = get_cluster_data('remove_namespace_quota_metrics', 'metrics', only_host='all', endpoint_params=endpoint_params)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: remove_namespace_quota_metrics - could not get remove_namespace_quota_metrics from the remote Skyline instances')
+        logger.info('remove_namespace_quota_metrics - got %s removed metrics from the remote Skyline instances' % str(len(remote_removed_metrics)))
+        if remote_removed_metrics:
+            removed_metrics = removed_metrics + remote_removed_metrics
+            removed_metrics = list(set(removed_metrics))
+        logger.info('remove_namespace_quota_metrics - %s removed metrics from parent_namespace %s quota metrics' % (
+            str(len(removed_metrics)), parent_namespace))
+    end = timer()
+    request_time = (end - start_timer)
+    if form_data:
+        redis_set = 'webapp.remove_namespace_quota_metrics.%s.removed_metrics' % parent_namespace
+        try:
+            REDIS_CONN.sadd(redis_set, *set(removed_metrics))
+            REDIS_CONN.expire(redis_set, 3600)
+        except Exception as err:
+            trace = traceback.format_exc()
+            message = 'remove_namespace_quota_metrics :: could not add removed_metrics to Redis set %s - error - %s' % (
+                redis_set, err)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+        try:
+            return render_template(
+                'utilities.html', remove_flux_namespace_quota_metrics=True,
+                dry_run=dry_run, removed_quota_metrics_key=redis_set,
+                removed_quota_metrics=removed_metrics,
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                print_debug=False), 200
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not render_template utilities.html - error - %s' % (e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+
+    status_code = 200
+    data_dict = {
+        "status": {
+            "remove_namespace_quota_metrics": "success", "response": 200,
+            "cluster_data": cluster_data, "request_time": request_time,
+            "dry_run": dry_run
+        },
+        "data": {
+            "metrics": removed_metrics,
+            "removed_metrics_count": len(removed_metrics)
+        }
+    }
     return jsonify(data_dict), status_code
 
 
@@ -9820,7 +10538,7 @@ def luminosity():
             namespaces=namespaces, metric_id=metric_id,
             related_to_metrics=related_to_metrics_dict,
             related_to_metrics_keys=related_to_metrics_keys,
-            version=skyline_version, duration=(time.time() - start),
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
             print_debug=debug_on), 200
     except:
         message = 'Uh oh ... a Skyline 500 :('
@@ -9985,7 +10703,7 @@ def snab():
             until_timestamp=until_timestamp, result=result,
             results_data=results_data, results_data_keys=results_data_keys,
             filter_on=filter_on, plot=plot,
-            version=skyline_version, duration=(time.time() - start)), 200
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except:
         message = 'Uh oh ... a Skyline 500 :('
         trace = traceback.format_exc()
@@ -10509,7 +11227,7 @@ def rebrow():
             # proxied
             # redis_password=redis_password,
             protocol=protocol, proxied=proxied, client_message=client_message,
-            version=skyline_version,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             # @added 20190519 - Branch #3002: docker
             running_on_docker=running_on_docker,
             rebrow_redis_password=rebrow_redis_password,
@@ -10572,7 +11290,7 @@ def rebrow_server_db(host, port, db):
         info=info,
         dbsize=dbsize,
         serverinfo_meta=serverinfo_meta,
-        version=skyline_version,
+        version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
         duration=(time.time() - start))
 
 
@@ -10631,6 +11349,13 @@ def rebrow_keys(host, port, db):
         # perpage = int(request.args.get('perpage', '10'))
         perpage = int(request.args.get('perpage', '50'))
         pattern = request.args.get('pattern', '*')
+
+        # @added 20220224 - Feature #4470: rebrow - filter keys - exclude and type
+        # Allow to filter by exclude patterns and by key type
+        exclude = request.args.get('exclude', '')
+        key_type = request.args.get('key_type', '')
+        key_types = []
+
         try:
             dbsize = r.dbsize()
         except:
@@ -10639,10 +11364,50 @@ def rebrow_keys(host, port, db):
             return internal_error(message, trace)
 
         keys = sorted(r.keys(pattern))
-        limited_keys = keys[offset:(perpage + offset)]
+        num_keys = len(keys)
+
+        # @added 20220224 - Feature #4470: rebrow - filter keys - exclude and type
+        filtered_out = 0
+        exclude_list = []
+        total_found_keys = len(keys)
+        if exclude != '':
+            exclude_list = exclude.split(',')
+            included_keys = []
+            for key in keys:
+                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, key, exclude_list, False)
+                try:
+                    del matched_by
+                except:
+                    pass
+                if not pattern_match:
+                    included_keys.append(key)
+            keys = list(included_keys)
+            filtered_out = total_found_keys - len(keys)
+
         types = {}
-        for key in limited_keys:
-            types[key] = r.type(key)
+        # @modified 20220224 - Feature #4470: rebrow - filter keys - exclude and type
+        # Added ability to filter by key type
+        key_sizes = {}
+        if key_type == '':
+            limited_keys = keys[offset:(perpage + offset)]
+            for key in limited_keys:
+                types[key] = r.type(key)
+                key_sizes[key] = r.memory_usage(key)
+        else:
+            key_types = key_type.split(',')
+            included_keys = []
+            for key in keys[offset:]:
+                if len(included_keys) == perpage:
+                    break
+                k_type = r.type(key)
+                if k_type in key_types:
+                    included_keys.append(key)
+                    types[key] = k_type
+                    key_sizes[key] = r.memory_usage(key)
+            if len(included_keys) < perpage:
+                num_keys = len(included_keys)
+            limited_keys = list(included_keys)
+
         logger.info('rebrow :: returned keys list')
 
         return render_template(
@@ -10661,8 +11426,12 @@ def rebrow_keys(host, port, db):
             offset=offset,
             perpage=perpage,
             pattern=pattern,
-            num_keys=len(keys),
-            version=skyline_version,
+            num_keys=num_keys,
+            # @added 20220224 - Feature #4470: rebrow - filter keys - exclude and type
+            exclude=exclude, filtered_out=filtered_out,
+            total_found_keys=total_found_keys, exclude_list=exclude_list,
+            key_type=key_type, key_types=key_types, key_sizes=key_sizes,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start))
 
 
@@ -10759,13 +11528,20 @@ def rebrow_key(host, port, db, key):
         except:
             abort(404)
 
+        # @added 20220311 - Bug #4500: Handle unicode chars in webapp rebrow
+        try_msgpack = False
+
         # @modified 20200610 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
         # Try decode val so that bytes-like objects are decoded, this will fail
         # sliently and if it is a msg_packed_key
         try:
             val = val.decode('utf-8')
-        except (UnicodeDecodeError, AttributeError):
+        # @modified 20220311 - Bug #4500: Handle unicode chars in webapp rebrow
+        # except (UnicodeDecodeError, AttributeError):
+        except UnicodeDecodeError:
+            try_msgpack = True
+        except AttributeError:
             pass
 
         # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -10775,6 +11551,14 @@ def rebrow_key(host, port, db, key):
             test_string = all(c in string.printable for c in val)
         except:
             test_string = False
+
+        # @added 20220311 - Bug #4500: Handle unicode chars in webapp rebrow
+        # The test_string test above fails on strings with extended ascii or
+        # unicode characters in them, however msgpack strings generally fail
+        # with a UnicodeDecodeError
+        if not test_string:
+            if not try_msgpack:
+                test_string = True
 
         # @added 20170920 - Bug #2166: panorama incorrect mysql_id cache keys
         # There are SOME cache key msgpack values that DO == string.printable
@@ -10822,7 +11606,7 @@ def rebrow_key(host, port, db, key):
         ttl=ttl / 1000.0,
         now=datetime.datetime.utcnow(),
         expiration=datetime.datetime.utcnow() + timedelta(seconds=ttl / 1000.0),
-        version=skyline_version,
+        version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
         duration=(time.time() - start),
         msg_packed_key=msg_pack_key)
 

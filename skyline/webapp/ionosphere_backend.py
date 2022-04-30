@@ -85,6 +85,22 @@ from functions.database.queries.fp_timeseries import get_db_fp_timeseries
 from functions.database.queries.metric_id_from_base_name import metric_id_from_base_name
 from functions.database.queries.metric_ids_from_metric_like import metric_ids_from_metric_like
 
+# @added 20220304 - Task #4486: Review Ionosphere learn from learn duration
+#                   Feature #2484: FULL_DURATION feature profiles
+#                   Feature #3380: Create echo features profile when a Mirage features profile is created
+from functions.database.queries.get_ionosphere_fp_ids_for_full_duration import get_ionosphere_fp_ids_for_full_duration
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
+# @added 20220405 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+OTEL_ENABLED = False
+try:
+    OTEL_ENABLED = settings.OTEL_ENABLED
+except AttributeError:
+    OTEL_ENABLED = False
+except:
+    OTEL_ENABLED = False
+
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
@@ -93,8 +109,8 @@ skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 try:
     ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
-except EnvironmentError as e:
-    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % e)
+except EnvironmentError as outer_err:
+    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % outer_err)
     ENABLE_WEBAPP_DEBUG = False
 
 try:
@@ -102,7 +118,7 @@ try:
 except:
     full_duration_seconds = 86400
 
-full_duration_in_hours = full_duration_seconds / 60 / 60
+full_duration_in_hours = int(full_duration_seconds / 60 / 60)
 exclude_redis_json = 'redis.%sh.json' % str(int(full_duration_in_hours))
 
 # @added 20190502 - Branch #2646: slack
@@ -4647,6 +4663,12 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         related_from_timestamp = from_timestamp
         related_until_timestamp = until_timestamp
 
+    # @added 20220405 - Task #4514: Integrate opentelemetry
+    #                   Feature #4516: flux - opentelemetry traces
+    if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
+        from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
+        PymemcacheInstrumentor().instrument()
+
     if settings.MEMCACHE_ENABLED:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
     else:
@@ -5315,20 +5337,20 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
         # matched_details_object = dict(row)
         try:
             matched_details_object = dict(row)
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             connection.close()
             logger.error(trace)
-            fail_msg = 'error :: could not get matched_id %s details from %s DB table row - %s' % (str(matched_id), use_table, e)
+            fail_msg = 'error :: could not get matched_id %s details from %s DB table row - %s' % (str(matched_id), use_table, err)
             logger.error('%s' % fail_msg)
             if engine:
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         connection.close()
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
-        fail_msg = 'error :: could not get matched_id %s details from %s DB table - %s' % (str(matched_id), use_table, e)
+        fail_msg = 'error :: could not get matched_id %s details from %s DB table - %s' % (str(matched_id), use_table, err)
         logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(engine)
@@ -5367,10 +5389,10 @@ minmax_anomalous_features_sum :: %s  | minmax_anomalous_features_count :: %s
                 str(minmax_fp_features_sum), str(minmax_fp_features_count),
                 str(minmax_anomalous_features_sum),
                 str(minmax_anomalous_features_count))
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            fail_msg = 'error :: could not get details for matched id %s - %s' % (str(matched_id), e)
+            fail_msg = 'error :: could not get details for matched id %s - %s' % (str(matched_id), err)
             logger.error('%s' % fail_msg)
             if engine:
                 engine_disposal(engine)
@@ -5386,10 +5408,10 @@ minmax_anomalous_features_sum :: %s  | minmax_anomalous_features_count :: %s
                 if not full_duration:
                     full_duration = int(row[0])
             logger.info('full_duration for matched determined as %s' % (str(full_duration)))
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            logger.error('error :: could not determine full_duration from ionosphere table - %s' % e)
+            logger.error('error :: could not determine full_duration from ionosphere table - %s' % err)
             # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
             if engine:
                 engine_disposal(engine)
@@ -5410,10 +5432,10 @@ full_duration       :: %s
 metric_timestamp    :: %s     | human_date :: %s
 ''' % (str(layer_id), str(anomalous_datapoint), str(full_duration),
                 str(metric_timestamp), str(matched_human_date))
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            fail_msg = 'error :: could not get details for matched id %s - %s' % (str(matched_id), e)
+            fail_msg = 'error :: could not get details for matched id %s - %s' % (str(matched_id), err)
             logger.error('%s' % fail_msg)
             if engine:
                 engine_disposal(engine)
@@ -5457,10 +5479,10 @@ metric_timestamp    :: %s     | human_date :: %s
                 motif_area = None
                 fp_motif_area = None
                 area_percent_diff = None
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            fail_msg = 'error :: could not get details for motif matched id %s - %s' % (str(matched_id), e)
+            fail_msg = 'error :: could not get details for motif matched id %s - %s' % (str(matched_id), err)
             logger.error('%s' % fail_msg)
             if engine:
                 engine_disposal(engine)
@@ -5473,9 +5495,9 @@ metric_timestamp    :: %s     | human_date :: %s
             results = mysql_select(skyline_app, query)
             for result in results:
                 generation = int(result[0])
-        except Exception as e:
+        except Exception as err:
             logger.error('error :: get_matched_id_resources :: failed to get generation from the database for fp_id %s from ionoshere table - %s' % (
-                str(fp_id), e))
+                str(fp_id), err))
         if generation == 0:
             generation_str = 'trained'
         else:
@@ -5495,9 +5517,9 @@ metric_timestamp    :: %s     | human_date :: %s
                     with open(inference_file, 'r') as f:
                         matched_motif_dict_str = f.read()
                     matched_motif_dict = literal_eval(matched_motif_dict_str)
-                except Exception as e:
+                except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to evaluate matched_motifs_dict from %s - %s' % (inference_file, e))
+                    logger.error('error :: failed to evaluate matched_motifs_dict from %s - %s' % (inference_file, err))
                     matched_motif_dict = {}
                     matched_motif = None
                 if matched_motif_dict:
@@ -5505,21 +5527,21 @@ metric_timestamp    :: %s     | human_date :: %s
                         matched_motif = list(matched_motif_dict.keys())[0]
                         motif_area = matched_motif_dict[matched_motif]['motif_area']
                         fp_motif_area = matched_motif_dict[matched_motif]['fp_motif_area']
-                    except Exception as e:
+                    except Exception as err:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to evaluate matched_motifs_dict from %s - %s' % (inference_file, e))
+                        logger.error('error :: failed to evaluate matched_motifs_dict from %s - %s' % (inference_file, err))
                     try:
                         area_percent_diff = matched_motif_dict[matched_motif]['area_percent_diff']
-                    except Exception as e:
+                    except Exception as err:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to evaluate matched_motifs_dict from %s - %s' % (inference_file, e))
+                        logger.error('error :: failed to evaluate matched_motifs_dict from %s - %s' % (inference_file, err))
                         percent_different = None
                         if motif_area and fp_motif_area:
                             try:
                                 percent_different = get_percent_different(fp_motif_area, motif_area, True)
                                 logger.info('percent_different between fp_motif_area and motif_area - %s' % str(percent_different))
-                            except Exception as e:
-                                logger.error('error :: failed to calculate percent_different - %s' % e)
+                            except Exception as err:
+                                logger.error('error :: failed to calculate percent_different - %s' % err)
 
         try:
             matched_details = '''
@@ -5541,10 +5563,10 @@ human_date          :: %s
                 str(match_type), str(type_id),
                 str(validated), primary_match_str,
                 str(metric_timestamp), str(matched_human_date))
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            fail_msg = 'error :: could not create matched_details for motif matched id %s - %s' % (str(matched_id), e)
+            fail_msg = 'error :: could not create matched_details for motif matched id %s - %s' % (str(matched_id), err)
             logger.error('%s' % fail_msg)
             matched_details = '''
 %s
@@ -5590,13 +5612,25 @@ human_date          :: %s
             #     str(fp_id), metric_fp_ts_table, e))
             logger.error('error :: get_matched_id_resources :: failed to get timeseries with get_db_fp_timeseries - %s' % (
                 e))
-        fp_motif = [item[1] for item in fp_timeseries[index:(index + size)]]
-        last_fp_timeseries_index = len(fp_timeseries) - 1
-        if last_fp_timeseries_index < (index + size):
-            logger.info('get_matched_id_resources :: adjusting index for fp_motif sequence because (index + size) > last_fp_timeseries_index')
-            index_diff = (index + size) - last_fp_timeseries_index
-            use_index = index - index_diff
-            fp_motif = [item[1] for item in fp_timeseries[use_index:last_fp_timeseries_index]]
+        # @modified 20220408 - Feature #4014: Ionosphere - inference
+        # Use same method as inference.py
+        # This is due to the fact that index:(index + size) does not always
+        # capture the entire motif due to there perhaps being more a then one
+        # data point in a period in relation to echo/full_duration data, the
+        # method used inference.py does.
+        # fp_motif = [item[1] for item in fp_timeseries[index:(index + size)]]
+        fp_motif = [item[1] for i_index, item in enumerate(fp_timeseries) if i_index >= index < (index + size)]
+        if len(fp_motif) > size:
+            fp_motif = fp_motif[-size:]
+
+        # last_fp_timeseries_index = len(fp_timeseries) - 1
+        # @modified 20220408 - Use same method as inference.py
+        # last_fp_timeseries_index = len(fp_timeseries)
+        # if last_fp_timeseries_index < (index + size):
+        #     logger.info('get_matched_id_resources :: adjusting index for fp_motif sequence because (index + size) > last_fp_timeseries_index')
+        #     index_diff = (index + size) - last_fp_timeseries_index
+        #     use_index = index - index_diff
+        #     fp_motif = [item[1] for item in fp_timeseries[use_index:last_fp_timeseries_index]]
 
         # Create the not anomalous motif that was matched with the fp_motif
         not_anomalous_motif_sequence = []
@@ -5626,9 +5660,9 @@ human_date          :: %s
             # @modified 20210419 -
             # Properly interpolate the FULL_DURATION hours
             # full_duration_timeseries_json = '%s/%s.mirage.redis.24h.json' % (metric_training_dir, metric)
-            full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
+            full_duration_in_hours_int = int(settings.FULL_DURATION / 60 / 60)
             full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
-                metric_training_dir, metric, str(full_duration_in_hours))
+                metric_training_dir, metric, str(full_duration_in_hours_int))
 
             full_duration = 0
             try:
@@ -5674,10 +5708,24 @@ human_date          :: %s
         matched_details_object['motif_period_seconds'] = graph_period_seconds
         matched_details_object['motif_period_minutes'] = round(graph_period_seconds / 60)
 
+        # @added 20220410 - Feature #4014: Ionosphere - inference
+        # Ensure that the not_anomalous_motif_sequence and fp_motif are the
+        # same length, becasue when the full_duration data is being used there
+        # can be missing data points in either data set if Redis did not
+        # receive data for any timestamps, which does happen.
+        logger.info('not_anomalous_motif_sequence: %s' % (str(len(not_anomalous_motif_sequence))))
+        logger.info('fp_motif length: %s' % (str(len(fp_motif))))
+        if len(not_anomalous_motif_sequence) > len(fp_motif):
+            logger.info('resizing not_anomalous_motif_sequence becasue it is greater than the fp_motif length')
+            not_anomalous_motif_sequence = not_anomalous_motif_sequence[-len(fp_motif):]
+        if len(fp_motif) > len(not_anomalous_motif_sequence):
+            logger.info('resizing fp_motif becasue it is greater than the not_anomalous_motif_sequence')
+            fp_motif = fp_motif[-len(not_anomalous_motif_sequence):]
+
         plotted_image = False
         if not path.isfile(graph_image_file):
             on_demand_motif_analysis = True
-            logger.info('fp_motif length: %s' % (str(len(fp_motif))))
+            # logger.info('fp_motif length: %s' % (str(len(fp_motif))))
 
             plotted_image, plotted_image_file = plot_motif_match(
                 skyline_app, metric, metric_timestamp, fp_id, full_duration,
@@ -5795,6 +5843,28 @@ def get_features_profiles_to_validate(base_name):
             if int(fp_full_duration) > int(maximum_full_duration):
                 maximum_full_duration = int(fp_full_duration)
 
+    # @added 20220304 - Task #4486: Review Ionosphere learn from learn duration
+    #                   Feature #2484: FULL_DURATION feature profiles
+    #                   Feature #3380: Create echo features profile when a Mirage features profile is created
+    # With the introduce of echo features profiles there can now be 3 durations,
+    # when previously there were only 3.  Now there can be
+    # [FULL_DURATION, SECOND_ORDER_RESOLUTION_SECONDS, IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS]
+    # this only impacts the metadata displayed on the validate features profiles
+    # page.
+    metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+    all_full_durations = []
+    metric_fp_ids = get_ionosphere_fp_ids_for_full_duration(skyline_app, metric_id, full_duration=0, enabled=True)
+    for i_fp_id in list(metric_fp_ids.keys()):
+        all_full_durations.append(metric_fp_ids[i_fp_id][2])
+    all_full_durations = sorted(list(set(all_full_durations)))
+    logger.info('%s :: all_full_durations: %s' % (
+        function_str, str(all_full_durations)))
+    if all_full_durations[0] == settings.FULL_DURATION:
+        minimum_full_duration = all_full_durations[1]
+    else:
+        minimum_full_duration = all_full_durations[0]
+    maximum_full_duration = all_full_durations[-1]
+
     # Get the features profile parent details (or parent parent if needed) to
     # determine the correct arguments for the ionosphere_image URIs for the
     # graph images of the parent, from which the fp being evaluated this was
@@ -5888,16 +5958,31 @@ def get_features_profiles_to_validate(base_name):
         fp_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
             str(anomaly_timestamp))
-        full_duration_in_hours = fp_full_duration / 60 / 60
+        fp_full_duration_in_hours = fp_full_duration / 60 / 60
         fp_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(anomaly_timestamp)))
         fp_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
-            str(fp_data_dir), base_name, str(int(full_duration_in_hours)))
+            str(fp_data_dir), base_name, str(int(fp_full_duration_in_hours)))
         if int(fp_full_duration) < maximum_full_duration:
             fp_hours = int(maximum_full_duration / 60 / 60)
             get_hours = str(fp_hours)
         else:
             fp_hours = int(minimum_full_duration / 60 / 60)
             get_hours = str(fp_hours)
+
+        # @added 20220304 - Task #4486: Review Ionosphere learn from learn duration
+        #                   Feature #2484: FULL_DURATION feature profiles
+        #                   Feature #3380: Create echo features profile when a Mirage features profile is created
+        for index, i_full_duration in enumerate(all_full_durations):
+            if int(fp_full_duration) == i_full_duration:
+                try:
+                    get_fp_hours = int(all_full_durations[(index + 1)] / 60 / 60)
+                except IndexError:
+                    get_fp_hours = int(all_full_durations[index] / 60 / 60)
+                logger.info('%s :: changing get_hours from %s to %s for fp_learn_graph_uri' % (
+                    function_str, str(get_hours), str(get_fp_hours)))
+                get_hours = str(get_fp_hours)
+                break
+
         fp_learn_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
             str(fp_data_dir), base_name, get_hours)
 
@@ -5932,6 +6017,21 @@ def get_features_profiles_to_validate(base_name):
         else:
             fp_hours = int(maximum_full_duration / 60 / 60)
             get_hours = str(fp_hours)
+
+        # @added 20220304 - Task #4486: Review Ionosphere learn from learn duration
+        #                   Feature #2484: FULL_DURATION feature profiles
+        #                   Feature #3380: Create echo features profile when a Mirage features profile is created
+        for index, i_full_duration in enumerate(all_full_durations):
+            if int(fp_full_duration) == i_full_duration:
+                try:
+                    get_fp_hours = int(all_full_durations[(index + 1)] / 60 / 60)
+                except IndexError:
+                    get_fp_hours = int(all_full_durations[index] / 60 / 60)
+                logger.info('%s :: changing get_hours from %s to %s for fp_learn_graph_uri' % (
+                    function_str, str(get_hours), str(get_fp_hours)))
+                get_hours = str(get_fp_hours)
+                break
+
         parent_fp_learn_graph_uri = 'ionosphere_images?image=%s/%s.graphite_now.%sh.png' % (
             # str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))
             str(parent_fp_data_dir), base_name, get_hours)
