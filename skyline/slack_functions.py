@@ -100,11 +100,19 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
                     text=message,
                     thread_ts=thread_ts
                 )
-        except:
-            current_logger.error(traceback.format_exc())
-            current_logger.error(
-                'error :: slack_post_to_thread :: falied to post message to thread %s - %s' % (
-                    thread_ts, message))
+        except Exception as err:
+            # @added 20220422 - Bug #4448: Handle missing slack response
+            # Handle slack SSL errors which occur more than one would expect
+            if 'CERTIFICATE_VERIFY_FAILED' in str(err):
+                slack_post = {'ok': False, 'slack_ssl_error': True}
+                fail_msg = 'warning :: slack_post_message :: failed to post message to thread (slack SSL issue) - %s - %s - %s' % (
+                    thread_ts, message, err)
+                current_logger.warning('%s' % fail_msg)
+            else:
+                current_logger.error(traceback.format_exc())
+                current_logger.error(
+                    'error :: slack_post_message :: failed to post message to thread %s - %s - %s' % (
+                        thread_ts, message, err))
             # @modified 20200826 - Bug #3710: Gracefully handle slack failures
             # return False
             return slack_post
@@ -124,11 +132,19 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
                     icon_emoji=icon_emoji,
                     text=message
                 )
-        except:
-            current_logger.error(traceback.format_exc())
-            current_logger.error(
-                'error :: slack_post_message :: falied to post message to thread %s - %s' % (
-                    thread_ts, message))
+        except Exception as err:
+            # @added 20220422 - Bug #4448: Handle missing slack response
+            # Handle slack SSL errors which occur more than one would expect
+            if 'CERTIFICATE_VERIFY_FAILED' in str(err):
+                slack_post = {'ok': False, 'slack_ssl_error': True}
+                fail_msg = 'warning :: slack_post_message :: failed to post message to thread (slack SSL issue) - %s - %s - %s' % (
+                    thread_ts, message, err)
+                current_logger.warning('%s' % fail_msg)
+            else:
+                current_logger.error(traceback.format_exc())
+                current_logger.error(
+                    'error :: slack_post_message :: falied to post message to thread %s - %s' % (
+                        thread_ts, message))
             # @modified 20200826 - Bug #3710: Gracefully handle slack failures
             # return False
             return slack_post
@@ -196,6 +212,10 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
 
     # slack_response = None
 
+    # @added 20220328 - Bug #4448: Handle missing slack response
+    # Handle slack SSL errors which occur more than one would expect
+    slack_ssl_error = False
+
     try:
         # @modified 20200701 - Task #3612: Upgrade to slack v2
         #                      Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -213,15 +233,32 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
                 name=emoji,
                 timestamp=thread_ts
             )
-    except:
-        current_logger.error(traceback.format_exc())
-        current_logger.error(
-            'error :: slack_post_reaction :: falied to post reaction to thread %s - %s' % (
-                thread_ts, emoji))
-        # @modified 20200826 - Bug #3710: Gracefully handle slack failures
-        # return False
-        return slack_response
-    if not slack_response['ok']:
+    except Exception as err:
+        # @added 20200826 - Bug #3710: Gracefully handle slack failures
+        # Handle already_reacted
+        if 'already_reacted' in str(err):
+            current_logger.info(
+                'slack_post_reaction :: post reaction to thread %s - %s - (already_reacted)' % (
+                    thread_ts, emoji))
+            slack_response['ok'] = True
+        elif 'CERTIFICATE_VERIFY_FAILED' in str(err):
+            slack_ssl_error = True
+
+            # @added 20220422 - Bug #4448: Handle missing slack response
+            # Handle slack SSL errors which occur more than one would expect
+            slack_response = {'ok': False, 'slack_ssl_error': True}
+
+            fail_msg = 'warning :: create_features_profile :: failed to slack_post_message - %s' % err
+            current_logger.warning('%s' % fail_msg)
+        else:
+            current_logger.warning(traceback.format_exc())
+            current_logger.warning(
+                'warning :: slack_post_reaction :: failed to post reaction to thread %s - %s - %s' % (
+                    thread_ts, emoji, err))
+            # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+            # return False
+            return slack_response
+    if not slack_response['ok'] and not slack_ssl_error:
         # @modified 20220214 - Bug #4448: Handle missing slack response
         # if str(slack_response['error']) == 'already_reacted':
         slack_response_error = None
@@ -237,7 +274,7 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
                     channel, str(thread_ts)))
         else:
             current_logger.error(
-                'error :: slack_post_reaction :: falied to post reaction to channel %s, thread %s - %s' % (
+                'error :: slack_post_reaction :: failed to post reaction to channel %s, thread %s - %s' % (
                     channel, str(thread_ts), emoji))
             current_logger.error(
                 'error :: slack_post_reaction :: slack response dict follows')
