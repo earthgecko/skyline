@@ -1,0 +1,17 @@
+[Unit]
+Description=luminosity instance (Skyline)
+After=network.target
+
+[Service]
+Environment=PATH=/opt/python_virtualenv/projects/skyline/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin
+Environment=VIRTUAL_ENV=/opt/python_virtualenv/projects/skyline
+Type=forking
+User=skyline
+Group=skyline
+ExecStart=/opt/skyline/github/skyline/bin/luminosity.d start
+ExecStop=/opt/skyline/github/skyline/bin/luminosity.d stop
+PIDFile=/var/run/skyline/luminosity.pid
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

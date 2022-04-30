@@ -7,25 +7,49 @@
 #  and serving SSL on the machine and no other nginx sites being served.
 #
 
+## You would normally put these map definitions in your main nginx config
+    map $remote_addr $proxy_forwarded_elem {
+        # IPv4 addresses can be sent as-is
+        ~^[0-9.]+$          "for=$remote_addr";
+        # IPv6 addresses need to be bracketed and quoted
+        ~^[0-9A-Fa-f:.]+$   "for=\"[$remote_addr]\"";
+        # Unix domain socket names cannot be represented in RFC 7239 syntax
+        default             "for=unknown";
+    }
+    map $http_forwarded $proxy_add_forwarded {
+        # If the incoming Forwarded header is syntactically valid, append to it
+        "~^(,[ \\t]*)*([!#$%&'*+.^_`|~0-9A-Za-z-]+=([!#$%&'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?(;([!#$%&'*+.^_`|~0-9A-Za-z-]+=([!#$%&'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?)*([ \\t]*,([ \\t]*([!#$%&'*+.^_`|~0-9A-Za-z-]+=([!#$%&'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?(;([!#$%&'*+.^_`|~0-9A-Za-z-]+=([!#$%&'*+.^_`|~0-9A-Za-z-]+|\"([\\t \\x21\\x23-\\x5B\\x5D-\\x7E\\x80-\\xFF]|\\\\[\\t \\x21-\\x7E\\x80-\\xFF])*\"))?)*)?)*$" "$http_forwarded, $proxy_forwarded_elem";
+        # Otherwise, replace it
+        default "$proxy_forwarded_elem";
+    }
+
   upstream skyline-webapp {
     server 127.0.0.1:1500;
     # maintain a maximum of 20 idle connections to each upstream server
     keepalive 20;
   }
 
-  # Only required if you are posting metrics to Skyline via HTTP
-#  upstream skyline-flux {
-#    server 127.0.0.1:8000;
+  upstream skyline-flux {
+    server 127.0.0.1:8000;
+    # maintain a maximum of 20 idle connections to each upstream server
+    keepalive 20;
+  }
+
+  # Only required if you enable opentelemetry and want to server Jaeger directly
+  # via a Skyline UI endpoint
+#  upstream jaeger {
+#    server 127.0.0.1:16686;
 #    # maintain a maximum of 20 idle connections to each upstream server
 #    keepalive 20;
 #  }
 
-  server {
-      listen 80 default_server;
-      listen [::]:80 default_server;
-
-      return 301 https://$host$request_uri;
-  }
+# If you want to listen on http and redirect to https you need to uncomment
+# this AND comment out the default_server section in /etc/nginx/nginx.conf
+#  server {
+#      listen 80 default_server;
+#      listen [::]:80 default_server;
+#      return 301 https://$host$request_uri;
+#  }
 
   server {
 
@@ -59,8 +83,9 @@
     add_header Strict-Transport-Security "max-age=63072000" always;
 
     # OCSP stapling
-    ssl_stapling on;
-    ssl_stapling_verify on;
+## If you use a letsencrypt type of certificate uncomment these 2 lines
+#    ssl_stapling on;
+#    ssl_stapling_verify on;
 
     # verify chain of trust of OCSP response using Root CA and Intermediate certs
     # if you are using a letsencrypt certificate this is same as your certificate
@@ -88,6 +113,25 @@
     proxy_connect_timeout 120s;
     proxy_send_timeout 120s;
 
+    # JAEGER
+    # Only enable this if you enable opentelemetry and want to server Jaeger
+    # directly via a Skyline UI endpoint
+    # IMPORTANT you must start Jaeger with --query.base-path=/jaeger otherwise
+    # Jaeger will not be available via the Skyline UI via /jaeger
+#    location /jaeger {
+#      satisfy any;
+#      allow <YOUR_SERVER_IP_ADDRESS>;
+#      allow <YOUR_OTHER_IP_ADDRESS>;
+#      deny all;
+#      auth_basic "Authorization required";
+#      auth_basic_user_file /etc/nginx/conf.d/.skyline_htpasswd;
+#      proxy_set_header Host $host;
+#      proxy_set_header Forwarded $proxy_add_forwarded;
+#      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#      proxy_set_header X-Forwarded-Proto $scheme;
+#      proxy_pass http://jaeger;
+#    }
+
     # Allow authorized IPs to access /api without auth
     location /api {
       satisfy any;
@@ -99,28 +143,33 @@
       proxy_set_header Host $host;
       proxy_set_header Forwarded $proxy_add_forwarded;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto $scheme";
+      proxy_set_header X-Forwarded-Proto $scheme;
       proxy_pass http://skyline-webapp;
     }
 
-## Only required if you are posting metrics to Skyline flux via HTTP
-#    location /flux/ {
-#      ## You can uncomment this in order to turn authentication off
-#      # auth_basic "off";
-#      # allow all;
-#      ## Limit the max body size as falcon does not, the ungzipped json for 450
-#      ## metrics with LONG names and LONG values was 92K.  However a partitioned
-#      ## telegraf collector can send 10s of 1000s of metrics in a single payload
-#      ## when the network partition is resolved so very large payloads can be
-#      ## expected.
-#      client_max_body_size 1024K;
-#
-#      proxy_set_header Host $host;
-#      proxy_set_header Forwarded $proxy_add_forwarded;
-#      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-#      proxy_set_header X-Forwarded-Proto $scheme";
-#      proxy_pass http://skyline-flux/;
-#    }
+    # Only required if you are posting metrics to Skyline flux via HTTP
+    location /flux/ {
+      satisfy any;
+      allow <YOUR_SERVER_IP_ADDRESS>;
+      allow <YOUR_OTHER_IP_ADDRESS>;
+      deny all;
+      ## You can comment this out in order to turn authentication off
+      auth_basic "Authorization required";
+      auth_basic_user_file /etc/nginx/conf.d/.skyline_htpasswd;
+
+      ## Limit the max body size as falcon does not, the ungzipped json for 450
+      ## metrics with LONG names and LONG values was 92K.  However a partitioned
+      ## telegraf collector can send 10s of 1000s of metrics in a single payload
+      ## when the network partition is resolved so very large payloads can be
+      ## expected.
+      client_max_body_size 1024K;
+
+      proxy_set_header Host $host;
+      proxy_set_header Forwarded $proxy_add_forwarded;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_pass http://skyline-flux/;
+    }
 
 
 ## To create the htpasswd password file
@@ -140,7 +189,7 @@
       proxy_set_header Host $host;
       proxy_set_header Forwarded $proxy_add_forwarded;
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_set_header X-Forwarded-Proto $scheme";
+      proxy_set_header X-Forwarded-Proto $scheme;
 
       proxy_pass http://skyline-webapp;
 

@@ -19,7 +19,7 @@ and considerations relating to the following components:
 
 - Graphite
 - Redis
-- MySQL
+- MariaDB
 - nginx
 - memcached
 
@@ -32,10 +32,16 @@ recommendations in terms of configurations of the various components and how and
 where they should be run in relation to Skyline.  There are no cfengine, puppet,
 chef or ansible patterns here.
 
+There are two methods of installation described here:
+
+- The quickstart standalone build script
+- Manual install
+
 The documentation is aimed at installing Skyline securely by default.  It is
 possible to run Skyline very insecurely, however this documentation does not
 specify how to do that.  Both the set up and documentation are verbose.  Setting
-up Skyline takes a while.
+up Skyline takes a while, the quickstart installation script takes about 30
+minutes to run.
 
 Skyline's default settings and documentation are aimed to run behind a SSL
 terminated and authenticated reverse proxy and use Redis authentication.  This
@@ -50,38 +56,27 @@ the end of this page.
 What the components do
 ----------------------
 
-- Graphite - sends metric data to Skyline Horizon via a pickle (Python object
-  serialization).  Graphite is a separate application that will probably be
-  running on another server, although Graphite could run on the same server, in
-  a production environment it will probably be a remote machine or container.
-  Graphite is not part of Skyline.
+- Graphite - is a TSDB that receives metrics for machines and applications,
+  stores the metric data and sends the metric data to Skyline Horizon via a
+  pickle (Python object serialization).  Graphite is a separate application that
+  will probably be running on another server in a large production deployment,
+  although Graphite can run on the same server as Skyline.  Graphite is not part
+  of Skyline, however the standalone build script does install Graphite by
+  default.
 - Redis - stores :mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
   of time series data that Graphite sends to Skyline Horizon and Horizon writes
   the data to Redis.  Skyline Analyzer pulls the data from Redis for analysis.
   Redis must run on the same host as Skyline.  It may be possible to run Redis
   in another container or VM that is on the same host.
-- MySQL/MariaDB - stores data about anomalies and time series features profile
+- MariaDB - stores data about anomalies and time series features profile
   fingerprints for matching and learning things that are not anomalous.  mariadb
   can run on the same host as Skyline or it can be remote.  Running the DB
   remotely will make the Skyline a little bit slower.
-- nginx - Skyline serves the webapp via gunicorn and nginx handles endpoint
-  routing, SSL termination and basic http auth.  Ideally the reverse proxy
-  should be run on the same host as Skyline.
-- memcached - caches Ionosphere MySQL data, memcached should ideally be run on
+- nginx - Skyline serves the webapp and flux via gunicorn and nginx handles
+  endpoint routing, SSL termination and basic http auth.  Ideally the reverse
+  proxy should be run on the same host as Skyline.
+- memcached - caches Ionosphere SQL data, memcached should ideally be run on
   the same host as Skyline.
-
-``sudo``
-~~~~~~~~
-
-Use ``sudo`` appropriately for your environment wherever necessary.
-
-Steps
------
-
-.. note:: All the documentation and testing is based on running Skyline in a
-  Python-3.8.12 virtualenv, if you choose to deploy Skyline another way, you are
-  on your own.  Although it is possible to run Skyline in a different type of
-  environment, it does not lend itself to repeatability or a common known state.
 
 Skyline configuration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -103,21 +98,47 @@ this page and labelled with ``[USER_DEFINED]`` in the settings.py
   and alerts on the data, in order to understand their use, implementation and
   execution.  This knowledge comes from use and experience and the documentation
   cannot describe every aspect of all the highly configurable manners in which
-  Skyline can be run.
+  Skyline can be run.  Further to this any feature labelled with ADVANCED FEATURE
+  or EXPERIMENTAL should be considered as not stable and may change rapidly with
+  backwards incompatible changes or not entirely fleshed out or used. One
+  exception to this being cluster related settings which can be considered
+  latest and should be stable.
 
-Dawn
-~~~~
+Ouickstart - Dawn
+-----------------
 
-- Should you wish to review the build steps, component builds and installs
-  described below, there is a convenience build script for **testing** purposes
-  **only** in `utils/dawn/skyline.dawn.sh` see
-  `Dawn <development/dawn.html>`__ section
+- `utils/dawn/skyline.dawn.sh` is a set up script to deploy a standalone Skyline
+  and Graphite instance, it is for testing purposes and if used to deploy a
+  permanent instance the recommendations regarding security and configuration
+  should be followed, see `Dawn <development/dawn.html>`__ section.
+- Or should you wish to just review the build steps, component builds and installs
+  described below, the convenience build script you can review
+  `utils/dawn/skyline.dawn.sh` and see `Dawn <development/dawn.html>`__ section.
+
+Manual Installation
+-------------------
+
+.. note:: All the documentation and testing is based on running Skyline in a
+  Python-3.8.13 virtualenv, if you choose to deploy Skyline another way, you are
+  on your own.  Although it is possible to run Skyline in a different type of
+  environment, it does not lend itself to repeatability or a common known state.
+
+Considering Skyline is composed on a number of common open source applications
+the manual installation described here does not cover installing these
+applications other than describing the Skyline specific configurations that they
+require.  Note that deploying Skyline via configuration management is
+non-trivial due to the number of components and configurations involved.
+
+``sudo``
+~~~~~~~~
+
+Use ``sudo`` appropriately for your environment wherever necessary.
 
 Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
 - The first part of the installation is to build Python and create a
-  Python-3.8.12 virtualenv for Skyline to run in.  For this first step in the
+  Python-3.8.13 virtualenv for Skyline to run in.  For this first step in the
   installation process see and follow the steps laid out in
   `Running Skyline in a Python virtualenv <running-in-python-virtualenv.html>`__
 
@@ -130,10 +151,10 @@ Firewall
   - The IP address and port being used to reverse proxy the Webapp e.g.
     <YOUR_SERVER_IP_ADDRESS>:443, ensure that this is only accessible to
     specified IPs in iptables/ip6tables (further these addresses should also be
-    added to the reverse proxy conf as ``Allow from`` or ``allow`` defines when
-    you create the reverse proxy conf file).
-  - The IP address and port being used by MySQL/MariaDB, if you are not binding
-    MySQL/MariaDB to 127.0.0.1 only, ensure that the MySQL/MariaDB port declared
+    added to the reverse proxy conf as ``allow`` defines when you create the
+    nginx reverse proxy conf file).
+  - The IP address and port being used by MariaDB, if you are not binding
+    MariaDB to 127.0.0.1 only, ensure that the MariaDB port declared
     in :mod:`settings.PANORAMA_DBPORT` (default 3306) is only accessible to
     specified IPs in iptables/ip6tables
   - Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
@@ -148,7 +169,7 @@ Firewall
     available to remote Skyline instances for any required remote Redis data
     retrieval and preprocessing.
   - If you are going to run Vista and Flux, ensure that the Skyline IP is
-    allowed to connect to the Graphite node on the `PICKLE_RECEIVER_PORT`
+    allowed to connect to the Graphite node on the `[relay]` ``PICKLE_RECEIVER_PORT``
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) **before continuing**.
 
@@ -186,6 +207,7 @@ memcached
 Skyline directories
 ~~~~~~~~~~~~~~~~~~~
 
+- Create the skyline user and group with the following options ``--system --shell /sbin/nologin --home-dir /opt/skyline``
 - Make the required directories
 
 .. code-block:: bash
@@ -204,8 +226,7 @@ Skyline directories
     mkdir /tmp/skyline
 
 .. note:: Ensure you provide the appropriate ownership and permissions to the
-  above specified directories for the user you wish to run the Skyline process
-  as.
+  above specified directories.
 
 .. code-block:: bash
 
@@ -225,8 +246,8 @@ Skyline and dependencies install
 
 - git clone Skyline (git should have been installed in the `Running in Python
   virtualenv <running-in-python-virtualenv.html>`__ section) and it is
-  recommended to then git checkout the commit reference of the latest stable
-  release.
+  recommended to then git checkout the commit reference or tag of the latest
+  stable release.
 
 .. code-block:: bash
 
@@ -236,8 +257,11 @@ Skyline and dependencies install
     # If you wish to switch to a specific commit or the latest release
     #cd /opt/skyline/github/skyline
     #git checkout <COMMITREF>
+    mkdir -p /opt/skyline/github/skyline/skyline/webapp/static/dump
+    chown skyline:skyline -R /opt/skyline/github/skyline/skyline/webapp/static/dump
 
-- Once again using the Python-3.8.12 virtualenv,  install the requirements using
+
+- Once again using the Python-3.8.13 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -254,7 +278,10 @@ Skyline and dependencies install
 
     PYTHON_MAJOR_VERSION="3"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3812"
+    PROJECT="skyline-py3813"
+
+    # Ensure a symlink exists to the virtualenv
+    ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" "${PYTHON_VIRTUALENV_DIR}/projects/skyline"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -262,11 +289,21 @@ Skyline and dependencies install
     # As of statsmodels 0.9.0 numpy, et al need to be installed before
     # statsmodels in requirements
     # https://github.com/statsmodels/statsmodels/issues/4654
-    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
-    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==")
-
-    # This can take lots of minutes...
-    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
+    cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.1.txt
+    cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==" > /tmp/requirements.2.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.2.txt
+    # Currently matrixprofile protobuf version conflicts with the opentelemetry
+    # required version
+    cat /opt/skyline/github/skyline/requirements.txt | grep -v "^opentelemetry" > /tmp/requirements.3.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.3.txt
+    # Handle conflict between opentelemetry contrib packages and opentelemetry
+    # main because opentelemetry contibs are behind main
+    cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep -v "1.11.1" > /tmp/requirements.4.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.4.txt
+    # opentelemetry main
+    cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep "1.11.1" > /tmp/requirements.5.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.5.txt
 
     deactivate
 
@@ -280,11 +317,17 @@ Skyline and dependencies install
     # Deploy patched version to fix
     cat /opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py > "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py"
 
+    # Deploy the systemd files
+    for i in $(find /opt/skyline/github/skyline/etc/systemd/system -type f)
+    do
+      /bin/cp -f "$i" /etc/systemd/system/
+    done
+    systemctl daemon-reload
 
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py3812/bin/python3.8``
+  ``/opt/python_virtualenv/projects/skyline-py3813/bin/python3.8``
 
 .. code-block:: bash
 
@@ -309,7 +352,7 @@ the nginx resources and set up the is required.
 
     htpasswd -c /etc/nginx/conf.d/.skyline_htpasswd admin
 
-.. note:: Ensure that the user and password for Apache match the user and
+.. note:: Ensure that the user and password for nginx match the user and
   password that you provide in `settings.py` for
   :mod:`settings.WEBAPP_AUTH_USER` and :mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
 
@@ -325,7 +368,7 @@ the nginx resources and set up the is required.
 Skyline database
 ~~~~~~~~~~~~~~~~
 
-- Create the Skyline MySQL/MariaDB database for Panorama (see
+- Create the Skyline MariaDB database for Panorama (see
   `Panorama <panorama.html>`__) and Ionosphere.
 
 Skyline settings
@@ -354,8 +397,8 @@ types are briefly outlined here to inform the user of the types.
 There are a lot of settings in Skyline because it is highly configurable in many
 different aspects and it has a lot of advanced features in terms of clustering,
 other time series analysis capabilities and analysis methodologies.  This means
-there is a lot of settings that will make no sense to the user.  The important
-ones are labelled with ``[USER_DEFINED]`` in the settings.py
+there is a lot of settings that will make no sense to the user initially.  The
+important ones are labelled with ``[USER_DEFINED]`` in the settings.py
 
 Required changes to settings.py follow.
 
@@ -401,7 +444,7 @@ Required changes to settings.py follow.
   - :mod:`settings.THUNDER_OPTS` ensure you update these
   - :mod:`settings.MIRAGE_ENABLE_ALERTS` set this to ```True``` if you want to
     have Mirage running as described above.
-  - If you are deploying with a Skyline MySQL Panorama DB straight away ensure
+  - If you are deploying with a Skyline MariaDB Panorama DB straight away ensure
     that :mod:`settings.PANORAMA_ENABLED` is set to ``True`` and set all the
     other Panorama related variables as appropriate.  Enabling Panorama from the
     start is RECOMMENDED as it is integral to Ionosphere and Luminosity.
@@ -458,23 +501,35 @@ Starting and testing the Skyline installation
 - Before you test Skyline by seeding Redis with some test data, ensure
   that you have configured the firewall/iptables/ip6tables with the appropriate
   restricted access.
-- Start the Skyline apps
+- Start the Skyline services
 
 .. code-block:: bash
 
-    /opt/skyline/github/skyline/bin/horizon.d start
-    /opt/skyline/github/skyline/bin/analyzer.d start
-    /opt/skyline/github/skyline/bin/mirage.d start
-    /opt/skyline/github/skyline/bin/webapp.d start
-    # And Panorama if you have set up in the DB at this stage
-    /opt/skyline/github/skyline/bin/panorama.d start
-    /opt/skyline/github/skyline/bin/ionosphere.d start
-    /opt/skyline/github/skyline/bin/luminosity.d start
-
+    for i in $(find /opt/skyline/github/skyline/etc/systemd/system -type f)
+    do
+      /bin/cp -f "$i" /etc/systemd/system/
+    done
+    systemctl daemon-reload
+    systemctl start horizon
+    systemctl start panorama
+    systemctl start analyzer
+    systemctl start mirage
+    systemctl start ionosphere
+    systemctl start luminosity
+    systemctl start webapp
     # You can also start thunder - Skyline's internal monitoring but it may
     # fire a few alerts until you have some metrics being fed in, but that is
     # OK.
-    /opt/skyline/github/skyline/bin/thunder.d start
+    systemctl start thunder
+
+    # Alternatively at a later point you can start any other Skyline services
+    # you may wish to use
+    # systemctl start boundary
+    # systemctl start flux
+    # systemctl start analyzer_batch
+    # systemctl start snab
+    # systemctl start crucible
+
 
 - Check the log files to ensure things started OK and are running and there are
   no errors.
@@ -550,14 +605,18 @@ Configure Graphite to send data to Skyline
 Other Skyline components
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-- For Mirage set up see `Mirage <mirage.html>`__
 - For Boundary set up see `Boundary <boundary.html>`__
+- For Flux set up see `Flux <flux.html>`__
 - For more in-depth Ionosphere set up see `Ionosphere <ionosphere.html>`__
   however Ionosphere is only relevant once Skyline has at least
   :mod:`settings.FULL_DURATION` data in Redis.
 
 Automation and configuration management notes
 ---------------------------------------------
+
+Deploying Skyline via configuration management is non-trivial due to the number
+of components and configurations involved and is well beyond the scope of this
+documentation.
 
 The installation of packages in the ``requirements.txt`` can take a long time,
 specifically the pandas build.  This will usually take longer than the default
