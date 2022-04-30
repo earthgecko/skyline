@@ -9501,7 +9501,8 @@ def upload_data():
     return 'Bad Request', 400
 
 
-# @added 20220403 - otlp data
+# @added 20220403 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
 @app.route('/otel_trace', methods=['POST'])
 def otel_trace():
     from opentelemetry.proto.trace.v1 import trace_pb2
