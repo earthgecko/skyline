@@ -34,6 +34,8 @@ if True:
         # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
         #                   Bug #3778: Handle single encoded forward slash requests to Graphite
         sanitise_graphite_url)
+    # @added 20220429 - Feature #4536: Handle Redis failure
+    from functions.flux.get_last_metric_data import get_last_metric_data
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'fetcher'
@@ -399,40 +401,66 @@ class Fetcher(Thread):
             last_flux_timestamp = None
             redis_last_flux_metric_data = None
             cache_key = 'flux.last.%s' % metric
-            try:
-                # if python_version == 3:
-                #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
-                # else:
-                #     redis_last_flux_metric_data = self.redis_conn.get(cache_key)
-                redis_last_flux_metric_data = self.redis_conn_decoded.get(cache_key)
 
-                if LOCAL_DEBUG:
-                    if redis_last_flux_metric_data:
-                        logger.info('fetcher :: Redis key %s is present' % str(cache_key))
-                    else:
-                        logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
-            except AttributeError:
-                logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
-                last_flux_timestamp = False
-                redis_last_flux_metric_data = False
-            except Exception as e:
-                logger.error(traceback.format_exc())
-                logger.error('error :: fetcher :: retrieving Redis key %s data - %s' % (
-                    str(cache_key), str(e)))
-                redis_last_flux_metric_data = False
-            if redis_last_flux_metric_data:
+            # @added 20220429 - Feature #4536: Handle Redis failure
+            # Swap to using a Redis hash instead of the
+            # flux.last.<metric> keys
+            use_old_timestamp_keys = True
+            redis_last_metric_data_dict = {}
+            try:
+                redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
+            except Exception as err:
+                logger.error('error :: populate_metric_worker :: get_last_metric_data failed - %s' % (
+                    err))
+            if redis_last_metric_data_dict:
                 try:
-                    last_flux_metric_data = literal_eval(redis_last_flux_metric_data)
-                    last_flux_timestamp = int(last_flux_metric_data[0])
+                    last_flux_timestamp = redis_last_metric_data_dict['timestamp']
+                    use_old_timestamp_keys = False
+                except KeyError:
+                    last_flux_timestamp = None
+                except Exception as err:
+                    logger.error('error :: populate_metric_worker :: failed to get timestamp from - %s - %s' % (
+                        str(redis_last_metric_data_dict), err))
+                    last_flux_timestamp = None
+
+            # @modified 20220429 - Feature #4536: Handle Redis failure
+            # Swap to using a Redis hash instead of the
+            # flux.last.<metric> keys
+            if use_old_timestamp_keys:
+                try:
+                    # if python_version == 3:
+                    #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                    # else:
+                    #     redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+                    redis_last_flux_metric_data = self.redis_conn_decoded.get(cache_key)
+
                     if LOCAL_DEBUG:
-                        if last_flux_timestamp:
-                            logger.info('fetcher :: Redis key %s last_flux_timestamp %s' % (str(cache_key), str(last_flux_timestamp)))
+                        if redis_last_flux_metric_data:
+                            logger.info('fetcher :: Redis key %s is present' % str(cache_key))
                         else:
-                            logger.info('fetcher :: Redis key %s last_flux_timestamp unknown' % (str(cache_key)))
+                            logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
+                except AttributeError:
+                    logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
+                    last_flux_timestamp = False
+                    redis_last_flux_metric_data = False
                 except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: fetch :: failed determining last_flux_timestamp - %s' % e)
-                    last_flux_timestamp = False
+                    logger.error('error :: fetcher :: retrieving Redis key %s data - %s' % (
+                        str(cache_key), str(e)))
+                    redis_last_flux_metric_data = False
+                if redis_last_flux_metric_data:
+                    try:
+                        last_flux_metric_data = literal_eval(redis_last_flux_metric_data)
+                        last_flux_timestamp = int(last_flux_metric_data[0])
+                        if LOCAL_DEBUG:
+                            if last_flux_timestamp:
+                                logger.info('fetcher :: Redis key %s last_flux_timestamp %s' % (str(cache_key), str(last_flux_timestamp)))
+                            else:
+                                logger.info('fetcher :: Redis key %s last_flux_timestamp unknown' % (str(cache_key)))
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: fetch :: failed determining last_flux_timestamp - %s' % e)
+                        last_flux_timestamp = False
 
             value = None
             timestamp = None
@@ -498,6 +526,16 @@ class Fetcher(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: fetcher :: even though no data points, failed to set Redis key - %s - %s' % (
                             cache_key, e))
+
+                    # @added 20220429 - Feature #4536: Handle Redis failure
+                    # Swap to using a Redis hash instead of the
+                    # flux.last.<metric> keys
+                    metric_data_dict = {'timestamp': int(last_ts), 'value': None}
+                    try:
+                        self.redis_conn.hset('flux.last.metric_data', metric, str(metric_data_dict))
+                    except Exception as err:
+                        logger.error('error :: fetcher :: failed to set flux.last.metric_data Redis key - %s' % str(err))
+
                     # Adding to the vista.fetcher.unique_metrics Redis set
                     redis_set = 'vista.fetcher.unique_metrics'
                     data = str(metric)
@@ -662,6 +700,7 @@ class Fetcher(Thread):
             # Report app up
             try:
                 self.redis_conn.setex(skyline_app, 120, begin_fetcher_run)
+                logger.info('fetcher :: set Redis %s key, to report UP' % skyline_app)
             except:
                 logger.error('error :: fetcher :: could not update the Redis %s key' % skyline_app)
                 logger.error(traceback.format_exc())
@@ -710,7 +749,7 @@ class Fetcher(Thread):
                 try:
                     # remote_host_type = fetch_tuple[1]
                     valid_remote_host_type = False
-                    if remote_host_type == 'graphite' or remote_host_type == 'prometheus':
+                    if remote_host_type in ['graphite', 'prometheus']:
                         valid_remote_host_type = True
                     if not valid_remote_host_type:
                         logger.error('error :: invalid remote_host_type for %s in %s' % (
@@ -816,46 +855,72 @@ class Fetcher(Thread):
                 # for he metric
                 last_flux_timestamp = None
                 redis_last_flux_metric_data = None
-                cache_key = None
-                try:
-                    cache_key = 'flux.last.%s' % metric
-                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # if python_version == 3:
-                    #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
-                    # else:
-                    #     redis_last_flux_metric_data = self.redis_conn.get(cache_key)
-                    redis_last_flux_metric_data = self.redis_conn_decoded.get(cache_key)
 
-                    if LOCAL_DEBUG:
-                        if redis_last_flux_metric_data:
-                            logger.info('fetcher :: Redis key %s is present' % str(cache_key))
-                        else:
-                            logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
-                except AttributeError:
-                    logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
-                    last_flux_timestamp = False
-                    redis_last_flux_metric_data = False
-                except Exception as e:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: fetcher :: retrieving Redis key %s data - %s' % (
-                        str(cache_key), str(e)))
-                    redis_last_flux_metric_data = False
-                if redis_last_flux_metric_data:
+                # @added 20220429 - Feature #4536: Handle Redis failure
+                # Swap to using a Redis hash instead of the
+                # flux.last.<metric> keys
+                use_old_timestamp_keys = True
+                redis_last_metric_data_dict = {}
+                try:
+                    redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
+                except Exception as err:
+                    logger.error('error :: populate_metric_worker :: get_last_metric_data failed - %s' % (
+                        err))
+                if redis_last_metric_data_dict:
                     try:
-                        last_flux_metric_data = literal_eval(redis_last_flux_metric_data)
-                        last_flux_timestamp = int(last_flux_metric_data[0])
+                        last_flux_timestamp = redis_last_metric_data_dict['timestamp']
+                        use_old_timestamp_keys = False
+                    except KeyError:
+                        last_flux_timestamp = None
+                    except Exception as err:
+                        logger.error('error :: populate_metric_worker :: failed to get timestamp from - %s - %s' % (
+                            str(redis_last_metric_data_dict), err))
+                        last_flux_timestamp = None
+
+                # @modified 20220429 - Feature #4536: Handle Redis failure
+                # Swap to using a Redis hash instead of the
+                # flux.last.<metric> keys
+                if use_old_timestamp_keys:
+                    cache_key = None
+                    try:
+                        cache_key = 'flux.last.%s' % metric
+                        # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # if python_version == 3:
+                        #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                        # else:
+                        #     redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+                        redis_last_flux_metric_data = self.redis_conn_decoded.get(cache_key)
+
                         if LOCAL_DEBUG:
-                            if last_flux_timestamp:
-                                logger.info('fetcher :: Redis key %s last_flux_timestamp %s' % (str(cache_key), str(last_flux_timestamp)))
+                            if redis_last_flux_metric_data:
+                                logger.info('fetcher :: Redis key %s is present' % str(cache_key))
                             else:
-                                logger.info('fetcher :: Redis key %s last_flux_timestamp unknown' % (str(cache_key)))
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: fetch :: failed determining last_flux_timestamp')
+                                logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
+                    except AttributeError:
+                        logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
                         last_flux_timestamp = False
+                        redis_last_flux_metric_data = False
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: fetcher :: retrieving Redis key %s data - %s' % (
+                            str(cache_key), str(e)))
+                        redis_last_flux_metric_data = False
+                    if redis_last_flux_metric_data:
+                        try:
+                            last_flux_metric_data = literal_eval(redis_last_flux_metric_data)
+                            last_flux_timestamp = int(last_flux_metric_data[0])
+                            if LOCAL_DEBUG:
+                                if last_flux_timestamp:
+                                    logger.info('fetcher :: Redis key %s last_flux_timestamp %s' % (str(cache_key), str(last_flux_timestamp)))
+                                else:
+                                    logger.info('fetcher :: Redis key %s last_flux_timestamp unknown' % (str(cache_key)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: fetch :: failed determining last_flux_timestamp')
+                            last_flux_timestamp = False
 
                 time_now = int(time())
                 if last_flux_timestamp:
@@ -911,7 +976,7 @@ class Fetcher(Thread):
                         # Added older_than_resolution
                         # if populate_at_resolutions:
                         if populate_at_resolutions and older_than_resolution:
-                            if remote_host_type == 'graphite' or remote_host_type == 'prometheus':
+                            if remote_host_type in ['graphite', 'prometheus']:
                                 pre_populate_graphite_metric = True
                                 behind_by_seconds = time_now - last_flux_timestamp
                                 logger.info('fetcher :: last_flux_timestamp is behind by %s seconds, attempting to pre-populate %s' % (
@@ -920,13 +985,13 @@ class Fetcher(Thread):
                 if remote_target in vista_unique_metrics:
                     if not last_flux_timestamp:
                         if populate_at_resolutions:
-                            if remote_host_type == 'graphite' or remote_host_type == 'prometheus':
+                            if remote_host_type in ['graphite', 'prometheus']:
                                 pre_populate_graphite_metric = True
 
                 # Problem with asyncio so using Flux directly
                 if remote_target in vista_unique_metrics and last_flux_timestamp and USE_FLUX:
                     if populate_at_resolutions:
-                        if remote_host_type == 'graphite' or remote_host_type == 'prometheus':
+                        if remote_host_type in ['graphite', 'prometheus']:
                             pre_populate_graphite_metric = True
 
                 if pre_populate_graphite_metric:
