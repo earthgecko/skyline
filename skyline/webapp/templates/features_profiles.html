@@ -391,7 +391,7 @@ you need to try and be quicker next time.
   	  </div>
     {% endif %}
   {% else %}
-  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span>< False</h4>
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span>False</h4>
 	  <div class="alert alert-warning">
     <strong>Warning!</strong> This features profile has not been validated, please review it against
 <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a>
@@ -569,6 +569,10 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
     <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    {% endif %}
+    {% if matched_fp_plot %}
+    <br>
+    <img src="ionosphere_images?image={{ matched_fp_plot }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
     <br>
 
@@ -756,7 +760,7 @@ Image file: {{ image }}<br><br>
   {% else %}
     {% for image in metric_images %}
 <!-- # @modified 20210323 - Feature #3642: Anomaly type classification -->
-      {% if ((not '.redis.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image)) %}
+      {% if ((not '.redis.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image) and (not 'match_compare' in image)) %}
         {% if metric_second_order_resolution_hours != False %}
           {% if parent_id == 0 %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
@@ -994,7 +998,7 @@ Image file: {{ image }}<br><br>
  -->
 <!-- # @modified 20200711 - Feature #3634: webapp - ionosphere - report number of data points
      # Added length -->
-      <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points of {{ anomalous_timeseries_length }}</span></h4>
+      <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_json_length }}]] - last 30 data points of {{ anomalous_timeseries_length }}</span></h4>
       {{ last_ts_json[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
@@ -1007,7 +1011,7 @@ based features profile -->
 -->
 <!-- # @modified 20200711 - Feature #3634: webapp - ionosphere - report number of data points
      # Added length -->
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points of {{ ts_json_length }}</span></h4>
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points of {{ ts_full_duration }}</span></h4>
       {{ last_i_ts_json[-30:] }}
     {% endif %}
   {% endif %}

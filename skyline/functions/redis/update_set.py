@@ -13,7 +13,7 @@ LOCAL_DEBUG = False
 # Add a global method to update or remove data from a Redis set
 def update_redis_set(
         current_skyline_app, redis_set, original_data_str, update_data_str,
-        log=True):
+        log):
     """
     Manage data in a Redis set.
 

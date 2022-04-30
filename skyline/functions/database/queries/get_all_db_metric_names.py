@@ -14,17 +14,17 @@ def get_all_db_metric_names(current_skyline_app, with_ids=False):
     """
     metric_names = []
     metric_names_with_ids = {}
-    function_str = 'database_queries.get_all_db_metric_names'
+    function_str = 'database.queries.get_all_db_metric_names'
 
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     try:
         engine, fail_msg, trace = get_engine(current_skyline_app)
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, e)
+        fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, err)
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace
 

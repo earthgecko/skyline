@@ -100,6 +100,8 @@ if boundary_alerts_enabled:
         if alert[0] == options.metric:
             if options.trigger in alert[7]:
                 print('    Testing Boundary alerting against "' + alert[0] + '" to send for ' + alert[7] + ' via ' + options.trigger)
-                trigger_alert(options.trigger, '0', alert[0], '1', '1', 'test', int(time()))
+                # @modified 20220217 - Bug #4348: matplotlib 3.5.1 error
+                # Added alert_threshold
+                trigger_alert(options.trigger, '0', alert[0], '1', '1', 'test', int(time()), 0)
 else:
     print('Boundary alerts are disabled')

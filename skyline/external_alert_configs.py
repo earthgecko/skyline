@@ -3,11 +3,11 @@ external_alert_configs
 """
 import logging
 import traceback
+from ast import literal_eval
 import requests
 import simplejson as json
-from ast import literal_eval
-from skyline_functions import get_redis_conn_decoded
 import settings
+from skyline_functions import get_redis_conn_decoded
 
 
 # @added 20200528 - Feature #3560: External alert config
@@ -155,7 +155,7 @@ def get_external_alert_configs(current_skyline_app):
                     str(external_alert_config)))
                 continue
             external_alert_config_post_data = None
-            if external_alert_config_method == 'POST' or external_alert_config_method == 'post':
+            if external_alert_config_method in ['POST', 'post']:
                 try:
                     external_alert_config_post_data = EXTERNAL_ALERTS[external_alert_config]['data']
                 except:
@@ -206,12 +206,11 @@ def get_external_alert_configs(current_skyline_app):
                             if key == 'inactive_after':
                                 alerter_config[key] = 7200
                             continue
-                        else:
-                            current_logger.error(traceback.format_exc())
-                            current_logger.error('error :: get_external_alert_configs :: could not determine %s from json - %s' % (
-                                key, str(alerter_id)))
-                            alerter_config = {}
-                            break
+                        current_logger.error(traceback.format_exc())
+                        current_logger.error('error :: get_external_alert_configs :: could not determine %s from json - %s' % (
+                            key, str(alerter_id)))
+                        alerter_config = {}
+                        break
                 if alerter_config:
                     try:
                         if namespace_prefix == namespace:

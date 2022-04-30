@@ -8,6 +8,9 @@ from sys import version_info
 
 import traceback
 
+# @added 20180828 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+import math
+
 # @modified 20191115 - Branch #3262: py3
 # import mysql.connector
 # from mysql.connector import errorcode
@@ -15,10 +18,8 @@ import traceback
 from sqlalchemy.sql import select
 
 import numpy as np
-import scipy
-
-# @added 20180828 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
-import math
+# @modified 20210420 - Support #4026: Change from scipy array to numpy array
+# import scipy
 
 import settings
 
@@ -40,7 +41,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: layers :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: layers :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings')
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
@@ -77,7 +78,7 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
     :rtype: boolean
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     logger.info('layers :: layers_id - %s' % str(layers_id))
 
     def layers_get_an_engine():
@@ -112,6 +113,7 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
     engine = None
     try:
         engine, log_msg, trace = layers_get_an_engine()
+        del trace
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: could not get a MySQL engine for layers_algorithms for layers_id %s - %s' % (str(layers_id), base_name))
@@ -434,11 +436,10 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
                     str(last_datapoint), d_log_string, str(d_condition),
                     str(d_boundary_limit)))
             return False
-        else:
-            # @added 20181014 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
-            logger.info(
-                'layers :: the last value %s in the time series does not breach D layer boundary of %s %s' % (
-                    str(last_datapoint), str(d_condition), str(d_boundary_limit)))
+        # @added 20181014 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+        logger.info(
+            'layers :: the last value %s in the time series does not breach D layer boundary of %s %s' % (
+                str(last_datapoint), str(d_condition), str(d_boundary_limit)))
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: layers :: invalid D layer op_func for layers_id %s - %s' % (str(layers_id), base_name))
@@ -538,8 +539,7 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
             layers_engine_disposal(engine)
         logger.info('layers :: returning False not_anomalous breached E layer')
         return False
-    else:
-        not_anomalous = True
+    not_anomalous = True
 
     if not_anomalous:
         try:

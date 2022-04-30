@@ -40,6 +40,8 @@ def thunder_send_event(current_skyline_app, event, log=True):
         redis_conn = get_redis_conn(current_skyline_app)
         submitted = redis_conn.sadd('thunder.events', str(event))
         if submitted:
+            if log:
+                current_logger.info('%s thunder event submitted' % current_skyline_app)
             return True
     except Exception as e:
         if not log:
@@ -52,7 +54,8 @@ def thunder_send_event(current_skyline_app, event, log=True):
     # If the thunder event was not added to Redis set, create the event_file
     if not path.exists(THUNDER_EVENTS_DIR):
         mkdir_p(THUNDER_EVENTS_DIR)
-        current_logger.info('created dir - %s' % THUNDER_EVENTS_DIR)
+        if log:
+            current_logger.info('created dir - %s' % THUNDER_EVENTS_DIR)
     event_file = '%s/%s.thunder.event.dict' % (THUNDER_EVENTS_DIR, str(time()))
     try:
         write_data_to_file(current_skyline_app, event_file, 'w', str(event))

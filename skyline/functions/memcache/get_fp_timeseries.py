@@ -84,7 +84,7 @@ def get_fp_timeseries(current_skyline_app, metric_id, fp_id, log=True):
             if not log:
                 current_skyline_app_logger = current_skyline_app + 'Log'
                 current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.info('%s :: did not get %s from memcache, will query DB - %e' % (
+            current_logger.info('%s :: did not get %s from memcache, will query DB - %s' % (
                 function_str, fp_id_metric_ts_key, e))
         try:
             memcache_client.close()

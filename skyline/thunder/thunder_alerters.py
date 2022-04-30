@@ -17,7 +17,7 @@ def thunder_alert(alert_via, subject, body):
     """
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
 
     message_sent = False
 
