@@ -40,6 +40,8 @@ if True:
     from skyline_functions import (
         get_redis_conn, get_redis_conn_decoded, mkdir_p, sort_timeseries,
         filesafe_metricname, write_data_to_file)
+    # @added 20220429 - Feature #4536: Handle Redis failure
+    from functions.flux.get_last_metric_data import get_last_metric_data
 
 # Consolidate flux logging
 logger = set_up_logging(None)
@@ -1017,25 +1019,50 @@ class UploadedDataWorker(Process):
                         if data_df_successful and timeseries and metric:
                             cache_key = 'flux.last.%s' % metric
                             redis_last_metric_data = None
-                            # @added 20200521 - Feature #3538: webapp - upload_data endpoint
-                            #                   Feature #3550: flux.uploaded_data_worker
-                            # Added the ability to ignore_submitted_timestamps and not
-                            # check flux.last metric timestamp
+
+                            # @added 20220429 - Feature #4536: Handle Redis failure
+                            # Swap to using a Redis hash instead of the
+                            # flux.last.<metric> keys
+                            last_flux_timestamp = None
                             if not ignore_submitted_timestamps:
+                                use_old_timestamp_keys = True
+                                redis_last_metric_data_dict = {}
                                 try:
-                                    redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
-                                except:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                                    last_flux_timestamp = None
-                            if redis_last_metric_data:
-                                try:
-                                    last_metric_data = literal_eval(redis_last_metric_data)
-                                    last_flux_timestamp = int(last_metric_data[0])
-                                except:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                                    last_flux_timestamp = None
+                                    redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
+                                except Exception as err:
+                                    logger.error('error :: populate_metric_worker :: get_last_metric_data failed - %s' % (
+                                        err))
+                                if redis_last_metric_data_dict:
+                                    try:
+                                        last_flux_timestamp = redis_last_metric_data_dict['timestamp']
+                                        use_old_timestamp_keys = False
+                                    except KeyError:
+                                        last_flux_timestamp = None
+                                    except Exception as err:
+                                        logger.error('error :: populate_metric_worker :: failed to get timestamp from - %s - %s' % (
+                                            str(redis_last_metric_data_dict), err))
+                                        last_flux_timestamp = None
+
+                            if use_old_timestamp_keys:
+                                # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+                                #                   Feature #3550: flux.uploaded_data_worker
+                                # Added the ability to ignore_submitted_timestamps and not
+                                # check flux.last metric timestamp
+                                if not ignore_submitted_timestamps:
+                                    try:
+                                        redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                                        last_flux_timestamp = None
+                                if redis_last_metric_data:
+                                    try:
+                                        last_metric_data = literal_eval(redis_last_metric_data)
+                                        last_flux_timestamp = int(last_metric_data[0])
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                                        last_flux_timestamp = None
                         valid_timeseries = []
                         if last_flux_timestamp:
                             try:
@@ -1364,9 +1391,23 @@ class UploadedDataWorker(Process):
                                         logger.info('uploaded_data_worker :: added %s to flux.sort_and_dedup.metrics Redis set' % (
                                             metric))
                                     else:
-                                        self.redis_conn.set(cache_key, str(metric_data))
+                                        # @modified 20220429 - Feature #4536: Handle Redis failure
+                                        # Swap to using a Redis hash instead of the
+                                        # flux.last.<metric> keys make existing keys
+                                        # expire
+                                        # self.redis_conn.set(cache_key, str(metric_data))
+                                        self.redis_conn.setex(cache_key, 3600, str(metric_data))
                                         logger.info('uploaded_data_worker :: set the metric Redis key - %s - %s' % (
                                             cache_key, str(metric_data)))
+
+                                        # @added 20220429 - Feature #4536: Handle Redis failure
+                                        # Swap to using a Redis hash instead of the
+                                        # flux.last.<metric> keys
+                                        metric_data_dict = {'timestamp': int(last_timestamp_sent), 'value': float(last_value_sent)}
+                                        try:
+                                            self.redis_conn.hset('flux.last.metric_data', metric, str(metric_data_dict))
+                                        except Exception as err:
+                                            logger.error('error :: uploaded_data_worker :: failed to hset flux.last.metric_data Redis key - %s' % str(err))
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: uploaded_data_worker :: failed to set Redis key - %s - %s' % (
