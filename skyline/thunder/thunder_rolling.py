@@ -4,12 +4,16 @@ from time import time, sleep
 from threading import Thread
 from multiprocessing import Process
 import os
+from sys import exit
 from os import kill, getpid
 import traceback
 
 import settings
 from skyline_functions import (
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded, send_graphite_metric)
+from functions.thunder.checks.app.up import thunder_check_app
+from functions.thunder.checks.analyzer.run_time import thunder_check_analyzer_run_time
+from functions.thunder.checks.horizon.metrics_received import thunder_check_horizon_metrics_received
 
 # from functions.thunder.stale_metrics import thunder_stale_metrics
 
@@ -75,14 +79,16 @@ class RollingThunder(Thread):
         spin_start = time()
         logger.info('thunder/rolling :: rolling_process started')
 
+        redis_available = False
         last_run_timestamp = 0
         thunder_rolling_last_timestamp_key = 'thunder.rolling.last_run_timestamp'
         try:
             last_run_timestamp = self.redis_conn_decoded.get(thunder_rolling_last_timestamp_key)
-        except Exception as e:
+            redis_available = True
+        except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: thunder/rolling :: failed to timestamp from %s Redis key - %s' % (
-                thunder_rolling_last_timestamp_key, e))
+                thunder_rolling_last_timestamp_key, err))
             last_run_timestamp = 0
         if last_run_timestamp:
             logger.info('thunder/rolling :: %s Redis key has not expired, not running' % (
@@ -96,30 +102,27 @@ class RollingThunder(Thread):
             if settings.THUNDER_CHECKS[thunder_app]['up']['run']:
                 check_apps.append(thunder_app)
         apps_up = 0
-        thunder_check_app = None
-        if len(check_apps) > 0:
-            try:
-                from functions.thunder.checks.app.up import thunder_check_app
-            except Exception as e:
-                logger.error(traceback.format_exc())
-                logger.error('error :: thunder/rolling :: failed to import thunder_check_app - %s' % (
-                    e))
 
+        check_apps_up = []
         for check_app in check_apps:
+            if not redis_available:
+                logger.warning('warning :: thunder/rolling :: redis not available not check %s' % (
+                    check_app))
+                continue
             try:
-                if thunder_check_app:
-                    success = thunder_check_app(self, check_app)
-                    if success:
-                        apps_up += 1
-                        logger.info('thunder/rolling :: %s is reporting UP' % (
-                            check_app))
-                    else:
-                        logger.warning('warning :: thunder/rolling :: %s is NOT reporting UP' % (
-                            check_app))
-            except Exception as e:
+                success = thunder_check_app(self, check_app)
+                if success:
+                    apps_up += 1
+                    logger.info('thunder/rolling :: %s is reporting UP' % (
+                        check_app))
+                    check_apps_up.append(check_app)
+                else:
+                    logger.warning('warning :: thunder/rolling :: %s is NOT reporting UP' % (
+                        check_app))
+            except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: thunder/rolling :: thunder_check_app errored for %s - %s' % (
-                    check_app, e))
+                    check_app, err))
         if check_apps:
             logger.info('thunder/rolling :: %s Skyline apps checked and %s apps reporting UP' % (
                 str(len(check_apps)), str(apps_up)))
@@ -133,27 +136,22 @@ class RollingThunder(Thread):
             except Exception as e:
                 logger.error('error :: thunder/rolling :: failed to determine if analyzer run_time check should be run - %s' % (
                     e))
+
+            if not redis_available:
+                logger.warning('warning :: thunder/rolling :: redis not available not checking analyzer run_time')
+                run_time_check = False
+
             if run_time_check:
-                thunder_check_analyzer_run_time = None
                 try:
-                    from functions.thunder.checks.analyzer.run_time import thunder_check_analyzer_run_time
-                except Exception as e:
+                    success = thunder_check_analyzer_run_time(self)
+                    if success:
+                        logger.info('thunder/rolling :: analyzer run_time OK')
+                    else:
+                        logger.warning('warning :: thunder/rolling :: analyzer run_time overruning')
+                except Exception as err:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: thunder/rolling :: failed to import thunder_check_analyzer_run_time - %s' % (
-                        e))
-                if thunder_check_analyzer_run_time:
-                    try:
-                        success = thunder_check_analyzer_run_time(self)
-                        if success:
-                            logger.info('thunder/rolling :: analyzer run_time OK')
-                        else:
-                            logger.warning('warning :: thunder/rolling :: analyzer run_time overruning')
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: thunder/rolling :: thunder_check_analyzer_run_time errored - %s' % (
-                            e))
-                else:
-                    logger.warning('warning :: thunder/rolling :: did not check Analyzer run_time as thunder_check_analyzer_run_time failed to import')
+                    logger.error('error :: thunder/rolling :: thunder_check_analyzer_run_time errored - %s' % (
+                        err))
 
         # Horizon checks
         if 'horizon' in thunder_apps:
@@ -164,31 +162,107 @@ class RollingThunder(Thread):
             except Exception as e:
                 logger.error('error :: thunder/rolling :: failed to determine if horizon metrics_received check should be run - %s' % (
                     e))
+            if not redis_available:
+                logger.warning('warning :: thunder/rolling :: redis not available not checking horizon metrics_received')
+                metrics_received_check = False
+
             if metrics_received_check:
-                thunder_check_horizon_metrics_received = None
                 try:
-                    from functions.thunder.checks.horizon.metrics_received import thunder_check_horizon_metrics_received
+                    success = thunder_check_horizon_metrics_received(self)
+                    if success:
+                        logger.info('thunder/rolling :: horizon metrics_received OK')
+                    else:
+                        logger.warning('warning :: thunder/rolling :: horizon metrics_received has significantly changed')
                 except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: thunder/rolling :: failed to import thunder_check_analyzer_run_time - %s' % (
+                    logger.error('error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - %s' % (
                         e))
-                if thunder_check_horizon_metrics_received:
-                    try:
-                        success = thunder_check_horizon_metrics_received(self)
-                        if success:
-                            logger.info('thunder/rolling :: horizon metrics_received OK')
-                        else:
-                            logger.warning('warning :: thunder/rolling :: horizon metrics_received has significantly changed')
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - %s' % (
-                            e))
                 else:
                     logger.warning('warning :: thunder/rolling :: did not check horizon metrics_recieved as thunder_check_horizon_metrics_received failed to import')
+
+        if not redis_available:
+            for check_app in check_apps:
+                check_apps_up.append(check_app)
+
+        # @added 20220328 - Feature #4018: thunder - skyline.errors
+        # Consume the app RedisErrorLogHandler Redis key which is a count for
+        # every error logged and create the
+        # skyline.<hostname>.<skyline_app>.logged_errors metrics
+        if 'thunder' not in check_apps_up:
+            check_apps.append('thunder')
+        flux_done = False
+        vista_done = False
+        for check_app in check_apps_up:
+            # Do not check Redis
+            if check_app == 'redis':
+                continue
+            check_app_name = str(check_app)
+            error_count = 0
+            error_count_key = '%s.log.errors.per_minute' % check_app
+            # Only check flux once, although there are flux.listen and
+            # flux.worker check app Redis keys, both submit errors to the same
+            # Redis error key
+            if check_app.startswith('flux'):
+                check_app_name = 'flux'
+                error_count_key = 'flux.log.errors.per_minute'
+                if flux_done:
+                    continue
+                flux_done = True
+                check_app = 'flux'
+            # Only check vista once, although there are vista and vista.worker
+            # check app Redis keys, both submit errors to the same Redis error
+            # key
+            if check_app.startswith('vista'):
+                check_app_name = 'vista'
+                error_count_key = 'vista.log.errors.per_minute'
+                if vista_done:
+                    continue
+                vista_done = True
+                check_app = 'vista'
+            check_log_errors_file = False
+            try:
+                error_count_str = None
+                error_count_str = self.redis_conn_decoded.getset(error_count_key, 0)
+                if error_count_str:
+                    error_count = int(error_count_str)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: thunder/rolling :: failed to getset Redis key %s - %s' % (
+                    error_count_key, err))
+                check_log_errors_file = True
+            if check_log_errors_file:
+                error_count = 0
+                log_errors_file = '%s/%s.log_errors.txt' % (
+                    settings.SKYLINE_TMP_DIR, check_app_name)
+                error_count_array = []
+                if os.path.isfile(log_errors_file):
+                    logger.info('thunder/rolling :: using %s' % (
+                        log_errors_file))
+                    try:
+                        with open(log_errors_file, 'r') as f:
+                            for line in f:
+                                value_string = line.replace('\n', '')
+                                unquoted_value_string = value_string.replace("'", '')
+                                float_value = float(unquoted_value_string)
+                                error_count_array.append(float_value)
+                    except:
+                        error_count_array = []
+                    try:
+                        os.remove(log_errors_file)
+                    except:
+                        pass
+                if error_count_array:
+                    error_count = len(error_count_array)
+
+            check_app_graphite_namespace = 'skyline.%s%s' % (check_app, SERVER_METRIC_PATH)
+            send_metric_name = '%s.logged_errors' % check_app_graphite_namespace
+            logger.info('thunder/rolling :: %s :: %s' % (send_metric_name, str(error_count)))
+            send_graphite_metric(skyline_app, send_metric_name, error_count)
 
         spin_end = time() - spin_start
         logger.info('thunder/rolling :: checks took %.2f seconds' % spin_end)
         return
+
 
     def run(self):
         """
@@ -216,14 +290,6 @@ class RollingThunder(Thread):
 
         logger.info('thunder/rolling :: starting %s/rolling' % skyline_app)
 
-        try:
-            SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
-            if SERVER_METRIC_PATH == '.':
-                SERVER_METRIC_PATH = ''
-        except Exception as e:
-            SERVER_METRIC_PATH = ''
-            logger.warning('warning :: thunder/rolling :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
-
         run_every = 60
 
         while 1:
@@ -243,7 +309,7 @@ class RollingThunder(Thread):
                 except Exception as e:
                     logger.info(traceback.format_exc())
                     logger.error('error :: thunder/rolling cannot connect to get_redis_conn - %s' % e)
-                continue
+                # continue
 
             # Report app up
             try:
