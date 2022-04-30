@@ -1147,7 +1147,7 @@ def run_selected_algorithm(
         if unordered_timeseries:
             try:
                 redis_conn.sadd('analyzer.unordered_timeseries', metric_name)
-                del unorder_timeseries
+                del unordered_timeseries
             except:
                 pass
 
@@ -1606,7 +1606,12 @@ def run_selected_algorithm(
         # @modified 20220113 - Feature #3566: custom_algorithms
         #                      Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
         # if ensemble.count(False) <= threshold:
-        if ensemble.count(False) <= threshold and ensemble.count(False) > 0:
+        # @modified 20220309 - Feature #3566: custom_algorithms
+        #                      Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # Correct this because the False count can be 0 if the ensemble is only
+        # filled with True
+        # if ensemble.count(False) <= threshold and ensemble.count(False) > 0:
+        if ensemble.count(False) <= threshold and ensemble.count(False) >= 0:
 
             # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
             # Only run a negatives_present check if it is anomalous, there

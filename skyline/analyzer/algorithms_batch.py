@@ -81,6 +81,7 @@ try:
 except:
     send_algorithm_run_metrics = False
 
+LOCAL_DEBUG = False
 
 """
 This is no man's land. Do anything you want in here,
@@ -615,8 +616,17 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     except:
         BATCH_PROCESSING_STALE_PERIOD = 86400
 
+    debug_logging = False
+    if LOCAL_DEBUG:
+        logger.debug('debug :: algorithms_batch :: %s - timeseries (sample last 3): %s' % (
+            metric_name, str(timeseries[-3:])))
+        debug_logging = True
+
     # Get rid of short series
     if len(timeseries) < MIN_TOLERABLE_LENGTH:
+        if LOCAL_DEBUG:
+            logger.debug('debug :: algorithms_batch :: %s - timeseries too short: %s' % (
+                metric_name, str(len(timeseries))))
         raise TooShort()
 
     # Get rid of stale series
@@ -624,10 +634,16 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     # Renamed to avoid confusion
     # if time() - timeseries[-1][0] > BATCH_PROCESSING_STALE_PERIOD:
     if time() - timeseries[-1][0] > BATCH_PROCESSING_STALE_PERIOD:
+        if LOCAL_DEBUG:
+            logger.debug('debug :: algorithms_batch :: %s - timeseries stale' % (
+                metric_name))
         raise Stale()
 
     # Get rid of boring series
     if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
+        if LOCAL_DEBUG:
+            logger.debug('debug :: algorithms_batch :: %s - timeseries boring' % (
+                metric_name))
         raise Boring()
 
     # RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:
@@ -667,9 +683,9 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         custom_algorithms_to_run = {}
         try:
             custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
-            if DEBUG_CUSTOM_ALGORITHMS:
+            if DEBUG_CUSTOM_ALGORITHMS or LOCAL_DEBUG:
                 if custom_algorithms_to_run:
-                    logger.debug('algorithms :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
+                    logger.debug('algorithms_batch :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
         except:
             logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
             custom_algorithms_to_run = {}
@@ -681,7 +697,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     debug_logging = custom_algorithms_to_run[custom_algorithm]['debug_logging']
                 except:
                     debug_logging = False
-                if DEBUG_CUSTOM_ALGORITHMS:
+                if DEBUG_CUSTOM_ALGORITHMS or LOCAL_DEBUG:
                     debug_logging = True
 
                 # @added 20211125 - Feature #3566: custom_algorithms
@@ -692,7 +708,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     run_before_3sigma = False
                 if not run_before_3sigma:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.debug('debug :: algorithms :: not running custom algorithm %s before 3-sigma' % (
+                        logger.debug('debug :: algorithms_batch :: not running custom algorithm %s before 3-sigma' % (
                             str(algorithm)))
                     continue
 
@@ -706,7 +722,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                 if send_algorithm_run_metrics:
                     start = timer()
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: algorithms :: running custom algorithm %s on %s' % (
+                    logger.debug('debug :: algorithms_batch :: running custom algorithm %s on %s' % (
                         str(algorithm), str(base_name)))
                     start_debug_timer = timer()
                 # @modified 20211124 - linting
@@ -715,7 +731,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     # @modified 20211124 - linting
                     # from custom_algorithms import run_custom_algorithm_on_timeseries
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.debug('debug :: algorithms :: loaded run_custom_algorithm_on_timeseries')
+                        logger.debug('debug :: algorithms_batch :: loaded run_custom_algorithm_on_timeseries')
                 except:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.error(traceback.format_exc())
@@ -731,7 +747,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                         result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
                         algorithm_result = [result]
                         if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                            logger.debug('debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
+                            logger.debug('debug :: algorithms_batch :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
                                 str(result), str(anomalyScore)))
                         # @added 20211125 - Feature #3566: custom_algorithms
                         custom_algorithms_run_results.append(result)
@@ -746,10 +762,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                         custom_algorithms_run_results.append(False)
                 else:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
+                        logger.error('error :: debug :: algorithms_batch :: run_custom_algorithm_on_timeseries was not loaded so was not run')
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                     end_debug_timer = timer()
-                    logger.debug('debug :: algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
+                    logger.debug('debug :: algorithms_batch :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
                         str(algorithm), str(base_name),
                         str(result), str(anomalyScore),
                         (end_debug_timer - start_debug_timer)))
@@ -788,7 +804,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                 run_3sigma_algorithms = False
                 run_3sigma_algorithms_overridden_by.append(custom_algorithm)
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: algorithms :: run_3sigma_algorithms is False on %s for %s' % (
+                    logger.debug('debug :: algorithms_batch :: run_3sigma_algorithms is False on %s for %s' % (
                         custom_algorithm, base_name))
             if result:
                 try:
@@ -810,7 +826,7 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                         str(algorithm), str(base_name)))
                 # TODO - figure out how to handle consensus overrides if
                 #        multiple custom algorithms are used
-    if DEBUG_CUSTOM_ALGORITHMS:
+    if DEBUG_CUSTOM_ALGORITHMS or LOCAL_DEBUG:
         if not run_3sigma_algorithms:
             logger.debug('algorithms :: not running 3 sigma algorithms')
         if len(run_3sigma_algorithms_overridden_by) > 0:
@@ -836,6 +852,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             for metric_namespace in list(BATCH_METRICS_CUSTOM_FULL_DURATIONS.keys()):
                 if metric_namespace in base_name:
                     use_full_duration = BATCH_METRICS_CUSTOM_FULL_DURATIONS[metric_namespace]
+    if LOCAL_DEBUG:
+        logger.debug('debug :: algorithms_batch :: %s - use_full_duration: %s' % (
+            metric_name, str(use_full_duration)))
+        debug_logging = True
 
     detect_drop_off_cliff_trigger = False
 
@@ -850,8 +870,8 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                 custom_consensus_override = False
                 custom_consensus = int(CONSENSUS)
                 final_ensemble = []
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: algorithms :: reset final_ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False')
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging or LOCAL_DEBUG:
+                    logger.debug('debug :: algorithms_batch :: reset final_ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False')
 
     for algorithm in ALGORITHMS:
         # @modified 20200607 - Feature #3566: custom_algorithms
@@ -876,11 +896,14 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                 # Allow for custom durations on namespaces
                 # algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
                 algorithm_result = [globals()[test_algorithm](timeseries, use_full_duration) for test_algorithm in run_algorithm]
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: algorithms :: ran 3-sigma algorithms on %s with algorithm_result: %s' % (
-                        str(base_name), str(algorithm_result)))
-            except:
-                # logger.error('%s failed' % (algorithm))
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging or LOCAL_DEBUG:
+                    logger.debug('debug :: algorithms_batch :: ran 3-sigma algorithm on %s - %s - algorithm_result: %s' % (
+                        str(base_name), algorithm, str(algorithm_result)))
+            except Exception as err:
+                logger.error('error :: algorithm error - %s failed - %s' % (algorithm, err))
+                if LOCAL_DEBUG:
+                    logger.error('error :: algorithms_batch :: %s - error with %s - %s' % (
+                        str(base_name), str(algorithm), err))
                 algorithm_result = [None]
 
             # @added 20200607 - Feature #3566: custom_algorithms
@@ -927,12 +950,15 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             # logger.info('CONSENSUS cannot be reached as %s algorithms have already not been triggered' % (str(false_count)))
             # skip_algorithms_count = number_of_algorithms - number_of_algorithms_run
             # logger.info('skipping %s algorithms' % (str(skip_algorithms_count)))
+            if LOCAL_DEBUG:
+                logger.debug('debug :: algorithms_batch :: %s - consensus_possible: %s' % (
+                    metric_name, str(consensus_possible)))
 
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
 
     try:
         # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
-        ensemble = final_ensemble
+        ensemble = list(final_ensemble)
 
         # @modified 20200607 - Feature #3566: custom_algorithms
         # threshold = len(ensemble) - CONSENSUS
@@ -941,6 +967,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         else:
             threshold = len(ensemble) - CONSENSUS
 
+        if LOCAL_DEBUG:
+            logger.debug('debug :: algorithms_batch :: %s analysis complete - threshold: %s, ensemble: %s' % (
+                metric_name, str(threshold), str(ensemble)))
+
         # @added 20220113 - Feature #3566: custom_algorithms
         #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
         # With the addition of the custom_consensus_override and the possibility
@@ -948,12 +978,20 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         # handle if the ensemble list is all None and do not return anomalous as
         # True
         if ensemble.count(None) == len(ensemble):
+            if LOCAL_DEBUG:
+                logger.debug('debug :: algorithms_batch :: %s - ensemble.count(None) == len(ensemble), returning False' % (
+                    metric_name))
             return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
 
         # @modified 20220113 - Feature #3566: custom_algorithms
         #                      Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
         # if ensemble.count(False) <= threshold:
-        if ensemble.count(False) <= threshold and ensemble.count(False) > 0:
+        # @modified 20220309 - Feature #3566: custom_algorithms
+        #                      Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # Correct this because the False count can be 0 if the ensemble is only
+        # filled with True
+        # if ensemble.count(False) <= threshold and ensemble.count(False) > 0:
+        if ensemble.count(False) <= threshold and ensemble.count(False) >= 0:
 
             # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
             # Only run a negatives_present check if it is anomalous, there
@@ -971,6 +1009,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     logger.error('Algorithm error: negatives_present :: %s' % traceback.format_exc())
                     negatives_found = False
 
+            if LOCAL_DEBUG:
+                logger.debug('debug :: algorithms_batch :: %s - ensemble.count(False) <= threshold and ensemble.count(False) > 0, returning True' % (
+                    metric_name))
+
             # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
             # return True, ensemble, timeseries[-1][1]
             # @modified 20200607 - Feature #3566: custom_algorithms
@@ -981,6 +1023,9 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             # return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
             return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
 
+        if LOCAL_DEBUG:
+            logger.debug('debug :: algorithms_batch :: %s - NOT ensemble.count(False) <= threshold and ensemble.count(False) > 0, returning False' % (
+                metric_name))
         # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # return False, ensemble, timeseries[-1][1]
         # @modified 20200607 - Feature #3566: custom_algorithms
@@ -991,6 +1036,10 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
+        if LOCAL_DEBUG:
+            logger.debug('debug :: algorithms_batch :: %s - returning False' % (
+                metric_name))
+
         # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # return False, [], 1
         # @modified 20200607 - Feature #3566: custom_algorithms
