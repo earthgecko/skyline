@@ -60,6 +60,10 @@ Overview
   time series using |tsfresh| to "fingerprint" the data set.
 - This allows the operator to fingerprint and profile what is not anomalous, but
   normal and to be expected, even if 3sigma will always detect it as anomalous.
+- Further to this, Ionosphere uses the trained data to create 1000s of motifs
+  (small patterns) of what normal is and supplements the feature profile
+  comparisons by evaluating the current potentially anomaly against the 1000s of
+  trained normal motifs from the features profiles.
 - Ionosphere also allows for the creation of layers rules which allow the
   operator to define ad hoc boundaries and conditions that can be considered as
   not anomalous for each features profile that is created.
@@ -316,7 +320,7 @@ The validate features profile page is useful for this. See
    <a href="_static/ionosphere_demo/fp_validate_demo_page/validate_features_profiles.demo.html" target="_blank">Ionosphere validate features profile demo page</a>
 
 .. warning:: A **important** note on learning.  When you let Ionosphere learn
-  you create a lot of work for yourself in terms of validating every learnt
+  you create work for yourself in terms of validating every learnt
   profile that Ionosphere learns.  If Ionosphere learns badly and you do not
   keep up to date with validating learnt features profiles, Ionosphere could end
   up silencing genuine anomalies which you would **want** to be alerted on.

@@ -54,6 +54,8 @@ given the methods and modes that can be configured.
 :mod:`settings.CUSTOM_ALGORITHMS`
 ---------------------------------
 
+Custom algorithms are only available in analyzer, analyzer_batch and mirage.
+
 Custom algorithms are defined in the :mod:`settings.CUSTOM_ALGORITHMS`
 dictionary.  The format and key values of the dictionary are shown in the
 following **example**:
@@ -72,7 +74,7 @@ following **example**:
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
             'trigger_history_override': 0,
-            'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
+            'use_with': ['analyzer', 'analyzer_batch', 'mirage'],
             'debug_logging': False,
         },
         'last_same_hours': {
@@ -107,7 +109,7 @@ following **example**:
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
             'trigger_history_override': 0,
-            'use_with': ['analyzer', 'crucible'],
+            'use_with': ['analyzer'],
             'debug_logging': True,
         },
         'skyline_matrixprofile': {

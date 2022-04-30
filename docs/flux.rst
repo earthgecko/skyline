@@ -243,13 +243,24 @@ Firstly a few things must be pointed out:
 
 - Flux applies the same logic that is used by the telegraf Graphite template
   pattern e.g. `template = "host.tags.measurement.field"` - https://github.com/influxdata/telegraf/tree/master/plugins/serializers/graphite
-- Flux replaces  ``.` for ``_`` and ``/`` for ``-`` in any tags, measurement or fields
+- Flux replaces  ``.`` for ``_`` and ``/`` for ``-`` in any tags, measurement or fields
   in which these characters are found.
+- Some telegraf outputs send string/boolean values, by default Flux drops
+  metrics with string/boolean values, e.g.
+  ``{'fields': {..., 'aof_last_bgrewrite_status': 'ok', ...}, 'name': 'redis', ...}``
+  One way to deal with string/boolean values metrics if you want to record them
+  numerically as metrics is to convert them in telegraf itself using the
+  appropriate telegraf processors and filters (see telegraf documentation).  If
+  Flux receives string/boolean value metrics it will report what metrics were
+  dropped in a HTTP status code 207 response in the json body and not the normal
+  204 response.  However string/boolean value metrics will not cause errors and
+  all other metrics with numerical values in the POST will be accepted.
 - The additional `outputs.http.headers` **must** be specified.
 - ``content_encoding`` must be set to gzip
 - There are a number of status codes that telegraf should not resubmit data on
   these are to ensure telegraf does not attempt to send the same bad data or
-  too much data over and over again.
+  too much data over and over again (coming soon in the upcoming telegraf March
+  2022 release).
 - If there is a long network partition between telegraf agents and Flux,
   sometimes some data may be dropped, but this can often be preferable to the
   thundering herd swamping I/O
@@ -260,10 +271,6 @@ host to the tags:
 
 .. code-block:: ini
 
-  ## Maximum number of unwritten metrics per output.
-  # Ideally change this from 10000 to 1000 to minimise thundering herd issues
-  # metric_buffer_limit = 10000
-  metric_buffer_limit = 1000
   ## Override default hostname, if empty use os.Hostname()
   hostname = ""
   ## If set to true, do no set the "host" tag in the telegraf agent.
@@ -291,13 +298,77 @@ Also add the ``[[outputs.http]]`` to the telegraf config as below replacing
     json_timestamp_units = "1s"
     content_encoding = "gzip"
     ## A list of statuscodes (<200 or >300) upon which requests should not be retried
-    non_retryable_statuscodes = [400, 403, 409, 413, 499, 500, 502, 503]
+    ## Coming soon to a version of telegraf March 2022.
+    # non_retryable_statuscodes = [400, 403, 409, 413, 499, 500, 502, 503]
     [outputs.http.headers]
       Content-Type = "application/json"
       key = "<settings.FLUX_SELF_API_KEY>"
       telegraf = "true"
       ## Optionally you can pass a prefix e.g.
       # prefix = "telegraf"
+
+
+Ideally telegraf would be configured for optimum Flux performance, however
+seeing as the ``[[outputs.http]]`` may simply be added to existing telegraf
+instances, you may already have the following ``[agent]`` configuration options
+tuned to how you like them and performs well for you.  However the following are
+commented suggestions for the optimal settings to send telegraf data to Flux.
+Bear in mind that it is also possible to run another independent instance over
+telegraf on the same machine, although this adds another overhead and collection
+processing it does allow for isolation of your existing telegraf and one
+specifically running for Flux.  To reduce collection processing your current
+telegraf instance could additionally send to ``[[outputs.file]]`` and your Flux
+telegraf could use ``[[inputs.file]]``.
+
+The following ``[agent]`` configuration options are recommended for sending
+teleraf data to flux.
+
+.. code-block:: ini
+
+# Configuration for telegraf agent
+[agent]
+  ## Default data collection interval for all inputs
+  ## IDEALLY for Skyline and Flux change 10s to 60s
+  # interval = "10s"
+  interval = "60s"
+
+  ## Rounds collection interval to 'interval'
+  ## ie, if interval="10s" then always collect on :00, :10, :20, etc.
+  round_interval = true
+
+  ## Telegraf will send metrics to outputs in batches of at most
+  ## metric_batch_size metrics.
+  ## This controls the size of writes that Telegraf sends to output plugins.
+  metric_batch_size = 1000
+
+  ## Maximum number of unwritten metrics per output.  Increasing this value
+  ## allows for longer periods of output downtime without dropping metrics at the
+  ## cost of higher maximum memory usage.
+  metric_buffer_limit = 10000
+
+  ## Collection jitter is used to jitter the collection by a random amount.
+  ## Each plugin will sleep for a random time within jitter before collecting.
+  ## This can be used to avoid many plugins querying things like sysfs at the
+  ## same time, which can have a measurable effect on the system.
+  ## IDEALLY for your own devices change this from 0s to 5s
+  # collection_jitter = "0s"
+  collection_jitter = "5s"
+
+  ## Collection offset is used to shift the collection by the given amount.
+  ## This can be be used to avoid many plugins querying constraint devices
+  ## at the same time by manually scheduling them in time.
+  # collection_offset = "0s"
+
+  ## Default flushing interval for all outputs. Maximum flush_interval will be
+  ## flush_interval + flush_jitter
+  ## IDEALLY for Skyline and Flux change 10s to 60s
+  # flush_interval = "10s"
+  flush_interval = "60s"
+  ## Jitter the flush interval by a random amount. This is primarily to avoid
+  ## large write spikes for users running a large number of telegraf instances.
+  ## ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
+  ## IDEALLY for Skyline and Flux change 0s to 5s
+  flush_jitter = "5s"
 
 
 populate_metric endpoint
