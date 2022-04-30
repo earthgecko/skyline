@@ -121,9 +121,27 @@ class Thunder(Thread):
                 # Delete the item from the Redis set
                 try:
                     # removed_item = update_redis_set(
+                    # @added 20220303 - Feature #4412: flux - quota - thunder alert
+                    do_log = True
+                    try:
+                        redis_item_dict = literal_eval(redis_item)
+                        if isinstance(redis_item_dict, dict):
+                            if redis_item_dict['event_type'] == 'metric_quota_exceeded':
+                                do_log = False
+                                logger.info('not logging total event string as metric_quota_exceeded, sampling with data removed')
+                                try:
+                                    del redis_item_dict['data']
+                                except Exception as err:
+                                    logger.error('error :: failed to removed data key from dict - %s' % err)
+                                logger.info('sample: %s' % str(redis_item_dict))
+                    except Exception as err:
+                        logger.error('error :: failed literal_eval the redis_item - %s' % err)
+
                     update_redis_set(
                         skyline_app, thunder_redis_set, redis_item,
-                        'remove', log=True)
+                        # @modified 20220303 - Feature #4412: flux - quota - thunder alert
+                        # 'remove', log=True)
+                        'remove', do_log)
                     # if removed_item:
                     #     logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
                     #         thunder_redis_set, str(redis_item)))
@@ -144,8 +162,24 @@ class Thunder(Thread):
 
         spin_start = time()
         spin_thunder_process_pid = os.getpid()
-        logger.info('spin_thunder_process - %s, processing check - %s' % (
-            str(spin_thunder_process_pid), str(validated_event_details)))
+
+        # @added 20220303 - Feature #4412: flux - quota - thunder alert
+        # Do not log out metric_quota_exceeded as has too much data
+        log_validated_event_details = True
+        event_type = None
+        try:
+            event_type = str(validated_event_details['event_type'])
+            if event_type == 'metric_quota_exceeded':
+                log_validated_event_details = False
+        except Exception as err:
+            logger.error('error :: failed literal_eval the redis_item - %s' % err)
+
+        if log_validated_event_details:
+            logger.info('spin_thunder_process - %s, processing check - %s' % (
+                str(spin_thunder_process_pid), str(validated_event_details)))
+        else:
+            logger.info('spin_thunder_process - %s, processing check for %s (not logging validated_event_details)' % (
+                str(spin_thunder_process_pid), str(event_type)))
 
         try:
             level = str(validated_event_details['level'])
@@ -447,7 +481,7 @@ class Thunder(Thread):
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: not connected via get_redis_conn - %s' % e)
-                continue
+                # continue
             try:
                 self.redis_conn_decoded.ping()
             except Exception as e:
@@ -456,11 +490,11 @@ class Thunder(Thread):
                 sleep(10)
                 try:
                     self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-                    logger.info('onnected via get_redis_conn_decoded')
+                    logger.info('connected via get_redis_conn_decoded')
                 except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: cannot connect to get_redis_conn_decoded - %s' % e)
-                continue
+                    logger.error('error :: cannot connect via get_redis_conn_decoded - %s' % e)
+                # continue
 
             # Determine if any metric has been added to process
             thunder_last_run = int(time())
@@ -599,6 +633,10 @@ class Thunder(Thread):
                                         thunder_key_file, e))
                     logger.info('%s thunder failover key files found' % str(thunder_key_files_count))
 
+                # @added 20220222 -Branch #1444: thunder
+                # Create a list for redis_items
+                redis_items = []
+
                 total_thunder_events_item_count = len(thunder_events)
                 validated_event_details = {}
                 if thunder_events:
@@ -618,7 +656,18 @@ class Thunder(Thread):
                                     thunder_redis_set, e))
                             missing_required_keys = False
                             if event_details:
-                                logger.info('validating thunder event_details: %s' % str(event_details))
+                                try:
+                                    event_type = str(event_details['event_type'])
+                                except KeyError:
+                                    event_type = str(event_details['type'])
+                                except Exception as e:
+                                    logger.error('error :: failed to determine type from event_details dict - %s' % (
+                                        e))
+                                    event_type = False
+                                if event_type != 'metric_quota_exceeded':
+                                    logger.info('validating thunder event_details: %s' % str(event_details))
+                                else:
+                                    logger.info('validating thunder event_details for %s' % str(event_type))
                                 try:
                                     level = str(event_details['level'])
                                 except KeyError:
@@ -739,7 +788,7 @@ class Thunder(Thread):
                                         # removed_item = update_redis_set(
                                         update_redis_set(
                                             skyline_app, thunder_redis_set, event_item,
-                                            'remove', log=True)
+                                            'remove', True)
                                         # if removed_item:
                                         #     logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
                                         #         thunder_redis_set, str(event_item)))
@@ -769,6 +818,10 @@ class Thunder(Thread):
                                 validated_event_details['alert_vias'] = ['default']
                             logger.info('thunder event_details validated')
 
+                            # @added 20220222 -Branch #1444: thunder
+                            # Add to list for redis_items
+                            redis_items.append(redis_item)
+
                         # Check if an alert has gone out if so removed the item
                         if validated_event_details and level == 'alert':
                             alert_cache_key = 'thunder.alert.%s.%s.%s.%s' % (
@@ -788,11 +841,29 @@ class Thunder(Thread):
                                 if redis_item:
                                     # Delete the item from the Redis set
                                     try:
+                                        # @added 20220303 - Feature #4412: flux - quota - thunder alert
+                                        do_log = True
+                                        try:
+                                            redis_item_dict = literal_eval(redis_item)
+                                            if isinstance(redis_item_dict, dict):
+                                                if redis_item_dict['event_type'] == 'metric_quota_exceeded':
+                                                    do_log = False
+                                                    logger.info('not logging total event string as metric_quota_exceeded, sampling with data removed')
+                                                    try:
+                                                        del redis_item_dict['data']
+                                                    except Exception as err:
+                                                        logger.error('error :: failed to removed data key from dict - %s' % err)
+                                                    logger.info('sample: %s' % str(redis_item_dict))
+                                        except Exception as err:
+                                            logger.error('error :: failed literal_eval the redis_item - %s' % err)
+
                                         # @modified 20210907 - Bug #4258: cleanup thunder.events
                                         # removed_item = update_redis_set(
                                         update_redis_set(
                                             skyline_app, thunder_redis_set, redis_item,
-                                            'remove', log=True)
+                                            # @modified 20220303 - Feature #4412: flux - quota - thunder alert
+                                            # 'remove', log=True)
+                                            'remove', do_log)
                                         # if removed_item:
                                         #     logger.info('alert key exists, removed event_details from %s Redis set entry - %s' % (
                                         #         thunder_redis_set, str(redis_item)))
@@ -917,13 +988,34 @@ class Thunder(Thread):
 
                     # @added 20210907 - Bug #4258: cleanup thunder.events
                     # Remove event
-                    try:
-                        update_redis_set(
-                            skyline_app, thunder_redis_set, redis_item,
-                            'remove', log=True)
-                    except Exception as e:
-                        logger.error('error :: could not remove item from Redis set %s - %s' % (
-                            thunder_redis_set, e))
+                    # @modified 20220222 -Branch #1444: thunder
+                    # Iterate redis_items list, rather than assuming a single
+                    # redis_item
+                    for redis_item in redis_items:
+                        try:
+
+                            # @added 20220303 - Feature #4412: flux - quota - thunder alert
+                            do_log = True
+                            try:
+                                redis_item_dict = literal_eval(redis_item)
+                                if isinstance(redis_item_dict, dict):
+                                    if redis_item_dict['event_type'] == 'metric_quota_exceeded':
+                                        do_log = False
+                                        logger.info('not logging total event string as metric_quota_exceeded, sampling with data removed')
+                                        try:
+                                            del redis_item_dict['data']
+                                        except Exception as err:
+                                            logger.error('error :: failed to removed data key from dict - %s' % err)
+                                        logger.info('sample: %s' % str(redis_item_dict))
+                            except Exception as err:
+                                logger.error('error :: failed literal_eval the redis_item - %s' % err)
+
+                            update_redis_set(
+                                skyline_app, thunder_redis_set, redis_item,
+                                'remove', do_log)
+                        except Exception as e:
+                            logger.error('error :: could not remove item from Redis set %s - %s' % (
+                                thunder_redis_set, e))
 
             if int(time()) >= (last_sent_to_graphite + 60):
                 logger.info('sending Graphite metrics')
@@ -962,31 +1054,59 @@ class Thunder(Thread):
                 if thunder_events_list:
                     logger.info('managing %s items in thunder.events Redis set' % str(len(thunder_events_list)))
                     for thunder_event_str in thunder_events_list:
-                        thunder_event = None
-                        remove_item = False
                         try:
-                            thunder_event = literal_eval(thunder_event_str)
+                            thunder_event = None
+                            remove_item = False
+                            try:
+                                thunder_event = literal_eval(thunder_event_str)
+                            except Exception as err:
+                                logger.error('error :: could not literal_eval(thunder_events_str) - %s' % str(err))
+                            thunder_event_timestamp = 0
+                            if thunder_event:
+                                try:
+                                    thunder_event_timestamp = int(thunder_event['timestamp'])
+                                except KeyError:
+                                    # No timestamp, remove event
+                                    remove_item = thunder_event_str
+                                    thunder_event_timestamp = None
+                            if thunder_event_timestamp:
+                                # @modified 20220307 -
+                                # if thunder_event_timestamp > (last_sent_to_graphite - 86400):
+                                if (current_timestamp - 86400) > thunder_event_timestamp:
+                                    remove_item = thunder_event_str
+                            if remove_item:
+                                # Remove event
+
+                                # @added 20220303 - Feature #4412: flux - quota - thunder alert
+                                do_log = True
+                                try:
+                                    redis_item_dict = literal_eval(thunder_event_str)
+                                    if isinstance(redis_item_dict, dict):
+                                        if redis_item_dict['event_type'] == 'metric_quota_exceeded':
+                                            do_log = False
+                                            logger.info('removing event from thunder.events Redis set as the event is older than 86400 seconds')
+                                            logger.info('not logging total event string as metric_quota_exceeded, sampling with data removed')
+                                            try:
+                                                del redis_item_dict['data']
+                                            except Exception as err:
+                                                logger.error('error :: failed to removed data key from dict - %s' % err)
+                                            logger.info('sample: %s' % str(redis_item_dict))
+                                except Exception as err:
+                                    logger.error('error :: failed literal_eval the redis_item - %s' % err)
+
+                                if do_log:
+                                    logger.info('removing event from thunder.events Redis set as the event is older than 86400 seconds. event: %s' % (
+                                        str(thunder_event)))
+                                try:
+                                    update_redis_set(
+                                        # @modified 20220222 -Branch #1444: thunder
+                                        # Use thunder_event_str rather than redis_item
+                                        # skyline_app, thunder_redis_set, redis_item,
+                                        skyline_app, thunder_redis_set,
+                                        thunder_event_str, 'remove', do_log)
+                                except Exception as e:
+                                    logger.error('error :: could not remove item from Redis set %s - %s' % (
+                                        thunder_redis_set, e))
                         except Exception as err:
-                            logger.error('error :: could not literal_eval(thunder_events_str) - %s' % str(err))
-                        thunder_event_timestamp = 0
-                        if thunder_event:
-                            try:
-                                thunder_event_timestamp = int(thunder_event['timestamp'])
-                            except KeyError:
-                                # No timestamp, remove event
-                                remove_item = thunder_event_str
-                                thunder_event_timestamp = None
-                        if thunder_event_timestamp:
-                            if thunder_event_timestamp > (last_sent_to_graphite - 86400):
-                                remove_item = thunder_event_str
-                        if remove_item:
-                            # Remove event
-                            logger.info('removing event from thunder.events Redis set as the event is older than 86400 seconds. event: %s' % (
-                                str(thunder_event)))
-                            try:
-                                update_redis_set(
-                                    skyline_app, thunder_redis_set, redis_item,
-                                    'remove', log=True)
-                            except Exception as e:
-                                logger.error('error :: could not remove item from Redis set %s - %s' % (
-                                    thunder_redis_set, e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to manage a thunder_event in the thunder_events_list - %s' % err)
