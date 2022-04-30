@@ -52,7 +52,7 @@ itsdangerous==2.1.2
 # from jinja2 import FileSystemLoader, BaseLoader, TemplateNotFound, \
 # ImportError: cannot import name 'contextfunction' from 'jinja2' (/home/docs/checkouts/readthedocs.org/user_builds/earthgecko-skyline/envs/latest/lib/python3.7/site-packages/jinja2/__init__.py)
 #Jinja2==3.1.1
-Jinja2==2.11.3
+Jinja2==3.0.3
 # @modified 20211220 - Task #4344: Update dependencies
 #MarkupSafe==1.1.1
 # @modified 20220422 - Task #4452: Update dependencies
