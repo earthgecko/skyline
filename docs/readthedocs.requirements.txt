@@ -9,6 +9,7 @@
 # @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 # @modified 20220206 - Feature #4416: settings - additional SMTP_OPTS
+# @modified 20220422 - Task #4452: Update dependencies
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -18,7 +19,9 @@ wheel
 #redis==3.5.3
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #redis==4.0.2
-redis==4.1.0
+# @modified 20220422 - Task #4452: Update dependencies
+#redis==4.1.0
+redis==4.2.2
 # @modified 20211220 - Task #4344: Update dependencies
 #hiredis==1.1.0
 hiredis==2.0.0
@@ -33,26 +36,38 @@ python-daemon==2.3.0
 #itsdangerous==1.1.0
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #itsdangerous==2.0.0
-itsdangerous==2.0.1
+# @modified 20220422 - Task #4452: Update dependencies
+#itsdangerous==2.0.1
+itsdangerous==2.1.2
 # @modified 20210202 - Task #3960: SNYK-PYTHON-JINJA2-1012994
 # @modified 20210324 - Support #3990: Update jinja - CVE-2020-28493
 #                      Task #3960: SNYK-PYTHON-JINJA2-1012994
 #Jinja2==2.11.2
 # @modified 20211220 - Task #4344: Update dependencies
 #Jinja2==2.11.3
-Jinja2==3.0.3
+# @modified 20220422 - Task #4452: Update dependencies
+#Jinja2==3.0.3
+Jinja2==3.1.1
 # @modified 20211220 - Task #4344: Update dependencies
 #MarkupSafe==1.1.1
-MarkupSafe==2.0.1
+# @modified 20220422 - Task #4452: Update dependencies
+#MarkupSafe==2.0.1
+MarkupSafe==2.1.1
 # @modified 20211220 - Task #4344: Update dependencies
 #Werkzeug==1.0.1
-Werkzeug==2.0.2
+# @modified 20220422 - Task #4452: Update dependencies
+#Werkzeug==2.0.2
+Werkzeug==2.1.1
 # @modified 20211220 - Task #4344: Update dependencies
 #click==7.1.2
-click==8.0.3
+# @modified 20220422 - Task #4452: Update dependencies
+#click==8.0.3
+click==8.1.2
 # @modified 20211220 - Task #4344: Update dependencies
 #Flask==1.1.2
-Flask==2.0.2
+# @modified 20220422 - Task #4452: Update dependencies
+#Flask==2.0.2
+Flask==2.1.1
 # @modified 20211220 - Task #4344: Update dependencies
 #simplejson==3.17.2
 simplejson==3.17.6
@@ -66,7 +81,9 @@ unittest2==1.1.0
 funcsigs==1.0.2
 # @modified 20211220 - Task #4344: Update dependencies
 #pbr==5.5.1
-pbr==5.8.0
+# @modified 20220422 - Task #4452: Update dependencies
+#pbr==5.8.0
+pbr==5.8.1
 mock==4.0.3
 # @modified 20211220 - Task #4344: Update dependencies
 #numpy==1.19.4
@@ -75,7 +92,9 @@ mock==4.0.3
 # @modified 20220206 - Feature #4416: settings - additional SMTP_OPTS
 # numpy 1.22.0 not available on readthedocs
 #numpy==1.22.0
-numpy==1.21.5
+# @modified 20220422 - Task #4452: Update dependencies
+#numpy==1.21.5
+numpy==1.22.3
 # @modified 20211220 - Task #4344: Update dependencies
 #scipy==1.5.4
 scipy==1.7.3
@@ -84,13 +103,17 @@ scipy==1.7.3
 python-dateutil==2.8.2
 # @modified 20211220 - Task #4344: Update dependencies
 #pytz==2020.5
-pytz==2021.3
+# @modified 20220422 - Task #4452: Update dependencies
+#pytz==2021.3
+pytz==2022.1
 # @modified 20211220 - Task #4344: Update dependencies
 #cycler==0.10.0
 cycler==0.11.0
 # @modified 20211220 - Task #4344: Update dependencies
 #pyparsing==2.4.7
-pyparsing==3.0.6
+# @modified 20220422 - Task #4452: Update dependencies
+#pyparsing==3.0.6
+pyparsing==3.0.8
 # @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 #Pillow==8.1.2
 # @modified 20211110 - Task #4282: Update dependencies
@@ -100,11 +123,17 @@ pyparsing==3.0.6
 #Pillow==8.3.2
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #Pillow==8.4.0
-Pillow==9.0.0
-matplotlib==3.3.3
+# @modified 20220422 - Task #4452: Update dependencies
+#Pillow==9.0.0
+Pillow==9.1.0
+# @modified 20220217 - Task #4452: Update dependencies
+#matplotlib==3.3.3
+matplotlib==3.5.1
 # @modified 20211220 - Task #4344: Update dependencies
 #pandas==1.2.0
-pandas==1.3.5
+# @modified 20220422 - Task #4452: Update dependencies
+#pandas==1.3.5
+pandas==1.4.2
 # @modified 20211220 - Task #4344: Update dependencies
 #patsy==0.5.1
 patsy==0.5.2
@@ -119,7 +148,9 @@ requests==2.27.1
 pygerduty==0.38.3
 # @modified 20211220 - Task #4344: Update dependencies
 #mysql-connector-python==8.0.22
-mysql-connector-python==8.0.27
+# @modified 20220422 - Task #4452: Update dependencies
+#mysql-connector-python==8.0.27
+mysql-connector-python==8.0.28
 # @modified 20211220 - Task #4344: Update dependencies
 #gunicorn==20.0.4
 gunicorn==20.1.0
@@ -151,15 +182,21 @@ termcolor==1.1.0
 py==1.11.0
 # @modified 20211220 - Task #4344: Update dependencies
 #pytest==6.2.1
-pytest==6.2.5
+# @modified 20220422 - Task #4452: Update dependencies
+#pytest==6.2.5
+pytest==7.1.1
 # @modified 20211220 - Task #4344: Update dependencies
 #SQLAlchemy==1.3.22
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #SQLAlchemy==1.4.28
-SQLAlchemy==1.4.29
+# @modified 20220422 - Task #4452: Update dependencies
+#SQLAlchemy==1.4.29
+SQLAlchemy==1.4.35
 # @modified 20211220 - Task #4344: Update dependencies
 #pymemcache==3.4.0
-pymemcache==3.5.0
+# @modified 20220422 - Task #4452: Update dependencies
+#pymemcache==3.5.0
+pymemcache==3.5.2
 # @modified 20211220 - Task #4344: Update dependencies
 #PyJWT==1.7.1
 PyJWT==2.3.0
@@ -172,17 +209,24 @@ slackclient==2.9.3
 #urllib3==1.26.5
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #urllib3==1.26.7
-urllib3==1.26.8
+# @modified 20220422 - Task #4452: Update dependencies
+#urllib3==1.26.8
+urllib3==1.26.9
 # @modified 20211220 - Task #4344: Update dependencies
 #graphyte==1.6.0
 graphyte==1.7.0
 statsd==3.3.0
 # @modified 20211220 - Task #4344: Update dependencies
 #falcon==2.0.0
-falcon==3.0.1
+# @modified 20220422 - Task #4452: Update dependencies
+#falcon==3.0.1
+falcon==3.1.0
 
 xlrd==1.2.0
-pandas_log==0.1.6; python_version >= '3.2'
+# @modified 20220422 - Task #4452: Update dependencies
+#pandas_log==0.1.6; python_version >= '3.2'
+pandas_log==0.1.6
+
 # @modified 20211220 - Task #4344: Update dependencies
 #timeout-decorator==0.4.1
 timeout-decorator==0.5.0
@@ -190,10 +234,35 @@ timeout-decorator==0.5.0
 #matrixprofile==1.1.4
 matrixprofile==1.1.10
 mass-ts==0.1.4
-boto3==1.20.24
+# @modified 20220422 - Task #4452: Update dependencies
+#boto3==1.20.24
+boto3==1.21.44
 
 adtk
 
 # @added 20220110 - Feature #4180: custom_algorithm - m66
 #                   Feature #4164: luminosity - cloudbursts
 bottleneck==1.3.2
+
+# @added 20220111 - Feature #3550: flux.uploaded_data_worker
+#                   Feature #3538: webapp - upload_data endpoint
+#                   Task #4362: snyk - numpy and pillow updates
+# New dependency for pandas reading xls
+openpyxl==3.0.9
+
+# @added 20220422 - Task #4452: Update dependencies
+opentelemetry-api==1.11.1
+opentelemetry-distro==0.29b0
+opentelemetry-exporter-jaeger==1.11.1
+opentelemetry-exporter-jaeger-proto-grpc==1.11.1
+opentelemetry-exporter-jaeger-thrift==1.11.1
+opentelemetry-instrumentation==0.29b0
+opentelemetry-instrumentation-flask==0.29b1
+opentelemetry-instrumentation-pymemcache==0.29b0
+opentelemetry-instrumentation-redis==0.29b0
+opentelemetry-instrumentation-sqlalchemy==0.29b0
+opentelemetry-instrumentation-wsgi==0.29b0
+opentelemetry-proto==1.11.1
+opentelemetry-sdk==1.11.1
+opentelemetry-semantic-conventions==0.29b0
+opentelemetry-util-http==0.29b0
