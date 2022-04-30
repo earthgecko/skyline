@@ -649,7 +649,7 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
 # https://github.com/pyenv/pyenv/issues/1183
     apt-get -y install libffi-dev
     if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
-      apt -y install python3-dev python3-pip build-essential nginx apache2-utils \
+      apt-get -y install python3-dev python3-pip build-essential nginx apache2-utils \
         lzma lzma-dev liblzma-dev
     fi
   fi
