@@ -9,6 +9,9 @@ from ast import literal_eval
 from skyline_functions import get_redis_conn_decoded
 import settings
 
+# @added 20220426 - Feature #4536: Handle Redis failure
+from functions.memcache.set_memcache_key import set_memcache_key
+
 
 # @added 20210601 - Feature #4000: EXTERNAL_SETTINGS
 def manage_external_settings(current_skyline_app):
@@ -157,6 +160,12 @@ def manage_external_settings(current_skyline_app):
     if LOCAL_EXTERNAL_SETTINGS:
         external_settings_config_ids = list(external_settings.keys())
         for config_id in list(LOCAL_EXTERNAL_SETTINGS.keys()):
+
+            # @added 20220225 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+            # Added _global wildcard namespace settings
+            if config_id == '_global':
+                continue
+
             local_external_settings_used = False
             if config_id in external_settings_config_ids:
                 external_settings_config_id_present = True
@@ -214,6 +223,64 @@ def manage_external_settings(current_skyline_app):
                 if local_external_settings_used:
                     external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = LOCAL_EXTERNAL_SETTINGS[config_id].copy()
 
+    # @added 20220225 - Feature #4442: settings - LOCAL_EXTERNAL_SETTINGS
+    # Added _global wildcard namespace settings
+    global_settings = {}
+    try:
+        global_settings = LOCAL_EXTERNAL_SETTINGS['_global'].copy()
+    except KeyError:
+        global_settings = {}
+    if global_settings:
+        for setting in list(global_settings.keys()):
+            value = None
+            try:
+                value = LOCAL_EXTERNAL_SETTINGS['_global'][setting]['value']
+            except KeyError:
+                value = None
+            use_key = None
+            if not value:
+                try:
+                    use_key = LOCAL_EXTERNAL_SETTINGS['_global'][setting]['use_key']
+                except KeyError:
+                    use_key = None
+            use_type = 'str'
+            try:
+                use_type = LOCAL_EXTERNAL_SETTINGS['_global'][setting]['type']
+            except KeyError:
+                use_type = 'str'
+
+            override = False
+            try:
+                override = LOCAL_EXTERNAL_SETTINGS['_global'][setting]['override']
+            except KeyError:
+                override = False
+            for config_id in list(external_settings.keys()):
+                setting_present = False
+                try:
+                    setting_present = external_settings[config_id][setting]
+                except KeyError:
+                    setting_present = False
+                if (setting_present and override) or not setting_present:
+                    use_value = None
+                    if value:
+                        use_value = value
+                    if use_key:
+                        use_value = external_settings[config_id][use_key]
+                        if setting == 'correlate_namespaces_only' and use_key == 'namespace':
+                            use_value = '%s\\.' % use_value
+                    if use_type == 'list':
+                        use_value = [use_value]
+                    if use_type == 'dict':
+                        use_value = {use_value}
+                    external_settings[config_id][setting] = use_value
+                    try:
+                        known_local_settings = external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS']
+                    except KeyError:
+                        external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'] = {}
+                        known_local_settings = True
+                    if known_local_settings:
+                        external_settings[config_id]['LOCAL_EXTERNAL_SETTINGS'][setting] = use_value
+
     redis_conn_decoded = None
     try:
         redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
@@ -241,6 +308,18 @@ def manage_external_settings(current_skyline_app):
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_external_settings :: failed to set Redis key %s - %s' % (
             redis_key, e))
+    # @added 20220426 - Feature #4536: Handle Redis failure
+    # Add flux required data to memcache as well
+    if settings.MEMCACHE_ENABLED:
+        try:
+            success = set_memcache_key(current_skyline_app, redis_key, external_settings)
+            if success:
+                current_logger.info('%s :: set memcache %s key' % (
+                    function_str, str(redis_key)))
+        except Exception as err:
+            current_logger.error('error :: %s :: set_memcache_key failed - %s' % (
+                function_str, err))
+
     try:
         redis_conn_decoded.set(last_known_redis_key, str(external_settings))
     except Exception as e:
