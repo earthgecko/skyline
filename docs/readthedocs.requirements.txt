@@ -135,6 +135,7 @@ matplotlib==3.5.1
 #pandas==1.2.0
 # @modified 20220422 - Task #4452: Update dependencies
 #pandas==1.3.5
+# @modified 20220430 - Task #4452: Update dependencies
 # pandas 1.4.2 not available on readthedocs
 #pandas==1.4.2
 pandas==1.3.5
@@ -255,18 +256,20 @@ bottleneck==1.3.2
 openpyxl==3.0.9
 
 # @added 20220422 - Task #4452: Update dependencies
-opentelemetry-api==1.11.1
-opentelemetry-distro==0.29b0
-opentelemetry-exporter-jaeger==1.11.1
-opentelemetry-exporter-jaeger-proto-grpc==1.11.1
-opentelemetry-exporter-jaeger-thrift==1.11.1
-opentelemetry-instrumentation==0.29b0
-opentelemetry-instrumentation-flask==0.29b1
-opentelemetry-instrumentation-pymemcache==0.29b0
-opentelemetry-instrumentation-redis==0.29b0
-opentelemetry-instrumentation-sqlalchemy==0.29b0
-opentelemetry-instrumentation-wsgi==0.29b0
-opentelemetry-proto==1.11.1
-opentelemetry-sdk==1.11.1
-opentelemetry-semantic-conventions==0.29b0
-opentelemetry-util-http==0.29b0
+# @modified 20220430 - Task #4452: Update dependencies
+# opentelemetry conflicts, disabling
+#opentelemetry-api==1.11.1
+#opentelemetry-distro==0.29b0
+#opentelemetry-exporter-jaeger==1.11.1
+#opentelemetry-exporter-jaeger-proto-grpc==1.11.1
+#opentelemetry-exporter-jaeger-thrift==1.11.1
+#opentelemetry-instrumentation==0.29b0
+#opentelemetry-instrumentation-flask==0.29b1
+#opentelemetry-instrumentation-redis==0.29b0
+#opentelemetry-instrumentation-pymemcache==0.29b0
+#opentelemetry-instrumentation-sqlalchemy==0.29b0
+#opentelemetry-instrumentation-wsgi==0.29b0
+#opentelemetry-proto==1.11.1
+#opentelemetry-sdk==1.11.1
+#opentelemetry-semantic-conventions==0.29b0
+#opentelemetry-util-http==0.29b0
