@@ -1,3 +1,6 @@
+"""
+flux.py
+"""
 import sys
 import os
 from multiprocessing import Queue
@@ -44,6 +47,17 @@ if True:
         prometheus_settings = {}
     if prometheus_settings:
         from prometheus import PrometheusMetricDataPost
+
+    # @added 20220405 - Feature #4516: flux - opentelemetry traces
+    FLUX_OTEL_ENABLED = False
+    try:
+        FLUX_OTEL_ENABLED = settings.FLUX_OTEL_ENABLED
+    except AttributeError:
+        FLUX_OTEL_ENABLED = False
+    except Exception as err:
+        FLUX_OTEL_ENABLED = False
+    if FLUX_OTEL_ENABLED:
+        from listen import OTLPTracePost
 
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 try:
@@ -114,8 +128,21 @@ else:
 logger.info('flux :: starting %s aggregator processes' % str(settings.FLUX_WORKERS))
 Aggregator(pid).start()
 
-logger.info('flux :: starting %s worker/s' % str(settings.FLUX_WORKERS))
+# @modified 20220428 - Feature #4536: Handle Redis failure
+# logger.info('flux :: starting %s gunicorn worker/s' % str(settings.FLUX_WORKERS))
+# Worker(httpMetricDataQueue, pid).start()
+logger.info('flux :: starting %s gunicorn worker/s, each with 2 threads' % str(settings.FLUX_WORKERS))
 Worker(httpMetricDataQueue, pid).start()
+Worker(httpMetricDataQueue, pid).start()
+if settings.FLUX_WORKERS == 2:
+    Worker(httpMetricDataQueue, pid).start()
+    Worker(httpMetricDataQueue, pid).start()
+if settings.FLUX_WORKERS == 3:
+    Worker(httpMetricDataQueue, pid).start()
+    Worker(httpMetricDataQueue, pid).start()
+if settings.FLUX_WORKERS > 3:
+    Worker(httpMetricDataQueue, pid).start()
+    Worker(httpMetricDataQueue, pid).start()
 
 # @modified 20191010 - Bug #3254: flux.populateMetricQueue Full
 # populateMetricQueue = Queue(maxsize=3000)
@@ -144,9 +171,17 @@ httpMetricDataPost = MetricDataPost()
 if prometheus_settings:
     prometheusMetricDataPost = PrometheusMetricDataPost()
 
+# @added 20220408 - Feature #4516: flux - opentelemetry traces
+if FLUX_OTEL_ENABLED:
+    otelTracePost = OTLPTracePost()
+
 api.add_route('/metric_data', httpMetricData)
 api.add_route('/populate_metric', populateMetric)
 api.add_route('/metric_data_post', httpMetricDataPost)
 # @added 20211026 - Branch #4300: prometheus
 if prometheus_settings:
     api.add_route('/prometheus/write', prometheusMetricDataPost)
+
+# @added 20220408 - Feature #4516: flux - opentelemetry traces
+if FLUX_OTEL_ENABLED:
+    api.add_route('/otlp/v1/trace', otelTracePost)

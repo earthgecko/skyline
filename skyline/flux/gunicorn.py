@@ -18,6 +18,14 @@ if True:
     import settings
     from skyline_functions import get_redis_conn
 
+# @added 20220427 - Feature #4536: Handle Redis failure
+if settings.MEMCACHE_ENABLED:
+    from functions.memcache.set_memcache_key import set_memcache_key
+    from functions.memcache.delete_memcache_key import delete_memcache_key
+else:
+    set_memcache_key = None
+    delete_memcache_key = None
+
 bind = '%s:%s' % (settings.FLUX_IP, str(settings.FLUX_PORT))
 # workers = multiprocessing.cpu_count() * 2 + 1
 workers = settings.FLUX_WORKERS
@@ -38,12 +46,29 @@ try:
     redis_conn.set('flux.main_process_pid', pid)
     logger.info('flux :: gunicorn.py :: set the Redis key flux.main_process_pid to %s' % (
         str(pid)))
-except Exception as e:
+    del redis_conn
+except Exception as err:
     logger.error('error :: flux :: gunicorn.py :: failed to set the Redis key flux.main_process_pid to %s, exit - %s' % (
-        str(pid), str(e)))
-    sys.exit(1)
+        str(pid), str(err)))
+# @added 20220428 - Feature #4536: Handle Redis failure
+# Add flux required data to memcache as well
+success = False
+if settings.MEMCACHE_ENABLED:
+    try:
+        success = set_memcache_key(skyline_app, 'flux.main_process_pid', pid)
+        if success:
+            logger.info('flux :: gunicorn.py :: set memcache flux.main_process_pid')
+    except Exception as err:
+        logger.error('error :: metrics_manager :: set_memcache_key failed to set flux.main_process_pid - %s' % (
+            err))
+    success = False
+    try:
+        success = delete_memcache_key(skyline_app, 'flux.worker.primary_worker_key')
+    except Exception as err:
+        logger.error('error :: worker :: failed to delete memcache flux.worker.primary_worker_key - %s' % (str(err)))
+    if success:
+        logger.info('worker :: deleted flux.worker.primary_worker_key memcache key')
 
-del redis_conn
 
 # access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 
