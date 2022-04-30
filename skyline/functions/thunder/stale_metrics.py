@@ -76,7 +76,7 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: failed to get Redis connection - %s' % (
             function_str, e))
-        return namespace_stale_metrics_dict
+        return namespace_stale_metrics_dict, namespace_recovered_metrics_dict
 
     try:
         metrics_last_timestamp_dict = redis_conn_decoded.hgetall(hash_key)
@@ -88,7 +88,7 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         current_logger.error('error :: %s :: failed to get Redis hash key %s - %s' % (
             function_str, hash_key, e))
     if not metrics_last_timestamp_dict:
-        return namespace_stale_metrics_dict
+        return namespace_stale_metrics_dict, namespace_recovered_metrics_dict
 
     # Do not send stale alerts for any identified sparsely populated metrics
     metrics_sparsity_dict = {}
@@ -174,6 +174,16 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     if custom_stale_metrics_dict:
         custom_stale_metrics = list(custom_stale_metrics_dict.keys())
 
+    # @added 20220410 - Task #4514: Integrate opentelemetry
+    #                   Feature #4516: flux - opentelemetry traces
+    # Remove metrics in DO_NOT_SKIP_LISTs
+    try:
+        metrics_manager_do_not_alert_on_stale_metrics = list(redis_conn_decoded.smembers('metrics_manager.do_not_alert_on_stale_metrics'))
+    except Exception as err:
+        current_logger.error('error :: %s :: failed to get metrics_manager.do_not_alert_on_stale_metrics Redis set - %s' % (
+            function_str, str(err)))
+        metrics_manager_do_not_alert_on_stale_metrics = []
+
     metrics_last_timestamps = []
     parent_namespaces = []
     unique_base_names = list(metrics_last_timestamp_dict.keys())
@@ -181,6 +191,13 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     last_error = None
     error_count = 0
     for base_name in unique_base_names:
+
+        # @added 20220410 - Task #4514: Integrate opentelemetry
+        #                   Feature #4516: flux - opentelemetry traces
+        # Remove metrics in DO_NOT_SKIP_LISTs
+        if base_name in metrics_manager_do_not_alert_on_stale_metrics:
+            continue
+
         try:
             parent_namespace = base_name.split('.')[0]
             metrics_last_timestamps.append([base_name, int(metrics_last_timestamp_dict[base_name])])
