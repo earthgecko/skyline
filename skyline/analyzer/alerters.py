@@ -105,6 +105,10 @@ if True:
     from functions.settings.get_sms_recipients import get_sms_recipients
     # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
     from functions.smtp.determine_smtp_server import determine_smtp_server
+    # @added 20220410 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+    from functions.metrics.last_known_value_metrics_list import last_known_value_metrics_list
+    from functions.metrics.zero_fill_metrics_list import zero_fill_metrics_list
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -135,10 +139,11 @@ alert: the tuple specified in your settings:\n
     alert[0]: The matched substring of the anomalous metric\n
     alert[1]: the name of the strategy being used to alert\n
     alert[2]: The timeout of the alert that was triggered\n
-        alert[4]: The type [optional for http_alerter only] (dict)\n
-                  The snab_details [optional for SNAB and slack only] (list)\n
-        alert[5]: The snab_details [optional for SNAB and slack only] (list)\n
-                  The anomaly_id [optional for http_alerter only] (list)\n
+    alert[3]: The type [optional for http_alerter only] (dict)\n
+              The snab_details [optional for SNAB and slack only] (list)\n
+              Alert testing (dict) e.g. {'test alert': True}\n
+    alert[4]: The snab_details [optional for SNAB and slack only] (list)\n
+              The anomaly_id [optional for http_alerter only] (list)\n
 metric: information about the anomaly itself\n
     metric[0]: the anomalous value\n
     metric[1]: The full name of the anomalous metric\n
@@ -188,6 +193,20 @@ def alert_smtp(alert, metric, context):
         base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
     else:
         base_name = metric_name
+
+    # @added 20220301 - Feature #4482: Test alerts
+    test_alert = False
+    test_alert_dict = {}
+    try:
+        test_alert_dict = alert[3]
+    except:
+        test_alert_dict = {}
+    if test_alert_dict:
+        if isinstance(test_alert_dict, dict):
+            try:
+                test_alert = test_alert_dict['test alert']
+            except:
+                test_alert = False
 
     # @modified 20190520 - Branch #3002: docker
     # wix-playground added a hashlib hexdigest method which has not been
@@ -372,6 +391,11 @@ def alert_smtp(alert, metric, context):
     if waterfall_alert:
         unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL%20ALERT')
 
+    # @added 20220301 - Feature #4482: Test alerts
+    if test_alert:
+        unencoded_graph_title = 'TEST - %s' % unencoded_graph_title
+        main_alert_title = 'TEST - %s' % main_alert_title
+
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
@@ -445,6 +469,41 @@ def alert_smtp(alert, metric, context):
             graphite_render_uri, str(graphite_from),
             # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
             # str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
+            graph_title)
+
+    # @added 20220410 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+    last_known_value_metrics = []
+    try:
+        last_known_value_metrics = last_known_value_metrics_list(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: alert_smtp :: last_known_value_metrics_list failed - %s' % err)
+    zero_fill_metrics = []
+    try:
+        zero_fill_metrics = zero_fill_metrics_list(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: alert_smtp :: zero_fill_metrics_list failed - %s' % err)
+    # Do not zero fill derivative metrics, if the use has defined a metric as a
+    # zero fill metric and it is a derivative metric do not break the metric
+    # by applying zero filling, rather correct it and apply last_known_value
+    if base_name in zero_fill_metrics:
+        if not known_derivative_metric:
+            link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(transformNull(nonNegativeDerivative(%s),0),%%27si%%27)%s%s&colorList=orange' % (
+                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+                graphite_render_uri, str(graphite_from),
+                str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
+                graph_title)
+        else:
+            # Fix the badly defined metric
+            last_known_value_metrics.append(base_name)
+    if base_name in last_known_value_metrics:
+        target_metric = 'keepLastValue(%s)' % str(target_metric)
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(keepLastValue(nonNegativeDerivative(%s)),%%27si%%27)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+            graphite_render_uri, str(graphite_from),
             str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
@@ -561,7 +620,7 @@ def alert_smtp(alert, metric, context):
                     logger.info(traceback.format_exc())
                     logger.error(
                         'error :: failed to add %s Ionosphere Graphite image' % (
-                            skyline_app, graphite_image_file))
+                            graphite_image_file))
             else:
                 logger.info(
                     '%s Ionosphere Graphite image already exists :: %s' % (
@@ -646,7 +705,7 @@ def alert_smtp(alert, metric, context):
                     logger.info('added %s Ionosphere Redis data timeseries json file :: %s' % (skyline_app, json_file))
                 except:
                     logger.info(traceback.format_exc())
-                    logger.error('error :: failed to add %s Ionosphere Redis data timeseries json file' % (skyline_app, json_file))
+                    logger.error('error :: failed to add %s Ionosphere Redis data timeseries json file' % (json_file))
             else:
                 # Replace the timeseries object
                 logger.info('%s Ionosphere Redis data timeseries json file already exists, using :: %s' % (skyline_app, json_file))
@@ -937,6 +996,11 @@ def alert_smtp(alert, metric, context):
             body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % alert_context
         else:
             body = '<h3>%s<font color="black"> %s alert</font></h3><br>' % (main_alert_title, alert_context)
+
+        # @added 20220301 - Feature #4482: Test alerts
+        if test_alert:
+            body += '<font color="red"><b>TEST ALERT</b></font><br>'
+
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
         body += '<font color="black">Anomalous value: %s</font><br>' % str(metric[0])
         body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
@@ -1053,6 +1117,10 @@ def alert_smtp(alert, metric, context):
             else:
                 msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
 
+            # @added 20220301 - Feature #4482: Test alerts
+            if test_alert:
+                msg['Subject'] = 'TEST - [%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+
             msg['From'] = sender
             # @modified 20180524 - Task #2384: Change alerters to cc other recipients
             # msg['To'] = recipient
@@ -1089,13 +1157,12 @@ def alert_smtp(alert, metric, context):
                             logger.error(
                                 'error :: alert_smtp - failed to remove file - %s' % buf)
                             logger.info(traceback.format_exc())
-                            pass
-                    except:
-                        logger.error('error :: failed to read plot file - %s' % buf)
+                    except Exception as err:
+                        logger.error('error :: failed to read plot file - %s - %s' % (buf, err))
                         plot_image_data = None
 
                     # @added 20161124 - Branch #922: ionosphere
-                    msg_plot_attachment = MIMEImage(plot_image_data)
+                    msg_plot_attachment = MIMEImage(plot_image_data, _subtype='png')
                     msg_plot_attachment.add_header('Content-ID', '<%s>' % redis_graph_content_id)
                     msg.attach(msg_plot_attachment)
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
@@ -1107,7 +1174,7 @@ def alert_smtp(alert, metric, context):
             msg_attachment = None
             if image_data is not None:
                 try:
-                    msg_attachment = MIMEImage(image_data)
+                    msg_attachment = MIMEImage(image_data, _subtype='png')
                     msg_attachment.add_header('Content-ID', '<%s>' % content_id)
                     msg.attach(msg_attachment)
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
@@ -1203,7 +1270,9 @@ def alert_smtp(alert, metric, context):
                     str(send_email_alert), str(primary_recipient), str(cc_recipients)))
 
     # @added 20200825 - Feature #3704: Add alert to anomalies
-    if settings.PANORAMA_ENABLED:
+    # @modified 20220301 - Feature #4482: Test alerts
+    # if settings.PANORAMA_ENABLED:
+    if settings.PANORAMA_ENABLED and not test_alert:
         added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric[2]), base_name)
         if not added_panorama_alert_event:
             logger.error(
@@ -1296,7 +1365,9 @@ def alert_pagerduty(alert, metric, context):
         pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
 
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        if settings.PANORAMA_ENABLED:
+        # @modified 20220301 - Feature #4482: Test alerts
+        # if settings.PANORAMA_ENABLED:
+        if settings.PANORAMA_ENABLED and not test_alert:
             added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric[2]), metric[1])
             if not added_panorama_alert_event:
                 logger.error(
@@ -1509,6 +1580,20 @@ def alert_slack(alert, metric, context):
         logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
 
+    # @added 20220301 - Feature #4482: Test alerts
+    test_alert = False
+    test_alert_dict = {}
+    try:
+        test_alert_dict = alert[3]
+    except:
+        test_alert_dict = {}
+    if test_alert_dict:
+        if isinstance(test_alert_dict, dict):
+            try:
+                test_alert = test_alert_dict['test alert']
+            except:
+                test_alert = False
+
     # @modified 20200701 - Task #3612: Upgrade to slack v2
     #                      Task #3608: Update Skyline to Python 3.8.3 and deps
     #                      Task #3556: Update deps
@@ -1647,6 +1732,11 @@ def alert_slack(alert, metric, context):
     if waterfall_alert:
         unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL%20ALERT')
         slack_title = slack_title.replace('ALERT', 'WATERFALL ALERT')
+
+    # @added 20220301 - Feature #4482: Test alerts
+    if test_alert:
+        unencoded_graph_title = 'TEST - %s' % unencoded_graph_title
+        slack_title = '*TEST* - %s' % slack_title
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
@@ -2135,7 +2225,9 @@ def alert_slack(alert, metric, context):
                         (cache_key, str(cache_key_value)))
 
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        if settings.PANORAMA_ENABLED:
+        # @modified 20220301 - Feature #4482: Test alerts
+        # if settings.PANORAMA_ENABLED:
+        if settings.PANORAMA_ENABLED and not test_alert:
             metric_timestamp = int(metric[2])
             added_panorama_alert_event = add_panorama_alert(skyline_app, metric_timestamp, base_name)
             if not added_panorama_alert_event:
@@ -2152,6 +2244,21 @@ def alert_http(alert, metric, context):
 
     """
     if settings.HTTP_ALERTERS_ENABLED:
+
+        # @added 20220301 - Feature #4482: Test alerts
+        test_alert = False
+        test_alert_dict = {}
+        try:
+            test_alert_dict = alert[3]
+        except:
+            test_alert_dict = {}
+        if test_alert_dict:
+            if isinstance(test_alert_dict, dict):
+                try:
+                    test_alert = test_alert_dict['test alert']
+                except:
+                    test_alert = False
+
         alerter_name = alert[1]
         alerter_enabled = False
         try:
@@ -2391,15 +2498,24 @@ def alert_http(alert, metric, context):
             # Added anomaly_id and anomalyScore
             metric_alert_dict = {
                 "metric": str(metric[1]),
-                "timestamp": timestamp_str,
-                "value": value_str,
-                "full_duration": full_duration_str,
-                "expiry": expiry_str,
+                # @modified 20220301 - Feature #4482: Test alerts
+                # Use native json types apart from anomaly_id which is converted
+                # into a str for direct use in URLs
+                # "timestamp": timestamp_str,
+                # "value": value_str,
+                # "full_duration": full_duration_str,
+                # "expiry": expiry_str,
+                "timestamp": int(timestamp_str),
+                "value": float(value_str),
+                "full_duration": int(full_duration_str),
+                "expiry": int(expiry_str),
                 "source": str(source),
-                "token": str(alerter_token),
+                # "token": str(alerter_token),
+                "token": alerter_token,
                 "id": str(external_alerter_id),
                 "anomaly_id": str(anomaly_id),
-                "anomalyScore": str(anomalyScore),
+                # "anomalyScore": str(anomalyScore),
+                "anomalyScore": float(anomalyScore),
                 # @added 20201112 - Feature #3772: Add the anomaly_id to the http_alerter json
                 # Add the upper and lower 3sigma bounds
                 "3sigma_upper": sigma3_upper_bound,
@@ -2411,6 +2527,11 @@ def alert_http(alert, metric, context):
                 "yhat_lower": yhat_lower,
                 "yhat_real_lower": yhat_real_lower,
             }
+
+            # @added 20220301 - Feature #4482: Test alerts
+            if test_alert:
+                metric_alert_dict['test_alert'] = True
+
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
             # alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
@@ -2455,7 +2576,8 @@ def alert_http(alert, metric, context):
                 pass
         if resend_queue:
             try:
-                for index, resend_item in enumerate(resend_queue):
+                # for index, resend_item in enumerate(resend_queue):
+                for resend_item in resend_queue:
                     resend_item_list = literal_eval(resend_item)
                     # resend_alert = literal_eval(resend_item_list[0])
                     # resend_metric = literal_eval(resend_item_list[1])
@@ -2464,6 +2586,7 @@ def alert_http(alert, metric, context):
                         if int(resend_metric_alert_dict['timestamp']) == timestamp:
                             previous_attempts = int(resend_metric_alert_dict['attempts'])
                             in_resend_queue = True
+                            item_to_resend = resend_item
                             break
             except:
                 logger.error(traceback.format_exc())
@@ -2500,13 +2623,13 @@ def alert_http(alert, metric, context):
 
             if in_resend_queue:
                 try:
-                    REDIS_HTTP_ALERTER_CONN.srem(redis_set, str(resend_item))
+                    REDIS_HTTP_ALERTER_CONN.srem(redis_set, str(item_to_resend))
                     logger.info('alert_http :: alert removed from %s' % (
                         str(redis_set)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
-                        str(resend_item), redis_set))
+                        str(item_to_resend), redis_set))
 
             # @added 20200310 - Feature #3396: http_alerter
             # When the response code is 401 the response object appears to be
@@ -2535,7 +2658,9 @@ def alert_http(alert, metric, context):
                         pass
 
                     # @added 20200825 - Feature #3704: Add alert to anomalies
-                    if settings.PANORAMA_ENABLED:
+                    # @modified 20220301 - Feature #4482: Test alerts
+                    # if settings.PANORAMA_ENABLED:
+                    if settings.PANORAMA_ENABLED and not test_alert:
                         added_panorama_alert_event = add_panorama_alert(skyline_app, timestamp, metric_name)
                         if not added_panorama_alert_event:
                             logger.error(
@@ -2619,6 +2744,21 @@ def alert_sms(alert, metric, context):
         logger.error('error :: alert_sms recieved but settings.AWS_SNS_SMS_ALERTS_ENABLED not enabled for alert - %s and metric %s' % (
             str(alert), str(metric)))
         return
+
+    # @added 20220301 - Feature #4482: Test alerts
+    test_alert = False
+    test_alert_dict = {}
+    try:
+        test_alert_dict = alert[3]
+    except:
+        test_alert_dict = {}
+    if test_alert_dict:
+        if isinstance(test_alert_dict, dict):
+            try:
+                test_alert = test_alert_dict['test alert']
+            except:
+                test_alert = False
+
     metric_name = str(metric[1])
     if metric_name.startswith(settings.FULL_NAMESPACE):
         base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
@@ -2626,6 +2766,11 @@ def alert_sms(alert, metric, context):
         base_name = metric_name
 
     message = '[Skyline alert] Analyzer - %s: %s' % (base_name, str(metric[0]))
+
+    # @added 20220301 - Feature #4482: Test alerts
+    if test_alert:
+        message = 'TEST - %s' % message
+
     sms_recipients = []
     try:
         sms_recipients = get_sms_recipients(skyline_app, base_name)
@@ -2666,6 +2811,7 @@ def trigger_alert(alert, metric, context):
         alert[2]: The timeout of the alert that was triggered (int)\n
         alert[3]: The type [optional for http_alerter only] (dict)\n
                   The snab_details [optional for SNAB and slack only] (list)\n
+                  Alert testing (dict) e.g. {'test alert': True}\n
         alert[4]: The snab_details [optional for SNAB and slack only] (list)\n
                   The anomaly_id [optional for http_alerter only] (list)\n
     :param metric:
