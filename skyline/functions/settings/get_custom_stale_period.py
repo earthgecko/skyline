@@ -86,10 +86,13 @@ def custom_stale_period(
                         use_custom_stale_period = None
                     if use_custom_stale_period:
                         custom_stale_period_dict[namespace] = use_custom_stale_period
-                        if log:
-                            if current_skyline_app == 'analyzer':
-                                current_logger.info('metrics_manager :: %s :: external_settings stale_period found for %s: %s' % (
-                                    function_str, base_name, str(use_custom_stale_period)))
+                        # @modified 20220311 - Feature #4000: EXTERNAL_SETTINGS
+                        # Reduce logging
+                        # if log:
+                        #     if current_skyline_app == 'analyzer':
+                        #         current_logger.info('metrics_manager :: %s :: external_settings stale_period found for %s: %s (in external_settings config_id %s)' % (
+                        #             function_str, namespace, str(use_custom_stale_period),
+                        #             str(config_id)))
             except Exception as e:
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
@@ -136,11 +139,13 @@ def custom_stale_period(
             custom_stale_period_int = int(float(custom_stale_period_dict[matched_namespace]))
             if log:
                 if current_skyline_app == 'analyzer':
-                    current_logger.info('metrics_manager :: %s :: custom_stale_period found for %s: %s' % (
-                        function_str, base_name, str(custom_stale_period_int)))
+                    current_logger.info('metrics_manager :: %s :: custom_stale_period found for %s: %s (matched by namespace: %s)' % (
+                        function_str, base_name, str(custom_stale_period_int),
+                        matched_namespace))
                 else:
-                    current_logger.info('%s :: custom_stale_period found for %s: %s' % (
-                        function_str, base_name, str(custom_stale_period_int)))
+                    current_logger.info('%s :: custom_stale_period found for %s: %s (matched by namespace: %s)' % (
+                        function_str, base_name, str(custom_stale_period_int),
+                        matched_namespace))
         except ValueError:
             custom_stale_period_int = stale_period
         except Exception as e:

@@ -64,7 +64,7 @@ except:
 try:
     LUMINOSITY_PROCESSES = settings.LUMINOSITY_PROCESSES
 except:
-    logger.info('warning :: cannot determine LUMINOSITY_PROCESSES from settings' % skyline_app)
+    logger.warning('warning :: cannot determine LUMINOSITY_PROCESSES from settings')
     # @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch
     # It is fast and lightweight
     # luminosity_processes = 2
@@ -614,6 +614,11 @@ class Luminosity(Thread):
             try:
                 self.redis_conn.setex(skyline_app, 120, now)
                 logger.info('updated Redis key for %s up' % skyline_app)
+                # @added 20220414 - Branch #1444: thunder
+                # Add key to identify that luminosity is enabled and has been
+                # started as currently there is no way of thunder determining if
+                # luminosity should be running just from the settings.
+                self.redis_conn.set('luminosity.enabled', now)
             except:
                 logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
@@ -624,10 +629,7 @@ class Luminosity(Thread):
                 sleep(20)
                 continue
 
-
-            """
-            Determine if any new anomalies have been added
-            """
+            # Determine if any new anomalies have been added
             while True:
                 process_anomaly_id = None
                 last_processed_anomaly_id = None

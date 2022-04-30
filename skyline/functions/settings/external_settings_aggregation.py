@@ -38,7 +38,7 @@ def external_settings_aggregation(
             if not aggregate:
                 continue
             for namespace_key in list(external_settings[config_id]['aggregate'].keys()):
-                external_settings_aggregations[namespace_key] = external_settings[config_id]['aggregate'][namespace_key]
+                external_settings_aggregations[namespace_key] = external_settings[config_id]['aggregate'][namespace_key].copy()
         except Exception as e:
             if not log:
                 current_skyline_app_logger = current_skyline_app + 'Log'

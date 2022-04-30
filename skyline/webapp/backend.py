@@ -6,6 +6,7 @@ import time
 import traceback
 
 from ast import literal_eval
+import datetime
 
 from flask import request
 # import mysql.connector
@@ -309,8 +310,6 @@ def panorama_request():
             if from_timestamp and from_timestamp != 'all':
 
                 if ":" in from_timestamp:
-                    import time
-                    import datetime
                     # @modified 20211021 - handle multiple date formats
                     try:
                         new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
@@ -338,8 +337,6 @@ def panorama_request():
             until_timestamp = request.args.get('until_timestamp', None)
             if until_timestamp and until_timestamp != 'all':
                 if ":" in until_timestamp:
-                    import time
-                    import datetime
                     # @modified 20211021 - handle multiple date formats
                     try:
                         new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
@@ -1031,11 +1028,11 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                 # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
                 # Handle list and dic items
                 if isinstance(remote_data, list):
-                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                    logger.info('get_cluster_data :: got %s items %s from %s' % (
                         str(len(remote_data)), str(data_required), str(item[0])))
                     data = data + remote_data
                 if isinstance(remote_data, dict):
-                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                    logger.info('get_cluster_data :: got %s items %s from %s' % (
                         str(len(remote_data)), str(data_required), str(item[0])))
                     data.append(remote_data)
                 if isinstance(remote_data, bool):
@@ -1364,16 +1361,16 @@ def get_mirage_not_anomalous_metrics(
 
     """
 
-    import datetime
-
-    # fail_msg = None
-    # trace = None
+    logger.info(
+        'get_mirage_not_anomalous_metrics called with - metric: %s, from_timestamp: %s, until_timestamp: %s, anomalies: %s' % (
+            str(metric), str(from_timestamp), str(until_timestamp),
+            str(anomalies)))
 
     current_date = datetime.datetime.now().date()
     current_date_str = '%s 00:00' % str(current_date)
     # from_timestamp_date_str = current_date_str
     # until_timestamp_date_str = current_date_str
-    until_timestamp = str(int(time.time()))
+    # until_timestamp = str(int(time.time()))
 
     base_name = None
     if 'metric' in request.args:
@@ -1383,25 +1380,23 @@ def get_mirage_not_anomalous_metrics(
     if metric:
         base_name = metric
 
-    if not from_timestamp and 'from_timestamp' in request.args:
-        from_timestamp = request.args.get('from_timestamp', None)
+    # if not from_timestamp and 'from_timestamp' in request.args:
+    if not from_timestamp:
+        from_timestamp = request.args.get('from_timestamp', 'today')
         if from_timestamp == 'today':
             # from_timestamp_date_str = current_date_str
             # @modified 20211021 - handle multiple date formats
             try:
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
-            except ValueError:
-                new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
             except Exception as err:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
-                fail_msg = 'error :: panorama_request :: failed to unix timestamp from current_date_str - %s' % str(err)
+                fail_msg = 'error :: panorama_request :: failed to determine unix timestamp from current_date_str - %s' % str(err)
                 logger.error('%s' % fail_msg)
                 raise  # to webapp to return in the UI
-
-            from_timestamp = str(int(new_from_timestamp))
+            from_timestamp = int(new_from_timestamp)
         if from_timestamp and from_timestamp != 'today':
-            if ":" in from_timestamp:
+            if ":" in str(from_timestamp):
                 # try:
                 #     datetime_object = datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M')
                 # except:
@@ -1419,31 +1414,28 @@ def get_mirage_not_anomalous_metrics(
                     fail_msg = 'error :: panorama_request :: failed to unix timestamp from from_timestamp - %s' % str(err)
                     logger.error('%s' % fail_msg)
                     raise  # to webapp to return in the UI
-
-                from_timestamp = str(int(new_from_timestamp))
-    else:
+                from_timestamp = int(new_from_timestamp)
+    if not from_timestamp:
         # from_timestamp_date_str = current_date_str
         # @modified 20211021 - handle multiple date formats
         try:
             new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
-        except ValueError:
-            new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y%m%d %H:%M').timetuple())
         except Exception as err:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
-            fail_msg = 'error :: panorama_request :: failed to unix timestamp from current_date_str - %s' % str(err)
+            fail_msg = 'error :: panorama_request :: failed to unix get timestamp from current_date_str - %s' % str(err)
             logger.error('%s' % fail_msg)
             raise  # to webapp to return in the UI
+        from_timestamp = int(new_from_timestamp)
 
-        from_timestamp = str(int(new_from_timestamp))
-
-    if not until_timestamp and 'until_timestamp' in request.args:
-        until_timestamp = request.args.get('until_timestamp', None)
+    # if not until_timestamp and 'until_timestamp' in request.args:
+    if not until_timestamp:
+        until_timestamp = request.args.get('until_timestamp', 'all')
         if until_timestamp == 'all':
             # until_timestamp_date_str = current_date_str
-            until_timestamp = str(int(time.time()))
+            until_timestamp = int(time.time())
         if until_timestamp and until_timestamp != 'all':
-            if ":" in until_timestamp:
+            if ":" in str(until_timestamp):
                 # datetime_object = datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M')
                 # until_timestamp_date_str = str(datetime_object.date())
                 # @modified 20211021 - handle multiple date formats
@@ -1457,11 +1449,10 @@ def get_mirage_not_anomalous_metrics(
                     fail_msg = 'error :: panorama_request :: failed to unix timestamp from until_timestamp - %s' % str(err)
                     logger.error('%s' % fail_msg)
                     raise  # to webapp to return in the UI
-
-                until_timestamp = str(int(new_until_timestamp))
-    else:
+                until_timestamp = int(new_until_timestamp)
+    if not until_timestamp:
         # until_timestamp_date_str = current_date_str
-        until_timestamp = str(int(time.time()))
+        until_timestamp = int(time.time())
 
     get_anomalies = False
     if 'anomalies' in request.args:
@@ -1490,12 +1481,16 @@ def get_mirage_not_anomalous_metrics(
     all_timestamp_float_strings = []
     if mirage_panorama_not_anomalous:
         all_timestamp_float_strings = list(mirage_panorama_not_anomalous.keys())
+        logger.info('get_mirage_not_anomalous_metrics :: %s all_timestamp_float_strings to check from the %s Redis hash key' % (
+            str(len(all_timestamp_float_strings)), redis_hash))
     timestamp_floats = []
     if all_timestamp_float_strings:
         for timestamp_float_string in all_timestamp_float_strings:
             if int(float(timestamp_float_string)) >= int(from_timestamp):
                 if int(float(timestamp_float_string)) <= int(until_timestamp):
                     timestamp_floats.append(timestamp_float_string)
+    logger.info('get_mirage_not_anomalous_metrics :: found %s timestamp entries in range from the %s Redis hash key' % (
+        str(len(timestamp_floats)), redis_hash))
 
     not_anomalous_dict = {}
     not_anomalous_count = 0
@@ -1506,6 +1501,7 @@ def get_mirage_not_anomalous_metrics(
                 if base_name:
                     if base_name != i_metric:
                         continue
+                    logger.info('get_mirage_not_anomalous_metrics :: found entry for %s' % base_name)
                 try:
                     metric_dict = not_anomalous_dict[i_metric]
                 except:

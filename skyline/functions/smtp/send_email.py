@@ -65,7 +65,14 @@ def send_email(current_skyline_app, to, cc, subject, body, log=True):
         (function_str, str(primary_recipient), str(cc_recipients)))
 
     send_email_alert = True
-    if primary_recipient:
+
+    if primary_recipient == 'no_email':
+        send_email_alert = False
+        current_logger.info(
+            '%s - not sending email as primary_recipient set to %s' %
+            (function_str, primary_recipient))
+
+    if primary_recipient and send_email_alert:
         try:
             msg = MIMEMultipart('mixed')
             cs_ = charset.Charset('utf-8')
@@ -133,7 +140,7 @@ def send_email(current_skyline_app, to, cc, subject, body, log=True):
         s.quit()
     else:
         current_logger.info(
-            'alert_smtp - send_email_alert was set to %s message was not sent to primary_recipient :: %s, cc_recipients :: %s' % (
-                str(send_email_alert), str(primary_recipient), str(cc_recipients)))
+            '%s - send_email_alert was set to %s message was not sent to primary_recipient :: %s, cc_recipients :: %s' % (
+                str(function_str), str(send_email_alert), str(primary_recipient), str(cc_recipients)))
 
     return

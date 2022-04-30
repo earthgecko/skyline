@@ -7,9 +7,10 @@ from ast import literal_eval
 import shutil
 import glob
 from sys import version_info
+import traceback
 
 from redis import StrictRedis
-import traceback
+import requests
 
 # @modified 20191115 - Branch #3262: py3
 # import mysql.connector
@@ -17,7 +18,10 @@ import traceback
 
 from sqlalchemy.sql import select
 
-import numpy as np
+# @modified 20210425 - Task #4030: refactoring
+#                      Feature #4014: Ionosphere - inference
+# Use the common function get_percent_different
+# import numpy as np
 
 import settings
 from skyline_functions import (
@@ -60,7 +64,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: learn :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: learn :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings')
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
@@ -105,7 +109,7 @@ def learn_load_metric_vars(metric_vars_file):
 
     """
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     if os.path.isfile(metric_vars_file):
         logger.info(
             'learn :: loading metric variables from metric_check_file - %s' % (
@@ -166,9 +170,7 @@ def learn_load_metric_vars(metric_vars_file):
             metric_vars_array.append([key, value])
 
         if len(metric_vars_array) == 0:
-            logger.error(
-                'error :: learn :: loading metric variables - none found' % (
-                    str(metric_vars_file)))
+            logger.error('error :: learn :: loading metric variables - none found')
             return False
 
     logger.info('debug :: learn :: metric_vars for %s' % str(metric))
@@ -185,7 +187,7 @@ def get_learn_json(
     metric from Graphite and save as json.
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     ts_json = None
     try:
         from_timestamp = int(metric_timestamp) - int(use_full_duration)
@@ -215,7 +217,7 @@ def get_metric_from_metrics(base_name, engine):
 
     """
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     metrics_id = 0
     metric_db_object = None
 
@@ -224,6 +226,8 @@ def get_metric_from_metrics(base_name, engine):
     try:
         metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
         logger.info('learn :: metrics_table OK for %s' % base_name)
+        del log_msg
+        del trace
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: learn :: failed to get metrics_table meta for %s' % base_name)
@@ -253,13 +257,14 @@ def get_ionosphere_fp_ids(base_name, metrics_id, engine):
 
     """
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     fp_ids = []
 
     try:
         ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
         logger.info(log_msg)
         logger.info('learn :: ionosphere_table OK')
+        del trace
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: learn :: failed to get ionosphere_table meta for %s' % base_name)
@@ -288,12 +293,13 @@ def get_ionosphere_record(fp_id, engine):
 
     """
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     row = None
 
     try:
         ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
         logger.info(log_msg)
+        del trace
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: learn :: failed to get ionosphere_table meta for %s' % str(fp_id))
@@ -320,7 +326,7 @@ def remove_work_list_from_redis_set(learn_metric_list):
 
     """
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     work_set = 'ionosphere.learn.work'
     try:
         # @modified 20190412 - Task #2824: Test redis-py upgrade
@@ -432,7 +438,7 @@ def ionosphere_learn(timestamp):
       - deadline: 'Soft'
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     child_process_pid = os.getpid()
     logger.info('learn :: child_process_pid - %s' % str(child_process_pid))
 
@@ -478,10 +484,11 @@ def ionosphere_learn(timestamp):
     # work_set and work deadlines
 
     # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-    if settings.REDIS_PASSWORD:
-        redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-    else:
-        redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    # if settings.REDIS_PASSWORD:
+    #     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+    # else:
+    #     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
     work_set = 'ionosphere.learn.work'
     learn_work = None
     try:
@@ -491,7 +498,7 @@ def ionosphere_learn(timestamp):
         learn_work = redis_conn_decoded.smembers(work_set)
         logger.info('learn :: got Redis %s set' % work_set)
     except Exception as e:
-        logger.error('error :: learn :: could not query Redis for ionosphere.learn.work - %s' % (work_set, e))
+        logger.error('error :: learn :: could not query Redis for ionosphere.learn.work - %s' % (e))
 
     if not learn_work:
         logger.info('learn :: no work ready to be done')
@@ -502,8 +509,9 @@ def ionosphere_learn(timestamp):
     if work_items_todo == 0:
         logger.info('learn :: no work do')
         return
-    else:
-        logger.info('learn :: work items in queue - %s' % str(work_items_todo))
+    # else:
+    #     logger.info('learn :: work items in queue - %s' % str(work_items_todo))
+    logger.info('learn :: work items in queue - %s' % str(work_items_todo))
 
     for index, ionosphere_learn_work in enumerate(learn_work):
 
@@ -616,8 +624,9 @@ def ionosphere_learn(timestamp):
         if work_age < int(learn_valid_ts_older_than):
             logger.info('learn :: this work is not ready')
             continue
-        else:
-            logger.info('learn :: this work is ready - work_age - %s' % str(work_age))
+        # else:
+        #     logger.info('learn :: this work is ready - work_age - %s' % str(work_age))
+        logger.info('learn :: this work is ready - work_age - %s' % str(work_age))
 
         logger.info('learn :: processing %s for %s - %s' % (work, learn_base_name, str(learn_metric_list)))
 
@@ -647,7 +656,7 @@ def ionosphere_learn(timestamp):
             # (".*", 0, 3661, 16, 100),
             # patch.1
             if learn_full_duration_days == 0:
-                logger.error('error :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
+                logger.warning('warning :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
                 learn_full_duration_days = 30
                 # @added 20200717 - Bug #3382: Prevent ionosphere.learn loop edge cases
                 learn_full_duration_seconds = int(learn_full_duration_days * 86400)
@@ -698,13 +707,12 @@ def ionosphere_learn(timestamp):
                 logger.info('info :: learn :: completed work check - a features profile at learn_full_duration_days of %s has already been created for fp id %s' % (
                     str(learn_full_duration_days), str(learn_parent_id)))
                 logger.info('info :: learn :: features profiles exists %s' % (str(exisitng_recent_fps)))
-                logger.error('error :: learn :: the required features profile has already created, removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
+                logger.warning('warning :: learn :: the required features profile has already created, removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
                 remove_work_list_from_redis_set(learn_metric_list)
                 learn_engine_disposal(engine)
                 continue
-            else:
-                logger.info('info :: learn :: completed work check - no features profile at learn_full_duration_days of %s has already been created for fp id %s, OK' % (
-                    str(learn_full_duration_days), str(learn_parent_id)))
+            logger.info('info :: learn :: completed work check - no features profile at learn_full_duration_days of %s has already been created for fp id %s, OK' % (
+                str(learn_full_duration_days), str(learn_parent_id)))
 
         # @added 20200616 - Bug #3382: Prevent ionosphere.learn loop edge cases
         # Do not learn from any recent feature profiles
@@ -735,9 +743,8 @@ def ionosphere_learn(timestamp):
                     remove_work_list_from_redis_set(learn_metric_list)
                     learn_engine_disposal(engine)
                     continue
-                else:
-                    logger.info('info :: learn :: completed work check - the learn_parent_id fp %s is not in exisitng_recent_fps continuing' % (
-                        str(learn_parent_id)))
+                logger.info('info :: learn :: completed work check - the learn_parent_id fp %s is not in exisitng_recent_fps continuing' % (
+                    str(learn_parent_id)))
             else:
                 logger.info('info :: learn :: completed work check - the learn_parent_id fp %s is not in exisitng_recent_fps continuing' % (
                     str(learn_parent_id)))
@@ -752,8 +759,7 @@ def ionosphere_learn(timestamp):
             logger.info('learn :: cannot process as the training data directory no longer exists - %s' % (metric_training_data_dir))
             remove_work_list_from_redis_set(learn_metric_list)
             continue
-        else:
-            logger.info('learn :: metric_training_data_dir exists - %s' % (metric_training_data_dir))
+        logger.info('learn :: metric_training_data_dir exists - %s' % (metric_training_data_dir))
 
         # If a learning directory does not exist, create it and populate it with the
         # training data directory image files and the check file, this is required
@@ -795,7 +801,7 @@ def ionosphere_learn(timestamp):
                             lines.append(line)
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: learn :: failed to read original_metric_check_file' % original_metric_check_file)
+                    logger.error('error :: learn :: failed to read original_metric_check_file - %s' % original_metric_check_file)
                 try:
                     logger.info('learn :: writing metric_check_file - %s' % metric_check_file)
                     with open(metric_check_file, 'w') as outfile:
@@ -1010,12 +1016,12 @@ def ionosphere_learn(timestamp):
 
         # Before we continue, now that we have the actual metric_db_object
         learn_full_duration_days = None
-        learn_full_duration = None
+        learn_full_duration_seconds = None
         use_full_duration = None
         try:
             learn_full_duration_days = metric_db_object['learn_full_duration_days']
-            learn_full_duration = int(learn_full_duration_days) * 86400
-            use_full_duration = learn_full_duration
+            learn_full_duration_seconds = int(learn_full_duration_days) * 86400
+            use_full_duration = learn_full_duration_seconds
             # @added 20200415 - Feature #1854: Ionosphere learn
             # IONOSPHERE_LEARN_NAMESPACE_CONFIG handle 0 learn_full_duration_days
             # Handle if the IONOSPHERE_LEARN_NAMESPACE_CONFIG is configured with
@@ -1023,11 +1029,11 @@ def ionosphere_learn(timestamp):
             # (".*", 0, 3661, 16, 100),
             # patch.2
             if learn_full_duration_days == 0:
-                logger.error('error :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
+                logger.warning('warning :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
                 learn_full_duration_days = 30
                 # patch.2
-                learn_full_duration = int(learn_full_duration_days) * 86400
-                use_full_duration = learn_full_duration
+                learn_full_duration_seconds = int(learn_full_duration_days) * 86400
+                use_full_duration = learn_full_duration_seconds
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: learn :: failed get the determine the learn_full_duration_days from the metric_db_object')
@@ -1056,7 +1062,7 @@ def ionosphere_learn(timestamp):
                     with open(old_metric_check_file) as fr:
                         for line in fr:
                             if 'full_duration' in line:
-                                line = line.replace(str(full_duration), str(learn_full_duration))
+                                line = line.replace(str(full_duration), str(learn_full_duration_seconds))
                             lines.append(line)
                 except:
                     logger.error(traceback.format_exc())
@@ -1105,6 +1111,9 @@ def ionosphere_learn(timestamp):
                 got_learn_json = get_learn_json(
                     learn_json_file, base_name, use_full_duration, metric_timestamp,
                     learn_full_duration_days)
+                # @added 20220406 - Feature #4520: settings - ZERO_FILL_NAMESPACES
+                # get_graphite_metric is applying nonNegativeDerivative
+                preprocessed_learn_json_data_exists = True
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: learn_json call failed')
@@ -1140,53 +1149,16 @@ def ionosphere_learn(timestamp):
             # Only calculate the derivative_timeseries if the preprocessed json
             # data did not exist and the data was fetched from Graphite by
             # wrapping the entire derivate block in this if condition
+            # @modified 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
+            #                      Feature #4520: settings - ZERO_FILL_NAMESPACES
+            # Removed entire derivate block because get_graphite_metric is
+            # applying nonNegativeDerivative
             if not preprocessed_learn_json_data_exists:
+                del preprocessed_learn_json_data_exists
 
-                # @added 20170603 - Feature #2034: analyse_derivatives
-                # Convert the values of metrics strictly increasing monotonically
-                # to their deriative products
-                known_derivative_metric = False
-                try:
-                    # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
-                    # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
-                    # derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
-                    derivative_metrics = list(redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
-                except:
-                    derivative_metrics = []
-                if metric in derivative_metrics:
-                    known_derivative_metric = True
-                if known_derivative_metric:
-                    try:
-                        # @modified 20200606 - Bug #3572: Apply list to settings import
-                        non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
-                    except:
-                        non_derivative_monotonic_metrics = []
-                    skip_derivative = in_list(metric, non_derivative_monotonic_metrics)
-                    if skip_derivative:
-                        known_derivative_metric = False
-                if known_derivative_metric:
-                    try:
-                        derivative_timeseries = nonNegativeDerivative(timeseries)
-                        datapoints = derivative_timeseries
-                    except:
-                        logger.error('error :: nonNegativeDerivative failed')
-
-                    validated_timeseries = []
-                    for datapoint in datapoints:
-                        try:
-                            new_datapoint = [int(datapoint[0]), float(datapoint[1])]
-                            validated_timeseries.append(new_datapoint)
-                        # @modified 20170913 - Task #2160: Test skyline with bandit
-                        # Added nosec to exclude from bandit tests
-                        except:  # nosec
-                            continue
-                    timeseries = validated_timeseries
-
-                    # @modified 20170129 - Bug #1898: Ionosphere - missing json
-                    # logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
-                    logger.info('learn :: data points surfaced :: %s' % (str(len(timeseries))))
+            # @modified 20170129 - Bug #1898: Ionosphere - missing json
+            # logger.info('learn :: data points surfaced :: %s' % (len(timeseries)))
+            logger.info('learn :: data points :: %s' % (str(len(timeseries))))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: learn :: failed to read learning data ts json - %s' % (learn_json_file))
@@ -1498,7 +1470,7 @@ def ionosphere_learn(timestamp):
         #                   Feature #1842: Ionosphere - Graphite now graphs
         if str(work) == 'learn_fp_learnt':
             logger.info('learn :: requesting Ionosphere webapp training_data page to generate Graphite NOW graphs')
-            import requests
+            # import requests
             # @modified 20170122 - Feature #1854: Ionosphere learn - generations
             #                      Feature #1842: Ionosphere - Graphite now graphs
             # Corrected typos in url
@@ -1594,8 +1566,7 @@ def ionosphere_learn(timestamp):
                         profile_context, str(generation)))
                 remove_work_list_from_redis_set(learn_metric_list)
                 continue
-            else:
-                logger.info('learn :: %s :: generation limit OK at %s' % (profile_context, str(generation)))
+            logger.info('learn :: %s :: generation limit OK at %s' % (profile_context, str(generation)))
 
             # @added 20170129 - Feature #1886 Ionosphere learn - child like parent with evolutionary maturity
             # Before a features profile can be created by a child, a check must
@@ -1653,11 +1624,10 @@ def ionosphere_learn(timestamp):
                 logger.error('error :: learn :: %s :: create_features_profile failed' % profile_context)
                 remove_work_list_from_redis_set(learn_metric_list)
                 continue
-            else:
-                logger.info(
-                    'learn :: %s :: new generation %s features profile with id %s using %s days data based on the human generated parent feature profile with id %s' % (
-                        profile_context, str(generation), str(fp_id),
-                        str(learn_full_duration_days), str(learn_parent_id)))
+            logger.info(
+                'learn :: %s :: new generation %s features profile with id %s using %s days data based on the human generated parent feature profile with id %s' % (
+                    profile_context, str(generation), str(fp_id),
+                    str(learn_full_duration_days), str(learn_parent_id)))
 
             remove_work_list_from_redis_set(learn_metric_list)
             continue

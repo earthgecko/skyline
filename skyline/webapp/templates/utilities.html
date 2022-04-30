@@ -4,16 +4,26 @@
 <!--
 # @added 20201212 - Feature #3880: webapp - utilities - match_metric
  -->
-{% if metrics_match %}
+{% if metrics_match or match_metric %}
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
   		<li><a href="/">Home</a></li>
   		<li><a href="/utilities">Utilities</a></li>
   		<li class="active"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></li>
-			<li><a href="/utilities?thunder_test=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">test</span></span></a></li>
     </div>
 	</ol>
   {% include "match_metric.html" %}
+{% endif %}
+
+{% if test_alert %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></span></li>
+    </div>
+	</ol>
+  {% include "test_alert.html" %}
 {% endif %}
 
 <!-- # @added 20210602 - Branch #1444: thunder  -->
@@ -21,12 +31,23 @@
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
   		<li><a href="/">Home</a></li>
-  		<li><a href="/utilities?thunder_testing=true">Utilities</a></li>
   		<li class="active"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></span></li>
     </div>
 	</ol>
   {% include "thunder_testing.html" %}
 {% endif %}
+
+{% if remove_flux_namespace_quota_metrics %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></span></li>
+    </div>
+	</ol>
+  {% include "remove_flux_namespace_quota_metrics.html" %}
+{% endif %}
+
 
 <!-- END /utilities block -->
 {% endblock %}

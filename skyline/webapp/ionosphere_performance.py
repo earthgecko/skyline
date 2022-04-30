@@ -197,8 +197,8 @@ def get_ionosphere_performance(
         remove_prefix_str = request.args.get('remove_prefix', 'false')
         if remove_prefix_str != 'false':
             remove_prefix = True
-    except Exception as e:
-        dev_null = e
+    except Exception as err:
+        dev_null = err
     # Allow for the removal of a prefix from the metric name
     use_metric_name = metric
     if remove_prefix:
@@ -288,7 +288,7 @@ def get_ionosphere_performance(
         trace = 'none'
         fail_msg = 'error :: get_ionosphere_performance - engine not obtained'
         logger.error(fail_msg)
-        raise
+        # raise
     try:
         metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
     except Exception as e:
@@ -338,7 +338,10 @@ def get_ionosphere_performance(
                     created_dates.append(row['created_timestamp'])
                     # break
                 connection.close()
-                start_timestamp_date = sorted(created_dates)[0]
+
+                # @modified 20220308 - handle no created_dates
+                if created_dates:
+                    start_timestamp_date = sorted(created_dates)[0]
 
                 if not start_timestamp_date:
                     logger.error('error :: get_ionosphere_performance - could not determine created_timestamp - returning empty')

@@ -109,6 +109,8 @@ class Cloudburst(Thread):
         spin_start = time()
         logger.info('cloudburst :: find_cloudbursts :: process %s started' % str(i))
 
+        engine = None
+
         def get_an_engine():
             try:
                 engine, log_msg, trace = get_engine(skyline_app)

@@ -149,8 +149,8 @@ def alert_on_no_data(self, level, message, parent_namespace, data):
             total_recent_metrics = str(data['total_recent_metrics'])
             total_stale_metrics = str(data['total_stale_metrics'])
             total_metrics = str(data['total_metrics'])
-            use_body = '%s %s namespace metrics were removed from the no data check (from %s)' % (
-                total_metrics, parent_namespace, this_host)
+            use_body = '%s %s namespace metrics were removed from the no data check %s (from %s)' % (
+                total_metrics, parent_namespace, data['add_to_body'], this_host)
         try:
             if alert_via == 'alert_via_slack':
                 title = 'Skyline Thunder - %s - URGENT - %s no data' % (

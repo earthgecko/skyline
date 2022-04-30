@@ -5,7 +5,8 @@ import logging
 import traceback
 
 from skyline_functions import get_redis_conn_decoded
-from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
+# from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 
@@ -23,16 +24,19 @@ def get_inactive_metrics(current_skyline_app, namespace=None):
 
     """
     function_str = 'functions.metrics.get_inactive_metrics'
-    inactive_metrics = []
+    inactive_metrics = {}
 
+    base_names = []
     base_names_with_ids = {}
+    with_ids = True
     try:
-        base_names_with_ids = get_base_names_and_metric_ids(current_skyline_app)
+        # base_names_with_ids = get_base_names_and_metric_ids(current_skyline_app)
+        base_names, base_names_with_ids = get_all_db_metric_names(current_skyline_app, with_ids)
     except Exception as err:
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error(traceback.format_exc())
-        current_logger.error('error :: %s :: %s :: get_base_names_and_metric_ids failed - %s' % (
+        current_logger.error('error :: %s :: %s :: get_all_db_metric_names failed - %s' % (
             current_skyline_app, function_str, str(err)))
         return inactive_metrics
 
@@ -70,6 +74,6 @@ def get_inactive_metrics(current_skyline_app, namespace=None):
                 pattern_match_errors.append([base_name, namespace, err])
             if not pattern_match:
                 continue
-        inactive_metrics.append(base_name)
+        inactive_metrics[base_name] = base_names_with_ids[base_name]
 
     return inactive_metrics

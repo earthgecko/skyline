@@ -65,6 +65,8 @@ def matched_or_regexed_in_list(current_skyline_app, base_name, match_list, debug
         base_name_namespace_elements = base_name.split('.')
         for match_namespace in match_list:
 
+            last_match_namespace = match_namespace
+
             # @added 20200425 - Feature #3512: matched_or_regexed_in_list function
             # Added absolute_match
             if base_name == match_namespace:
@@ -140,7 +142,9 @@ def matched_or_regexed_in_list(current_skyline_app, base_name, match_list, debug
         #                   Feature #3510: Enable Luminosity to handle correlating namespaces only
         # Add what namespace pattern was matched
         if matched:
-            matched_namespace = match_namespace
+            # matched_namespace = match_namespace
+            matched_namespace = last_match_namespace
+
         matched_by['matched_namespace'] = matched_namespace
 
     except:

@@ -56,9 +56,12 @@ momentjs to handle date ticker in the timezone in Dygraph
 Have Skyline serve the js, tried of allowing cloudflare scripts
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
   <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.5/moment-timezone-with-data.min.js"></script>
--->
+# @modified 20220409 - Task #4522: Update moment.js - CVE-2022-24785
   <script type="text/javascript" src="/static/moment-2.14.1/moment.min.js"></script>
   <script type="text/javascript" src="/static/moment-timezone-0.5.5/moment-timezone-with-data.min.js"></script>
+-->
+  <script type="text/javascript" src="/static/moment-2.29.2/moment.min.js"></script>
+  <script type="text/javascript" src="/static/moment-timezone-0.5.34/moment-timezone-with-data.min.js"></script>
 
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
@@ -152,7 +155,7 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
               </select>
               <br>
 {% endif %}
-              <label>limit:</label><input type="number" name="limit" min="1" max="100" value="10" /><br>
+              <label>limit:</label><input type="number" name="limit" min="1" max="500" value="10" /><br>
               <br>
               <label>order:</label>
               <select name="order">
@@ -165,12 +168,12 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
           </div>
           <p>
 {% if anomalies %}
-          <div class="container search_results_container"></p>
+          <div class="container search_results_container">
 <!-- @modified 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
             <h4>Anomaly Search</h4>
 -->
-            <h4><span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></span></h4>
+            <h4><span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></h4>
             <h6>{{ results }} :: {{ anomalies|length }} anomalies</h6>
             <table>
 <!-- @modified 20161125 - Branch #922: ionosphere
