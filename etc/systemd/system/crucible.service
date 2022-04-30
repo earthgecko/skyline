@@ -1,0 +1,17 @@
+[Unit]
+Description=crucible instance (Skyline)
+After=network.target
+
+[Service]
+Environment=PATH=/opt/python_virtualenv/projects/skyline/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin
+Environment=VIRTUAL_ENV=/opt/python_virtualenv/projects/skyline
+Type=forking
+User=skyline
+Group=skyline
+ExecStart=/opt/skyline/github/skyline/bin/crucible.d start
+ExecStop=/opt/skyline/github/skyline/bin/crucible.d stop
+PIDFile=/var/run/skyline/crucible.pid
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target

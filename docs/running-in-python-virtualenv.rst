@@ -25,25 +25,30 @@ Dependencies
 Building Python versions from the Python sources in Python virtualenv
 requires the following system dependencies:
 
-- RedHat family - only CentOS 8 is tested, for el6 and el7 deps see `Running in
-  a Python 2.7 virtualenv <running-in-python-virtualenv-py2.html>`__ .
+- RedHat family - only CentOS Stream 8 is tested.  CentOS 7 support has been
+  deprecated due to the lagging Python version and environment and there Being
+  no desire to support builds against SCL repos.
 
 .. code-block:: bash
 
     yum -y install epel-release
-    # CentOS 8 only tested
+    # CentOS Stream 8 only tested
     yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
       gcc gcc-c++ readline-devel ncurses-devel gdbm-devel freetype-devel \
       libpng-devel python38 wget tar git xz-devel
+    yum -y install libffi-devel
 
-- Debian family - only tested on Ubuntu 16.04 and 18.04
+- Debian family - only tested on Ubuntu 18.04 and 20.04
 
 .. code-block:: bash
 
     apt-get -y install build-essential
     apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev \
       libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 \
-      libfreetype6-dev libxft-dev python-pip wget tar git
+      libfreetype6-dev libxft-dev wget tar git
+    apt-get -y install libffi-dev
+    apt-get -y install python3-dev python3-pip build-essential nginx apache2-utils \
+      lzma lzma-dev liblzma-dev
 
 virtualenv
 ~~~~~~~~~~
@@ -56,23 +61,19 @@ This is using your **system** pip at this point only to install virtualenv.
 
 .. code-block:: bash
 
-    # CentOS 8
-    pip3 install --user virtualenv==16.7.9
-
-    # Ubuntu 16.04 and 18.04
-    pip install virtualenv==16.7.9
+    pip3 install --user virtualenv
 
 Python version
 ~~~~~~~~~~~~~~
 
 Below we use the path ``/opt/python_virtualenv``, which you can substitute
-with any path you choose.  We are going to use the Python-3.8.12 source and
-build and install an isolated Python-3.8.12, this has no effect on your system
+with any path you choose.  We are going to use the Python-3.8.13 source and
+build and install an isolated Python-3.8.13, this has no effect on your system
 Python:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.12"
+    PYTHON_VERSION="3.8.13"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 
@@ -95,24 +96,25 @@ Python:
     make altinstall
 
 
-You will now have a Python-3.8.12 environment with the Python
-executable: ``/opt/python_virtualenv/versions/3.8.12/bin/python3.8``
+You will now have a Python-3.8.13 environment with the Python
+executable: ``/opt/python_virtualenv/versions/3.8.13/bin/python3.8``
 
 Create a Skyline Python virtualenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once again using Python-3.8.12:
+Once again using Python-3.8.13:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.12"
+    PYTHON_VERSION="3.8.13"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3812"
+    PROJECT="skyline-py3813"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
     virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
 
+    ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/skyline" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
 
 Make sure to add the ``/etc/skyline/skyline.conf`` file with the Python - see
 `Installation <installation.html>`__
