@@ -38,7 +38,9 @@ from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
-if True:
+# This prevents flake8 E402 - module level import not at top of file
+load_settings = True
+if load_settings:
     import settings
     from skyline_functions import (
         send_graphite_metric,
@@ -54,6 +56,8 @@ if True:
         # @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
         #                   Bug #3778: Handle single encoded forward slash requests to Graphite
         encode_graphite_metric_name)
+    # @added 20220429 - Feature #4536: Handle Redis failure
+    from functions.flux.get_last_metric_data import get_last_metric_data
 
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
@@ -280,20 +284,49 @@ class PopulateMetricWorker(Process):
 
             last_flux_timestamp = None
 
+            # @added 20220429 - Feature #4536: Handle Redis failure
+            # Swap to using a Redis hash instead of the
+            # flux.last.<metric> keys
+            use_old_timestamp_keys = True
+            redis_last_metric_data_dict = {}
+            try:
+                redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
+            except Exception as err:
+                logger.error('error :: populate_metric_worker :: get_last_metric_data failed - %s' % (
+                    err))
+            if redis_last_metric_data_dict:
+                try:
+                    last_flux_timestamp = redis_last_metric_data_dict['timestamp']
+                    use_old_timestamp_keys = False
+                except KeyError:
+                    last_flux_timestamp = None
+                except Exception as err:
+                    logger.error('error :: populate_metric_worker :: failed to get timestamp from - %s - %s' % (
+                        str(redis_last_metric_data_dict), err))
+                    last_flux_timestamp = None
+
             # @modified 20201207 - Task #3864: flux - try except everything
             # Only check if cache_key
             if cache_key:
-                try:
-                    # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # redis_last_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
-                    redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
-                    last_metric_data = literal_eval(redis_last_metric_data)
-                    last_flux_timestamp = int(last_metric_data[0])
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                    last_flux_timestamp = False
+                # @modified 20220429 - Feature #4536: Handle Redis failure
+                # Swap to using a Redis hash instead of the
+                # flux.last.<metric> keys
+                if use_old_timestamp_keys:
+                    try:
+                        # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # redis_last_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                        redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
+                        if redis_last_metric_data:
+                            last_metric_data = literal_eval(redis_last_metric_data)
+                            last_flux_timestamp = int(last_metric_data[0])
+                        else:
+                            logger.warning('warning ::populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                            last_flux_timestamp = False
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                        last_flux_timestamp = False
 
             recent_last_flux_timestamp_present = False
             if last_flux_timestamp:
@@ -694,13 +727,28 @@ class PopulateMetricWorker(Process):
                         # Update Redis flux key
                         cache_key = 'flux.last.%s' % metric
                         metric_data = [int(last_ts), None]
-                        self.redis_conn.set(cache_key, str(metric_data))
+                        # @modified 20220429 - Feature #4536: Handle Redis failure
+                        # Swap to using a Redis hash instead of the
+                        # flux.last.<metric> keys make existing keys
+                        # expire
+                        # self.redis_conn.set(cache_key, str(metric_data))
+                        self.redis_conn.setex(cache_key, 3600, str(metric_data))
                         logger.info('populate_metric_worker :: even though no data points so as to not loop round on this metric, set the metric Redis key - %s - %s' % (
                             cache_key, str(metric_data)))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: populate_metric_worker :: even though no data points, failed to set Redis key - %s - %s' % (
                             cache_key, str(metric_data)))
+
+                    # @added 20220429 - Feature #4536: Handle Redis failure
+                    # Swap to using a Redis hash instead of the
+                    # flux.last.<metric> keys
+                    metric_data_dict = {'timestamp': int(last_ts), 'value': None}
+                    try:
+                        self.redis_conn.hset('flux.last.metric_data', metric, str(metric_data_dict))
+                    except Exception as err:
+                        logger.error('error :: populate_metric_worker :: failed to hset flux.last.metric_data Redis key - %s' % str(err))
+
                     # Adding to the vista.fetcher.unique_metrics Redis set
                     redis_set = 'vista.fetcher.unique_metrics'
                     data = str(remote_target)
@@ -904,13 +952,26 @@ class PopulateMetricWorker(Process):
                     # Update Redis flux key
                     cache_key = 'flux.last.%s' % metric
                     metric_data = [int(timestamp), float(value)]
-                    self.redis_conn.set(cache_key, str(metric_data))
+                    # @modified 20220429 - Feature #4536: Handle Redis failure
+                    # Swap to using a Redis hash instead of the
+                    # flux.last.<metric> keys make existing keys
+                    # expire
+                    # self.redis_conn.set(cache_key, str(metric_data))
+                    self.redis_conn.set(cache_key, 3600, str(metric_data))
                     logger.info('populate_metric_worker :: set the metric Redis key - %s - %s' % (
                         cache_key, str(metric_data)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: populate_metric_worker :: failed to set Redis key - %s - %s' % (
                         cache_key, str(metric_data)))
+                # @added 20220429 - Feature #4536: Handle Redis failure
+                # Swap to using a Redis hash instead of the
+                # flux.last.<metric> keys
+                metric_data_dict = {'timestamp': int(timestamp), 'value': float(value)}
+                try:
+                    self.redis_conn.hset('flux.last.metric_data', metric, str(metric_data_dict))
+                except Exception as err:
+                    logger.error('error :: worker :: failed to set flux.last.metric_data Redis key - %s' % str(err))
 
                 # Adding to the vista.fetcher.unique_metrics Redis set
                 redis_set = 'vista.fetcher.unique_metrics'
