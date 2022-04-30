@@ -132,7 +132,7 @@ class Crucible(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
     # @added 20200327 - Branch #3262: py3
@@ -1155,7 +1155,6 @@ class Crucible(Thread):
                 logger.info('moved check file to - %s' % failed_check_file)
             except OSError:
                 logger.error('error :: failed to move check file to - %s' % failed_check_file)
-                pass
             return
 
         # @added 20200507 - Feature #3532: Sort all time series
@@ -1166,6 +1165,7 @@ class Crucible(Thread):
         if original_timeseries:
             timeseries = sort_timeseries(original_timeseries)
             del original_timeseries
+        logger.info('timeseries length: %s' % str(len(timeseries)))
 
         start_timestamp = int(timeseries[0][0])
         if settings.ENABLE_CRUCIBLE_DEBUG:
