@@ -1,14 +1,17 @@
+"""
+mirage_algorithms.py
+"""
 from __future__ import division
-import pandas
-import numpy as np
-import scipy
-import statsmodels.api as sm
 import traceback
 import logging
 from time import time
 import os.path
 import sys
 from os import getpid
+import pandas
+import numpy as np
+import scipy
+import statsmodels.api as sm
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -609,6 +612,27 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
     custom_algorithms_to_run = {}
 
+    # @added 20220218 - Bug #4308: matrixprofile - fN on big drops
+    check_trigger_history_enabled = False
+    if CUSTOM_ALGORITHMS:
+        for custom_algorithm in list(CUSTOM_ALGORITHMS.keys()):
+            if 'use_with' in list(CUSTOM_ALGORITHMS[custom_algorithm].keys()):
+                if 'mirage' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
+                    if 'trigger_history_override' in list(CUSTOM_ALGORITHMS[custom_algorithm].keys()):
+                        if CUSTOM_ALGORITHMS[custom_algorithm]['trigger_history_override']:
+                            check_trigger_history_enabled = True
+    logger.info('mirage_algorithms :: check_trigger_history_enabled: %s' % str(check_trigger_history_enabled))
+    if check_trigger_history_enabled:
+        from ast import literal_eval
+        from skyline_functions import get_redis_conn_decoded
+        from functions.timeseries.determine_data_frequency import determine_data_frequency
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
+                str(err)))
+
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
         custom_algorithms_to_run = {}
@@ -782,7 +806,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 custom_consensus = int(MIRAGE_CONSENSUS)
                 ensemble = []
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: mirage-algorithms :: reset ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False')
+                    logger.debug('debug :: mirage_algorithms :: reset ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False')
 
     # @modified 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
     # Check run_3sigma_algorithms as well to the conditional
@@ -791,7 +815,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
         if DEBUG_CUSTOM_ALGORITHMS:
             logger.debug('debug :: mirage_algorithms :: running three-sigma algorithms')
         try:
-            logger.info('mirage_algorithms :: running three-sigma algorithms')
+            logger.info('mirage_algorithms :: running three-sigma algorithms against %s' % base_name)
             ensemble = [globals()[algorithm](timeseries, second_order_resolution_seconds) for algorithm in MIRAGE_ALGORITHMS]
             for algorithm in MIRAGE_ALGORITHMS:
                 algorithms_run.append(algorithm)
@@ -819,30 +843,93 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     if not run_3sigma_algorithms:
         ensemble = final_custom_ensemble
 
+    # @added 20220218 - Bug #4308: matrixprofile - fN on big drops
+    if check_trigger_history_enabled and ensemble.count(True) >= MIRAGE_CONSENSUS:
+        logger.info('mirage_algorithms :: getting trigger_history for %s' % base_name)
+        trigger_history = {}
+        try:
+            raw_trigger_history = redis_conn_decoded.hget('mirage.trigger_history', base_name)
+            if raw_trigger_history:
+                trigger_history = literal_eval(raw_trigger_history)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: failed to evaluate data from mirage.trigger_history Redis hash key - %s' % (
+                str(err)))
+        logger.info('mirage_algorithms :: %s trigger_history count - %s' % (base_name, str(len(trigger_history))))
+        metric_resolution = 60
+        try:
+            metric_resolution = determine_data_frequency(skyline_app, timeseries, False)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: determine_data_frequency failed - %s' % (
+                str(err)))
+        tmp_final_ensemble = ensemble + final_after_custom_ensemble
+        trigger_dict = {
+            'true_count': ensemble.count(True),
+            'ensemble': ensemble,
+            'final_ensemble': tmp_final_ensemble,
+            'final_ensemble_true_count': tmp_final_ensemble.count(True),
+            'algorithms_run': algorithms_run,
+            'value': timeseries[-1][1],
+            'resolution': metric_resolution
+        }
+        last_timestamp = int(timeseries[-1][0])
+        trigger_history[last_timestamp] = trigger_dict
+        # @added 20220416 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        # When checking downsampled FULL_DURATION data and merged Graphite data
+        # do not set the trigger history again as it will have been set on the
+        # analysis of the Graphite data
+        trigger_history_set = 0
+        trigger_history_set_key = 'mirage.trigger_history_set.%s' % base_name
+        try:
+            trigger_history_set = redis_conn_decoded.get(trigger_history_set_key)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: failed to set key in mirage.trigger_history Redis hash key - %s' % (
+                str(err)))
+        if trigger_history_set:
+            logger.info('mirage_algorithms :: current trigger_history_set exists for %s, not resetting' % base_name)
+
+        # @modified 20220416 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                     Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        # Only set the trigger_history on the first analysis based on Graphite
+        # data and not if this is the second analysis run on downsampled
+        # FULL_DURATION data and merged Graphite data
+        if not trigger_history_set:
+            try:
+                redis_conn_decoded.hset('mirage.trigger_history', base_name, str(trigger_history))
+                logger.info('mirage_algorithms :: added event for %s to mirage.trigger_history: %s' % (base_name, str(trigger_dict)))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: mirage_algorithms :: failed to set key in mirage.trigger_history Redis hash key - %s' % (
+                    str(err)))
+            try:
+                redis_conn_decoded.setex(trigger_history_set_key, 59, 1)
+                logger.info('mirage_algorithms :: added trigger_history_set_key for %s' % base_name)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: mirage_algorithms :: failed to set trigger_history_set_key - %s' % (
+                    str(err)))
+
     # @added 20211104 - Bug #4308: matrixprofile - fN on big drops
     #                   Branch #3068: SNAB
     ensemble_pre_custom_algorithms_true_count = ensemble.count(True)
     ensemble_pre_custom_algorithms = list(ensemble)
     # if ensemble_pre_custom_algorithms_true_count >= 7:
     #     skyline_matrixprofile_override = True
-    check_trigger_history = False
-    trigger_history_override = 0
-    try:
-        trigger_history_override = custom_algorithms_to_run[custom_algorithm]['trigger_history_override']
-    except KeyError:
-        trigger_history_override = 0
 
-    redis_conn_decoded = None
-    if ensemble_pre_custom_algorithms_true_count >= MIRAGE_CONSENSUS and trigger_history_override:
-        from ast import literal_eval
-        from skyline_functions import get_redis_conn_decoded
-        try:
-            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-        except Exception as err:
-            logger.error(traceback.format_exc())
-            logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
-                str(err)))
-        check_trigger_history = True
+    # check_trigger_history = False
+    # trigger_history_override = 0
+    # try:
+    #     trigger_history_override = custom_algorithms_to_run[custom_algorithm]['trigger_history_override']
+    #     logger.info('mirage_algorithms :: trigger_history_override is set to %s on %s for %s' % (
+    #         str(trigger_history_override), custom_algorithm, base_name))
+    # except KeyError:
+    #     trigger_history_override = 0
+
+    if ensemble_pre_custom_algorithms_true_count >= MIRAGE_CONSENSUS and check_trigger_history_enabled:
+        logger.info('mirage_algorithms :: will check trigger_history on %s during custom_algorithms runs if trigger_history_override is set' % base_name)
 
     # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
     if run_custom_algorithm_after_3sigma:
@@ -867,6 +954,18 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         str(custom_algorithm), str(base_name),
                         str(run_before_3sigma)))
                 continue
+
+            # @added 20220301 - Bug #4308: matrixprofile - fN on big drops
+            #                   Branch #3068: SNAB
+            trigger_history_override = 0
+            try:
+                trigger_history_override = custom_algorithms_to_run[custom_algorithm]['trigger_history_override']
+            except KeyError:
+                trigger_history_override = 0
+            if trigger_history_override:
+                logger.info('mirage_algorithms :: trigger_history_override is set to %s on %s for %s' % (
+                    str(trigger_history_override), custom_algorithm, base_name))
+
             try:
                 custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
                 if custom_consensus == 0:
@@ -887,11 +986,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                             str(custom_algorithm), str(base_name),
                             str(ensemble.count(True)), str(MIRAGE_CONSENSUS)))
                     continue
-                else:
-                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.debug('debug :: mirage_algorithms :: running custom algorithm %s on %s AFTER three-sigma algorithms as %s three-sigma algorithms triggered - MIRAGE_CONSENSUS of %s was achieved' % (
-                            str(custom_algorithm), str(base_name),
-                            str(ensemble.count(True)), str(MIRAGE_CONSENSUS)))
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: mirage_algorithms :: running custom algorithm %s on %s AFTER three-sigma algorithms as %s three-sigma algorithms triggered - MIRAGE_CONSENSUS of %s was achieved' % (
+                        str(custom_algorithm), str(base_name),
+                        str(ensemble.count(True)), str(MIRAGE_CONSENSUS)))
             run_algorithm = []
             run_algorithm.append(custom_algorithm)
             if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
@@ -979,12 +1077,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
 
                 # @added 20211104 - Bug #4308: matrixprofile - fN on big drops
                 #                   Branch #3068: SNAB
-                if custom_algorithm == 'skyline_matrixprofile' and check_trigger_history:
+                # if custom_algorithm == 'skyline_matrixprofile' and check_trigger_history:
+                if trigger_history_override:
                     trigger_history = {}
                     try:
                         raw_trigger_history = redis_conn_decoded.hget('mirage.trigger_history', base_name)
                         if raw_trigger_history:
                             trigger_history = literal_eval(raw_trigger_history)
+                            logger.info('mirage_algorithms :: %s trigger_history count before removing old entires: %s' % (base_name, str(len(trigger_history))))
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: mirage_algorithms :: failed to evaluate data from mirage.trigger_history Redis hash key - %s' % (
@@ -992,7 +1092,6 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     metric_resolution = 60
                     if trigger_history:
                         try:
-                            from functions.timeseries.determine_data_frequency import determine_data_frequency
                             metric_resolution = determine_data_frequency(skyline_app, timeseries, False)
                         except Exception as err:
                             logger.error(traceback.format_exc())
@@ -1000,12 +1099,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                                 str(err)))
                     recent_trigger_history = {}
                     last_timestamp = int(timeseries[-1][0])
-                    oldest_trigger_timestamp = last_timestamp - (metric_resolution * 4)
+                    oldest_trigger_timestamp = last_timestamp - (metric_resolution * (trigger_history_override + 1))
                     # Self clean trigger_history
                     for trigger_timestamp in list(trigger_history.keys()):
                         if trigger_timestamp < oldest_trigger_timestamp:
                             continue
                         recent_trigger_history[trigger_timestamp] = trigger_history[trigger_timestamp]
+                    logger.info('mirage_algorithms :: %s trigger_history count after removing entries older than %s: %s' % (
+                        base_name, str(oldest_trigger_timestamp), str(len(recent_trigger_history))))
                     tmp_final_ensemble = ensemble + final_after_custom_ensemble
                     trigger_dict = {
                         'count': ensemble_pre_custom_algorithms_true_count,
@@ -1019,11 +1120,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     recent_trigger_history[last_timestamp] = trigger_dict
                     try:
                         redis_conn_decoded.hset('mirage.trigger_history', base_name, str(recent_trigger_history))
+                        logger.info('mirage_algorithms :: added event for %s to mirage.trigger_history: %s' % (base_name, str(trigger_dict)))
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: mirage_algorithms :: failed to set key in mirage.trigger_history Redis hash key - %s' % (
                             str(err)))
                     recent_trigger_history_count = len(list(recent_trigger_history.keys()))
+                    logger.info('mirage_algorithms :: recent_trigger_history_count: %s' % str(recent_trigger_history_count))
                     if recent_trigger_history_count >= trigger_history_override and custom_consensus == 1:
                         logger.info('mirage_algorithms :: %s overriding %s - recent_trigger_history_count breached with %s recent triggers' % (
                             str(base_name), custom_algorithm,

@@ -105,6 +105,12 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                 if app == current_skyline_app:
                     use_with_app = True
 
+            # @added 20220301 - Bug #4308: matrixprofile - fN on big drops
+            try:
+                trigger_history_override = custom_algorithms[custom_algorithm]['trigger_history_override']
+            except:
+                trigger_history_override = 0
+
             if debug:
                 current_logger.debug('debug :: get_custom_algorithms_to_run :: %s - custom_algorithm - %s, max_execution_time - %s' % (
                     base_name, str(custom_algorithm), str(max_execution_time)))
@@ -130,6 +136,8 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                     # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
                     'run_before_3sigma': run_before_3sigma,
                     'run_only_if_consensus': run_only_if_consensus,
+                    # @added 20220301 - Bug #4308: matrixprofile - fN on big drops
+                    'trigger_history_override': trigger_history_override,
                     'use_with': use_with,
                 }
                 if debug:
