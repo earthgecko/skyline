@@ -1,22 +1,28 @@
+"""
+process_correlations.py
+"""
 import logging
-from redis import StrictRedis
-from msgpack import Unpacker
 import traceback
 # @modified 20191115 - Branch #3262: py3
 # from math import ceil
-
-from luminol.anomaly_detector import AnomalyDetector
-from luminol.correlator import Correlator
 from timeit import default_timer as timer
 # @added 20180720 - Feature #2464: luminosity_remote_data
 # Added requests and ast
-import requests
 from ast import literal_eval
-
 # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
 #                   Feature #3500: webapp - crucible_process_metrics
 #                   Feature #1448: Crucible web UI
 from time import time
+
+from redis import StrictRedis
+from msgpack import Unpacker
+
+from luminol.anomaly_detector import AnomalyDetector
+from luminol.correlator import Correlator
+
+# @added 20180720 - Feature #2464: luminosity_remote_data
+# Added requests and ast
+import requests
 
 import settings
 from skyline_functions import (
@@ -35,14 +41,18 @@ from skyline_functions import (
 #                   Feature #4164: luminosity - cloudbursts
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 
+# @added 20220225 - Feature #4000: EXTERNAL_SETTINGS
+# Use correlation related settings from external settings
+from functions.settings.get_external_settings import get_external_settings
+
 # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
 #                   Feature #3512: matched_or_regexed_in_list function
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 try:
     # @modified 20200606 - Bug #3572: Apply list to settings import
-    correlate_namespaces_only = list(settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY)
+    LUMINOSITY_CORRELATE_NAMESPACES_ONLY = list(settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY)
 except:
-    correlate_namespaces_only = []
+    LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
 
 # @added 20200924 - Feature #3756: LUMINOSITY_CORRELATION_MAPS
 try:
@@ -72,9 +82,9 @@ config = {'user': settings.PANORAMA_DBUSER,
 #                   Branch #2270: luminosity
 # Only correlate metrics with an alert setting
 try:
-    correlate_alerts_only = settings.CORRELATE_ALERTS_ONLY
+    CORRELATE_ALERTS_ONLY = settings.CORRELATE_ALERTS_ONLY
 except:
-    correlate_alerts_only = True
+    CORRELATE_ALERTS_ONLY = True
 
 skyline_app = 'luminosity'
 skyline_app_logger = '%sLog' % skyline_app
@@ -166,7 +176,7 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
     # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
     #                   Branch #2270: luminosity
     # Only correlate metrics with an alert setting
-    if correlate_alerts_only:
+    if CORRELATE_ALERTS_ONLY:
         try:
             # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
@@ -358,8 +368,61 @@ def get_assigned_metrics(i, base_name):
 
     # @added 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only
     correlate_namespace_to = None
-    if correlate_namespaces_only:
-        for correlate_namespace in correlate_namespaces_only:
+
+    # @added 20220225 - Feature #4000: EXTERNAL_SETTINGS
+    # Use correlation related settings from external settings
+    correlate_namespaces_only_override = None
+    correlation_maps = {}
+    parent_namespace = base_name.split('.')[0]
+    external_settings = {}
+    try:
+        external_settings = get_external_settings(skyline_app, parent_namespace, False)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error ::get_asssigned_metrics :: get_external_settings failed - %s' % (
+            err))
+    if external_settings:
+        config_id = list(external_settings.keys())[0]
+        try:
+            external_settings_correlate_namespaces_only = external_settings[config_id]['correlate_namespaces_only']
+        except KeyError:
+            external_settings_correlate_namespaces_only = None
+        if isinstance(external_settings_correlate_namespaces_only, list):
+            # Override the Skyline LUMINOSITY_CORRELATE_NAMESPACES_ONLY list
+            # with the external_settings list
+            correlate_namespaces_only_override = list(external_settings_correlate_namespaces_only)
+        external_settings_correlation_maps = None
+        try:
+            external_settings_correlation_maps = external_settings[config_id]['correlation_maps']
+        except KeyError:
+            external_settings_correlation_maps = None
+        if isinstance(external_settings_correlation_maps, dict):
+            correlation_maps = external_settings_correlation_maps.copy()
+
+    # @modified 20220225 - Feature #4000: EXTERNAL_SETTINGS
+    # Use correlation related settings from external settings if they exist
+    # if correlate_namespaces_only:
+    #     for correlate_namespace in correlate_namespaces_only:
+    if LUMINOSITY_CORRELATE_NAMESPACES_ONLY or correlate_namespaces_only_override:
+        if correlate_namespaces_only_override:
+            correlate_namespaces_only_list = list(correlate_namespaces_only_override)
+        else:
+            correlate_namespaces_only_list = list(LUMINOSITY_CORRELATE_NAMESPACES_ONLY)
+
+        # @added 20220225 - Feature #4000: EXTERNAL_SETTINGS
+        # Allow for multiple namespaces to be declared and match the LONGEST
+        # namespace first
+        try:
+            correlate_namespaces_only_list_len = []
+            for item in correlate_namespaces_only_list:
+                correlate_namespaces_only_list_len.append([item, len(item.split('.'))])
+            sorted_correlate_namespaces_only_list_len = sorted(correlate_namespaces_only_list_len, key=lambda x: x[1], reverse=True)
+            correlate_namespaces_only_list = [x[0] for x in sorted_correlate_namespaces_only_list_len]
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_assigned_metrics :: failed to sort correlate_namespaces_only_list by length - %s' % err)
+
+        for correlate_namespace in correlate_namespaces_only_list:
             try:
                 correlate_namespace_matched_by = None
                 correlate_namespace_to, correlate_namespace_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [correlate_namespace])
@@ -367,7 +430,11 @@ def get_assigned_metrics(i, base_name):
                     break
             except:
                 pass
-    if correlate_namespaces_only:
+
+    # @modified 20220225 - Feature #4000: EXTERNAL_SETTINGS
+    # Use correlation related settings from external settings if they exist
+    # if correlate_namespaces_only:
+    if LUMINOSITY_CORRELATE_NAMESPACES_ONLY or correlate_namespaces_only_override:
         if not correlate_namespace_to:
             correlate_with_metrics = []
             for metric_name in unique_metrics:
@@ -378,7 +445,10 @@ def get_assigned_metrics(i, base_name):
                 else:
                     metric_base_name = metric_name
 
-                add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, correlate_namespaces_only)
+                # @modified 20220225 - Feature #4000: EXTERNAL_SETTINGS
+                # add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, correlate_namespaces_only)
+                add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, correlate_namespaces_only_list)
+
                 if not add_metric:
                     correlate_with_metrics.append(metric_name)
             if correlate_with_metrics:
@@ -407,7 +477,23 @@ def get_assigned_metrics(i, base_name):
 
     # @added 20200924 - Feature #3756: LUMINOSITY_CORRELATION_MAPS
     # WIP not tested or fully POCed
-    if LUMINOSITY_CORRELATION_MAPS:
+    # @modified 20220225 - Feature #4000: EXTERNAL_SETTINGS
+    # Use correlation related settings from external settings if they exist
+    # if LUMINOSITY_CORRELATION_MAPS:
+    if LUMINOSITY_CORRELATION_MAPS or correlation_maps:
+
+        # @added 20220225 - Feature #4000: EXTERNAL_SETTINGS
+        # Replace Skyline LUMINOSITY_CORRELATION_MAPS with external settings
+        # correlation_maps if they exist
+        if correlation_maps and LUMINOSITY_CORRELATION_MAPS:
+            for c_map in list(LUMINOSITY_CORRELATION_MAPS.keys()):
+                try:
+                    del LUMINOSITY_CORRELATION_MAPS[c_map]
+                except:
+                    pass
+        for c_map in list(correlation_maps.keys()):
+            LUMINOSITY_CORRELATION_MAPS[c_map] = correlation_maps[c_map].copy()
+
         also_correlate = []
         if metric_name.startswith(settings.FULL_NAMESPACE):
             metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
