@@ -28,10 +28,11 @@ if True:
         from cloudburst import Cloudburst
         # @added 20210806 - Feature #4164: luminosity - cloudbursts
         from cloudbursts import Cloudbursts
-
     # @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
     if settings.LUMINOSITY_RELATED_METRICS:
         from related_metrics import RelatedMetrics
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
 
 skyline_app = 'luminosity'
 skyline_app_logger = skyline_app + 'Log'
@@ -132,6 +133,15 @@ if __name__ == "__main__":
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    # For every error logged set a count in the app Redis key which is consumed
+    # by thunder and creates the sskyline.<hostname>.<skyline_app>.logged_errors
+    # metric
+    redis_error_log_handler = RedisErrorLogHandler(skyline_app)
+    redis_error_log_handler.setLevel(logging.ERROR)
+    redis_error_log_handler.setFormatter(formatter)
+    logger.addHandler(redis_error_log_handler)
 
     # Validate settings variables
     valid_settings = validate_settings_variables(skyline_app)

@@ -24,6 +24,8 @@ if True:
     from validate_settings import validate_settings_variables
     # @added 20211026 - Branch #4300: prometheus
     from prometheus import PrometheusMetrics
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
 
 skyline_app = 'horizon'
 skyline_app_logger = '%sLog' % skyline_app
@@ -165,7 +167,7 @@ def run():
             except:
                 horizon_shards_validated = False
         if not horizon_shards_validated:
-            print('the HORIZON_SHARDS dict in settings.py does not have valid shard numbers' % str(settings.HORIZON_SHARDS))
+            print('the HORIZON_SHARDS dict in settings.py does not have valid shard numbers - %s' % str(settings.HORIZON_SHARDS))
             sys.exit(1)
 
     logger.setLevel(logging.DEBUG)
@@ -181,6 +183,15 @@ def run():
                                                     target=handler)
     handler.setFormatter(formatter)
     logger.addHandler(memory_handler)
+
+    # @added 20220328 - Feature #4018: thunder - skyline.errors
+    # For every error logged set a count in the app Redis key which is consumed
+    # by thunder and creates the sskyline.<hostname>.<skyline_app>.logged_errors
+    # metric
+    redis_error_log_handler = RedisErrorLogHandler(skyline_app)
+    redis_error_log_handler.setLevel(logging.ERROR)
+    redis_error_log_handler.setFormatter(formatter)
+    logger.addHandler(redis_error_log_handler)
 
     # Validate settings variables
     valid_settings = validate_settings_variables(skyline_app)
