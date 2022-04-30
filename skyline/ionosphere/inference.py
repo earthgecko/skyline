@@ -49,49 +49,49 @@ this_host = str(os.uname()[1])
 # long string otherwise.
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
-except Exception as e:
-    logger.error('error :: inference :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings - %s' % e)
+except Exception as outer_err:
+    logger.error('error :: inference :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings - %s' % outer_err)
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
     SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
     if SERVER_METRIC_PATH == '.':
         SERVER_METRIC_PATH = ''
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine SERVER_METRIC_PATH from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine SERVER_METRIC_PATH from settings - %s' % outer_err)
     SERVER_METRIC_PATH = ''
 try:
     SINGLE_MATCH = settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % outer_err)
     SINGLE_MATCH = True
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
 try:
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING
-except Exception as e:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - %s' % e)
+except Exception as outer_err:
+    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = 10
 
 context = 'ionosphere_inference'
@@ -99,7 +99,7 @@ context = 'ionosphere_inference'
 
 def ionosphere_motif_inference(metric, timestamp):
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     child_process_pid = os.getpid()
     logger.info('inference :: running for process_pid - %s for %s' % (
         str(child_process_pid), metric))
@@ -158,9 +158,9 @@ def ionosphere_motif_inference(metric, timestamp):
 
     try:
         metric_vars_dict = mirage_load_metric_vars(skyline_app, metric_vars_file, True)
-    except Exception as e:
+    except Exception as err:
         logger.error('error :: inference :: failed to load metric variables from check file - %s - %s' % (
-            metric_vars_file, e))
+            metric_vars_file, err))
     if not metric_vars_dict:
         return matched_motifs, fps_checked_for_motifs
 
@@ -347,10 +347,12 @@ def ionosphere_motif_inference(metric, timestamp):
 
             relate_dataset = [float(item[1]) for item in fp_timeseries]
 
+            pattern_found = False
             for namespace_key in list(IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.keys()):
                 pattern_found, matched_by_result = matched_or_regexed_in_list(skyline_app, metric, [namespace_key], False)
+                del matched_by_result
                 if pattern_found:
-                    namespace_key = namespace_key
+                    namespace_key = str(namespace_key)
                     break
             if not pattern_found:
                 namespace_key = 'default_inference_batch_sizes'
@@ -575,7 +577,7 @@ def ionosphere_motif_inference(metric, timestamp):
                         continue
 
                     # @modified 20210505 - Feature #4014: Ionosphere - inference
-                    # Skip he batch size if the fp_timeseries is a similar
+                    # Skip the batch size if the fp_timeseries is a similar
                     # length as the batch_size.  This was specifically added to
                     # reduce errors were there may be missing data points in a
                     # timeseries and the lengths are not the same.  This was
@@ -623,8 +625,14 @@ def ionosphere_motif_inference(metric, timestamp):
                         # Handle the query_length being shorter than the batch_size
                         if len(current_best_indices) != len(current_best_dists):
                             current_best_indices = []
-                            if index[0] >= (query_length - 1):
-                                current_best_indices.append(index[0])
+                            # @modified 20220329 - Feature #4014: Ionosphere - inference
+                            # Re-iterate because this was using the previously
+                            # defined loop index
+                            # if index[0] >= (query_length - 1):
+                            #     current_best_indices.append(index[0])
+                            for index in enumerate(relate_dataset):
+                                if index[0] >= (query_length - 1):
+                                    current_best_indices.append(index[0])
                         if len(current_best_indices) != len(current_best_dists):
                             logger.info('inference :: discarding mass3 results as current_best_dists length: %s, current_best_indices length: %s do not match, took %6f seconds' % (
                                 str(len(current_best_dists)), str(len(current_best_indices)),
@@ -647,12 +655,10 @@ def ionosphere_motif_inference(metric, timestamp):
                     add_motifs_count = 0
                     for index, best_dist in enumerate(current_best_dists):
                         try:
-                            """
-                            Note: mass2_batch finds similar motifs NOT the same
-                            motif, the same motif will result in the best_dists
-                            being a 0j with mass3.
-                            So it is DIYed with FIND EXACT MATCHES
-                            """
+                            # Note: mass2_batch finds similar motifs NOT the same
+                            # motif, the same motif will result in the best_dists
+                            # being a 0j with mass3.
+                            # So it is DIYed with FIND EXACT MATCHES
 
                             # Do all in one in the distance_valid_motifs
                             # comprehension after the loop
@@ -826,7 +832,8 @@ def ionosphere_motif_inference(metric, timestamp):
                     logger.debug('debug :: inference :: exact match: %s' % (str(motif)))
 
             full_relate_timeseries = fps_timeseries[current_fp_id]
-            relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
+            # relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
+            relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index < (best_index + motif_size)]
             relate_dataset = [item[1] for item in relate_timeseries]
             # relate_dataset_timestamps = [int(item[0]) for item in relate_timeseries]
 
@@ -1007,7 +1014,7 @@ def ionosphere_motif_inference(metric, timestamp):
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: inference :: fp id %s and motif: %s - %s' % (
-                str(fp_id), str(motif), str(e)))
+                str(motif[0]), str(motif), str(e)))
             continue
     end_motifs_check = timer()
     logger.info('inference :: motifs checked in %.6f seconds' % (
@@ -1029,8 +1036,10 @@ def ionosphere_motif_inference(metric, timestamp):
         logger.info('inference :: sorting %s matched_motifs by distance and area_percent_diff' % (
             str(len(sorted_ordered_matched_motifs_list))))
         if sorted_ordered_matched_motifs_list:
-            inference_debug_file = '%s/%s.%s.fp_id.%s.inference.sorted_ordered_matched_motifs.list' % (
-                metric_timeseries_dir, str(timestamp), metric, str(fp_id))
+            # inference_debug_file = '%s/%s.%s.fp_id.%s.inference.sorted_ordered_matched_motifs.list' % (
+            #     metric_timeseries_dir, str(timestamp), metric, str(fp_id))
+            inference_debug_file = '%s/%s.%s.inference.sorted_ordered_matched_motifs.list' % (
+                metric_timeseries_dir, str(timestamp), metric)
             if not os.path.isfile(inference_debug_file):
                 try:
                     write_data_to_file(skyline_app, inference_debug_file, 'w', str(sorted_ordered_matched_motifs_list))
