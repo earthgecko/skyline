@@ -1,3 +1,6 @@
+"""
+boundary.py
+"""
 from __future__ import division
 import logging
 try:
@@ -5,7 +8,7 @@ try:
 except:
     from queue import Empty
 # from redis import StrictRedis
-from time import time, sleep
+from time import time, sleep, strftime, gmtime
 from threading import Thread
 from collections import defaultdict
 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -13,7 +16,6 @@ from collections import defaultdict
 # processes
 # from multiprocessing import Process, Manager, Queue
 from multiprocessing import Process, Queue
-from msgpack import Unpacker, packb
 from os import path, kill, getpid
 from math import ceil
 import traceback
@@ -22,10 +24,12 @@ import re
 import os
 import errno
 import sys
-import os.path
+# import os.path
 # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
 # literal_eval required to evaluate Redis sets
 from ast import literal_eval
+
+from msgpack import Unpacker, packb
 
 import settings
 # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
@@ -41,7 +45,11 @@ from skyline_functions import (
     # charset='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200506 - Feature #3532: Sort all time series
-    sort_timeseries)
+    sort_timeseries,
+    # @added 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+    mkdir_p,
+)
 
 from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
@@ -52,6 +60,14 @@ from algorithm_exceptions import (TooShort, Stale, Boring)
 # Changed original alert matching pattern to use new
 # method
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+
+# @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+#                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+from functions.metrics.last_known_value_metrics_list import last_known_value_metrics_list
+from functions.metrics.zero_fill_metrics_list import zero_fill_metrics_list
+# @added 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+#                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+from functions.timeseries.full_duration_timeseries_fill import full_duration_timeseries_fill
 
 skyline_app = 'boundary'
 skyline_app_logger = skyline_app + 'Log'
@@ -91,6 +107,9 @@ alert_test_file = '%s/%s_alert_test.txt' % (settings.SKYLINE_TMP_DIR, skyline_ap
 
 
 class Boundary(Thread):
+    """
+    Boundary Thread
+    """
     def __init__(self, parent_pid):
         """
         Initialize the Boundary
@@ -143,25 +162,31 @@ class Boundary(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
-            exit(0)
+            logger.warning('warning :: parent or current process dead')
+            sys.exit(0)
 
     def unique_noHash(self, seq):
+        """
+        Unique no hashed things
+        """
         seen = set()
         return [x for x in seq if str(x) not in seen and not seen.add(str(x))]
 
     # This is to make a dump directory in /tmp if ENABLE_BOUNDARY_DEBUG is True
     # for dumping the metric timeseries data into for debugging purposes
-    def mkdir_p(self, path):
-        try:
-            os.makedirs(path)
-            return True
-        except OSError as exc:
-            # Python >2.5
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
+    # @modified 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    #                      Feature #4520: settings - ZERO_FILL_NAMESPACES
+    # Deprecated use skyline_functions mkdir_p
+    # def mkdir_p(self, dir_path):
+    #     try:
+    #         os.makedirs(dir_path)
+    #         return True
+    #     except OSError as exc:
+    #         # Python >2.5
+    #         if exc.errno == errno.EEXIST and os.path.isdir(dir_path):
+    #             pass
+    #         else:
+    #             raise
 
     # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
     # Pass added_at as an argument to spin_process so that the panaroma_anomaly_file
@@ -196,8 +221,10 @@ class Boundary(Thread):
 
         # Compile assigned metrics
         assigned_metrics = []
-        for i in assigned_metrics_and_algos:
-            assigned_metrics.append(i[0])
+#        for i in assigned_metrics_and_algos:
+#            assigned_metrics.append(i[0])
+        for iaa in assigned_metrics_and_algos:
+            assigned_metrics.append(iaa[0])
 
         # unique unhashed things
         def unique_noHash(seq):
@@ -237,32 +264,28 @@ class Boundary(Thread):
         if ENABLE_BOUNDARY_DEBUG:
             logger.debug('debug :: boundary_algorithms - %s' % str(boundary_algorithms))
 
+        # @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+        #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+        last_known_value_metrics = []
+        try:
+            last_known_value_metrics = last_known_value_metrics_list(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: last_known_value_metrics_list failed - %s' % err)
+        zero_fill_metrics = []
+        try:
+            zero_fill_metrics = zero_fill_metrics_list(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: zero_fill_metrics_list failed - %s' % err)
+
+        # @added 20220420 - Feature #4530: namespace.analysed_events
+        analysed_metrics = []
+
         discover_run_metrics = []
 
         # Distill metrics into a run list
-        for i, metric_name, in enumerate(unique_assigned_metrics):
-            self.check_if_parent_is_alive()
-
-            try:
-                if ENABLE_BOUNDARY_DEBUG:
-                    logger.debug('debug :: unpacking timeseries for %s - %s' % (metric_name, str(i)))
-                raw_series = raw_assigned[i]
-                unpacker = Unpacker(use_list=False)
-                unpacker.feed(raw_series)
-                timeseries = list(unpacker)
-            except Exception as e:
-                exceptions['Other'] += 1
-                logger.error('error :: redis data error: ' + traceback.format_exc())
-                logger.error('error :: %e' % e)
-
-            # @added 20200506 - Feature #3532: Sort all time series
-            # To ensure that there are no unordered timestamps in the time
-            # series which are artefacts of the collector or carbon-relay, sort
-            # all time series by timestamp before analysis.
-            original_timeseries = timeseries
-            if original_timeseries:
-                timeseries = sort_timeseries(original_timeseries)
-                del original_timeseries
+        for index, metric_name, in enumerate(unique_assigned_metrics):
 
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
 
@@ -355,7 +378,8 @@ class Boundary(Thread):
                             if metric_pattern_matched and algo_pattern_matched:
                                 if ENABLE_BOUNDARY_DEBUG:
                                     logger.debug('debug :: added metric - %s, %s, %s, %s, %s, %s, %s, %s, %s' % (str(i), metric_name, str(metric_expiration_time), str(metric_min_average), str(metric_min_average_seconds), str(metric_trigger), str(alert_threshold), metric_alerters, algorithm))
-                                discover_run_metrics.append([i, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm])
+                                # discover_run_metrics.append([i, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm])
+                                discover_run_metrics.append([index, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm])
 
         if ENABLE_BOUNDARY_DEBUG:
             logger.debug('debug :: printing discover_run_metrics')
@@ -456,7 +480,8 @@ class Boundary(Thread):
                     # @modified 20170913 - Task #2160: Test skyline with bandit
                     # Added nosec to exclude from bandit tests
                     timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm  # nosec
-                    self.mkdir_p(timeseries_dump_dir)
+                    # self.mkdir_p(timeseries_dump_dir)
+                    mkdir_p(timeseries_dump_dir)
                     timeseries_dump_file = timeseries_dump_dir + "/" + metric_name + ".json"
                     with open(timeseries_dump_file, 'w+') as f:
                         f.write(str(timeseries))
@@ -548,6 +573,29 @@ class Boundary(Thread):
                         except:
                             logger.error('error :: nonNegativeDerivative failed')
 
+                    # @added 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+                    #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+                    if base_name in zero_fill_metrics:
+                        if not known_derivative_metric:
+                            try:
+                                timeseries = full_duration_timeseries_fill(self, skyline_app, base_name, timeseries, 'zero')
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: full_duration_timeseries_fill failed - %s' % err)
+                        else:
+                            # Fix the badly defined metric if a metric has been defined
+                            # as a zero_fill metric but is a derivative_metric apply
+                            # last_known_value AFTER nonNegativeDerivative because
+                            # zero filling derivative metrics does not have the desired
+                            # effect
+                            last_known_value_metrics.append(base_name)
+                    if base_name in last_known_value_metrics:
+                        try:
+                            timeseries = full_duration_timeseries_fill(self, skyline_app, base_name, timeseries, 'last_known_value')
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: full_duration_timeseries_fill failed - %s' % err)
+
                     # @added 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
                     #                   Feature #3532: Sort all time series
                     try:
@@ -579,6 +627,9 @@ class Boundary(Thread):
                         except:
                             logger.error('error :: debug :: analysed - %s, but unknown datapoint or timestamp' % (
                                 metric_name))
+
+                    # @added 20220420 - Feature #4530: namespace.analysed_events
+                    analysed_metrics.append(base_name)
 
                     # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
                     # If it's not anomalous, add it to list
@@ -786,6 +837,28 @@ class Boundary(Thread):
                 exceptions['Other'] += 1
                 logger.error('error :: exceptions[\'Other\']')
 
+        # @added 20220420 - Feature #4530: namespace.analysed_events
+        namespace_analysed = defaultdict(int)
+        for base_name in list(set(analysed_metrics)):
+            parent_namespace = base_name.split('.')[0]
+            namespace_analysed[parent_namespace] += 1
+        date_string = str(strftime('%Y-%m-%d', gmtime()))
+        namespace_analysed_events_hash = 'namespace.analysed_events.%s.%s' % (skyline_app, date_string)
+        for namespace in list(namespace_analysed.keys()):
+            try:
+                self.redis_conn.hincrby(namespace_analysed_events_hash, namespace, namespace_analysed[namespace])
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to increment %s Redis hash - %s' % (
+                    namespace_analysed_events_hash, err))
+        try:
+            self.redis_conn.expire(namespace_analysed_events_hash, (86400 * 15))
+            logger.info('updated %s Redis hash' % namespace_analysed_events_hash)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to set expire %s Redis hash - %s' % (
+                namespace_analysed_events_hash, err))
+
         # Add values to the queue so the parent process can collate
         for key, value in anomaly_breakdown.items():
             self.anomaly_breakdown_q.put((key, value))
@@ -808,7 +881,6 @@ class Boundary(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -827,7 +899,6 @@ class Boundary(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -915,10 +986,9 @@ class Boundary(Thread):
                 logger.info('no metrics in redis. try adding some - see README')
                 sleep(10)
                 continue
-            else:
-                if ENABLE_BOUNDARY_DEBUG:
-                    logger.debug('debug :: %s metrics in Redis set %s' % (
-                        str(len(unique_metrics)), redis_set))
+            if ENABLE_BOUNDARY_DEBUG:
+                logger.debug('debug :: %s metrics in Redis set %s' % (
+                    str(len(unique_metrics)), redis_set))
 
             # Reset boundary_metrics
             boundary_metrics = []
@@ -1035,18 +1105,18 @@ class Boundary(Thread):
                 p.join()
 
             # Grab data from the queue and populate dictionaries
-            exceptions = dict()
+            exceptions = {}
 
             # @added 20211107 - send default values
             exceptions['Boring'] = 0
             exceptions['Stale'] = 0
             exceptions['TooShort'] = 0
 
-            anomaly_breakdown = dict()
+            anomaly_breakdown = {}
             while 1:
                 try:
                     key, value = self.anomaly_breakdown_q.get_nowait()
-                    if key not in anomaly_breakdown.keys():
+                    if key not in list(anomaly_breakdown.keys()):
                         anomaly_breakdown[key] = value
                     else:
                         anomaly_breakdown[key] += value
@@ -1056,7 +1126,7 @@ class Boundary(Thread):
             while 1:
                 try:
                     key, value = self.exceptions_q.get_nowait()
-                    if key not in exceptions.keys():
+                    if key not in list(exceptions.keys()):
                         exceptions[key] = value
                     else:
                         exceptions[key] += value
@@ -1127,7 +1197,6 @@ class Boundary(Thread):
                         except OSError:
                             if ENABLE_BOUNDARY_DEBUG:
                                 logger.debug('debug :: error removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
-                            pass
 
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Use Redis set instead of Manager() list
@@ -1578,7 +1647,6 @@ class Boundary(Thread):
                 self.redis_conn.delete('boundary.anomalous_metrics')
             except:
                 logger.info('failed to delete boundary.anomalous_metrics Redis set')
-                pass
 
             # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1587,7 +1655,6 @@ class Boundary(Thread):
                 self.redis_conn.delete('boundary.not_anomalous_metrics')
             except:
                 logger.info('failed to delete boundary.not_anomalous_metrics Redis set')
-                pass
 
             # Only run once per
             process_runtime = time() - now

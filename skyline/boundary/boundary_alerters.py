@@ -275,6 +275,11 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
             main_alert_title, app_alert_context, alert_context, str(metric_trigger),
             str(alert_threshold), str(datapoint))
 
+    # @added 20220301 - Feature #4482: Test alerts
+    if algorithm == 'testing':
+        main_alert_title = 'TEST - %s' % main_alert_title
+        unencoded_graph_title = 'TEST - %s' % unencoded_graph_title
+
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
@@ -414,6 +419,11 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         email_subject = '[%s alert] %s ALERT - %s - %s' % (
             main_alert_title, app_alert_context, alert_context, metric_name)
         msg['Subject'] = email_subject
+
+        # @added 20220301 - Feature #4482: Test alerts
+        if algorithm == 'testing':
+            msg['Subject'] = 'TEST - %s' % email_subject
+
         msg['From'] = sender
         # @modified 20180524 - Task #2384: Change alerters to cc other recipients
         # msg['To'] = recipient
@@ -429,7 +439,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
 
             # msg_attachment = MIMEImage(image_data)
             fp = open(image_file, 'rb')
-            msg_attachment = MIMEImage(fp.read())
+            msg_attachment = MIMEImage(fp.read(), _subtype='png')
             fp.close()
 
             msg_attachment.add_header('Content-ID', '<%s>' % content_id)
@@ -441,7 +451,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
             smtp_server = determine_smtp_server()
         except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: determine_smtp_server failed' % err)
+            logger.error('error :: determine_smtp_server failed - %s' % err)
         if not smtp_server:
             logger.error('error :: no smtp_server mail cannot be sent')
             return
@@ -470,7 +480,10 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
                 (str(primary_recipient), str(cc_recipients)))
         s.quit()
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        if settings.PANORAMA_ENABLED:
+
+        # @modified 20220301 - Feature #4482: Test alerts
+        # if settings.PANORAMA_ENABLED:
+        if settings.PANORAMA_ENABLED and algorithm != 'testing':
             added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
             if not added_panorama_alert_event:
                 logger.error(
@@ -721,6 +734,11 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             main_alert_title, app_alert_context, alert_context,
             str(metric_trigger), str(alert_threshold), metric, str(datapoint))
 
+    # @added 20220301 - Feature #4482: Test alerts
+    if algorithm == 'testing':
+        unencoded_graph_title = 'TEST - %s' % unencoded_graph_title
+        slack_title = '*TEST* - %s' % slack_title
+
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
 
@@ -933,7 +951,7 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 for i_channel in settings.BOUNDARY_SLACK_OPTS['channels'][channel]:
                     matched_channels.append(i_channel)
 
-    if matched_channels != []:
+    if matched_channels:
         # @modified 20220111 - Bug #4366: Fix boundary slack channels match
         # for i_metric_name in matched_channels:
         #     channels = settings.BOUNDARY_SLACK_OPTS['channels'][i_metric_name]
@@ -1040,7 +1058,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             logger.error('error :: alert_slack - could not upload file')
             return False
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        if settings.PANORAMA_ENABLED:
+        # @modified 20220301 - Feature #4482: Test alerts
+        # if settings.PANORAMA_ENABLED:
+        if settings.PANORAMA_ENABLED and algorithm != 'testing':
             added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
             if not added_panorama_alert_event:
                 logger.error(
@@ -1104,16 +1124,28 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
             metric_alert_dict = {
                 "metric": metric_name,
                 "algorithm": algorithm,
-                "timestamp": timestamp_str,
-                "value": value_str,
-                "full_duration": full_duration_str,
-                "expiry": expiry_str,
+                # @modified 20220301 - Feature #: Test alerts
+                # Use native json types apart from anomaly_id which is converted
+                # into a str for direct use in URLs
+                # "timestamp": timestamp_str,
+                # "value": value_str,
+                # "full_duration": full_duration_str,
+                # "expiry": expiry_str,
+                "timestamp": int(timestamp_str),
+                "value": float(value_str),
+                "full_duration": int(full_duration_str),
+                "expiry": int(expiry_str),
                 # @added 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-                "metric_trigger": metric_trigger,
-                "alert_threshold": alert_threshold,
+                "metric_trigger": float(metric_trigger),
+                "alert_threshold": int(alert_threshold),
                 "source": str(source),
-                "token": str(alerter_token)
+                "token": alerter_token
             }
+
+            # @added 20220301 - Feature #4482: Test alerts
+            if algorithm == 'testing':
+                metric_alert_dict['test alert'] = True
+
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
             # alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
@@ -1150,7 +1182,8 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
         item_to_resend = None
         if resend_queue:
             try:
-                for index, resend_item in enumerate(resend_queue):
+                # for index, resend_item in enumerate(resend_queue):
+                for resend_item in resend_queue:
                     resend_item_list = literal_eval(resend_item)
                     # resend_alert = literal_eval(resend_item_list[0])
                     # resend_metric = literal_eval(resend_item_list[1])
@@ -1231,7 +1264,9 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                         pass
 
                     # @added 20200825 - Feature #3704: Add alert to anomalies
-                    if settings.PANORAMA_ENABLED:
+                    # @modified 20220301 - Feature #4482: Test alerts
+                    # if settings.PANORAMA_ENABLED:
+                    if settings.PANORAMA_ENABLED and algorithm != 'testing':
                         added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
                         if not added_panorama_alert_event:
                             logger.error(
