@@ -10,7 +10,7 @@
 	</ol>
 
 
-	  <h3><span class="logo"><span class="sky">API methods ::</span> <span class="re">documentation</span></span></h3>
+	  <h3><span class="logo"><span class="sky">API and Admin methods ::</span> <span class="re">documentation</span></span></h3>
 
 	  <h5><span class="logo"><span class="sky">NOTE</span> <span class="re">When running a Skyline cluster</span></span></h5>
     When <span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> is running as a distributed
@@ -1340,6 +1340,60 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?redis_data</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the data from an allowed Redis set/hash/key.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?redis_data</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>type=[hash|set|key | str | <font color=red>required</font>]<br>
+                  key=[Redis key name | str | <font color=red>required</font>]<br>
+                  cluster_data=[true | bool | [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?redis_data&type=hash&key=metrics_manager.flux.aggregate_namespaces</code></td>
+		          <td><code>/api?redis_data&type=set&key=flux.quota.namespace_metrics.telegraf&cluster_data=true</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - with json response, example
+                  <code>{
+  "data": {
+    "metrics_manager.flux.aggregate_namespaces": {
+      "skyline-test-external-settings.1": "{'interval': 60, 'last_known_value': False, 'method': ['avg'], 'method_suffix': False, 'zero_fill': False}",
+      "skyline-test-external-settings.2": "{'interval': 60, 'last_known_value': False, 'method': ['avg', 'sum', 'max', 'min'], 'method_suffix': True, 'zero_fill': False}"
+    }
+  },
+  "status": {
+    "cluster_data": false,
+    "request_time": 0.0012733489274978638,
+    "response": 200
+  }
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?related_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -1470,7 +1524,7 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
 		    </tbody>
 		  </table>
 
-	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?thunder_no_data_remove_namespace</span></span></h4>
+	  <h4><span class="logo"><span class="sky">Admin method ::</span> <span class="re">/remove_namespace_quota_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
   		      <tr>
@@ -1481,8 +1535,105 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>This is a <strong>ADMIN</strong> method to remove a top level namespace for the thunder no_data check.  Internal this removes all metrics starting with the passed namespace from the <code>analyzer.metrics.last_timeseries_timestamp</code> Redis hash key.
-              If metrics stop for a top level namespace and they are expected to have stopped, the namespace can be removed to silence the no_data Thunder alerts in the next Thunder run.</td>
+  		        <td>Removes metrics defined in metrics or by patterns from the namespace flux quota AND removes the metrics from all Redis reources INCLUDING the metric timesereis data for the metrics and sets the metrics to inactive in the database.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/remove_namespace_quota_metrics</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>POST</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Authentication:</td>
+  		        <td><font color=red>required</font>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>key=[FLUX_SELF_API_KEY | str | <font color=red>required</font>]<br>
+                  parent_namespace=[top_level_namespace | str | <font color=red>required</font>]<br>
+                  metrics=[list_of_base_names | list | optional]<br>
+                  patterns=[list_of_patterns_to_match | list | optional]<br>
+                  cluster_data=[true | boolean | optional]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example with POST data:</td>
+              <td>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "namespace": "telegraf", "metrics": ["telegraf.server-1.cpu-total.cpu.usage_steal", "telegraf.server-1.cpu-total.cpu.usage_guest"]}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code><br>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "namespace": "telegraf", "metrics": ["telegraf.server-1.cpu-total.cpu.usage_steal"], "patterns": ["telegraf.redis.redis_cmdstat.usec_per_call", "mysql.performance_schema"]}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code><br>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "namespace": "telegraf", "patterns": ["telegraf.redis.redis_cmdstat.usec_per_call", "mysql.performance_schema"], "cluster_data": true}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code> [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json responses, examples:<br>
+Single response:<br>
+                  <code>
+</code><br>
+cluster_data response:<br>
+<code>
+</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?test_alert</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Adds a test alert for a metric, app and alerter.
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?test_alert&metric=[base_name | str]&app=[app | str]&alerter=[alerter | str]&alerter_id=[alerter_id (optional) | int ]&trigger_anomaly=[false (optional and ONLY available for mirage) | boolean ]</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?test_alert&metric=test.metric&app=mirage&alerter=slack</code>
+              </td>
+		          <td><code>/api?test_alert&metric=test.metric&app=mirage&alerter=slack&alerter_id=143</code> (optional alerter_id if from external alert settings)
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{"data":{"test alert added":true,"metric":"test.metric","app":"mirage","alerter":"slack"},"status":{"response":200}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">Admin method ::</span> <span class="re">/api?thunder_no_data_remove_namespace</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>This is a <strong>Admin</strong> method to remove a top level namespace for the thunder no_data check.  Internal this removes all metrics starting with the passed namespace from the <code>analyzer.metrics.last_timeseries_timestamp</code> Redis hash key.
+              If metrics stop for a top level namespace and they are expected to have stopped, the namespace can be removed to silence the no_data Thunder alerts in the next Thunder run.<br>
+              Optionally expiry can be passed to silence any repeated alerts, if not passed the default of 3600 is used.</td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
@@ -1495,6 +1646,7 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
   		      <tr>
   		        <td>Request example:</td>
 		          <td><code>/api?thunder_no_data_remove_namespace&namespace=[top_level_namespace]</code><br>
+		          <code>/api?thunder_no_data_remove_namespace&namespace=[top_level_namespace]&expiry=86400</code><br>
               </td>
   		      </tr>
   		      <tr>

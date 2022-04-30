@@ -41,26 +41,49 @@
       </div><!-- /.nav-collapse -->
 
 {% if pattern != "*" %}
+  {% if exclude != "" %}
+    {% if key_type != "" %}
+	<h1>Keys matching <code>{{ pattern }}</code> of types <code>{{ key_types }}</code></h1>
+    {% else %}
 	<h1>Keys matching <code>{{ pattern }}</code></h1>
-	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched</strong></p>
+    {% endif %}
+    {% if key_type != "" %}
+	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched, excluding <strong>{{ filtered_out}}</strong> keys matching <code>{{ exclude_list }}</code> and including only <code>{{ key_types }}</code> key types</p>
+    {% else %}
+	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched, excluding <strong>{{ filtered_out}}</strong> keys matching <code>{{ exclude_list }}</code></p>
+    {% endif %}
+  {% else %}
+	<h1>Keys matching <code>{{ pattern }}</code></h1>
+    {% if key_type != "" %}
+	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched, including only <code>{{ key_types }}</code> key types</p>
+    {% else %}
+	<p><strong>{{ num_keys }}</strong> out of <strong>{{ dbsize }}</strong> matched</p>
+    {% endif %}
+  {% endif %}
 {% else %}
+  {% if key_type != "" %}
+	<h1>All Keys of types <code>{{ key_types }}</code></h1>
+	<p><strong>{{ num_keys }} Keys available</strong></p>
+  {% else %}
 	<h1>All Keys</h1>
 	<p><strong>{{ num_keys }} Keys available</strong></p>
+  {% endif %}
 {% endif %}
 
 	<nav class="navbar navbar-default" role="navigation">
 
 		<form class="navbar-form navbar-left" role="search" method="GET" action="./">
+		  <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>
+		  <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Reset</a>
 		  <div class="form-group">
-		    <input name="pattern" type="text" class="form-control" placeholder="{{ pattern }}" value="{{ pattern }}">
+		    <input name="pattern" type="text" class="form-control" placeholder="{{ pattern }}" value="{{ pattern }}"> match pattern<br>
+		    <input name="exclude" type="text" class="form-control" placeholder="{{ exclude }}" value="{{ exclude }}"> exclude pattern/s [optional] - multiple exclude patterns can be passed with comma separation<br>
+		    <input name="key_type" type="text" class="form-control" placeholder="{{ key_type }}" value="{{ key_type }}"> filter by Redis key type [hash|set|string] [optional] - multiple types can be passed with comma separation e.g. <code>hash,set</code>
 		  </div>
 <!-- @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow -->
 		  <div class="form-group">
 		    <input name="token" type="hidden" class="form-control" placeholder="{{ token }}" value="{{ token }}">
 		  </div>
-
-		  <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>
-		  <a href="./" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span> Reset</a>
 		</form>
 
 	</nav>
@@ -71,6 +94,7 @@
 				<th class="text-right">#</th>
 				<th>Type</th>
 				<th>Key</th>
+				<th>Size</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -79,6 +103,11 @@
 	    		<td class="text-right" style="width: 5%">{{ loop.index + offset }}</td>
 	    		<td>{{ types[key] }}</td>
 	    		<td><a href="/rebrow_key/{{ host }}:{{ port }}/{{ db }}/keys/{{ key|urlsafe_base64 }}/?token={{ token }}">{{ key }}</a></td>
+	    		<td>{{ key_sizes[key] }} {% if key_sizes[key] > (1024*1024) %}
+          				({{ "%.1f"|format(key_sizes[key] / 1024.0 / 1024.0) }} MB)
+          				{% elif key_sizes[key] > 1024 %}
+          				({{ "%.1f"|format(key_sizes[key] / 1024.0) }} KB)
+          				{% endif %}</td>
 	    		<td><form method="POST"><input type="hidden" name="action" value="delkey" /><input type="hidden" name="key" value="{{ key }}" /><button class="btn btn-default" type="submit" onclick="return confirm('Are you sure you want to delete this key? {{ key }}');"><span class="glyphicon glyphicon-trash"></span></button></form></td>
 	    	</tr>
 			{% endfor %}
@@ -88,15 +117,15 @@
 	{% if num_keys > perpage %}
 	<ul class="pagination">
 	  {% if offset > 0 %}
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, offset=(offset-perpage), perpage=perpage, pattern=pattern) }}">&laquo;</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, offset=(offset-perpage), perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">&laquo;</a></li>
 	  {% endif %}
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=0, perpage=perpage, pattern=pattern) }}">1</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=perpage, perpage=perpage, pattern=pattern) }}">2</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*2), perpage=perpage, pattern=pattern) }}">3</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*3), perpage=perpage, pattern=pattern) }}">4</a></li>
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*4), perpage=perpage, pattern=pattern) }}">5</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=0, perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">1</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=perpage, perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">2</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*2), perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">3</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*3), perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">4</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(perpage*4), perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">5</a></li>
 	  {% if num_keys > (offset + perpage) %}
-	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(offset+perpage), perpage=perpage, pattern=pattern) }}">&raquo;</a></li>
+	  <li><a href="{{ url_for('rebrow_keys', host=host, port=port, db=db, token=token, salt=salt, offset=(offset+perpage), perpage=perpage, pattern=pattern, exclude=exclude, key_type=key_type) }}">&raquo;</a></li>
 	  {% endif %}
 	</ul>
 	{% endif %}

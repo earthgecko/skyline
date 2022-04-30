@@ -1,0 +1,121 @@
+{% block remove_flux_namespace_quota_metrics_block %}
+<!--
+# @added 20201212 - Feature #3880: webapp - utilities - match_metric
+ -->
+<!-- BEGIN /utilities match_metric block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities remove_flux_namespace_quota_metrics_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+      <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
+      <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+      <li class="active"><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
+      <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Flux ::</span> <span class="re">remove namespace quota metrics</span></h4>
+
+  {% if removed_quota_metrics %}
+	  <div class="alert alert-success">
+	    <strong>Removed metrics count</strong> :: {{ removed_quota_metrics|length }}<br>
+	  </div>
+  {% endif %}
+
+        <form action="remove_namespace_quota_metrics" method=post enctype=multipart/form-data>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Parent namespace</td>
+  		        <td><input type="text" name="parent_namespace" value="" /> the parent namespace want to remove from the Flux namespace quota (top level namespace)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metrics</td>
+  		        <td><input type="text" name="metrics" value="" /> a comma separated list of metric names you want to remove from the Flux namespace quota</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Patterns</td>
+  		        <td><input type="text" name="patterns" value="" /> a comma separated list of patterns to match metric names you want to remove from the Flux namespace quota (uses matched_or_regexed_in_list)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>cluster_data</td>
+  		        <td><select name="cluster_data">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Dry run</td>
+  		        <td><select name="dry_run">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Remove namespace quota metrics">
+      </form>
+      </div>
+  </div>
+
+  {% if removed_quota_metrics %}
+    {% if dry_run %}
+	  <h3><span class="logo"><span class="sky">Would remove ::</span> <span class="re">namespace quota metrics</span> <strong>DRY RUN</strong></h3>
+    {% else %}
+	  <h3><span class="logo"><span class="sky">Removed ::</span> <span class="re">namespace quota metrics</span></h3>
+    {% endif %}
+
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Metric</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+    {% for item in removed_quota_metrics %}
+  		      <tr>
+  		        <td>{{ item }}</td>
+  		      </tr>
+    {% endfor %}
+  		    </tbody>
+  		  </table>
+  {% endif %}
+
+	</div>
+	</div>
+	</div>
+
+<!-- END remove_flux_namespace_quota_metrics block -->
+{% endblock %}
