@@ -1,3 +1,8 @@
+## IMPORTANT NOTICE - 2022-04-30
+
+The master branch is currently being updated to version 3.0.0 and should be
+considered unstable and breaking until this notice is removed.
+
 ## Skyline
 
 Skyline is a real time anomaly detection, time series analysis and performance
