@@ -72,7 +72,10 @@ click==8.1.2
 #Flask==1.1.2
 # @modified 20220422 - Task #4452: Update dependencies
 #Flask==2.0.2
-Flask==2.1.1
+# @modified 20220430 - Task #4452: Update dependencies
+# readthedocs error
+#Flask==2.1.1
+Flask==2.0.2
 # @modified 20211220 - Task #4344: Update dependencies
 #simplejson==3.17.2
 simplejson==3.17.6
