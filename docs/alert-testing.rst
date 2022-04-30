@@ -2,6 +2,16 @@
 Alert testing
 #############
 
+You can test alerts before (during set up) and after you have metrics (when up
+and running).
+
+Testing alerts after you are up and running is easy, just go to the Utilities
+tab in the webapp and then select the Test alert tab and submit your metric and
+app to test an alert from.
+
+If you want to test alerting before you have metrics being fed into the system
+you can follow the below procedure.
+
 The settings.py has a default non-existent metric namespace for testing your
 alerters, in the ``skyline_test.alerters.test`` :mod:`settings.ALERTS` tuple.
 
@@ -12,13 +22,13 @@ and working, do the following.
   correctly with your strings/tokens/etc in settings.py
 - Ensure the relevant ``skyline_test.alerters.test`` instances in settings.py
   are configured to your desired outputs
-- Once again using the Python-3.8.3 virtualenv and documentation PATHs as an
+- Once again using the Python-3.8.13 virtualenv and documentation PATHs as an
   example:
 
 .. code-block:: bash
 
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py383"
+  PROJECT="skyline-py3813"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
