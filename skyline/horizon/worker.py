@@ -1,13 +1,14 @@
+"""
+worker.py
+"""
 from __future__ import division
 # from os import kill, system
 from os import kill
-from redis import StrictRedis, WatchError
 from multiprocessing import Process
 try:
     from Queue import Empty
 except ImportError:
     from queue import Empty
-from msgpack import packb
 from time import time, sleep
 
 import traceback
@@ -21,6 +22,10 @@ from os import remove as os_remove
 # @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
 #                   Branch #3262: py3
 from sys import version_info
+from sys import exit as sys_exit
+
+from msgpack import packb
+from redis import StrictRedis, WatchError
 
 import settings
 # @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list
@@ -120,7 +125,7 @@ class Worker(Process):
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
             logger.warning('warning :: parent process is dead')
-            exit(0)
+            sys_exit(0)
 
     def in_skip_list(self, metric_name):
         """
@@ -207,7 +212,6 @@ class Worker(Process):
                     os_remove(skyline_app_logwait)
                 except OSError:
                     logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                    pass
 
         now = time()
         log_wait_for = now + 5
@@ -229,7 +233,6 @@ class Worker(Process):
                     logger.info('log lock file removed')
                 except OSError:
                     logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                    pass
             else:
                 logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -241,6 +244,7 @@ class Worker(Process):
         skip_metrics_list = []
         do_not_skip_metrics_list = []
         checked_for_skip_count = 0
+        checked_through_skip_list = []
 
         # @added 20201103 - Feature #3820: HORIZON_SHARDS
         if HORIZON_SHARDS:
@@ -331,8 +335,7 @@ class Worker(Process):
                         if not self.in_shard(metric[0]):
                             horizon_shard_dropped_metrics.append(metric[0])
                             continue
-                        else:
-                            horizon_shard_assigned_metrics.append(metric[0])
+                        horizon_shard_assigned_metrics.append(metric[0])
 
                     # @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list
                     found_in_do_not_skip_dict = False
@@ -356,6 +359,7 @@ class Worker(Process):
                     # @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list
                     if not found_in_do_not_skip_dict:
                         checked_for_skip_count += 1
+                        checked_through_skip_list.append(metric[0])
 
                         # Check if we should skip it
                         if self.in_skip_list(metric[0]):
@@ -395,12 +399,14 @@ class Worker(Process):
                     #                      Bug #3266: py3 Redis binary objects not strings
                     # pipe.append(key, packb(metric[1]))
                     # pipe.sadd(full_uniques, key)
+
                     try:
                         pipe.append(str(key), packb(metric[1]))
                         # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
                         datapoints_sent_to_redis += 1
-                    except Exception as e:
-                        logger.error('%s :: error on pipe.append: %s' % (skyline_app, str(e)))
+                    except Exception as err:
+                        logger.error('error :: worker :: error on pipe.append to %s: %s' % (
+                            str(key), str(err)))
                     try:
                         # pipe.sadd(full_uniques, key)
                         pipe.sadd(full_uniques, str(key))
@@ -560,18 +566,38 @@ class Worker(Process):
                     horizon_shard_dropped_metrics = []
 
                 # @added 20201120 - Feature #3820: HORIZON_SHARDS
-                try:
-                    self.redis_conn.sadd('horizon.metrics_received', *set(metrics_received))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('%s :: error adding horizon.metrics_received' % (skyline_app))
-                if self.canary:
+                if metrics_received:
                     try:
-                        logger.info('renaming key horizon.metrics_received to aet.horizon.metrics_received')
-                        self.redis_conn.rename('horizon.metrics_received', 'aet.horizon.metrics_received')
-                    except Exception as e:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received - %s' % e)
+                        self.redis_conn.sadd('horizon.metrics_received', *set(metrics_received))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('%s :: error adding horizon.metrics_received' % (skyline_app))
+                    if self.canary:
+                        try:
+                            logger.info('%s :: renaming key horizon.metrics_received to aet.horizon.metrics_received' % skyline_app)
+                            self.redis_conn.rename('horizon.metrics_received', 'aet.horizon.metrics_received')
+                        except Exception as e:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: %s failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received - %s' % (
+                                skyline_app, e))
+
+                        metrics_received_count = 0
+                        try:
+                            metrics_received_count = self.redis_conn.scard('aet.horizon.metrics_received')
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: %s :: running redis_conn.scard(\'aet.horizon.metrics_received\') - %s' % (
+                                skyline_app, e))
+                        cache_key = 'thunder.horizon.worker.metrics_received'
+                        try:
+                            self.redis_conn.hset(cache_key, 'value', int(metrics_received_count))
+                            self.redis_conn.hset(cache_key, 'timestamp', int(now))
+                        except Exception as e:
+                            logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
+                                cache_key, e))
+                        send_metric_name = '%s.metrics_received' % (
+                            skyline_app_graphite_namespace)
+                        send_graphite_metric(skyline_app, send_metric_name, metrics_received_count)
 
                     # @added 20210520 - Branch #1444: thunder
                     # Added Redis hash keys for thunder to monitor the horizon
@@ -586,23 +612,6 @@ class Worker(Process):
                     except Exception as e:
                         logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
                             cache_key, e))
-                    metrics_received_count = 0
-                    try:
-                        metrics_received_count = self.redis_conn.scard('aet.horizon.metrics_received')
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('%s :: error running redis_conn.scard(\'aet.horizon.metrics_received\') - %s' % (
-                            skyline_app, e))
-                    cache_key = 'thunder.horizon.worker.metrics_received'
-                    try:
-                        self.redis_conn.hset(cache_key, 'value', int(metrics_received_count))
-                        self.redis_conn.hset(cache_key, 'timestamp', int(now))
-                    except Exception as e:
-                        logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
-                            cache_key, e))
-                    send_metric_name = '%s.metrics_received' % (
-                        skyline_app_graphite_namespace)
-                    send_graphite_metric(skyline_app, send_metric_name, metrics_received_count)
 
                 metrics_received = []
 
@@ -677,5 +686,14 @@ class Worker(Process):
                     logger.error('%s :: error on hgetall horizon.do_not_skip_metrics: %s' % (skyline_app, str(err)))
                 logger.info('%s :: checked %s metrics through in_skip_list' % (
                     skyline_app, str(checked_for_skip_count)))
+                if checked_through_skip_list:
+                    try:
+                        self.redis_conn_decoded.sadd('horizon.checked_through_skip_list', *set(checked_through_skip_list))
+                        self.redis_conn_decoded.expire('horizon.checked_through_skip_list', 86400)
+                        logger.info('%s :: updated horizon.checked_through_skip_list Redis set on minutely run' % (
+                            skyline_app))
+                    except Exception as err:
+                        logger.error('%s :: sadd failed on horizon.checked_through_skip_list - %s' % (skyline_app, str(err)))
+                    checked_through_skip_list = []
                 skip_metrics_list = []
                 do_not_skip_metrics_list = []

@@ -2,9 +2,6 @@ from __future__ import division
 import logging
 import uuid
 import random
-
-import requests
-
 from time import time, sleep
 from threading import Thread
 from multiprocessing import Process
@@ -12,11 +9,26 @@ import os
 from os import kill, getpid
 import traceback
 from sys import version_info
-import os.path
+from sys import exit as sys_exit
+# import os.path
 import datetime
+
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 import settings
 from skyline_functions import get_redis_conn, get_redis_conn_decoded
+# @added 20220429 - Feature #4536: Handle Redis failure
+from functions.flux.get_last_metric_data import get_last_metric_data
+if settings.MEMCACHE_ENABLED:
+    from functions.memcache.get_memcache_key import get_memcache_key
+    from functions.memcache.set_memcache_key import set_memcache_key
+    from functions.memcache.delete_memcache_key import delete_memcache_key
+else:
+    get_memcache_key = None
+    set_memcache_key = None
+    delete_memcache_key = None
+
 
 skyline_app = 'snab_flux_load_test'
 skyline_app_logger = 'snab_flux_load_testLog'
@@ -59,6 +71,8 @@ LOCAL_DEBUG = False
 snab_flux_load_test_metrics_set = 'snab.flux_load_test.metrics'
 snab_flux_load_test_metrics_all_set = 'snab.flux_load_test.metrics.all'
 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 
 class SNAB_flux_load_test(Thread):
     """
@@ -88,8 +102,8 @@ class SNAB_flux_load_test(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
-            exit(0)
+            logger.warning('warning :: parent or current process dead')
+            sys_exit(0)
 
     def spin_snab_flux_load_test_process(self, current_timestamp):
         """
@@ -102,8 +116,8 @@ class SNAB_flux_load_test(Thread):
         """
 
         spin_start = time()
-        snab_flux_load_test_metrics_set = 'snab.flux_load_test.metrics'
-        snab_flux_load_test_metrics_all_set = 'snab.flux_load_test.metrics.all'
+        # snab_flux_load_test_metrics_set = 'snab.flux_load_test.metrics'
+        # snab_flux_load_test_metrics_all_set = 'snab.flux_load_test.metrics.all'
 
         spin_snab_flux_load_test_process_pid = os.getpid()
         logger.info('spin_snab_flux_load_test_process - pid %s, sending %s metrics to flux at %s metrics per POST' % (
@@ -119,6 +133,20 @@ class SNAB_flux_load_test(Thread):
             snab_flux_load_test_metrics = sorted(list(self.redis_conn_decoded.smembers(snab_flux_load_test_metrics_set)))
         except Exception as e:
             logger.error('error :: could not query Redis for set %s - %s' % (snab_flux_load_test_metrics_set, e))
+            # @added 20220429 - Feature #4536: Handle Redis failure
+            if settings.MEMCACHE_ENABLED:
+                try:
+                    snab_flux_load_test_metrics = get_memcache_key('snab_flux_load_test', snab_flux_load_test_metrics_set)
+                    if not snab_flux_load_test_metrics:
+                        snab_flux_load_test_metrics = []
+                    else:
+                        snab_flux_load_test_metrics = sorted(snab_flux_load_test_metrics)
+                        logger.info('failed over to memcache - got data from memcache key %s' % snab_flux_load_test_metrics_set)
+                except Exception as err:
+                    logger.error('error :: get_memcache_key %s failed - %s' % (
+                        snab_flux_load_test_metrics_set, err))
+                    snab_flux_load_test_metrics = []
+
         logger.info('snab_flux_load_test_metrics determined %s test metrics from Redis' % (
             str(len(snab_flux_load_test_metrics))))
 
@@ -128,12 +156,37 @@ class SNAB_flux_load_test(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to add multiple members to the %s Redis set' % snab_flux_load_test_metrics_all_set)
+            # @added 20220429 - Feature #4536: Handle Redis failure
+            if settings.MEMCACHE_ENABLED:
+                success = False
+                try:
+                    success = set_memcache_key('snab_flux_load_test', snab_flux_load_test_metrics_all_set, snab_flux_load_test_metrics)
+                except Exception as err:
+                    logger.error('error :: failed to add %s metrics to memcache %s key - %s' % (
+                        str(len(snab_flux_load_test_metrics)), snab_flux_load_test_metrics_set, err))
+                if success:
+                    logger.info('added %s metrics to memcache %s key' % (
+                        str(len(snab_flux_load_test_metrics)), snab_flux_load_test_metrics_set))
 
         snab_flux_load_test_metrics_all = []
         try:
             snab_flux_load_test_metrics_all = sorted(list(self.redis_conn_decoded.smembers(snab_flux_load_test_metrics_all_set)))
         except Exception as e:
             logger.error('error :: could not query Redis for set %s - %s' % (snab_flux_load_test_metrics_all_set, e))
+            # @added 20220429 - Feature #4536: Handle Redis failure
+            if settings.MEMCACHE_ENABLED:
+                try:
+                    snab_flux_load_test_metrics_all = get_memcache_key('snab_flux_load_test', snab_flux_load_test_metrics_all_set)
+                    if not snab_flux_load_test_metrics_all:
+                        snab_flux_load_test_metrics_all = []
+                    else:
+                        snab_flux_load_test_metrics_all = sorted(snab_flux_load_test_metrics_all)
+                        logger.info('failed over to memcache - got data from memcache key %s' % snab_flux_load_test_metrics_all_set)
+                except Exception as err:
+                    logger.error('error :: get_memcache_key %s failed - %s' % (
+                        snab_flux_load_test_metrics_all_set, err))
+                    snab_flux_load_test_metrics_all = []
+
         logger.info('snab_flux_load_test_metrics_all determined %s known test metrics from Redis' % (
             str(len(snab_flux_load_test_metrics_all))))
 
@@ -168,6 +221,7 @@ class SNAB_flux_load_test(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to generate a list from %s Redis set' % full_uniques)
+                unique_metrics = []
             logger.info('checking if any snab test metrics need to be removed from metrics.unique_metrics')
             for metric in unique_metrics:
                 if SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX in metric:
@@ -195,7 +249,12 @@ class SNAB_flux_load_test(Thread):
                         pass
             del snab_flux_load_test_metrics_all
             logger.info('getting list of flux.last Redis keys')
-            flux_last_keys = list(self.redis_conn_decoded.scan_iter(match=flux_last_key_prefix))
+            try:
+                flux_last_keys = list(self.redis_conn_decoded.scan_iter(match=flux_last_key_prefix))
+            except Exception as err:
+                logger.error('error :: scan_iter failed on flux.last Redis keys - %s' % err)
+                flux_last_keys = []
+
             logger.info('there are potentially %s flux.last keys that need to be removed from Redis for not in use snab test metrics' % str(len(snab_remove_flux_last_keys)))
             logger.info('checking if any of the %s flux.last keys need to be removed from Redis' % str(len(flux_last_keys)))
             snab_flux_last_keys_to_remove = []
@@ -229,6 +288,20 @@ class SNAB_flux_load_test(Thread):
             except Exception as e:
                 logger.error('error :: could not query Redis for set %s - %s' % (snab_flux_load_test_metrics_all_set, e))
                 snab_flux_load_test_metrics_all = []
+                # @added 20220429 - Feature #4536: Handle Redis failure
+                if settings.MEMCACHE_ENABLED:
+                    try:
+                        snab_flux_load_test_metrics_all = get_memcache_key('snab_flux_load_test', snab_flux_load_test_metrics_all_set)
+                        if not snab_flux_load_test_metrics_all:
+                            snab_flux_load_test_metrics_all = []
+                        else:
+                            snab_flux_load_test_metrics_all = sorted(snab_flux_load_test_metrics_all)
+                            logger.info('failed over to memcache - got data from memcache key %s' % snab_flux_load_test_metrics_all_set)
+                    except Exception as err:
+                        logger.error('error :: get_memcache_key %s failed - %s' % (
+                            snab_flux_load_test_metrics_all_set, err))
+                        snab_flux_load_test_metrics_all = []
+
             logger.info('snab_flux_load_test_metrics_all determined %s test metrics from Redis' % (
                 str(len(snab_flux_load_test_metrics_all))))
             if snab_flux_load_test_metrics_all:
@@ -274,7 +347,18 @@ class SNAB_flux_load_test(Thread):
             self.redis_conn.sadd(snab_flux_load_test_metrics_set, *set(snab_flux_load_test_metrics))
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: failed to add multiple members to the %s Redis set' % snab_flux_load_test_metrics)
+            logger.error('error :: failed to add multiple members to the %s Redis set' % snab_flux_load_test_metrics_set)
+            # @added 20220429 - Feature #4536: Handle Redis failure
+            if settings.MEMCACHE_ENABLED:
+                success = False
+                try:
+                    success = set_memcache_key('snab_flux_load_test', snab_flux_load_test_metrics_set, snab_flux_load_test_metrics)
+                except Exception as err:
+                    logger.error('error :: failed to add %s metrics to memcache %s key - %s' % (
+                        str(len(snab_flux_load_test_metrics)), snab_flux_load_test_metrics_set, err))
+                if success:
+                    logger.info('added %s metrics to memcache %s key' % (
+                        str(len(snab_flux_load_test_metrics)), snab_flux_load_test_metrics_set))
 
         epoch_Y = datetime.datetime.today().year
         epoch_m = datetime.datetime.today().month
@@ -285,7 +369,9 @@ class SNAB_flux_load_test(Thread):
         initial_datetime = datetime.datetime(epoch_Y, epoch_m, epoch_d, epoch_H, epoch_M, epoch_S)
         one_minute = datetime.timedelta(minutes=1)
         epoch_datetime = initial_datetime - one_minute
-        epoch_timestamp = int(epoch_datetime.strftime('%s'))
+        # epoch_timestamp = int(epoch_datetime.strftime('%s'))
+        now_epoch_timestamp = int(initial_datetime.strftime('%s'))
+        epoch_timestamp = int(now_epoch_timestamp // 60 * 60)
 
         connect_timeout = 5
         read_timeout = 5
@@ -363,7 +449,6 @@ class SNAB_flux_load_test(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -382,7 +467,6 @@ class SNAB_flux_load_test(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -404,7 +488,9 @@ class SNAB_flux_load_test(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: not connected via get_redis_conn')
-                continue
+                # @added 20220429 - Feature #4536: Handle Redis failure
+                if not settings.MEMCACHE_ENABLED:
+                    continue
             try:
                 self.redis_conn_decoded.ping()
                 logger.info('pinged Redis via get_redis_conn_decoded')
@@ -418,11 +504,11 @@ class SNAB_flux_load_test(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cannot connect to get_redis_conn_decoded')
-                continue
+                # @added 20220429 - Feature #4536: Handle Redis failure
+                if not settings.MEMCACHE_ENABLED:
+                    continue
 
-            """
-            Run load test
-            """
+            # Run load test
             while True:
 
                 current_timestamp = int(time())

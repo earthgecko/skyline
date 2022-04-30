@@ -42,6 +42,11 @@ def get_db_fp_timeseries(current_skyline_app, metric_id, fp_id):
             fp_id_ts_value = float(row['value'])
             if fp_id_ts_timestamp and fp_id_ts_value:
                 timeseries.append([fp_id_ts_timestamp, fp_id_ts_value])
+            # @added 20220317 - Feature #4540: Plot matched timeseries
+            #                   Feature #4014: Ionosphere - inference
+            # Handle all 0s
+            if fp_id_ts_timestamp and fp_id_ts_value == 0:
+                timeseries.append([fp_id_ts_timestamp, fp_id_ts_value])
         connection.close()
         end_db_query = timer()
         current_logger.info('%s :: determined %s values for the fp_id %s time series in %6f seconds' % (
