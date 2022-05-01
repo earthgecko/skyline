@@ -34,6 +34,10 @@
 #
 #
 #
+
+echo "NO LONGER MAINTAINED"
+exit 1
+
 #### USER DEFINED VARIABLES ####
 # Please replace the values here and populate these variables as appropriate
 # with the values of YOUR set up or write them to /etc/skyline/skyline.dawn.conf

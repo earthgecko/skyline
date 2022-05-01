@@ -494,7 +494,7 @@ if [ ! -f /tmp/skyline.dawn.redis.make.txt ]; then
   fi
   cd "/opt/redis/${REDIS_VERSION}" || exit 1
   echo "Running make in /opt/redis/${REDIS_VERSION}"
-  make
+  make -j
   MAKE_EXIT_CODE=$?
   if [ $MAKE_EXIT_CODE -ne 0 ]; then
     echo -e "error :: failed to make Redis in /opt/redis/${REDIS_VERSION} - \e[31mFAIL $COLOUR_OFF"
@@ -760,7 +760,7 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
     fi
   fi
 
-  make
+  make -j4
   if [ $? -ne 0 ]; then
     echo -e "error :: Python make failed - \e[31mFAIL $COLOUR_OFF"
     exit 1
@@ -1632,6 +1632,8 @@ systemctl start horizon
 if [ $? -ne 0 ]; then
   echo -e "error :: failed to start horizon - \e[31mFAIL $COLOUR_OFF"
   START_ERRORS=1
+else
+    echo -e "horizon started - \e[32mOK $COLOUR_OFF"
 fi
 
 # @modified 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
@@ -1660,6 +1662,8 @@ do
   if [ $? -ne 0 ]; then
     echo -e "error :: failed to start $skyline_app - \e[31mFAIL $COLOUR_OFF"
     START_ERRORS=1
+  else
+    echo -e "$skyline_app started - \e[32mOK $COLOUR_OFF"
   fi
   systemctl enable $skyline_app
 done

@@ -6,7 +6,6 @@ Development
 
   building-documentation
   dawn
-  dawn-docker
   webapp
   debugging
   ionosphere
