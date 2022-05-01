@@ -2,6 +2,11 @@
 Development - dawn-docker
 *************************
 
+No longer maintained
+====================
+
+Running Skyline on docker is possible but it is no longer maintained.
+
 Build script - utils/dawn/skyline.docker.dawn.sh
 ================================================
 

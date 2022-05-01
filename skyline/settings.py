@@ -755,16 +755,16 @@ METRICS_INACTIVE_AFTER = FULL_DURATION - 3600
 :vartype METRICS_INACTIVE_AFTER: int
 """
 
-CANARY_METRIC = 'statsd.numStats'
+CANARY_METRIC = 'skyline.horizon.%s.worker.metrics_received' % SERVER_METRICS_NAME
 """
 :var CANARY_METRIC: The metric name to use as the CANARY_METRIC [USER_DEFINED]
 :vartype CANARY_METRIC: str
 
 - The canary metric should be a metric with a very high, reliable resolution
-  that you can use to gauge the status of the system as a whole.  Like the
-  ``statsd.numStats`` or a metric in the ``carbon.`` namespace or a Skyline
+  that you can use to gauge the status of the system as a whole.  Like a metric
+  in the ``carbon.`` or a Skyline namespace.
   metric like:
-  CANARY_METRIC = 'skyline.%s.analyzer.run_time' % SERVER_METRICS_NAME
+  CANARY_METRIC = 'skyline.%s.worker.metrics_received' % SERVER_METRICS_NAME
 """
 
 ALGORITHMS = [
@@ -3584,7 +3584,7 @@ LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS = False
 :vartype LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS: boolean
 """
 
-LUMINOSITY_CLOUDBURST_ENABLED = True
+LUMINOSITY_CLOUDBURST_ENABLED = False
 """
 :var LUMINOSITY_CLOUDBURST_ENABLED: Whether to enable Luminosity cloudburst to
     run and identify significant changepoints
@@ -4345,9 +4345,9 @@ Prometheus settings
 """
 PROMETHEUS_SETTINGS = {}
 """
-:var PROMETHEUS_SETTINGS: UNDER DEVELOPMENT Prometheus can be enabled to push
-    metrics to Skyline which Skyline will add to Redis and analyse.  In the
-    Mirage context Skyline will fetch data from Prometheus.  For full details of
+:var PROMETHEUS_SETTINGS: UNDER DEVELOPMENT (**not functional**) Prometheus can be
+    enabled to push metrics to Skyline which Skyline will add to Redis and analyse.
+    In the Mirage context Skyline will fetch data from Prometheus.  For full details of
     this functionality please see the Prometheus integration documentation page at:
     https://earthgecko-skyline.readthedocs.io/en/latest/prometheus.html
 :vartype PROMETHEUS_SETTINGS: dict

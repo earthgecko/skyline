@@ -208,6 +208,7 @@ def validate_settings_variables(current_skyline_app):
         'LUMINOSITY_CLOUDBURST_ENABLED': bool,
         'LUMINOSITY_CLOUDBURST_PROCESSES': int,
         'LUMINOSITY_CLOUDBURST_RUN_EVERY': int,
+        'LUMINOSITY_CORRELATE_ALL': bool,
         'LUMINOSITY_CORRELATE_NAMESPACES_ONLY': list,
         'LUMINOSITY_CORRELATION_MAPS': dict,
         'LUMINOSITY_DATA_FOLDER': str,
@@ -2701,6 +2702,8 @@ def validate_settings_variables(current_skyline_app):
         not_tested_settings = []
         for setting in settings_variables:
             if setting not in settings_tested:
+                if 'HIPCHAT' in str(setting):
+                    continue
                 not_tested_settings.append(setting)
         if not_tested_settings:
             print('info :: validate_settings.py :: Not tested variables: %s' % str(not_tested_settings))

@@ -57,8 +57,39 @@ Luminosity classifications
 Luminosity can also be enabled to classify metrics and timeseries.
 There are a number of classifications the luminosity/classify_metrics can be
 enabled to do.  These different types of classifications are required to enable
-certain functionalities.  For in-depth informations on the classifications see
-`classify_metrics <luminosity/classify_metrics.html>`__
+certain functionalities.
+
+Enabling :mod:`settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT` results in
+identifying metrics that can experience significant level shifts using the `adtk`_
+`LevelShiftAD`_ and `PersistAD`_ algorithms.  When this classification is enabled
+luminosity/classify_metrics iterates through all the metrics (once every 4 hours)
+and runs LevelShiftAD and PersistAD algorithms against the previous 7 days of
+data for the metric and identifies any significant level shifts.  Both algorithms
+are configured with ``c=9.9`` to ensure as few false positives as possible.
+`PersistAD`_ is evaluated if `LevelShiftAD`_ triggers and a significant
+level shift will only be identified if both `LevelShiftAD`_ anomalies and
+`PersistAD`_ anomalies align, this identifies a true persisted level shift was
+experienced.  When first enabled luminosity/classify_metrics checks each 7 day
+window in the last 6 months of data for each metric, to identify if any historic
+level shifts were experienced. Thereafter each metric will only have the last 7
+day window checked per 4 hours.  Once a metric has been identified as level
+shift metric, the level shift classification will not been run again.  This is
+also true if the metric is in a known or configured namespace.
+
+The purpose of identifying metrics that can experience genuine level shifts, is
+to feed them back into custom_algorithms/adtk_level_shift for level shift
+analysis at runtime.  There are certain types of metrics that could level shift
+without the bounds of the three-sigma based analysis and not trigger as
+anomalous or another custom_algorithm may not trigger them as anomalous, but
+these level shifts are important and should be alerted on with some metrics.
+Identifying with metrics or namespaces that can experience significant level
+shifts is useful to identify and automatically add them to the metrics on which
+to run custom_algorithms/adtk_level_shift on.
+
+.. _adtk: https://github.com/arundo/adtk
+.. _LevelShiftAD: https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.LevelShiftAD
+.. _PersistAD: https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.PersistAD
+
 
 Luminosity as a replacement for Kale Oculus
 -------------------------------------------
