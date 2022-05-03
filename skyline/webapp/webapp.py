@@ -3343,6 +3343,13 @@ def api():
 
     if 'metric' in request.args:
         metric = request.args.get(str('metric'), None)
+
+        # @added 20220503 - Feature #4530: namespace.analysed_events
+        # Handle cluster_data
+        logger.info('/api?metric=%s' % str(metric))
+        timeseries = []
+        raw_series = None
+
         try:
             # @modified 20200225 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
@@ -3354,13 +3361,13 @@ def api():
                 # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
                 # Roll back change - breaking existing metrics with colons
                 # metric_name = url_encode_metric_name(metric_name)
-
                 raw_series = REDIS_CONN_UNDECODE.get(metric_name)
-            if not raw_series:
-                resp = json.dumps(
-                    {'results': 'Error: No metric by that name - try /api?metric=' + settings.FULL_NAMESPACE + 'metric_namespace'})
-                return resp, 404
-            else:
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not get raw data from Redis for %s' % metric)
+
+        if raw_series:
+            try:
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 # @modified 20201117 - Feature #3824: get_cluster_data
@@ -3370,36 +3377,61 @@ def api():
                 # Replace redefinition of item from line 1338
                 # timeseries = [item[:2] for item in unpacker]
                 timeseries = [ts_item[:2] for ts_item in unpacker]
-                # @added 20210416
-                remove_full_namespace_prefix = False
-                if 'remove_full_namespace_prefix' in request.args:
-                    remove_full_namespace_prefix_str = request.args.get('remove_full_namespace_prefix', 'false')
-                    if remove_full_namespace_prefix_str == 'true':
-                        remove_full_namespace_prefix = True
-                        if metric.startswith(settings.FULL_NAMESPACE):
-                            metric = metric.replace(settings.FULL_NAMESPACE, '', 1)
-                if 'format' in request.args:
-                    format = request.args.get(str('format'), 'pjson')
-                    if format == 'json':
-                        duration = (time.time() - start)
-                        data_dict = {
-                            "status": {
-                                "cluster_data": cluster_data,
-                                "format": format,
-                                "response": 200,
-                                "request_time": duration,
-                                "remove_full_namespace_prefix": remove_full_namespace_prefix
-                            },
-                            "data": {
-                                "metric": metric,
-                                "timeseries": timeseries
-                            }
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to unpack raw data from Redis for %s' % metric)
+
+        if not timeseries:
+            if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+                redis_metric_data_uri = 'metric=%s&format=json' % str(metric)
+                try:
+                    timeseries = get_cluster_data(redis_metric_data_uri, 'timeseries')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+                if timeseries:
+                    logger.info('got timeseries of length %s from the remote Skyline instances' % str(len(timeseries)))
+                else:
+                    logger.warning('warning :: failed to get timeseries from the remote Skyline instances')
+
+        if not timeseries:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 404}}
+            return jsonify(data_dict), 404
+
+            resp = json.dumps(
+                {'results': 'Error: No metric by that name - try /api?metric=' + settings.FULL_NAMESPACE + 'metric_namespace'})
+            return resp, 404
+
+        try:
+            remove_full_namespace_prefix = False
+            if 'remove_full_namespace_prefix' in request.args:
+                remove_full_namespace_prefix_str = request.args.get('remove_full_namespace_prefix', 'false')
+                if remove_full_namespace_prefix_str == 'true':
+                    remove_full_namespace_prefix = True
+                    if metric.startswith(settings.FULL_NAMESPACE):
+                        metric = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            if 'format' in request.args:
+                use_format = request.args.get(str('format'), 'pjson')
+                if use_format == 'json':
+                    duration = (time.time() - start)
+                    data_dict = {
+                        "status": {
+                            "cluster_data": cluster_data,
+                            "format": use_format,
+                            "response": 200,
+                            "request_time": duration,
+                            "remove_full_namespace_prefix": remove_full_namespace_prefix
+                        },
+                        "data": {
+                            "metric": metric,
+                            "timeseries": timeseries
                         }
-                        return jsonify(data_dict), 200
-                resp = json.dumps({'results': timeseries})
-                return resp, 200
-        except Exception as e:
-            error = "Error: " + str(e)
+                    }
+                    return jsonify(data_dict), 200
+            resp = json.dumps({'results': timeseries})
+            return resp, 200
+        except Exception as err:
+            error = "Error: " + str(err)
             resp = json.dumps({'results': error})
             return resp, 500
 

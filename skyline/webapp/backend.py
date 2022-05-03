@@ -1004,6 +1004,13 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             logger.error('error :: get_cluster_data :: failed to get %s from %s' % (
                 api_endpoint, str(item)))
         if r:
+            # @added 20220503 - Feature #4530: namespace.analysed_events
+            # Added 404 to handle resource not on cluster node
+            if r.status_code == 404:
+                logger.warning('get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
+                    api_endpoint, str(item), str(r.status_code), str(r.reason)))
+                return data
+
             if r.status_code != 200:
                 logger.error('error :: get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
                     api_endpoint, str(item), str(r.status_code), str(r.reason)))
@@ -1040,6 +1047,13 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                         str(remote_data), str(data_required), str(item[0])))
                     data.append(remote_data)
         else:
+            # @added 20220503 - Feature #4530: namespace.analysed_events
+            # Added 404 to handle resource not on cluster node
+            if r.status_code == 404:
+                logger.warning('get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
+                    api_endpoint, str(item), str(r.status_code), str(r.reason)))
+                return data
+
             logger.error('error :: get_cluster_data :: failed to get response from %s on %s' % (
                 api_endpoint, str(item)))
 

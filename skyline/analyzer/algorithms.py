@@ -1569,7 +1569,7 @@ def run_selected_algorithm(
                 # @added 20201127 - Feature #3566: custom_algorithms
                 # Handle if the result is None
                 if result is None:
-                    logger.warn('warning :: algorithms :: %s failed to run on %s' % (
+                    logger.warning('warning :: algorithms :: %s failed to run on %s' % (
                         str(custom_algorithm), str(base_name)))
                 else:
                     if custom_consensus == 1:
