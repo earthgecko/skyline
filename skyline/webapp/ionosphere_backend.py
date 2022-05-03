@@ -7109,7 +7109,6 @@ def expected_features_profiles_dirs():
                     #     logger.error('error :: could not determine fp_dir for fp_id %s' % str(fp_id))
                     #     features_profiles_dirs_error_logged = True
                     fp_dir = None
-                    pass
             if not fp_dir:
                 try:
                     metric_id = fps[fp_id]['metric_id']
@@ -7119,7 +7118,10 @@ def expected_features_profiles_dirs():
                     fp_dir = '%s/%s/%s' % (
                         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
                         str(timestamp))
-                    features_profile_dirs_dict[fp_id] = fp_dir
+                    # @modified 20220503 - Feature #3890: metrics_manager - sync_cluster_files
+                    # Use a str for jsonify
+                    # features_profile_dirs_dict[fp_id] = fp_dir
+                    features_profile_dirs_dict[str(fp_id)] = fp_dir
                     added_fps += 1
                 except:
                     logger.error(traceback.format_exc())
