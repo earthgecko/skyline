@@ -626,6 +626,96 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_analysed_events</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the number of analysed events per namespace and app or for a specific namespace per app for the period defined.<br>
+                  If the timestamps are not midnight UTC timestamps then the first day's total are estimated based on the number of minutes that have
+                  passed in the current day.<br>
+                  This means that for the until_timestamp represent 12:00 for the current data and the from_timestamps represents 12:00 a week ago,<br>
+                  the totals for the first day will be estimated by <code>(total / 1440) * 720</code>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?get_analysed_events</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>from_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  until_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  namespace=[parent_namespace | str | optional]<br>
+                  cluster_data=[true | bool | [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?get_analysed_events=true&from_timestamp=1650462105&until_timestamp=1651671729</code><br>
+		          <code>/api?get_analysed_events=true&from_timestamp=1650462105&until_timestamp=1651671729&namespace=telegraf</code><br>
+		          <code>/api?get_analysed_events=true&from_timestamp=1650462105&until_timestamp=1651671729&cluster_data=true</code> [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{"data":{
+"analysed_events":{
+"analyzer":{
+"carbon":278063,
+"cswellsurf":346193,
+"otel":142980,
+"skyline":524935,
+"skyline-syslog":385383,
+"telegraf":3062908,
+"vista":234796},
+"analyzer_batch":{
+"vista":236088},
+"boundary":{
+"carbon":74182,
+"cswellsurf":55405,
+"skyline":92524,
+"telegraf":296112},
+"estimated_from_timestamp":1650499185,
+"from":1650462105,
+"mirage":{
+"carbon":311,
+"otel":262,
+"skyline":1103,
+"skyline-syslog":830,
+"telegraf":11129},
+"total":5743204,
+"total_analysed_events":{
+"carbon":352556,
+"cswellsurf":401598,
+"otel":143242,
+"skyline":618562,
+"skyline-syslog":386213,
+"telegraf":3370149,
+"vista":470884},
+"until":1651671729}},
+"status":{
+"cluster_data":false,
+"request_time":0.03727630153298378,
+"response":200}}</code><br>
+200 with json response for request passed with the namespace parameter<br>
+<code>{"data":{"analysed_events":{"analyzer":{"telegraf":3062908},"boundary":{"telegraf":296112},"estimated_from_timestamp":1650499185,"from":1650462105,"mirage":{"telegraf":11129},"total_analysed_events":{"telegraf":3370149},"until":1651671729}},"status":{"cluster_data":false,"request_time":0.023266267031431198,"response":200}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_json</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -684,6 +774,67 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   ],
   "metric": "stats.statsd.graphiteStats.calculationtime"
 }</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_metric_analysed_events</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the number of analysed events for a metric per app for the period defined.<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?get_metric_analysed_events</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>from_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  until_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
+                  namespace=[parent_namespace | str | optional]<br>
+                  cluster_data=[true | bool | [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?get_metric_analysed_events=true&metric=telegraf.26820.cpu-total.cpu.usage_idle&from_timestamp=1650462105&until_timestamp=1651671729</code><br>
+		          <code>/api?get_metric_analysed_events=true&metric=telegraf.26820.cpu-total.cpu.usage_idle&from_timestamp=1650462105&until_timestamp=1651671729&cluster_data=true</code> [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "data": {
+    "analysed_events": {
+      "analyzer": 21143,
+      "boundary": 21143,
+      "from": 1650462105,
+      "metric": "telegraf.26820.cpu-total.cpu.usage_idle",
+      "total": 42286,
+      "until": 1651671729
+    }
+  },
+  "status": {
+    "cluster_data": false,
+    "request_time": 0.8154124729335308,
+    "response": 200
+  }
+}</code>
               </td>
   		      </tr>
 		    </tbody>

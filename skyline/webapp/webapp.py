@@ -136,7 +136,9 @@ if True:
         # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
         historical_data_dir_exists,
         # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
-        correlate_or_relate_with,
+        # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+        # Moved to new functions.metrics.correlate_or_relate_with
+        # correlate_or_relate_with,
         # @added 20210324 - Feature #3642: Anomaly type classification
         get_anomaly_type,
     )
@@ -307,6 +309,15 @@ if True:
     from functions.ionosphere.get_matched_timeseries import get_matched_timeseries
     from fp_match_plots import plot_fp_match
 
+    # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+    #                   Feature #3858: skyline_functions - correlate_or_relate_with
+    # New function to handle external_settings
+    from functions.metrics.correlate_or_relate_with import correlate_or_relate_with
+
+    # @added 202200504 - Feature #4530: namespace.analysed_events
+    from api_get_metric_analysed_events import api_get_metric_analysed_events
+    from api_get_analysed_events import api_get_analysed_events
+
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
     OTEL_ENABLED = False
@@ -314,7 +325,7 @@ if True:
         OTEL_ENABLED = settings.OTEL_ENABLED
     except AttributeError:
         OTEL_ENABLED = False
-    except Exception as err:
+    except Exception as outer_err:
         OTEL_ENABLED = False
     if OTEL_ENABLED:
         from opentelemetry import trace
@@ -427,7 +438,10 @@ python_version = int(version_info[0])
 #                   Feature #4516: flux - opentelemetry traces
 if OTEL_ENABLED:
     # Instrument redis
-    RedisInstrumentor().instrument()
+    try:
+        RedisInstrumentor().instrument()
+    except Exception as outer_err:
+        logger.error('RedisInstrumentor().instrument() failed - %s' % outer_err)
 
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
@@ -443,8 +457,11 @@ app = Flask(__name__)
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
 if OTEL_ENABLED:
-    FlaskInstrumentor().instrument_app(app)
-    tracer = trace.get_tracer(__name__)
+    try:
+        FlaskInstrumentor().instrument_app(app)
+        tracer = trace.get_tracer(__name__)
+    except Exception as outer_err:
+        logger.error('FlaskInstrumentor().instrument_app and tracer failed - %s' % outer_err)
 
 # @modified 20190502 - Branch #2646: slack
 # Reduce logging, removed gunicorn
@@ -902,6 +919,43 @@ def api():
 
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
+
+    # @added 202200504 - Feature #4530: namespace.analysed_events
+    if 'get_analysed_events' in request.args:
+        start_get_analysed_events = timer()
+        analysed_events = {}
+        try:
+            analysed_events = api_get_analysed_events(skyline_app, cluster_data=cluster_data)
+        except Exception as err:
+            logger.error('error :: api_get_analysed_events failed - %s' % err)
+            return 'Internal Server Error', 500
+        end_get_analysed_events = timer()
+        get_analysed_events_time = (end_get_analysed_events - start_get_analysed_events)
+        if not analysed_events:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_analysed_events_time, "response": 404}, "data": {}}
+            return jsonify(data_dict), 404
+        data = {'analysed_events': analysed_events}
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_analysed_events_time, "response": 200}, "data": data}
+        return jsonify(data_dict), 200
+
+    # @added 202200504 - Feature #4530: namespace.analysed_events
+    if 'get_metric_analysed_events' in request.args:
+        start_get_metric_analysed_events = timer()
+        analysed_events = {}
+        try:
+            analysed_events = api_get_metric_analysed_events(skyline_app, cluster_data=cluster_data)
+        except Exception as err:
+            logger.error('error :: api_get_metric_analysed_events failed - %s' % err)
+            return 'Internal Server Error', 500
+        end_get_metric_analysed_events = timer()
+        get_metric_analysed_events_time = (end_get_metric_analysed_events - start_get_metric_analysed_events)
+        if not analysed_events:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_metric_analysed_events_time, "response": 404}, "data": {}}
+            return jsonify(data_dict), 404
+        else:
+            data = {'analysed_events': analysed_events}
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_metric_analysed_events_time, "response": 200}, "data": data}
+            return jsonify(data_dict), 200
 
     # @added 20220318 - Feature #4540: Plot matched timeseries
     #                   Feature #4014: Ionosphere - inference
@@ -2454,10 +2508,24 @@ def api():
                 fail_msg = 'error :: Webapp error with get_related'
                 logger.error(fail_msg)
                 return internal_error(fail_msg, trace)
+
+            # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+            #                   Feature #3858: skyline_functions - correlate_or_relate_with
+            external_settings = {}
+            if settings.EXTERNAL_SETTINGS:
+                try:
+                    external_settings = get_external_settings(skyline_app, None, False)
+                except Exception as err:
+                    logger.error('error :: get_external_settings failed - %s' % (
+                        err))
+
             for related_anomaly_id, related_metric_id, related_metric_name, related_anomaly_timestamp, related_full_duration in related:
                 # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
                 # Filter only related anomalies that are in correlations group
-                correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric_name)
+                # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+                #                      Feature #3858: skyline_functions - correlate_or_relate_with
+                # Added external_settings
+                correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric_name, external_settings)
                 if not correlate_or_relate:
                     continue
                 metric_dict = {
@@ -2492,6 +2560,17 @@ def api():
                         related_matches = []
             if related_matches:
                 logger.info('%s possible related matches found' % (str(len(related_matches))))
+
+                # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+                #                   Feature #3858: skyline_functions - correlate_or_relate_with
+                external_settings = {}
+                if settings.EXTERNAL_SETTINGS:
+                    try:
+                        external_settings = get_external_settings(skyline_app, None, False)
+                    except Exception as err:
+                        logger.error('error :: get_external_settings failed - %s' % (
+                            err))
+
                 # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
                 # Added match_anomaly_timestamp
                 # @modified 20210413 - Feature #4014: Ionosphere - inference
@@ -2500,7 +2579,10 @@ def api():
                 for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
                     # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
                     # Filter only related matches that are in correlations group
-                    correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric)
+                    # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+                    #                      Feature #3858: skyline_functions - correlate_or_relate_with
+                    # Added external_settings
+                    correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric, external_settings)
                     if not correlate_or_relate:
                         continue
 
@@ -2525,13 +2607,27 @@ def api():
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
         correlationsDict = {}
+
+        # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+        #                   Feature #3858: skyline_functions - correlate_or_relate_with
+        external_settings = {}
+        if settings.EXTERNAL_SETTINGS and correlations:
+            try:
+                external_settings = get_external_settings(skyline_app, None, False)
+            except Exception as err:
+                logger.error('error :: get_external_settings failed - %s' % (
+                    err))
+
         try:
             for correlation in correlations:
                 correlated_metric = correlation[0]
 
                 # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
                 # Filter only correlations that are in correlations group
-                correlate_or_relate = correlate_or_relate_with(skyline_app, metric, correlated_metric)
+                # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+                #                      Feature #3858: skyline_functions - correlate_or_relate_with
+                # Added external_settings
+                correlate_or_relate = correlate_or_relate_with(skyline_app, metric, correlated_metric, external_settings)
                 if not correlate_or_relate:
                     continue
 
