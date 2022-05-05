@@ -62,6 +62,8 @@ from functions.timeseries.full_duration_timeseries_fill import full_duration_tim
 #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
 from functions.metrics.non_derivative_metrics_list import non_derivative_metrics_list
 
+# @added 20220504 - Feature #2580: illuminance
+from functions.illuminance.add_illuminance_entries import add_illuminance_entries
 
 # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
 #                      Feature #3480: batch_processing
@@ -352,6 +354,9 @@ class AnalyzerBatch(Thread):
 
         # @added 20220420 - Feature #4530: namespace.analysed_events
         analysed_metrics = []
+
+        # @added 20220504 - Feature #2580: illuminance
+        illuminance_dict = {}
 
         for item in metrics:
             metric_name = item[0]
@@ -1267,6 +1272,16 @@ class AnalyzerBatch(Thread):
                                 anomaly_breakdown[algorithm] += 1
                                 triggered_algorithms.append(algorithm)
 
+                        # @added 20220504 - Feature #2580: illuminance
+                        try:
+                            illuminance_dict[base_name] = {
+                                'timestamp': int(metric_timestamp),
+                                'value': float(datapoint),
+                                'triggered_algorithms_count': len(triggered_algorithms)}
+                        except Exception as err:
+                            logger.error('error :: failed to add %s to illuminance_dict' % (
+                                str(base_name)))
+
                         # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
                         sane_metricname = filesafe_metricname(str(base_name))
 
@@ -1733,6 +1748,19 @@ class AnalyzerBatch(Thread):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to set expire %s Redis hash - %s' % (
                 namespace_analysed_events_hash, err))
+
+        # @added 20220504 - Feature #2580: illuminance
+        if len(illuminance_dict) > 0:
+            logger.info('calling add_illuminance_entries with %s entries to add' % (
+                str(len(illuminance_dict))))
+            current_illuminance_dict = {}
+            try:
+                current_illuminance_dict = add_illuminance_entries(self, skyline_app, int(run_timestamp), illuminance_dict)
+            except Exception as err:
+                logger.error('error :: add_illuminance_entries failed - %s' % (
+                    err))
+            logger.info('illuminance Redis hash now has %s entries' % (
+                str(len(current_illuminance_dict))))
 
         LOCAL_DEBUG = False
 
