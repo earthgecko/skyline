@@ -69,6 +69,9 @@ from functions.metrics.zero_fill_metrics_list import zero_fill_metrics_list
 #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
 from functions.timeseries.full_duration_timeseries_fill import full_duration_timeseries_fill
 
+# @added 20220504 - Feature #2580: illuminance
+from functions.illuminance.add_illuminance_entries import add_illuminance_entries
+
 skyline_app = 'boundary'
 skyline_app_logger = skyline_app + 'Log'
 logger = logging.getLogger(skyline_app_logger)
@@ -281,6 +284,9 @@ class Boundary(Thread):
 
         # @added 20220420 - Feature #4530: namespace.analysed_events
         analysed_metrics = []
+
+        # @added 20220504 - Feature #2580: illuminance
+        illuminance_dict = {}
 
         discover_run_metrics = []
 
@@ -672,6 +678,16 @@ class Boundary(Thread):
                             anomaly_breakdown[algorithm] += 1
                             triggered_algorithms.append(algorithm)
 
+                    # @added 20220504 - Feature #2580: illuminance
+                    try:
+                        illuminance_dict[base_name] = {
+                            'timestamp': int(metric_timestamp),
+                            'value': float(datapoint),
+                            'triggered_algorithms_count': len(triggered_algorithms)}
+                    except Exception as err:
+                        logger.error('error :: failed to add %s to illuminance_dict' % (
+                            str(base_name)))
+
                     # If Crucible or Panorama are enabled determine details
                     determine_anomaly_details = False
                     if settings.ENABLE_CRUCIBLE and settings.BOUNDARY_CRUCIBLE_ENABLED:
@@ -858,6 +874,19 @@ class Boundary(Thread):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to set expire %s Redis hash - %s' % (
                 namespace_analysed_events_hash, err))
+
+        # @added 20220504 - Feature #2580: illuminance
+        if len(illuminance_dict) > 0:
+            logger.info('calling add_illuminance_entries with %s entries to add' % (
+                str(len(illuminance_dict))))
+            current_illuminance_dict = {}
+            try:
+                current_illuminance_dict = add_illuminance_entries(self, skyline_app, int(added_at), illuminance_dict)
+            except Exception as err:
+                logger.error('error :: add_illuminance_entries failed - %s' % (
+                    err))
+            logger.info('illuminance Redis hash now has %s entries' % (
+                str(len(current_illuminance_dict))))
 
         # Add values to the queue so the parent process can collate
         for key, value in anomaly_breakdown.items():

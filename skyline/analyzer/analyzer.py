@@ -80,6 +80,9 @@ from functions.timeseries.full_duration_timeseries_fill import full_duration_tim
 #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
 from functions.metrics.non_derivative_metrics_list import non_derivative_metrics_list
 
+# @added 20220504 - Feature #2580: illuminance
+from functions.illuminance.add_illuminance_entries import add_illuminance_entries
+
 try:
     send_algorithm_run_metrics = settings.ENABLE_ALGORITHM_RUN_METRICS
 except:
@@ -575,6 +578,9 @@ class Analyzer(Thread):
         global_anomaly_in_progress = False
         if global_anomaly_in_progress:
             logger.warning('warning :: a global anomaly event is in progress')
+
+        # @added 20220504 - Feature #2580: illuminance
+        illuminance_dict = {}
 
         # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
         # The number of metrics to load test Analyzer with, testing is only done
@@ -3058,6 +3064,16 @@ class Analyzer(Thread):
                         logger.error('error :: failed to add %s to Redis set %s' % (
                             str(data), str(redis_set)))
 
+                    # @added 20220504 - Feature #2580: illuminance
+                    try:
+                        illuminance_dict[base_name] = {
+                            'timestamp': int(metric_timestamp),
+                            'value': float(datapoint),
+                            'triggered_algorithms_count': len(triggered_algorithms)}
+                    except Exception as err:
+                        logger.error('error :: failed to add %s to illuminance_dict' % (
+                            str(base_name)))
+
                     # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
                     sane_metricname = filesafe_metricname(str(base_name))
 
@@ -3908,6 +3924,19 @@ class Analyzer(Thread):
 
         if LOCAL_DEBUG:
             logger.debug('debug :: Memory usage spin_process end: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        # @added 20220504 - Feature #2580: illuminance
+        if len(illuminance_dict) > 0:
+            logger.info('calling add_illuminance_entries with %s entries to add' % (
+                str(len(illuminance_dict))))
+            current_illuminance_dict = {}
+            try:
+                current_illuminance_dict = add_illuminance_entries(self, skyline_app, int(spin_start), illuminance_dict)
+            except Exception as err:
+                logger.error('error :: add_illuminance_entries failed - %s' % (
+                    err))
+            logger.info('illuminance Redis hash now has %s entries' % (
+                str(len(current_illuminance_dict))))
 
         # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
         # This is not full analysis as the metrics are not checked if they are

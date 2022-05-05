@@ -91,6 +91,8 @@ from functions.timeseries.determine_data_frequency import determine_data_frequen
 from functions.timeseries.downsample import downsample_timeseries
 from functions.mirage.downsample_full_duration_and_merge_graphite import downsample_full_duration_and_merge_graphite
 
+# @added 20220504 - Feature #2580: illuminance
+from functions.illuminance.add_illuminance_entries import add_illuminance_entries
 
 """
 ENABLE_MEMORY_PROFILING - DEVELOPMENT ONLY
@@ -1750,6 +1752,23 @@ class Mirage(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to add %s to mirage.anomalous_metrics Redis set' % (
                     str(data)))
+
+            # @added 20220504 - Feature #2580: illuminance
+            illuminance_dict = {}
+            illuminance_dict[base_name] = {
+                'timestamp': int(metric_timestamp),
+                'value': float(datapoint),
+                'triggered_algorithms_count': len(triggered_algorithms)}
+            logger.info('calling add_illuminance_entries with %s entries to add' % (
+                str(len(illuminance_dict))))
+            current_illuminance_dict = {}
+            try:
+                current_illuminance_dict = add_illuminance_entries(self, skyline_app, int(run_timestamp), illuminance_dict)
+            except Exception as err:
+                logger.error('error :: add_illuminance_entries failed - %s' % (
+                    err))
+            logger.info('illuminance Redis hash now has %s entries' % (
+                str(len(current_illuminance_dict))))
 
             # @modified 20201001 - Branch #3068: SNAB
             #                      Task #3748: POC SNAB
