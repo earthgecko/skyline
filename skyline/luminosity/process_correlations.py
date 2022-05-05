@@ -35,7 +35,10 @@ from skyline_functions import (
     # @added 20200506 - Feature #3532: Sort all time series
     sort_timeseries,
     # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
-    correlate_or_relate_with)
+    # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+    # Moved to new functions.metrics.correlate_or_relate_with
+    # correlate_or_relate_with,
+    )
 
 # @added 20210820 - Task #4030: refactoring
 #                   Feature #4164: luminosity - cloudbursts
@@ -44,6 +47,11 @@ from functions.timeseries.determine_data_frequency import determine_data_frequen
 # @added 20220225 - Feature #4000: EXTERNAL_SETTINGS
 # Use correlation related settings from external settings
 from functions.settings.get_external_settings import get_external_settings
+
+# @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+#                   Feature #3858: skyline_functions - correlate_or_relate_with
+# New function to handle external_settings
+from functions.metrics.correlate_or_relate_with import correlate_or_relate_with
 
 # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
 #                   Feature #3512: matched_or_regexed_in_list function
@@ -655,7 +663,7 @@ def get_correlations(
     base_name, anomaly_timestamp, anomalous_ts, assigned_metrics, raw_assigned,
         remote_assigned, anomalies):
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
 
     # Distill timeseries strings into lists
     start = timer()
@@ -857,10 +865,21 @@ def get_correlations(
     # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
     do_not_correlate_with = []
 
+    # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+    #                   Feature #3858: skyline_functions - correlate_or_relate_with
+    external_settings = {}
+    if settings.EXTERNAL_SETTINGS and remote_assigned:
+        try:
+            external_settings = get_external_settings(skyline_app, None, False)
+        except Exception as err:
+            logger.error('error :: get_external_settings failed - %s' % (
+                err))
+
     remote_metrics_count = 0
     remote_correlations_check_count = 0
     remote_correlations_count = 0
     logger.info('get_correlations :: remote_assigned count %s' % str(len(remote_assigned)))
+
     start_remote_correlations = timer()
     for ts_data in remote_assigned:
         remote_metrics_count += 1
@@ -878,7 +897,10 @@ def get_correlations(
 
         # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
         try:
-            correlate_or_relate = correlate_or_relate_with(skyline_app, base_name, metric_base_name)
+            # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
+            #                   Feature #3858: skyline_functions - correlate_or_relate_with
+            # Added external_settings
+            correlate_or_relate = correlate_or_relate_with(skyline_app, base_name, metric_base_name, external_settings)
             if not correlate_or_relate:
                 do_not_correlate_with.append(metric_base_name)
                 continue
