@@ -85,7 +85,7 @@ the terminal:
   MYSQL_ROOT_PASSWORD="<YOUR_ROOT_MYSQL_USER_PASSWORD>"        # The MySQL root user password
   MYSQL_SKYLINE_PASSWORD="<YOUR_SKYLINE_MYSQL_USER_PASSWORD>"  # The Skyline DB user password
   REDIS_PASSWORD="<YOUR_REALLY_REALLY_LONG_Redis_PASSWORD>"   # The Redis password
-  SKYLINE_RELEASE="v3.0.0"                                     # The Skyline release/branch/commit to deploy
+  SKYLINE_RELEASE="v3.0.2"                                     # The Skyline release/branch/commit to deploy
   INSTALL_GRAPHITE=1                                           # Install Graphite 0 = no, 1 = yes (CentOS 8 only)
   GRAPHITE_VERSION=1.1.8' > /etc/skyline/skyline.dawn.conf
 
