@@ -522,7 +522,10 @@ class Cloudburst(Thread):
                     timeseries = []
 
                 if not timeseries:
+                    # @modified 20220506 - Feature #4164: luminosity - cloudbursts
+                    # Change error to warning
                     logger.error('error :: cloudburst :: find_cloudbursts :: no timeseries from Graphite for %s' % base_name)
+                    logger.warning('warning :: cloudburst :: find_cloudbursts :: no timeseries from Graphite for %s' % base_name)
                     continue
 
                 if truncate_last_datapoint:
