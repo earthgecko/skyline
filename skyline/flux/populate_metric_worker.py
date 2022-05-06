@@ -731,6 +731,8 @@ class PopulateMetricWorker(Process):
                         # Swap to using a Redis hash instead of the
                         # flux.last.<metric> keys make existing keys
                         # expire
+                        # @modified 20220505 - Feature #4536: Handle Redis failure
+                        # Change to corret setex method so the keys expire
                         # self.redis_conn.set(cache_key, str(metric_data))
                         self.redis_conn.setex(cache_key, 3600, str(metric_data))
                         logger.info('populate_metric_worker :: even though no data points so as to not loop round on this metric, set the metric Redis key - %s - %s' % (
@@ -957,7 +959,7 @@ class PopulateMetricWorker(Process):
                     # flux.last.<metric> keys make existing keys
                     # expire
                     # self.redis_conn.set(cache_key, str(metric_data))
-                    self.redis_conn.set(cache_key, 3600, str(metric_data))
+                    self.redis_conn.setex(cache_key, 3600, str(metric_data))
                     logger.info('populate_metric_worker :: set the metric Redis key - %s - %s' % (
                         cache_key, str(metric_data)))
                 except:

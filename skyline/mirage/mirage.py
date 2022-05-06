@@ -1558,6 +1558,39 @@ class Mirage(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: unhandled error - %s' % err)
 
+            # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+            #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+            # If the downsampled data is not anomalous, remove the entry from
+            # the mirage.trigger_history
+            if not anomalous:
+                logger.info('realigned downsampled data not anomalous removing entry from mirage.trigger_history for - %s' % (metric))
+                trigger_history = {}
+                try:
+                    raw_trigger_history = self.redis_conn_decoded.hget('mirage.trigger_history', metric)
+                    if raw_trigger_history:
+                        trigger_history = literal_eval(raw_trigger_history)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: mirage_algorithms :: failed to evaluate data from mirage.trigger_history Redis hash key - %s' % (
+                        str(err)))
+                new_trigger_history = {}
+                last_timestamp = int(timeseries[-1][0])
+                history_removed = False
+                for history_timestamp in list(trigger_history.keys()):
+                    if history_timestamp == int(timeseries[-1][0]):
+                        history_removed = True
+                        logger.info('removing entry for %s from mirage.trigger_history - %s' % (
+                            metric, str(trigger_history[history_timestamp])))
+                        continue
+                    new_trigger_history[history_timestamp] = trigger_history[history_timestamp]
+                if history_removed:
+                    try:
+                        self.redis_conn_decoded.hset('mirage.trigger_history', metric, str(new_trigger_history))
+                        logger.info('updated mirage.trigger_history for %s' % metric)
+                    except Exception as err:
+                        logger.error('error :: failed to set key in mirage.trigger_history Redis hash key - %s' % (
+                            str(err)))
+
         # @added 20220420 - Feature #4530: namespace.analysed_events
         parent_namespace = metric.split('.', maxsplit=1)[0]
         date_string = str(strftime('%Y-%m-%d', gmtime()))

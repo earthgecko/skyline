@@ -1997,13 +1997,15 @@ class AnalyzerBatch(Thread):
             except:
                 logger.error('error :: failed to cleanup algorithm.error files')
                 logger.info(traceback.format_exc())
-            pattern = '%s.*.algorithm.timings' % skyline_app
+            # @modified 20220506 - Feature #3486: analyzer_batch
+            # pattern = '%s.*.algorithm.timings' % skyline_app
+            pattern = '%s.*.(timings|count)' % skyline_app
             try:
                 for f in os.listdir(settings.SKYLINE_TMP_DIR):
                     if re.search(pattern, f):
                         try:
                             os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
-                            logger.info('cleaning up old timings file - %s' % (str(f)))
+                            logger.info('cleaning up old timings/count file - %s' % (str(f)))
                         except OSError:
                             pass
             except:

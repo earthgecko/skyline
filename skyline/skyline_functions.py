@@ -89,6 +89,8 @@ except:
 if OTEL_ENABLED:
     # from opentelemetry import trace
     from opentelemetry.instrumentation.redis import RedisInstrumentor
+    if settings.MEMCACHE_ENABLED:
+        from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
 
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -118,8 +120,14 @@ def get_redis_conn(current_skyline_app):
     # @added 20220405 - Task #4514: Integrate opentelemetry
     #                   Feature #4516: flux - opentelemetry traces
     # Instrument redis
-    if current_skyline_app == 'webapp':
-        RedisInstrumentor().instrument()
+    # @modified 20220505 - Task #4514: Integrate opentelemetry
+    # Fail gracefully if opentelemetry breaks it breaks
+    # if current_skyline_app == 'webapp':
+    if current_skyline_app == 'webapp' and OTEL_ENABLED:
+        try:
+            RedisInstrumentor().instrument()
+        except:
+            pass
 
     REDIS_CONN = None
     try:
@@ -168,8 +176,14 @@ def get_redis_conn_decoded(current_skyline_app):
     # @added 20220405 - Task #4514: Integrate opentelemetry
     #                   Feature #4516: flux - opentelemetry traces
     # Instrument redis
-    if current_skyline_app == 'webapp':
-        RedisInstrumentor().instrument()
+    # @modified 20220505 - Task #4514: Integrate opentelemetry
+    # Fail gracefully if opentelemetry breaks it breaks
+    # if current_skyline_app == 'webapp':
+    if current_skyline_app == 'webapp' and OTEL_ENABLED:
+        try:
+            RedisInstrumentor().instrument()
+        except:
+            pass
 
     REDIS_CONN_DECODED = None
     try:
@@ -415,8 +429,7 @@ def get_graphite_graph_image(current_skyline_app, url=None, image_file=None):
         if current_skyline_app == 'webapp':
             # Raise to webbapp
             raise
-        else:
-            return False
+        return False
     return True
 
 
@@ -652,6 +665,9 @@ def get_graphite_metric(
 
     # @added 20220406 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
     #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
+    # These cannot be added in the top level import as that results in a circular
+    # import error and nothing will start
+    # ImportError: cannot import name 'get_redis_conn_decoded' from partially initialized module 'skyline_functions' (most likely due to a circular import)
     from functions.metrics.last_known_value_metrics_list import last_known_value_metrics_list
     from functions.metrics.zero_fill_metrics_list import zero_fill_metrics_list
 
@@ -686,8 +702,8 @@ def get_graphite_metric(
     # Commented out colon
     # new_metric_namespace = metric.replace(':', '\:')
     # metric_namespace = new_metric_namespace.replace('(', '\(')
-    metric_namespace = metric.replace('(', '\(')
-    metric = metric_namespace.replace(')', '\)')
+    metric_namespace = metric.replace('(', '\\(')
+    metric = metric_namespace.replace(')', '\\)')
 
     # Graphite timeouts
     connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
@@ -1025,6 +1041,16 @@ def get_graphite_metric(
         graphite_json_fetched = False
         try:
             r = requests.get(url, timeout=use_timeout)
+            # @added 20220505 - Bug #4374: webapp - handle url encoded chars
+            # Handle metrics with url encoded names
+            try_encoded_name = False
+            if r and '%' in metric:
+                if r.text == '[]':
+                    try_encoded_name = True
+            if try_encoded_name:
+                new_url = url.replace('%', '%25')
+                current_logger.info('get_graphite_metric :: no data - trying %s' % new_url)
+                r = requests.get(new_url, timeout=use_timeout)
             graphite_json_fetched = True
         except:
             datapoints = [[None, str(graphite_until)]]
@@ -1037,6 +1063,7 @@ def get_graphite_metric(
                 if settings.ENABLE_DEBUG:
                     current_logger.debug('debug :: get_graphite_metric :: data retrieved OK')
             except:
+
                 datapoints = [[None, str(graphite_until)]]
                 current_logger.error('error :: get_graphite_metric :: failed to parse data points from retrieved json')
 
@@ -1574,8 +1601,12 @@ def get_memcache_metric_object(current_skyline_app, base_name):
     # @added 20220405 - Task #4514: Integrate opentelemetry
     #                   Feature #4516: flux - opentelemetry traces
     if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
-        from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
-        PymemcacheInstrumentor().instrument()
+        # @modified 20220505 - Task #4514: Integrate opentelemetry
+        # Fail gracefully if opentelemetry breaks it breaks
+        try:
+            PymemcacheInstrumentor().instrument()
+        except:
+            pass
 
     if settings.MEMCACHE_ENABLED:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)

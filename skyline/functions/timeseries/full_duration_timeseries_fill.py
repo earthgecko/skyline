@@ -36,7 +36,7 @@ def full_duration_timeseries_fill(self, current_skyline_app, base_name, timeseri
     resolution = 0
     # Check if the resolution of the metric is known
     try:
-        resolution_str = self.redis_conn.hget('analyzer.metrics_manager.resolutions', base_name)
+        resolution_str = self.redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', base_name)
         if resolution_str:
             resolution = int(float(resolution_str))
     except Exception as err:
@@ -63,10 +63,24 @@ def full_duration_timeseries_fill(self, current_skyline_app, base_name, timeseri
                 logger.error('error :: %s :: failed to hset on analyzer.metrics_manager.resolutions failed for %s with resolution %s - %s' % (
                     function_str, base_name, str(resolution), err))
 
+    # @added 20220505 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
+    # If there is only 1 data point in the timeseries determine_data_frequency
+    # will not return a resolution so set a sensible default as it does not
+    # matter, it will be boring.
+    if not resolution:
+        resolution = 60
+
     # Align timestamps in the timeseries to the resolution
     aligned_timeseries = []
+    error_logged = False
     for ts, value in timeseries:
-        aligned_timeseries.append([int(int(ts) // resolution * resolution), value])
+        try:
+            aligned_timeseries.append([int(int(ts) // resolution * resolution), value])
+        except Exception as err:
+            if not error_logged:
+                logger.error('error :: %s :: failed to align timestamp on %s with timestamp %s and resolution %s - %s' % (
+                    function_str, base_name, str(ts), str(resolution), err))
+                error_logged = True
 
     # What is the expected number of timestamps in the period
     expected_number_of_timestamps = int((aligned_timeseries[-1][0] - aligned_timeseries[0][0]) / resolution) + 1

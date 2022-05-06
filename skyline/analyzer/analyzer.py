@@ -2839,7 +2839,19 @@ class Analyzer(Thread):
                             logger.error('error :: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED - failed to set Redis key %s for low priority metric' % last_metric_timestamp_key)
 
                 # @added 20200908 - Feature #3734: waterfall alerts
-                from_timestamp = int(timeseries[1][0])
+                # @modified 20220505 - Feature #3734: waterfall alerts
+                # Handle single value timeseries. The second timestamp in the
+                # timeseries was used because the first timestamp in a
+                # nonNegativeDerivative timeseries has no value.
+                try:
+                    from_timestamp = int(timeseries[1][0])
+                except:
+                    try:
+                        from_timestamp = int(timeseries[0][0])
+                    except:
+                        # Failover to int_metric_timestamp
+                        from_timestamp = int(int_metric_timestamp)
+
                 triggered_algorithms_for_waterfall_alert = []
                 for index, value in enumerate(ensemble):
                     if value:
