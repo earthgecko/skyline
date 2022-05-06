@@ -52,7 +52,12 @@ except:
     OTEL_ENABLED = False
 if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
     from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
-    PymemcacheInstrumentor().instrument()
+    # @modified 20220505 - Task #4514: Integrate opentelemetry
+    # Fail gracefully if opentelemetry breaks it breaks
+    try:
+        PymemcacheInstrumentor().instrument()
+    except:
+        pass
 
 if settings.MEMCACHE_ENABLED:
     memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
