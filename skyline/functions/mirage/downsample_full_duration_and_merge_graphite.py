@@ -110,6 +110,23 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
             metric, str(timeseries[-5:])))
         logger.info('downsampled FULL_DURATION data last data points for %s: %s' % (
             metric, str(resampled_aligned_timeseries[-5:])))
+
+    # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    # Remove all nan because they break histogram_bins
+    removed_nans = 0
+    if resampled_aligned_timeseries:
+        resampled_aligned_timeseries_no_nans = []
+        for ts, v in resampled_aligned_timeseries:
+            if str(v) == 'nan':
+                removed_nans += 1
+                continue
+            resampled_aligned_timeseries_no_nans.append([ts, v])
+    if removed_nans:
+        logger.info('removed %s nan values from downsampled FULL_DURATION data for %s' % (
+            str(removed_nans), metric))
+        resampled_aligned_timeseries = resampled_aligned_timeseries_no_nans
+
     # The resampled_aligned_timeseries data must have nonNegativeDerivative
     # applied if it is a derivative_metric
     if resampled_aligned_timeseries and known_derivative_metric:

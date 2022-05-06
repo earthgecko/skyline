@@ -864,6 +864,23 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             logger.error('error :: mirage_algorithms :: determine_data_frequency failed - %s' % (
                 str(err)))
         tmp_final_ensemble = ensemble + final_after_custom_ensemble
+
+        # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        # Prune entries older than 1 day from the trigger_history
+        new_trigger_history = {}
+        pruned_histories = 0
+        prune_older_than = int(time()) - 86400
+        for history_timestamp in list(trigger_history.keys()):
+            if history_timestamp < prune_older_than:
+                pruned_histories += 1
+                continue
+            new_trigger_history[history_timestamp] = trigger_history[history_timestamp]
+        if pruned_histories:
+            logger.info('mirage_algorithms :: pruned %s old entries from trigger_history for %s' % (
+                str(pruned_histories), base_name))
+            trigger_history = new_trigger_history
+
         trigger_dict = {
             'true_count': ensemble.count(True),
             'ensemble': ensemble,
