@@ -920,38 +920,18 @@ class UploadedDataWorker(Process):
                 processed_data_columns = []
                 if successful and data_columns:
                     for data_col in data_columns:
-                        data_df_successful = True
-                        data_df = None
-                        data_col_key = '%s (%s)' % (data_col, processing_filename)
-                        upload_status.append([data_col_key, 'processing'])
+                        # @modified 20220506 - wrapped in try
                         try:
-                            data_df = df[['pandas_utc_timestamp', data_col]].copy()
-                            logger.info('uploaded_data_worker :: created dataframe for %s' % data_col)
-                        except:
-                            logger.error(traceback.format_exc())
-                            failure_reason = 'failed to create dataframe for pandas_utc_timestamp and %s' % data_col
-                            logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
-                            data_df_successful = False
-                            data_df_failures += 1
-                            if upload_status:
-                                upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
+                            data_df_successful = True
+                            data_df = None
+                            data_col_key = '%s (%s)' % (data_col, processing_filename)
+                            upload_status.append([data_col_key, 'processing'])
                             try:
-                                del data_df
-                            except:
-                                pass
-                            continue
-                        timeseries = None
-                        original_timeseries_length = 0
-                        if data_df_successful:
-                            try:
-                                data_df['timeseries'] = data_df.apply(lambda x: list([x['pandas_utc_timestamp'], x[data_col]]), axis=1)
-                                timeseries = data_df['timeseries'].values.tolist()
-                                original_timeseries_length = len(timeseries)
-                                logger.info('uploaded_data_worker :: created timeseries for %s with %s timestamps and values' % (
-                                    data_col, str(original_timeseries_length)))
+                                data_df = df[['pandas_utc_timestamp', data_col]].copy()
+                                logger.info('uploaded_data_worker :: created dataframe for %s' % data_col)
                             except:
                                 logger.error(traceback.format_exc())
-                                failure_reason = 'failed to create timeseries from pandas_utc_timestamp and %s' % data_col
+                                failure_reason = 'failed to create dataframe for pandas_utc_timestamp and %s' % data_col
                                 logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
                                 data_df_successful = False
                                 data_df_failures += 1
@@ -962,126 +942,70 @@ class UploadedDataWorker(Process):
                                 except:
                                     pass
                                 continue
-                        original_timeseries = None
-                        if data_df_successful and timeseries:
-                            original_timeseries = timeseries
-                            try:
-                                sorted_timeseries = sort_timeseries(timeseries)
-                                if sorted_timeseries:
-                                    sorted_timeseries_length = len(sorted_timeseries)
-                                    timeseries = sorted_timeseries
-                                    logger.info('uploaded_data_worker :: sorted timeseries for %s which has %s timestamps and values' % (
-                                        data_col, str(sorted_timeseries_length)))
+                            timeseries = None
+                            original_timeseries_length = 0
+                            if data_df_successful:
+                                try:
+                                    data_df['timeseries'] = data_df.apply(lambda x: list([x['pandas_utc_timestamp'], x[data_col]]), axis=1)
+                                    timeseries = data_df['timeseries'].values.tolist()
+                                    original_timeseries_length = len(timeseries)
+                                    logger.info('uploaded_data_worker :: created timeseries for %s with %s timestamps and values' % (
+                                        data_col, str(original_timeseries_length)))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    failure_reason = 'failed to create timeseries from pandas_utc_timestamp and %s' % data_col
+                                    logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
+                                    data_df_successful = False
+                                    data_df_failures += 1
+                                    if upload_status:
+                                        upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
                                     try:
-                                        del sorted_timeseries
+                                        del data_df
                                     except:
                                         pass
-                                else:
-                                    logger.error('error :: uploaded_data_worker :: sorted_timeseries does not exists - %s' % (
-                                        str(sorted_timeseries)))
-                            except:
-                                logger.error(traceback.format_exc())
-                                failure_reason = 'failed to sort timeseries of pandas_utc_timestamp and %s' % data_col
-                                logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
-                                timeseries = original_timeseries
-
-                        metric = None
-                        if data_df_successful and timeseries:
-                            if original_timeseries:
+                                    continue
+                            original_timeseries = None
+                            if data_df_successful and timeseries:
+                                original_timeseries = timeseries
                                 try:
-                                    del original_timeseries
+                                    sorted_timeseries = sort_timeseries(timeseries)
+                                    if sorted_timeseries:
+                                        sorted_timeseries_length = len(sorted_timeseries)
+                                        timeseries = sorted_timeseries
+                                        logger.info('uploaded_data_worker :: sorted timeseries for %s which has %s timestamps and values' % (
+                                            data_col, str(sorted_timeseries_length)))
+                                        try:
+                                            del sorted_timeseries
+                                        except:
+                                            pass
+                                    else:
+                                        logger.error('error :: uploaded_data_worker :: sorted_timeseries does not exists - %s' % (
+                                            str(sorted_timeseries)))
                                 except:
-                                    pass
-                            try:
-                                full_metric_name = '%s.%s' % (str(parent_metric_namespace), str(data_col))
-                                metric = filesafe_metricname(full_metric_name)
-                                logger.info('uploaded_data_worker :: interpolated metric name to %s' % metric)
-                            except:
-                                logger.error(traceback.format_exc())
-                                failure_reason = 'failed to interpolated metric name for %s, cannot continue' % data_col
-                                logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
-                                data_df_successful = False
-                                data_df_failures += 1
-                                if upload_status:
-                                    upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
-                                try:
-                                    del data_df
-                                except:
-                                    pass
-                                try:
-                                    del timeseries
-                                except:
-                                    pass
-                                continue
+                                    logger.error(traceback.format_exc())
+                                    failure_reason = 'failed to sort timeseries of pandas_utc_timestamp and %s' % data_col
+                                    logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
+                                    timeseries = original_timeseries
 
-                        # Best effort to de-duplicate the data sent to Graphite
-                        last_flux_timestamp = None
-                        if data_df_successful and timeseries and metric:
-                            cache_key = 'flux.last.%s' % metric
-                            redis_last_metric_data = None
-
-                            # @added 20220429 - Feature #4536: Handle Redis failure
-                            # Swap to using a Redis hash instead of the
-                            # flux.last.<metric> keys
-                            last_flux_timestamp = None
-                            if not ignore_submitted_timestamps:
-                                use_old_timestamp_keys = True
-                                redis_last_metric_data_dict = {}
-                                try:
-                                    redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
-                                except Exception as err:
-                                    logger.error('error :: populate_metric_worker :: get_last_metric_data failed - %s' % (
-                                        err))
-                                if redis_last_metric_data_dict:
+                            metric = None
+                            if data_df_successful and timeseries:
+                                if original_timeseries:
                                     try:
-                                        last_flux_timestamp = redis_last_metric_data_dict['timestamp']
-                                        use_old_timestamp_keys = False
-                                    except KeyError:
-                                        last_flux_timestamp = None
-                                    except Exception as err:
-                                        logger.error('error :: populate_metric_worker :: failed to get timestamp from - %s - %s' % (
-                                            str(redis_last_metric_data_dict), err))
-                                        last_flux_timestamp = None
-
-                            if use_old_timestamp_keys:
-                                # @added 20200521 - Feature #3538: webapp - upload_data endpoint
-                                #                   Feature #3550: flux.uploaded_data_worker
-                                # Added the ability to ignore_submitted_timestamps and not
-                                # check flux.last metric timestamp
-                                if not ignore_submitted_timestamps:
-                                    try:
-                                        redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
+                                        del original_timeseries
                                     except:
-                                        logger.error(traceback.format_exc())
-                                        logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                                        last_flux_timestamp = None
-                                if redis_last_metric_data:
-                                    try:
-                                        last_metric_data = literal_eval(redis_last_metric_data)
-                                        last_flux_timestamp = int(last_metric_data[0])
-                                    except:
-                                        logger.error(traceback.format_exc())
-                                        logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                                        last_flux_timestamp = None
-                        valid_timeseries = []
-                        if last_flux_timestamp:
-                            try:
-                                logger.info('uploaded_data_worker :: determined last timestamp from Redis for %s as %s' % (
-                                    metric, str(last_flux_timestamp)))
-                                for timestamp, value in timeseries:
-                                    if timestamp > last_flux_timestamp:
-                                        valid_timeseries.append([timestamp, value])
-                                valid_timeseries_length = len(valid_timeseries)
-                                logger.info('uploaded_data_worker :: deduplicated timeseries based on last_flux_timestamp for %s which now has %s timestamps and values' % (
-                                    data_col, str(valid_timeseries_length)))
-                                if valid_timeseries:
-                                    timeseries = valid_timeseries
-                                else:
-                                    newest_data_timestamp = str(timeseries[-1][0])
-                                    logger.info('uploaded_data_worker :: none of the timestamps in %s data are older than %s, the newset being %s, nothing to submit continuing' % (
-                                        data_col, str(last_flux_timestamp), newest_data_timestamp))
+                                        pass
+                                try:
+                                    full_metric_name = '%s.%s' % (str(parent_metric_namespace), str(data_col))
+                                    metric = filesafe_metricname(full_metric_name)
+                                    logger.info('uploaded_data_worker :: interpolated metric name to %s' % metric)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    failure_reason = 'failed to interpolated metric name for %s, cannot continue' % data_col
+                                    logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
+                                    data_df_successful = False
+                                    data_df_failures += 1
                                     if upload_status:
-                                        upload_status = new_upload_status(upload_status, data_col_key, 'processed - no new timestamps, all already known')
+                                        upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
                                     try:
                                         del data_df
                                     except:
@@ -1091,142 +1015,83 @@ class UploadedDataWorker(Process):
                                     except:
                                         pass
                                     continue
-                            except:
-                                logger.error(traceback.format_exc())
-                                failure_reason = 'failed to determine if timestamps for %s are newer than the last_flux_timestamp, cannot continue' % data_col
-                                logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
-                                data_df_successful = False
-                                data_df_failures += 1
-                                if upload_status:
-                                    upload_status = new_upload_status(upload_status, data_col_key, 'failed to determine if timestamps for %s are newer than the last known timestamp, cannot continue')
-                                try:
-                                    del data_df
-                                except:
-                                    pass
-                                try:
-                                    del timeseries
-                                except:
-                                    pass
-                                continue
 
-                        valid_timeseries = []
-                        if data_df_successful and timeseries and metric:
-                            datapoints_with_no_value = 0
-                            for timestamp, value in timeseries:
+                            # Best effort to de-duplicate the data sent to Graphite
+                            last_flux_timestamp = None
+                            if data_df_successful and timeseries and metric:
+                                cache_key = 'flux.last.%s' % metric
+                                redis_last_metric_data = None
+
+                                # @added 20220506 - Feature #4536: Handle Redis failure
+                                # Declare before the ignore_submitted_timestamps
+                                # condition
+                                use_old_timestamp_keys = True
+
+                                # @added 20220429 - Feature #4536: Handle Redis failure
+                                # Swap to using a Redis hash instead of the
+                                # flux.last.<metric> keys
+                                last_flux_timestamp = None
+                                if not ignore_submitted_timestamps:
+                                    # @modified 20220506 - Feature #4536: Handle Redis failure
+                                    # Declare before the ignore_submitted_timestamps
+                                    # condition
+                                    # use_old_timestamp_keys = True
+                                    redis_last_metric_data_dict = {}
                                     try:
-                                        if value is None:
-                                            datapoints_with_no_value += 1
-                                            continue
-                                        float_value = float(value)
-                                        valid_timeseries.append([timestamp, float_value])
-                                    except:
-                                        datapoints_with_no_value += 1
-                                        continue
-                            if datapoints_with_no_value > 0:
-                                logger.info('uploaded_data_worker :: dropped %s timestamps from %s which have no value' % (
-                                    str(datapoints_with_no_value), metric))
-                            if valid_timeseries:
-                                timeseries = valid_timeseries
-                                try:
-                                    del valid_timeseries
-                                except:
-                                    pass
-                            else:
-                                logger.info('uploaded_data_worker :: none of the timestamps have value data in %s data, nothing to submit continuing' % (
-                                    data_col))
-                                if upload_status:
-                                    upload_status = new_upload_status(upload_status, data_col_key, 'failed - no timestamps have value data')
-                                try:
-                                    del data_df
-                                except:
-                                    pass
-                                try:
-                                    del timeseries
-                                except:
-                                    pass
-                                continue
-                        if data_df_successful and timeseries and metric:
-                            try:
-                                # Deal with lower frequency data
-                                # Determine resolution from the last 30 data points
-                                resolution_timestamps = []
-                                metric_resolution_determined = False
-                                for metric_datapoint in timeseries[-30:]:
-                                    timestamp = int(metric_datapoint[0])
-                                    resolution_timestamps.append(timestamp)
-                                timestamp_resolutions = []
-                                if resolution_timestamps:
-                                    last_timestamp = None
-                                    for timestamp in resolution_timestamps:
-                                        if last_timestamp:
-                                            resolution = timestamp - last_timestamp
-                                            timestamp_resolutions.append(resolution)
-                                            last_timestamp = timestamp
-                                        else:
-                                            last_timestamp = timestamp
-                                    try:
-                                        del resolution_timestamps
-                                    except:
-                                        pass
-                                if timestamp_resolutions:
-                                    try:
-                                        timestamp_resolutions_count = Counter(timestamp_resolutions)
-                                        ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
-                                        metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
-                                        if metric_resolution > 0:
-                                            metric_resolution_determined = True
-                                    except:
-                                        logger.error(traceback.format_exc())
-                                        logger.error('error :: uploaded_data_worker :: failed to determine metric_resolution from timeseries')
-                                    try:
-                                        del timestamp_resolutions
-                                    except:
-                                        pass
-                                # Resample
-                                resample_at = None
-                                if metric_resolution_determined and metric_resolution < 60:
-                                    resample_at = '1Min'
-                                if resample_at:
-                                    try:
-                                        high_res_df = pd.DataFrame(timeseries)
-                                        high_res_df.columns = ['date', data_col]
-                                        high_res_df = high_res_df.set_index('date')
-                                        high_res_df.index = pd.to_datetime(high_res_df.index, unit='s')
-                                        resample_at = '1Min'
-                                        if resample_method == 'mean':
-                                            resampled_df = high_res_df.resample(resample_at).mean()
-                                        else:
-                                            resampled_df = high_res_df.resample(resample_at).sum()
-                                        logger.info('uploaded_data_worker :: resampled %s data by %s' % (
-                                            data_col, resample_method))
+                                        redis_last_metric_data_dict = get_last_metric_data(skyline_app, metric)
+                                    except Exception as err:
+                                        logger.error('error :: populate_metric_worker :: get_last_metric_data failed - %s' % (
+                                            err))
+                                    if redis_last_metric_data_dict:
                                         try:
-                                            del high_res_df
-                                        except:
-                                            pass
-                                        resampled_df.reset_index(level=0, inplace=True)
-                                        resampled_df['date'] = resampled_df['date'].dt.tz_localize(pytz_tz)
-                                        dates = resampled_df['date'].tolist()
-                                        timestamps = []
-                                        for d in dates:
-                                            timestamps.append(int(d.strftime('%s')))
-                                        resampled_df['pandas_utc_timestamp'] = timestamps
-                                        resampled_df['timeseries'] = resampled_df.apply(lambda x: list([x['pandas_utc_timestamp'], x[data_col]]), axis=1)
-                                        timeseries = resampled_df['timeseries'].values.tolist()
+                                            last_flux_timestamp = redis_last_metric_data_dict['timestamp']
+                                            use_old_timestamp_keys = False
+                                        except KeyError:
+                                            last_flux_timestamp = None
+                                        except Exception as err:
+                                            logger.error('error :: populate_metric_worker :: failed to get timestamp from - %s - %s' % (
+                                                str(redis_last_metric_data_dict), err))
+                                            last_flux_timestamp = None
+
+                                if use_old_timestamp_keys:
+                                    # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+                                    #                   Feature #3550: flux.uploaded_data_worker
+                                    # Added the ability to ignore_submitted_timestamps and not
+                                    # check flux.last metric timestamp
+                                    if not ignore_submitted_timestamps:
                                         try:
-                                            del resampled_df
+                                            redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
                                         except:
-                                            pass
-                                        resampled_timeseries_length = len(timeseries)
-                                        logger.info('uploaded_data_worker :: created resampled timeseries for %s with %s timestamps and values' % (
-                                            data_col, str(resampled_timeseries_length)))
-                                    except:
-                                        logger.error(traceback.format_exc())
-                                        failure_reason = 'failed to create resampled timeseries from %s' % data_col
-                                        logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
-                                        data_df_successful = False
-                                        data_df_failures += 1
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                                            last_flux_timestamp = None
+                                    if redis_last_metric_data:
+                                        try:
+                                            last_metric_data = literal_eval(redis_last_metric_data)
+                                            last_flux_timestamp = int(last_metric_data[0])
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                                            last_flux_timestamp = None
+                            valid_timeseries = []
+                            if last_flux_timestamp:
+                                try:
+                                    logger.info('uploaded_data_worker :: determined last timestamp from Redis for %s as %s' % (
+                                        metric, str(last_flux_timestamp)))
+                                    for timestamp, value in timeseries:
+                                        if timestamp > last_flux_timestamp:
+                                            valid_timeseries.append([timestamp, value])
+                                    valid_timeseries_length = len(valid_timeseries)
+                                    logger.info('uploaded_data_worker :: deduplicated timeseries based on last_flux_timestamp for %s which now has %s timestamps and values' % (
+                                        data_col, str(valid_timeseries_length)))
+                                    if valid_timeseries:
+                                        timeseries = valid_timeseries
+                                    else:
+                                        newest_data_timestamp = str(timeseries[-1][0])
+                                        logger.info('uploaded_data_worker :: none of the timestamps in %s data are older than %s, the newset being %s, nothing to submit continuing' % (
+                                            data_col, str(last_flux_timestamp), newest_data_timestamp))
                                         if upload_status:
-                                            upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
+                                            upload_status = new_upload_status(upload_status, data_col_key, 'processed - no new timestamps, all already known')
                                         try:
                                             del data_df
                                         except:
@@ -1236,191 +1101,342 @@ class UploadedDataWorker(Process):
                                         except:
                                             pass
                                         continue
-                            except:
-                                logger.error(traceback.format_exc())
-                                failure_reason = 'failed to resampled timeseries for %s' % data_col
-                                logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
-                                data_df_successful = False
-                                data_df_failures += 1
-                                if upload_status:
-                                    upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
-                                try:
-                                    del data_df
                                 except:
-                                    pass
-                                try:
-                                    del timeseries
-                                except:
-                                    pass
-                                continue
-                        try:
-                            del data_df
-                        except:
-                            pass
-                        sent_to_graphite = 0
-                        last_timestamp_sent = None
-                        last_value_sent = None
-                        if data_df_successful and timeseries and metric:
-                            timeseries_length = len(timeseries)
-                            logger.info('uploaded_data_worker :: after preprocessing there are %s data points to send to Graphite for %s' % (
-                                str(timeseries_length), metric))
+                                    logger.error(traceback.format_exc())
+                                    failure_reason = 'failed to determine if timestamps for %s are newer than the last_flux_timestamp, cannot continue' % data_col
+                                    logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
+                                    data_df_successful = False
+                                    data_df_failures += 1
+                                    if upload_status:
+                                        upload_status = new_upload_status(upload_status, data_col_key, 'failed to determine if timestamps for %s are newer than the last known timestamp, cannot continue')
+                                    try:
+                                        del data_df
+                                    except:
+                                        pass
+                                    try:
+                                        del timeseries
+                                    except:
+                                        pass
+                                    continue
 
-                            if LOCAL_DEBUG:
-                                timeseries_debug_file = '%s/%s.%s.txt' % (settings.SKYLINE_TMP_DIR, str(upload_id), metric)
-                                try:
-                                    write_data_to_file(
-                                        skyline_app, timeseries_debug_file, 'w',
-                                        str(timeseries))
-                                    logger.debug('debug :: added timeseries_debug_file :: %s' % (timeseries_debug_file))
-                                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                    # Move to Redis set block below
-                                    # self.sent_to_panorama.append(base_name)
-                                except:
-                                    logger.error('error :: failed to add timeseries_debug_file :: %s' % (timeseries_debug_file))
-                                    logger.info(traceback.format_exc())
-
-                            timestamp = None
-                            value = None
-                            start_populating = timer()
-                            listOfMetricTuples = []
-                            try:
+                            valid_timeseries = []
+                            if data_df_successful and timeseries and metric:
+                                datapoints_with_no_value = 0
                                 for timestamp, value in timeseries:
-                                    tuple_data = (metric, (int(timestamp), float(value)))
-                                    if LOCAL_DEBUG or debug_enabled_in_info:
-                                        logger.debug('debug :: uploaded_data_worker :: sending - %s' % str(tuple_data))
-                                    listOfMetricTuples.append(tuple_data)
-                                    sent_to_graphite += 1
-                                    if value == 0.0:
-                                        has_value = True
-                                    if value == 0:
-                                        has_value = True
-                                    if value:
-                                        has_value = True
-                                    if has_value:
-                                        last_timestamp_sent = int(timestamp)
-                                        last_value_sent = float(value)
+                                    try:
+                                        if value is None:
+                                            datapoints_with_no_value += 1
+                                            continue
+                                        float_value = float(value)
+                                        valid_timeseries.append([timestamp, float_value])
+                                    except:
+                                        datapoints_with_no_value += 1
+                                        continue
+                                if datapoints_with_no_value > 0:
+                                    logger.info('uploaded_data_worker :: dropped %s timestamps from %s which have no value' % (
+                                        str(datapoints_with_no_value), metric))
+                                if valid_timeseries:
+                                    timeseries = valid_timeseries
+                                    try:
+                                        del valid_timeseries
+                                    except:
+                                        pass
+                                else:
+                                    logger.info('uploaded_data_worker :: none of the timestamps have value data in %s data, nothing to submit continuing' % (
+                                        data_col))
+                                    if upload_status:
+                                        upload_status = new_upload_status(upload_status, data_col_key, 'failed - no timestamps have value data')
+                                    try:
+                                        del data_df
+                                    except:
+                                        pass
+                                    try:
+                                        del timeseries
+                                    except:
+                                        pass
+                                    continue
+                            if data_df_successful and timeseries and metric:
+                                try:
+                                    # Deal with lower frequency data
+                                    # Determine resolution from the last 30 data points
+                                    resolution_timestamps = []
+                                    metric_resolution_determined = False
+                                    for metric_datapoint in timeseries[-30:]:
+                                        timestamp = int(metric_datapoint[0])
+                                        resolution_timestamps.append(timestamp)
+                                    timestamp_resolutions = []
+                                    if resolution_timestamps:
+                                        last_timestamp = None
+                                        for timestamp in resolution_timestamps:
+                                            if last_timestamp:
+                                                resolution = timestamp - last_timestamp
+                                                timestamp_resolutions.append(resolution)
+                                                last_timestamp = timestamp
+                                            else:
+                                                last_timestamp = timestamp
+                                        try:
+                                            del resolution_timestamps
+                                        except:
+                                            pass
+                                    if timestamp_resolutions:
+                                        try:
+                                            timestamp_resolutions_count = Counter(timestamp_resolutions)
+                                            ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
+                                            metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
+                                            if metric_resolution > 0:
+                                                metric_resolution_determined = True
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: uploaded_data_worker :: failed to determine metric_resolution from timeseries')
+                                        try:
+                                            del timestamp_resolutions
+                                        except:
+                                            pass
+                                    # Resample
+                                    resample_at = None
+                                    if metric_resolution_determined and metric_resolution < 60:
+                                        resample_at = '1Min'
+                                    if resample_at:
+                                        try:
+                                            high_res_df = pd.DataFrame(timeseries)
+                                            high_res_df.columns = ['date', data_col]
+                                            high_res_df = high_res_df.set_index('date')
+                                            high_res_df.index = pd.to_datetime(high_res_df.index, unit='s')
+                                            resample_at = '1Min'
+                                            if resample_method == 'mean':
+                                                resampled_df = high_res_df.resample(resample_at).mean()
+                                            else:
+                                                resampled_df = high_res_df.resample(resample_at).sum()
+                                            logger.info('uploaded_data_worker :: resampled %s data by %s' % (
+                                                data_col, resample_method))
+                                            try:
+                                                del high_res_df
+                                            except:
+                                                pass
+                                            resampled_df.reset_index(level=0, inplace=True)
+                                            resampled_df['date'] = resampled_df['date'].dt.tz_localize(pytz_tz)
+                                            dates = resampled_df['date'].tolist()
+                                            timestamps = []
+                                            for d in dates:
+                                                timestamps.append(int(d.strftime('%s')))
+                                            resampled_df['pandas_utc_timestamp'] = timestamps
+                                            resampled_df['timeseries'] = resampled_df.apply(lambda x: list([x['pandas_utc_timestamp'], x[data_col]]), axis=1)
+                                            timeseries = resampled_df['timeseries'].values.tolist()
+                                            try:
+                                                del resampled_df
+                                            except:
+                                                pass
+                                            resampled_timeseries_length = len(timeseries)
+                                            logger.info('uploaded_data_worker :: created resampled timeseries for %s with %s timestamps and values' % (
+                                                data_col, str(resampled_timeseries_length)))
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            failure_reason = 'failed to create resampled timeseries from %s' % data_col
+                                            logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
+                                            data_df_successful = False
+                                            data_df_failures += 1
+                                            if upload_status:
+                                                upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
+                                            try:
+                                                del data_df
+                                            except:
+                                                pass
+                                            try:
+                                                del timeseries
+                                            except:
+                                                pass
+                                            continue
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    failure_reason = 'failed to resampled timeseries for %s' % data_col
+                                    logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
+                                    data_df_successful = False
+                                    data_df_failures += 1
+                                    if upload_status:
+                                        upload_status = new_upload_status(upload_status, data_col_key, failure_reason)
+                                    try:
+                                        del data_df
+                                    except:
+                                        pass
+                                    try:
+                                        del timeseries
+                                    except:
+                                        pass
+                                    continue
+                            try:
+                                del data_df
                             except:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: uploaded_data_worker :: failed to populate listOfMetricTuples for %s' % str(metric))
-                            if listOfMetricTuples:
-                                data_points_sent = 0
-                                smallListOfMetricTuples = []
-                                tuples_added = 0
-                                # @added 20200617 - Feature #3550: flux.uploaded_data_worker
-                                # Reduce the speed of submissions to Graphite
-                                # if there are lots of data points
-                                number_of_datapoints = len(listOfMetricTuples)
+                                pass
+                            sent_to_graphite = 0
+                            last_timestamp_sent = None
+                            last_value_sent = None
+                            if data_df_successful and timeseries and metric:
+                                timeseries_length = len(timeseries)
+                                logger.info('uploaded_data_worker :: after preprocessing there are %s data points to send to Graphite for %s' % (
+                                    str(timeseries_length), metric))
 
-                                for data in listOfMetricTuples:
-                                    smallListOfMetricTuples.append(data)
-                                    tuples_added += 1
-                                    if tuples_added >= 1000:
+                                if LOCAL_DEBUG:
+                                    timeseries_debug_file = '%s/%s.%s.txt' % (settings.SKYLINE_TMP_DIR, str(upload_id), metric)
+                                    try:
+                                        write_data_to_file(
+                                            skyline_app, timeseries_debug_file, 'w',
+                                            str(timeseries))
+                                        logger.debug('debug :: added timeseries_debug_file :: %s' % (timeseries_debug_file))
+                                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                        # Move to Redis set block below
+                                        # self.sent_to_panorama.append(base_name)
+                                    except:
+                                        logger.error('error :: failed to add timeseries_debug_file :: %s' % (timeseries_debug_file))
+                                        logger.info(traceback.format_exc())
+
+                                timestamp = None
+                                value = None
+                                start_populating = timer()
+                                listOfMetricTuples = []
+                                try:
+                                    for timestamp, value in timeseries:
+                                        tuple_data = (metric, (int(timestamp), float(value)))
+                                        if LOCAL_DEBUG or debug_enabled_in_info:
+                                            logger.debug('debug :: uploaded_data_worker :: sending - %s' % str(tuple_data))
+                                        listOfMetricTuples.append(tuple_data)
+                                        sent_to_graphite += 1
+                                        if value == 0.0:
+                                            has_value = True
+                                        if value == 0:
+                                            has_value = True
+                                        if value:
+                                            has_value = True
+                                        if has_value:
+                                            last_timestamp_sent = int(timestamp)
+                                            last_value_sent = float(value)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: uploaded_data_worker :: failed to populate listOfMetricTuples for %s' % str(metric))
+                                if listOfMetricTuples:
+                                    data_points_sent = 0
+                                    smallListOfMetricTuples = []
+                                    tuples_added = 0
+                                    # @added 20200617 - Feature #3550: flux.uploaded_data_worker
+                                    # Reduce the speed of submissions to Graphite
+                                    # if there are lots of data points
+                                    number_of_datapoints = len(listOfMetricTuples)
+
+                                    for data in listOfMetricTuples:
+                                        smallListOfMetricTuples.append(data)
+                                        tuples_added += 1
+                                        if tuples_added >= 1000:
+                                            if dryrun:
+                                                pickle_data_sent = True
+                                                logger.info('uploaded_data_worker :: DRYRUN :: faking sending data')
+                                            else:
+                                                pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
+                                                # @added 20200617 - Feature #3550: flux.uploaded_data_worker
+                                                # Reduce the speed of submissions to Graphite
+                                                # if there are lots of data points
+                                                if number_of_datapoints > 4000:
+                                                    sleep(0.3)
+                                            if pickle_data_sent:
+                                                data_points_sent += tuples_added
+                                                logger.info('uploaded_data_worker :: sent %s/%s of %s data points to Graphite via pickle for %s' % (
+                                                    str(tuples_added), str(data_points_sent),
+                                                    str(timeseries_length), metric))
+                                                sent_to_graphite += len(smallListOfMetricTuples)
+                                                smallListOfMetricTuples = []
+                                                tuples_added = 0
+                                            else:
+                                                logger.error('error :: uploaded_data_worker :: failed to send %s data points to Graphite via pickle for %s' % (
+                                                    str(tuples_added), metric))
+                                    if smallListOfMetricTuples:
+                                        tuples_to_send = len(smallListOfMetricTuples)
                                         if dryrun:
                                             pickle_data_sent = True
                                             logger.info('uploaded_data_worker :: DRYRUN :: faking sending data')
                                         else:
                                             pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
-                                            # @added 20200617 - Feature #3550: flux.uploaded_data_worker
-                                            # Reduce the speed of submissions to Graphite
-                                            # if there are lots of data points
-                                            if number_of_datapoints > 4000:
-                                                sleep(0.3)
                                         if pickle_data_sent:
-                                            data_points_sent += tuples_added
-                                            logger.info('uploaded_data_worker :: sent %s/%s of %s data points to Graphite via pickle for %s' % (
-                                                str(tuples_added), str(data_points_sent),
+                                            data_points_sent += tuples_to_send
+                                            logger.info('uploaded_data_worker :: sent the last %s/%s of %s data points to Graphite via pickle for %s' % (
+                                                str(tuples_to_send), str(data_points_sent),
                                                 str(timeseries_length), metric))
-                                            sent_to_graphite += len(smallListOfMetricTuples)
-                                            smallListOfMetricTuples = []
-                                            tuples_added = 0
                                         else:
-                                            logger.error('error :: uploaded_data_worker :: failed to send %s data points to Graphite via pickle for %s' % (
-                                                str(tuples_added), metric))
-                                if smallListOfMetricTuples:
-                                    tuples_to_send = len(smallListOfMetricTuples)
-                                    if dryrun:
-                                        pickle_data_sent = True
-                                        logger.info('uploaded_data_worker :: DRYRUN :: faking sending data')
-                                    else:
-                                        pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
-                                    if pickle_data_sent:
-                                        data_points_sent += tuples_to_send
-                                        logger.info('uploaded_data_worker :: sent the last %s/%s of %s data points to Graphite via pickle for %s' % (
-                                            str(tuples_to_send), str(data_points_sent),
-                                            str(timeseries_length), metric))
-                                    else:
-                                        logger.error('error :: uploaded_data_worker :: failed to send the last %s data points to Graphite via pickle for %s' % (
-                                            str(tuples_to_send), metric))
-                            try:
-                                del timeseries
-                            except:
-                                pass
-                            try:
-                                del listOfMetricTuples
-                            except:
-                                pass
-                            try:
-                                del smallListOfMetricTuples
-                            except:
-                                pass
-
-                            logger.info('uploaded_data_worker :: sent %s data points to Graphite for %s' % (
-                                str(sent_to_graphite), metric))
-
-                            if last_timestamp_sent:
+                                            logger.error('error :: uploaded_data_worker :: failed to send the last %s data points to Graphite via pickle for %s' % (
+                                                str(tuples_to_send), metric))
                                 try:
-                                    # Update Redis flux key
-                                    cache_key = 'flux.last.%s' % metric
-                                    metric_data = [int(last_timestamp_sent), float(last_value_sent)]
-                                    if dryrun:
-                                        logger.info('uploaded_data_worker :: DRYRUN :: faking updating %s with %s' % (
-                                            cache_key, str(metric_data)))
-                                    # @added 20200521 - Feature #3538: webapp - upload_data endpoint
-                                    #                   Feature #3550: flux.uploaded_data_worker
-                                    # Added the ability to ignore_submitted_timestamps and not
-                                    # check flux.last metric timestamp
-                                    elif ignore_submitted_timestamps:
-                                        logger.info('uploaded_data_worker :: ignore_submitted_timestamps :: not updating %s with %s' % (
-                                            cache_key, str(metric_data)))
-                                        # @added 20200527 - Feature #3550: flux.uploaded_data_worker
-                                        # If submitted timestamps are ignored
-                                        # add the the Redis set for analyzer to
-                                        # sorted and deduplicated the time
-                                        # series data in Redis
-                                        self.redis_conn.sadd('flux.sort_and_dedup.metrics', metric)
-                                        logger.info('uploaded_data_worker :: added %s to flux.sort_and_dedup.metrics Redis set' % (
-                                            metric))
-                                    else:
-                                        # @modified 20220429 - Feature #4536: Handle Redis failure
-                                        # Swap to using a Redis hash instead of the
-                                        # flux.last.<metric> keys make existing keys
-                                        # expire
-                                        # self.redis_conn.set(cache_key, str(metric_data))
-                                        self.redis_conn.setex(cache_key, 3600, str(metric_data))
-                                        logger.info('uploaded_data_worker :: set the metric Redis key - %s - %s' % (
-                                            cache_key, str(metric_data)))
-
-                                        # @added 20220429 - Feature #4536: Handle Redis failure
-                                        # Swap to using a Redis hash instead of the
-                                        # flux.last.<metric> keys
-                                        metric_data_dict = {'timestamp': int(last_timestamp_sent), 'value': float(last_value_sent)}
-                                        try:
-                                            self.redis_conn.hset('flux.last.metric_data', metric, str(metric_data_dict))
-                                        except Exception as err:
-                                            logger.error('error :: uploaded_data_worker :: failed to hset flux.last.metric_data Redis key - %s' % str(err))
+                                    del timeseries
                                 except:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: uploaded_data_worker :: failed to set Redis key - %s - %s' % (
-                                        cache_key, str(metric_data)))
+                                    pass
+                                try:
+                                    del listOfMetricTuples
+                                except:
+                                    pass
+                                try:
+                                    del smallListOfMetricTuples
+                                except:
+                                    pass
 
-                            processed_data_columns.append(data_col)
-                            end_populating = timer()
-                            seconds_to_run = end_populating - start_populating
-                            logger.info('uploaded_data_worker :: %s populated to Graphite in %.6f seconds' % (
-                                metric, seconds_to_run))
-                        if upload_status:
-                            new_status = 'processed - %s data points submitted' % str(sent_to_graphite)
-                            upload_status = new_upload_status(upload_status, data_col_key, new_status)
+                                logger.info('uploaded_data_worker :: sent %s data points to Graphite for %s' % (
+                                    str(sent_to_graphite), metric))
+
+                                if last_timestamp_sent:
+                                    try:
+                                        # Update Redis flux key
+                                        cache_key = 'flux.last.%s' % metric
+                                        metric_data = [int(last_timestamp_sent), float(last_value_sent)]
+                                        if dryrun:
+                                            logger.info('uploaded_data_worker :: DRYRUN :: faking updating %s with %s' % (
+                                                cache_key, str(metric_data)))
+                                        # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+                                        #                   Feature #3550: flux.uploaded_data_worker
+                                        # Added the ability to ignore_submitted_timestamps and not
+                                        # check flux.last metric timestamp
+                                        elif ignore_submitted_timestamps:
+                                            logger.info('uploaded_data_worker :: ignore_submitted_timestamps :: not updating %s with %s' % (
+                                                cache_key, str(metric_data)))
+                                            # @added 20200527 - Feature #3550: flux.uploaded_data_worker
+                                            # If submitted timestamps are ignored
+                                            # add the the Redis set for analyzer to
+                                            # sorted and deduplicated the time
+                                            # series data in Redis
+                                            self.redis_conn.sadd('flux.sort_and_dedup.metrics', metric)
+                                            logger.info('uploaded_data_worker :: added %s to flux.sort_and_dedup.metrics Redis set' % (
+                                                metric))
+                                        else:
+                                            # @modified 20220429 - Feature #4536: Handle Redis failure
+                                            # Swap to using a Redis hash instead of the
+                                            # flux.last.<metric> keys make existing keys
+                                            # expire
+                                            # self.redis_conn.set(cache_key, str(metric_data))
+                                            self.redis_conn.setex(cache_key, 3600, str(metric_data))
+                                            logger.info('uploaded_data_worker :: set the metric Redis key - %s - %s' % (
+                                                cache_key, str(metric_data)))
+
+                                            # @added 20220429 - Feature #4536: Handle Redis failure
+                                            # Swap to using a Redis hash instead of the
+                                            # flux.last.<metric> keys
+                                            metric_data_dict = {'timestamp': int(last_timestamp_sent), 'value': float(last_value_sent)}
+                                            try:
+                                                self.redis_conn.hset('flux.last.metric_data', metric, str(metric_data_dict))
+                                            except Exception as err:
+                                                logger.error('error :: uploaded_data_worker :: failed to hset flux.last.metric_data Redis key - %s' % str(err))
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: uploaded_data_worker :: failed to set Redis key - %s - %s' % (
+                                            cache_key, str(metric_data)))
+
+                                processed_data_columns.append(data_col)
+                                end_populating = timer()
+                                seconds_to_run = end_populating - start_populating
+                                logger.info('uploaded_data_worker :: %s populated to Graphite in %.6f seconds' % (
+                                    metric, seconds_to_run))
+                            if upload_status:
+                                new_status = 'processed - %s data points submitted' % str(sent_to_graphite)
+                                upload_status = new_upload_status(upload_status, data_col_key, new_status)
+
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: uploaded_data_worker :: failed to process - %s - %s' % (
+                                data_col, err))
+
                     if upload_status:
                         upload_status = new_upload_status(upload_status, processing_filename, 'complete')
                 try:
