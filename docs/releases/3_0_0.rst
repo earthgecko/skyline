@@ -220,7 +220,11 @@ How to update from v2.0.0
 - Download the new release tag or clone/update to get it to a temp location,
   ready to be deployed.
 - Get your new settings.py ready
-- Deploy a new Python-3.8.13 virtualenv, see `Running Skyline in a Python virtualenv <running-in-python-virtualenv.html>`__
+- **NOTE** you must currently set :mod:`settings.OTEL_ENABLED` to `True`, even if
+  you are not using it.  This is to simply prevent an unhandled error in v3.0.0
+  relating to opentelemetry, resulting traces will be sent to 127.0.0.1:26831
+  via UDP so will fail silently with no ill effects.
+- Deploy a new Python-3.8.13 virtualenv
 - Ensure all the dependencies are at the correct versions in the new
   Python-3.8.13 virtualenv
 - Stop the Skyline apps, backup the database and Redis, move to the new version,
@@ -323,6 +327,10 @@ How to update from v2.0.0
 
     # There will be lots of changes, consider using a GUI diff editor and create your
     # new settings.py
+
+    # NOTE you must currently set OTEL_ENABLED to True in settings.py, even if
+    # you are not using it.  This is to simply prevent an unhandled error in
+    # v3.0.0 relating to opentelemetry.
 
     # **TEST**
     # **TEST**
