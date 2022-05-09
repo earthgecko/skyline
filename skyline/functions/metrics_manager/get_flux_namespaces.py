@@ -59,7 +59,11 @@ def get_flux_namespaces(self):
                 last_timestamp = int(float(metrics_manager_flux_namespaces_dict[namespace]))
                 age = current_timestamp - last_timestamp
                 if age > 86400:
-                    logger.info('metrics_manager :: get_flux_namespaces :: removing %s from metrics_manager.flux.namespaces as no data for %s seconds' % str(age))
+                    # @modified 20220509 - Release #4560: v3.0.3
+                    #                      Feature #4536: Handle Redis failure
+                    # Added missing log str
+                    logger.info('metrics_manager :: get_flux_namespaces :: removing %s from metrics_manager.flux.namespaces as no data for %s seconds' % (
+                        str(namespace), str(age)))
                     remove_stale_namespaces.append(namespace)
             except Exception as err:
                 logger.error('error :: metrics_manager :: get_flux_namespaces :: failed to determine last data time for %s - %s' % (
