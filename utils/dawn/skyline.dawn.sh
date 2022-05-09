@@ -17,6 +17,7 @@
 # @modified 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 # @modified 20220506 - Release #4552: v3.0.2
+# @modified 20220509 - Release #4552: v3.0.3
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -53,7 +54,10 @@ WEBAPP_AUTH_USER_PASSWORD="$(echo ${HOSTNAME}_skyline)"    # The password you wa
 MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
 MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
 REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
-SKYLINE_RELEASE="v3.0.2"                                   # The Skyline release to deploy
+# @modified 20220423 - Task #4534: Build and test skyline v3.0.0
+# @modified 20220506 - Release #4552: v3.0.2
+# @modified 20220509 - Release #4552: v3.0.3
+SKYLINE_RELEASE="v3.0.3"                                   # The Skyline release to deploy
 # @added 20191016 - Branch #3262: py3
 INSTALL_GRAPHITE=1                                         # Install Graphite 0 = no, 1 = yes (CentOS 8 only)
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
@@ -913,7 +917,7 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
 #  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
 #  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==")
 # @modified 20220506 - Release #4552: v3.0.2
-# Changed pip to --use-deprecated=legacy-resolver 
+# Changed pip to --use-deprecated=legacy-resolver
   cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
   "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.1.txt
   cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==" > /tmp/requirements.2.txt

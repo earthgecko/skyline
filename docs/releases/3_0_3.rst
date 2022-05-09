@@ -1,0 +1,148 @@
+=====
+3.0.3
+=====
+
+v3.0.3 - May 9, 2022
+
+This is a minor release with minor bug fixes for v3.0.2
+
+Changes
+~~~~~~~
+
+- Change error to warning for Graphite timeseries is unavailable (4164: luminosity - cloudbursts)
+- Added missing log str (#4536: Handle Redis failure)
+
+Upgrade notes
+-------------
+
+- These update instructions apply to upgrading from v3.0.0 or v3.0.2
+- There are no changes to the DB in v3.0.3
+- There are no changes to settings.py in v3.0.3
+
+How to update from v3.0.0/v3.0.2
+-------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Copy your settings.py from v3.0.0/v3.0.2 and replace the v3.0.2 settings.py
+- Stop the Skyline apps, backup the database and Redis, move to the new version,
+  start the Skyline apps.
+
+
+.. code-block:: bash
+
+    # Get the new version
+    NEW_SKYLINE_VERSION="v3.0.3"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v3.0.2"    # Your old Skyline version
+    # OLD_SKYLINE_VERSION="v3.0.0"    # Your old Skyline version
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # settings.py
+    cp "$NEW_SKYLINE_PATH/skyline/settings.py" "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak"
+
+    # Create a new settings.py file in the new version based on your existing
+    # settings.py file
+    cat "${CURRENT_SKYLINE_PATH}/skyline/settings.py" > "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # **TEST**
+    # Test your new settings.py BEFORE continuing with the upgrade,
+    # test_settings.sh runs the validate_settings.py that the Skyline apps run
+    # when they start
+    $NEW_SKYLINE_PATH/bin/test_settings.sh
+
+    # Stop/disable any/all service controls like monit, etc that are controlling
+    # Skyline services.
+
+    # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+    # or do not wish to run.
+    SKYLINE_SERVICES="analyzer
+    analyzer_batch
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp
+    vista
+    snab
+    flux
+    horizon"
+    for i in $SKYLINE_SERVICES
+    do
+      systemctl stop "$i"
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v3.0.3 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+    # Set permission on the dump dir
+    chown skyline:skyline "$CURRENT_SKYLINE_PATH"/skyline/webapp/static/dump
+
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+    # apart from the new thunder Skyline app
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="horizon
+    flux
+    panorama
+    webapp
+    vista
+    analyzer
+    analyzer_batch
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    snab
+    thunder"
+    for i in $SKYLINE_SERVICES
+    do
+      systemctl start "$i"
+      if [ $? -ne 0 ]; then
+        echo "failed to start $i"
+      else
+        echo "started $i"
+      fi
+    done
+    # Restart any/all service controls like monit, etc that are controlling
+    # Skyline services.
+
+- Check the logs
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
+
+Congratulations, you are now running the best open source anomaly detection
+stack in the world (probably).
