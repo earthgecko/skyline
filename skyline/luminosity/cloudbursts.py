@@ -394,7 +394,7 @@ class Cloudbursts(Thread):
                 SERVER_METRIC_PATH = ''
         except Exception as e:
             SERVER_METRIC_PATH = ''
-            logger.warn('warning :: luminosity/cloudbursts :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
+            logger.warning('warning :: luminosity/cloudbursts :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
 
         while 1:
             now = time()
