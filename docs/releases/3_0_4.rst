@@ -11,8 +11,17 @@ v3.0.3
 Changes
 ~~~~~~~
 
-- Change error to warning for Graphite timeseries is unavailable (4164: luminosity - cloudbursts)
-- Added missing log str (#4536: Handle Redis failure)
+- http_alerter - discard after x resend attempts (4566)
+- flux worker - Only rename if exists - flux.workers.metrics_sent to
+  aet.flux.workers.metrics_sent (3824)
+- Correct cluster call api parameters append _timestamp (4530)
+- get_cluster_data - cluster changes (3824)
+- ionosphere_performance - convert rows with nans to 0, drop rows with date 0 (3934)
+- metrics_manager - Create a single hash that contains all the
+  flux.quota.namespace_metrics namespaces to allow for the cluster sync to make
+  a single call rather than a call per namespace (4464)
+- metrics_manager - Reduce cluster logging (4568)
+- Updated version and release docs (4562)
 
 Upgrade notes
 -------------
