@@ -762,7 +762,11 @@ class Worker(Process):
                                 # @modified 20220427 - Feature #4536: Handle Redis failure
                                 # Add flux required data to memcache as well
                                 # self.redis_conn.delete('flux.workers.metrics_sent')
-                                self.redis_conn.rename('flux.workers.metrics_sent', 'aet.flux.workers.metrics_sent')
+                                # @modified 20220510 - Feature #3824: get_cluster_data
+                                #                      Release #4562 - v3.0.4
+                                # Only rename if exists
+                                if all_metrics_sent_to_graphite:
+                                    self.redis_conn.rename('flux.workers.metrics_sent', 'aet.flux.workers.metrics_sent')
                             except:
                                 # pass
                                 # @added 20220428 - Feature #4536: Handle Redis failure
