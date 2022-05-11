@@ -2682,6 +2682,15 @@ def alert_http(alert, metric, context):
 
             number_of_send_attempts = previous_attempts + 1
             metric_alert_dict['attempts'] = number_of_send_attempts
+
+            # @added 20220510 - Task #4566: http_alerter - discard after x resend attempts
+            #                   Feature #3396: http_alerter
+            # Discard after 15 attempts
+            if number_of_send_attempts >= 15:
+                add_to_resend_queue = False
+                logger.warning('warning :: alert_http :: failing alert after %s attempts to send - %s' % (
+                    str(number_of_send_attempts), str(metric_alert_dict)))
+
             if add_to_resend_queue:
                 alert_str = str(alert)
                 metric_str = str(metric)
