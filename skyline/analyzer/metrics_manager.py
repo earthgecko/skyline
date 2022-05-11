@@ -398,8 +398,12 @@ class Metrics_Manager(Thread):
         except:
             user = None
             password = None
-        logger.info('metrics_manager :: get_remote_data - querying %s for %s on %s' % (
-            str(remote_skyline_instance[0]), str(data_required), str(endpoint)))
+
+        # @modified 20220510 - Task #4568: Reduce cluster logging
+        #                      Release #4562: v3.0.4
+        if LOCAL_DEBUG:
+            logger.debug('debug :: metrics_manager :: get_remote_data - querying %s for %s on %s' % (
+                str(remote_skyline_instance[0]), str(data_required), str(endpoint)))
         try:
             url = '%s/%s' % (str(remote_skyline_instance[0]), endpoint)
             if use_auth:
@@ -411,8 +415,11 @@ class Metrics_Manager(Thread):
             logger.error('error :: metrics_manager :: get_remote_data - failed to get %s from %s' % (
                 str(endpoint), str(remote_skyline_instance[0])))
         if not r:
-            logger.warning('warning :: metrics_manager :: get_remote_data - no r from %s on %s' % (
-                endpoint, str(remote_skyline_instance[0])))
+            # @modified 20220510 - Task #4568: Reduce cluster logging
+            #                      Release #4562: v3.0.4
+            if LOCAL_DEBUG:
+                logger.warning('warning :: metrics_manager :: get_remote_data - no r from %s on %s' % (
+                    endpoint, str(remote_skyline_instance[0])))
             return data
         if r:
             if r.status_code != 200:
@@ -441,12 +448,18 @@ class Metrics_Manager(Thread):
                 logger.error('error :: metrics_manager :: get_remote_data - failed to get json from the response from %s on %s' % (
                     endpoint, str(remote_skyline_instance)))
             if js:
-                logger.info('metrics_manager :: get_remote_data - got response for %s from %s' % (
-                    str(data_required), str(remote_skyline_instance[0])))
+                # @modified 20220510 - Task #4568: Reduce cluster logging
+                #                      Release #4562: v3.0.4
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: metrics_manager :: get_remote_data - got response for %s from %s' % (
+                        str(data_required), str(remote_skyline_instance[0])))
                 try:
                     data = js['data'][data_required]
-                    logger.debug('metrics_manager :: debug :: get_remote_data - response for %s has %s items' % (
-                        str(data_required), str(len(data))))
+                    # @modified 20220510 - Task #4568: Reduce cluster logging
+                    #                      Release #4562: v3.0.4
+                    if LOCAL_DEBUG:
+                        logger.debug('metrics_manager :: debug :: get_remote_data - response for %s has %s items' % (
+                            str(data_required), str(len(data))))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: get_remote_data - failed to build remote_training_data from %s on %s' % (
@@ -460,7 +473,7 @@ class Metrics_Manager(Thread):
         files from REMOTE_SKYLINE_INSTANCES
         """
         spin_start = time()
-        logger.info('metrics_manager :: sync_cluster_files started')
+        logger.info('metrics_manager :: sync_cluster_files started - %s' % str(i))
 
         local_skyline_instance = None
         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
@@ -954,20 +967,74 @@ class Metrics_Manager(Thread):
             ]
         else:
             local_skyline_instance = [skyline_url, None, None, this_host]
+
+        # @added 20220510 - Feature #4464: flux - quota - cluster_sync
+        #                   Release #4562 - v3.0.4
+        # Create a single hash that contains all the flux.quota.namespace_metrics
+        # namespaces to allow for the cluster sync to make a single call rather
+        # than a call per namespace
+        flux_quota_namespace_metrics_dict = {}
+
         # If there are flux quotas then sync the quota keys
         if metrics_manager_flux_namespace_quotas:
             logger.info('metrics_manager :: sync_cluster_files :: updating flux.quota.namespace_metrics Redis keys with cluster data')
-        for parent_namespace in list(metrics_manager_flux_namespace_quotas.keys()):
-            namespace_quota_key = 'flux.quota.namespace_metrics.%s' % parent_namespace
-            endpoint = 'redis_data&type=set&key=%s&cluster_data=true' % namespace_quota_key
+
+            # @added 20220510 - Feature #4464: flux - quota - cluster_sync
+            #                   Release #4562 - v3.0.4
+            # Create a single hash that contains all the flux.quota.namespace_metrics
+            # namespaces to allow for the cluster sync to make a single call rather
+            # than a call per namespace
+            namespaces_quota_key = 'metrics_manager.flux.quota.namespace_metrics'
+            endpoint = 'api?redis_data&type=hash&key=%s&cluster_data=true' % namespaces_quota_key
             save_file = False
             data = []
             try:
-                data = self.get_remote_data(local_skyline_instance, namespace_quota_key, endpoint, save_file)
+                data = self.get_remote_data(local_skyline_instance, namespaces_quota_key, endpoint, save_file)
             except Exception as err:
-                logger.error(traceback.format_exc())
                 logger.error('error :: metrics_manager :: sync_cluster_files :: failed to get %s from %s - %s' % (
                     endpoint, str(local_skyline_instance[0]), err))
+            if data:
+                for namespace in list(data.keys()):
+                    try:
+                        namespace_metrics_str = data[namespace]
+                        if namespace_metrics_str:
+                            flux_quota_namespace_metrics_dict[namespace] = literal_eval(namespace_metrics_str)
+                    except Exception as err:
+                        logger.error('error :: metrics_manager :: sync_cluster_files :: failed to add metrics to flux_quota_namespace_metrics_dict for %s - %s' % (
+                            namespace, err))
+                logger.info('metrics_manager :: sync_cluster_files :: updating flux.quota.namespace_metrics Redis keys with cluster data from metrics_manager.flux.quota.namespace_metrics')
+
+        for parent_namespace in list(metrics_manager_flux_namespace_quotas.keys()):
+            # @modified 20220510 - Feature #4464: flux - quota - cluster_sync
+            #                      Release #4562 - v3.0.4
+            # Use single hash that contains all the flux.quota.namespace_metrics
+            # namespaces to allow for the cluster sync to make a single call rather
+            # than a call per namespace
+            data = []
+            namespace_quota_key = 'flux.quota.namespace_metrics.%s' % parent_namespace
+            if not flux_quota_namespace_metrics_dict:
+                # @modified 20220510 - Feature #4464: flux - quota - cluster_sync
+                #                      Release #4562 - v3.0.4
+                # Correct redis_data URI
+                # endpoint = 'redis_data&type=set&key=%s&cluster_data=true' % namespace_quota_key
+                endpoint = 'api?redis_data&type=set&key=%s&cluster_data=true' % namespace_quota_key
+                save_file = False
+                data = []
+                try:
+                    data = self.get_remote_data(local_skyline_instance, namespace_quota_key, endpoint, save_file)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: sync_cluster_files :: failed to get %s from %s - %s' % (
+                        endpoint, str(local_skyline_instance[0]), err))
+            else:
+                try:
+                    data = flux_quota_namespace_metrics_dict[parent_namespace]
+                except KeyError:
+                    data = []
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: sync_cluster_files :: failed to determine metrics from flux_quota_namespace_metrics_dict for %s - %s' % (
+                        parent_namespace, err))
+
             if data:
                 # Fetch the current Redis data to determine if any new metrics
                 # need to be added
@@ -2050,6 +2117,36 @@ class Metrics_Manager(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: metrics_manager :: failed to hgetall metrics_manager.flux.namespace_quotas Redis hash key - %s' % (
                     err))
+
+        # @added 20220510 - Feature #4464: flux - quota - cluster_sync
+        #                   Release #4562 - v3.0.4
+        # Create a single hash that contains all the flux.quota.namespace_metrics
+        # namespaces to allow for the cluster sync to make a single call rather
+        # than a call per namespace
+        for parent_namespace in list(namespace_quotas_dict.keys()):
+            namespace_quota_key = 'flux.quota.namespace_metrics.%s' % parent_namespace
+            namespace_metrics = []
+            try:
+                namespace_metrics = list(self.redis_conn_decoded.smembers(namespace_quota_key))
+            except:
+                namespace_metrics = []
+            if namespace_metrics:
+                known_namespace_metrics = []
+                try:
+                    known_namespace_metrics_str = self.redis_conn_decoded.hget('metrics_manager.flux.quota.namespace_metrics', parent_namespace)
+                    if known_namespace_metrics_str:
+                        known_namespace_metrics = literal_eval(known_namespace_metrics_str)
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: failed to hget %s from metrics_manager.flux.quota.namespace_metrics - %s' % (
+                        namespace, err))
+                all_namespace_metrics = list(set(known_namespace_metrics + namespace_metrics))
+                try:
+                    self.redis_conn_decoded.hset('metrics_manager.flux.quota.namespace_metrics', parent_namespace, str(all_namespace_metrics))
+                    logger.info('metrics_manager :: added %s metrics for %s to metrics_manager.flux.quota.namespace_metrics' % (
+                        str(len(all_namespace_metrics)), parent_namespace))
+                except Exception as err:
+                    logger.error('error :: metrics_manager :: failed to hset %s in metrics_manager.flux.quota.namespace_metrics - %s' % (
+                        parent_namespace, err))
 
         # @added 20220426 - Feature #4536: Handle Redis failure
         # Add flux required data to memcache as well
