@@ -84,10 +84,10 @@ Notable changes for users that were moving with master
 Update notes
 ------------
 
-- These update instruction apply to upgrading from v2.0.0 to v3.0.0
-  only. However as with all Skyline updates it is possible to go through the update
-  notes for each version and make your own update notes/process to take you from
-  version x to version y.
+- These update instruction apply to upgrading from v2.0.0 to v3.0.0 (through
+  to v3.0.4) only. However as with all Skyline updates it is possible to go
+  through the update notes for each version and make your own update notes/process
+  to take you from version x to version y.
 - If you have been running on the rolling master and unreleased rolling v2.1.0
   version, please determine what SQL updates you have applied and apply only
   further v2.1.0 SQL updates as appropriate.
@@ -234,7 +234,9 @@ How to update from v2.0.0
 .. code-block:: bash
 
     # Get the new version
-    NEW_SKYLINE_VERSION="v3.0.0"    # Your new Skyline version
+    # NEW_SKYLINE_VERSION="v3.0.0"    # Your new Skyline version
+    # Updated to v3.0.4
+    NEW_SKYLINE_VERSION="v3.0.4"    # Your new Skyline version
     OLD_SKYLINE_VERSION="v2.0.0"    # Your old Skyline version
 
     CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
@@ -379,7 +381,7 @@ How to update from v2.0.0
     ls -al $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
 
     # Update DB
-    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/${NEW_SKYLINE_VERSION}.sql"
+    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/v3.0.0.sql"
 
     # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
     # or do not wish to run.

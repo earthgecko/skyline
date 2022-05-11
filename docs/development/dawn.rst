@@ -23,12 +23,12 @@ be used to deploy any other kind of environment unless the other components such
 as Graphite, iptables/iptables6/ufw are configured at the same time.  The build
 script is suitable for:
 
-- -CentOS 7.5 and 7.6 (last build time 23 mins)- (no longer supported as
-  CentOS 7 is on python 2.7 and/or rh SCL 3.6 which are incompatible with Skyline)
-- -Ubuntu 16.04.4 LTS (last build time 21 mins)- end of life, not supported
 - CentOS Stream 8 (last build time 20 mins)
 - Ubuntu 18.04 LTS (last build time 24 mins)
 - Ubuntu 20.04 LTS (last build time 21 mins)
+- NO LONGER SUPPORTED (as CentOS 7 is on python 2.7 and/or rh SCL 3.6 which are
+  incompatible with Skyline) CentOS 7.5 and 7.6 (last build time 23 mins)
+- NO LONGER SUPPORTED (OS now end of life) Ubuntu 16.04.4 LTS (last build time 21 mins)
 
 Note that is recommended to run Skyline on CentOS Stream 8 because development,
 testing and production instances are run on CentOS Stream 8.  Although the build
@@ -85,7 +85,7 @@ the terminal:
   MYSQL_ROOT_PASSWORD="<YOUR_ROOT_MYSQL_USER_PASSWORD>"        # The MySQL root user password
   MYSQL_SKYLINE_PASSWORD="<YOUR_SKYLINE_MYSQL_USER_PASSWORD>"  # The Skyline DB user password
   REDIS_PASSWORD="<YOUR_REALLY_REALLY_LONG_Redis_PASSWORD>"   # The Redis password
-  SKYLINE_RELEASE="v3.0.2"                                     # The Skyline release/branch/commit to deploy
+  SKYLINE_RELEASE="v3.0.4"                                     # The Skyline release/branch/commit to deploy
   INSTALL_GRAPHITE=1                                           # Install Graphite 0 = no, 1 = yes (CentOS 8 only)
   GRAPHITE_VERSION=1.1.8' > /etc/skyline/skyline.dawn.conf
 

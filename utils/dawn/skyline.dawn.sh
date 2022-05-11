@@ -18,6 +18,7 @@
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 # @modified 20220506 - Release #4552: v3.0.2
 # @modified 20220509 - Release #4552: v3.0.3
+# @modified 20220511 - Release #4562: v3.0.4
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -57,7 +58,8 @@ REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 # @modified 20220506 - Release #4552: v3.0.2
 # @modified 20220509 - Release #4552: v3.0.3
-SKYLINE_RELEASE="v3.0.3"                                   # The Skyline release to deploy
+# @modified 20220511 - Release #4562: v3.0.4
+SKYLINE_RELEASE="v3.0.4"                                   # The Skyline release to deploy
 # @added 20191016 - Branch #3262: py3
 INSTALL_GRAPHITE=1                                         # Install Graphite 0 = no, 1 = yes (CentOS 8 only)
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
