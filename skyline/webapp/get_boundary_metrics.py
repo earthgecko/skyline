@@ -74,8 +74,11 @@ def get_boundary_metrics(
 
     remote_boundary_metrics = []
     if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
-        boundary_metrics_uri = 'boundary_metrics'
+        boundary_metrics_uri = 'boundary_metrics&cluster_call=true'
         try:
+            # @added 20220509 - Feature #3824: get_cluster_data
+            #                   Release #4562 - v3.0.4
+            # Added cluster_call
             remote_boundary_metrics = get_cluster_data(boundary_metrics_uri, 'boundary_metrics')
         except Exception as e:
             if not log:

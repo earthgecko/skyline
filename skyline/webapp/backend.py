@@ -87,8 +87,8 @@ REQUEST_ARGS = ['from_date',
 # long string otherwise.
 try:
     ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
-except Exception as e:
-    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % e)
+except Exception as outer_err:
+    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % outer_err)
     ENABLE_WEBAPP_DEBUG = False
 
 # @added 20180720 - Feature #2464: luminosity_remote_data
@@ -921,6 +921,23 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
     use_timeout = (int(connect_timeout), int(read_timeout))
     data = []
 
+    # @added 20220509 - Feature #3824: get_cluster_data
+    #                   Release #4562 - v3.0.4
+    # Force cluster_data on appropriate methods and added cluster_call to prevent
+    # infinite loop calls
+    cluster_call = False
+    try:
+        cluster_call_str = request.args.get('cluster_call', 'false')
+        if cluster_call_str == 'true':
+            cluster_call = True
+    except KeyError:
+        cluster_call = False
+    except Exception as err:
+        logger.error('error :: get_cluster_data - %s' % err)
+    if cluster_call:
+        logger.warning('warning :: get_cluster_data was call with a request that pased cluster_call=true, prevent loop returning empty data')
+        return data
+
     if only_host != 'all':
         logger.info('get_cluster_data :: querying all remote hosts as only_host set to %s' % (
             str(only_host)))
@@ -979,6 +996,13 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
         url = '%s/api?%s' % (str(item[0]), api_endpoint)
         if not normal_api:
             url = '%s/%s' % (str(item[0]), str(api_endpoint))
+
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if 'cluster_call' not in url:
+            url = '%s&cluster_call=true' % url
+
         r = None
 
         try:
@@ -1006,7 +1030,10 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
         if r:
             # @added 20220503 - Feature #4530: namespace.analysed_events
             # Added 404 to handle resource not on cluster node
-            if r.status_code == 404:
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            # Added 400 to handle bad request on cluster node
+            # if r.status_code == 404:
+            if r.status_code in [404, 400]:
                 logger.warning('get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
                     api_endpoint, str(item), str(r.status_code), str(r.reason)))
                 # @modified 20220504 - Feature #4530: namespace.analysed_events
@@ -1016,6 +1043,8 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             if r.status_code != 200:
                 logger.error('error :: get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
                     api_endpoint, str(item), str(r.status_code), str(r.reason)))
+                continue
+
             js = None
             try:
                 js = r.json()
@@ -1048,10 +1077,17 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                     logger.info('get_cluster_data :: got %s %s from %s' % (
                         str(remote_data), str(data_required), str(item[0])))
                     data.append(remote_data)
+                if isinstance(remote_data, int):
+                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                        str(remote_data), str(data_required), str(item[0])))
+                    data.append(remote_data)
         else:
             # @added 20220503 - Feature #4530: namespace.analysed_events
             # Added 404 to handle resource not on cluster node
-            if r.status_code == 404:
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            # Added 400 to handle bad request on cluster node
+            # if r.status_code == 404:
+            if r.status_code in [404, 400]:
                 logger.warning('get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
                     api_endpoint, str(item), str(r.status_code), str(r.reason)))
                 # @modified 20220504 - Feature #4530: namespace.analysed_events
@@ -1930,7 +1966,10 @@ def namespace_stale_metrics(namespace, cluster_data, exclude_sparsely_populated)
         if exclude_sparsely_populated:
             exclude_sparsely_populated_str = 'true'
         remote_namespaces_namespace_stale_metrics_dicts = []
-        stale_metrics_uri = 'stale_metrics=true&namespace=%s&exclude_sparsely_populated=%s' % (
+        # @modified 20220509 - Feature #3824: get_cluster_data
+        #                      Release #4562 - v3.0.4
+        # Added cluster_call
+        stale_metrics_uri = 'stale_metrics=true&namespace=%s&exclude_sparsely_populated=%s&cluster_call=true' % (
             str(namespace), str(exclude_sparsely_populated_str))
         try:
             remote_namespaces_namespace_stale_metrics_dicts = get_cluster_data(stale_metrics_uri, 'stale_metrics')
