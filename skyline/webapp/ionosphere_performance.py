@@ -38,7 +38,7 @@ except EnvironmentError as e:
 
 # @added 20210107 - Feature #3934: ionosphere_performance
 def get_ionosphere_performance(
-        metric, metric_like, from_timestamp, until_timestamp, format,
+        metric, metric_like, from_timestamp, until_timestamp, output_format,
         # @added 20210128 - Feature #3934: ionosphere_performance
         # Improve performance and pass arguments to get_ionosphere_performance
         # for cache key
@@ -1119,11 +1119,21 @@ def get_ionosphere_performance(
         # @modified 20210203 - Feature #3934: ionosphere_performance
         # Correct conditional operator
         # performance_df = performance_df[(performance_df.index > begin_date) & (performance_df.index <= end_date)]
+
+        logger.info('get_ionosphere_performance - performance_df has %s rows' % str(len(performance_df)))
+        logger.info('get_ionosphere_performance - extracting rows from %s to %s ' % (
+            str(original_begin_date), str(use_end_date)))
         performance_df = performance_df[(performance_df.index >= original_begin_date) & (performance_df.index <= use_end_date)]
-        performance_df = performance_df.dropna(how='any')
+        logger.info('get_ionosphere_performance - performance_df now has %s rows' % str(len(performance_df)))
+        # logger.info('get_ionosphere_performance - performance_df: %s' % str(performance_df.to_string()))
+
+        # @modified 20220510 - Feature #3934: ionosphere_performance
+        # Do not drop rows with nans, convert them to 0
+        # performance_df = performance_df.dropna(how='any')
+        performance_df = performance_df.fillna(0)
 
     plot_png = None
-    if format != 'json':
+    if output_format != 'json':
         # Custom title
         if 'title' in request.args:
             title_str = request.args.get('title', 'default')
@@ -1212,6 +1222,20 @@ def get_ionosphere_performance(
         performance_dict = new_performance_df.to_dict('records')
         # logger.debug('get_ionosphere_performance - performance_dict: %s' % str(performance_dict))
 
+    # @modified 20220510 - Feature #3934: ionosphere_performance
+    # Do drop entries with the date set to 0
+    performance_dict_no_zero_dates = []
+    if performance_dict:
+        for item in performance_dict:
+            for key in item:
+                if key == 'date':
+                    date_time_str = item['date']
+                    if date_time_str == 0:
+                        continue
+                    performance_dict_no_zero_dates.append(item)
+    if performance_dict_no_zero_dates:
+        performance_dict = performance_dict_no_zero_dates
+
     yesterday_data_dict = {}
     yesterday_date_time_obj = datetime.datetime.strptime(yesterday_end_date, '%Y-%m-%d')
     # logger.debug('debug :: get_ionosphere_performance - performance_dict - %s' % str(performance_dict))
@@ -1219,6 +1243,8 @@ def get_ionosphere_performance(
         for key in item:
             if key == 'date':
                 date_time_str = item['date']
+                if date_time_str == 0:
+                    continue
                 date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d')
                 if date_time_obj <= yesterday_date_time_obj:
                     yesterday_data_dict[date_time_str] = {}

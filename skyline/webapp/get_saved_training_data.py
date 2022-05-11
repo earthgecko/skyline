@@ -101,7 +101,10 @@ def get_saved_training_data(
         return saved_training_data_dict
 
     if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
-        saved_training_data_uri = 'saved_training_data'
+        # @modified 20220509 - Feature #3824: get_cluster_data
+        #                      Release #4562 - v3.0.4
+        # Added cluster_call
+        saved_training_data_uri = 'saved_training_data&cluster_call=true'
         try:
             remote_saved_training_data = get_cluster_data(saved_training_data_uri, 'saved_training_data')
         except Exception as e:

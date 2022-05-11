@@ -35,21 +35,33 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
         current_logger.info('/api?get_metric_analysed_events with metric: %s' % base_name)
     except Exception as err:
         current_logger.error('error :: api get_metric_analysed_events request no metric argument - %s' % err)
-        return 'Bad Request', 400
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Does not have the desired result
+        # return 'Bad Request', 400
+        return 400
     from_timestamp = None
     try:
         from_timestamp = int(request.args.get('from_timestamp'))
         current_logger.info('/api?get_metric_analysed_events with from_timestamp: %s' % str(from_timestamp))
     except Exception as err:
         current_logger.error('error :: api get_metric_analysed_events request no from_timestamp argument - %s' % err)
-        return 'Bad Request', 400
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Does not have the desired result
+        # return 'Bad Request', 400
+        return 400
     until_timestamp = None
     try:
         until_timestamp = int(request.args.get('until_timestamp'))
         current_logger.info('/api?get_metric_analysed_events with until_timestamp: %s' % str(until_timestamp))
     except Exception as err:
         current_logger.error('error :: api get_metric_analysed_events request no until_timestamp argument - %s' % err)
-        return 'Bad Request', 400
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Does not have the desired result
+        # return 'Bad Request', 400
+        return 400
 
     try:
         redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
@@ -89,7 +101,10 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
     if REMOTE_SKYLINE_INSTANCES and cluster_data:
         analysed_events = {}
         remote_analysed_events = []
-        api_uri = 'get_metric_analysed_events=true&metric=%s&from=%s&until=%s&cluster_data=false' % (
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Correct parameters append _timestamp
+        api_uri = 'get_metric_analysed_events=true&metric=%s&from_timestamp=%s&until_timestamp=%s&cluster_data=false&cluster_call=true' % (
             base_name, from_timestamp, until_timestamp)
         try:
             remote_analysed_events = get_cluster_data(api_uri, 'analysed_events')

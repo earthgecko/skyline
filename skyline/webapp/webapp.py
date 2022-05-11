@@ -318,8 +318,8 @@ if True:
     from api_get_metric_analysed_events import api_get_metric_analysed_events
     from api_get_analysed_events import api_get_analysed_events
 
-# @added 20220405 - Task #4514: Integrate opentelemetry
-#                   Feature #4516: flux - opentelemetry traces
+    # @added 20220405 - Task #4514: Integrate opentelemetry
+    #                   Feature #4516: flux - opentelemetry traces
     OTEL_ENABLED = False
     try:
         OTEL_ENABLED = settings.OTEL_ENABLED
@@ -331,6 +331,9 @@ if True:
         from opentelemetry import trace
         from opentelemetry.instrumentation.flask import FlaskInstrumentor
         from opentelemetry.instrumentation.redis import RedisInstrumentor
+
+    # @added 20220509 - Feature #4564: authoritative_node
+    from functions.metrics.get_authoritative_node import get_authoritative_node
 
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
@@ -916,21 +919,41 @@ def api():
         except:
             logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
+    # @added 20220509 - Feature #3824: get_cluster_data
+    #                   Release #4562 - v3.0.4
+    # Force cluster_data on appropriate methods
+    cluster_call = False
+    try:
+        cluster_call_str = request.args.get('cluster_call', 'false')
+        if cluster_call_str == 'true':
+            cluster_call = True
+    except KeyError:
+        cluster_call = False
+    except Exception as err:
+        logger.error('error :: Webapp error with api?thunder_no_data_remove_namespace - %s' % err)
 
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
 
-    # @added 202200504 - Feature #4530: namespace.analysed_events
+    # @added 20220504 - Feature #4530: namespace.analysed_events
     if 'get_analysed_events' in request.args:
         start_get_analysed_events = timer()
         analysed_events = {}
         try:
-            analysed_events = api_get_analysed_events(skyline_app, cluster_data=cluster_data)
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            #                      Release #4562 - v3.0.4
+            # analysed_events = api_get_analysed_events(skyline_app, cluster_data=cluster_data)
+            analysed_events = api_get_analysed_events(skyline_app, cluster_data)
         except Exception as err:
             logger.error('error :: api_get_analysed_events failed - %s' % err)
             return 'Internal Server Error', 500
         end_get_analysed_events = timer()
         get_analysed_events_time = (end_get_analysed_events - start_get_analysed_events)
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Added handle 400
+        if analysed_events == 400:
+            return 'Bad Request', 400
         if not analysed_events:
             data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_analysed_events_time, "response": 404}, "data": {}}
             return jsonify(data_dict), 404
@@ -941,14 +964,33 @@ def api():
     # @added 202200504 - Feature #4530: namespace.analysed_events
     if 'get_metric_analysed_events' in request.args:
         start_get_metric_analysed_events = timer()
+
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         analysed_events = {}
         try:
-            analysed_events = api_get_metric_analysed_events(skyline_app, cluster_data=cluster_data)
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            #                      Release #4562 - v3.0.4
+            # analysed_events = api_get_metric_analysed_events(skyline_app, cluster_data=cluster_data)
+            analysed_events = api_get_metric_analysed_events(skyline_app, cluster_data)
         except Exception as err:
             logger.error('error :: api_get_metric_analysed_events failed - %s' % err)
             return 'Internal Server Error', 500
         end_get_metric_analysed_events = timer()
         get_metric_analysed_events_time = (end_get_metric_analysed_events - start_get_metric_analysed_events)
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Added handle 400
+        if analysed_events == 400:
+            return 'Bad Request', 400
         if not analysed_events:
             data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_metric_analysed_events_time, "response": 404}, "data": {}}
             return jsonify(data_dict), 404
@@ -1067,6 +1109,60 @@ def api():
         except Exception as err:
             logger.error('error :: api test_alert error - %s' % err)
             return 'Bad Request', 400
+
+        # @added 20220509 - Feature #4564: authoritative_node
+        #                   Feature #4482: Test alerts
+        # Ensure that the test alert is triggered on the correct cluster node
+        cluster_request = False
+        if HORIZON_SHARDS:
+            authoritative_node = None
+            try:
+                authoritative_node = get_authoritative_node(metric)
+                logger.info('api test_alert get_authoritative_node - reports - %s as the authoritative cluster node' % authoritative_node)
+            except Exception as err:
+                logger.error('error :: api test_alert get_authoritative_node failed - %s' % err)
+            if authoritative_node == this_host:
+                logger.info('api test_alert creating test alert from a cluster_call because this host is authoritative_node: %s' % authoritative_node)
+            if authoritative_node != this_host:
+                cluster_request = True
+                cluster_call = False
+                try:
+                    cluster_call = request.args.get('cluster_call', 'false')
+                    if cluster_call == 'true':
+                        logger.info('api test_alert - requested test_alert but not authoritative_node so allowing %s to handle the request' % authoritative_node)
+                        end_test_alert = timer()
+                        test_alert_time = (end_test_alert - start_test_alert)
+                        data_dict = {"status": {"request_time": test_alert_time, "response": 200}, "data": {"test alert added": False, "cluster_node": this_host, "authoritative_node": authoritative_node}}
+                        logger.info('api test_alert - responding with: %s' % str(data_dict))
+                        return jsonify(data_dict), 200
+                except Exception as err:
+                    logger.error('error :: api test_alert error - %s' % err)
+                    return 'Internal Server Error', 500
+        if cluster_request:
+            logger.info('api test_alert - requesting test_alert from %s' % authoritative_node)
+            if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+                test_alert_list = []
+                test_alert_uri = 'test_alert&metric=%s&app=%s&alerter=%s&cluster_call=true' % (
+                    metric, alerter_app, alerter)
+                if alerter_id:
+                    test_alert_uri = '%s&alerter_id=%s' % (test_alert_uri, str(alerter_id))
+                if trigger_anomaly:
+                    test_alert_uri = '%s&trigger_anomaly=true' % test_alert_uri
+                try:
+                    test_alert_list = get_cluster_data(test_alert_uri, 'test alert added')
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: /api?test_alert get_cluster_data failed - could not get data from the remote Skyline instances - %s' % err)
+                if test_alert_list.count(True) > 0:
+                    data = {'test alert added': True, 'metric': metric, 'app': alerter_app, "alerter": alerter, "trigger_anomaly": trigger_anomaly, "cluster_node": this_host, "authoritative_node": authoritative_node}
+                    if alerter_id:
+                        data['id'] = alerter_id
+                    end_test_alert = timer()
+                    test_alert_time = (end_test_alert - start_test_alert)
+                    data_dict = {"status": {"request_time": test_alert_time, "response": 200, "cluster_data": True}, "data": data}
+                    logger.info('api test_alert - got a True test_alert_added from a cluster node, responding with: %s' % str(data_dict))
+                    return jsonify(data_dict), 200
+
         # @added 20220315 - Feature #4482: Test alerts
         # Allow for full testing with the injection of an anomaly on a
         # metric
@@ -1083,6 +1179,7 @@ def api():
             try:
                 test_alert_redis_key = '%s.test_alerts' % alerter_app
                 REDIS_CONN.hset(test_alert_redis_key, time.time(), str(key_data))
+                test_alert_added = True
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to save test_alert dict to Redis key - %s' % err)
@@ -1107,6 +1204,7 @@ def api():
         end_test_alert = timer()
         test_alert_time = (end_test_alert - start_test_alert)
         data_dict = {"status": {"request_time": test_alert_time, "response": 200}, "data": data}
+        logger.info('api test_alert - responding with: %s' % str(data_dict))
         return jsonify(data_dict), 200
 
     # @added 20220223 - Feature #4466: webapp - api - redis_data
@@ -1117,9 +1215,12 @@ def api():
             'metrics_manager.flux.aggregate_namespaces',
             # @added 20220302 - Feature #4400: flux - quota
             'flux.quota.namespace_rejected_metrics',
+            # @added 20220510 - Feature #4464: flux - quota - cluster_sync
+            #                   Release #4562 - v3.0.4
+            # Use single hash that contains all the flux.quota.namespace_metrics
+            'metrics_manager.flux.quota.namespace_metrics',
         ]
         start_redis_data = timer()
-        logger.info('/api?redis_data')
         key = None
         try:
             key = request.args.get('key', 'false')
@@ -1147,27 +1248,35 @@ def api():
             logger.error('error :: /api?redis_data request failed to query type - %s' % err)
         if not key_type:
             return 'Bad Request', 400
+        logger.info('/api?redis_data - %s' % str(request.args.to_dict()))
+
         data = []
         if key_type == 'hash':
             data = {}
         try:
             if key_type == 'set':
                 data = list(REDIS_CONN.smembers(key))
-                logger.info('/api?redis_data - got list of length %s from Redis for %s' % (str(len(data)), key))
+                if data:
+                    logger.info('/api?redis_data - got list of length %s from Redis for %s' % (str(len(data)), key))
             if key_type == 'hash':
                 data = REDIS_CONN.hgetall(key)
-                logger.info('/api?redis_data - got dict of length %s from Redis for %s' % (str(len(data)), key))
+                if data:
+                    logger.info('/api?redis_data - got dict of length %s from Redis for %s' % (str(len(data)), key))
             if key_type == 'key':
                 key_data = REDIS_CONN.get(key)
                 data = [key_data]
-                logger.info('/api?redis_data - got data from Redis for %s' % (key))
+                if data:
+                    logger.info('/api?redis_data - got data from Redis for %s' % (key))
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: /api?redis_data - failed - %s' % (
                 err))
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             redis_data_lists = []
-            redis_data_uri = 'redis_data&type=%s&key=%s' % (key_type, key)
+            # @modified 20220509 - Feature #3824: get_cluster_data
+            #                      Release #4562 - v3.0.4
+            # Added cluster_call
+            redis_data_uri = 'redis_data&type=%s&key=%s&cluster_call=true' % (key_type, key)
             try:
                 redis_data_lists = get_cluster_data(redis_data_uri, key)
             except Exception as err:
@@ -1203,8 +1312,11 @@ def api():
         end_redis_data = timer()
         redis_data_time = (end_redis_data - start_redis_data)
         if not data:
+            logger.info('/api?redis_data - took %.6f seconds - returning 404' % redis_data_time)
             data_dict = {"status": {"cluster_data": cluster_data, "request_time": redis_data_time, "response": 404}, "data": data}
             return jsonify(data_dict), 404
+        logger.info('/api?redis_data - took %.6f seconds - returning data and 200' % redis_data_time)
+
         data_dict = {"status": {"cluster_data": cluster_data, "request_time": redis_data_time, "response": 200}, "data": data}
         return jsonify(data_dict), 200
 
@@ -1231,11 +1343,21 @@ def api():
             logger.error('error :: /api?inactive_metrics - get_inactive_metrics failed - %s' % (
                 err))
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             inactive_metrics_lists = []
-            inactive_metrics_uri = 'inactive_metrics'
+            inactive_metrics_uri = 'inactive_metrics&cluster_call=true'
             if namespace:
-                inactive_metrics_uri = 'inactive_metrics?namespace=%s' % str(namespace)
+                inactive_metrics_uri = 'inactive_metrics?namespace=%s&cluster_call=true' % str(namespace)
             try:
                 inactive_metrics_lists = get_cluster_data(inactive_metrics_uri, 'metrics')
             except:
@@ -1490,9 +1612,19 @@ def api():
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_resolutions_dicts = []
-            redis_metric_data_uri = 'metrics_resolutions'
+            redis_metric_data_uri = 'metrics_resolutions&cluster_call=true'
             try:
                 remote_resolutions_dicts = get_cluster_data(redis_metric_data_uri, 'resolutions')
             except:
@@ -1620,9 +1752,19 @@ def api():
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_sparsity_dicts = []
-            redis_metric_data_uri = 'metrics_sparsity'
+            redis_metric_data_uri = 'metrics_sparsity&cluster_call=true'
             try:
                 remote_sparsity_dicts = get_cluster_data(redis_metric_data_uri, 'sparsity')
             except:
@@ -1715,9 +1857,19 @@ def api():
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_timestamp_resolutions_dict = {}
-            redis_metric_data_uri = 'metrics_timestamp_resolutions'
+            redis_metric_data_uri = 'metrics_timestamp_resolutions&cluster_call=true'
             try:
                 remote_timestamp_resolutions_dicts = get_cluster_data(redis_metric_data_uri, 'timestamp_resolutions')
             except:
@@ -1859,6 +2011,16 @@ def api():
                 logger.error(fail_msg)
                 return internal_error(fail_msg, trace)
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         namespaces_namespace_stale_metrics_dict = {}
         try:
             namespaces_namespace_stale_metrics_dict = namespace_stale_metrics(namespace, cluster_data, exclude_sparsely_populated)
@@ -1948,6 +2110,26 @@ def api():
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: /api?thunder_no_data_remove_namespace fail to create Redis key %s  %s' % (redis_key, e))
+
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            thunder_no_data_remove_namespace_uri = 'thunder_no_data_remove_namespace&namespace=%s&expiry=%s&cluster_call=true' % (
+                namespace, str(expiry))
+            try:
+                remove_namespace_from_no_data_check = get_cluster_data(thunder_no_data_remove_namespace_uri, 'remove_namespace_from_no_data_check')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get remove_namespace_from_no_data_check from the remote Skyline instances')
+
         end_thunder_no_data_remove_namespace = timer()
         thunder_no_data_remove_namespace_time = (end_thunder_no_data_remove_namespace - start_thunder_no_data_remove_namespace)
         if key_set:
@@ -2019,6 +2201,17 @@ def api():
             namespaces = []
         logger.info('/api?boundary_metrics - get_boundary_metrics with metrics: %s, namespaces: %s' % (
             str(metrics), str(namespaces)))
+
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         boundary_metrics = None
         try:
             boundary_metrics = get_boundary_metrics(skyline_app, metrics, namespaces, cluster_data, True)
@@ -2100,11 +2293,15 @@ def api():
             return jsonify(data_dict), 200
         remote_last_analyzed_timestamp = None
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
-            last_analyzed_timestamp_uri = 'last_analyzed_timestamp&metric=%s' % metric
+            last_analyzed_timestamp_uri = 'last_analyzed_timestamp&metric=%s&cluster_call=true' % metric
             try:
-                remote_last_analyzed_timestamp = get_cluster_data(last_analyzed_timestamp_uri, 'last_analyzed_timestamp')
+                remote_last_analyzed_timestamps = get_cluster_data(last_analyzed_timestamp_uri, 'last_analyzed_timestamp')
             except Exception as e:
                 logger.error('error :: /api?last_analyzed_timestamp fail to get last_analyzed_timestamp for %s from other cluster nodes - %s' % (metric, e))
+            if remote_last_analyzed_timestamps:
+                for item in remote_last_analyzed_timestamps:
+                    if isinstance(item, int):
+                        remote_last_analyzed_timestamp = item
         end_last_analyzed_timestamp = timer()
         last_analyzed_timestamp_time = '%.6f' % (end_last_analyzed_timestamp - start_last_analyzed_timestamp)
         if remote_last_analyzed_timestamp:
@@ -2359,7 +2556,7 @@ def api():
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_batch_processing_metrics = None
             try:
-                remote_batch_processing_metrics = get_cluster_data('batch_processing_metrics', 'metrics')
+                remote_batch_processing_metrics = get_cluster_data('batch_processing_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get batch_processing_metrics from the remote Skyline instances')
@@ -2858,9 +3055,9 @@ def api():
             remote_training_data = None
             training_data_uri = 'training_data'
             if metric_filter:
-                training_data_uri = 'training_data&metric=%s' % metric_filter
+                training_data_uri = 'training_data&metric=%s&cluster_call=true' % metric_filter
             if timestamp_filter:
-                training_data_uri = '%s&timestamp=%s' % (training_data_uri, timestamp_filter)
+                training_data_uri = '%s&timestamp=%s&cluster_call=true' % (training_data_uri, timestamp_filter)
             try:
                 remote_training_data = get_cluster_data(training_data_uri, 'metrics')
             except:
@@ -2892,7 +3089,7 @@ def api():
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_non_alerting_metrics = None
             try:
-                remote_non_alerting_metrics = get_cluster_data('non_alerting_metrics', 'metrics')
+                remote_non_alerting_metrics = get_cluster_data('non_alerting_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get non_alerting_metrics from the remote Skyline instances')
@@ -2914,11 +3111,21 @@ def api():
             logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis - %s' % e)
             return 'Internal Server Error', 500
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         # @added 20201103 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_alerting_metrics = None
             try:
-                remote_alerting_metrics = get_cluster_data('alerting_metrics', 'metrics')
+                remote_alerting_metrics = get_cluster_data('alerting_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get alerting_metrics from the remote Skyline instances')
@@ -3075,7 +3282,7 @@ def api():
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_ionosphere_learn_work = None
             try:
-                remote_ionosphere_learn_work = get_cluster_data('ionosphere_learn_work', 'metrics')
+                remote_ionosphere_learn_work = get_cluster_data('ionosphere_learn_work&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get ionosphere_learn_work from the remote Skyline instances')
@@ -3154,11 +3361,21 @@ def api():
             logger.error('error :: Webapp could not get the mirage.unique_metrics list from Redis')
             return 'Internal Server Error', 500
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_mirage_metrics = None
             try:
-                remote_mirage_metrics = get_cluster_data('mirage_metrics', 'metrics')
+                remote_mirage_metrics = get_cluster_data('mirage_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get mirage_metrics from the remote Skyline instances')
@@ -3179,11 +3396,21 @@ def api():
             logger.error('error :: Webapp could not get the ionosphere.unique_metrics list from Redis')
             return 'Internal Server Error', 500
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_ionosphere_metrics = None
             try:
-                remote_ionosphere_metrics = get_cluster_data('ionosphere_metrics', 'metrics')
+                remote_ionosphere_metrics = get_cluster_data('ionosphere_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get ionosphere_metrics from the remote Skyline instances')
@@ -3211,18 +3438,28 @@ def api():
             logger.error('error :: Webapp could not get the derivative_metrics list from Redis')
             return 'Internal Server Error', 500
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_derivative_metrics = None
             try:
                 # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
                 # remote_derivative_metrics = get_cluster_data('derivative_metrics', 'metrics')
-                remote_derivative_metrics = get_cluster_data('aet.metrics_manager.derivative_metrics', 'metrics')
+                remote_derivative_metrics = get_cluster_data('derivative_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: Webapp could not get aet.metrics_manager.derivative_metrics from the remote Skyline instances')
+                logger.error('error :: Webapp could not get derivative_metrics from the remote Skyline instances')
             if remote_derivative_metrics:
-                logger.info('got %s remote aet.metrics_manager.derivative_metrics from the remote Skyline instances' % str(len(remote_derivative_metrics)))
+                logger.info('got %s remote derivative_metrics from the remote Skyline instances' % str(len(remote_derivative_metrics)))
                 derivative_metrics_list = derivative_metrics + remote_derivative_metrics
                 derivative_metrics = list(set(derivative_metrics_list))
 
@@ -3243,11 +3480,21 @@ def api():
             logger.error('error :: Webapp could not get the unique_metrics list from Redis')
             return 'Internal Server Error', 500
 
+        # @added 20220509 - Feature #3824: get_cluster_data
+        #                   Release #4562 - v3.0.4
+        # Force cluster_data on appropriate methods
+        if not cluster_data:
+            cluster_data = True
+            logger.info('api forcing cluster_data=true')
+        if cluster_call:
+            cluster_data = False
+            logger.info('api cluster_call forcing cluster_data=false')
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_unique_metrics = None
             try:
-                remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
@@ -3479,7 +3726,7 @@ def api():
 
         if not timeseries:
             if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
-                redis_metric_data_uri = 'metric=%s&format=json' % str(metric)
+                redis_metric_data_uri = 'metric=%s&format=json&cluster_call=true' % str(metric)
                 try:
                     timeseries = get_cluster_data(redis_metric_data_uri, 'timeseries')
                 except:
@@ -4333,7 +4580,7 @@ def panorama():
                     if settings.REMOTE_SKYLINE_INSTANCES:
                         remote_unique_metrics = None
                         try:
-                            remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                            remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
@@ -6093,7 +6340,7 @@ def ionosphere():
                 if settings.REMOTE_SKYLINE_INSTANCES:
                     remote_unique_metrics = None
                     try:
-                        remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                        remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
@@ -7016,7 +7263,7 @@ def ionosphere():
                                         try:
                                             remote_unique_metrics = None
                                             try:
-                                                remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics', only_host=str(item[0]))
+                                                remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics', only_host=str(item[0]))
                                             except:
                                                 logger.error(traceback.format_exc())
                                                 logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instance - %s' % str(item[0]))
@@ -7153,7 +7400,7 @@ def ionosphere():
                     if settings.REMOTE_SKYLINE_INSTANCES:
                         remote_unique_metrics = None
                         try:
-                            remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                            remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
@@ -7292,7 +7539,7 @@ def ionosphere():
                                 try:
                                     remote_unique_metrics = None
                                     try:
-                                        remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics', only_host=str(item[0]))
+                                        remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics', only_host=str(item[0]))
                                     except:
                                         logger.error(traceback.format_exc())
                                         logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instance - %s' % str(item[0]))
@@ -9979,7 +10226,7 @@ def update_external_settings():
             }
         }
         try:
-            remote_external_settings = get_cluster_data('update_external_settings', 'updated', only_host='all', endpoint_params=endpoint_params)
+            remote_external_settings = get_cluster_data('update_external_settings&cluster_call=true', 'updated', only_host='all', endpoint_params=endpoint_params)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: webapp could not get update_external_settings from the remote Skyline instances')
@@ -10190,7 +10437,7 @@ def remove_namespace_quota():
             }
         }
         try:
-            remote_removed_metrics = get_cluster_data('remove_namespace_quota_metrics', 'metrics', only_host='all', endpoint_params=endpoint_params)
+            remote_removed_metrics = get_cluster_data('remove_namespace_quota_metrics&cluster_call=true', 'metrics', only_host='all', endpoint_params=endpoint_params)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: remove_namespace_quota_metrics - could not get remove_namespace_quota_metrics from the remote Skyline instances')

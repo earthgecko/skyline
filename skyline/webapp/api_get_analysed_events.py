@@ -36,14 +36,22 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
         current_logger.info('api_get_analysed_events :: with from_timestamp: %s' % str(from_timestamp))
     except Exception as err:
         current_logger.error('error :: api get_analysed_events request no from_timestamp argument - %s' % err)
-        return 'Bad Request', 400
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Does not have the desired result
+        # return 'Bad Request', 400
+        return 400
     until_timestamp = None
     try:
         until_timestamp = int(request.args.get('until_timestamp'))
         current_logger.info('api_get_analysed_events :: with until_timestamp: %s' % str(until_timestamp))
     except Exception as err:
         current_logger.error('error :: api get_analysed_events request no until_timestamp argument - %s' % err)
-        return 'Bad Request', 400
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # Does not have the desired result
+        # return 'Bad Request', 400
+        return 400
 
     namespace = None
     try:
@@ -66,10 +74,16 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
     if REMOTE_SKYLINE_INSTANCES and cluster_data:
         current_logger.info('/api_get_analysed_events :: determining analysed_events from other cluster nodes')
         if namespace:
-            api_uri = 'get_analysed_events=true&from=%s&until=%s&namespace=%s&cluster_data=false' % (
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            #                      Release #4562 - v3.0.4
+            # Correct parameters append _timestamp
+            api_uri = 'get_analysed_events=true&from_timestamp=%s&until_timestamp=%s&namespace=%s&cluster_call=true' % (
                 from_timestamp, until_timestamp, namespace)
         else:
-            api_uri = 'get_analysed_events=true&from=%s&until=%s&cluster_data=false' % (
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            #                      Release #4562 - v3.0.4
+            # Correct parameters append _timestamp
+            api_uri = 'get_analysed_events=true&from_timestamp=%s&until_timestamp=%s&cluster_data=false&cluster_call=true' % (
                 from_timestamp, until_timestamp)
         try:
             remote_analysed_events = get_cluster_data(api_uri, 'analysed_events')
@@ -81,7 +95,13 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
             function_str, str(len(remote_analysed_events))))
 
     if remote_analysed_events:
-        current_logger.info('got %s remote analysed_events from the remote Skyline instances' % str(len(remote_analysed_events)))
+        current_logger.info('%s :: got remote analysed_events from the remote Skyline instances: %s' % (
+            function_str, str(remote_analysed_events)))
+        # @modified 20220509 - Feature #4530: namespace.analysed_events
+        #                      Release #4562 - v3.0.4
+        # current_logger.debug('debug :: %s :: got remote analysed_events: %s' % (
+        #     function_str, str(remote_analysed_events)))
+
         for remote_analysed_events_dict in remote_analysed_events:
             for key in list(remote_analysed_events_dict.keys()):
                 if isinstance(remote_analysed_events_dict[key], int):
