@@ -757,7 +757,7 @@ pymemcache==3.5.2
 #PyJWT==1.6.4
 # @modified 20211220 - Task #4344: Update dependencies
 #PyJWT==1.7.1
-PyJWT==2.3.0
+PyJWT==2.4.0
 
 # @added 20180105 - Branch #2270: luminosity
 # @added 20180105 - Branch #2270: luminosity
