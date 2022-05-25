@@ -212,7 +212,7 @@ SQLAlchemy==1.4.35
 pymemcache==3.5.2
 # @modified 20211220 - Task #4344: Update dependencies
 #PyJWT==1.7.1
-PyJWT==2.3.0
+PyJWT==2.4.0
 slackclient==2.9.3
 # @modified 20210614 - Task #4140: deps updates
 #                      Branch #1444: thunder
