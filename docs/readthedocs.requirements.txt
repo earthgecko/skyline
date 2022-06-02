@@ -135,7 +135,7 @@ pyparsing==3.0.8
 #Pillow==8.4.0
 # @modified 20220422 - Task #4452: Update dependencies
 #Pillow==9.0.0
-Pillow==9.1.0
+Pillow==9.1.1
 # @modified 20220217 - Task #4452: Update dependencies
 #matplotlib==3.3.3
 matplotlib==3.5.1
