@@ -96,15 +96,15 @@ mock==4.0.3
 # @modified 20211220 - Task #4344: Update dependencies
 #numpy==1.19.4
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
-#numpy==1.21.5
+#numpy==1.22.0
 # @modified 20220206 - Feature #4416: settings - additional SMTP_OPTS
 # numpy 1.22.0 not available on readthedocs
 #numpy==1.22.0
 # @modified 20220422 - Task #4452: Update dependencies
 # numpy 1.22.0 stil not available on readthedocs
-#numpy==1.21.5
+#numpy==1.22.0
 #numpy==1.22.3
-numpy==1.21.5
+numpy==1.22.0
 # @modified 20211220 - Task #4344: Update dependencies
 #scipy==1.5.4
 scipy==1.7.3
