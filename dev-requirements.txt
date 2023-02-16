@@ -109,7 +109,7 @@ MarkupSafe==2.1.1
 #Werkzeug==1.0.1
 # @modified 20220422 - Task #4452: Update dependencies
 #Werkzeug==2.0.2
-Werkzeug==2.1.1
+Werkzeug==2.2.3
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #click==6.6
