@@ -19,7 +19,7 @@ wheel
 #redis==4.0.2
 # @modified 20220422 - Task #4452: Update dependencies
 #redis==4.1.0
-redis==4.2.2
+redis==4.5.3
 
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #hiredis==1.0.1
