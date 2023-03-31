@@ -21,7 +21,7 @@ wheel
 #redis==4.0.2
 # @modified 20220422 - Task #4452: Update dependencies
 #redis==4.1.0
-redis==4.2.2
+redis==4.4.4
 # @modified 20211220 - Task #4344: Update dependencies
 #hiredis==1.1.0
 hiredis==2.0.0
