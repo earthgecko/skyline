@@ -1,6 +1,6 @@
 setuptools
 wheel
-redis==4.2.2
+redis==4.4.4
 hiredis==2.0.0
 docutils==0.18.1
 lockfile==0.12.2
