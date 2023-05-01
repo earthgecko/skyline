@@ -139,7 +139,7 @@ click==8.1.2
 #Flask==1.1.2
 # @modified 20220422 - Task #4452: Update dependencies
 #Flask==2.0.2
-Flask==2.1.1
+Flask==2.3.2
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
