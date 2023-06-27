@@ -91,10 +91,12 @@ if [ "$WEBAPP_SERVER" == "" ]; then
 fi
 if [ "$WEBAPP_SERVER" == "gunicorn" ]; then
   WEBAPP_SERVICE_STRING="gunicorn.py webapp"
+  WEBAPP_GUNICORN_WORKERS=$(cat "$BASEDIR/skyline/settings.py" | grep -v "^#" | grep "^WEBAPP_GUNICORN_WORKERS = " | sed -e "s/.*= //;s/'//g" | sed -e 's/"//g')
 fi
 if [ "$WEBAPP_SERVER" == "flask" ]; then
   WEBAPP_SERVICE_STRING="webapp.py start"
 fi
+
 
 # Check if it is running and if so its state
 RESTART=0
@@ -184,6 +186,13 @@ start () {
       rm -f "$BASEDIR/skyline/settings.pyc"
     fi
 
+# @added 20221103 - Task #4514: Integrate opentelemetry
+#                   Feature #4516: flux - opentelemetry traces
+# This prevents the opentelemetry.exporter.jaeger.thrift import JaegerExporter
+# from warning that Data exceeds the max UDP packet size and losing data on
+# large traces
+    export OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES="True"
+
     if [ $USE_VIRTUALENV -eq 0 ]; then
       if [ "$WEBAPP_SERVER" == "flask" ]; then
         /usr/bin/env python "$BASEDIR/skyline/${SERVICE_NAME}/webapp.py" start
@@ -205,6 +214,16 @@ start () {
         # @modified 20201121 - Feature #3820: HORIZON_SHARDS
         # Added gunicorn timeout
         gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" webapp:app --timeout 120 &
+        if [ $WEBAPP_GUNICORN_WORKERS -gt 2 ]; then
+          echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: settings.WEBAPP_GUNICORN_WORKERS is set to $WEBAPP_GUNICORN_WORKERS, automatically decreased to 2 as more than 2 are not required with the gevent worker_class" >> "$LOG_PATH/${SERVICE_NAME}.log"
+        fi
+        # @added 20221208 - Feature #4756: Use gevent gunicorn worker_class
+        #                   Feature #4732: flux vortex
+        # A workaround process to handle tsfresh multiprocessing as it is not
+        # possible with the current app layout and gunicorn running a gevent
+        # worker_class.  This app uses the sync worker_class and allows for the
+        # normal calculate_features_profile function to be run.
+        gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn_features_profile.py" webapp_features_profile:app --timeout 120 &
       fi
     fi
     RETVAL=$?
