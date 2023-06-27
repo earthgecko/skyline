@@ -16,7 +16,7 @@ def downsample_timeseries(
         required_resolution, method='mean', origin='end'):
     """
     Downsample the timeseries to resolution and align to resolution.  This is
-    done by defualt using Panda Backward resample, using origin='end' which was
+    done by default using Panda Backward resample, using origin='end' which was
     introduced in version 1.3, see
     https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#backward-resample
     https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html
