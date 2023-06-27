@@ -14,7 +14,7 @@ from os.path import isdir
 from os import path
 import string
 from os import remove as os_remove
-from time import sleep
+from time import sleep, strftime, gmtime
 # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
 from timeit import default_timer as timer
 # @added 20160703 - Feature #1464: Webapp Redis browser
@@ -49,10 +49,17 @@ import os.path
 # @added 20191029 - Task #3302: Handle csv.reader in py3
 #                   Branch #3262: py3
 import codecs
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
+import json
 
 import redis
 import simplejson as json
 from msgpack import Unpacker
+
+import requests
+
 from flask import (
     Flask, request, render_template, redirect, Response, abort, flash,
     send_file, jsonify)
@@ -80,7 +87,14 @@ from six.moves.urllib.parse import quote
 
 # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
 # from features_profile import feature_name_id, calculate_features_profile
-from features_profile import calculate_features_profile
+
+# @modified 20221208 - Feature #4756: Use gevent gunicorn worker_class
+#                      Feature #4732: flux vortex
+# A workaround process was added to handle tsfresh multiprocessing as it is not
+# possible with the current webapp layout and gunicorn running a gevent
+# worker_class.  This app uses the sync worker_class and allows for the
+# normal calculate_features_profile function to be run.
+# from features_profile import calculate_features_profile
 
 from tsfresh_feature_names import TSFRESH_VERSION
 
@@ -109,6 +123,11 @@ from flask import escape as flask_escape
 # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
 # Roll back change - breaking existing metrics with colons
 # from werkzeug.urls import iri_to_uri
+
+# @added 20220823 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Return namespaces, labels, values and elements with the response
+from prometheus_client.parser import _parse_labels as parse_labels
 
 if True:
     sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -144,7 +163,12 @@ if True:
     )
 
     from backend import (
-        panorama_request, get_list,
+        panorama_request,
+        # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # Deprecated get_list and using get_ functions in weabpp instead
+        # get_list,
         # @added 20180720 - Feature #2464: luminosity_remote_data
         luminosity_remote_data,
         # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
@@ -318,6 +342,31 @@ if True:
     from api_get_metric_analysed_events import api_get_metric_analysed_events
     from api_get_analysed_events import api_get_analysed_events
 
+    # @added 20220516 - Feature #2580: illuminance
+    from functions.illuminance.get_illuminance_entries import get_illuminance_entries
+
+    # @added 20220517 - Feature #4578: webapp - api_get_fp_timeseries
+    from api_get_fp_timeseries import api_get_fp_timeseries
+
+    # @added 20220727 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+    from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+
+    # @added 20221206 - Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    from functions.plots.vortex_training_data_graphs import get_vortex_training_data_graphs
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    from functions.mirage.get_vortex_metric_data_archive_filename import get_vortex_metric_data_archive_filename
+
+    # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    from functions.database.queries.get_apps import get_apps
+    from functions.database.queries.get_sources import get_sources
+    from functions.database.queries.get_hosts import get_hosts
+    from functions.database.queries.get_algorithms import get_algorithms
+
     # @added 20220405 - Task #4514: Integrate opentelemetry
     #                   Feature #4516: flux - opentelemetry traces
     OTEL_ENABLED = False
@@ -328,12 +377,47 @@ if True:
     except Exception as outer_err:
         OTEL_ENABLED = False
     if OTEL_ENABLED:
-        from opentelemetry import trace
+        from opentelemetry import trace as otel_trace
         from opentelemetry.instrumentation.flask import FlaskInstrumentor
         from opentelemetry.instrumentation.redis import RedisInstrumentor
 
     # @added 20220509 - Feature #4564: authoritative_node
     from functions.metrics.get_authoritative_node import get_authoritative_node
+
+    # @added 20220725 -
+    from expose_metrics import expose_metrics
+
+    from timeseries_graph import timeseries_graph
+
+    # @added 20221018 - Feature #4650: ionosphere.bulk.training
+#    from api_get_bulk_training_data import api_get_bulk_training_data
+
+    # @added 20221204 - Feature #4754: csv_to_timeseries
+    #                   Feature #4734: mirage_vortex
+    #                   Branch #4728: vortex
+    from functions.pandas.csv_to_timeseries import csv_to_timeseries
+    from functions.mirage.get_vortex_metric_data_from_archive import get_vortex_metric_data_from_archive
+    from vortex import vortex_request
+
+    # @added 20230127 - Feature #4830: webapp - panorama_plot_anomalies - all_events
+    from functions.metrics.get_metric_all_events import get_metric_all_events
+    from functions.plots.plot_metric_all_events import plot_metric_all_events
+
+    # @added 20230130 - Feature #4834: webapp - api - get_all_activity
+    #                   Feature #4830: webapp - panorama_plot_anomalies - all_events
+    from api_get_panorama_all_activity import get_panorama_all_activity
+
+    # @added 20230131 - Feature #4838: functions.metrics.get_namespace_metric.count
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from api_get_namespace_metric_count import api_get_namespace_metric_count
+
+    # @added 20230202 - Feature #4842: webapp - api - get_flux_test_metrics
+    #                   Feature #4840: flux - prometheus - x-test-only header
+    from api_get_flux_test_metrics import api_get_flux_test_metrics
+
+    # @added 20230605 - Feature #4932: mute_alerts_on
+    from api_mute_alerts_on import api_mute_alerts_on
 
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
@@ -352,7 +436,9 @@ if file_uploads_enabled:
     try:
         DATA_UPLOADS_PATH = settings.DATA_UPLOADS_PATH
     except:
-        DATA_UPLOADS_PATH = '/tmp/skyline/data_uploads'
+        # @modified 20230106 - Task #4778: v4.0.0 - update dependencies
+        # DATA_UPLOADS_PATH = '/tmp/skyline/data_uploads'
+        DATA_UPLOADS_PATH = '%s/data_uploads' % settings.SKYLINE_TMP_DIR
     ALLOWED_EXTENSIONS = {'json', 'csv', 'xlsx', 'xls', 'zip', 'gz'}
     ALLOWED_FORMATS = {'csv', 'xlsx', 'xls'}
     # @modified 20200520 - Bug #3552: flux.uploaded_data_worker - tar.gz
@@ -379,7 +465,9 @@ else:
 # Added the HORIZON_SHARD variable to add to alerts for determining which
 # Skyline instance sent the alert
 try:
-    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
 except:
     HORIZON_SHARDS = {}
 this_host = str(os.uname()[1])
@@ -440,11 +528,21 @@ python_version = int(version_info[0])
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
 if OTEL_ENABLED:
-    # Instrument redis
+
+    # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+    instrumented = False
     try:
-        RedisInstrumentor().instrument()
+        instrumented = RedisInstrumentor().is_instrumented_by_opentelemetry
     except Exception as outer_err:
-        logger.error('RedisInstrumentor().instrument() failed - %s' % outer_err)
+        logger.error('error :: RedisInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+            outer_err))
+    if not instrumented:
+        logger.info('starting RedisInstrumentor')
+        # Instrument redis
+        try:
+            RedisInstrumentor().instrument()
+        except Exception as outer_err:
+            logger.error('RedisInstrumentor().instrument() failed - %s' % outer_err)
 
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
@@ -462,7 +560,7 @@ app = Flask(__name__)
 if OTEL_ENABLED:
     try:
         FlaskInstrumentor().instrument_app(app)
-        tracer = trace.get_tracer(__name__)
+        tracer = otel_trace.get_tracer(__name__)
     except Exception as outer_err:
         logger.error('FlaskInstrumentor().instrument_app and tracer failed - %s' % outer_err)
 
@@ -489,7 +587,7 @@ if file_uploads_enabled:
     app.config['DATA_UPLOADS_PATH'] = DATA_UPLOADS_PATH
 
 graph_url_string = str(settings.GRAPH_URL)
-PANORAMA_GRAPH_URL = re.sub('\/render.*', '', graph_url_string)
+PANORAMA_GRAPH_URL = re.sub('\\/render.*', '', graph_url_string)
 
 # @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
 # Defaults for momentjs to work if the setttings.py was not updated
@@ -850,31 +948,32 @@ def panorama_not_anomalous():
 def app_settings():
 
     try:
-        app_settings = {'GRAPH_URL': settings.GRAPH_URL,
-                        'OCULUS_HOST': settings.OCULUS_HOST,
-                        'FULL_NAMESPACE': settings.FULL_NAMESPACE,
-                        'SKYLINE_VERSION': skyline_version,
-                        'PANORAMA_ENABLED': settings.PANORAMA_ENABLED,
-                        'PANORAMA_DATABASE': settings.PANORAMA_DATABASE,
-                        'PANORAMA_DBHOST': settings.PANORAMA_DBHOST,
-                        'PANORAMA_DBPORT': settings.PANORAMA_DBPORT,
-                        'PANORAMA_DBUSER': settings.PANORAMA_DBUSER,
-                        'PANORAMA_DBUSERPASS': 'redacted',
-                        'PANORAMA_GRAPH_URL': PANORAMA_GRAPH_URL,
-                        'WEBAPP_USER_TIMEZONE': settings.WEBAPP_USER_TIMEZONE,
-                        'WEBAPP_FIXED_TIMEZONE': settings.WEBAPP_FIXED_TIMEZONE,
-                        'WEBAPP_JAVASCRIPT_DEBUG': settings.WEBAPP_JAVASCRIPT_DEBUG
-                        }
+        web_app_settings = {
+            'GRAPH_URL': settings.GRAPH_URL,
+            'OCULUS_HOST': settings.OCULUS_HOST,
+            'FULL_NAMESPACE': settings.FULL_NAMESPACE,
+            'SKYLINE_VERSION': skyline_version,
+            'PANORAMA_ENABLED': settings.PANORAMA_ENABLED,
+            'PANORAMA_DATABASE': settings.PANORAMA_DATABASE,
+            'PANORAMA_DBHOST': settings.PANORAMA_DBHOST,
+            'PANORAMA_DBPORT': settings.PANORAMA_DBPORT,
+            'PANORAMA_DBUSER': settings.PANORAMA_DBUSER,
+            'PANORAMA_DBUSERPASS': 'redacted',
+            'PANORAMA_GRAPH_URL': PANORAMA_GRAPH_URL,
+            'WEBAPP_USER_TIMEZONE': settings.WEBAPP_USER_TIMEZONE,
+            'WEBAPP_FIXED_TIMEZONE': settings.WEBAPP_FIXED_TIMEZONE,
+            'WEBAPP_JAVASCRIPT_DEBUG': settings.WEBAPP_JAVASCRIPT_DEBUG
+        }
     except Exception as e:
         error = "error: " + str(e)
         resp = json.dumps({'app_settings': error})
         return resp, 500
 
-    resp = json.dumps(app_settings)
+    resp = json.dumps(web_app_settings)
     return resp, 200
 
 
-@app.route("/version")
+@app.route('/version')
 @requires_auth
 def version():
 
@@ -886,7 +985,7 @@ def version():
         return "Not Found", 404
 
 
-@app.route("/api", methods=['GET'])
+@app.route('/api', methods=['GET'])
 # @modified 20180720 - Feature #2464: luminosity_remote_data
 # Rnamed def from data to api for the purpose of trying to add some
 # documentation relating to the API endpoints and their required parameters,
@@ -934,6 +1033,162 @@ def api():
 
     # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
     #            is used and required by many of the following API methods
+
+    # @added 20230504 - Feature #4564: authoritative_node
+    if 'authoritative_cluster_node' in request.args:
+        try:
+            metric = request.args.get('metric')
+            logger.info('/api?authoritative_cluster_node request for metric: %s' % metric)
+        except Exception as err:
+            logger.error('error :: /api?authoritative_cluster_node request no metric argument - %s' % err)
+            return 'Bad Request', 400
+        authoritative_node = str(this_host)
+        authoritative_fqdn = settings.SKYLINE_URL
+        if HORIZON_SHARDS:
+            authoritative_node = None
+            try:
+                authoritative_node = get_authoritative_node(skyline_app, metric)
+                logger.info('/api?authoritative_cluster_node - reports - %s as the authoritative cluster node' % authoritative_node)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_authoritative_node failed - %s' % err)
+                return 'Internal Server Error', 500
+            authoritative_fqdn = None
+            try:
+                authoritative_fqdn = get_authoritative_node(skyline_app, metric, return_fqdn=True)
+                logger.info('/api?authoritative_cluster_node - reports - %s as the authoritative cluster node FQDN' % authoritative_fqdn)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_authoritative_node failed to determine authoritative_fqdn - %s' % err)
+                return 'Internal Server Error', 500
+        data = {'authoritative_node': authoritative_node, 'authoritative_fqdn': authoritative_fqdn, 'metric': metric}
+        data_dict = {"status": {"cluster_data": cluster_data, "response": 200}, "data": data}
+        return jsonify(data_dict), 200
+
+    # @added 20230202 - Feature #4842: webapp - api - get_flux_test_metrics
+    #                   Feature #4840: flux - prometheus - x-test-only header
+    if 'get_flux_test_metrics' in request.args:
+        start_get_flux_test_metrics = timer()
+        namespace = None
+        try:
+            namespace = request.args.get('namespace')
+            logger.info('/api?get_flux_test_metrics request with namespace: %s' % namespace)
+        except Exception as err:
+            logger.error('error :: /api?get_flux_test_metrics request no namespace argument - %s' % err)
+            return 'Bad Request', 400
+        flux_test_data = {}
+        try:
+            flux_test_data = api_get_flux_test_metrics(skyline_app, cluster_data)
+        except Exception as err:
+            logger.error('error :: api_get_flux_test_metrics failed - %s' % err)
+        end_flux_test_metrics_time = timer()
+        get_flux_test_metrics_time = (end_flux_test_metrics_time - start_get_flux_test_metrics)
+        if not flux_test_data:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_flux_test_metrics_time, "response": 404}, "data": {'flux_test_metrics': flux_test_data}}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_flux_test_metrics_time, "response": 200}, "data": {'flux_test_metrics': flux_test_data}}
+        logger.info('/api?get_flux_test_metrics - responding with flux_test_data')
+        # Flask jsonify baulk on the data with,
+        # TypeError: '<' not supported between instances of 'str' and 'int'
+        # but json.dumps does not.  Flask uses simplejson not the built-in one.
+        # return jsonify(data_dict), 200
+        response = app.response_class(
+            response=json.dumps(data_dict),
+            status=200,
+            mimetype='application/json'
+        )
+        return response
+
+    # @added 20230131 - Feature #4838: functions.metrics.get_namespace_metric.count
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if 'get_namespace_metric_count' in request.args:
+        start_get_namespace_metric_count = timer()
+        namespace = None
+        try:
+            namespace = request.args.get('namespace')
+            logger.info('/api?get_namespace_metric_count request with namespace: %s' % namespace)
+        except Exception as err:
+            logger.error('error :: /api?get_namespace_metric_count request no namespace argument - %s' % err)
+            return 'Bad Request', 400
+        namespace_metric_count = {}
+        try:
+            namespace_metric_count = api_get_namespace_metric_count(skyline_app)
+        except Exception as err:
+            logger.error('error :: api_get_namespace_metric_count failed - %s' % err)
+        end_get_namespace_metric_count = timer()
+        get_namespace_metric_count_time = (end_get_namespace_metric_count - start_get_namespace_metric_count)
+        if not namespace_metric_count:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_namespace_metric_count_time, "response": 404}, "data": {}}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_namespace_metric_count_time, "response": 200}, "data": namespace_metric_count}
+        return jsonify(data_dict), 200
+
+    # @added 20230130 - Feature #4834: webapp - api - get_all_activity
+    #                   Feature #4830: webapp - panorama_plot_anomalies - all_events
+    # Added an api method to make the request to /panorama? which requires auth
+    # and further the api is more suited to making cluster requests than the
+    # panorama endpoint
+    if 'get_all_activity' in request.args:
+        start_get_all_activity = timer()
+        request_url = str(request.url)
+        metric = None
+        try:
+            metric = request.args.get('metric')
+            logger.info('/api?get_all_activity request with metric: %s' % metric)
+        except Exception as err:
+            logger.error('error :: /api?get_all_activity request no metric argument - %s' % err)
+            return 'Bad Request', 400
+        authoritative_node = str(this_host)
+        if HORIZON_SHARDS:
+            try:
+                authoritative_node = get_authoritative_node(skyline_app, metric)
+                logger.info('api get_authoritative_node - reports - %s as the authoritative cluster node for %s' % (authoritative_node, metric))
+            except Exception as err:
+                logger.error('error :: api get_authoritative_node failed - %s' % err)
+            if authoritative_node != this_host:
+                find_host = this_host
+                replace_host = authoritative_node
+                if settings.SKYLINE_URL in request_url:
+                    find_host = settings.SKYLINE_URL
+                if this_host not in request_url:
+                    for item in settings.REMOTE_SKYLINE_INSTANCES:
+                        if item[3] == authoritative_node:
+                            replace_host = item[0]
+                if find_host != replace_host:
+                    redirect_url = request_url.replace(find_host, replace_host, 1)
+                    logger.info('/api?get_all_activity :: returning redirect to authoritative_node - %s' % str(redirect_url))
+                    return redirect(redirect_url, code=302)
+        try:
+            all_activity_dict = get_panorama_all_activity(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_panorama_all_activity failed - %s' % err)
+            return 'Internal Server Error', 500
+        end_get_all_activity = timer()
+        get_all_activity_time = (end_get_all_activity - start_get_all_activity)
+        if not all_activity_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_all_activity_time, "response": 404}, "data": {}}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_all_activity_time, "response": 200}, "data": all_activity_dict['data']}
+        return jsonify(data_dict), 200
+
+    # @added 20220517 - Feature #4578: webapp - api_get_fp_timeseries
+    if 'get_fp_timeseries' in request.args:
+        start_get_fp_timeseries = timer()
+        fp_timeseries_dict = {}
+        try:
+            fp_timeseries_dict = api_get_fp_timeseries(skyline_app)
+        except Exception as err:
+            logger.error('error :: api_get_fp_timeseries failed - %s' % err)
+            return 'Internal Server Error', 500
+        end_get_fp_timeseries = timer()
+        get_fp_timeseries_time = (end_get_fp_timeseries - start_get_fp_timeseries)
+        if not fp_timeseries_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_fp_timeseries_time, "response": 404}, "data": {}}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": get_fp_timeseries_time, "response": 200}, "data": fp_timeseries_dict}
+        return jsonify(data_dict), 200
 
     # @added 20220504 - Feature #4530: namespace.analysed_events
     if 'get_analysed_events' in request.args:
@@ -1031,32 +1286,94 @@ def api():
             logger.error('error :: api get_matched_timeseries - %s' % err)
             return 'Internal Server Error', 500
 
+        # @added 20220713 - Feature #4540: Plot matched timeseries
+        #                   Feature #4014: Ionosphere - inference
+        # Only for details_only parameter to be passed to strip out the time
+        # series data
+        details_only = False
+        matched_timeseries = {}
+        cache_data_fetched = False
         try:
-            matched_timeseries = get_matched_timeseries(
-                skyline_app, match_id, layers_match_id)
+            details_only_str = request.args.get('details_only', 'false')
+            if details_only_str == 'true':
+                details_only = True
+                logger.info('/api?get_matched_timeseries with details_only: %s' % details_only_str)
         except Exception as err:
             logger.error('error :: api get_matched_timeseries - %s' % err)
             return 'Internal Server Error', 500
-
-        if plot:
-            plotted_comparsion_image = None
-            output_file = '%s/%s.%s.macth_plot.png' % (
-                settings.SKYLINE_TMP_DIR, str(matched_timeseries['match']['metric_timestamp']),
-                matched_timeseries['metric'])
+        if details_only:
+            redis_key = 'webapp.match_details.id.%s' % str(match_id)
             try:
-                plotted_comparsion_image, plotted_match_comparison_image_file = plot_fp_match(
-                    skyline_app, matched_timeseries['metric'],
-                    matched_timeseries['match']['fp_id'],
-                    [value for ts, value in matched_timeseries['matched_fp_timeseries']],
-                    matched_timeseries['timeseries'], output_file, strip_prefix)
+                matched_timeseries_str = REDIS_CONN.get(redis_key)
+                if matched_timeseries_str:
+                    matched_timeseries = literal_eval(matched_timeseries_str)
+                    logger.info('/api?get_matched_timeseries with details_only cache data retrieved')
+                    cache_data_fetched = True
+                else:
+                    logger.info('/api?get_matched_timeseries with details_only no cache data retrieved running get_matched_timeseries')
             except Exception as err:
-                logger.error('error :: api plot_fp_match - %s' % err)
+                logger.error(traceback.format_exc())
+                logger.error('error :: api get_matched_timeseries :: failed to hget %s from Redis - %s' % (
+                    redis_key, err))
+        if not matched_timeseries:
+            try:
+                matched_timeseries = get_matched_timeseries(
+                    skyline_app, match_id, layers_match_id)
+            except Exception as err:
+                logger.error('error :: api get_matched_timeseries - %s' % err)
                 return 'Internal Server Error', 500
-            if plotted_comparsion_image:
-                redirect_url = '%s/ionosphere_images?image=%s' % (
-                    settings.SKYLINE_URL, str(plotted_match_comparison_image_file))
-                logger.info('returning redirect to image url - %s' % str(redirect_url))
-                return redirect(redirect_url, code=302)
+
+            if plot:
+                plotted_comparsion_image = None
+
+                # @added 20220831 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                use_base_name = matched_timeseries['metric']
+                labelled_metric_name = None
+                if '{' in use_base_name and '}' in use_base_name and '_tenant_id="' in use_base_name:
+                    metric_id = 0
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, use_base_name)
+                    except Exception as err:
+                        logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+                    if metric_id:
+                        labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                if labelled_metric_name:
+                    use_base_name = str(labelled_metric_name)
+
+                output_file = '%s/%s.%s.match_plot.png' % (
+                    settings.SKYLINE_TMP_DIR, str(matched_timeseries['match']['metric_timestamp']),
+                    # matched_timeseries['metric'])
+                    use_base_name)
+                try:
+                    plotted_comparsion_image, plotted_match_comparison_image_file = plot_fp_match(
+                        # skyline_app, matched_timeseries['metric'],
+                        skyline_app, use_base_name,
+                        matched_timeseries['match']['fp_id'],
+                        [value for ts, value in matched_timeseries['matched_fp_timeseries']],
+                        matched_timeseries['timeseries'], output_file, strip_prefix)
+                except Exception as err:
+                    logger.error('error :: api plot_fp_match - %s' % err)
+                    return 'Internal Server Error', 500
+                if plotted_comparsion_image:
+                    redirect_url = '%s/ionosphere_images?image=%s' % (
+                        settings.SKYLINE_URL, str(plotted_match_comparison_image_file))
+                    logger.info('returning redirect to image url - %s' % str(redirect_url))
+                    return redirect(redirect_url, code=302)
+
+        if details_only and not cache_data_fetched:
+            redis_key = 'webapp.match_details.id.%s' % str(match_id)
+            try:
+                matched_timeseries_str = REDIS_CONN.get(redis_key)
+                if matched_timeseries_str:
+                    matched_timeseries = literal_eval(matched_timeseries_str)
+                    logger.info('/api?get_matched_timeseries with details_only cache data created from get_matched_timeseries retrieved')
+                else:
+                    logger.warning('warning :: /api?get_matched_timeseries with details_only no cache data retrieved from get_matched_timeseries')
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: api get_matched_timeseries :: failed to hget %s from Redis - %s' % (
+                    redis_key, err))
 
         end_get_matched_timeseries = timer()
         get_matched_timeseries_time = (end_get_matched_timeseries - start_get_matched_timeseries)
@@ -1117,7 +1434,7 @@ def api():
         if HORIZON_SHARDS:
             authoritative_node = None
             try:
-                authoritative_node = get_authoritative_node(metric)
+                authoritative_node = get_authoritative_node(skyline_app, metric)
                 logger.info('api test_alert get_authoritative_node - reports - %s as the authoritative cluster node' % authoritative_node)
             except Exception as err:
                 logger.error('error :: api test_alert get_authoritative_node failed - %s' % err)
@@ -1634,7 +1951,9 @@ def api():
                 for remote_resolutions_dict in remote_resolutions_dicts:
                     logger.info('got remote_resolutions_dict of length %s from a remote Skyline instances' % str(len(remote_resolutions_dict)))
                     new_resolutions_dict = {**resolutions_dict, **remote_resolutions_dict}
-                    resolutions_dict = new_resolutions_dict.copy()
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # resolutions_dict = new_resolutions_dict.copy()
+                    resolutions_dict = copy.deepcopy(new_resolutions_dict)
                     del new_resolutions_dict
             else:
                 logger.warning('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
@@ -1654,7 +1973,8 @@ def api():
                     filtered_discarded += 1
                     continue
             if namespace != 'all':
-                if not use_metric.startswith(namespace):
+                parent_namespace = '%s.' % namespace
+                if not use_metric.startswith(parent_namespace):
                     filtered_discarded += 1
                     continue
             if remove_prefix:
@@ -1774,7 +2094,9 @@ def api():
                 for remote_sparsity_dict in remote_sparsity_dicts:
                     logger.info('got remote_sparsity_dict of length %s from a remote Skyline instances' % str(len(remote_sparsity_dict)))
                     new_sparsity_dict = {**sparsity_dict, **remote_sparsity_dict}
-                    sparsity_dict = new_sparsity_dict.copy()
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # sparsity_dict = new_sparsity_dict.copy()
+                    sparsity_dict = copy.deepcopy(new_sparsity_dict)
                     del new_sparsity_dict
             else:
                 logger.warning('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
@@ -1879,7 +2201,9 @@ def api():
                 for remote_timestamp_resolutions_dict in remote_timestamp_resolutions_dicts:
                     logger.info('got remote_timestamp_resolutions_dict of length %s from a remote Skyline instances' % str(len(remote_timestamp_resolutions_dict)))
                     new_timestamp_resolutions_dict = {**timestamp_resolutions_dict, **remote_timestamp_resolutions_dict}
-                    timestamp_resolutions_dict = new_timestamp_resolutions_dict.copy()
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # timestamp_resolutions_dict = new_timestamp_resolutions_dict.copy()
+                    timestamp_resolutions_dict = copy.deepcopy(new_timestamp_resolutions_dict)
                     del new_timestamp_resolutions_dict
             else:
                 logger.warning('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
@@ -1891,7 +2215,8 @@ def api():
             metric_data = timestamp_resolutions_dict[metric]
             use_metric = metric.replace(settings.FULL_NAMESPACE, '')
             if namespace != 'all':
-                if not use_metric.startswith(namespace):
+                parent_namespace = '%s.'
+                if not use_metric.startswith(parent_namespace):
                     filtered_discarded += 1
                     continue
             if remove_prefix:
@@ -2166,9 +2491,8 @@ def api():
         if metric_quota_exceeded_dict:
             data_dict = {"status": {"request_time": thunder_metric_quota_exceeded_time, "response": 200}, "data": metric_quota_exceeded_dict}
             return jsonify(data_dict), 200
-        else:
-            data_dict = {"status": {"request_time": thunder_metric_quota_exceeded_time, "response": 404}, "data": {"metrics": 'null'}}
-            return jsonify(data_dict), 404
+        data_dict = {"status": {"request_time": thunder_metric_quota_exceeded_time, "response": 404}, "data": {"metrics": 'null'}}
+        return jsonify(data_dict), 404
 
     # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
     if 'boundary_metrics' in request.args:
@@ -2227,9 +2551,8 @@ def api():
         if boundary_metrics:
             data_dict = {"status": {"cluster_data": cluster_data, "request_time": boundary_metrics_time, "response": 200}, "data": {"boundary_metrics": boundary_metrics}}
             return jsonify(data_dict), 200
-        else:
-            data_dict = {"status": {"cluster_data": cluster_data, "request_time": boundary_metrics_time, "response": 404}, "data": {"boundary_metrics": None}}
-            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": boundary_metrics_time, "response": 404}, "data": {"boundary_metrics": None}}
+        return jsonify(data_dict), 404
 
     # @added 20210211 - Feature - last_analyzed_timestamp
     # @added 20210211 - Feature #3968: webapp - last_analyzed_timestamp API endpoint
@@ -2330,9 +2653,8 @@ def api():
         if features_profiles_dirs:
             data_dict = {"status": {"request_time": features_profiles_dir_time, "response": 200}, "data": {"features_profile_dirs": features_profiles_dirs}}
             return jsonify(data_dict), 200
-        else:
-            data_dict = {"status": {"request_time": features_profiles_dir_time, "response": 404}, "data": {"features_profile_dirs": 'null'}}
-            return jsonify(data_dict), 404
+        data_dict = {"status": {"request_time": features_profiles_dir_time, "response": 404}, "data": {"features_profile_dirs": 'null'}}
+        return jsonify(data_dict), 404
 
     # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
     # api?yhat_value=true&metric=metric&from=<from>&until=<until>&include_value=true&include_mean=true&include_yhat_real_lower=true
@@ -2408,10 +2730,25 @@ def api():
 
         yhat_dict = {}
 
+        # @added 20221025 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        redis_use_metric = str(metric)
+        if '_tenant_id="' in metric:
+            metric_id = 0
+            try:
+                metric_id = get_metric_id_from_base_name(skyline_app, metric)
+            except Exception as err:
+                logger.error('error :: /api?yhat_values :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(metric), err))
+            if metric_id:
+                redis_use_metric = 'labelled_metrics.%s' % str(metric_id)
+
         # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
         # Cache request yhat_dict
         yhat_dict_cache_key = 'webapp.%s.%s.%s.%s.%s.%s' % (
-            metric, str(from_timestamp), str(until_timestamp),
+            # @modified 20221025 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # metric, str(from_timestamp), str(until_timestamp),
+            redis_use_metric, str(from_timestamp), str(until_timestamp),
             str(include_value), str(include_mean),
             str(include_yhat_real_lower))
 
@@ -2726,6 +3063,7 @@ def api():
                 if not correlate_or_relate:
                     continue
                 metric_dict = {
+                    'metric_id': related_metric_id,
                     'metric': related_metric_name,
                     'timestamp': int(related_anomaly_timestamp),
                 }
@@ -2752,7 +3090,10 @@ def api():
                 # @modified 20210413 - Feature #4014: Ionosphere - inference
                 #                      Branch #3590: inference
                 # Added related_motifs_matched_id
-                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
+                # @modified 20221020 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Handle labelled_metric name added metric id
+                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id, metric_id in related_matches:
                     if related_matched_by == 'no matches were found':
                         related_matches = []
             if related_matches:
@@ -2773,7 +3114,10 @@ def api():
                 # @modified 20210413 - Feature #4014: Ionosphere - inference
                 #                      Branch #3590: inference
                 # Added related_motifs_matched_id
-                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
+                # @modified 20221020 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Handle labelled_metric name added metric id
+                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id, metric_id in related_matches:
                     # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
                     # Filter only related matches that are in correlations group
                     # @modified 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
@@ -2950,6 +3294,7 @@ def api():
     # @added 20200410 - Feature #3474: webapp api - training_data
     #                   Feature #3472: ionosphere.training_data Redis set
     if 'training_data' in request.args:
+        start = timer()
         metric_filter = None
         timestamp_filter = None
         if 'metric' in request.args:
@@ -2958,6 +3303,41 @@ def api():
             timestamp_filter = request.args.get('timestamp', 0)
         training_data = []
         training_data_raw = list(REDIS_CONN.smembers('ionosphere.training_data'))
+
+        # @added 20220822 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        if metric_filter and '_tenant_id="' in metric_filter:
+            metric_id = 0
+            try:
+                metric_id = get_metric_id_from_base_name(skyline_app, metric_filter)
+            except Exception as err:
+                logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(metric_filter), err))
+            if metric_id:
+                metric_filter = 'labelled_metrics.%s' % str(metric_id)
+
+        # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+        # Remove ionosphere.untrainable_metrics from the training data
+        # when entries exist at the same resolution
+        ionosphere_untrainable_metrics_list = []
+        ionosphere_untrainable_metrics = []
+        ionosphere_untrainable_metrics_redis_set = 'ionosphere.untrainable_metrics'
+        try:
+            ionosphere_untrainable_metrics_list = list(REDIS_CONN.smembers(ionosphere_untrainable_metrics_redis_set))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not get the ionosphere.untrainable_metrics set from Redis')
+            ionosphere_untrainable_metrics_list = []
+        if ionosphere_untrainable_metrics_list:
+            for ionosphere_untrainable_metric_str in ionosphere_untrainable_metrics_list:
+                try:
+                    ionosphere_untrainable_metric = literal_eval(ionosphere_untrainable_metric_str)
+                    ium_metric_name = ionosphere_untrainable_metric[0]
+                    ium_resolution = int(ionosphere_untrainable_metric[5])
+                    ionosphere_untrainable_metrics.append([ium_metric_name, ium_resolution])
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add to ionosphere_untrainable_metrics - %s' % err)
+
         for training_data_str in training_data_raw:
             try:
                 training_data_item = literal_eval(training_data_str)
@@ -3019,31 +3399,36 @@ def api():
                 # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Remove ionosphere.untrainable_metrics from the training data
                 # when entries exist at the same resolution
-                ionosphere_untrainable_metrics = []
-                ionosphere_untrainable_metrics_redis_set = 'ionosphere.untrainable_metrics'
-                try:
-                    ionosphere_untrainable_metrics = list(REDIS_CONN.smembers(ionosphere_untrainable_metrics_redis_set))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: could not get the ionosphere.untrainable_metrics set from Redis')
-                    ionosphere_untrainable_metrics = None
+                removed_as_untrainable = []
                 if add_to_response and ionosphere_untrainable_metrics:
-                    for ionosphere_untrainable_metric_str in ionosphere_untrainable_metrics:
+                    for ionosphere_untrainable_metric in ionosphere_untrainable_metrics:
                         try:
-                            ionosphere_untrainable_metric = literal_eval(ionosphere_untrainable_metric_str)
                             ium_metric_name = ionosphere_untrainable_metric[0]
                             if ium_metric_name == training_metric:
-                                ium_resolution = int(ionosphere_untrainable_metric[5])
+                                ium_resolution = ionosphere_untrainable_metric[1]
                                 if ium_resolution == training_resolution_seconds:
                                     add_to_response = False
-                                    logger.info('removed training data from response as identified as untrainable as has negative value/s - %s' % str(ionosphere_untrainable_metric))
+                                    # logger.info('removed training data from response as identified as untrainable as has negative value/s - %s' % str(ionosphere_untrainable_metric))
+                                    removed_as_untrainable.append(ium_metric_name)
                                     break
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to determine if metric is in ionosphere.untrainable_metrics Redis set')
+                if removed_as_untrainable:
+                    logger.info('removed %s training data sets from response as identified as untrainable' % str(len(removed_as_untrainable)))
 
                 if add_to_response:
                     training_data.append([training_metric, training_timestamp])
+                    # @added 20220905 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if training_metric.startswith('labelled_metrics.'):
+                        try:
+                            labelled_base_name = get_base_name_from_labelled_metrics_name(skyline_app, training_metric)
+                            if labelled_base_name:
+                                training_data.append([labelled_base_name, training_timestamp])
+                        except Exception as err:
+                            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                                training_metric, err))
             except:
                 logger.error(traceback.format_exc())
                 logger.error(
@@ -3071,8 +3456,9 @@ def api():
                 # list which is unhashable
                 # training_data = list(set(remote_training_data_list))
                 training_data = remote_training_data_list
-
-        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": training_data}}
+        end = timer()
+        request_duration = end - start
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": request_duration}, "data": {"metrics": training_data}}
         return jsonify(data_dict), 200
 
     # @added 20200129 - Feature #3422: webapp api - alerting_metrics and non_alerting_metrics
@@ -3448,13 +3834,64 @@ def api():
             cluster_data = False
             logger.info('api cluster_call forcing cluster_data=false')
 
+        # @added 20230519 - Feature #3336: webapp api - derivative_metrics
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # To handle labelled_metrics, allow for the request to pass a metric
+        # to determine if it is a derivative_metric or not
+        parameters_str_to_add = ''
+        derivative_metric = False
+        matched_derivative_metrics = []
+        base_name = None
+        labelled_metric_request = False
+        include_labelled_metrics = False
+        if 'include_labelled_metrics' in request.args:
+            include_labelled_metrics = request.args.get('include_labelled_metrics', 'false')
+            if include_labelled_metrics == 'true':
+                include_labelled_metrics = True
+                parameters_str_to_add = '&include_labelled_metrics=true'
+        derivative_labelled_metrics = []
+        if include_labelled_metrics:
+            try:
+                derivative_labelled_metrics = list(REDIS_CONN.smembers('aet.metrics_manager.derivative_labelled_metrics'))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get the aet.metrics_manager.derivative_labelled_metrics set from Redis')
+                return 'Internal Server Error', 500
+        if derivative_labelled_metrics:
+            logger.info('adding %s derivative_labelled_metrics' % str(len(derivative_labelled_metrics)))
+            derivative_metrics_list = derivative_metrics + derivative_labelled_metrics
+            derivative_metrics = list(set(derivative_metrics_list))
+        if request.referrer:
+            if 'graph' in request.referrer and '_tenant_id' in request.referrer:
+                labelled_metric_request = True
+        if 'metric' in request.args:
+            base_name = request.args.get('metric', 'no_metric_passed')
+            parameters_str_to_add = '%s&metric=%s' % (parameters_str_to_add, base_name)
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_derivative_metrics = None
+
+            # @added 20230519 - Feature #3336: webapp api - derivative_metrics
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # To handle labelled_metrics, allow for the request to pass a metric
+            # to determine if it is a derivative_metric or not
+            get_cluster_data_str = 'derivative_metrics&cluster_call=true'
+            if len(parameters_str_to_add):
+                get_cluster_data_str = '%s%s' % (get_cluster_data_str, parameters_str_to_add)
+
             try:
                 # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
                 # remote_derivative_metrics = get_cluster_data('derivative_metrics', 'metrics')
-                remote_derivative_metrics = get_cluster_data('derivative_metrics&cluster_call=true', 'metrics')
+                # @modified 20230519 - Feature #3336: webapp api - derivative_metrics
+                #                      Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # To handle labelled_metrics, allow for the request to pass a metric
+                # to determine if it is a derivative_metric or not
+                # remote_derivative_metrics = get_cluster_data('derivative_metrics&cluster_call=true', 'metrics')
+                remote_derivative_metrics = get_cluster_data(get_cluster_data_str, 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get derivative_metrics from the remote Skyline instances')
@@ -3463,22 +3900,103 @@ def api():
                 derivative_metrics_list = derivative_metrics + remote_derivative_metrics
                 derivative_metrics = list(set(derivative_metrics_list))
 
+        # @added 20230519 - Feature #3336: webapp api - derivative_metrics
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # To handle labelled_metrics, allow for the request to pass a metric
+        # to determine if it is a derivative_metric or not
+        if base_name:
+            matched_derivative_metrics = [metric for metric in derivative_metrics if base_name in metric]
+            if matched_derivative_metrics:
+                derivative_metrics = list(set(matched_derivative_metrics))
+
         data_dict = {
             "status": {"cluster_data": cluster_data},
             "data": {
                 "metrics": derivative_metrics
             }
         }
+
+        # @added 20230519 - Feature #3336: webapp api - derivative_metrics
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # To handle labelled_metrics, allow for the request to pass a metric
+        # to determine if it is a derivative_metric or not
+        if matched_derivative_metrics:
+            data_dict['data']['metric'] = base_name
+            data_dict['data']['derivative_metric'] = True
+
         return jsonify(data_dict), 200
 
     # @added 20191008 - Feature #3252: webapp api - unique_metrics
     if 'unique_metrics' in request.args:
+
+        # @added 20220823 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Return cached response if present
+        logger.debug('debug :: request.args: %s' % str(request.args))
+        cache_key = 'webapp.api.unique_metrics'
+        cache_data = False
+        details = False
+        strip_labels = []
+
+        # @added 20230329 - Feature #3252: webapp api - unique_metrics
+        # Add parameter to include inactive_metrics and set filter_namespace_str
+        # to a default of None
+        include_inactive_metrics = False
+        filter_namespace_str = None
+
+        for i in request.args:
+            key = str(i)
+            value = request.args.get(key, 'none')
+            cache_key = '%s.%s.%s' % (cache_key, key, str(value))
+            if key == 'details' and value == 'true':
+                details = True
+            if key == 'strip_labels':
+                strip_labels = value.split(',')
+            # @added 20230329 - Feature #3252: webapp api - unique_metrics
+            # Add parameter to include inactive_metrics
+            if key == 'include_inactive_metrics' and value == 'true':
+                include_inactive_metrics = True
+                logger.info('/api?unique_metrics include_inactive_metrics passed')
+
+        cache_data_str = None
+        cache_ttl = 0
+        try:
+            cache_data_str = REDIS_CONN.get(cache_key)
+            if cache_data_str:
+                cache_data = literal_eval(cache_data_str)
+                cache_ttl = REDIS_CONN.ttl(cache_key)
+        except Exception as err:
+            logger.error('error :: failed to interpolate %s from Redis - %s' % (cache_key, err))
+        if cache_data and not include_inactive_metrics:
+            duration = (time.time() - start)
+            cache_data['status']['request_time'] = duration
+            cache_data['status']['cache_data'] = True
+            cache_data['status']['cache_ttl'] = cache_ttl
+            logger.info('api/unique_metrics returning cache_data from %s with TTL: %s' % (cache_key, str(cache_ttl)))
+            return jsonify(cache_data), 200
+
         try:
             unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the unique_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20220822 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        unique_labelled_metrics = []
+        try:
+            active_labelled_metrics_with_id = REDIS_CONN.hgetall('aet.metrics_manager.active_labelled_metrics_with_id')
+            if active_labelled_metrics_with_id:
+                unique_labelled_metrics = list(active_labelled_metrics_with_id.keys())
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the aet.metrics_manager.active_labelled_metrics_with_id from Redis')
+            return 'Internal Server Error', 500
+        if unique_labelled_metrics:
+            unique_metrics = unique_metrics + unique_labelled_metrics
 
         # @added 20220509 - Feature #3824: get_cluster_data
         #                   Release #4562 - v3.0.4
@@ -3490,11 +4008,80 @@ def api():
             cluster_data = False
             logger.info('api cluster_call forcing cluster_data=false')
 
+        # @added 20230131 - Feature #4838: functions.metrics.get_namespace_metric.count
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Added the filter_namespace and remove_full_namespace_prefix parameters
+        # to the cluster request to reduce payload size and distribute filter work
+        # because on a cluster with 15420 metrics returning filtered namespaces,
+        # labels, values and elements added for labelled_metrics with details=true
+        # results in a request_time of ~19.590527296066284 seconds.  On the
+        # cluster this has a high time complexity, because the cluster_data=true
+        # is calling it on all the cluster nodes and all the cluster nodes are
+        # creating the labels, values, namespaces and namespace_elements for
+        # all the metrics without filtering.
+        cluster_request_uri = 'unique_metrics&cluster_call=true'
+        if 'filter_namespace' in request.args:
+            filtered_unique_metrics = []
+            filter_namespace_str = request.args.get('filter_namespace', '')
+            logger.info('/api?unique_metrics filter_namespace passed filtering: %s' % filter_namespace_str)
+            cluster_request_uri = '%s&filter_namespace=%s' % (cluster_request_uri, filter_namespace_str)
+        if 'remove_full_namespace_prefix' in request.args:
+            remove_full_namespace_prefix_str = request.args.get('remove_full_namespace_prefix', 'false')
+            if remove_full_namespace_prefix_str == 'true':
+                cluster_request_uri = '%s&remove_full_namespace_prefix=%s' % (cluster_request_uri, remove_full_namespace_prefix_str)
+
+        # @added 20230329 - Feature #3252: webapp api - unique_metrics
+        # Add parameter to include inactive_metrics
+        if include_inactive_metrics:
+            inactive_metrics = []
+            if filter_namespace_str:
+                filter_on_namespace = '%s\\.' % filter_namespace_str
+            try:
+                inactive_metrics = get_inactive_metrics(skyline_app, filter_on_namespace)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: api/unique_metrics  - get_inactive_metrics failed - %s' % (
+                    err))
+            logger.info('/api?unique_metrics %s inactive_metrics found' % str(len(inactive_metrics)))
+            if inactive_metrics:
+                inactive_metric_names = []
+                for m in list(inactive_metrics.keys()):
+                    if settings.FULL_NAMESPACE:
+                        m = '%s%s' % (settings.FULL_NAMESPACE, m)
+                    inactive_metric_names.append(m)
+                unique_metrics = list(set(unique_metrics + inactive_metric_names))
+            inactive_labelled_metrics = []
+            if filter_namespace_str:
+                filter_on_namespace = '"%s"' % filter_namespace_str
+            try:
+                inactive_labelled_metrics_keys = get_inactive_metrics(skyline_app, filter_on_namespace)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: api/unique_metrics  - get_inactive_metrics failed - %s' % (
+                    err))
+            logger.info('/api?unique_metrics %s inactive_labelled_metrics found' % str(len(inactive_labelled_metrics)))
+            if inactive_labelled_metrics:
+                unique_metrics = list(set(unique_metrics + list(inactive_labelled_metrics.keys())))
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_unique_metrics = None
             try:
-                remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
+                if details:
+                    # @modified 20230131 - Feature #4838: functions.metrics.get_namespace_metric.count
+                    #                      Task #2732: Prometheus to Skyline
+                    #                      Branch #4300: prometheus
+                    # Due to size and time complexity being shaped on the cluster
+                    # with this call, added the filter_namespace and
+                    # remove_full_namespace_prefix parameters to the cluster
+                    # request to reduce payload size and distribute filter work
+                    # remote_unique_metrics = get_cluster_data('unique_metrics&details=true&cluster_call=true', 'metrics')
+                    cluster_request_uri = '%s&details=true' % cluster_request_uri
+                    remote_unique_metrics = get_cluster_data(cluster_request_uri, 'metrics')
+                else:
+                    # remote_unique_metrics = get_cluster_data('unique_metrics&cluster_call=true', 'metrics')
+                    remote_unique_metrics = get_cluster_data(cluster_request_uri, 'metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
@@ -3508,11 +4095,40 @@ def api():
         total_unique_metrics = len(unique_metrics)
         filtered = False
         filter_namespace = None
-        if 'filter_namespace' in request.args:
+        # if 'filter_namespace' in request.args:
+        if filter_namespace_str:
             filtered_unique_metrics = []
-            filter_namespace_str = request.args.get('filter_namespace', '')
+            # filter_namespace_str = request.args.get('filter_namespace', '')
             logger.info('/api?unique_metrics filter_namespace passed filtering: %s' % filter_namespace_str)
             filter_namespace = [filter_namespace_str]
+
+            # @added 20220822 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if ',' in filter_namespace_str:
+                filter_namespace = filter_namespace_str.split(',')
+
+            # @added 20230329 - Feature #3252: webapp api - unique_metrics
+            # Handle dotted and labelled metrics
+            filtered_namespaces = []
+            for f in filter_namespace:
+                if settings.FULL_NAMESPACE:
+                    dotted = '%s%s\\.' % (settings.FULL_NAMESPACE, f)
+                else:
+                    dotted = '%s\\.' % f
+                filtered_namespaces.append(dotted)
+
+                # @added 20230531 - Feature #3252: webapp api - unique_metrics
+                # Handle single dotted if the request requests the remove_full_namespace_prefix
+                single_dotted = '^%s\\.' % f
+                if single_dotted not in filtered_namespaces:
+                    filtered_namespaces.append(single_dotted)
+
+                labelled = '="%s"' % f
+                filtered_namespaces.append(labelled)
+            filter_namespace = list(filtered_namespaces)
+            logger.info('/api?unique_metrics determined filter_namespace: %s, filtering %s metrics' % (
+                str(filter_namespace), str(total_unique_metrics)))
+
             for metric_name in unique_metrics:
                 pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric_name, filter_namespace, False)
                 if pattern_match:
@@ -3538,21 +4154,153 @@ def api():
                     basename_unique_metrics.append(base_name)
             logger.info('/api?unique_metrics stripped: %s' % settings.FULL_NAMESPACE)
             unique_metrics = basename_unique_metrics
-        duration = (time.time() - start)
 
-        data_dict = {
-            "status": {
-                "cluster_data": cluster_data,
-                "filtered": filtered,
-                "filter_namespace": filter_namespace,
-                "remove_full_namespace_prefix": remove_full_namespace_prefix,
-                "response": 200,
-                "request_time": duration
-            },
-            "data": {
-                "metrics": unique_metrics
+        # @added 20220823 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Return namespaces, labels, values and elements with the response
+        # request_time pre returning namespaces, labels, values and elements - 0.2227020263671875
+        # request_time post returning namespaces, labels, values and elements - 0.33968615531921387
+        # request_time with cache_key - 0.03976845741271973
+        # @added 20230131 - Feature #4838: functions.metrics.get_namespace_metric.count
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Just added this comment for #4838 a cluster with 15420 metrics returning
+        # filtered namespaces, labels, values and elements - request_time
+        # 19.590527296066284 seconds.  On the cluster this has a high time
+        # complexity, because the cluster_data=true is calling it on all the
+        # cluster nodes.
+        namespaces_dict = {}
+        labels_dict = {}
+        values_dict = {}
+        elements = []
+        metrics_and_labels = {}
+        if details:
+            for metric_name in unique_metrics:
+                base_name = str(metric_name)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                if '_tenant_id' in base_name:
+                    metric_labels = None
+                    namespace = None
+                    try:
+                        metric_elements = base_name.split('{', 1)
+                        namespace = metric_elements[0]
+                        metric_labels_str = metric_elements[1]
+                        metric_labels = metric_labels_str.rstrip('}')
+                    except Exception as err:
+                        logger.error('error :: failed to parse metric %s - %s' % (
+                            str(base_name), str(err)))
+                    metrics_and_labels[base_name] = {}
+                    metrics_and_labels[base_name]['namespaces'] = [namespace]
+                    metrics_and_labels[base_name]['labels'] = []
+                    metrics_and_labels[base_name]['values'] = []
+                    namespaces_dict_defined = None
+                    try:
+                        namespaces_dict_defined = namespaces_dict[namespace]
+                    except:
+                        namespaces_dict[namespace] = {}
+                        namespaces_dict[namespace]['labels'] = []
+                        namespaces_dict[namespace]['values'] = []
+                    labels = {}
+                    if metric_labels:
+                        try:
+                            labels = parse_labels(metric_labels)
+                        except Exception as err:
+                            logger.error('error :: failed to parse labels %s - %s' % (
+                                str(base_name), str(err)))
+                    for label in list(labels.keys()):
+                        if label in strip_labels:
+                            continue
+                        labels_dict_defined = None
+                        try:
+                            labels_dict_defined = labels_dict[label]
+                        except:
+                            labels_dict[label] = {}
+                            labels_dict[label]['namespaces'] = []
+                            labels_dict[label]['values'] = []
+                        value = labels[label]
+                        values_dict_defined = None
+                        try:
+                            values_dict_defined = values_dict[value]
+                        except:
+                            values_dict[value] = {}
+                            values_dict[value]['namespaces'] = []
+                            values_dict[value]['labels'] = []
+                        namespaces_dict[namespace]['labels'].append(label)
+                        namespaces_dict[namespace]['values'].append(value)
+                        metrics_and_labels[base_name]['labels'].append(label)
+                        metrics_and_labels[base_name]['values'].append(value)
+                        labels_dict[label]['namespaces'].append(namespace)
+                        labels_dict[label]['values'].append(value)
+                        values_dict[value]['namespaces'].append(namespace)
+                        values_dict[value]['labels'].append(label)
+                else:
+                    namespace_elements = base_name.split('.')
+                    elements = elements + namespace_elements
+            for namespace in list(namespaces_dict.keys()):
+                namespaces_dict[namespace]['labels'] = list(set(namespaces_dict[namespace]['labels']))
+                namespaces_dict[namespace]['values'] = list(set(namespaces_dict[namespace]['values']))
+            for label in list(labels_dict.keys()):
+                labels_dict[label]['namespaces'] = list(set(labels_dict[label]['namespaces']))
+                labels_dict[label]['values'] = list(set(labels_dict[label]['values']))
+            for value in list(values_dict.keys()):
+                values_dict[value]['namespaces'] = list(set(values_dict[value]['namespaces']))
+                values_dict[value]['labels'] = list(set(values_dict[value]['labels']))
+        duration = (time.time() - start)
+        if details:
+            data_dict = {
+                "status": {
+                    "cache_data": False,
+                    "cache_ttl": None,
+                    "cluster_data": cluster_data,
+                    "details": details,
+                    "filtered": filtered,
+                    "filter_namespace": filter_namespace,
+                    "remove_full_namespace_prefix": remove_full_namespace_prefix,
+                    "response": 200,
+                    "request_time": duration,
+                    'time_complexity': 'high',
+                },
+                "data": {
+                    "metrics": unique_metrics,
+                    # @added 20220823 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    # Return namespaces, labels, values and elements with the response
+                    # @modified 20230330 - Feature #3252: webapp api - unique_metrics
+                    # Return a unique list as many are duplicated
+                    #"namespace_elements": elements,
+                    "namespace_elements": list(set(elements)),
+                    "namespaces": namespaces_dict,
+                    "labels": labels_dict,
+                    "values": values_dict,
+                    "metrics_and_labels": metrics_and_labels,
+                    'time_complexity': 'high',
+                }
             }
-        }
+        else:
+            data_dict = {
+                "status": {
+                    "cache_data": False,
+                    "cache_ttl": None,
+                    "cluster_data": cluster_data,
+                    "details": details,
+                    "filtered": filtered,
+                    "filter_namespace": filter_namespace,
+                    "remove_full_namespace_prefix": remove_full_namespace_prefix,
+                    "response": 200,
+                    "request_time": duration,
+                    'time_complexity': 'medium',
+                },
+                "data": {
+                    "metrics": unique_metrics,
+                    'time_complexity': 'medium',
+                }
+            }
+        try:
+            REDIS_CONN.setex(cache_key, 300, str(data_dict))
+            logger.info('api/unique_metrics - set %s Redis key' % cache_key)
+        except Exception as err:
+            logger.error('error :: failed to set %s Redis key - %s' % (cache_key, err))
         return jsonify(data_dict), 200
 
     # @added 20180929
@@ -3564,7 +4312,7 @@ def api():
         if 'source' in request.args:
             valid_source = False
             source = request.args.get('source', None)
-            if source == 'features_profile' or source == 'training_data':
+            if source in ['features_profile', 'training_data']:
                 valid_source = True
             if not valid_source:
                 resp = json.dumps(
@@ -3615,6 +4363,7 @@ def api():
             data_dict = {'metric': metric}
             datapoints = literal_eval(datapoints)
             data_dict['datapoints'] = datapoints
+            data_dict['time_complexity'] = 'low'
             return jsonify(data_dict), 200
 
     # @added 20180720 - Feature #2464: luminosity_remote_data
@@ -3644,6 +4393,15 @@ def api():
             except:
                 resolution = 60
 
+        # @added 20230409 - Task #4872: Optimise luminosity for labelled_metrics
+        # Added namespace for filter by namespace rather than surfacing the
+        # entire Redis data
+        namespace = None
+        if 'namespace' in request.args:
+            namespace_str = request.args.get('namespace', 'none')
+            if namespace_str != 'none':
+                namespace = str(namespace_str)
+
         luminosity_data = []
         if anomaly_timestamp:
             # @modified 20201117 - Feature #3824: get_cluster_data
@@ -3655,7 +4413,9 @@ def api():
                 # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
                 # Added resolution
                 # luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
-                luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp, resolution)
+                # @added 20230409 - Task #4872: Optimise luminosity for labelled_metrics
+                # Added namespace
+                luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp, resolution, namespace=namespace)
 
                 if luminosity_data:
                     # @modified 20201123 - Feature #3824: get_cluster_data
@@ -3683,6 +4443,113 @@ def api():
             resp = json.dumps(
                 {'results': 'Error: no anomaly_timestamp parameter was passed to /api?luminosity_remote_data'})
             return resp, 400
+
+    if 'graphite_metric' in request.args:
+        logger.info('processing graphite_metric api request')
+        for i in request.args:
+            key = str(i)
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+
+        valid_request = True
+        missing_arguments = []
+
+        metric = request.args.get('graphite_metric', None)
+        from_timestamp = request.args.get('from_timestamp', None)
+        until_timestamp = request.args.get('until_timestamp', None)
+
+        if not metric:
+            valid_request = False
+            missing_arguments.append('metric')
+            logger.error('metric argument not found')
+        else:
+            logger.info('metric - %s' % metric)
+
+        if not from_timestamp:
+            valid_request = False
+            missing_arguments.append('from_timestamp')
+            logger.error('from_timestamp argument not found')
+        else:
+            logger.info('from_timestamp - %s' % str(from_timestamp))
+
+        if not until_timestamp:
+            valid_request = False
+            missing_arguments.append('until_timestamp')
+        else:
+            logger.info('until_timestamp - %s' % str(until_timestamp))
+
+        if not valid_request:
+            error = 'Error: not all arguments where passed, missing %s' % str(missing_arguments)
+            resp = json.dumps({'results': error})
+            return resp, 404
+        else:
+            logger.info('requesting data from graphite for %s from %s to %s' % (
+                str(metric), str(from_timestamp), str(until_timestamp)))
+
+        data_source = 'graphite'
+        if '_tenant_id="' in metric:
+            data_source = 'victoriametrics'
+        if data_source == 'graphite':
+            try:
+                timeseries = get_graphite_metric(
+                    skyline_app, metric, from_timestamp, until_timestamp, 'json',
+                    'object')
+            except:
+                error = 'error :: %s' % str(traceback.print_exc())
+                resp = json.dumps({'results': error})
+                return resp, 500
+        if data_source == 'victoriametrics':
+
+            # @added 20230519 - Feature #3336: webapp api - derivative_metrics
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # To handle labelled_metrics, allow for the request to pass a metric
+            # to determine if it is a derivative_metric or not
+            monotonic = False
+            if 'monotonic' in request.args:
+                monotonic = request.args.get('monotonic', 'false')
+                if monotonic == 'true':
+                    monotonic = True
+
+            try:
+                # get_victoriametrics_metric automatically applies the rate and
+                # step required no downsampling or nonNegativeDerivative is
+                # required.
+                if not monotonic:
+                    timeseries = get_victoriametrics_metric(
+                        skyline_app, metric, from_timestamp, until_timestamp, 'json',
+                        'object')
+                else:
+                    timeseries = get_victoriametrics_metric(
+                        skyline_app, metric, from_timestamp, until_timestamp, 'json',
+                        'object', metric_data={}, plot_parameters={}, do_not_type=True)
+
+            except Exception as err:
+                error = 'error :: get_victoriametrics_metric failed for %s - %s' % (
+                    metric, err)
+                logger.error(error)
+                resp = json.dumps({'results': error})
+                return resp, 500
+
+        resp = json.dumps({'results': timeseries})
+        cleaned_resp = False
+        try:
+            # @modified 20191014 - Task #3270: Deprecate string.replace for py3
+            # format_resp_1 = string.replace(str(resp), '"[[', '[[')
+            # cleaned_resp = string.replace(str(format_resp_1), ']]"', ']]')
+            resp_str = str(resp)
+            format_resp_1 = resp_str.replace('"[[', '[[')
+            cleaned_resp = format_resp_1.replace(']]"', ']]')
+
+        except:
+            logger.error('error :: failed string replace resp: ' + traceback.format_exc())
+
+        if cleaned_resp:
+            return cleaned_resp, 200
+        else:
+            resp = json.dumps(
+                {'results': 'Error: failed to generate timeseries'})
+            return resp, 404
 
     if 'metric' in request.args:
         metric = request.args.get(str('metric'), None)
@@ -3777,77 +4644,6 @@ def api():
             error = "Error: " + str(err)
             resp = json.dumps({'results': error})
             return resp, 500
-
-    if 'graphite_metric' in request.args:
-        logger.info('processing graphite_metric api request')
-        for i in request.args:
-            key = str(i)
-            value = request.args.get(key, None)
-            logger.info('request argument - %s=%s' % (key, str(value)))
-
-        valid_request = True
-        missing_arguments = []
-
-        metric = request.args.get('graphite_metric', None)
-        from_timestamp = request.args.get('from_timestamp', None)
-        until_timestamp = request.args.get('until_timestamp', None)
-
-        if not metric:
-            valid_request = False
-            missing_arguments.append('graphite_metric')
-            logger.error('graphite_metric argument not found')
-        else:
-            logger.info('graphite_metric - %s' % metric)
-
-        if not from_timestamp:
-            valid_request = False
-            missing_arguments.append('from_timestamp')
-            logger.error('from_timestamp argument not found')
-        else:
-            logger.info('from_timestamp - %s' % str(from_timestamp))
-
-        if not until_timestamp:
-            valid_request = False
-            missing_arguments.append('until_timestamp')
-        else:
-            logger.info('until_timestamp - %s' % str(until_timestamp))
-
-        if not valid_request:
-            error = 'Error: not all arguments where passed, missing %s' % str(missing_arguments)
-            resp = json.dumps({'results': error})
-            return resp, 404
-        else:
-            logger.info('requesting data from graphite for %s from %s to %s' % (
-                str(metric), str(from_timestamp), str(until_timestamp)))
-
-        try:
-            timeseries = get_graphite_metric(
-                skyline_app, metric, from_timestamp, until_timestamp, 'json',
-                'object')
-        except:
-            error = 'error :: %s' % str(traceback.print_exc())
-            resp = json.dumps({'results': error})
-            return resp, 500
-
-        resp = json.dumps({'results': timeseries})
-        cleaned_resp = False
-        try:
-            # @modified 20191014 - Task #3270: Deprecate string.replace for py3
-            # format_resp_1 = string.replace(str(resp), '"[[', '[[')
-            # cleaned_resp = string.replace(str(format_resp_1), ']]"', ']]')
-            resp_str = str(resp)
-            format_resp_1 = resp_str.replace('"[[', '[[')
-            cleaned_resp = format_resp_1.replace(']]"', ']]')
-
-        except:
-            logger.error('error :: failed string replace resp: ' + traceback.format_exc())
-
-        if cleaned_resp:
-            return cleaned_resp, 200
-        else:
-            resp = json.dumps(
-                {'results': 'Error: failed to generate timeseries'})
-            return resp, 404
 
     # @modified 20200128 - Feature #3424: webapp - api documentation
     # resp = json.dumps(
@@ -4125,6 +4921,7 @@ def panorama():
             return 'Uh oh ... a Skyline 500 :(', 500
 
     start = time.time()
+    logger.info('request.url: %s' % str(request.url))
 
     # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies
     if 'plot_metric_anomalies' in request.args:
@@ -4163,16 +4960,195 @@ def panorama():
                 except:
                     data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "data": {"error": "invalid until_timestamp"}}
                     return jsonify(data_dict), 400
+
+        # @added 20220801 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        metric_id = 0
+        labelled_metric_base_name = None
+        labelled_metric_name = None
+        base_name = str(metric)
         if metric:
+            if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+                try:
+                    metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                except Exception as err:
+                    logger.error('error :: plot_metric_anomalies :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+                if metric_id:
+                    labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                    metric = str(labelled_metric_name)
+                    redirect_url = '%s/panorama?plot_metric_anomalies=true' % settings.SKYLINE_URL
+                    for i in request.args:
+                        key = str(i)
+                        value = request.args.get(key, None)
+                        if key == 'metric':
+                            value = labelled_metric_name
+                        new_redirect_url = '%s&%s=%s' % (
+                            redirect_url, str(key), str(value))
+                        redirect_url = new_redirect_url
+                    logger.info('plot_metric_anomalies :: returning redirect on original request - %s' % str(redirect_url))
+                    return redirect(redirect_url, code=302)
+            if base_name.startswith('labelled_metrics.'):
+                labelled_metric_name = str(base_name)
+                try:
+                    metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+                    if metric_name:
+                        labelled_metric_base_name = str(metric_name)
+                except Exception as err:
+                    logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                        base_name, err))
+
+        # @added 20220519 - Feature #4326: webapp - panorama_plot_anomalies
+        # Added matches
+        matches_dict = {}
+        matches = False
+        matches_plot_file = None
+        if 'plot_matches' in request.args:
+            plot_matches = request.args.get('plot_matches', 'false')
+            if plot_matches == 'true':
+                matches = True
+            else:
+                matches = False
+        # @added 20230127 - Feature #4830: webapp - panorama_plot_anomalies - all_events
+        if metric and from_timestamp > until_timestamp:
+            logger.info('plot_metric_anomalies :: returning 400 as from_timestamp is greater than until_timestamp')
+            data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "data": {"error": "from_timestamp is greater than until_timestamp"}}
+            return jsonify(data_dict), 400
+
+        plot_all_events = False
+        events_plot_file = None
+        use_format = 'html'
+        run_panorama_plot_anomalies = False
+        if metric:
+            run_panorama_plot_anomalies = True
+        if 'format' in request.args:
+            use_format = request.args.get('format', 'html')
+        if 'plot_all_events' in request.args:
+            plot_all_events = request.args.get('plot_all_events', 'false')
+            if plot_all_events == 'true':
+                plot_all_events = True
+            else:
+                plot_all_events = False
+                # Do not incur the overhead as plot_all_events does matches and
+                # anomalies
+                if use_format == 'json':
+                    run_panorama_plot_anomalies = False
+        # @added 20230130 - Feature #4830: webapp - panorama_plot_anomalies - all_events
+        #                   Feature #4834: webapp - api - get_all_activity
+        # The redirect needs to happen first for plot_all_events if this is a
+        # cluster because only the authoritative_node have the illuminance data
+
+        if HORIZON_SHARDS and metric:
+            authoritative_node = str(this_host)
             try:
-                anomalies_dict, plot_file = panorama_plot_anomalies(metric, from_timestamp, until_timestamp)
+                authoritative_node = get_authoritative_node(skyline_app, metric)
+                logger.info('plot_metric_anomalies :: reports %s as the authoritative cluster node for %s' % (authoritative_node, metric))
+            except Exception as err:
+                logger.error('error :: api get_authoritative_node failed - %s' % err)
+            request_url = str(request.url)
+            if authoritative_node != this_host:
+                find_host = this_host
+                replace_host = authoritative_node
+                if settings.SKYLINE_URL in request_url:
+                    find_host = settings.SKYLINE_URL
+                if this_host not in request_url:
+                    for item in settings.REMOTE_SKYLINE_INSTANCES:
+                        if item[3] == authoritative_node:
+                            replace_host = item[0]
+                if find_host != replace_host:
+                    redirect_url = request_url.replace(find_host, replace_host, 1)
+                    logger.info('plot_metric_anomalies :: returning redirect to authoritative_node - %s' % str(redirect_url))
+                    return redirect(redirect_url, code=302)
+
+        # @added 20221115 - Feature #4326: webapp - panorama_plot_anomalies
+        # Added timeseries_dict
+        timeseries_dict = {}
+
+        # @modified 20230127 - Feature #4830: webapp - panorama_plot_anomalies - all_events
+        # if metric:
+        anomalies_dict = {}
+        if run_panorama_plot_anomalies:
+            logger.info('plot_metric_anomalies :: running panorama_plot_anomalies')
+            try:
+                # anomalies_dict, plot_file = panorama_plot_anomalies(metric, from_timestamp, until_timestamp)
+                # @modified 20221115 - Feature #4326: webapp - panorama_plot_anomalies
+                # Added timeseries_dict
+                anomalies_dict, plot_file, matches_dict, matches_plot_file, labelled_metric_name, timeseries_dict = panorama_plot_anomalies(metric, from_timestamp, until_timestamp, matches)
             except:
                 trace = traceback.format_exc()
                 message = 'Uh oh ... a Skyline 500 using panorama_plot_anomalies'
                 return internal_error(message, trace)
+
+        # @added 20230127 - Feature #4830: webapp - panorama_plot_anomalies - all_events
+        events_plot_file = None
+        all_events_dict = {}
+        if plot_all_events:
+
+            if not base_name:
+                data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "error": "no metric parameter passed", "data": {}}
+                return jsonify(data_dict), 400
+
+            logger.info('plot_metric_anomalies :: running get_metric_all_events')
+            try:
+                all_events_dict = get_metric_all_events(skyline_app, base_name, from_timestamp, until_timestamp)
+            except Exception as err:
+                trace = traceback.format_exc()
+                message = 'Uh oh ... a Skyline 500 using get_metric_all_events - %s' % err
+                return internal_error(message, trace)
+            if all_events_dict:
+                if not metric_id:
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                    except Exception as err:
+                        logger.error('error ::  get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+                if use_format != 'json':
+                    try:
+                        success, events_plot_file = plot_metric_all_events(
+                            skyline_app, base_name, metric_id,
+                            from_timestamp, until_timestamp, all_events_dict,
+                            plot_parameters={'title': None, 'figsize': (16, 4)})
+                    except Exception as err:
+                        trace = traceback.format_exc()
+                        message = 'Uh oh ... a Skyline 500 using plot_metric_all_timeseries - %s' % err
+                        return internal_error(message, trace)
+
+        # @added 20221115 - Feature #4326: webapp - panorama_plot_anomalies
+        # Added json response
+        if 'format' in request.args:
+            use_format = request.args.get('format', 'html')
+            if use_format == 'json':
+                took = (time.time() - start)
+                logger.info('plot_metric_anomalies :: took %s seconds, responding with json' % str(took))
+                data_dict = {
+                    "status": {"response": 200, 'request_time': took},
+                    "data": {
+                        "anomalies": anomalies_dict,
+                        "matches": matches_dict,
+                        "timeseries": timeseries_dict,
+                    }
+                }
+                if plot_all_events:
+                    data_dict['data']['events'] = copy.deepcopy(all_events_dict)
+                    data_dict['data']['metric'] = base_name
+                    data_dict['data']['metric_id'] = metric_id
+                    data_dict['data']['from'] = from_timestamp
+                    data_dict['data']['until'] = until_timestamp
+                    del data_dict['data']['timeseries']
+
+            logger.info('plot_metric_anomalies returned json')
+            return jsonify(data_dict), 200
+
         return render_template(
             'panorama.html', plot_metric_anomalies=True, metric=metric,
             anomalies_dict=anomalies_dict, plot_file=plot_file,
+            plot_matches=matches, matches_dict=matches_dict,
+            matches_plot_file=matches_plot_file,
+            labelled_metric_name=labelled_metric_name,
+            labelled_metric_base_name=labelled_metric_base_name,
+            # @added 20221115 - Feature #4326: webapp - panorama_plot_anomalies
+            timeseries_dict=timeseries_dict,
+            # @added 20230127 - Feature #4830: webapp - panorama_plot_anomalies - all_events
+            plot_all_events=plot_all_events, events_plot_file=events_plot_file,
+            all_events_dict=all_events_dict,
             version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start), print_debug=False), 200
 
@@ -4212,6 +5188,9 @@ def panorama():
                 not_anomalous_metrics_dict[i_metric]['count'] = len(not_anomalous_dict[i_metric]['timestamps'])
                 not_anomalous_metrics_dict[i_metric]['from'] = not_anomalous_dict[i_metric]['from']
                 not_anomalous_metrics_dict[i_metric]['until'] = not_anomalous_dict[i_metric]['until']
+                not_anomalous_metrics_dict[i_metric]['labelled_metric_base_name'] = not_anomalous_dict[i_metric]['labelled_metric_base_name']
+                not_anomalous_metrics_dict[i_metric]['metric_id'] = not_anomalous_dict[i_metric]['metric_id']
+
         anomalies_metrics_dict = {}
         if anomalies_dict:
             for i_metric in list(anomalies_dict.keys()):
@@ -4219,6 +5198,8 @@ def panorama():
                 anomalies_metrics_dict[i_metric]['count'] = len(anomalies_dict[i_metric]['timestamps'])
                 anomalies_metrics_dict[i_metric]['from'] = anomalies_dict[i_metric]['from']
                 anomalies_metrics_dict[i_metric]['until'] = anomalies_dict[i_metric]['until']
+                anomalies_metrics_dict[i_metric]['labelled_metric_base_name'] = anomalies_dict[i_metric]['labelled_metric_base_name']
+                anomalies_metrics_dict[i_metric]['metric_id'] = anomalies_dict[i_metric]['metric_id']
 
         return render_template(
             'panorama.html', not_anomalous=True,
@@ -4313,14 +5294,22 @@ def panorama():
             trace = traceback.format_exc()
             message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
             return internal_error(message, trace)
+        # logger.info('not_anomalous_dict: %s' % str(not_anomalous_dict))
+
+        # @added 20221115 - Feature #4326: webapp - panorama_plot_anomalies
+        # Added timeseries_dict
+        timeseries_dict = {}
+
         anomalies_dict = {}
         if anomalies_param:
+            logger.info('trying to get anomalies from cache')
             try:
                 anomalies_dict = get_cache_dict('anomalies', base_name, from_timestamp, until_timestamp)
             except:
                 trace = traceback.format_exc()
                 message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
                 return internal_error(message, trace)
+        # logger.info('anomalies_dict: %s' % str(anomalies_dict))
 
         if not not_anomalous_dict:
             logger.info('not_anomalous_dict data not found in Redis')
@@ -4358,6 +5347,11 @@ def panorama():
                     str(not_anomalous_count), base_name))
             return jsonify(data_dict), 200
 
+        # logger.debug('debug :: not_anomalous_dict: %s' % str(not_anomalous_dict))
+        # logger.debug('debug :: anomalies_dict: %s' % str(anomalies_dict))
+        logger.info('not_anomalous_dict length: %s' % str(len(not_anomalous_dict)))
+        logger.info('anomalies_dict length: %s' % str(len(anomalies_dict)))
+
         not_anomalous_plot = None
         if not_anomalous_dict or anomalies_dict:
             try:
@@ -4381,32 +5375,58 @@ def panorama():
             else:
                 logger.warning('warning :: no anomalies_dict to plot for %s' % base_name)
 
+        labelled_metric_name = None
+        labelled_metric_base_name = None
+        if base_name.startswith('labelled_metrics.'):
+            labelled_metric_name = str(base_name)
+            try:
+                metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+                if metric_name:
+                    labelled_metric_base_name = str(metric_name)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    base_name, err))
+
         return render_template(
             'panorama.html', not_anomalous_metric=True, metric=base_name,
             not_anomalous_dict=not_anomalous_dict,
             from_timestamp=from_timestamp, until_timestamp=until_timestamp,
             not_anomalous_plot=not_anomalous_plot,
             anomalies_plot=anomalies_plot,
+            labelled_metric_name=labelled_metric_name,
+            labelled_metric_base_name=labelled_metric_base_name,
             version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER,
             duration=(time.time() - start), print_debug=False), 200
 
+    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    # Deprecated get_list and using get_ functions
     try:
-        apps = get_list('app')
+        # apps = get_list('app')
+        apps_dict = get_apps(skyline_app)
+        apps = list(apps_dict.keys())
     except:
         logger.error('error :: %s' % traceback.print_exc())
         apps = ['None']
     try:
-        sources = get_list('source')
+        # sources = get_list('source')
+        sources_dict = get_sources(skyline_app)
+        sources = list(sources_dict.keys())
     except:
         logger.error('error :: %s' % traceback.print_exc())
         sources = ['None']
     try:
-        algorithms = get_list('algorithm')
+        # algorithms = get_list('algorithm')
+        algorithms_dict = get_algorithms(skyline_app)
+        algorithms = list(algorithms_dict.keys())
     except:
         logger.error('error :: %s' % traceback.print_exc())
         algorithms = ['None']
     try:
-        hosts = get_list('host')
+        # hosts = get_list('host')
+        hosts_dict = get_hosts(skyline_app)
+        hosts = list(hosts_dict.keys())
     except:
         logger.error('error :: %s' % traceback.print_exc())
         hosts = ['None']
@@ -4442,6 +5462,12 @@ def panorama():
         if 'label' in request.args:
             label = request.args.get(str('label'), None)
         do_label_anomalies = False
+
+        # @added 20230112 - Task #4778: v4.0.0 - update dependencies
+        # Default end_timestamp to now
+        if not end_timestamp:
+            end_timestamp = int(time.time())
+
         if start_timestamp and end_timestamp and label:
             if metrics:
                 do_label_anomalies = True
@@ -4544,6 +5570,69 @@ def panorama():
                     # Roll back change - breaking existing metrics with colons
                     # metric_name = url_encode_metric_name(metric_name)
 
+                    if '_tenant_id="' in value:
+                        metric_name = str(value)
+                        # @added 20221025 - Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        metric_id = 0
+                        try:
+                            metric_id = get_metric_id_from_base_name(skyline_app, metric_name)
+                        except Exception as err:
+                            logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                                value, err))
+                        if metric_id:
+                            unique_metrics.append(metric_name)
+
+                    # @added 20230207 - Bug #4374: webapp - handle url encoded chars
+                    if metric_name not in unique_metrics and ':' in metric_name:
+                        try:
+                            encoded_metric_name = metric_name.replace(':', '%3A')
+                            if encoded_metric_name in unique_metrics:
+                                logger.info('encoded metric name found in unique_metrics: %s' % (
+                                    encoded_metric_name))
+                                unique_metrics.append(metric_name)
+                        except Exception as err:
+                            logger.error('error :: encoded metric name failed for %s - %s' % (
+                                metric, err))
+
+                    # @added 20220722 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if metric_name not in unique_metrics:
+
+                        # @added 20220727 - Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        if value.startswith('labelled_metrics.'):
+                            try:
+                                metric_name = get_base_name_from_labelled_metrics_name(skyline_app, value)
+                                if metric_name:
+                                    unique_metrics.append(value)
+                                    unique_metrics.append(metric_name)
+                                    base_name = str(metric_name)
+                                    labelled_metric_base_name = str(metric_name)
+                                    value = str(metric_name)
+                            except Exception as err:
+                                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                                    value, err))
+                        metric_id_str = False
+                        try:
+                            logger.info('looking up %s in aet.metrics_manager.metric_names_with_ids from Redis' % value)
+                            metric_id_str = REDIS_CONN.hget('aet.metrics_manager.metric_names_with_ids', value)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: Webapp could not get the aet.metrics_manager.metric_names_with_ids from Redis - %s' % err)
+                            return 'Internal Server Error', 500
+                        has_redistimeseries = False
+                        if metric_id_str:
+                            try:
+                                redistimeseries_key = 'labelled_metrics.%s' % metric_id_str
+                                has_redistimeseries = REDIS_CONN.exists(redistimeseries_key)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: Webapp could not check if redistimeseries_key exists - %s' % err)
+                        if has_redistimeseries:
+                            append_metric = 'metrics.%s' % value
+                            unique_metrics.append(append_metric)
+
                     # @added 20180423 - Feature #2034: analyse_derivatives
                     #                   Branch #2270: luminosity
                     other_unique_metrics = []
@@ -4597,7 +5686,7 @@ def panorama():
                         if request.args.get(str('fp_search'), None):
                             logger.info('check request.args -  %s not in Redis, but fp_search request so continuing' % metric_name)
                         else:
-                            error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                            error_string = 'error :: no metric (fp_search not in request.args) - %s - exists in Redis' % metric_name
                             logger.error(error_string)
                             resp = json.dumps(
                                 {'404 Not Found': error_string})
@@ -4632,6 +5721,19 @@ def panorama():
                         unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                     except:
                         logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+                        logger.info(traceback.format_exc())
+                        return 'Internal Server Error', 500
+                    # @added 20220729 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    unique_labelled_metrics = []
+                    try:
+                        active_labelled_metrics_with_id = REDIS_CONN.hgetall('aet.metrics_manager.active_labelled_metrics_with_id')
+                        if active_labelled_metrics_with_id:
+                            unique_metrics = unique_metrics + list(active_labelled_metrics_with_id.keys())
+                        del active_labelled_metrics_with_id
+                        logger.info('adding %s unique_labelled_metrics to unique_metrics' % str(len(unique_labelled_metrics)))
+                    except:
+                        logger.error('error :: Webapp could not get aet.metrics_manager.active_labelled_metrics_with_id from Redis')
                         logger.info(traceback.format_exc())
                         return 'Internal Server Error', 500
 
@@ -4770,7 +5872,7 @@ def panorama():
     if get_anomaly_id:
         try:
             query, panorama_data = panorama_request()
-            logger.info('debug :: panorama_data - %s' % str(panorama_data))
+            logger.info('debug :: query: %s, panorama_data: %s' % (str(query), str(panorama_data)))
         except:
             logger.error('error :: failed to get panorama: ' + traceback.format_exc())
             return 'Uh oh ... a Skyline 500 :(', 500
@@ -4913,6 +6015,9 @@ def crucible():
     # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
     # Allow the user to pass algorithms to run -->
     run_algorithms = settings.ALGORITHMS
+
+    # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+    summarise = 0
 
     if request_args_len:
         if 'process_metrics' in request.args:
@@ -5090,6 +6195,16 @@ def crucible():
                         else:
                             logger.error('error :: crucible_process_metrics - run_algorithms passed, with invalid algorithm - %s, excluding' % str(r_algorithm))
 
+        # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+        # Added summarise option
+        if 'summarise' in request.args:
+            summarise_str = request.args.get('summarise', '0')
+            if summarise_str:
+                try:
+                    summarise = int(summarise_str)
+                except:
+                    summarise = 0
+
         do_process_metrics = False
         if from_timestamp and until_timestamp:
             if metrics:
@@ -5120,7 +6235,9 @@ def crucible():
                 # Added training_data_json
                 # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
                 # Allow the user to pass run_algorithms to run
-                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json, run_algorithms)
+                # @modified 20220610 - Feature #3500: webapp - crucible_process_metrics
+                # Added summarise option
+                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json, run_algorithms, summarise)
                 logger.info('crucible_process_metrics - submit_crucible_job returned (%s, %s, %s, %s)' % (
                     str(crucible_job_id), str(metrics_submitted_to_process),
                     str(message), str(trace)))
@@ -5227,7 +6344,10 @@ def crucible():
 
 
 # @added 20161123 - Branch #922: ionosphere
-@app.route('/ionosphere', methods=['GET'])
+# @modified 20221018 - Feature #4650: ionosphere.bulk.training
+# Added POST
+# @app.route('/ionosphere', methods=['GET'])
+@app.route('/ionosphere', methods=['GET', 'POST'])
 @requires_auth
 def ionosphere():
     if not settings.IONOSPHERE_ENABLED:
@@ -5281,16 +6401,20 @@ def ionosphere():
         if not success:
             logger.error('error :: /ionosphere could not get_user_details(%s)' % str(user))
             return 'Internal Server Error - ref: i - could not determine user_id', 500
-        else:
-            try:
-                user_id = int(user_id)
-                logger.info('/ionosphere get_user_details() with %s returned user id %s' % (
-                    str(user), str(user_id)))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: /ionosphere get_user_details() with %s did not return an int' % (
-                    str(user)))
-                return 'Internal Server Error - ref: i - user_id not int', 500
+        try:
+            user_id = int(user_id)
+            logger.info('/ionosphere get_user_details() with %s returned user id %s' % (
+                str(user), str(user_id)))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /ionosphere get_user_details() with %s did not return an int' % (
+                str(user)))
+            return 'Internal Server Error - ref: i - user_id not int', 500
+
+    # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+    request_id_str = '%s.%s' % (str(start), str(request.url))
+    request_id = hashlib.sha256(request_id_str.encode('utf-8')).hexdigest()
+    logger.info('starting ionosphere request_id: %s' % str(request_id))
 
     logger.info('request.url: %s' % str(request.url))
     # logger.debug('request.args: %s' % str(request.args))
@@ -5320,7 +6444,7 @@ def ionosphere():
     # Added ionosphere_echo
     echo_hdate = False
 
-    metric_id = False
+    metric_id = 0
 
     # @added 20210417 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
@@ -5349,6 +6473,100 @@ def ionosphere():
     # Allow user to specify the difference between the areas under the
     # curve
     motif_max_area_percent_diff = None
+
+    # @added 20220822 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    valid_length_for_training = True
+
+    # @added 20221018 - Feature #4650: ionosphere.bulk.training
+    bulk_training = False
+
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Look up base_name for labelled_metrics and determine base_name if the
+    # metric_id is passed.
+    base_name = None
+    labelled_metric_base_name = None
+    labelled_metric_name = None
+    if request_args_present:
+        if 'metric' in request.args:
+            passed_metric = request.args.get('metric')
+            if passed_metric.startswith('labelled_metrics.'):
+                labelled_metric_name = str(passed_metric)
+                logger.info('passed labelled_metric_name: %s' % labelled_metric_name)
+                try:
+                    metric_id_str = labelled_metric_name.replace('labelled_metrics.', '', 1)
+                    if metric_id_str:
+                        metric_id = int(float(metric_id_str))
+                except Exception as err:
+                    logger.error('error :: failed to determine metric_id from passed_metric: %s - %s' % (
+                        str(passed_metric), err))
+        if 'metric_id' in request.args:
+            passed_metric_id = request.args.get('metric_id')
+            if passed_metric_id:
+                try:
+                    metric_id = int(float(passed_metric_id))
+                    logger.info('passed metric_id: %s' % str(metric_id))
+                except Exception as err:
+                    logger.error('error :: failed to determine valid metric_id from passed_metric_id: %s - %s' % (
+                        str(passed_metric_id), err))
+        if metric_id:
+            try:
+                base_name = get_base_name_from_metric_id(skyline_app, metric_id)
+                if base_name:
+                    logger.info('base_name looked up for metric_id: %s, base_name: %s' % (
+                        str(metric_id), base_name))
+                    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+                        labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                        labelled_metric_base_name = str(base_name)
+                        base_name = str(labelled_metric_name)
+                        logger.info('determined labelled_metric_name: %s' % labelled_metric_name)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_metric_id failed with metric_id: %s - %s' % (
+                    str(metric_id), err))
+        if labelled_metric_name and not base_name:
+            try:
+                metric_name = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+                if metric_name:
+                    labelled_metric_base_name = str(metric_name)
+                    base_name = str(labelled_metric_base_name)
+                    logger.info('base_name looked up from labelled_metric_name: %s, base_name: %s' % (
+                        labelled_metric_name, base_name))
+                    logger.info('labelled_metric_base_name: %s' % (
+                        labelled_metric_base_name))
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    labelled_metric_name, err))
+
+    # @added 20221018 - Feature #4650: ionosphere.bulk.training
+    if 'bulk_training' in request.args:
+        bulk_training = True
+        trained = {}
+        training_data = {}
+        if 'trained' in request.args:
+            if len(request.form) > 0:
+                if 'trained' in request.form:
+                    trained = request.form['trained']
+        use_format = 'html'
+        if 'format' in request.args:
+            use_format = request.args.get('format', 'html')
+        if use_format == 'json':
+            data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"trained": trained}}
+            logger.info('bulk_training returned json')
+            return jsonify(data_dict), 200
+        if not trained:
+            # training_data = api_get_bulk_training_data(skyline_app)
+            training_data = {}
+
+        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+            str(request_id), str((time.time() - start))))
+
+        return render_template(
+            'ionosphere.html', bulk_training=bulk_training, training_data=training_data,
+            trained=trained,
+            version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, user=user,
+            duration=(time.time() - start), print_debug=False), 200
 
     # This allows to plot best first, just makes an ordered list of the motif_id
     # in the dict ordered by dist, just to add some order to a dict :)
@@ -5621,7 +6839,13 @@ def ionosphere():
             data_dict = {"status": {"response": 204, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "matched_motifs": matched_motifs, "success": False, "reason": "no data for query"}}
         if format == 'json':
             logger.info('ionosphere motif_matches returned json with %s matched_motifs elements listed' % str(len(matched_motifs)))
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
             return jsonify(data_dict), 200
+        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+            str(request_id), str((time.time() - start))))
         return render_template(
             'ionosphere.html', motif_matches=motif_matches_req,
             matched_motifs=matched_motifs, for_metric=metric,
@@ -5645,7 +6869,7 @@ def ionosphere():
         # Added the validate_all context and function
         validate_all = False
         all_validated = False
-        metric_id = False
+        # metric_id = False
         validated_count = 0
 
         for i in request.args:
@@ -5712,6 +6936,15 @@ def ionosphere():
                     if base_name in metric_names:
                         metric_found = True
                         metric_name = base_name
+
+                # @added 20220729 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metrics
+                if not metric_found and labelled_metric_base_name:
+                    if labelled_metric_base_name in metric_names:
+                        logger.info('%s found in in DB metrics list' % labelled_metric_base_name)
+                        metric_found = True
+                        metric_name = str(labelled_metric_base_name)
 
                 if not metric_found:
                     metric_name = settings.FULL_NAMESPACE + base_name
@@ -5807,6 +7040,7 @@ def ionosphere():
                 # metrics_with_features_profiles_to_validate
                 # [[metric_id, metric, fps_to_validate_count]]
                 metrics_with_features_profiles_to_validate, fail_msg, trace = get_metrics_with_features_profiles_to_validate()
+                logger.info('get_metrics_with_features_profiles_to_validate returned %s features profiles to validate' % str(len(metrics_with_features_profiles_to_validate)))
 
                 # @added 20190501 - Feature #2430: Ionosphere validate learnt features profiles page
                 # Only add to features_profiles_to_validate if the metric is active
@@ -5816,23 +7050,53 @@ def ionosphere():
                         active_metrics_with_features_profiles_to_validate = []
                         try:
                             unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                            # @added 20220729 - Task #2732: Prometheus to Skyline
+                            #                   Branch #4300: prometheus
+                            # Handle labelled_metrics
+                            if labelled_metric_base_name:
+                                i_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(labelled_metric_base_name))
+                                unique_metrics.append(i_metric_name)
                         except:
                             logger.error('error :: Webapp could not get the unique_metrics list from Redis')
                             logger.info(traceback.format_exc())
                             return 'Internal Server Error', 500
+
+                        # @added 20220729 - Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        # Handle labelled_metrics
+                        if base_name == 'all':
+                            unique_labelled_metrics = []
+                            try:
+                                active_labelled_metrics_with_id = REDIS_CONN.hgetall('aet.metrics_manager.active_labelled_metrics_with_id')
+                                unique_labelled_metrics = list(active_labelled_metrics_with_id.keys())
+                                del active_labelled_metrics_with_id
+                                logger.info('adding %s unique_labelled_metrics to unique_metrics' % str(len(unique_labelled_metrics)))
+                            except:
+                                logger.error('error :: Webapp could not get aet.metrics_manager.active_labelled_metrics_with_id from Redis')
+                                logger.info(traceback.format_exc())
+                                return 'Internal Server Error', 500
+                            for i_metric in unique_labelled_metrics:
+                                i_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(i_metric))
+                                unique_metrics.append(i_metric_name)
+
                         for i_metric_id, i_metric, fps_to_validate_count in metrics_with_features_profiles_to_validate:
                             i_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(i_metric))
                             if i_metric_name not in unique_metrics:
                                 continue
                             active_metrics_with_features_profiles_to_validate.append([i_metric_id, i_metric, fps_to_validate_count])
+                        del unique_metrics
                         metrics_with_features_profiles_to_validate = active_metrics_with_features_profiles_to_validate
-
+                        logger.info('%s active features profiles to validate' % str(len(metrics_with_features_profiles_to_validate)))
                 logger.info('no features_profiles_to_validate was passed so determined metrics_with_features_profiles_to_validate')
 
             # @added 20190503 - Branch #2646: slack
             if validated_count > 0:
                 slack_updated = webapp_update_slack_thread(base_name, 0, validated_count, 'validated')
                 logger.info('slack_updated for validated features profiles %s' % str(slack_updated))
+
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
 
             return render_template(
                 'ionosphere.html', fp_validate=fp_validate_req,
@@ -5847,9 +7111,13 @@ def ionosphere():
                 # @added 20190919 - Feature #3230: users DB table
                 #                   Feature #2516: Add label to features profile
                 user=user,
+                # @added 20220729 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metrics
+                labelled_metric_name=labelled_metric_name,
+                labelled_metric_base_name=labelled_metric_base_name,
                 duration=(time.time() - start), print_debug=False), 200
 
-###
     # @added 20210727 - Feature #4206: webapp - saved_training_data page
     saved_training_data_dict = {}
     if 'ionosphere_saved_training' in request.args:
@@ -5875,7 +7143,7 @@ def ionosphere():
         metric = None
         try:
             metric = request.args.get('metric')
-            if metric == 'all' or metric == '':
+            if metric in ['all', '']:
                 metric = None
         except KeyError:
             metric = None
@@ -5885,7 +7153,7 @@ def ionosphere():
         namespaces = None
         try:
             namespaces = request.args.get('namespaces')
-            if namespaces == 'all' or namespaces == '':
+            if namespaces in ['all', '']:
                 namespaces = None
         except KeyError:
             namespaces = None
@@ -5928,6 +7196,10 @@ def ionosphere():
                     saved_training_data_metrics.append([metric, timestamp])
             saved_training_data_metrics = sorted(saved_training_data_metrics, key=lambda x: x[1], reverse=True)
 
+        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+            str(request_id), str((time.time() - start))))
+
         return render_template(
             'ionosphere.html', saved_training_data_page=True,
             saved_training_data_dict=saved_training_data_dict,
@@ -5935,7 +7207,6 @@ def ionosphere():
             version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
             print_debug=False), 200
 
-###
     # @added 20210107 - Feature #3934: ionosphere_performance
     performance_request = False
     if 'performance' in request.args:
@@ -5951,6 +7222,8 @@ def ionosphere():
             # @added 20210202 - Feature #3934: ionosphere_performance
             # Handle user timezone
             'tz',
+            # @added 20230418 - Feature #3934: ionosphere_performance
+            'full_duration',
         ]
         metric = None
         metric_like = None
@@ -5980,6 +7253,14 @@ def ionosphere():
         for pytz_timezone in pytz.all_timezones:
             pytz_timezones.append(pytz_timezone)
 
+        # @added 20230418 - Feature #3934: ionosphere_performance
+        # Allow for a minimum full_duration to differential between analyzer and
+        # mirage anomalies
+        if settings.FULL_DURATION < 604800:
+            min_full_duration = 604800  - 900
+        else:
+            min_full_duration = int(settings.FULL_DURATION - 900)
+
         performance_data_request = False
         for i in request.args:
             key = str(i)
@@ -5991,13 +7272,24 @@ def ionosphere():
                 return flask_escape(resp), 400
             value = request.args.get(key, '0')
             if key == 'metric':
+                logger.info('metric %s was passed' % value)
                 if str(value) == 'all':
                     metric = str(value)
                     performance_data_request = True
                 if str(value) != 'all':
                     metric = str(value)
+                    # @added 20220831 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if metric.startswith('labelled_metrics.'):
+                        try:
+                            metric = get_base_name_from_labelled_metrics_name(skyline_app, value)
+                            logger.info('metric looked up - %s' % metric)
+                        except Exception as err:
+                            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                                value, err))
+
                     performance_data_request = True
-            if key == 'from_timestamp' or key == 'until_timestamp':
+            if key in ['from_timestamp', 'until_timestamp']:
                 timestamp_format_invalid = True
                 if value == 'all':
                     timestamp_format_invalid = False
@@ -6037,7 +7329,9 @@ def ionosphere():
             if key == 'total_fps':
                 if value == 'true':
                     fps_matched_count = True
-
+            # @added 20230418 - Feature #3934: ionosphere_performance
+            if key == 'full_duration':
+                min_full_duration = int(float(value))
         try:
             remove_prefix_str = request.args.get('remove_prefix', 'false')
             if remove_prefix_str != 'false':
@@ -6064,7 +7358,9 @@ def ionosphere():
                     sum_matches, title, period, height, width, fp_type,
                     # @added 20210202 - Feature #3934: ionosphere_performance
                     # Handle user timezone
-                    timezone_str)
+                    timezone_str,
+                    # @added 20230418 - Feature #3934: ionosphere_performance
+                    min_full_duration)
             except:
                 trace = traceback.format_exc()
                 fail_msg = 'error :: Webapp error with get_ionosphere_performance'
@@ -6076,6 +7372,9 @@ def ionosphere():
                     performance_json_dict = {}
                     data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict, "success": False, "reason": "no data for query"}}
                     logger.info('ionosphere performance returned json with with no data from query')
+                    # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                    logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                        str(request_id), str((time.time() - start))))
                     return jsonify(data_dict), 200
                 trace = ionosphere_performance_data
                 fail_msg = 'error :: Webapp no ionosphere_performance_data'
@@ -6097,6 +7396,8 @@ def ionosphere():
             dates = []
             for item in performance_list:
                 dates.append(item['date'])
+            last_fps_total_count = None
+            fps_total_count_column = False
             for date_str in dates:
                 performance_json_dict[date_str] = {}
                 for item in performance_list:
@@ -6109,9 +7410,23 @@ def ionosphere():
                             # Convert nan to null or 0 for valid json
                             if str(item[column]) == 'nan':
                                 if column == 'fps_total_count':
+                                    fps_total_count_column = True
                                     performance_json_dict[date_str][column] = 0
+                                    if last_fps_total_count:
+                                        performance_json_dict[date_str][column] = last_fps_total_count
                                 else:
                                     performance_json_dict[date_str][column] = None
+                            if column == 'fps_total_count':
+                                if str(item[column]) not in ['nan', 'null', 'None']:
+                                    if isinstance(item[column], float):
+                                        last_fps_total_count = item[column]
+            if fps_total_count_column:
+                if performance_json_dict[dates[-1]]['fps_total_count'] == 0:
+                    use_value = performance_json_dict[dates[-2]]['fps_total_count']
+                    if use_value > 0:
+                        performance_json_dict[dates[-1]]['fps_total_count'] = use_value
+                        logger.info('ionosphere_performance_data changed last fps_total_count from 0 to %s' % str(use_value))
+
         # Allow for the removal of a prefix from the metric name
         if remove_prefix:
             try:
@@ -6128,7 +7443,14 @@ def ionosphere():
             data_dict = {"status": {"response": 204, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict, "success": False, "reason": "no data for query"}}
         if format == 'json':
             logger.info('ionosphere performance returned json with %s performance elements listed' % str(len(performance_json_dict)))
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
             return jsonify(data_dict), 200
+
+        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+            str(request_id), str((time.time() - start))))
 
         return render_template(
             'ionosphere.html', performance=True,
@@ -6251,7 +7573,7 @@ def ionosphere():
                     logger.error('error :: limit is not an integer - %s' % str(limit))
                     limited_by = '30'
 
-            if key == 'from_timestamp' or key == 'until_timestamp':
+            if key in ['from_timestamp', 'until_timestamp']:
                 timestamp_format_invalid = True
                 if value == 'all':
                     timestamp_format_invalid = False
@@ -6311,6 +7633,25 @@ def ionosphere():
                 # Roll back change - breaking existing metrics with colons
                 # metric_name = url_encode_metric_name(metric_name)
 
+                # @added 20221025 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                if '_tenant_id="' in value:
+                    metric_name = str(value)
+                    metric_id = 0
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, metric_name)
+                    except Exception as err:
+                        logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                            value, err))
+                    if metric_id:
+                        unique_metrics.append(metric_name)
+                # @added 20221103 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                if value.startswith('labelled_metrics.'):
+                    unique_metrics.append(value)
+                    unique_metrics.append(metric_name)
+                    metric_name = str(value)
+
                 # @added 20180423 - Feature #2034: analyse_derivatives
                 #                   Branch #2270: luminosity
                 metric_found_in_other_redis = False
@@ -6359,7 +7700,7 @@ def ionosphere():
                         get_metric_profiles = True
                         metric = str(value)
                     else:
-                        error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                        error_string = 'error :: no metric (not fp_search_req) - %s - exists in Redis' % metric_name
                         logger.error(error_string)
                         resp = json.dumps(
                             {'results': error_string})
@@ -6391,6 +7732,20 @@ def ionosphere():
                         logger.info(traceback.format_exc())
                         return internal_error(fail_msg, trace)
 
+                    # @added 20220729 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    unique_labelled_metrics = []
+                    try:
+                        active_labelled_metrics_with_id = REDIS_CONN.hgetall('aet.metrics_manager.active_labelled_metrics_with_id')
+                        if active_labelled_metrics_with_id:
+                            unique_metrics = unique_metrics + list(active_labelled_metrics_with_id.keys())
+                        del active_labelled_metrics_with_id
+                        logger.info('adding %s unique_labelled_metrics to unique_metrics' % str(len(unique_labelled_metrics)))
+                    except:
+                        logger.error('error :: Webapp could not get aet.metrics_manager.active_labelled_metrics_with_id from Redis')
+                        logger.info(traceback.format_exc())
+                        return 'Internal Server Error', 500
+
                     matching = [s for s in unique_metrics if metric_namespace_pattern in s]
                     if len(matching) == 0:
                         error_string = 'error :: no metric like - %s - exists in Redis' % metric_namespace_pattern
@@ -6401,10 +7756,9 @@ def ionosphere():
                         #                      Bug #2816: Cross-Site Scripting Security Vulnerability
                         # return resp, 404
                         return flask_escape(resp), 404
-                    else:
-                        # @added 20200710 - Feature #1996: Ionosphere - matches page
-                        logger.info('metric_like %s was passed, %s metrics found matching' % (value, str(len(matching))))
-                        metric_like = str(value)
+                    # @added 20200710 - Feature #1996: Ionosphere - matches page
+                    logger.info('metric_like %s was passed, %s metrics found matching' % (value, str(len(matching))))
+                    metric_like = str(value)
                 if matching:
                     metric_like = str(value)
 
@@ -6414,6 +7768,11 @@ def ionosphere():
             # Added missing search_success variable
             features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
             logger.info('fp_search_req returning response')
+
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
+
             return render_template(
                 'ionosphere.html', fp_search=fp_search_req,
                 fp_search_results=fp_search_req,
@@ -6528,6 +7887,10 @@ def ionosphere():
                             trace = traceback.format_exc()
                             return internal_error(message, trace)
 
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
+
             # @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles
             # Added enabled_list to display DISABLED in search_features_profiles
             # page results.
@@ -6541,6 +7904,11 @@ def ionosphere():
                 # @added 20180917 - Feature #2602: Graphs in search_features_profiles
                 features_profiles_with_images=features_profiles_with_images,
                 show_graphs=show_graphs,
+                # @added 20220729 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metrics
+                labelled_metric_name=labelled_metric_name,
+                labelled_metric_base_name=labelled_metric_base_name,
                 version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=False), 200
 
@@ -6637,6 +8005,10 @@ def ionosphere():
                 logger.info('matches filtered by validated = %s' % (
                     str(filter_match_validation)))
 
+        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+            str(request_id), str((time.time() - start))))
+
         return render_template(
             'ionosphere.html', fp_matches=fp_matches_req, for_metric=metric,
             fp_matches_results=matches, order=ordered_by, limit=limited_by,
@@ -6701,6 +8073,9 @@ def ionosphere():
         # Allow user to specify the difference between the areas under the
         # curve
         'max_area_percent_diff',
+        # @added 20220728 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        'labelled_metric_name', 'metric_id',
     ]
 
     # @modified 20190503 - Branch #2646: slack - linting
@@ -6765,7 +8140,15 @@ def ionosphere():
     # Allow the user to specify the range_padding
     motif_range_padding = None
 
+    # @added 20220516 - Feature #2580: illuminance
+    # illuminance_events_dict = False
+    illuminance_events_dict = {}
+
+    # @added 20230626
+    insufficient_data_for_training = False
+
     try:
+
         if request_args_present:
             timestamp_arg = False
             metric_arg = False
@@ -6776,7 +8159,12 @@ def ionosphere():
 
             if 'fp_view' in request.args:
                 fp_view = request.args.get(str('fp_view'), None)
-                base_name = request.args.get(str('metric'), None)
+                if not base_name:
+                    base_name = request.args.get(str('metric'), None)
+
+                if labelled_metric_base_name and not base_name:
+                    base_name = str(labelled_metric_name)
+                    logger.info('set base_name to labelled_metric_name')
 
                 # @added 20170917 - Feature #1996: Ionosphere - matches page
                 if 'matched_fp_id' in request.args:
@@ -6859,6 +8247,10 @@ def ionosphere():
 
                     use_timestamp = 0
                     metric_timeseries_dir = base_name.replace('.', '/')
+
+                    if labelled_metric_name:
+                        metric_timeseries_dir = labelled_metric_name.replace('.', '/')
+
                     # @modified 20170126 - Feature #1872: Ionosphere - features profile page by id only
                     # The the incorrect logic, first it should be checked if
                     # there is a use_full_duration parent timestamp
@@ -6895,9 +8287,24 @@ def ionosphere():
                             else:
                                 check_timestamp -= 1
 
-                    features_profiles_data_dir = '%s/%s/%s' % (
-                        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
-                        str(anomaly_timestamp))
+                    # @added 20220729 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if use_timestamp == 0:
+                        if 'timestamp' in request.args:
+                            try:
+                                timestamp_str = request.args.get('timestamp')
+                                features_profiles_data_dir = '%s/%s/%s' % (
+                                    settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                                    str(timestamp_str))
+                                if os.path.exists(features_profiles_data_dir):
+                                    use_timestamp = int(timestamp_str)
+                            except:
+                                logger.error('error :: invalid request argument - fp_id is not an int')
+
+                    if use_timestamp == 0 and anomaly_timestamp:
+                        features_profiles_data_dir = '%s/%s/%s' % (
+                            settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                            str(anomaly_timestamp))
                     # @modified 20170126 - Feature #1872: Ionosphere - features profile page by id only
                     # This was the incorrect logic, first it should be checked if
                     # there is a use_full_duration parent timestamp
@@ -6922,10 +8329,15 @@ def ionosphere():
                             alternative_urls = []
                             for alt_url in use_alternative_urls:
                                 alt_redirect_url = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (str(alt_url), str(fp_id), str(base_name))
+                                if labelled_metric_name:
+                                    alt_redirect_url = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (str(alt_url), str(fp_id), str(labelled_metric_name))
                                 alternative_urls.append(alt_redirect_url)
                             message = 'no timestamp feature profiles data dir found on this Skyline instance try at the alternative URLS listed below:'
                             logger.info('passing alternative_urls - %s' % str(alternative_urls))
                             try:
+                                # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                    str(request_id), str((time.time() - start))))
                                 return render_template(
                                     'ionosphere.html', display_message=message,
                                     alternative_urls=alternative_urls,
@@ -6945,6 +8357,9 @@ def ionosphere():
                         return flask_escape(resp), 400
 
                     redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
+                    if labelled_metric_name:
+                        redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), labelled_metric_name)
+
                     logger.info('base redirect_url - %s' % redirect_url)
 
                     # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
@@ -6956,6 +8371,9 @@ def ionosphere():
                     if validate_fp_req:
                         redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&validate_fp=true' % (
                             settings.SKYLINE_URL, str(use_timestamp), base_name)
+                        if labelled_metric_name:
+                            redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&validate_fp=true' % (
+                                settings.SKYLINE_URL, str(use_timestamp), labelled_metric_name)
 
                     # @added 20180816 - Feature #2430: Ionosphere validate learnt features profiles page
                     disable_fp_req = False
@@ -6967,6 +8385,10 @@ def ionosphere():
                         redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&disable_fp=%s' % (
                             settings.SKYLINE_URL, str(use_timestamp), base_name,
                             str(disable_fp_id))
+                        if labelled_metric_name:
+                            redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&disable_fp=%s' % (
+                                settings.SKYLINE_URL, str(use_timestamp),
+                                labelled_metric_name, str(disable_fp_id))
 
                     # @added 20170917 - Feature #1996: Ionosphere - matches page
                     if matched_fp_id:
@@ -6974,11 +8396,19 @@ def ionosphere():
                             redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_fp_id=%s' % (
                                 settings.SKYLINE_URL, str(use_timestamp), base_name,
                                 str(matched_fp_id))
+                            if labelled_metric_name:
+                                redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_fp_id=%s' % (
+                                    settings.SKYLINE_URL, str(use_timestamp),
+                                    labelled_metric_name, str(matched_fp_id))
                     if matched_layer_id:
                         if matched_layer_id != 'False':
                             redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_layer_id=%s' % (
                                 settings.SKYLINE_URL, str(use_timestamp), base_name,
                                 str(matched_layer_id))
+                            if labelled_metric_name:
+                                redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_layer_id=%s' % (
+                                    settings.SKYLINE_URL, str(use_timestamp),
+                                    labelled_metric_name, str(matched_layer_id))
 
                     # @added 20210413 - Feature #4014: Ionosphere - inference
                     #                   Branch #3590: inference
@@ -6986,6 +8416,11 @@ def ionosphere():
                         redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_motif_id=%s' % (
                             settings.SKYLINE_URL, str(use_timestamp), base_name,
                             str(matched_motif_id))
+                        if labelled_metric_name:
+                            redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_motif_id=%s' % (
+                                settings.SKYLINE_URL, str(use_timestamp),
+                                labelled_metric_name, str(matched_motif_id))
+
                         logger.info('redirecting fp_id matched_motif_id request')
                     # @added 20210416 - Feature #4014: Ionosphere - inference
                     if ionosphere_matched_id:
@@ -7014,6 +8449,9 @@ def ionosphere():
                             if key == 'timestamp':
                                 continue
                             value = request.args.get(key, None)
+                            if key == 'metric':
+                                if labelled_metric_name:
+                                    value = labelled_metric_name
                             new_redirect_url = '%s&%s=%s' % (
                                 redirect_url, str(key), str(value))
                             redirect_url = new_redirect_url
@@ -7021,6 +8459,9 @@ def ionosphere():
                         logger.info('not returning redirect as edit_fp_layers request')
                     else:
                         logger.info('returned redirect on original request - %s' % str(redirect_url))
+                        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                            str(request_id), str((time.time() - start))))
                         return redirect(redirect_url, code=302)
 
             for i in request.args:
@@ -7122,7 +8563,7 @@ def ionosphere():
                     if str(value) == 'False':
                         valid_rt_timestamp = True
                     if not valid_rt_timestamp:
-                        if not len(str(value)) == 10:
+                        if len(str(value)) != 10:
                             logger.info('bad request argument - %s=%s not an epoch timestamp' % (str(key), str(value)))
                             resp = json.dumps(
                                 {'results': 'Error: not an epoch timestamp for ' + str(key) + ' - ' + str(value) + ' - please pass a proper epoch timestamp'})
@@ -7161,9 +8602,9 @@ def ionosphere():
                     label = label_arg[:255]
                     logger.info('label - %s ' % (str(value)))
 
-                if key == 'timestamp' or key == 'timestamp_td':
+                if key in ['timestamp', 'timestamp_td']:
                     valid_timestamp = True
-                    if not len(str(value)) == 10:
+                    if len(str(value)) != 10:
                         valid_timestamp = False
                         logger.info('bad request argument - %s=%s not an epoch timestamp' % (str(key), str(value)))
                         resp = json.dumps(
@@ -7305,9 +8746,18 @@ def ionosphere():
                                         alt_redirect_url = '%s/ionosphere?' % (str(url_with_auth))
                                         for key in request.args:
                                             value = request.args.get(key)
+                                            if key == 'metric':
+                                                if labelled_metric_name:
+                                                    value = labelled_metric_name
                                             new_alt_redirect_url = '%s&%s=%s' % (alt_redirect_url, str(key), str(value))
                                             alt_redirect_url = new_alt_redirect_url
                                         logger.info('redirecting client to - %s' % alt_redirect_url)
+                                        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                            str(request_id), str((time.time() - start))))
+                                        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                            str(request_id), str((time.time() - start))))
                                         return redirect(alt_redirect_url)
 
                                 # @added 20180713 - Branch #2270: luminosity
@@ -7322,12 +8772,20 @@ def ionosphere():
                                     alternative_urls = []
                                     for alt_url in use_alternative_urls:
                                         alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(alt_url), str(value), str(base_name))
+                                        if labelled_metric_name:
+                                            alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(alt_url), str(value), str(labelled_metric_name))
                                         if len(use_alternative_urls) == 1:
+                                            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                                str(request_id), str((time.time() - start))))
                                             return redirect(alt_redirect_url)
                                         alternative_urls.append(alt_redirect_url)
                                     message = 'no training data dir exists on this Skyline instance try at the alternative URLS listed below:'
                                     logger.info('passing alternative_urls - %s' % str(alternative_urls))
                                     try:
+                                        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                            str(request_id), str((time.time() - start))))
                                         return render_template(
                                             'ionosphere.html', display_message=message,
                                             alternative_urls=alternative_urls,
@@ -7360,7 +8818,7 @@ def ionosphere():
                 if key == 'requested_timestamp':
                     td_requested_timestamp = str(value)
 
-                if key == 'metric' or key == 'metric_td':
+                if key in ['metric', 'metric_td']:
                     try:
                         unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                     except:
@@ -7372,6 +8830,35 @@ def ionosphere():
                     # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
                     # Roll back change - breaking existing metrics with colons
                     # metric_name = url_encode_metric_name(metric_name)
+
+                    # @added 20220727 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if value.startswith('labelled_metrics.'):
+                        try:
+                            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, value)
+                            if metric_name:
+                                unique_metrics.append(value)
+                                unique_metrics.append(metric_name)
+                                base_name = str(metric_name)
+                                labelled_metric_base_name = str(metric_name)
+                                labelled_metric_name = str(value)
+                        except Exception as err:
+                            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                                value, err))
+                    # @added 20221020 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if 'tenant_id="' in value:
+                        try:
+                            metric_id = get_metric_id_from_base_name(skyline_app, value)
+                            if metric_id:
+                                unique_metrics.append(value)
+                                metric_name = value
+                                base_name = str(metric_name)
+                                labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                                labelled_metric_base_name = str(value)
+                        except Exception as err:
+                            logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                                value, err))
 
                     metric_found = False
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
@@ -7427,7 +8914,7 @@ def ionosphere():
                         elif saved_training_data:
                             logger.info('IONOSPHERE_REQUEST_ARGS check - %s not in Redis, but saved_training_data request so continuing' % metric_name)
                         else:
-                            error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                            error_string = 'error :: no metric (not fp_view, fp_search_req or saved_training_data) - %s - exists in Redis' % metric_name
                             logger.error(error_string)
                             resp = json.dumps(
                                 {'results': error_string})
@@ -7439,11 +8926,16 @@ def ionosphere():
                 if key == 'metric':
                     metric_arg = True
 
+                # @added 20220729 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                if key == 'metric_id' and labelled_metric_name and base_name and labelled_metric_base_name:
+                    metric_arg = True
+
                 if key == 'metric_td':
                     metric_td_arg = True
 
                 if metric_arg or metric_td_arg:
-                    if key == 'metric' or key == 'metric_td':
+                    if key in ['metric', 'metric_td']:
                         base_name = str(value)
                         # @added 20220112 - Bug #4374: webapp - handle url encoded chars
                         # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
@@ -7475,10 +8967,24 @@ def ionosphere():
                                 logger.error('failed to remove graphite_now images')
                 if set_derivative_metric:
                     return_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(settings.SKYLINE_URL), str(requested_timestamp), str(base_name))
+                    if labelled_metric_name:
+                        return_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(settings.SKYLINE_URL), str(requested_timestamp), str(labelled_metric_name))
+                    # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                    logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                        str(request_id), str((time.time() - start))))
                     return redirect(return_url)
 
                 if timestamp_arg and metric_arg:
                     timeseries_dir = base_name.replace('.', '/')
+
+                    # @added 20221020 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if 'tenant_id="' in base_name:
+                        try:
+                            timeseries_dir = labelled_metric_name.replace('.', '/')
+                        except Exception as err:
+                            logger.error('error :: failed to interpolate timeseries_dir from labelled_metric_name for %s - %s' % (
+                                base_name, err))
 
                     if not fp_view:
                         ionosphere_data_dir = '%s/%s/%s' % (
@@ -7573,9 +9079,15 @@ def ionosphere():
                                 alt_redirect_url = '%s/ionosphere?' % (str(url_with_auth))
                                 for key in request.args:
                                     value = request.args.get(key)
+                                    if key == 'metric':
+                                        if labelled_metric_name:
+                                            value = labelled_metric_name
                                     new_alt_redirect_url = '%s&%s=%s' % (alt_redirect_url, str(key), str(value))
                                     alt_redirect_url = new_alt_redirect_url
                                 logger.info('redirecting client to - %s' % alt_redirect_url)
+                                # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                    str(request_id), str((time.time() - start))))
                                 return redirect(alt_redirect_url)
 
                         # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -7619,11 +9131,18 @@ def ionosphere():
                                     alt_redirect_url = request_url.replace(request_endpoint, alt_redirect_url_base, 1)
                                     if len(use_alternative_urls) == 1:
                                         logger.info('redirecting to %s' % str(alt_redirect_url))
+                                        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                            str(request_id), str((time.time() - start))))
                                         return redirect(alt_redirect_url)
                                     alternative_urls.append(alt_redirect_url)
                                 message = 'no features profile dir exists on this Skyline instance try at the alternative URLS listed below:'
                                 logger.info('passing alternative_urls - %s' % str(alternative_urls))
                                 try:
+                                    # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                                    logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                                        str(request_id), str((time.time() - start))))
+
                                     return render_template(
                                         'ionosphere.html', display_message=message,
                                         alternative_urls=alternative_urls,
@@ -7667,7 +9186,7 @@ def ionosphere():
         do_first = True
         args = [
             'timestamp', 'metric', 'metric_td', 'timestamp_td',
-            'requested_timestamp', 'features_profiles']
+            'requested_timestamp', 'features_profiles', 'metric_id']
         for i_arg in args:
             if i_arg in request.args:
                 do_first = False
@@ -7680,13 +9199,26 @@ def ionosphere():
         if dated_list:
             listed_by = 'date'
         try:
-            mpaths, unique_m, unique_ts, hdates = ionosphere_data(False, 'all', context)
+            # @modified 20220729 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Added labelled_metric_base_names
+            mpaths, unique_m, unique_ts, hdates, labelled_metric_base_names = ionosphere_data(False, 'all', context)
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
+
             return render_template(
                 'ionosphere.html', unique_metrics=unique_m, list_by=listed_by,
                 unique_timestamps=unique_ts, human_dates=hdates,
                 metric_td_dirs=zip(unique_ts, hdates), td_files=mpaths,
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
                 matched_from_datetime=matched_from_datetime,
+                # @modified 20220729 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Added labelled_metric_base_names
+                labelled_metric_base_names=labelled_metric_base_names,
+                labelled_metric_base_name=labelled_metric_base_name,
+                labelled_metric_name=labelled_metric_name,
                 version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -7720,6 +9252,10 @@ def ionosphere():
 
         if fd_list:
             try:
+                # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                    str(request_id), str((time.time() - start))))
+
                 return render_template(
                     'ionosphere.html', list_by=listed_by, fp_search=fp_search_param,
                     full_duration_list=fd_list, enabled_list=en_list,
@@ -7735,12 +9271,25 @@ def ionosphere():
     if metric_td_arg:
         listed_by = 'metric_td_dirs'
         try:
-            mpaths, unique_m, unique_ts, hdates = ionosphere_data(False, base_name, context)
+            # @modified 20220729 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Added labelled_metric_base_names
+            mpaths, unique_m, unique_ts, hdates, labelled_metric_base_names = ionosphere_data(False, base_name, context)
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
+
             return render_template(
                 'ionosphere.html', metric_td_dirs=zip(unique_ts, hdates),
                 list_by=listed_by, for_metric=base_name, td_files=mpaths,
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
                 matched_from_datetime=matched_from_datetime,
+                # @modified 20220729 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Added labelled_metric_base_names
+                labelled_metric_base_names=labelled_metric_base_names,
+                labelled_metric_base_name=labelled_metric_base_name,
+                labelled_metric_name=labelled_metric_name,
                 version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -7753,19 +9302,37 @@ def ionosphere():
         # a metric is selected the time is the only one wrapped in <code> .e.g red?
         listed_by = 'timestamp_td_dirs'
         try:
-            mpaths, unique_m, unique_ts, hdates = ionosphere_get_metrics_dir(requested_timestamp_td, context)
+            # @modified 20220729 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Added labelled_metric_base_names
+            # mpaths, unique_m, unique_ts, hdates = ionosphere_get_metrics_dir(requested_timestamp_td, context)
+            mpaths, unique_m, unique_ts, hdates, labelled_metric_base_names = ionosphere_get_metrics_dir(requested_timestamp_td, context)
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
+
             return render_template(
                 'ionosphere.html', unique_metrics=unique_m, list_by=listed_by,
                 unique_timestamps=unique_ts, human_dates=hdates, td_files=mpaths,
                 metric_td_dirs=zip(unique_ts, hdates),
                 requested_timestamp=td_requested_timestamp, fp_view=fp_view_on,
                 matched_from_datetime=matched_from_datetime,
+                # @modified 20220729 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Added labelled_metric_base_name
+                labelled_metric_base_name=labelled_metric_base_name,
+                labelled_metric_name=labelled_metric_name,
+                labelled_metric_base_names=labelled_metric_base_names,
                 version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
             message = 'Uh oh ... a Skyline 500 :('
             trace = traceback.format_exc()
             return internal_error(message, trace)
+
+    # @added 20221230 - Feature #4772: webapp - link to current VictoriaMetrics graph
+    g_until_ts = int(time.time())
+    g_from_ts = g_until_ts - (86400 * 7)
 
     if timestamp_arg and metric_arg:
         try:
@@ -7775,12 +9342,17 @@ def ionosphere():
             # GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
             # A regex is required to change the TARGET_HOURS, no? extend do not modify?
             # Not certain will review after Dude morning excersion
-
             # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
             # graph_url = '%scactiStyle(%s)%s&colorList=blue' % (
             graph_url = '%scactiStyle(%s,%%27si%%27)%s&colorList=blue' % (
                 settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
-        except:
+            # @added 20221230 - Feature #4772: webapp - link to current VictoriaMetrics graph
+            if labelled_metric_name:
+                graph_url = '%s/utilities?timeseries_graph=true&metric=%s&from_timestamp=%s&until_timestamp=%s&data_source=victoriametrics&downsample_at=0&downsample_by=mean' % (
+                    settings.SKYLINE_URL, labelled_metric_name,
+                    str(g_from_ts), str(g_until_ts))
+        except Exception as err:
+            logger.error('error :: failed to interpolate graph_url - %s ' % str(err))
             graph_url = False
 
         # @added 20170604 - Feature #2034: analyse_derivatives
@@ -7815,7 +9387,13 @@ def ionosphere():
                 # graph_url = '%scactiStyle(nonNegativeDerivative(%s))%s&colorList=blue' % (
                 graph_url = '%scactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s&colorList=blue' % (
                     settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
-            except:
+                # @added 20221230 - Feature #4772: webapp - link to current VictoriaMetrics graph
+                if labelled_metric_name:
+                    graph_url = '%s/utilities?timeseries_graph=true&metric=%s&from_timestamp=%s&until_timestamp=%s&data_source=victoriametrics&downsample_at=0&downsample_by=mean' % (
+                        settings.SKYLINE_URL, labelled_metric_name,
+                        str(g_from_ts), str(g_until_ts))
+            except Exception as err:
+                logger.error('error :: failed to interpolate graph_url - %s ' % str(err))
                 graph_url = False
 
         # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
@@ -7851,13 +9429,60 @@ def ionosphere():
         fp_id = None
 
         if calculate_features or create_feature_profile or fp_view:
+            successful = False
+            fp_csv = None
             try:
-                fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, requested_timestamp, base_name, context)
+                # @modified 20221208 - Feature #4756: Use gevent gunicorn worker_class
+                #                      Feature #4732: flux vortex
+                # Changed from calling calculate_features_profile directly as
+                # gevent does not play nicely with multiprocessing that is
+                # called by tsfresh.  Lots/every option was tried using gevent
+                # threadpool, threading, etc, etc and although most of these
+                # methods should work, they are end up hanging or erroring with
+                # child watchers are only available on the default loop.
+                # Attempts were made to not monkey patch thread and socket as
+                # well to no avail.
+                # The workaround that has been implemented is to start another
+                # gunicorn process that has a worker_class of sync that
+                # specifically handles running the calculate_features_profile.
+                # This process is another flask app called webapp_features_profile.py
+                # fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, requested_timestamp, base_name, context)
+                # fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = gevent_spawn(calculate_features_profile(skyline_app, requested_timestamp, base_name, context))
+                # g = pool.spawn(calculate_features_profile, (skyline_app, requested_timestamp, base_name, context))
+                # fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = thread_pool.spawn(calculate_features_profile, skyline_app, requested_timestamp, base_name, context).get()
+                # pool.join(timeout=60, raise_error=True)
+                # fp_csv, successful, fp_exists, fp_id, fail_msg, traceback_format_exc, f_calc = pool.spawn(calculate_features_profile(skyline_app, requested_timestamp, base_name, context)).get()
+                try:
+                    fp_url = 'http://127.0.0.1:%s/ionosphere_features_profile' % str((settings.WEBAPP_PORT + 1))
+                    post_data = {'requested_timestamp': requested_timestamp, 'base_name': base_name, 'context': context}
+                    r = requests.post(fp_url, data=post_data, timeout=120)
+                    r_json = r.json()
+                    fp_csv = r_json['data']['fp_csv']
+                    successful = r_json['data']['successful']
+                    fp_exists = r_json['data']['fp_exists']
+                    fp_id = r_json['data']['fp_id']
+                    fail_msg = r_json['data']['fail_msg']
+                    traceback_format_exc = r_json['data']['traceback_format_exc']
+                    f_calc = r_json['data']['f_calc']
+                    logger.info('got fp_csv from webapp_features_profile app - %s' % (
+                        str(fp_csv)))
+
+                    # @added 20230626
+                    if not successful and fail_msg:
+                        if 'insufficient data to create profile' in fail_msg:
+                            successful = True
+                            logger.info(fail_msg)
+                            insufficient_data_for_training = True
+
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    message = 'failed to get calculated features from webapp_features_profile app - %s' % err
+                    return internal_error(message, trace)
             except:
                 trace = traceback.format_exc()
                 message = 'failed to calculate features'
                 return internal_error(message, trace)
-
+                
             if not successful:
                 return internal_error(fail_msg, traceback_format_exc)
 
@@ -7912,6 +9537,9 @@ def ionosphere():
                         str(requested_timestamp), str(base_name)))
                     if response_format == 'json':
                         data_dict = {"status": {"created": "pending"}, "data": {"fp_id": 0}}
+                        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                            str(request_id), str((time.time() - start))))
                         return jsonify(data_dict), 200
                     resp = json.dumps(
                         {'results': 'Notice: a features profile is already being created for ' + str(requested_timestamp) + ' - ' + str(base_name) + ' - please click the back button and refresh the page'})
@@ -8086,6 +9714,88 @@ def ionosphere():
             # Added fp_anomaly_timestamp ionosphere_echo features profiles
             mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list, fp_anomaly_timestamp = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
 
+            logger.debug('debug :: p_id: %s' % str(p_id))
+
+            # @added 20221130 - Feature #4732: flux vortex
+            #                   Feature #4734: mirage_vortex
+            vortex_training = False
+            vortex_metric_data_archive = None
+            vortex_metric_data = {}
+            if mpaths:
+                for i_file, metric_file in mpaths:
+                    if 'vortex.metric_data.' in i_file:
+                        if '.json.gz' in i_file:
+                            vortex_training = True
+                            vortex_metric_data_archive = metric_file
+                            break
+                if vortex_training:
+                    logger.info('vortex training data identified via %s' % str(vortex_metric_data_archive))
+            vortex_fp = False
+            if m_vars:
+                try:
+                    for key, value in m_vars:
+                        if key == 'added_by':
+                            if value == 'mirage_vortex':
+                                vortex_fp = True
+                        if key == 'error: could not read metrics vars file':
+                            logger.error('failed to iterate m_vars: %s' % (
+                                str(m_vars)))
+                            message = 'failed to iterate m_vars: %s' % (str(m_vars))
+                            trace = 'None'
+                            return internal_error(message, trace)
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    logger.error('failed to iterate m_vars: %s, err: %s' % (
+                        str(m_vars), err))
+                    message = 'failed to iterate m_vars: %s, err: %s' % (str(m_vars), err)
+                    return internal_error(message, trace)
+            if vortex_metric_data_archive:
+                try:
+                    vortex_metric_data = get_vortex_metric_data_from_archive(skyline_app, vortex_metric_data_archive)
+                    if vortex_metric_data:
+                        logger.info('loaded vortex_metric_data')
+                except Exception as err:
+                    logger.error('get_vortex_metric_data_from_archive failed on %s - %s' % (
+                        str(vortex_metric_data_archive), err))
+            # Remove anomalies and scores data
+            if vortex_metric_data:
+                vortex_results_algorithms = []
+                try:
+                    vortex_results_algorithms = list(vortex_metric_data['results']['algorithms'].keys())
+                except Exception as err:
+                    logger.error('failed to determine vortex_results_algorithms from vortex_metric_data - %s' % (
+                        err))
+                for vortex_algo in vortex_results_algorithms:
+                    try:
+                        del vortex_metric_data['results']['algorithms'][vortex_algo]['anomalies']
+                    except:
+                        pass
+                    try:
+                        del vortex_metric_data['results']['algorithms'][vortex_algo]['scores']
+                    except:
+                        pass
+            # @added 20230601 - Feature #4734: mirage_vortex
+            #                   Branch #4728: vortex
+            # Add results to training_data_dir to be loaded in the Ionosphere
+            # training page
+            vortex_results_dict = {}
+            if mpaths:
+                vortex_results_dict_file = None
+                for i_file, metric_file in mpaths:
+                    if 'vortex.results.dict' in i_file:
+                        vortex_results_dict_file = metric_file
+                        break
+                if vortex_results_dict_file:
+                    logger.info('vortex results dict found %s' % str(vortex_results_dict_file))
+                    try:
+                        with open(vortex_results_dict_file) as f:
+                            vortex_results_dict_str = f.read()
+                        vortex_results_dict = literal_eval(vortex_results_dict_str)
+                        logger.info('vortex_results_dict evaluated to dict of len %s' % str(len(vortex_results_dict)))
+                    except Exception as err:
+                        logger.error('failed to load and eval vortex_results_dict_file: %s,  err: %s' % (
+                            str(vortex_results_dict_file), err))
+
             # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
             ts_json_length = 0
             anomalous_timeseries_length = 0
@@ -8111,6 +9821,7 @@ def ionosphere():
                 sample_i_ts_json = anomalous_timeseries[-30:]
                 # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
                 anomalous_timeseries_length = len(anomalous_timeseries)
+                anomalous_timeseries_length = len(list(anomalous_timeseries))
 
             if fp_details_list:
                 f_id_created = fp_details_list[0]
@@ -8149,6 +9860,26 @@ def ionosphere():
                 trace = traceback.format_exc()
                 return internal_error(message, trace)
 
+            # @added 20220822 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Only enable training if there is sufficient data
+            if second_order_resolution_hours and ts_json:
+                try:
+                    first_timestamp_in_anomalous_timeseries = ts_json[0][0]
+                    second_order_resolution_seconds = int(second_order_resolution_hours * 3600)
+                    offset = 7200
+                    if int(second_order_resolution_seconds) > 86400:
+                        offset = 14400
+                    timestamp_limit = int(requested_timestamp) - (second_order_resolution_seconds - offset)
+                    if first_timestamp_in_anomalous_timeseries > timestamp_limit:
+                        valid_length_for_training = False
+                        logger.info('insufficient data for training last_timestamp: %s, ts_full_duration: %s, first_timestamp: %s, timestamp_limit: %s' % (
+                            str(requested_timestamp), str(second_order_resolution_seconds),
+                            str(first_timestamp_in_anomalous_timeseries), str(timestamp_limit)))
+                except Exception as err:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: Webapp could not determine valid_length_for_training - %s' % err)
+
             # @added 20190330 - Feature #2484: FULL_DURATION feature profiles
             # For Ionosphere echo and adding red borders on the matched graphs
             if m_full_duration_in_hours:
@@ -8181,7 +9912,7 @@ def ionosphere():
             echo_fp_value = 0
 
             # @added 20190619 - Feature #2990: Add metrics id to relevant web pages
-            metric_id = False
+            # metric_id = False
 
             # Determine the parent_id and generation as they were added to the
             # fp_details_object
@@ -8249,6 +9980,11 @@ def ionosphere():
                     message = 'Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object'
                     return internal_error(message, trace)
 
+            # @added 20220727 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if labelled_metric_base_name:
+                base_name = str(labelled_metric_base_name)
+
             iono_metric = False
             if base_name:
                 try:
@@ -8256,6 +9992,10 @@ def ionosphere():
                 except:
                     logger.warning('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
                 metric_name = settings.FULL_NAMESPACE + str(base_name)
+
+                if labelled_metric_name:
+                    metric_name = str(labelled_metric_name)
+
                 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
                 # @modified 20220115 - Bug #4374: webapp - handle url encoded chars
                 # Roll back change - breaking existing metrics with colons
@@ -8352,7 +10092,10 @@ def ionosphere():
                 try:
                     request_time = int(time.time())
                     saved_hdate = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(request_time))
-                    training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, base_name, saved_td_label, saved_hdate)
+                    if labelled_metric_name:
+                        training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, labelled_metric_name, saved_td_label, saved_hdate)
+                    else:
+                        training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, base_name, saved_td_label, saved_hdate)
                     logger.info('saved training data')
                 except:
                     logger.error('error :: Webapp could not save_training_data_dir')
@@ -8361,7 +10104,10 @@ def ionosphere():
             if saved_training_data:
                 saved_td_requested = True
                 try:
-                    training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, base_name, None, None)
+                    if labelled_metric_name:
+                        training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, labelled_metric_name, None, None)
+                    else:
+                        training_data_saved, saved_td_details, fail_msg, trace = save_training_data_dir(requested_timestamp, base_name, None, None)
                     logger.info('got saved training data details')
                 except:
                     logger.error('error :: Webapp could not get saved training_data details')
@@ -8388,9 +10134,26 @@ def ionosphere():
                             layers_match_id = 0
                             matched_timeseries = get_matched_timeseries(
                                 skyline_app, matched_fp_id, layers_match_id)
+
+                            # @added 20220831 - Task #2732: Prometheus to Skyline
+                            #                   Branch #4300: prometheus
+                            use_base_name = matched_timeseries['metric']
+                            labelled_metric_name = None
+                            if '{' in use_base_name and '}' in use_base_name and '_tenant_id="' in use_base_name:
+                                if not metric_id:
+                                    try:
+                                        metric_id = get_metric_id_from_base_name(skyline_app, use_base_name)
+                                    except Exception as err:
+                                        logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+                                if metric_id:
+                                    labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                            if labelled_metric_name:
+                                use_base_name = str(labelled_metric_name)
+
                             logger.info('calling plot_fp_match with matched_timeseries dict')
                             plotted_comparsion_image, plotted_match_comparison_image_file = plot_fp_match(
-                                skyline_app, matched_timeseries['metric'],
+                                # skyline_app, matched_timeseries['metric'],
+                                skyline_app, use_base_name,
                                 matched_timeseries['match']['fp_id'],
                                 [value for ts, value in matched_timeseries['matched_fp_timeseries']],
                                 matched_timeseries['timeseries'], output_file)
@@ -8474,7 +10237,9 @@ def ionosphere():
             # panorama_anomaly_id is present
             correlations = False
             correlations_with_graph_links = []
+            logger.debug('debug :: before get_correlations p_id: %s' % str(p_id))
             if p_id:
+                logger.debug('debug :: get_correlations with p_id: %s' % str(p_id))
                 try:
                     correlations, fail_msg, trace = get_correlations(skyline_app, p_id)
                 except:
@@ -8519,6 +10284,19 @@ def ionosphere():
             # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
             labelled_anomalies = None
 
+            # @added 20220909 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Apply correlate_or_relate_with to labelled_metrics
+            base_name_to_correlate = str(base_name)
+            if labelled_metric_base_name:
+                base_name_to_correlate = str(labelled_metric_base_name)
+            try:
+                external_settings = get_external_settings(skyline_app, namespace=None, log=False)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_external_settings failed - %s' % (
+                    err))
+
             # @added 20200113 - Feature #3390: luminosity related anomalies
             #                   Branch #2270: luminosity
             related = False
@@ -8535,8 +10313,23 @@ def ionosphere():
                     logger.error(fail_msg)
                     return internal_error(fail_msg, trace)
                 if related:
+
                     # Added Graphite graph links to Related block
                     for related_anomaly_id, related_metric_id, related_metric_name, related_anomaly_timestamp, related_full_duration in related:
+
+                        # @added 20220909 - Task #2732: Prometheus to Skyline
+                        #                      Branch #4300: prometheus
+                        # Apply correlate_or_relate_with to labelled_metrics
+                        related_base_name = str(related_metric_name)
+                        if related_metric_name.startswith('labelled_metrics.'):
+                            related_base_name = get_base_name_from_labelled_metrics_name(related_metric_name)
+                        try:
+                            correlate_or_relate = correlate_or_relate_with(skyline_app, base_name_to_correlate, related_base_name, external_settings)
+                            if not correlate_or_relate:
+                                continue
+                        except:
+                            pass
+
                         related_from_timestamp = int(related_anomaly_timestamp) - related_full_duration
                         related_graphite_from = datetime.datetime.fromtimestamp(int(related_from_timestamp)).strftime('%H:%M_%Y%m%d')
                         related_graphite_until = datetime.datetime.fromtimestamp(int(related_anomaly_timestamp)).strftime('%H:%M_%Y%m%d')
@@ -8562,6 +10355,8 @@ def ionosphere():
                                 str(related_graphite_until), related_metric_name,
                                 settings.GRAPHITE_GRAPH_SETTINGS, related_graph_title)
                         related_human_timestamp = datetime.datetime.fromtimestamp(int(related_anomaly_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+                        if '{' in related_metric_name and '}' in related_metric_name and '_tenant_id="' in related_metric_name:
+                            related_graphite_link = None
                         related_with_graph_links.append([related_anomaly_id, related_metric_name, related_anomaly_timestamp, related_full_duration, related_human_timestamp, str(related_graphite_link)])
                 related_metric = 'get_related_matches'
                 related_metric_like = 'all'
@@ -8584,14 +10379,168 @@ def ionosphere():
                     # @modified 20210413 - Feature #4014: Ionosphere - inference
                     #                      Branch #3590: inference
                     # Added related_motifs_matched_id
-                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
+                    # @modified 20220801 - Task #2732: Prometheus to Skyline
+                    #                      Branch #4300: prometheus
+                    # Handle labelled_metric name added metric id
+                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id, metric_id in related_matches:
                         if related_matched_by == 'no matches were found':
                             related_matches = []
+
                 if related_matches:
                     logger.info('%s possible related matches found' % (str(len(related_matches))))
+                    # @added 20220909 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    # Apply correlate_or_relate_with to labelled_metrics
+                    correlate_or_relate_with_matches = []
+                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id, metric_id in related_matches:
+                        related_base_name = str(related_metric)
+                        if related_metric.startswith('labelled_metrics.'):
+                            related_base_name = get_base_name_from_labelled_metrics_name(related_metric)
+                        try:
+                            correlate_or_relate = correlate_or_relate_with(skyline_app, base_name_to_correlate, related_base_name, external_settings)
+                            if not correlate_or_relate:
+                                continue
+                        except:
+                            pass
+                        correlate_or_relate_with_matches.append([related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id, metric_id])
+                    related_matches = list(correlate_or_relate_with_matches)
+                    logger.info('%s possible related matches found (after correlate_or_relate_with)' % (str(len(related_matches))))
+
                 # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
                 if labelled_anomalies:
-                    logger.info('%s labelled anomalies found in the trying period' % (str(len(labelled_anomalies))))
+                    logger.info('%s labelled anomalies found in the period' % (str(len(labelled_anomalies))))
+
+            # @added 20230111 - Task #4778: v4.0.0 - update dependencies
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Debug applying correlate_or_relate_with to labelled_metrics
+            # because an issue was identified with LOCAL_EXTERNAL_SETTINGS
+            # being overrridden by _global settings in terms of possible
+            # related events that did not match correlate_or_relate_with
+            # but were being added to the final illuminance_events_dict
+            illuminance_items_checked = 0
+            illuminance_items_used = 0
+            illuminance_items_discarded_on_correlate_with = 0
+
+            # @added 20220516 - Feature #2580: illuminance
+            if p_id:
+                try:
+                    logger.info('determining illuminance_events_dict with %s and %s' % (str(minus_two_minutes), str(plus_two_minutes)))
+                    illuminance_events_dict = get_illuminance_entries(skyline_app, minus_two_minutes, plus_two_minutes)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: get_illuminance_entries failed - %s' % err)
+
+                # In the webapp context only one date_str is passed
+                for key in list(illuminance_events_dict.keys()):
+                    illuminance_events_dict = copy.deepcopy(illuminance_events_dict[key])
+                    break
+                logger.info('determined illuminance_events_dict with %s and %s, having %s items: %s' % (
+                    str(minus_two_minutes), str(plus_two_minutes),
+                    str(len(illuminance_events_dict)),
+                    str(list(illuminance_events_dict.keys()))))
+
+                # Reorder by timestamp not app
+                ill_dict = {}
+                for illuminance_app in list(illuminance_events_dict.keys()):
+                    try:
+                        for timestamp_hash in list(illuminance_events_dict[illuminance_app].keys()):
+
+                            # @modified 20230111 - Task #4778: v4.0.0 - update dependencies
+                            #                      Task #2732: Prometheus to Skyline
+                            #                      Branch #4300: prometheus
+                            # Debug applying correlate_or_relate_with to labelled_metrics
+                            # timestamp_hash_date_string = str(strftime('%Y-%m-%d %H:%M:%S UTC', gmtime(timestamp_hash)))
+                            ill_dt = datetime.datetime.strptime(timestamp_hash, '%Y-%m-%d %H:%M:%S')
+                            ill_dt_ts = int(ill_dt.strftime('%s'))
+                            timestamp_hash_date_string = str(strftime('%Y-%m-%d %H:%M:%S', gmtime(ill_dt_ts)))
+
+                            try:
+                                key_set = ill_dict[timestamp_hash_date_string]
+                                try:
+                                    del key_set
+                                except:
+                                    pass
+                            except KeyError:
+                                ill_dict[timestamp_hash_date_string] = {}
+
+                            # @added 20230111 - Task #4778: v4.0.0 - update dependencies
+                            #                   Task #2732: Prometheus to Skyline
+                            #                   Branch #4300: prometheus
+                            # Debug applying correlate_or_relate_with to labelled_metrics
+                            if timestamp_hash not in list(illuminance_events_dict[illuminance_app].keys()):
+                                logger.debug('debug :: no events for %s in timestamp_hash: %s' % (
+                                    illuminance_app, str(timestamp_hash)))
+                                continue
+
+                            for ill_metric in list(illuminance_events_dict[illuminance_app][timestamp_hash].keys()):
+
+                                # @added 20230111 - Task #4778: v4.0.0 - update dependencies
+                                #                   Task #2732: Prometheus to Skyline
+                                #                   Branch #4300: prometheus
+                                # Debug applying correlate_or_relate_with to labelled_metrics
+                                illuminance_items_checked += 1
+
+                                # @added 20220909 - Task #2732: Prometheus to Skyline
+                                #                   Branch #4300: prometheus
+                                # Apply correlate_or_relate_with to labelled_metrics
+                                related_base_name = str(ill_metric)
+                                if ill_metric.startswith('labelled_metrics.'):
+                                    related_base_name = get_base_name_from_labelled_metrics_name(ill_metric)
+                                try:
+                                    correlate_or_relate = correlate_or_relate_with(skyline_app, base_name_to_correlate, related_base_name, external_settings)
+                                    if not correlate_or_relate:
+                                        # @added 20230111 - Task #4778: v4.0.0 - update dependencies
+                                        #                   Task #2732: Prometheus to Skyline
+                                        #                   Branch #4300: prometheus
+                                        # Debug applying correlate_or_relate_with to labelled_metrics
+                                        illuminance_items_discarded_on_correlate_with += 1
+
+                                        continue
+                                except Exception as err:
+                                    logger.error('error :: correlate_or_relate_with failed for %s on %s - %s' % (
+                                        base_name_to_correlate, related_base_name, err))
+                                ill_metric_dict = illuminance_events_dict[illuminance_app][timestamp_hash][ill_metric]
+                                ill_metric_dict['app'] = illuminance_app
+                                ill_dict[timestamp_hash_date_string][ill_metric] = ill_metric_dict
+                                # @added 20230111 - Task #4778: v4.0.0 - update dependencies
+                                #                   Task #2732: Prometheus to Skyline
+                                #                   Branch #4300: prometheus
+                                # Debug applying correlate_or_relate_with to labelled_metrics
+                                illuminance_items_used += 1
+                    except Exception as err:
+                        logger.error('error :: iterating illuminance_events_dict for illuminance_app: %s - %s' % (
+                            illuminance_app, err))
+
+                if ill_dict:
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # illuminance_events_dict = ill_dict.copy()
+                    illuminance_events_dict = copy.deepcopy(ill_dict)
+
+                # @added 20230111 - Task #4778: v4.0.0 - update dependencies
+                #                   Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Debug applying correlate_or_relate_with to labelled_metrics
+                logger.debug('debug :: illuminance_events_dict checked - items_checked: %s, used: %s, discarded (did not correlate_or_relate_with): %s' % (
+                    str(illuminance_items_checked),
+                    str(illuminance_items_used),
+                    str(illuminance_items_discarded_on_correlate_with)))
+
+            # @added 20230108 - Task #4778: v4.0.0 - update dependencies
+            # Added look up to stop the metric id ever being reported as
+            # None in the UI
+            if labelled_metric_base_name:
+                check_base_name = labelled_metric_base_name
+            else:
+                check_base_name = base_name
+            try:
+                metric_id = get_metric_id_from_base_name(skyline_app, check_base_name)
+                logger.info('metric_id looked up base_name: %s and got metric_id: %s' % (
+                    base_name, str(metric_id)))
+            except Exception as err:
+                logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                    base_name, err))
+            logger.info('metric id is %s' % str(metric_id))
 
             # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
             # By this point in the request the previous function calls will have
@@ -8616,8 +10565,6 @@ def ionosphere():
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: Webapp could not get metric id from Redis key - %s' % cache_key)
-            else:
-                logger.info('metrics id is %s' % str(metric_id))
 
             # @added 20190502 - Branch #2646: slack
             if context == 'training_data':
@@ -8741,6 +10688,9 @@ def ionosphere():
                     else:
                         if fp_exists:
                             data_dict = {"status": {"created": "already exists"}, "data": {"fp_id": fp_id}}
+                    # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+                    logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                        str(request_id), str((time.time() - start))))
                     return jsonify(data_dict), 200
 
             # @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
@@ -8767,6 +10717,13 @@ def ionosphere():
                 except Exception as e:
                     fail_msg = 'error :: Webapp error with get_anomaly_type - %s' % str(e)
                     logger.error(fail_msg)
+
+            # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+            logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+                str(request_id), str((time.time() - start))))
+
+            if insufficient_data_for_training:
+                valid_length_for_training = False
 
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
@@ -8886,6 +10843,28 @@ def ionosphere():
                 # @added 20220317 - Feature #4540: Plot matched timeseries
                 #                   Feature #4014: Ionosphere - inference
                 matched_fp_plot=matched_fp_plot,
+                # @added 20220516 - Feature #2580: illuminance
+                illuminance_events_dict=illuminance_events_dict,
+                illuminance_events_count=illuminance_items_used,
+                # @added 20220728 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                labelled_metric_base_name=labelled_metric_base_name,
+                labelled_metric_name=labelled_metric_name,
+                # @added 20220822 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Only enable training if there is sufficient data
+                valid_length_for_training=valid_length_for_training,
+                # @added 20221202 - Feature #4732: flux vortex
+                #                   Feature #4734: mirage_vortex
+                vortex_training=vortex_training, vortex_fp=vortex_fp,
+                vortex_metric_data=vortex_metric_data,
+                # @added 20230601 - Feature #4734: mirage_vortex
+                #                   Branch #4728: vortex
+                # Add results to training_data_dir to be loaded in the Ionosphere
+                # training page
+                vortex_results_dict=vortex_results_dict,
+                # @added 20230626
+                insufficient_data_for_training=insufficient_data_for_training,
                 version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -8895,6 +10874,10 @@ def ionosphere():
 
     try:
         message = 'Unknown request'
+        # @added 20221026 - Feature #4706: Add request_id and timing to ionosphere requests
+        logger.info('completed ionosphere request_id: %s, took: %s seconds' % (
+            str(request_id), str((time.time() - start))))
+
         return render_template(
             'ionosphere.html', display_message=message,
             version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
@@ -8979,9 +10962,39 @@ def ionosphere_images():
                     return 'Forbidden', 403
 
                 # @added 20220112 - Bug #4374: webapp - handle url encoded chars
-                if not os.path.isfile(filename):
-                    r_url = iri_to_uri(request.url)
-                    logger.info('r_url: %s' % r_url)
+                # if not os.path.isfile(filename):
+                #     r_url = iri_to_uri(request.url)
+                #     logger.info('r_url: %s' % r_url)
+
+                # @added 20221206 - Feature #4732: flux vortex
+                #                   Feature #4734: mirage_vortex
+                # Generate vortex algorithm graphs on-demand if they do not
+                # exist.
+                file_basename = os.path.basename(filename)
+                generate_vortex_images = False
+                if file_basename.startswith('vortex.algorithm.'):
+                    if file_basename.endswith('.png'):
+                        if not os.path.isfile(filename):
+                            generate_vortex_images = True
+                            logger.info('image not found will attempt to get_vortex_training_data_graphs to create %s' % filename)
+                if generate_vortex_images:
+                    training_dir = os.path.dirname(filename)
+                    metric_data_archive = None
+                    try:
+                        metric_data_archive = get_vortex_metric_data_archive_filename(training_dir)
+                    except Exception as err:
+                        logger.error('error :: get_vortex_metric_data_archive_filename failed to determine metric_data_archive from %s - %s' % (
+                            training_dir, err))
+                    vortex_graphs = []
+                    if metric_data_archive:
+                        try:
+                            vortex_graphs = get_vortex_training_data_graphs(skyline_app, metric_data_archive, None)
+                        except Exception as err:
+                            message = 'get_vortex_training_data_graphs encountered an error - %s' % err
+                            trace = traceback.format_exc()
+                            return internal_error(message, trace)
+                    if filename in vortex_graphs:
+                        logger.info('image created %s' % filename)
 
                 if os.path.isfile(filename):
                     try:
@@ -9070,10 +11083,25 @@ def ionosphere_files():
         logger.error('error :: ionosphere_files no metric passed')
         return 'Bad Request', 400
 
+    # @added 20230331 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    use_metric = str(metric)
+    if '_tenant_id="' in metric:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, metric)
+        except Exception as err:
+            logger.error('error :: /api?ionospherere_files :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(metric), err))
+        if metric_id:
+            use_metric = 'labelled_metrics.%s' % str(metric_id)
+
     required_dir = None
     if allowed_source_dir and timestamp and metric:
         try:
-            metric_timeseries_dir = metric.replace('.', '/')
+            # @modified 20230331 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # metric_timeseries_dir = metric.replace('.', '/')
+            metric_timeseries_dir = use_metric.replace('.', '/')
             if source == 'features_profiles':
                 required_dir = '%s/%s/%s' % (
                     settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
@@ -9109,7 +11137,10 @@ def ionosphere_files():
                     training_data_removed = False
                     for training_data_item in ionosphere_training_data:
                         training_data = literal_eval(training_data_item)
-                        if training_data[0] == metric:
+                        # @modified 20230331 - Task #2732: Prometheus to Skyline
+                        #                      Branch #4300: prometheus
+                        # if training_data[0] == metric:
+                        if training_data[0] == use_metric:
                             if training_data[1] == int(timestamp):
                                 try:
                                     REDIS_CONN.srem('ionosphere.training_data', str(training_data))
@@ -9227,6 +11258,10 @@ def ionosphere_file():
                     # @added 20210112 - Feature #3934: ionosphere_performance
                     if filename.endswith('.csv'):
                         mimetype = 'text/csv'
+                    # @added 20230510 - Feature #4734: mirage_vortex
+                    if filename.endswith('json.gz'):
+                        mimetype = 'application/gzip'
+
                     try:
                         return send_file(filename, mimetype=mimetype)
                     except:
@@ -9243,7 +11278,7 @@ def ionosphere_file():
 #                   Branch #922: ionosphere
 #                   Task #1658: Patterning Skyline Ionosphere
 # Added utilities TODO
-@app.route("/utilities")
+@app.route("/utilities", methods=['GET', 'POST'])
 @requires_auth
 def utilities():
     start = time.time()
@@ -9272,6 +11307,30 @@ def utilities():
     http_alerters = []
 
     parent_namespaces = []
+
+    # @added 20220802 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    labelled_metric_dict = {}
+    labelled_metrics_names = False
+
+    # @added 20220808 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    timeseries_graph_request = False
+    timeseries_graph_image = None
+
+    # @added 20221204 - Feature #4754: csv_to_timeseries
+    #                   Feature #4734: mirage_vortex
+    #                   Branch #4728: vortex
+    csv_to_timeseries_request = False
+    temporary_key = None
+
+    # @added 20230605 - Feature #4932: mute_alerts_on
+    mute_alerts_on = None
+    muted_alerts_on = False
+    muted_metrics = {}
+    namespace = None
+    metric_patterns = []
+
     try:
         request_args_len = len(request.args)
     except:
@@ -9288,6 +11347,19 @@ def utilities():
         'test_alert', 'app', 'alerter',
         # @added 20220315 - Feature #4482: Test alerts
         'alerter_id', 'trigger_anomaly',
+        # @added 20220802 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        'labelled_metrics_names',
+        # @added 20220808 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        'timeseries_graph', 'from_timestamp', 'until_timestamp', 'data_source',
+        'downsample_at', 'downsample_by',
+        # @added 20221204 - Feature #4754: csv_to_timeseries
+        #                   Feature #4734: mirage_vortex
+        #                   Branch #4728: vortex
+        'csv_to_timeseries', 'key', 'data_file', 'file',
+        # @added 20230605 - Feature #4932: mute_alerts_on
+        'mute_alerts_on', 'list_muted_metrics', 'metric_patterns',
     ]
     if request_args_len:
         for i in request.args:
@@ -9356,6 +11428,89 @@ def utilities():
                 test_alert = True
                 http_alerters = list(settings.HTTP_ALERTERS_OPTS.keys())
                 metrics_match = False
+            # @added 20220802 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if key == 'labelled_metrics_names':
+                logger.info('labelled_metrics_names request')
+                metrics_match = False
+                labelled_metrics_names = True
+                metric_id = 0
+                labelled_metric_name = None
+                labelled_metric_base_name = None
+                if len(request.form) > 0:
+                    if 'labelled_metric_base_name' in request.form:
+                        labelled_metric_base_name = request.form['labelled_metric_base_name']
+                        if labelled_metric_base_name != '':
+                            logger.info('labelled_metrics_names labelled_metric_base_name: %s' % str(labelled_metric_base_name))
+                        else:
+                            labelled_metric_base_name = None
+                    if 'labelled_metric_name' in request.form:
+                        labelled_metric_name = request.form['labelled_metric_name']
+                        if labelled_metric_name != '':
+                            logger.info('labelled_metrics_names labelled_metric_name: %s' % str(labelled_metric_name))
+                            try:
+                                labelled_metric_base_name = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+                            except Exception as err:
+                                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                                    labelled_metric_name, err))
+                        else:
+                            labelled_metric_name = None
+                if labelled_metric_base_name:
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, labelled_metric_base_name)
+                    except Exception as err:
+                        logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                            labelled_metric_base_name, err))
+                if not labelled_metric_name and labelled_metric_base_name:
+                    labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                labelled_metric_dict = {
+                    'metric_id': metric_id,
+                    'labelled_metric_name': labelled_metric_name,
+                    'labelled_metric_base_name': labelled_metric_base_name,
+                }
+                if metric_id == 0:
+                    labelled_metric_dict = {}
+                logger.info('labelled_metrics_names labelled_metric_dict: %s' % str(labelled_metric_dict))
+                if 'format' in request.form:
+                    use_format = request.form['format']
+                    if use_format == 'json':
+                        data_dict = {"status": {"response": 200}, "data": labelled_metric_dict}
+                        logger.info('utilites returned labelled_metric_dict json: %s' % str(data_dict))
+                        return jsonify(data_dict), 200
+
+            # @added 20220808 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if key == 'timeseries_graph':
+                logger.info('timeseries_graph request')
+                metrics_match = False
+                timeseries_graph_request = True
+                try:
+                    timeseries_graph_image = timeseries_graph()
+                except Exception as err:
+                    logger.error('error :: timeseries_graph failed - %s' % err)
+
+            # @added 20221204 - Feature #4754: csv_to_timeseries
+            #                   Feature #4734: mirage_vortex
+            #                   Branch #4728: vortex
+            if key == 'csv_to_timeseries':
+                csv_to_timeseries_request = True
+                metrics_match = False
+                match_metric = False
+                temporary_key = str(uuid.uuid4())
+                redis_temporary_upload_key = 'csv_to_timeseries.tmp.temporary_upload_key.%s' % temporary_key
+                try:
+                    REDIS_CONN.setex(redis_temporary_upload_key, 600, str(temporary_key))
+                    logger.info('added Redis key %s' % redis_temporary_upload_key)
+                except:
+                    trace = traceback.format_exc()
+                    message = 'could not add Redis key - %s' % redis_temporary_upload_key
+                    logger.error(trace)
+                    logger.error('error :: %s' % message)
+
+            # @added 20230605 - Feature #4932: mute_alerts_on
+            if key == 'mute_alerts_on':
+                mute_alerts_on = True
+                metrics_match = False
 
     try:
         return render_template(
@@ -9370,6 +11525,16 @@ def utilities():
             dry_run=dry_run, removed_quota_metrics=removed_quota_metrics,
             test_alert=test_alert, metric=alert_on_metric, alerter_app=alerter_app,
             alerter=alerter, http_alerters=http_alerters,
+            labelled_metrics_names=labelled_metrics_names,
+            labelled_metric_dict=labelled_metric_dict,
+            timeseries_graph=timeseries_graph_request,
+            timeseries_graph_image=timeseries_graph_image,
+            csv_to_timeseries=csv_to_timeseries_request,
+            temporary_upload_key=temporary_key,
+            # @added 20230605 - Feature #4932: mute_alerts_on
+            mute_alerts_on=mute_alerts_on, muted_alerts_on=muted_alerts_on,
+            muted_metrics=muted_metrics, metric_patterns=metric_patterns,
+            namespace=namespace,
             version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
     except Exception as e:
         trace = traceback.format_exc()
@@ -9433,7 +11598,7 @@ def flux_frontend():
         if upload_id:
             upload_id_key = upload_id.replace('/', '.')
 
-    # To enable uplaods via the webapp Flux endpoint using the
+    # To enable uploads via the webapp Flux endpoint using the
     # settings.FLUX_SELF_API_KEY a shortlived FLUX_UPLOADS_KEYS is created in
     # in Redis and passed the the upload_data template to submit as the key
     temporary_key = str(uuid.uuid4())
@@ -9949,7 +12114,14 @@ def match_metric():
         logger.info('handling match_metric POST request')
 
         def get_settings(settings_string):
-            return getattr(sys.modules['settings'], settings_string)
+            # return getattr(sys.modules['settings'], settings_string)
+            result = None
+            try:
+                result = getattr(sys.modules['settings'], settings_string)
+            except Exception as err:
+                logger.error('error :: handling match_metric, getattr failed - %s' % err)
+                result = None
+            return result
 
         if 'metric' in request.form:
             metric = request.form['metric']
@@ -9975,12 +12147,18 @@ def match_metric():
         if not use_settings_list:
             if 'match_with' in request.form:
                 match_with = request.form['match_with']
+                if ',' in match_with:
+                    match_with = match_with.split(',')
                 logger.info('handling match_metric POST with variable match_with - %s' % str(match_with))
         if metric:
             if not use_settings_list:
                 if not match_with:
                     logger.info('handling match_metric, return 400 no settings_list or match_with')
-                    return 'Bad request', 400
+                    # return 'Bad request', 400
+                    status_code = 400
+                    data_dict = {"status": {"metrics_match": "fail", "response": 400}, "data": {"error": 'no settings_list attribute for match_with to compare with'}}
+                    return jsonify(data_dict), status_code
+
         pattern_match = None
         try:
             if use_settings_list:
@@ -10159,6 +12337,14 @@ def update_external_settings():
         data_dict = {"status": {"update_external_settings": "success", "response": 200, "request_time": request_time}, "data": {"updated": True, "external_settings": 'no EXTERNAL_SETTINGS configured nothing to update'}}
         return jsonify(data_dict), status_code
 
+    # @added 20230531 - TEMPORARY DISABLED ON STAGE
+    # anomify API calling every minute
+#    end = timer()
+#    request_time = (end - start_timer)
+#    status_code = 200
+#    data_dict = {"status": {"update_external_settings": "success", "response": 200, "request_time": request_time}, "data": {"updated": True, "external_settings": 'temporarily unavailable due to maintainance'}}
+#    return jsonify(data_dict), status_code
+
     external_settings = {}
     external_from_cache = False
     remote_external_settings = {}
@@ -10214,7 +12400,7 @@ def update_external_settings():
 
     if cluster_data:
         endpoint_params = {
-            'api_endpoint': '/update_external_settings',
+            'api_endpoint': 'update_external_settings',
             'data_required': 'updated',
             'only_host': 'all',
             'method': 'POST',
@@ -10222,11 +12408,12 @@ def update_external_settings():
                 'data': {
                     'key': key,
                     'cluster_data': False,
+                    'cluster_call': True,
                 }
             }
         }
         try:
-            remote_external_settings = get_cluster_data('update_external_settings&cluster_call=true', 'updated', only_host='all', endpoint_params=endpoint_params)
+            remote_external_settings = get_cluster_data('update_external_settings', 'updated', only_host='all', endpoint_params=endpoint_params)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: webapp could not get update_external_settings from the remote Skyline instances')
@@ -10266,6 +12453,11 @@ def remove_namespace_quota():
 
     cluster_data = False
     dry_run = True
+
+    # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+    #                   Feature #4464: flux - quota - cluster_sync
+    # Allow for the namespace prefix to be removed
+    remove_prefix = None
 
     # Test whether form or json POST
     form_data = False
@@ -10317,6 +12509,13 @@ def remove_namespace_quota():
             bad_key = str(key)
             logger.info('remove_namespace_quota_metrics, return 401 bad key - %s' % bad_key)
             return 'Unauthorized', 401
+        # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+        #                   Feature #4464: flux - quota - cluster_sync
+        # Allow for the namespace prefix to be removed
+        try:
+            remove_prefix = post_data['data']['remove_prefix']
+        except KeyError:
+            remove_prefix = None
 
     try:
         if form_data:
@@ -10449,8 +12648,9 @@ def remove_namespace_quota():
             str(len(removed_metrics)), parent_namespace))
     end = timer()
     request_time = (end - start_timer)
-    if form_data:
-        redis_set = 'webapp.remove_namespace_quota_metrics.%s.removed_metrics' % parent_namespace
+
+    redis_set = 'webapp.remove_namespace_quota_metrics.%s.removed_metrics' % parent_namespace
+    if removed_metrics:
         try:
             REDIS_CONN.sadd(redis_set, *set(removed_metrics))
             REDIS_CONN.expire(redis_set, 3600)
@@ -10461,6 +12661,8 @@ def remove_namespace_quota():
             logger.error(trace)
             logger.error('error :: %s' % message)
             return internal_error(message, trace)
+    logger.info('/remove_namespace_quota_metrics took %s' % str(request_time))
+    if form_data:
         try:
             return render_template(
                 'utilities.html', remove_flux_namespace_quota_metrics=True,
@@ -10475,6 +12677,19 @@ def remove_namespace_quota():
             logger.error('error :: %s' % message)
             return internal_error(message, trace)
 
+    # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+    #                   Feature #4464: flux - quota - cluster_sync
+    # Allow for the namespace prefix to be removed
+    if remove_prefix:
+        remove_prefix_str = '%s.' % str(remove_prefix)
+        stripped_metrics = []
+        for metric in removed_metrics:
+            metric = metric.replace(remove_prefix_str, '', 1)
+            stripped_metrics.append(metric)
+        removed_metrics = list(stripped_metrics)
+
+    end = timer()
+    request_time = (end - start_timer)
     status_code = 200
     data_dict = {
         "status": {
@@ -10489,6 +12704,256 @@ def remove_namespace_quota():
     }
     return jsonify(data_dict), status_code
 
+# @added 20230605 - Feature #4932: mute_alerts_on
+@app.route('/mute_alerts_on', methods=['POST'])
+@requires_auth
+def mute_alerts_on():
+    start_timer = timer()
+    start = time.time()
+    logger.info('/mute_alerts_on')
+    key = None
+    return_error = False
+    error_reason = None
+
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 405')
+        return 'Method Not Allowed', 405
+
+    cluster_data = False
+
+    # Test whether form or json POST
+    form_data = False
+    try:
+        cluster_data_str = request.form['cluster_data']
+        if cluster_data_str == 'true':
+            cluster_data = True
+        form_data = True
+        logger.info('mute_alerts_on, form POST')
+        logger.info('mute_alerts_on, cluster_data: %s' % cluster_data)
+    except:
+        logger.info('/mute_alerts_on no form data trying json')
+
+    post_data = {}
+    if not form_data:
+        try:
+            post_data = request.get_json()
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mute_alerts_on - no POST data - %s' % (
+                err))
+            logger.info('mute_alerts_on, return 400 no POST data')
+            return 'Bad request', 400
+        try:
+            cluster_data = post_data['data']['cluster_data']
+            if cluster_data:
+                logger.info('mute_alerts_on - cluster_data passed: %s' % str(cluster_data))
+        except KeyError:
+            cluster_data = False
+        except Exception as err:
+            cluster_data = False
+            logger.error(traceback.format_exc())
+            logger.error('error :: mute_alerts_on - evaluation of  post_data[\'data\'][\'cluster_data\'] failed - %s' % (
+                err))
+        try:
+            key = post_data['data']['key']
+        except KeyError:
+            key = None
+        if not key:
+            logger.info('mute_alerts_on, return 400 no key')
+            return 'Bad request', 400
+        if key != settings.FLUX_SELF_API_KEY:
+            bad_key = str(key)
+            logger.info('mute_alerts_on, return 401 bad key - %s' % bad_key)
+            return 'Unauthorized', 401
+        # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+        #                   Feature #4464: flux - quota - cluster_sync
+        # Allow for the namespace prefix to be removed
+        try:
+            remove_prefix = post_data['data']['remove_prefix']
+        except KeyError:
+            remove_prefix = None
+
+    try:
+        if form_data:
+            namespace = request.form['namespace']
+            key = settings.FLUX_SELF_API_KEY
+        else:
+            namespace = str(post_data['data']['namespace'])
+        if namespace:
+            logger.info('mute_alerts_on - namespace: %s' % namespace)
+    except KeyError:
+        namespace = None
+    if namespace == '':
+        namespace = None
+
+    separator = ','
+    try:
+        if form_data:
+            separator = request.form['separator']
+        else:
+            separator = post_data['data']['separator']
+    except KeyError:
+        separator = ','
+
+    metric_patterns = []
+    try:
+        if form_data:
+            metric_patterns_str = request.form['metric_patterns']
+            logger.info('mute_alerts_on, form_data metric_patterns: %s' % metric_patterns_str)
+            metric_patterns = metric_patterns_str.split(separator)
+            if metric_patterns == ['']:
+                metric_patterns = []
+            if metric_patterns == '':
+                metric_patterns = []
+        else:
+            metric_patterns = post_data['data']['metric_patterns']
+        if metric_patterns:
+            if not isinstance(metric_patterns, list):
+                logger.error('error :: mute_alerts_on - metric_patterns is not a list for namespace - %s' % (
+                    namespace))
+                return 'Bad request', 400
+            logger.info('mute_alerts_on - %s metric_patterns passed' % str(len(metric_patterns)))
+    except KeyError:
+        metric_patterns = []
+    except Exception as err:
+        metric_patterns = []
+        logger.error(traceback.format_exc())
+        logger.error('error :: mute_alerts_on - evaluation of  post_data[\'data\'][\'metric_patterns\'] failed for namespace %s - %s' % (
+            namespace, err))
+        return 'Bad request', 400
+    list_muted_metrics = False
+    try:
+        if form_data:
+            list_muted_metrics = request.form['list_muted_metrics']
+            if list_muted_metrics == 'true':
+                list_muted_metrics = True
+            if list_muted_metrics == 'false':
+                list_muted_metrics = False
+        else:
+            list_muted_metrics = post_data['data']['list_muted_metrics']
+            if list_muted_metrics:
+                logger.info('mute_alerts_on - list_muted_metrics passed, %s' % str(list_muted_metrics))
+                list_muted_metrics = True
+    except KeyError:
+        list_muted_metrics = False
+    if not metric_patterns and not list_muted_metrics and not namespace:
+        logger.error('error :: mute_alerts_on - no metric_patterns or list_muted_metrics or namespace passed to filter on')
+        return_error = True
+        error_reason = 'no namespace or metric_patterns passed to filter on'
+
+    expiry = None
+    try:
+        if form_data:
+            expiry = request.form['expiry']
+        else:
+            expiry = post_data['data']['expiry']
+        if expiry:
+            logger.info('mute_alerts_on - expiry passed, %s' % str(expiry))
+            expiry = int(expiry)
+    except KeyError:
+        expiry = None
+
+    output_format = 'html'
+    try:
+        if form_data:
+            output_format = request.form['format']
+        else:
+            output_format = post_data['data']['format']
+    except KeyError:
+        output_format = 'json'
+
+    remove_prefix = None
+    try:
+        if form_data:
+            remove_prefix = request.form['remove_prefix']
+        else:
+            remove_prefix = post_data['data']['remove_prefix']
+    except KeyError:
+        remove_prefix = None
+    if remove_prefix == '':
+        remove_prefix = None
+
+    logger.info('mute_alerts_on, namespace: %s, metric_patterns: %s, separator: \'%s\', expiry: %s, list_muted_metrics: %s, remove_prefix: %s, format: %s' % (
+        str(namespace), str(metric_patterns), str(separator), str(expiry),
+        str(list_muted_metrics), str(remove_prefix), str(output_format)))
+
+    if not list_muted_metrics:
+        if not namespace and not metric_patterns and not return_error:
+            return_error = True
+            error_reason = 'no namespace or metric_patterns passed to filter on'
+        if namespace and not expiry and not return_error:
+            return_error = True
+            error_reason = 'no expiry passed'
+        if metric_patterns and not expiry and not return_error:
+            return_error = True
+            error_reason = 'no expiry passed'
+    if return_error:
+        data_dict = {
+            "status": {
+                "mute_alerts_on": "fail", "response": 400,
+                "reason": "Bad request", "cluster_data": cluster_data, 
+            },
+            "error": {
+                "reason": error_reason,
+            }
+        }
+        return jsonify(data_dict), 400
+
+    muted_metrics = {}
+    try:
+        muted_metrics = api_mute_alerts_on(skyline_app, cluster_data, namespace, metric_patterns, expiry, list_muted_metrics)
+        logger.info('mute_alerts_on - got %s muted metrics' % str(len(muted_metrics)))
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: mute_alerts_on - api_mute_alerts_on failed - %s' % (
+            err))
+        return 'Internal Server Error', 500
+    end = timer()
+    request_time = (end - start_timer)
+    logger.info('/mute_alerts_on took %s' % str(request_time))
+
+    if form_data and output_format == 'html':
+        try:
+            return render_template(
+                'utilities.html', mute_alerts_on=True,
+                metrics_muted=muted_metrics, muted_alerts_on=muted_metrics,
+                list_muted_metrics=list_muted_metrics, namespace=namespace,
+                metric_patterns=metric_patterns,
+                version=skyline_version, serve_jaeger=WEBAPP_SERVE_JAEGER, duration=(time.time() - start),
+                print_debug=False), 200
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not render_template utilities.html - error - %s' % (e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+
+    # Allow for the namespace prefix to be removed
+    if remove_prefix:
+        remove_prefix_str = '%s.' % str(remove_prefix)
+        stripped_muted_metrics = {}
+        for metric in list(muted_metrics.keys()):
+            stripped_metric = metric.replace(remove_prefix_str, '', 1)
+            stripped_muted_metrics[stripped_metric] = muted_metrics[metric]
+        muted_metrics = stripped_muted_metrics
+
+    end = timer()
+    request_time = (end - start_timer)
+    status_code = 200
+    data_dict = {
+        "status": {
+            "mute_alerts_on": "success", "response": 200,
+            "cluster_data": cluster_data, "request_time": request_time,
+        },
+        "data": {
+            "metrics": muted_metrics,
+            "muted_metrics_count": len(muted_metrics),
+            "namespace": namespace,
+            "metric_patterns": metric_patterns,
+            "remove_prefix": remove_prefix,
+        }
+    }
+    return jsonify(data_dict), status_code
 
 # @added 20210316 - Feature #3978: luminosity - classify_metrics
 #                   Feature #3642: Anomaly type classification
@@ -10516,6 +12981,9 @@ def luminosity():
         # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
         'related_metrics', 'related_to_metrics', 'metric_id', 'cluster_data',
         'metric_related_metrics', 'namespaces',
+        # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+        # Allow related metrics to be returned as json
+        'format',
     ]
 
     classify_metrics = False
@@ -10547,7 +13015,10 @@ def luminosity():
     related_metrics_dict = {}
     related_metrics_keys = []
     related_to_metrics_dict = {}
-
+    # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+    # Allow related metrics to be returned as json
+    use_format = 'html'
+ 
     metric_id = 0
     namespaces = []
 
@@ -10616,6 +13087,11 @@ def luminosity():
                     resp = {'400 Bad Request': error_string}
                     return jsonify(resp), 400
 
+            # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            # Allow related metrics to be returned as json
+            if key == 'format':
+                use_format = request.args.get(key, 'html')
+
         if classification:
             algorithm = None
             metric = None
@@ -10655,7 +13131,7 @@ def luminosity():
                     try:
                         namespaces = value.split[',']
                     except TypeError:
-                        logger.error('error :: TypeError from namespaces parameter' % str(value))
+                        logger.error('error :: TypeError from namespaces parameter')
                         namespaces = [value]
             if key in ['from_timestamp', 'until_timestamp']:
                 timestamp_format_invalid = True
@@ -10823,8 +13299,31 @@ def luminosity():
     if metric_related_metrics:
         try:
             full_details = True
+            # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            # Allow related metrics to be returned as json and to pass a
+            # labelled_metric_name
+            if metric and metric.startswith('labelled_metrics.'):
+                try:
+                    metric = get_base_name_from_labelled_metrics_name(skyline_app, metric)
+                except Exception as err:
+                    message = 'related_to_metric request :: get_base_name_from_labelled_metrics_name failed to determine base_name from %s - %s' % (
+                        str(metric), str(err))
+                    logger.error('error :: %s' % message)
+                    return internal_error(message, trace)
+
             if metric == 'all':
                 metric = None
+                # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+                # Allow related metrics to be returned as json and to pass a
+                # metric_id only or a labelled_metric_name
+                if metric_id:
+                    try:
+                        metric = get_base_name_from_metric_id(skyline_app, metric_id)
+                    except Exception as err:
+                        message = 'related_to_metric request :: get_base_name_from_metric_id failed to determine base_name from metric_id: %s - %s' % (
+                            str(metric_id), str(err))
+                        logger.error('error :: %s' % message)
+                        return internal_error(message, trace)
             else:
                 if not metric_id:
                     try:
@@ -10843,6 +13342,23 @@ def luminosity():
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: get_related_metrics failed to set metric_related_metrics - %s' % str(err))
+        # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+        # Allow related metrics to be returned as json
+        if use_format == 'json':
+            duration = (time.time() - start)
+            data_dict = {
+                "status": {
+                    "cluster_data": cluster_data,
+                    "format": use_format,
+                    "response": 200,
+                    "request_time": duration,
+                },
+                "data": {
+                    "metric": metric,
+                    "metric_related_metrics": metric_related_metrics,
+                }
+            }
+            return jsonify(data_dict), 200
 
     # @added 20211006 - Feature #4264: luminosity - cross_correlation_relationships
     related_to_metrics_keys = []
@@ -11112,6 +13628,157 @@ def webapp_up():
         return jsonify(data_dict), 404
 
 
+@app.route('/metrics', methods=['GET'])
+def get_prometheus_scrape_metrics():
+    """
+    Expose Prometheus-like metrics
+    """
+    logger.info('/metrics request')
+    scrape_response = None
+    try:
+        scrape_response = expose_metrics()
+        logger.info('/metrics request expose_metrics called')
+    except Exception as err:
+        trace = traceback.format_exc()
+        message = 'expose_metrics failed - %s' % str(err)
+        logger.error(trace)
+        logger.error('error :: %s' % message)
+    if scrape_response:
+        return scrape_response, {'Content-Type': 'text/plain'}
+    return 'Not Found', 404
+
+
+# @added 20221204 - Feature #4754: csv_to_timeseries
+#                   Feature #4734: mirage_vortex
+#                   Branch #4728: vortex
+@app.route("/csv_to_timeseries", methods=['POST'])
+@requires_auth
+def csv_to_timeseries_data():
+    logger.info('/csv_to_timeseries request')
+    if not file_uploads_enabled:
+        return 'Not Found', 404
+    api_key = None
+    data_file = None
+    data_dict = {}
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 400')
+        return 'Method Not Allowed', 405
+    logger.info('handling csv_to_timeseries POST request')
+    # If there is no key a 401 is returned with no info
+    if 'key' not in request.form:
+        error_string = 'no key in the POST variables'
+        logger.error('error :: ' + error_string)
+        return 'Unauthorized', 401
+    api_key = str(request.form['key'])
+    known_key = None
+    temporary_upload_key = None
+    redis_temporary_upload_key = 'csv_to_timeseries.tmp.temporary_upload_key.%s' % api_key
+    try:
+        temporary_upload_key = REDIS_CONN.get(redis_temporary_upload_key)
+        logger.info('got temporary_upload_key from Redis')
+    except:
+        trace = traceback.format_exc()
+        message = 'could not get Redis key - %s' % redis_temporary_upload_key
+        logger.error(trace)
+        logger.error('error :: %s' % message)
+
+    if api_key in list(flux_upload_keys.keys()) or api_key == settings.FLUX_SELF_API_KEY or temporary_upload_key:
+        known_key = api_key
+        logger.info('handling csv_to_timeseries - key valid')
+    if not known_key:
+        logger.error('error :: unknown key passed %s' % api_key)
+        return 'Unauthorized', 401
+    data_filename = None
+    no_data_file = False
+    if 'data_file' not in request.files:
+        no_data_file = True
+        error_string = 'error :: no data_file in the POST'
+        logger.error(error_string)
+    if 'data_file' in request.files:
+        data_file = request.files['data_file']
+        if data_file.filename == '':
+            error_string = 'error :: blank data_file variable'
+            logger.error(error_string)
+            no_data_file = True
+    if no_data_file:
+        data_dict = {"status": {"error": error_string}, "data": {"timeseries": None}}
+        return jsonify(data_dict), 400
+
+    data_filename = None
+    saved_csv = None
+    if data_file and allowed_file(data_file.filename):
+        try:
+            data_filename = secure_filename(data_file.filename)
+            logger.info('handling csv_to_timeseries POST request with data file - %s' % str(data_filename))
+            saved_csv = '%s/%s' % (settings.SKYLINE_TMP_DIR, data_filename)
+            data_file.save(saved_csv)
+            logger.info('handling csv_to_timeseries POST request saved data file - %s' % saved_csv)
+        except:
+            trace = traceback.format_exc()
+            message = 'failed to save data file'
+            logger.error(trace)
+            logger.error(message)
+            return 'Internal Server Error', 500
+    if not saved_csv:
+        logger.error('error :: handling csv_to_timeseries POST no saved_csv')
+        return 'Internal Server Error', 500
+    if not os.path.isfile(saved_csv):
+        logger.error('error :: handling csv_to_timeseries POST no saved_csv - %s' % str(saved_csv))
+        return 'Internal Server Error', 500
+    try:
+        timeseries = csv_to_timeseries(skyline_app, saved_csv)
+    except Exception as err:
+        logger.error('error :: csv_to_timeseries failed - %s' % err)
+        return 'Internal Server Error', 500
+    success = False
+    try:
+        os.remove(saved_csv)
+        logger.info('handling csv_to_timeseries removed %s' % saved_csv)
+    except Exception as err:
+        logger.error('error :: csv_to_timeseries failed to remove %s - %s' % (
+            saved_csv, err))
+    if isinstance(timeseries, list):
+        success = True
+    data_dict = {"status": {"succes": success}, "data": {"timeseries": timeseries}}
+    if not success and 'error' in timeseries:
+        data_dict["status"]["error"] = str(timeseries)
+        data_dict["data"]["timeseries"] = None
+    if success:
+        return jsonify(data_dict), 200
+    return jsonify(data_dict), 400
+
+
+# @added 20221210 - Feature #4734: mirage_vortex
+#                   Branch #4728: vortex
+@app.route("/vortex", methods=['GET', 'POST'])
+@requires_auth
+def vortex():
+    start = time.time()
+    logger.info('/vortex request')
+    run_algorithms = None
+    results = None
+    try:
+        metric, results = vortex_request()
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+    if request.method == 'POST':
+        if request.form['json_output'] == 'true':
+            return jsonify(results), 200
+
+    try:
+        return render_template(
+            'vortex.html', vortex_algorithms=settings.VORTEX_ALGORITHMS,
+            metric=metric, results=results,
+            version=skyline_version, serve_jaeger=settings.WEBAPP_SERVE_JAEGER, duration=(time.time() - start)), 200
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+
 # @added 20160703 - Feature #1464: Webapp Redis browser
 # A port of Marian Steinbach's rebrow - https://github.com/marians/rebrow
 # Description of info keys
@@ -11227,7 +13894,10 @@ serverinfo_meta = {
 #                      Branch #3262: py3
 # def get_redis(host, port, db, password):
 def get_redis(host, port, db, password, decode):
-    if password == "":
+    # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+    # Added nosec B105 for bandit
+    # if password == "":
+    if password == "":  # nosec B105
         # @modified 20190517 - Branch #3002: docker
         # Allow rebrow to connect to Redis on the socket too
         if host == 'unix_socket':
@@ -11525,8 +14195,8 @@ def rebrow():
                 jwt_encoded_payload = jwt_encoded_payload
         except:
             message = 'Failed to create set jwt_encoded_payload for %s' % client_id
-            trace = traceback.format_exc()
-            return internal_error(message, trace)
+            rtrace = traceback.format_exc()
+            return internal_error(message, rtrace)
 
         # HERE WE WANT TO PUT THIS INTO REDIS with a TTL key and give the key
         # a salt and have the client use that as their token
@@ -11631,10 +14301,10 @@ def rebrow_server_db(host, port, db):
     # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
     # Added client_id and token
     client_id, protocol, proxied = get_client_details()
-    token, redis_password, fail_msg, trace = decode_token(client_id)
+    token, redis_password, fail_msg, rtrace = decode_token(client_id)
     if not token:
         if fail_msg:
-            return internal_error(fail_msg, trace)
+            return internal_error(fail_msg, rtrace)
 
     try:
         # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -11686,10 +14356,10 @@ def rebrow_keys(host, port, db):
     # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
     # Added client_id and token
     client_id, protocol, proxied = get_client_details()
-    token, redis_password, fail_msg, trace = decode_token(client_id)
+    token, redis_password, fail_msg, rtrace = decode_token(client_id)
     if not token:
         if fail_msg:
-            return internal_error(fail_msg, trace)
+            return internal_error(fail_msg, rtrace)
 
     try:
         # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -11739,7 +14409,21 @@ def rebrow_keys(host, port, db):
             trace = traceback.format_exc()
             return internal_error(message, trace)
 
+        # @modified 20230330 - Feature #4468: flux - remove_namespace_quota_metrics
+        # Use scan_iter
+        # keys = sorted(r.keys(pattern))
+        # keys = []
+        # try:
+        #     for key in r.scan_iter(pattern):
+        #         keys.append(key)
+        # except Exception as err:
+        #     message = 'rebrow - failed to scan_iter(\'%s\') on Redis - %s' % (str(pattern), err)
+        #     trace = traceback.format_exc()
+        #     return internal_error(message, trace)
+        # keys = sorted(keys)
+
         keys = sorted(r.keys(pattern))
+
         num_keys = len(keys)
 
         # @added 20220224 - Feature #4470: rebrow - filter keys - exclude and type
@@ -11839,10 +14523,10 @@ def rebrow_key(host, port, db, key):
     # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
     # Added client_id and token
     client_id, protocol, proxied = get_client_details()
-    token, redis_password, fail_msg, trace = decode_token(client_id)
+    token, redis_password, fail_msg, rtrace = decode_token(client_id)
     if not token:
         if fail_msg:
-            return internal_error(fail_msg, trace)
+            return internal_error(fail_msg, rtrace)
 
     try:
         r = get_redis(host, port, db, redis_password, False)
@@ -11887,12 +14571,17 @@ def rebrow_key(host, port, db, key):
     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
     #                      Branch #3262: py3
     # t = r.type(key)
-    if python_version == 2:
-        t = r.type(key)
-    if python_version == 3:
-        key = dump_key
-        t = r.type(key).decode('utf-8')
-    logger.info('rebrow :: got key - %s, of type %s' % (str(dump_key), str(t)))
+    try:
+        if python_version == 2:
+            t = r.type(key)
+        if python_version == 3:
+            key = dump_key
+            t = r.type(key).decode('utf-8')
+        logger.info('rebrow :: got key - %s, of type %s' % (str(dump_key), str(t)))
+    except Exception as err:
+        message = 'Failed to decode Redis key - %s - %s' % (str(key), err)
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
 
     ttl = r.pttl(key)
     if t == 'string':
@@ -11965,6 +14654,16 @@ def rebrow_key(host, port, db, key):
         logger.info('rebrow :: set key - %s' % str(key))
     elif t == 'zset':
         val = r.zrange(key, 0, -1, withscores=True)
+    elif t == 'TSDB-TYPE':
+        until_timestamp = int(time.time())
+        from_timestamp = until_timestamp - (86400 * 2)
+        # RedisTimeSeries uses milliseconds
+        val = r.ts().range(key, (from_timestamp * 1000), (until_timestamp * 1000))
+        # logger.debug('debug :: rebrow :: TSDB key value - %s' % str(val))
+        try:
+            val = val.decode('utf-8')
+        except (UnicodeDecodeError, AttributeError):
+            pass
     return render_template(
         'rebrow_key.html',
         host=host,
@@ -12043,7 +14742,6 @@ class App():
                 os_remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time.time()
 #        log_wait_for = now + 5
@@ -12063,7 +14761,6 @@ class App():
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -12159,6 +14856,15 @@ def run():
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_ALLOWED_IPS'))
         print('Failed to determine %s from settings.py' % str('WEBAPP_ALLOWED_IPS'))
         sys.exit(1)
+
+    try:
+        if settings.WEBAPP_GUNICORN_WORKERS > 2:
+            print('notice :: settings.WEBAPP_GUNICORN_WORKERS is set to %s, decreased to 2 as more than 2 are not required with the gevent worker_class' % (
+                str(settings.WEBAPP_GUNICORN_WORKERS)))
+            logger.notice('notice :: settings.WEBAPP_GUNICORN_WORKERS is set to %s, decreased to 2 as more than 2 are not required with the gevent worker_class' % (
+                str(settings.WEBAPP_GUNICORN_WORKERS)))
+    except:
+        logger.error('error :: failed to determine WEBAPP_GUNICORN_WORKERS from settings.py')
 
     webapp = App()
 
