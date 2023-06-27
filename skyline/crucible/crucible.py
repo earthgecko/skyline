@@ -3,7 +3,6 @@ try:
     from Queue import Empty
 except:
     from queue import Empty
-from redis import StrictRedis
 # import time
 from time import time, sleep
 from threading import Thread
@@ -12,16 +11,15 @@ from threading import Thread
 # processes
 # from multiprocessing import Process, Manager
 from multiprocessing import Process
-from msgpack import packb
 import os
 from os.path import join, isfile
 from os import kill, getpid, listdir
-from sys import exit, version_info
+from sys import version_info
+from sys import exit as sys_exit
 import traceback
 import re
 import json
 import gzip
-import requests
 
 # @modified 20200328 - Task #3290: Handle urllib2 in py3
 #                      Branch #3262: py3
@@ -44,7 +42,7 @@ except:
     import urllib.request
     import urllib.error
 
-import errno
+# import errno
 import datetime
 import shutil
 
@@ -53,6 +51,10 @@ import os.path
 # sys.path.insert(0, os.path.dirname(__file__))
 
 from ast import literal_eval
+
+from redis import StrictRedis
+from msgpack import packb
+import requests
 
 import settings
 
@@ -68,6 +70,11 @@ from skyline_functions import (
     # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
     #                   Bug #3778: Handle single encoded forward slash requests to Graphite
     sanitise_graphite_url)
+
+# @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+# Added summarise option
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+from functions.timeseries.downsample import downsample_timeseries
 
 from crucible_algorithms import run_algorithms
 
@@ -133,7 +140,7 @@ class Crucible(Thread):
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
             logger.warning('warning :: parent or current process dead')
-            exit(0)
+            sys_exit(0)
 
     # @added 20200327 - Branch #3262: py3
     # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
@@ -178,9 +185,11 @@ class Crucible(Thread):
         # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
         #                      Feature #1448: Crucible web UI
         # Added alert_interval to int_keys and add_to_panorama to the boolean_keys
+        # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+        # Added summarise option
         int_keys = [
             'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
-            'ionosphere_parent_id', 'alert_interval']
+            'ionosphere_parent_id', 'alert_interval', 'summarise']
         # @added 20201001 - Task #3748: POC SNAB
         # Added algorithms_run required to determine the anomalyScore
         # so this needs to be sent to Ionosphere so Ionosphere
@@ -220,7 +229,7 @@ class Crucible(Thread):
 
             if len(metric_vars_array) == 0:
                 logger.error(
-                    'error :: loading metric variables - none found' % (
+                    'error :: loading metric variables - none found - %s' % (
                         str(metric_vars_file)))
                 return False
 
@@ -510,6 +519,10 @@ class Crucible(Thread):
             key = 'run_script'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             run_script = str(value_list[0])
+            # @modified 20230109 - Task #4798: Deprecate run_script from crucible
+            #                      Task #4778: v4.0.0 - update dependencies
+            # logger.info('running - %s' % (run_script))
+            logger.warning('WARNING :: DEPRECATED run_script in v4.0.0')
         except:
             run_script = False
         if settings.ENABLE_CRUCIBLE_DEBUG:
@@ -581,6 +594,18 @@ class Crucible(Thread):
             training_data_json = None
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('metric variable - training_data_json - %s' % str(training_data_json))
+
+        # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+        # Added summarise option
+        summarise = 0
+        try:
+            key = 'summarise'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            summarise = int(value_list[0])
+        except:
+            summarise = 0
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - summarise - %s' % str(summarise))
 
         # Only check if the metric does not a EXPIRATION_TIME key set, crucible
         # uses the alert EXPIRATION_TIME for the relevant alert setting contexts
@@ -846,7 +871,7 @@ class Crucible(Thread):
                         # permitted schemes. Allowing use of file:/ or custom schemes is
                         # often unexpected.
                         if image_url.lower().startswith('http'):
-                            urllib.urlretrieve(image_url, graphite_image_file)  # nosec
+                            urllib.urlretrieve(image_url, graphite_image_file)  # nosec B310
                         else:
                             logger.error(
                                 'error :: %s :: image_url does not start with http - %s' % (str(image_url)))
@@ -856,7 +881,7 @@ class Crucible(Thread):
                         # permitted schemes. Allowing use of file:/ or custom schemes is
                         # often unexpected.
                         if image_url.lower().startswith('http'):
-                            urllib.request.urlretrieve(image_url, graphite_image_file)  # nosec
+                            urllib.request.urlretrieve(image_url, graphite_image_file)  # nosec B310
                         else:
                             logger.error(
                                 'error :: %s :: image_url does not start with http - %s' % (str(image_url)))
@@ -867,15 +892,18 @@ class Crucible(Thread):
                     logger.error('error :: url bad - %s' % (image_url))
                     # image_data = None
 
-                try:
-                    if python_version == 2:
-                        os.chmod(graphite_image_file, 0o644)
-                    if python_version == 3:
-                        os.chmod(graphite_image_file, mode=0o644)
-                    logger.info('graphite_image_file permissions set OK - %s' % (graphite_image_file))
-                except:
-                    logger.error(traceback.print_exc())
-                    logger.error('error :: graphite_image_file permissions could not be set - %s' % (graphite_image_file))
+                if os.path.isfile(graphite_image_file):
+                    try:
+                        if python_version == 2:
+                            os.chmod(graphite_image_file, 0o644)
+                        if python_version == 3:
+                            os.chmod(graphite_image_file, mode=0o644)
+                        logger.info('graphite_image_file permissions set OK - %s' % (graphite_image_file))
+                    except:
+                        logger.error(traceback.print_exc())
+                        logger.error('error :: graphite_image_file permissions could not be set - %s' % (graphite_image_file))
+                else:
+                    logger.error('error :: graphite_image_file does not exist - %s' % (graphite_image_file))
 
                 # @modified 20200328 - Task #3290: Handle urllib2 in py3
                 #                      Branch #3262: py3
@@ -915,42 +943,64 @@ class Crucible(Thread):
                     # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
                     #                   Bug #3778: Handle single encoded forward slash requests to Graphite
                     sanitised = False
-                    sanitised, url = sanitise_graphite_url(skyline_app, url)
+                    try:
+                        sanitised, url = sanitise_graphite_url(skyline_app, url)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: sanitise_graphite_url failed - %s - %s' % (str(url), err))
 
+                    datapoints = []
                     try:
                         r = requests.get(url, timeout=use_timeout)
                         js = r.json()
                         datapoints = js[0]['datapoints']
+                        logger.info('data retrieved OK')
                         if settings.ENABLE_CRUCIBLE_DEBUG:
                             logger.info('data retrieved OK')
-                    except:
-                        datapoints = [[None, int(graphite_until)]]
-                        logger.error('error :: data retrieval failed')
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: data retrieval failed - %s' % err)
+                        datapoints = []
 
                     converted = []
                     for datapoint in datapoints:
                         try:
-                            new_datapoint = [float(datapoint[1]), float(datapoint[0])]
+                            new_datapoint = [int(datapoint[1]), float(datapoint[0])]
                             converted.append(new_datapoint)
                         # @modified 20170913 - Task #2160: Test skyline with bandit
                         # Added nosec to exclude from bandit tests
-                        except:  # nosec
+                        except:  # nosec B110, B112
                             continue
 
-                    try:
-                        with open(anomaly_json, 'w') as f:
-                            f.write(json.dumps(converted))
-                        if python_version == 2:
-                            # @modified 20200327 - Branch #3262: py3
-                            # os.chmod(anomaly_json, 0644)
-                            os.chmod(anomaly_json, 0o644)
-                        if python_version == 3:
-                            os.chmod(anomaly_json, mode=0o644)
-                        if settings.ENABLE_CRUCIBLE_DEBUG:
-                            logger.info('json file - %s' % anomaly_json)
-                    except:
-                        logger.error(traceback.print_exc())
-                        logger.error('error :: failed to write or chmod anomaly_json - %s' % (anomaly_json))
+                    if not converted:
+                        logger.error('error :: failed to surface any json data for %s from graphite' % (metric))
+                        # Move metric check file
+                        try:
+                            shutil.move(metric_check_file, failed_check_file)
+                            logger.info('moved check file to - %s' % failed_check_file)
+                        except OSError:
+                            logger.error('error :: failed to move check file to - %s' % failed_check_file)
+                            # pass
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to move check file - %s' % (err))
+                        return
+
+                    if converted:
+                        try:
+                            with open(anomaly_json, 'w') as f:
+                                f.write(json.dumps(converted))
+                            if python_version == 2:
+                                # @modified 20200327 - Branch #3262: py3
+                                # os.chmod(anomaly_json, 0644)
+                                os.chmod(anomaly_json, 0o644)
+                            if python_version == 3:
+                                os.chmod(anomaly_json, mode=0o644)
+                            if settings.ENABLE_CRUCIBLE_DEBUG:
+                                logger.info('json file - %s' % anomaly_json)
+                        except:
+                            logger.error(traceback.print_exc())
+                            logger.error('error :: failed to write or chmod anomaly_json - %s' % (anomaly_json))
 
                     # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
                     #                   Feature #1448: Crucible web UI
@@ -971,7 +1021,7 @@ class Crucible(Thread):
                         logger.info('moved check file to - %s' % failed_check_file)
                     except OSError:
                         logger.error('error :: failed to move check file to - %s' % failed_check_file)
-                        pass
+                        # pass
                     return
 
         # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
@@ -985,11 +1035,15 @@ class Crucible(Thread):
                     logger.info('moved check file to - %s' % failed_check_file)
                 except OSError:
                     logger.error('error :: failed to move check file to - %s' % failed_check_file)
-                    pass
+                    # pass
                 return
             else:
-                logger.info('setting anomaly json to training_data_json - %s' % (training_data_json))
-                anomaly_json = training_data_json
+                logger.info('copying training_data_json %s to anomaly_json %s' % (training_data_json, anomaly_json))
+                try:
+                    shutil.copy(training_data_json, anomaly_json)
+                except Exception as err:
+                    logger.error('error :: failed to copy training_data_json file - %s' % err)
+                # anomaly_json = training_data_json
 
         # Check timeseries json exists - raw or gz
         if not os.path.isfile(anomaly_json):
@@ -1001,10 +1055,8 @@ class Crucible(Thread):
                     logger.info('moved check file to - %s' % failed_check_file)
                 except OSError:
                     logger.error('error :: failed to move check file to - %s' % failed_check_file)
-                    pass
                 return
-            else:
-                logger.info('timeseries json gzip exists - %s' % (anomaly_json_gz))
+            logger.info('timeseries json gzip exists - %s' % (anomaly_json_gz))
         else:
             logger.info('timeseries json exists - %s' % (anomaly_json))
 
@@ -1139,7 +1191,6 @@ class Crucible(Thread):
                 logger.info('moved check file to - %s' % failed_check_file)
             except OSError:
                 logger.error('error :: failed to move check file to - %s' % failed_check_file)
-                pass
             return
 
         if not timeseries:
@@ -1190,6 +1241,30 @@ class Crucible(Thread):
                 padded_with = from_timestamp - start_timestamp
                 logger.info('padded time series identified, padded with %s seconds' % str(padded_with))
 
+        # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+        # Added summarise option
+        if training_data_json and summarise:
+            resolution = determine_data_frequency(skyline_app, timeseries, False)
+            if summarise != resolution:
+                logger.info('downsampling training_data_json time series from %s to %s resolution' % (
+                    str(resolution), str(summarise)))
+                aligned_timeseries = []
+                for ts, value in timeseries:
+                    aligned_timeseries.append([int(int(ts) // resolution * resolution), value])
+                timeseries = aligned_timeseries
+                logger.info('original training_data_json time series has %s data points' % (
+                    str(len(timeseries))))
+                method = 'mean'
+                resampled_aligned_timeseries = []
+                try:
+                    resampled_aligned_timeseries = downsample_timeseries(skyline_app, timeseries, resolution, summarise, method, origin='end')
+                except Exception as err:
+                    logger.error('error :: downsample_timeseries failed on full_duration_timeseries - %s' % err)
+                if resampled_aligned_timeseries:
+                    logger.info('downsampled training_data_json time series has %s data points' % (
+                        str(len(resampled_aligned_timeseries))))
+                    timeseries = list(resampled_aligned_timeseries)
+
         self.check_if_parent_is_alive()
 
         run_algorithms_start_timestamp = int(time())
@@ -1229,7 +1304,6 @@ class Crucible(Thread):
                 logger.info('moved check file to - %s' % failed_check_file)
             except OSError:
                 logger.error('error :: failed to move check file to - %s' % failed_check_file)
-                pass
             return
 
         run_algorithms_end_timestamp = int(time())
@@ -1302,10 +1376,19 @@ class Crucible(Thread):
 
         if run_script:
             if os.path.isfile(run_script):
-                logger.info('running - %s' % (run_script))
+
+                # @modified 20230109 - Task #4798: Deprecate run_script from crucible
+                #                      Task #4778: v4.0.0 - update dependencies
+                # logger.info('running - %s' % (run_script))
+                logger.warning('WARNING :: not running - %s - DEPRECATED run_script in v4.0.0' % (run_script))
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                os.system('%s %s' % (str(run_script), str(crucible_anomaly_file)))  # nosec
+                # @modified 20230109 - Task #4798: Deprecate run_script from crucible
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Deprecate run_script was added to some internal testing, not
+                # tested and not maintained or used and is undocumented
+                # os.system('%s %s' % (str(run_script), str(crucible_anomaly_file)))  # nosec
 
         # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
         #                   Feature #1448: Crucible web UI
@@ -1409,7 +1492,6 @@ class Crucible(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -1428,7 +1510,6 @@ class Crucible(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -1466,9 +1547,7 @@ class Crucible(Thread):
                     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 continue
 
-            """
-            Determine if any metric has been added to test
-            """
+            # Determine if any metric has been added to test
             while True:
 
                 # Report app up
@@ -1583,7 +1662,7 @@ class Crucible(Thread):
                     # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
                     #                   Feature #1448: Crucible web UI
                     sleep_count += 1
-                    if (sleep_count % 100 == 0):
+                    if (sleep_count % 100) == 0:
                         logger.info('%s :: spin_process/es still running pid/s - %s' % (skyline_app, str(pids)))
                 else:
                     # All the processes are done, break now.
