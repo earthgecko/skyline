@@ -27,7 +27,8 @@ if True:
     if settings.LUMINOSITY_CLOUDBURST_ENABLED:
         from cloudburst import Cloudburst
         # @added 20210806 - Feature #4164: luminosity - cloudbursts
-        from cloudbursts import Cloudbursts
+        # Cloudbursts is currently abandoned WIP
+        # from cloudbursts import Cloudbursts
     # @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
     if settings.LUMINOSITY_RELATED_METRICS:
         from related_metrics import RelatedMetrics
@@ -85,12 +86,13 @@ class LuminosityAgent():
                 logger.error('error :: agent failed to start Cloudburst - %s' % e)
 
             # @added 20210806 - Feature #4164: luminosity - cloudbursts
-            logger.info('agent starting Cloudbursts')
-            try:
-                Cloudbursts(getpid()).start()
-            except Exception as e:
-                logger.info(traceback.format_exc())
-                logger.error('error :: agent failed to start Cloudbursts - %s' % e)
+            # Cloudbursts is currently abandoned WIP
+            # logger.info('agent starting Cloudbursts')
+            # try:
+            #     Cloudbursts(getpid()).start()
+            # except Exception as e:
+            #     logger.info(traceback.format_exc())
+            #     logger.error('error :: agent failed to start Cloudbursts - %s' % e)
         else:
             logger.info('agent not starting Cloudburst because LUMINOSITY_CLOUDBURST_ENABLED is %s' % str(settings.LUMINOSITY_CLOUDBURST_ENABLED))
 
