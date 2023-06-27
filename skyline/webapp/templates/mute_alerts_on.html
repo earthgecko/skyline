@@ -1,0 +1,156 @@
+{% block mute_alerts_on_block %}
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities mute_alerts_on_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+		  <li class="active"><a href="/utilities?mute_alerts_on"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></a></li>
+      <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
+      <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+      <li><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
+      <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+      <li><a href="/utilities?labelled_metrics_names"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></a></li>
+      <li><a href="/utilities?timeseries_graph"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></a></li>
+      <li><a href="/utilities?csv_to_timeseries"><span class="logo"><span class="sky">csv</span> - <span class="re">to timeseries</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Mute ::</span> <span class="re">alerts</span></h4>
+
+    You can mute alerts on certain metrics, namespaces, key/tag and or values, by defining patterns in the <code>metric_patterns</code>
+    input below and set an <code>expiry</code> in seconds for how long you was to mute alerts for.  Muting alerts does not stop analysis
+    or the recording of anomalies on the defined metrics, it only prevents alerts from being sent for these metrics.  Metrics that are
+    muted are handled like <code>settings.SKYLINE_FEEDBACK_METRICS</code>, which means that they will only be analysed once every 10
+    minutes.<br>
+    <br>
+    Should you wish to <strong>unmute</strong> metrics that have been muted, just use the same <code>namespace</code> and/or <code>metric_patterns</code> and set the <code>expiry</code> to 1 to override the previous <code>expiry</code>.
+    Muted metrics that have reached the <code>expiry</code> period are removed every 5 minutes, so once the <code>expiry</code> is reached the
+    metric will be removed from the muted state within 5 minutes.<br>
+    <br>
+
+  {% if muted_alerts_on and not list_muted_metrics %}
+	  <div class="alert alert-success">
+	    <strong>Muted alerts on</strong> :: {{ muted_alerts_on|length }} metrics<br>
+	  </div>
+  {% endif %}
+
+        <form action="mute_alerts_on" method=post enctype=multipart/form-data>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+              <td>List muted metrics</td>
+              <td><select name="list_muted_metrics">
+                <option value="false">false</option>
+                <option value="true">true</option>
+                </select> if you just want to list what metrics are currently muted you can set the to <code>true</code> and pass no further parameters below.
+              </td>
+    			  </tr>
+            <tr>
+              <td>cluster_data</td>
+              <td><select name="cluster_data">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select></td>
+            </tr>
+  		      <tr>
+  		        <td>Namespace</td>
+  		        <td><input type="text" name="namespace" value="" /> the parent namespace on which alerts are to be muted, this will be applied <strong>before</strong> <code>metric_patterns</code> <code>[optional]</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metric patterns</td>
+  		        <td><input type="text" name="metric_patterns" value="" /> a comma (or separator) separated list of metric patterns you want to mute alerts on <code>[optional]</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Metric patterns separator</td>
+  		        <td><input type="text" name="separator" value="," /> the character used to delimit the metric patterns <code>[required]</code></td>
+  		      </tr>
+            <tr>
+  		        <td>Expiry</td>
+  		        <td><input type="number" name="expiry" value="" /> the number of seconds you want to mute alerts for <code>[required]</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Remove prefix</td>
+  		        <td><input type="text" name="remove_prefix" value="" /> the prefix to remove <code>[optional]</code></td>
+  		      </tr>
+  		      <tr>
+              <td>Output format</td>
+              <td><select name="format">
+                <option value="html">html</option>
+                <option value="json">json</option>
+                </select> default output is to the Utilities page, if you want a json response set this to json.
+              </td>
+    			  </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Mute alerts on">
+      </form>
+      </div>
+  </div>
+
+  {% if not metrics_muted %}
+	  <h3><span class="logo"><span class="sky">Muted ::</span> <span class="re">metrics</span> - <code>None</code></h3>
+  {% endif %}
+
+  {% if metrics_muted %}
+	  <h3><span class="logo"><span class="sky">Muted ::</span> <span class="re">metrics</span></span> - {{ metrics_muted|length }} metrics are muted</h3>
+    {% if namespace %}
+	  <h4><span class="logo"><span class="sky">namespace ::</span> <span class="re">matched</span></span> - {{ namespace }}</h4>
+    {% endif %}
+    {% if metric_patterns %}
+	  <h4><span class="logo"><span class="sky">metric_patterns ::</span> <span class="re">matched</span></span> - {{ metric_patterns }}</h4>
+    {% endif %}
+    <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Metric</th>
+  		        <th>timestamp</th>
+  		        <th>Until</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+	{% for metric in metrics_muted %}
+  		      <tr>
+				<td>{{ metric }}</td>
+				<td>{{ metrics_muted[metric]['timestamp'] }}</td>
+				<td>{{ metrics_muted[metric]['until'] }}</td>
+  		      </tr>
+    {% endfor %}
+  		    </tbody>
+  		  </table>
+  {% endif %}
+
+	</div>
+	</div>
+	</div>
+{% endblock %}

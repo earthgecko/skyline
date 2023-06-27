@@ -1,6 +1,8 @@
-{% block remove_and_set_inactive_block %}
+{% block labelled_metrics_names_block %}
+
+<!-- BEGIN /utilities match_metric block -->
 {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /utilities set_metrics_as_inactive_block</br>
+<code> DEBUG </code> :: /utilities labelled_metrics_names_block</br>
 {% endif %}
 
 {% if display_message %}
@@ -16,10 +18,12 @@
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
 		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+		  <li><a href="/utilities?mute_alerts_on"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></a></li>
       <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
       <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
       <li><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
-      <li class="active"><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+      <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+      <li class="active"><a href="/utilities?labelled_metrics_names"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></a></li>
       <li><a href="/utilities?timeseries_graph"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></a></li>
       <li><a href="/utilities?csv_to_timeseries"><span class="logo"><span class="sky">csv</span> - <span class="re">to timeseries</span></a></li>
 		</ul>
@@ -37,15 +41,9 @@
 
 	<div class="col-md-12">
 
-	  <h4><span class="logo"><span class="sky">Remove ::</span> <span class="re">metrics</span></h4>
+	  <h4><span class="logo"><span class="sky">Labelled metrics ::</span> <span class="re">names</span></h4>
 
-  {% if removed_metrics %}
-	  <div class="alert alert-success">
-	    <strong>Removed metrics count</strong> :: {{ removed_metrics|length }}<br>
-	  </div>
-  {% endif %}
-
-        <form action="remove_and_set_metrics_as_inactive" method=post enctype=multipart/form-data>
+        <form action="utilities?labelled_metrics_names=true" method=post enctype=multipart/form-data>
   		  <table class="table table-hover">
   		    <thead>
   		      <tr>
@@ -55,16 +53,12 @@
   		    </thead>
   		    <tbody>
   		      <tr>
-  		        <td>Parent namespace</td>
-  		        <td><input type="text" name="parent_namespace" value="" /> the parent namespace want to remove and set metrics as inactive (top level namespace)</td>
+  		        <td>Labelled metric name</td>
+  		        <td><input type="text" name="labelled_metric_name" value="" /> the labelled metric name to look up</td>
   		      </tr>
   		      <tr>
-  		        <td>Metrics</td>
-  		        <td><input type="text" name="metrics" value="" /> a comma separated list of metric names you want to remove and set as inactive</td>
-  		      </tr>
-  		      <tr>
-  		        <td>Patterns</td>
-  		        <td><input type="text" name="patterns" value="" /> a comma separated list of patterns to match metric names you want to remove  and set as inactive (uses matched_or_regexed_in_list)</td>
+  		        <td>Labelled metric base_name</td>
+  		        <td><input type="text" name="labelled_metric_base_name" value="" /> the labelled metric base_name to look up</td>
   		      </tr>
   		      <tr>
   		        <td>cluster_data</td>
@@ -74,39 +68,37 @@
               </select></td>
   		      </tr>
   		      <tr>
-  		        <td>Dry run</td>
-  		        <td><select name="dry_run">
-                <option value="true">true</option>
-                <option value="false">false</option>
+  		        <td>format</td>
+  		        <td><select name="format">
+                <option value="html">html</option>
+                <option value="json">json</option>
               </select></td>
   		      </tr>
   		    </tbody>
   		  </table>
         <br>
-        <input type="submit" value="Remove and set as inactive">
+        <input type="submit" value="Look up names">
       </form>
       </div>
   </div>
 
-  {% if removed_metrics %}
-    {% if dry_run %}
-	  <h3><span class="logo"><span class="sky">Would remove and set as inactive ::</span> <span class="re">metrics</span> <strong>DRY RUN</strong></h3>
-    {% else %}
-	  <h3><span class="logo"><span class="sky">Removed and set as inactive ::</span> <span class="re">metrics</span></h3>
-    {% endif %}
+  {% if labelled_metric_dict %}
+	  <h3><span class="logo"><span class="sky">Results ::</span> <span class="re">labelled metric name lookup</span></h3>
 
   		  <table class="table table-hover">
   		    <thead>
   		      <tr>
-  		        <th>Metric</th>
+  		        <th>metric id</th>
+  		        <th>labelled_metric_name</th>
+  		        <th>labelled_metric_base_name</th>
   		      </tr>
   		    </thead>
   		    <tbody>
-    {% for item in removed_metrics %}
   		      <tr>
-  		        <td>{{ item }}</td>
+  		        <td>{{ labelled_metric_dict['metric_id'] }}</td>
+  		        <td>{{ labelled_metric_dict['labelled_metric_name'] }}</td>
+  		        <td><smallcode>{{ labelled_metric_dict['labelled_metric_base_name'] }}</smallcode></td>
   		      </tr>
-    {% endfor %}
   		    </tbody>
   		  </table>
   {% endif %}
@@ -115,5 +107,5 @@
 	</div>
 	</div>
 
-<!-- END remove_and_set_inactive block -->
+<!-- END labelled_metrics_names_block -->
 {% endblock %}

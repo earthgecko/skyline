@@ -1,3 +1,6 @@
+"""
+ionosphere_backend.py
+"""
 from __future__ import division
 import logging
 from os import path, walk, listdir, remove
@@ -6,11 +9,14 @@ import operator
 import time
 import re
 # import csv
-# import datetime
+import datetime
 import shutil
 import glob
 from ast import literal_eval
 from sys import version_info
+# @added 20221130 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+import gzip
 
 import traceback
 from flask import request
@@ -20,16 +26,15 @@ import requests
 # from sqlalchemy import (
 #    create_engine, Column, Table, Integer, String, MetaData, DateTime)
 # from sqlalchemy.dialects.mysql import DOUBLE, TINYINT
-from sqlalchemy.sql import select
+# @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
+#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
+# Added text
+from sqlalchemy.sql import select, text
 # import json
 # from tsfresh import __version__ as tsfresh_version
 
 # @added 20170916 - Feature #1996: Ionosphere - matches page
 from pymemcache.client.base import Client as pymemcache_Client
-
-# @added 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
-#                   Bug #2818: Mutliple SQL Injection Security Vulnerabilities
-from sqlalchemy.sql import text
 
 import settings
 import skyline_version
@@ -42,6 +47,7 @@ from skyline_functions import (
     # @added 20210413 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
     mysql_select,
+    nonNegativeDerivative,
 )
 
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -65,9 +71,12 @@ from database import (
     # @added 20210413 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
     motifs_matched_table_meta,
+    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    not_anomalous_motifs_table_meta,
 )
 from motif_match_types import motif_match_types_dict
-from functions.numpy.percent_different import get_percent_different
 
 # @added 20190502 - Branch #2646: slack
 from slack_functions import slack_post_message, slack_post_reaction
@@ -80,6 +89,8 @@ from ionosphere_functions import create_fp_ts_graph
 #                   Branch #3590: inference
 from motif_plots import plot_motif_match
 
+from functions.numpy.percent_different import get_percent_different
+
 # @added 20210430 - Feature #4014: Ionosphere - inference
 from functions.database.queries.fp_timeseries import get_db_fp_timeseries
 from functions.database.queries.metric_id_from_base_name import metric_id_from_base_name
@@ -90,6 +101,25 @@ from functions.database.queries.metric_ids_from_metric_like import metric_ids_fr
 #                   Feature #3380: Create echo features profile when a Mirage features profile is created
 from functions.database.queries.get_ionosphere_fp_ids_for_full_duration import get_ionosphere_fp_ids_for_full_duration
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
+# @added 20220727 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+
+# @added 20220801 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Handle labelled_metric name added metric id
+from functions.database.queries.get_ionosphere_fp_row import get_ionosphere_fp_db_row
+from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
+
+# @added 20221204 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+from functions.plots.vortex_training_data_graphs import get_vortex_training_data_graphs
+
+# @added 20220731 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from create_matplotlib_graph import create_matplotlib_graph
 
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
@@ -277,6 +307,25 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
     set_unique_metrics = set(metrics)
     unique_metrics = list(set_unique_metrics)
     unique_metrics.sort()
+
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    labelled_metric_base_names = {}
+    if unique_metrics:
+        errors = []
+        for i_metric in unique_metrics:
+            if i_metric.startswith('labelled_metrics.'):
+                try:
+                    labelled_metric_base_name = get_base_name_from_labelled_metrics_name(skyline_app, i_metric)
+                    if labelled_metric_base_name:
+                        labelled_metric_base_names[i_metric] = labelled_metric_base_name
+                except Exception as err:
+                    errors.append(['get_base_name_from_labelled_metrics_name', i_metric, err])
+        if errors:
+            logger.error('error :: errors encountered creating labelled_metric_base_names, last error: %s' % (
+                str(errors[-1])))
+
     set_unique_timestamps = set(timestamps)
     unique_timestamps = list(set_unique_timestamps)
     unique_timestamps.sort()
@@ -284,7 +333,10 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
         human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z', time.localtime(int(i_ts)))
         human_dates.append(human_date)
 
-    return (metric_paths, unique_metrics, unique_timestamps, human_dates)
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Added labelled_metric_base_names
+    return (metric_paths, unique_metrics, unique_timestamps, human_dates, labelled_metric_base_names)
 
 
 def ionosphere_data(requested_timestamp, data_for_metric, context):
@@ -434,6 +486,25 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
     set_unique_metrics = set(metrics)
     unique_metrics = list(set_unique_metrics)
     unique_metrics.sort()
+
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    labelled_metric_base_names = {}
+    if unique_metrics:
+        errors = []
+        for i_metric in unique_metrics:
+            if i_metric.startswith('labelled_metrics.'):
+                try:
+                    labelled_metric_base_name = get_base_name_from_labelled_metrics_name(skyline_app, i_metric)
+                    if labelled_metric_base_name:
+                        labelled_metric_base_names[i_metric] = labelled_metric_base_name
+                except Exception as err:
+                    errors.append(['get_base_name_from_labelled_metrics_name', i_metric, err])
+        if errors:
+            logger.error('error :: errors encountered creating labelled_metric_base_names, last error: %s' % (
+                str(errors[-1])))
+
     set_unique_timestamps = set(timestamps)
     unique_timestamps = list(set_unique_timestamps)
     unique_timestamps.sort()
@@ -441,7 +512,10 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
         human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(i_ts)))
         human_dates.append(human_date)
 
-    return (metric_paths, unique_metrics, unique_timestamps, human_dates)
+    # @modified 20220729 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Added labelled_metric_base_names
+    return (metric_paths, unique_metrics, unique_timestamps, human_dates, labelled_metric_base_names)
 
 
 def get_an_engine():
@@ -542,14 +616,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 metric_vars_array.append([key, value])
 
             if len(metric_vars_array) == 0:
-                logger.error(
-                    'error :: loading metric variables - none found' % (
-                        str(metric_vars_file)))
+                logger.error('error :: loading metric variables - none found')
                 return False
 
-            if settings.ENABLE_DEBUG:
-                logger.info(
-                    'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+            # if settings.ENABLE_DEBUG:
+            #     logger.info(
+            #         'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
 
         # @added 20170113 - Feature #1842: Ionosphere - Graphite now graphs
         # Handle features profiles that were created pre the addition of
@@ -587,11 +659,40 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     else:
         base_name = data_for_metric
 
-    logger.info('%s requested for %s at %s' % (
+    logger.info('ionosphere_metric_data :: %s requested for %s at %s' % (
         context, str(base_name), str(requested_timestamp)))
+
+    # @added 20220727 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    data_source = 'graphite'
+    # labelled_metric_base_name = None
+    labelled_metric_name = None
+    use_base_name = str(base_name)
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: ionosphere_metric_data :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+            data_source = 'victoriametrics'
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metric_name = str(base_name)
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+            if metric_name:
+                base_name = str(metric_name)
+                data_source = 'victoriametrics'
+        except Exception as err:
+            logger.error('error :: ionosphere_metric_data :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
+
     metric_paths = []
     images = []
-    timeseries_dir = base_name.replace('.', '/')
+    timeseries_dir = use_base_name.replace('.', '/')
 
     if context == 'training_data':
         metric_data_dir = '%s/%s/%s' % (
@@ -618,8 +719,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 if context == 'training_data':
                     # Raise to webbapp I believe to provide traceback to user in UI
                     raise
-                else:
-                    return False, False, False, fail_msg, trace
+                return False, False, False, fail_msg, trace
 
     if context == 'features_profiles':
         metric_data_dir = '%s/%s/%s' % (
@@ -646,17 +746,17 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # For ionosphere_echo features profiles
     fp_anomaly_timestamp = int(requested_timestamp)
 
-    metric_var_filename = '%s.txt' % str(base_name)
+    metric_var_filename = '%s.txt' % str(use_base_name)
     metric_vars_file = False
-    ts_json_filename = '%s.json' % str(base_name)
+    ts_json_filename = '%s.json' % str(use_base_name)
     ts_json_file = 'none'
 
     # @added 20170309 - Feature #1960: ionosphere_layers
     # Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
     # based features profile
-    full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+    full_duration_in_hours_int = int(settings.FULL_DURATION) / 3600
     ionosphere_json_filename = '%s.mirage.redis.%sh.json' % (
-        base_name, str(int(full_duration_in_hours)))
+        use_base_name, str(int(full_duration_in_hours_int)))
     ionosphere_json_file = 'none'
 
     # @added 20170308 - Feature #1960: ionosphere_layers
@@ -672,10 +772,31 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     fp_created_file = None
     fp_details_list = []
 
+    # @added 20221130 - Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    vortex_training = False
+    # vortex_training_data_dir = None
+    vortex_metric_data_file = None
+
+    undownsampled_archive = None
+
     td_files = listdir(metric_data_dir)
     for i_file in td_files:
         metric_file = path.join(metric_data_dir, i_file)
         metric_paths.append([i_file, metric_file])
+
+        # @added 20221130 - Feature #4732: flux vortex
+        #                   Feature #4734: mirage_vortex
+        if i_file.startswith('vortex.metric_data.'):
+            if i_file.endswith('.json.gz'):
+                vortex_training = True
+                # vortex_training_data_dir = metric_data_dir
+                data_source = metric_file
+                vortex_metric_data_file = metric_file
+        if i_file.startswith('undownsampled.'):
+            if i_file.endswith('.json.gz'):
+                undownsampled_archive = metric_file
+
         if i_file.endswith('.png'):
             # @modified 20170106 - Feature #1842: Ionosphere - Graphite now graphs
             # Exclude any graphite_now png files from the images lists
@@ -725,7 +846,9 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             ionosphere_json_file = str(metric_file)
 
     metric_vars_ok = False
-    metric_vars = ['error: could not read metrics vars file', metric_vars_file]
+    # @modified 20230207
+    # metric_vars = ['error: could not read metrics vars file', metric_vars_file]
+    metric_vars = [['error: could not read metrics vars file', {'metric_vars_file': metric_vars_file, 'metric_var_filename': metric_var_filename, 'metric_data_dir': metric_data_dir}]]
 
     # @added 20181114 - Bug #2684: ionosphere_backend.py - metric_vars_file not set
     # Handle if the metrics_var_file has not been set and is still False so
@@ -816,6 +939,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
             anomalous_timeseries = literal_eval(timeseries_array_str)
+            logger.info('ionosphere_backend :: anomalous_timeseries loaded data from ionosphere_json_file: %s' % ionosphere_json_file)
         except:
             logger.error('error :: failed to get time series from ionosphere_json_file - %s' % str(ionosphere_json_file))
     # @added 20171130 - Task #1988: Review - Ionosphere layers - always show layers
@@ -830,6 +954,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
             anomalous_timeseries = literal_eval(timeseries_array_str)
+            logger.info('ionosphere_backend :: anomalous_timeseries loaded data from ts_json_file: %s' % ts_json_file)
         except:
             logger.info('ionosphere_backend :: no time series json found at %s' % ts_json_file)
 
@@ -839,9 +964,9 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # metric.mirage.redis.FULL_DURATION.json exists in the case of Analyzer only
     # metrics and raise if no anomalous_timeseries
     if not anomalous_timeseries:
-        full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+        # full_duration_in_hours = int(settings.FULL_DURATION) / 3600
         fallback_json_filename = '%s.analyzer.redis.%sh.json' % (
-            base_name, str(int(full_duration_in_hours)))
+            use_base_name, str(int(full_duration_in_hours_int)))
         fallback_json_file = 'none'
         fallback_json_file = '%s/%s' % (metric_data_dir, fallback_json_filename)
         logger.info('ionosphere_backend :: trying fallback_json_file - %s' % fallback_json_file)
@@ -851,7 +976,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                     raw_timeseries = f.read()
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
                 anomalous_timeseries = literal_eval(timeseries_array_str)
-                logger.info('ionosphere_backend :: loaded data from fallback_json_file - %s' % fallback_json_file)
+                logger.info('ionosphere_backend :: anomalous_timeseries loaded data from fallback_json_file - %s' % fallback_json_file)
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -861,7 +986,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     if not anomalous_timeseries:
         fail_msg = 'error :: ionosphere_backend :: failed to load any time series data form json files'
         logger.error('%s' % fail_msg)
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     # @added 20170308 - Feature #1960: ionosphere_layers
     if layers_id_matched_file:
@@ -900,11 +1025,16 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             except:
                 fp_details_list = None
 
+    mirage_vortex = False
+
     ts_full_duration = None
     if metric_vars_ok and ts_json_ok:
         for key, value in metric_vars:
             if key == 'full_duration':
                 ts_full_duration = value
+            if key == 'added_by':
+                if value == 'mirage_vortex':
+                    mirage_vortex = True
 
     data_to_process = False
     if metric_vars_ok and ts_json_ok:
@@ -921,7 +1051,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(base_name), str(requested_timestamp), str(requested_timestamp))
     grace_from_timestamp = int(requested_timestamp) - 120
     grace_until_timestamp = int(requested_timestamp) + 120
-    url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(base_name), str(grace_from_timestamp), str(grace_until_timestamp))
+    url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (settings.SKYLINE_URL, str(use_base_name), str(grace_from_timestamp), str(grace_until_timestamp))
     panorama_resp = None
     logger.info('getting anomaly id from panorama: %s' % str(url))
 
@@ -973,10 +1103,10 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             data = literal_eval(r.text)
             if str(data) == '[]':
                 panorama_anomaly_id = None
-                logger.debug('debug :: panorama anomlay data: %s' % str(data))
+                logger.debug('debug :: panorama anomaly data: %s' % str(data))
             else:
                 panorama_anomaly_id = int(data[0][0])
-                logger.debug('debug :: panorama anomlay data: %s' % str(data))
+                logger.debug('debug :: panorama anomaly data: %s' % str(data))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get anomaly id from panorama response: %s' % str(r.text))
@@ -998,17 +1128,36 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # Also include the Graphite NOW graphs in the features_profile page as
     # graphs WHEN CREATED
     # if context == 'training_data':
-    if context == 'training_data' or context == 'features_profiles' or context == 'saved_training_data':
+    if context in ['training_data', 'features_profiles', 'saved_training_data']:
         graph_resolutions = [int(settings.TARGET_HOURS), 24, 168, 720]
         # @modified 20170107 - Feature #1842: Ionosphere - Graphite now graphs
         # Exclude if matches TARGET_HOURS - unique only
         _graph_resolutions = sorted(set(graph_resolutions))
         graph_resolutions = _graph_resolutions
 
+    # @added 20221130 - Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    vortex_graphs = []
+    if vortex_training:
+        try:
+            vortex_graphs = get_vortex_training_data_graphs(skyline_app, vortex_metric_data_file, undownsampled_archive)
+        except Exception as err:
+            logger.error('error :: vortex_training_data_graphs failed - %s' % err)
+        for graph_file in vortex_graphs:
+            if graph_file not in images:
+                images.append(graph_file)
+                graph_filename = path.basename(graph_file)
+                metric_paths_item = [graph_filename, graph_file]
+                if metric_paths_item not in metric_paths:
+                    metric_paths.append(metric_paths_item)
+
     for target_hours in graph_resolutions:
         graph_image = False
         try:
             graph_image_file = '%s/%s.graphite_now.%sh.png' % (metric_data_dir, base_name, str(target_hours))
+            if data_source == 'victoriametrics':
+                graph_image_file = '%s/%s.graphite_now.%sh.png' % (metric_data_dir, labelled_metric_name, str(target_hours))
+
             # These are NOW graphs, so if the graph_image_file exists, remove it
             # @modified 20170116 - Feature #1854: Ionosphere learn - generations
             #                      Feature #1842: Ionosphere - Graphite now graphs
@@ -1024,10 +1173,46 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                         logger.info('graph_image_file removed - %s' % str(graph_image_file))
                     except OSError:
                         pass
-                logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
-                graph_image = get_graphite_metric(
-                    skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                    graph_image_file)
+
+                # @modified 20220727 - Task #2732: Prometheus to Skyline
+                #                     Branch #4300: prometheus
+                # Handle getting data from Graphite and victoriametrics
+                if data_source == 'graphite':
+                    logger.info('getting Graphite graph for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+                    graph_image = get_graphite_metric(
+                        skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                        graph_image_file)
+                if data_source == 'victoriametrics':
+                    logger.info('getting victoriametrics data for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+                    metric_data = None
+                    step = 600
+                    timeseries_duration = int(until_timestamp) - int(from_timestamp)
+                    # @added 20230102 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    # Report correct days for new metrics
+                    days = round((timeseries_duration / 86400), 1)
+                    if days == 7.0:
+                        days = 7
+
+                    if timeseries_duration <= 86401:
+                        step = 60
+                        title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
+                    else:
+                        title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+                    plot_parameters = {
+                        'title': title, 'line_color': 'blue', 'bg_color': 'black',
+                        'figsize': (8, 4)
+                    }
+                    try:
+                        # get_victoriametrics_metric automatically applies the rate and
+                        # step required no downsampling or nonNegativeDerivative is
+                        # required.
+                        graph_image = get_victoriametrics_metric(
+                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                            graph_image_file, metric_data, plot_parameters)
+                    except Exception as err:
+                        logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                            err))
 
             # if graph_image:
             if path.isfile(graph_image_file):
@@ -1049,7 +1234,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             # little practice.
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: failed to get Graphite graph at %s hours for %s' % (str(target_hours), base_name))
+            logger.error('error :: failed to get %s graph at %s hours for %s' % (str(target_hours), data_source, base_name))
 
     # @added 20170107 - Feature #1852: Ionosphere - features_profile matched graphite graphs
     # Get the last 9 matched timestamps for the metric and get graphite graphs
@@ -1072,7 +1257,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             trace = 'none'
             fail_msg = 'error :: engine not obtained'
             logger.error(fail_msg)
-            raise
+            raise ValueError(fail_msg)
 
         try:
             ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
@@ -1135,7 +1320,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             last_graph_timestamp = int(time.time())
             # skip_if_last_graph_timestamp_less_than = 600
             sorted_matched_timestamps = sorted(matched_timestamps)
-#            get_matched_timestamps = sorted_matched_timestamps[-4:]
+            # get_matched_timestamps = sorted_matched_timestamps[-4:]
             get_matched_timestamps = sorted_matched_timestamps[-20:]
             # Order newest first
             for ts in get_matched_timestamps[::-1]:
@@ -1190,7 +1375,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                     full_duration = fp_db_full_duration
                 from_timestamp = str(int(matched_timestamp) - int(full_duration))
                 until_timestamp = str(matched_timestamp)
-                graph_image_file = '%s/%s.matched.fp_id-%s.%s.png' % (metric_data_dir, base_name, str(fp_id), str(matched_timestamp))
+                graph_image_file = '%s/%s.matched.fp_id-%s.%s.png' % (metric_data_dir, use_base_name, str(fp_id), str(matched_timestamp))
                 # @added 20210421 - Feature #4014: Ionosphere - inference
                 try:
                     motifs_matched_id = matched_timestamps_motif_ids_dict[int(matched_timestamp)]
@@ -1198,13 +1383,32 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                     motifs_matched_id = 0
                 if motifs_matched_id:
                     graph_image_file = '%s/%s.matched.fp_id-%s.motif_id-%s.%s.png' % (
-                        metric_data_dir, base_name, str(fp_id),
+                        metric_data_dir, use_base_name, str(fp_id),
                         str(motifs_matched_id), str(matched_timestamp))
                 if not path.isfile(graph_image_file):
-                    logger.info('getting Graphite graph for fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
-                    graph_image = get_graphite_metric(
-                        skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                        graph_image_file)
+                    if data_source == 'graphite':
+                        logger.info('getting Graphite graph for fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
+                        graph_image = get_graphite_metric(
+                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                            graph_image_file)
+                    if data_source == 'victoriametrics':
+                        logger.info('getting victoriametrics graph for fp_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (str(fp_id), str(from_timestamp), str(until_timestamp)))
+                        metric_data = None
+                        title = 'Matched timeseries\n%s' % str(use_base_name)
+                        plot_parameters = {
+                            'title': title, 'line_color': 'green', 'bg_color': 'black',
+                            'figsize': (8, 4)
+                        }
+                        try:
+                            # get_victoriametrics_metric automatically applies the rate and
+                            # step required no downsampling or nonNegativeDerivative is
+                            # required.
+                            graph_image = get_victoriametrics_metric(
+                                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                                graph_image_file, metric_data, plot_parameters)
+                        except Exception as err:
+                            logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                                err))
                 else:
                     graph_image = True
                     logger.info('not getting Graphite graph as exists - %s' % (graph_image_file))
@@ -1222,7 +1426,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         if not engine:
             fail_msg = 'error :: no engine obtained for ionosphere_layers_matched_table'
             logger.error('%s' % fail_msg)
-            raise  # to webapp to return in the UI
+            raise ValueError(fail_msg)  # to webapp to return in the UI
 
         try:
             ionosphere_layers_matched_table, log_msg, trace = ionosphere_layers_matched_table_meta(skyline_app, engine)
@@ -1288,16 +1492,38 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 until_timestamp = str(matched_layer[0])
                 matched_layer_id = str(matched_layer[1])
                 graph_image_file = '%s/%s.layers_id-%s.matched.layers.fp_id-%s.%s.png' % (
-                    metric_data_dir, base_name, str(matched_layer_id),
+                    metric_data_dir, use_base_name, str(matched_layer_id),
                     str(fp_id), str(matched_layer[0]))
                 if not path.isfile(graph_image_file):
-                    logger.info(
-                        'getting Graphite graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
-                            str(fp_id), str(matched_layer_id), str(from_timestamp),
-                            str(until_timestamp)))
-                    graph_image = get_graphite_metric(
-                        skyline_app, base_name, from_timestamp, until_timestamp, 'image',
-                        graph_image_file)
+                    if data_source == 'graphite':
+                        logger.info(
+                            'getting Graphite graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
+                                str(fp_id), str(matched_layer_id), str(from_timestamp),
+                                str(until_timestamp)))
+                        graph_image = get_graphite_metric(
+                            skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                            graph_image_file)
+                    if data_source == 'victoriametrics':
+                        logger.info(
+                            'getting victoriametrics graph for fp_id %s layer_id %s matched timeseries from_timestamp - %s, until_timestamp - %s' % (
+                                str(fp_id), str(matched_layer_id), str(from_timestamp),
+                                str(until_timestamp)))
+                        metric_data = None
+                        title = 'Matched timeseries\n%s' % str(use_base_name)
+                        plot_parameters = {
+                            'title': title, 'line_color': 'green', 'bg_color': 'black',
+                            'figsize': (8, 4)
+                        }
+                        try:
+                            # get_victoriametrics_metric automatically applies the rate and
+                            # step required no downsampling or nonNegativeDerivative is
+                            # required.
+                            graph_image = get_victoriametrics_metric(
+                                skyline_app, base_name, from_timestamp, until_timestamp, 'image',
+                                graph_image_file, metric_data, plot_parameters)
+                        except Exception as err:
+                            logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                                err))
                 else:
                     graph_image = True
                     logger.info('not getting Graphite graph as exists - %s' % (graph_image_file))
@@ -1309,6 +1535,71 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
         if engine:
             engine_disposal(engine)
+
+    # @added 20220731 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if labelled_metric_name or mirage_vortex:
+        create_plot = False
+        analyzer_redis_json_file = '%s/%s.mirage.redis.%sh.json' % (metric_data_dir, use_base_name, str(int(full_duration_in_hours)))
+        analyzer_redis_image_file = '%s/%s.mirage.redis.plot.%sh.png' % (metric_data_dir, use_base_name, str(int(full_duration_in_hours)))
+        if mirage_vortex:
+            analyzer_redis_image_file = '%s/%s.mirage.vortex.plot.%sh.png' % (metric_data_dir, use_base_name, str(int(full_duration_in_hours)))
+
+        logger.info('ionosphere_metric_data :: checking if required to plot %s' % analyzer_redis_image_file)
+        if path.isfile(analyzer_redis_json_file):
+            if analyzer_redis_image_file not in images:
+                create_plot = True
+        if create_plot:
+            logger.info('ionosphere_metric_data :: plotting %s' % analyzer_redis_image_file)
+            raw_timeseries = None
+            timeseries = []
+            try:
+                with open(analyzer_redis_json_file, 'r') as f:
+                    raw_timeseries = f.read()
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: ionosphere_metric_data :: failed to read timeseries data from %s - %s' % (
+                    analyzer_redis_json_file, err))
+            if raw_timeseries:
+                timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                del raw_timeseries
+                timeseries = literal_eval(timeseries_array_str)
+
+            is_strictly_increasing_monotonicity = False
+            try:
+                is_strictly_increasing_monotonicity = strictly_increasing_monotonicity(timeseries)
+            except Exception as err:
+                logger.error('error :: ionosphere_metric_data :: is_strictly_increasing_monotonicity failed on data from %s - %s' % (
+                    analyzer_redis_json_file, err))
+            monotonic_timeseries = []
+            if is_strictly_increasing_monotonicity:
+                monotonic_timeseries = list(timeseries)
+                logger.info('ionosphere_metric_data :: running nonNegativeDerivative on monotonic data for %s' % use_base_name)
+                try:
+                    timeseries = nonNegativeDerivative(timeseries)
+                except Exception as err:
+                    logger.error('error :: ionosphere_metric_data :: nonNegativeDerivative failed on data from %s - %s' % (
+                        analyzer_redis_json_file, err))
+
+            created_graph = None
+            if timeseries:
+                try:
+                    graph_title = 'Skyline Analyzer at %s hours (%s)\n%s' % (
+                        str(int(full_duration_in_hours)), human_date,
+                        use_base_name)
+                    if mirage_vortex:
+                        graph_title = 'Skyline Vortex data at %s hours (%s)\n%s' % (
+                            str(int(full_duration_in_hours)), human_date,
+                            use_base_name)
+                    anomalies = []
+                    created_graph = create_matplotlib_graph(skyline_app, analyzer_redis_image_file, graph_title, timeseries, anomalies, monotonic_timeseries)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: ionosphere_metric_data :: failed to plot %s - %s' % (
+                        analyzer_redis_image_file, err))
+            if created_graph:
+                images.append(analyzer_redis_image_file)
+                logger.info('ionosphere_metric_data :: adding %s to images' % analyzer_redis_image_file)
 
     return (
         metric_paths, images, human_date, metric_vars, ts_json, data_to_process,
@@ -1351,7 +1642,10 @@ def features_profile_details(fp_id):
     :rtype:  (str, boolean, str, str)
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: features_profile_details'
 
@@ -1376,7 +1670,7 @@ def features_profile_details(fp_id):
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
         # return False, False, fail_msg, trace, False
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
     ionosphere_table = None
     try:
         ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -1520,9 +1814,13 @@ def ionosphere_search(default_query, search_query):
     :rtype: array
 
     """
-    logger = logging.getLogger(skyline_app_logger)
-    import time
-    import datetime
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger, time and datetime which are defined in the outer
+    # scope
+    # logger = logging.getLogger(skyline_app_logger)
+    # import time
+    # import datetime
 
     function_str = 'ionoshere_backend.py :: ionosphere_search'
 
@@ -1614,11 +1912,36 @@ def ionosphere_search(default_query, search_query):
         else:
             count_by_generation = False
 
+    # @added 20220727 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name
+    labelled_metric_name = None
+    labelled_metric_base_name = None
+
     get_metric_profiles = None
     metric = None
     if 'metric' in request.args:
         metric = request.args.get('metric', None)
         if metric and metric != 'all' and metric != '*':
+
+            # @added 20220727 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Handle labelled_metric name
+            if metric.startswith('labelled_metrics.'):
+                labelled_metric_name = str(metric)
+                logger.info('ionosphere_search :: passed labelled_metric_name: %s' % labelled_metric_name)
+                try:
+                    metric = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+                    if metric:
+                        labelled_metric_base_name = str(metric)
+                        logger.info('ionosphere_search :: metric looked up from labelled_metric_name: %s, metric: %s' % (
+                            labelled_metric_name, metric))
+                        logger.info('ionosphere_search :: labelled_metric_base_name: %s' % (
+                            labelled_metric_base_name))
+                except Exception as err:
+                    logger.error('error :: ionosphere_search :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                        labelled_metric_name, err))
+
             # A count_request always takes preference over a metric
             if not count_request:
                 get_metric_profiles = True
@@ -1904,7 +2227,7 @@ def ionosphere_search(default_query, search_query):
             trace = 'none'
             fail_msg = 'error :: engine not obtained'
             logger.error(fail_msg)
-            raise
+            raise ValueError(fail_msg)
 
         try:
             metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
@@ -1949,7 +2272,6 @@ def ionosphere_search(default_query, search_query):
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
                 # results = connection.execute(metrics_like_query)
                 results = connection.execute(metrics_like_query, like_string=metric_like_str)
-                connection.close()
                 for row in results:
                     metric_id = str(row[0])
                     if metric_ids == '':
@@ -1957,6 +2279,7 @@ def ionosphere_search(default_query, search_query):
                     else:
                         new_metric_ids = '%s, %s' % (metric_ids, metric_id)
                         metric_ids = new_metric_ids
+                connection.close()
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('metrics_like_query done')
 
@@ -2237,7 +2560,8 @@ def ionosphere_search(default_query, search_query):
 
                 stmt = query_string
                 connection = engine.connect()
-                for row in engine.execute(stmt):
+                # for row in engine.execute(stmt):
+                for row in connection.execute(stmt):
                     fp_count = int(row[0])
                     fp_metric_id = int(row['metric_id'])
                     for metric_obj in metrics:
@@ -2265,7 +2589,8 @@ def ionosphere_search(default_query, search_query):
                     logger.info('count_request and search_query -  running query - "%s"' % query_string)
                     stmt = query_string
                     connection = engine.connect()
-                    for row in engine.execute(stmt):
+                    # for row in engine.execute(stmt):
+                    for row in connection.execute(stmt):
                         item_count = int(row[0])
                         item_id = int(row[1])
                         if count_by_matched or count_by_checked:
@@ -2356,12 +2681,26 @@ def ionosphere_search(default_query, search_query):
                     logger.info('engine_needed and engine and search_query - determined %s metric ids for the default Ionosphere search' % str(len(default_search_metric_ids)))
                     metrics = []
                     select_metric_ids = ''
+
+                    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    select_metric_ids_list = []
+
                     for default_search_metric_id in default_search_metric_ids:
                         if select_metric_ids == '':
                             select_metric_ids = '%s' % str(default_search_metric_id)
                         else:
                             select_metric_ids = '%s, %s' % (str(select_metric_ids), str(default_search_metric_id))
-                    select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id in (%s)' % select_metric_ids
+                        # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Use sqlalchemy rather than string-based query construction
+                        select_metric_ids_list.append(default_search_metric_id)
+                    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id in (%s)' % select_metric_ids
+                    select_metric_ids_stmt = select([metrics_table], metrics_table.c.id.in_(select_metric_ids_list))
 
                     # @modified 20201122 - Bug #3844: Handle no features profile in webapp
                     # When there are no features profiles in the ionosphere
@@ -2657,11 +2996,28 @@ def ionosphere_search(default_query, search_query):
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)  # nosec
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)  # nosec
+                if required_option == 'full_duration':
+                    stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.enabled == 1)
+                if required_option == 'enabled':
+                    stmt = select([ionosphere_table.c.enabled]).where(ionosphere_table.c.enabled == 1)
+                if required_option == 'tsfresh_version':
+                    stmt = select([ionosphere_table.c.tsfresh_version]).where(ionosphere_table.c.enabled == 1)
+                if required_option == 'generation':
+                    stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.enabled == 1)
+
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
-                logger.info('engine_needed and engine and default_query - running query - "%s"' % stmt)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Do not log SQL
+                # logger.info('engine_needed and engine and default_query - running query - "%s"' % stmt)
+                logger.info('engine_needed and engine and default_query - running query')
                 connection = engine.connect()
-                for row in engine.execute(stmt):
+                # for row in engine.execute(stmt):
+                for row in connection.execute(stmt):
                     value = row[str(required_option)]
                     all_list.append(value)
                 connection.close()
@@ -2729,7 +3085,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         fail_msg = 'error :: no d_condition argument passed'
         return False, False, layers_algorithms, layers_added, fail_msg, trace
 
-    if not str(d_condition) in conditions:
+    if str(d_condition) not in conditions:
         logger.error('d_condition not a valid conditon - %s' % str(d_condition))
         fail_msg = 'error :: d_condition not a valid conditon - %s' % str(d_condition)
         return False, False, layers_algorithms, layers_added, fail_msg, trace
@@ -2781,7 +3137,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         d1_boundary_limit = 0
         d1_boundary_times = 0
     else:
-        if not str(d1_condition) in conditions:
+        if str(d1_condition) not in conditions:
             logger.error('d1_condition not a valid conditon - %s' % str(d1_condition))
             fail_msg = 'error :: d1_condition not a valid conditon - %s' % str(d1_condition)
             return False, False, layers_algorithms, layers_added, fail_msg, trace
@@ -2822,7 +3178,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         fail_msg = 'error :: no e_condition argument passed'
         return False, False, layers_algorithms, layers_added, fail_msg, trace
 
-    if not str(e_condition) in value_conditions:
+    if str(e_condition) not in value_conditions:
         logger.error('e_condition not a valid value conditon - %s' % str(e_condition))
         fail_msg = 'error :: e_condition not a valid value conditon - %s' % str(e_condition)
         return False, False, layers_algorithms, layers_added, fail_msg, trace
@@ -2950,7 +3306,7 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             trace = 'none'
             fail_msg = 'error :: engine not obtained'
             logger.error(fail_msg)
-            raise
+            raise ValueError(fail_msg)
 
         try:
             metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
@@ -3018,8 +3374,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
         ins = ionosphere_layers_table.insert().values(
             fp_id=fp_id, metric_id=int(metrics_id), enabled=1, label=label)
         result = connection.execute(ins)
-        connection.close()
         new_layer_id = result.inserted_primary_key[0]
+        connection.close()
         logger.info('new ionosphere layer_id: %s' % str(new_layer_id))
     except:
         trace = traceback.format_exc()
@@ -3059,8 +3415,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             # Added d_boundary_times
             times_in_row=int(d_boundary_times))
         result = connection.execute(ins)
-        connection.close()
         new_layer_algorithm_id = result.inserted_primary_key[0]
+        connection.close()
         logger.info('new ionosphere_algorithms D layer id: %s' % str(new_layer_algorithm_id))
         new_layer_algorithm_ids.append(new_layer_algorithm_id)
         layers_added.append('D')
@@ -3084,8 +3440,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
             layer_boundary=str(e_boundary_limit),
             times_in_row=int(e_boundary_times))
         result = connection.execute(ins)
-        connection.close()
         new_layer_algorithm_id = result.inserted_primary_key[0]
+        connection.close()
         logger.info('new ionosphere_algorithms E layer id: %s' % str(new_layer_algorithm_id))
         new_layer_algorithm_ids.append(new_layer_algorithm_id)
         layers_added.append('E')
@@ -3110,8 +3466,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
                 layer_boundary=str(d1_boundary_limit),
                 times_in_row=int(d1_boundary_times))
             result = connection.execute(ins)
-            connection.close()
             new_layer_algorithm_id = result.inserted_primary_key[0]
+            connection.close()
             logger.info('new ionosphere_algorithms D1 layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('D1')
@@ -3132,8 +3488,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
                 layer_id=new_layer_id, fp_id=fp_id, metric_id=int(metrics_id),
                 layer='Es', type='day', condition='in', layer_boundary=es_day)
             result = connection.execute(ins)
-            connection.close()
             new_layer_algorithm_id = result.inserted_primary_key[0]
+            connection.close()
             logger.info('new ionosphere_algorithms Es layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('Es')
@@ -3155,8 +3511,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
                 layer='F1', type='time', condition='>',
                 layer_boundary=str(from_time))
             result = connection.execute(ins)
-            connection.close()
             new_layer_algorithm_id = result.inserted_primary_key[0]
+            connection.close()
             logger.info('new ionosphere_algorithms F1 layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('F1')
@@ -3178,8 +3534,8 @@ def create_ionosphere_layers(base_name, fp_id, requested_timestamp):
                 layer='F2', type='time', condition='<',
                 layer_boundary=str(until_time))
             result = connection.execute(ins)
-            connection.close()
             new_layer_algorithm_id = result.inserted_primary_key[0]
+            connection.close()
             logger.info('new ionosphere_algorithms F2 layer id: %s' % str(new_layer_algorithm_id))
             new_layer_algorithm_ids.append(new_layer_algorithm_id)
             layers_added.append('F2')
@@ -3243,7 +3599,10 @@ def feature_profile_layers_detail(fp_layers_id):
     :rtype:  (str, boolean, str, str, object)
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: features_profile_layers_details'
 
@@ -3268,7 +3627,7 @@ def feature_profile_layers_detail(fp_layers_id):
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
         # return False, False, fail_msg, trace, False
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     ionosphere_layers_table = None
     try:
@@ -3291,7 +3650,7 @@ def feature_profile_layers_detail(fp_layers_id):
         stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.id == int(fp_layers_id))
         result = connection.execute(stmt)
         row = result.fetchone()
-        layer_details_object = row
+        layer_details_object = dict(row)
         connection.close()
         feature_profile_id = row['fp_id']
         metric_id = row['metric_id']
@@ -3350,7 +3709,10 @@ def feature_profile_layer_alogrithms(fp_layers_id):
     :rtype:  (str, boolean, str, str)
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: features_profile_layer_algorithms'
 
@@ -3375,7 +3737,7 @@ def feature_profile_layer_alogrithms(fp_layers_id):
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
         # return False, False, fail_msg, trace, False
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
     layers_algorithms_table = None
     try:
         layers_algorithms_table, fail_msg, trace = layers_algorithms_table_meta(skyline_app, engine)
@@ -3408,10 +3770,17 @@ def feature_profile_layer_alogrithms(fp_layers_id):
         connection = engine.connect()
         stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == int(fp_layers_id))
         result = connection.execute(stmt)
-        connection.close()
-        layer_algorithms_details_object = result
         layer_active = '[\'ACTIVE\']'
+        # @modified 20230113 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # layer_algorithms_details_object = dict(result)
+        layer_algorithms_details_object = []
+
         for row in result:
+            # @added 20230113 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            layer_algorithms_details_object.append(dict(row))
+
             layer = row['layer']
             if layer == 'D':
                 d_condition = row['condition']
@@ -3440,6 +3809,7 @@ def feature_profile_layer_alogrithms(fp_layers_id):
             if layer == 'F2':
                 f2_until_time = row['layer_boundary']
                 f2_layer = layer_active
+        connection.close()
 
         layer_algorithms_details = '''
 D layer  :: if value %s %s                    :: [do not check]  ::  ['ACTIVE']
@@ -3481,7 +3851,10 @@ def metric_layers_alogrithms(base_name):
     :rtype:  (str, boolean, str, str)
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: metric_layers_alogrithms'
 
@@ -3504,7 +3877,7 @@ def metric_layers_alogrithms(base_name):
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     try:
         metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
@@ -3524,9 +3897,9 @@ def metric_layers_alogrithms(base_name):
         connection = engine.connect()
         stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
         result = connection.execute(stmt)
-        connection.close()
         for row in result:
             metric_id = int(row['id'])
+        connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -3546,7 +3919,7 @@ def metric_layers_alogrithms(base_name):
         logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(engine)
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     ionosphere_layers_table = None
     try:
@@ -3568,7 +3941,6 @@ def metric_layers_alogrithms(base_name):
         connection = engine.connect()
         stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.metric_id == metric_id)
         result = connection.execute(stmt)
-        connection.close()
         for row in result:
             try:
                 l_id = row['id']
@@ -3583,6 +3955,7 @@ def metric_layers_alogrithms(base_name):
                 logger.info('%s :: added layer id %s to layer count' % (function_str, str(l_id)))
             except:
                 metric_layers_count += 0
+        connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -3611,7 +3984,6 @@ def metric_layers_alogrithms(base_name):
         connection = engine.connect()
         stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.metric_id == metric_id)
         result = connection.execute(stmt)
-        connection.close()
         for row in result:
             la_id = row['id']
             la_layer_id = row['layer_id']
@@ -3623,6 +3995,7 @@ def metric_layers_alogrithms(base_name):
             la_layer_boundary = str(row['layer_boundary'])
             la_times_in_a_row = row['times_in_row']
             metric_layers_algorithm_details.append([la_id, la_layer_id, la_fp_id, la_metric_id, la_layer, la_type, la_condition, la_layer_boundary, la_times_in_a_row])
+        connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -3652,7 +4025,10 @@ def edit_ionosphere_layers(layers_id):
     :rtype: array
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: edit_ionosphere_layers'
 
@@ -3671,7 +4047,7 @@ def edit_ionosphere_layers(layers_id):
         fail_msg = 'error :: no d_condition argument passed'
         return False, fail_msg, trace
 
-    if not str(d_condition) in conditions:
+    if str(d_condition) not in conditions:
         logger.error('d_condition not a valid conditon - %s' % str(d_condition))
         fail_msg = 'error :: d_condition not a valid conditon - %s' % str(d_condition)
         return False, fail_msg, trace
@@ -3718,7 +4094,7 @@ def edit_ionosphere_layers(layers_id):
     if str(d1_condition) == 'none':
         d1_condition = None
     else:
-        if not str(d1_condition) in conditions:
+        if str(d1_condition) not in conditions:
             logger.error('d1_condition not a valid conditon - %s' % str(d1_condition))
             fail_msg = 'error :: d1_condition not a valid conditon - %s' % str(d1_condition)
             return False, fail_msg, trace
@@ -3759,7 +4135,7 @@ def edit_ionosphere_layers(layers_id):
         fail_msg = 'error :: no e_condition argument passed'
         return False, fail_msg, trace
 
-    if not str(e_condition) in value_conditions:
+    if str(e_condition) not in value_conditions:
         logger.error('e_condition not a valid value conditon - %s' % str(e_condition))
         fail_msg = 'error :: e_condition not a valid value conditon - %s' % str(e_condition)
         return False, fail_msg, trace
@@ -3827,7 +4203,7 @@ def edit_ionosphere_layers(layers_id):
             trace = 'none'
             fail_msg = 'error :: engine not obtained'
             logger.error(fail_msg)
-            raise
+            raise ValueError(fail_msg)
 
         try:
             ionosphere_layers_table, fail_msg, trace = ionosphere_layers_table_meta(skyline_app, engine)
@@ -3877,11 +4253,11 @@ def edit_ionosphere_layers(layers_id):
         connection = engine.connect()
         stmt = select([layers_algorithms_table]).where(layers_algorithms_table.c.layer_id == layers_id)
         result = connection.execute(stmt)
-        connection.close()
         for row in result:
             la_id = row['id']
             la_layer = str(row['layer'])
             layers_algorithms.append([la_id, la_layer])
+        connection.close()
     except:
         trace = traceback.format_exc()
         logger.error(trace)
@@ -3991,7 +4367,10 @@ def validate_fp(update_id, id_column_name, user_id):
     :rtype:  (boolean, str, str)
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: validate_fp'
 
@@ -4022,7 +4401,7 @@ def validate_fp(update_id, id_column_name, user_id):
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
 
     try:
         ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -4107,7 +4486,10 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
     :rtype: boolean, list, str, str
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: save_training_data'
 
@@ -4115,10 +4497,27 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
     fail_msg = 'none'
     training_data_saved = True
 
+    # @added 20220731 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    labelled_metric_name = None
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: save_training_data_dir :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+
     logger.info(
         '%s :: Saving training_data for %s.%s' % (
             function_str, (timestamp), str(base_name)))
     metric_timeseries_dir = base_name.replace('.', '/')
+
+    if labelled_metric_name:
+        metric_timeseries_dir = labelled_metric_name.replace('.', '/')
+
     metric_training_data_dir = '%s/%s/%s' % (
         settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
         metric_timeseries_dir)
@@ -4196,7 +4595,7 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
                 training_data_saved = False
 
     if not training_data_saved:
-        raise
+        raise ValueError('failed to find training_data files')
 
     for i_file in save_data_files:
         try:
@@ -4237,7 +4636,7 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
             fail_msg = 'error :: shutil error'
 
     if not training_data_saved:
-        raise
+        raise ValueError('failed to copy training data')
 
     # Create a label file
     try:
@@ -4268,7 +4667,10 @@ def features_profile_family_tree(fp_id):
     :rtype: array
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: features_profile_progeny'
 
@@ -4294,7 +4696,7 @@ def features_profile_family_tree(fp_id):
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
 
     try:
         ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -4314,12 +4716,12 @@ def features_profile_family_tree(fp_id):
             connection = engine.connect()
             stmt = select([ionosphere_table]).where(ionosphere_table.c.parent_id == current_fp_id)
             result = connection.execute(stmt)
-            connection.close()
             row = None
             for row in result:
                 progeny_id = row['id']
                 family_tree_fp_ids.append(int(progeny_id))
                 current_fp_id = progeny_id
+            connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -4345,7 +4747,10 @@ def disable_features_profile_family_tree(fp_ids):
     :rtype: array
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: disable_features_profile_and_progeny'
 
@@ -4369,7 +4774,7 @@ def disable_features_profile_family_tree(fp_ids):
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
 
     try:
         ionosphere_table, fail_msg, trace = ionosphere_table_meta(skyline_app, engine)
@@ -4522,9 +4927,26 @@ def disable_features_profile_family_tree(fp_ids):
                     logger.error(trace)
                     fail_msg = 'error :: disable_features_profile_family_tree :: could not determine metric from metrics table to message disabled fp id %s to slack' % str(fp_id)
                     continue
+
             if base_name:
                 ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
                     settings.SKYLINE_URL, str(fp_id), base_name)
+                # @added 20220729 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metrics
+                labelled_metric_name = None
+                if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+                    metric_id = 0
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                    except Exception as err:
+                        logger.error('error :: disable_features_profile_family_tree :: get_metric_id_from_base_name failed with base_name: %s - %s' % (
+                            str(base_name), err))
+                    if metric_id:
+                        labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                        ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
+                            settings.SKYLINE_URL, str(fp_id), labelled_metric_name)
+
                 # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
                 # Disable any related layers as well
                 # message = '*DISABLED* - features profile id %s was disabled for %s via %s - %s' % (
@@ -4536,7 +4958,7 @@ def disable_features_profile_family_tree(fp_ids):
                 if throw_exception_on_default_channel:
                     fail_msg = 'error :: disable_features_profile_family_tree :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
                     logger.error('%s' % fail_msg)
-                    raise  # to webapp to return in the UI
+                    raise ValueError(fail_msg)  # to webapp to return in the UI
                 if channel_id:
                     slack_response = {'ok': False}
                     try:
@@ -4642,7 +5064,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     :rtype: list
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: get_fp_matches'
 
@@ -4653,6 +5075,16 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         str(sort)))
     trace = 'none'
     fail_msg = 'none'
+
+    # @added 20220801 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name
+    fp_metric_ids = {}
+
+    # @added 20230613 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Added at the top level
+    fp_ids_list = []
 
     # @added 20200113 - Feature #3390: luminosity related anomalies
     #                   Branch #2270: luminosity
@@ -4667,12 +5099,23 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     #                   Feature #4516: flux - opentelemetry traces
     if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
         from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
-        # @modified 20220505 - Task #4514: Integrate opentelemetry
-        # Fail gracefully if opentelemetry breaks it breaks
+
+        # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+        instrumented = False
         try:
-            PymemcacheInstrumentor().instrument()
-        except:
-            pass
+            instrumented = PymemcacheInstrumentor().is_instrumented_by_opentelemetry
+        except Exception as err:
+            logger.error('error :: get_fp_matches - PymemcacheInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+                err))
+        if not instrumented:
+            # logger.info('get_fp_matches - starting PymemcacheInstrumentor')
+
+            # @modified 20220505 - Task #4514: Integrate opentelemetry
+            # Fail gracefully if opentelemetry breaks it breaks
+            try:
+                PymemcacheInstrumentor().instrument()
+            except:
+                pass
 
     if settings.MEMCACHE_ENABLED:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
@@ -4697,35 +5140,106 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         return False, fail_msg, trace
 
     query_string = 'SELECT * FROM ionosphere_matched'
+
+    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_fp_matches :: failed to get ionosphere_table meta')
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    try:
+        ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_fp_matches :: failed to get ionosphere_matched_table meta')
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    try:
+        ionosphere_layers_table, log_msg, trace = ionosphere_layers_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_fp_matches :: failed to get ionosphere_layers_matched_table meta for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    try:
+        ionosphere_layers_matched_table, log_msg, trace = ionosphere_layers_matched_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_fp_matches :: failed to get ionosphere_layers_matched_table meta for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    query_stmt = select([ionosphere_matched_table])
+    query_stmt_table = ionosphere_matched_table
+    query_table = 'ionosphere_matched'
+
     needs_and = False
 
-    if metric and metric != 'all':
-        metric_id_stmt = 'SELECT id FROM metrics WHERE metric=\'%s\'' % str(metric)
-        metric_id = None
-        logger.info('metric set to %s' % str(metric))
+    # @added 20221103 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if metric.startswith('labelled_metrics.'):
         try:
-            connection = engine.connect()
-            result = connection.execute(metric_id_stmt)
-            connection.close()
-            for row in result:
-                if not metric_id:
-                    metric_id = int(row[0])
-            logger.info('metric_id set to %s' % str(metric_id))
-        except:
-            trace = traceback.format_exc()
-            logger.error(trace)
-            logger.error('error :: could not determine id from metrics table')
-            # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+            metric = get_base_name_from_labelled_metrics_name(skyline_app, metric)
+        except Exception as err:
+            logger.error('error :: get_fp_matches :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                metric, err))
+
+    if metric and metric != 'all':
+        # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # But in this case just use get_metric_id_from_base_name
+        # metric_id_stmt = 'SELECT id FROM metrics WHERE metric=\'%s\'' % str(metric)
+        metric_id = None
+        # logger.info('metric set to %s' % str(metric))
+        # try:
+        #     connection = engine.connect()
+        #     result = connection.execute(metric_id_stmt)
+        #     connection.close()
+        #     for row in result:
+        #         if not metric_id:
+        #             metric_id = int(row[0])
+        #     logger.info('metric_id set to %s' % str(metric_id))
+        # except:
+        #     trace = traceback.format_exc()
+        #     logger.error(trace)
+        #     logger.error('error :: could not determine id from metrics table')
+        #     # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
+        #     if engine:
+        #         engine_disposal(engine)
+        #     return False, fail_msg, trace
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, metric)
+        except Exception as err:
+            logger.error('error :: get_fp_matches :: get_metric_id_from_base_name failed with base_name: %s - %s' % (
+                str(metric), err))
             if engine:
                 engine_disposal(engine)
             return False, fail_msg, trace
 
-        fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id=%s' % str(metric_id)
+        # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id=%s' % str(metric_id)
+        fp_ids_stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metric_id)
+        fp_ids_list = []
+
         fp_ids = ''
         try:
+            logger.info('get_fp_matches :: determining fp ids from ionosphere table for metric_id: %s' % str(metric_id))
             connection = engine.connect()
             results = connection.execute(fp_ids_stmt)
-            connection.close()
             for row in results:
                 fp_id = str(row[0])
                 if fp_ids == '':
@@ -4733,32 +5247,79 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 else:
                     new_fp_ids = '%s, %s' % (fp_ids, fp_id)
                     fp_ids = new_fp_ids
+                # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                fp_ids_list.append(row['id'])
+                # @added 20220801 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metric name
+                fp_metric_ids[int(fp_id)] = int(metric_id)
+            connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
-            logger.error('error :: could not determine id from metrics table')
+            logger.error('error :: get_fp_matches :: could not determine id from metrics table')
             # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
             if engine:
                 engine_disposal(engine)
             return False, fail_msg, trace
-        logger.info('fp_ids set to %s' % str(fp_ids))
-        query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id in (%s)' % str(fp_ids)
+        # logger.info('fp_ids set to %s' % str(fp_ids))
+        logger.info('get_fp_matches :: fp_ids_list: %s' % str(fp_ids_list))
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction, disabled
+        # query_string use
+        # query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id in (%s)' % str(fp_ids)
+        query_string = ''
+        # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
+        query_stmt_table = ionosphere_matched_table
+        query_table = 'ionosphere_matched'
+
+        # @added 20221103 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle no fps
+        if fp_ids == '':
+            return [None], fail_msg, trace
+
         needs_and = True
 
 #    if 'metric_like' in request.args:
     if metric_like:
         if metric_like and metric_like != 'all':
+
+            # @added 20221206 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Added for my own sanity as I keep forgetting that there is no
+            # translation in the metric_like query
+            if metric_like in ['labelled_metrics%', 'labelled_metrics.%']:
+                metric_like = metric_like.replace('labelled_metrics', '_tenant_id=')
+
             # SQLAlchemy requires the MySQL wildcard % to be %% to prevent
             # interpreting the % as a printf-like format character
             python_escaped_metric_like = metric_like.replace('%', '%%')
             # nosec to exclude from bandit tests
-            metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
-            logger.info('executing metrics_like_query - %s' % metrics_like_query)
+            # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # metrics_like_query = 'SELECT id FROM metrics WHERE metric LIKE \'%s\'' % (str(python_escaped_metric_like))  # nosec
+            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            metric_ids_list = []
+
+            logger.info('executing metrics_like_query - %s, (like_string: %s)' % (
+                str(metrics_like_query), str(python_escaped_metric_like)))
             metric_ids = ''
             try:
                 connection = engine.connect()
-                results = connection.execute(metrics_like_query)
-                connection.close()
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # results = connection.execute(metrics_like_query)
+                results = connection.execute(metrics_like_query, like_string=str(python_escaped_metric_like))
+
                 for row in results:
                     metric_id = str(row[0])
                     if metric_ids == '':
@@ -4766,6 +5327,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     else:
                         new_metric_ids = '%s, %s' % (metric_ids, metric_id)
                         metric_ids = new_metric_ids
+                    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    metric_ids_list.append(row['id'])
+                connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -4774,13 +5340,19 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 if engine:
                     engine_disposal(engine)
                 return False, fail_msg, trace
+            logger.info('get_fp_matches :: metrics like query returned metric_ids_list: %s' % str(metric_ids_list))
 
-            fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id IN (%s)' % str(metric_ids)
+            # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id IN (%s)' % str(metric_ids)
+            fp_ids_stmt = select([ionosphere_table], ionosphere_table.c.metric_id.in_(metric_ids_list))
+            fp_ids_list = []
+
             fp_ids = ''
             try:
                 connection = engine.connect()
                 results = connection.execute(fp_ids_stmt)
-                connection.close()
                 for row in results:
                     fp_id = str(row[0])
                     if fp_ids == '':
@@ -4788,6 +5360,12 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                     else:
                         new_fp_ids = '%s, %s' % (fp_ids, fp_id)
                         fp_ids = new_fp_ids
+                    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    fp_ids_list.append(row['id'])
+
+                connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -4796,8 +5374,29 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 if engine:
                     engine_disposal(engine)
                 return False, fail_msg, trace
-            query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id in (%s)' % str(fp_ids)
+            logger.info('get_fp_matches :: metrics like query returned fp_ids_list: %s' % str(fp_ids_list))
+
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction, disabled
+            # query_string use
+            # query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id in (%s)' % str(fp_ids)
+            query_string = ''
+
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            query_stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids_list))
+            query_stmt_table = ionosphere_matched_table
+            query_table = 'ionosphere_matched'
+
             needs_and = True
+
+    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    layers_matched_query_stmt = None
+    layers_matched_query_stmt = select([ionosphere_layers_matched_table])
 
     # @added 20170917 - Feature #1996: Ionosphere - matches page
     # Added by fp_id or layer_id as well
@@ -4808,41 +5407,92 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             logger.info('get_fp_id set to %s' % str(get_fp_id))
             if get_fp_id != '0':
                 get_layers_matched = False
-                query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id=%s' % str(get_fp_id)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction, disabled
+                # query_string use
+                # query_string = 'SELECT * FROM ionosphere_matched WHERE fp_id=%s' % str(get_fp_id)
+                query_string = ''
+                # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                query_stmt = select([ionosphere_matched_table]).where(ionosphere_matched_table.c.fp_id == int(get_fp_id))
+                query_stmt_table = ionosphere_matched_table
+                query_table = 'ionosphere_matched'
+                if get_layers_matched:
+                    layers_matched_query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.fp_id == int(get_fp_id))
+
         if get_layer_id:
             logger.info('get_layer_id set to %s' % str(get_layer_id))
             if get_layer_id != '0':
                 get_features_profiles_matched = False
-                query_string = 'SELECT * FROM ionosphere_layers_matched WHERE layer_id=%s' % str(get_layer_id)
-                fp_id_query_string = 'SELECT fp_id FROM ionosphere_layers WHERE id=%s' % str(get_layer_id)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction, disabled
+                # query_string use
+                # query_string = 'SELECT * FROM ionosphere_layers_matched WHERE layer_id=%s' % str(get_layer_id)
+                query_string = ''
+
+                # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
+                query_stmt_table = ionosphere_layers_matched_table
+                query_table = 'ionosphere_layers_matched'
+                if get_layers_matched:
+                    layers_matched_query_stmt = select([ionosphere_layers_matched_table]).where(ionosphere_layers_matched_table.c.layer_id == int(get_layer_id))
+
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # fp_id_query_string = 'SELECT fp_id FROM ionosphere_layers WHERE id=%s' % str(get_layer_id)
+                fp_id_query_string = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.id == int(get_layer_id))
+
                 fp_id = None
                 try:
                     connection = engine.connect()
                     result = connection.execute(fp_id_query_string)
-                    connection.close()
                     for row in result:
                         if not fp_id:
                             fp_id = int(row[0])
+                    connection.close()
                 except:
                     trace = traceback.format_exc()
                     logger.error(trace)
-                    logger.error('error :: could not determine id from metrics table')
+                    logger.error('error :: could not determine id from ionosphere_layers_table table')
                     # Disposal and return False, fail_msg, trace for Bug #2130: MySQL - Aborted_clients
                     if engine:
                         engine_disposal(engine)
                     return False, fail_msg, trace
+                logger.debug('debug :: get_layer_id fp_id_query_string query returned fp_id: %s' % str(fp_id))
         needs_and = True
         # @added 20190524 - Branch #3002: docker
-        if str(get_fp_id) == '0':
+        # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Added missing get_layer_id
+        if str(get_fp_id) == '0' and str(get_layer_id) == '0':
             needs_and = False
+
+    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    if query_table == 'ionosphere_layers_matched':
+        timestamp_parameter = 'anomaly_timestamp'
+    else:
+        timestamp_parameter = 'metric_timestamp'
 
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
         if from_timestamp and from_timestamp != 'all':
             if ":" in from_timestamp:
-                import datetime
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Import datetime in outer scope
+                # import datetime
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
                 from_timestamp = str(int(new_from_timestamp))
+
+            logger.debug('debug :: from_timestamp - %s' % str(from_timestamp))
 
             # @added 20190530 - Branch #3002: docker
             # Fix search so that if timestamps are passed and there is a list of
@@ -4854,30 +5504,69 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 logger.info('fp_ids length unknown, OK')
 
             if needs_and:
-                new_query_string = '%s AND metric_timestamp >= %s' % (query_string, from_timestamp)
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # new_query_string = '%s AND metric_timestamp >= %s' % (query_string, from_timestamp)
+                new_query_string = '%s AND %s >= %s' % (query_string, timestamp_parameter, from_timestamp)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE metric_timestamp >= %s' % (query_string, from_timestamp)
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # new_query_string = '%s WHERE metric_timestamp >= %s' % (query_string, from_timestamp)
+                new_query_string = '%s WHERE %s >= %s' % (query_string, timestamp_parameter, from_timestamp)
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            logger.debug('debug :: after from_timestamp - new query_string: %s' % str(query_string))
+            if query_table == 'ionosphere_layers_matched':
+                new_query_stmt = query_stmt.where(query_stmt_table.c.anomaly_timestamp >= int(from_timestamp))
+            else:
+                new_query_stmt = query_stmt.where(query_stmt_table.c.metric_timestamp >= int(from_timestamp))
+                if get_layers_matched:
+                    new_layers_matched_query_stmt = layers_matched_query_stmt.where(ionosphere_layers_matched_table.c.anomaly_timestamp >= int(from_timestamp))
+                    layers_matched_query_stmt = new_layers_matched_query_stmt
+            query_stmt = new_query_stmt
 
     if 'until_timestamp' in request.args:
         until_timestamp = request.args.get('until_timestamp', None)
         if until_timestamp and until_timestamp != 'all':
             if ":" in until_timestamp:
-                import datetime
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Import datetime in outer scope
+                # import datetime
                 new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
                 until_timestamp = str(int(new_until_timestamp))
 
             if needs_and:
-                new_query_string = '%s AND metric_timestamp <= %s' % (query_string, until_timestamp)
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # new_query_string = '%s AND metric_timestamp <= %s' % (query_string, until_timestamp)
+                new_query_string = '%s AND %s <= %s' % (query_string, timestamp_parameter, until_timestamp)
                 query_string = new_query_string
                 needs_and = True
             else:
-                new_query_string = '%s WHERE metric_timestamp <= %s' % (query_string, until_timestamp)
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # new_query_string = '%s WHERE metric_timestamp <= %s' % (query_string, until_timestamp)
+                new_query_string = '%s WHERE %s <= %s' % (query_string, timestamp_parameter, until_timestamp)
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            new_query_stmt = query_stmt.where(query_stmt_table.c.metric_timestamp <= int(until_timestamp))
+            query_stmt = new_query_stmt
+            if get_layers_matched:
+                new_layers_matched_query_stmt = layers_matched_query_stmt.where(ionosphere_layers_matched_table.c.anomaly_timestamp <= int(until_timestamp))
+                layers_matched_query_stmt = new_layers_matched_query_stmt
 
     if 'validated_equals' in request.args:
         filter_matches = False
@@ -4902,6 +5591,14 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 new_query_string = '%s WHERE validated = %s' % (query_string, str(filter_match_validation))
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            new_query_stmt = query_stmt.where(query_stmt_table.c.validated == filter_match_validation)
+            query_stmt = new_query_stmt
+            if get_layers_matched:
+                new_layers_matched_query_stmt = layers_matched_query_stmt.where(ionosphere_layers_matched_table.c.validated == filter_match_validation)
+                layers_matched_query_stmt = new_layers_matched_query_stmt
 
     ordered_by = None
     if 'order' in request.args:
@@ -4914,6 +5611,20 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     if ordered_by:
         new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
         query_string = new_query_string
+        # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        if str(order) == 'ASC':
+            new_query_stmt = query_stmt.order_by(query_stmt_table.c.id.asc())
+        else:
+            new_query_stmt = query_stmt.order_by(query_stmt_table.c.id.desc())
+        query_stmt = new_query_stmt
+        if get_layers_matched:
+            if str(order) == 'ASC':
+                new_layers_matched_query_stmt = layers_matched_query_stmt.order_by(ionosphere_layers_matched_table.c.id.asc())
+            else:
+                new_layers_matched_query_stmt = layers_matched_query_stmt.order_by(ionosphere_layers_matched_table.c.id.desc())
+            layers_matched_query_stmt = new_layers_matched_query_stmt
 
     if 'limit' in request.args:
         limit = request.args.get('limit', '30')
@@ -4923,6 +5634,14 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 new_query_string = '%s LIMIT %s' % (query_string, str(limit))
                 query_string = new_query_string
                 logger.info('test_limit tested OK with %s' % str(test_limit))
+                # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                new_query_stmt = query_stmt.limit(int(limit))
+                query_stmt = new_query_stmt
+                if get_layers_matched:
+                    new_layers_matched_query_stmt = layers_matched_query_stmt.limit(int(limit))
+                    layers_matched_query_stmt = new_layers_matched_query_stmt
         except:
             logger.error('error :: limit is not an integer - %s' % str(limit))
 
@@ -4930,12 +5649,33 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     #                   Branch #2270: luminosity
     if get_related_matches:
         try:
-            query_string = 'SELECT * FROM ionosphere_matched WHERE metric_timestamp > %s AND metric_timestamp <= %s' % (
-                str(related_from_timestamp), str(related_until_timestamp))
-        except:
+
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction, disabled
+            # query_string use
+            # query_string = 'SELECT * FROM ionosphere_matched WHERE metric_timestamp > %s AND metric_timestamp <= %s' % (
+            #     str(related_from_timestamp), str(related_until_timestamp))
+            query_string = ''
+
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            query_stmt = select([ionosphere_matched_table]).\
+                where(ionosphere_matched_table.c.metric_timestamp > int(related_from_timestamp)).\
+                where(ionosphere_matched_table.c.metric_timestamp <= int(related_until_timestamp))
+            query_stmt_table = ionosphere_matched_table
+            query_table = 'ionosphere_matched'
+            if get_layers_matched:
+                new_layers_matched_query_stmt = layers_matched_query_stmt.\
+                    where(ionosphere_layers_matched_table.c.anomaly_timestamp > int(related_from_timestamp)).\
+                    where(ionosphere_layers_matched_table.c.anomaly_timestamp <= int(related_until_timestamp))
+                layers_matched_query_stmt = new_layers_matched_query_stmt
+
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            logger.error('error :: could not generate query_string for get_related_matches')
+            logger.error('error :: could not generate query_string for get_related_matches - %s' % err)
             if engine:
                 engine_disposal(engine)
             return False, fail_msg, trace
@@ -5014,10 +5754,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         try:
             connection = engine.connect()
             results = connection.execute(echo_fp_ids_stmt)
-            connection.close()
             for row in results:
                 fp_id = int(row[0])
                 echo_fp_ids.append(fp_id)
+            connection.close()
         except:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -5060,8 +5800,13 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         try:
             connection = engine.connect()
             stmt = query_string
-            logger.info('executing %s' % stmt)
-            results = connection.execute(stmt)
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # logger.info('executing %s' % stmt)
+            # results = connection.execute(stmt)
+            # logger.info('executing %s' % stmt)
+            results = connection.execute(query_stmt)
             connection.close()
         except:
             trace = traceback.format_exc()
@@ -5074,6 +5819,15 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             return False, fail_msg, trace
 
         for row in results:
+
+            # @added 20230613 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            fp_id = int(row['fp_id'])
+            if fp_ids_list:
+                if fp_id not in fp_ids_list:
+                    continue
+
             metric_timestamp = int(row['metric_timestamp'])
             metric_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
             match_id = int(row['id'])
@@ -5085,7 +5839,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
                 matched_by = 'features profile'
             else:
                 matched_by = 'features profile - minmax'
-            fp_id = int(row['fp_id'])
+
+            # @modified 20230613 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Moved to beginning of block
+            # fp_id = int(row['fp_id'])
 
             # @added 20190601 - Feature #3084: Ionosphere - validated matches
             validated = int(row['validated'])
@@ -5136,11 +5894,17 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         query_string = new_query_string
         new_query_string = query_string.replace('metric_timestamp', 'anomaly_timestamp')
         query_string = new_query_string
+
         try:
             connection = engine.connect()
             stmt = query_string
-            logger.info('executing %s' % stmt)
-            results = connection.execute(stmt)
+            # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # results = connection.execute(stmt)
+            # logger.info('executing %s' % stmt)
+            # logger.info('executing layers_matched_query_stmt: %s' % str(layers_matched_query_stmt))
+            results = connection.execute(layers_matched_query_stmt)
             connection.close()
         except:
             trace = traceback.format_exc()
@@ -5153,7 +5917,32 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             return False, fail_msg, trace
 
         for row in results:
-            anomaly_timestamp = int(row['anomaly_timestamp'])
+
+            # @added 20230613 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            fp_id = int(row['fp_id'])
+            if fp_ids_list:
+                if fp_id not in fp_ids_list:
+                    continue
+
+            # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # The ionosphere_matched and ionosphere_layers_matched have
+            try:
+                if 'metric_timestamp' in list(row.keys()):
+                    anomaly_timestamp = int(row['metric_timestamp'])
+                else:
+                    anomaly_timestamp = int(row['anomaly_timestamp'])
+            except Exception as err:
+                trace = traceback.format_exc()
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine timestamp - %s' % err)
+                if engine:
+                    engine_disposal(engine)
+                return False, fail_msg, trace
+
             metric_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(anomaly_timestamp)))
             match_id = int(row['id'])
             # @modified 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
@@ -5170,7 +5959,11 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # @added 20190601 - Feature #3084: Ionosphere - validated matches
             validated = int(row['validated'])
 
-            fp_id = int(row['fp_id'])
+            # @modified 20230613 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Moved to beginning of block
+            # fp_id = int(row['fp_id'])
+
             layer_id = int(row['layer_id'])
             # Get metric name, first get metric id from the features profile
             # record
@@ -5217,7 +6010,53 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         # @modified 20210413 - Feature #4014: Ionosphere - inference
         #                      Branch #3590: inference
         # Added motifs_matched_id
-        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None', 'None', 'None']]
+        # @added 20220801 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metric name added metric id
+        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None', 'None', 'None', 'None']]
+
+    # @added 20220801 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name added metric id
+    matches_with_metric_id = []
+    matched_fp_ids = []
+    match_data = False
+    if matches:
+        if matches[0][0] != 'None':
+            match_data = True
+    if match_data:
+        try:
+            matched_fp_ids = [int(item[3]) for item in matches]
+        except Exception as err:
+            logger.error('error :: %s :: failed to get metric from fp_id_row for fp_id %s - %s' % (
+                function_str, str(fp_id), err))
+        matched_fp_ids = list(set(matched_fp_ids))
+        for fp_id in matched_fp_ids:
+            fp_id_row = None
+            try:
+                fp_id_row = get_ionosphere_fp_db_row('webapp', fp_id)
+            except Exception as err:
+                logger.error('error :: %s :: failed to get_ionosphere_fp_db_row for fp_id %s - %s' % (
+                    function_str, str(fp_id), err))
+            metric_id = 0
+            if fp_id_row:
+                try:
+                    metric_id = fp_id_row['metric_id']
+                except Exception as err:
+                    logger.error('error :: %s :: failed to get metric from fp_id_row for fp_id %s - %s' % (
+                        function_str, str(fp_id), err))
+            fp_metric_ids[fp_id] = metric_id
+        for item in matches:
+            try:
+                fp_id = int(item[3])
+                item.append(fp_metric_ids[fp_id])
+            except Exception as err:
+                logger.error('error :: %s :: failed to determine metric_id for fp_id %s from fp_metric_ids - %s' % (
+                    function_str, str(fp_id), err))
+                item.append(0)
+            matches_with_metric_id.append(item)
+    if matches_with_metric_id:
+        matches = list(matches_with_metric_id)
 
     return matches, fail_msg, trace
 
@@ -5239,14 +6078,50 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
     :rtype:  (str, boolean, str, str)
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: get_matched_id_resources'
+    logger.info('%s - matched_id: %s, matched_by: %s, metric: %s, requested_timestamp: %s' % (
+        function_str, str(matched_id), str(matched_by), str(metric),
+        str(requested_timestamp)))
 
     trace = 'none'
     fail_msg = 'none'
     matched_details = None
     matched_details_object = None
+
+    # @added 20220831 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    data_source = 'graphite'
+    # labelled_metric_base_name = None
+    labelled_metric_name = None
+    use_base_name = str(metric)
+    base_name = str(metric)
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        data_source = 'victoriametrics'
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: %s :: get_metric_id_from_base_name failed with base_name: %s - %s' % (
+                function_str, (base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metric_name = str(base_name)
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+            if metric_name:
+                base_name = str(metric_name)
+                data_source = 'victoriametrics'
+        except Exception as err:
+            logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                function_str, base_name, err))
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
 
     use_table = 'ionosphere_matched'
     if matched_by == 'layers':
@@ -5273,7 +6148,7 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
         # return False, False, fail_msg, trace, False
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     if matched_by == 'features_profile':
         ionosphere_matched_table = None
@@ -5310,7 +6185,7 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
         if engine:
             engine_disposal(engine)
         # return False, False, fail_msg, trace, False
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     logger.info('%s :: %s table OK' % (function_str, use_table))
 
@@ -5344,9 +6219,10 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
             matched_details_object = dict(row)
         except Exception as err:
             trace = traceback.format_exc()
-            connection.close()
+            # connection.close()
             logger.error(trace)
-            fail_msg = 'error :: could not get matched_id %s details from %s DB table row - %s' % (str(matched_id), use_table, err)
+            fail_msg = 'error :: %s :: could not get matched_id %s details from %s DB table row - %s' % (
+                function_str, str(matched_id), use_table, err)
             logger.error('%s' % fail_msg)
             if engine:
                 engine_disposal(engine)
@@ -5355,11 +6231,26 @@ def get_matched_id_resources(matched_id, matched_by, metric, requested_timestamp
     except Exception as err:
         trace = traceback.format_exc()
         logger.error(trace)
-        fail_msg = 'error :: could not get matched_id %s details from %s DB table - %s' % (str(matched_id), use_table, err)
+        fail_msg = 'error :: %s :: could not get matched_id %s details from %s DB table - %s' % (
+            function_str, str(matched_id), use_table, err)
         logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(engine)
         # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: failed to get ionosphere_table meta - %s' % (
+            function_str, err))
+        if engine:
+            engine_disposal(engine)
         raise  # to webapp to return in the UI
 
     if matched_by == 'features_profile':
@@ -5403,16 +6294,22 @@ minmax_anomalous_features_sum :: %s  | minmax_anomalous_features_count :: %s
                 engine_disposal(engine)
             # return False, False, fail_msg, trace, False
             raise  # to webapp to return in the UI
-        full_duration_stmt = 'SELECT full_duration FROM ionosphere WHERE id=%s' % str(fp_id)
+
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # full_duration_stmt = 'SELECT full_duration FROM ionosphere WHERE id=%s' % str(fp_id)
+        full_duration_stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.id == int(fp_id))
+
         full_duration = None
         try:
             connection = engine.connect()
             result = connection.execute(full_duration_stmt)
-            connection.close()
             for row in result:
                 if not full_duration:
                     full_duration = int(row[0])
-            logger.info('full_duration for matched determined as %s' % (str(full_duration)))
+            connection.close()
+            logger.info('full_duration for matched resource determined as %s' % (str(full_duration)))
         except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
@@ -5447,6 +6344,11 @@ metric_timestamp    :: %s     | human_date :: %s
             # return False, False, fail_msg, trace, False
             raise  # to webapp to return in the UI
 
+    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use defined match_type rather than using match_type defined in loop
+    matched_type = 'unknown'
+
     # @added 20210413 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
     if matched_by == 'motif':
@@ -5463,6 +6365,10 @@ metric_timestamp    :: %s     | human_date :: %s
             type_id = row['type_id']
             for match_type in motif_match_types:
                 if type_id == motif_match_types[match_type]:
+                    # @added 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use defined match_type rather than using match_type defined in loop
+                    matched_type = str(match_type)
                     break
             validated = row['validated']
             matched_human_date = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(metric_timestamp)))
@@ -5496,10 +6402,21 @@ metric_timestamp    :: %s     | human_date :: %s
         full_duration = size * 60
         generation = 0
         try:
-            query = 'SELECT generation FROM ionosphere WHERE id=%s' % (str(fp_id))
-            results = mysql_select(skyline_app, query)
-            for result in results:
-                generation = int(result[0])
+
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # query = 'SELECT generation FROM ionosphere WHERE id=%s' % (str(fp_id))
+            # results = mysql_select(skyline_app, query)
+            # for result in results:
+            #     generation = int(result[0])
+            stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.id == int(fp_id))
+            connection = engine.connect()
+            result = connection.execute(stmt)
+            for row in result:
+                generation = row['generation']
+            connection.close()
+            logger.info('generation for matched resource determined as %s' % (str(generation)))
         except Exception as err:
             logger.error('error :: get_matched_id_resources :: failed to get generation from the database for fp_id %s from ionoshere table - %s' % (
                 str(fp_id), err))
@@ -5511,10 +6428,10 @@ metric_timestamp    :: %s     | human_date :: %s
         # @added 20210424 -
         # matched_id, matched_by, metric, requested_timestamp
         # /opt/skyline/ionosphere/data/1619267040/telegraf/ssdnodes-26820/sda1/diskio/iops_in_progress/1619267040.telegraf.ssdnodes-26820.sda1.diskio.iops_in_progress.inference.matched_motifs.dict
-        metric_timeseries_dir = metric.replace('.', '/')
+        metric_timeseries_dir = use_base_name.replace('.', '/')
         inference_file = '%s/%s/%s/%s.%s.inference.matched_motifs.dict' % (
             settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
-            metric_timeseries_dir, str(metric_timestamp), metric)
+            metric_timeseries_dir, str(metric_timestamp), use_base_name)
         if path.isfile(inference_file):
             if not motif_area or fp_motif_area:
                 matched_motif_dict = {}
@@ -5565,7 +6482,11 @@ human_date          :: %s
                 str(motif_area),
                 str(fp_motif_area),
                 str(area_percent_diff),
-                str(match_type), str(type_id),
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use defined match_type rather that match_type defined in loop
+                # str(match_type), str(type_id),
+                str(matched_type), str(type_id),
                 str(validated), primary_match_str,
                 str(metric_timestamp), str(matched_human_date))
         except Exception as err:
@@ -5584,24 +6505,24 @@ human_date          :: %s
     # Create a Graphite image
     from_timestamp = str(int(metric_timestamp) - int(full_duration))
     until_timestamp = str(metric_timestamp)
-    timeseries_dir = metric.replace('.', '/')
+    timeseries_dir = use_base_name.replace('.', '/')
     metric_data_dir = '%s/%s/%s' % (
         settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
         str(requested_timestamp))
 
     if matched_by == 'features_profile':
         graph_image_file = '%s/%s.matched.fp_id-%s.%s.png' % (
-            metric_data_dir, metric, str(fp_id), str(metric_timestamp))
+            metric_data_dir, use_base_name, str(fp_id), str(metric_timestamp))
     if matched_by == 'layers':
         graph_image_file = '%s/%s.layers_id-%s.matched.layers.fp_id-%s.%s.png' % (
-            metric_data_dir, metric, str(matched_id),
+            metric_data_dir, use_base_name, str(matched_id),
             str(fp_id), str(layer_id))
 
     # @added 20210413 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
     if matched_by == 'motif':
         graph_image_file = '%s/%s.matched.motif_id-%s.%s.png' % (
-            metric_data_dir, metric, str(motif_id), str(metric_timestamp))
+            metric_data_dir, use_base_name, str(motif_id), str(metric_timestamp))
         # Create the fp motif
         fp_timeseries = []
         # metric_fp_ts_table = 'z_ts_%s' % str(metric_id)
@@ -5624,7 +6545,9 @@ human_date          :: %s
         # data point in a period in relation to echo/full_duration data, the
         # method used inference.py does.
         # fp_motif = [item[1] for item in fp_timeseries[index:(index + size)]]
-        fp_motif = [item[1] for i_index, item in enumerate(fp_timeseries) if i_index >= index < (index + size)]
+        # fp_motif = [item[1] for i_index, item in enumerate(fp_timeseries) if i_index >= index < (index + size)]
+        fp_motif = [item[1] for i_index, item in enumerate(fp_timeseries) if i_index >= index and index < (index + size)]
+
         if len(fp_motif) > size:
             fp_motif = fp_motif[-size:]
 
@@ -5640,11 +6563,37 @@ human_date          :: %s
         # Create the not anomalous motif that was matched with the fp_motif
         not_anomalous_motif_sequence = []
         if IONOSPHERE_INFERENCE_STORE_MATCHED_MOTIFS:
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
             try:
-                query = 'SELECT timestamp,value FROM not_anomalous_motifs WHERE motif_id=%s' % (str(motif_id))
-                results = mysql_select(skyline_app, query)
-                for result in results:
-                    not_anomalous_motif_sequence.append([int(result[0]), result[1]])
+                not_anomalous_motifs_table, log_msg, trace = not_anomalous_motifs_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: %s :: failed to get not_anomalous_motifs meta - %s' % (
+                    function_str, err))
+                if engine:
+                    engine_disposal(engine)
+                raise  # to webapp to return in the UI
+
+            try:
+
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # query = 'SELECT timestamp,value FROM not_anomalous_motifs WHERE motif_id=%s' % (str(motif_id))
+                # results = mysql_select(skyline_app, query)
+                # for result in results:
+                #     not_anomalous_motif_sequence.append([int(result[0]), result[1]])
+                stmt = select([not_anomalous_motifs_table.c.timestamp, not_anomalous_motifs_table.c.value]).\
+                    where(not_anomalous_motifs_table.c.motif_id == int(motif_id))
+                connection = engine.connect()
+                result = connection.execute(stmt)
+                for row in result:
+                    not_anomalous_motif_sequence.append([row['timestamp'], row['value']])
+                connection.close()
             except Exception as e:
                 logger.error('error :: get_matched_id_resources :: failed to get motif sequence from not_anomalous_motifs for motif_id %s - %s' % (
                     str(motif_id), e))
@@ -5657,24 +6606,34 @@ human_date          :: %s
         if not not_anomalous_motif_sequence:
             logger.info('get_matched_id_resources :: trying to get not_anomalous_motif_sequence from training data for motif_id %s' % (
                 str(motif_id)))
-            metric_dir = metric.replace('.', '/')
+            metric_dir = use_base_name.replace('.', '/')
             metric_training_dir = '%s/%s/%s' % (
                 settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp), metric_dir)
-            timeseries_json = '%s/%s.json' % (metric_training_dir, metric)
+            timeseries_json = '%s/%s.json' % (metric_training_dir, use_base_name)
 
             # @modified 20210419 -
             # Properly interpolate the FULL_DURATION hours
             # full_duration_timeseries_json = '%s/%s.mirage.redis.24h.json' % (metric_training_dir, metric)
             full_duration_in_hours_int = int(settings.FULL_DURATION / 60 / 60)
             full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
-                metric_training_dir, metric, str(full_duration_in_hours_int))
+                metric_training_dir, use_base_name, str(full_duration_in_hours_int))
 
             full_duration = 0
             try:
-                query = 'SELECT full_duration from ionosphere WHERE id=%s' % (str(fp_id))
-                results = mysql_select(skyline_app, query)
-                for result in results:
-                    full_duration = int(result[0])
+
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # query = 'SELECT full_duration from ionosphere WHERE id=%s' % (str(fp_id))
+                # results = mysql_select(skyline_app, query)
+                # for result in results:
+                #     full_duration = int(result[0])
+                stmt = select([ionosphere_table.c.full_duration]).where(ionosphere_table.c.id == int(fp_id))
+                connection = engine.connect()
+                result = connection.execute(stmt)
+                for row in result:
+                    full_duration = row['full_duration']
+                connection.close()
             except Exception as e:
                 logger.error('error :: get_matched_id_resources :: failed to get full_duration of fp id %s via mysql_select - %s' % (str(fp_id), e))
             if full_duration == settings.FULL_DURATION:
@@ -5733,7 +6692,7 @@ human_date          :: %s
             # logger.info('fp_motif length: %s' % (str(len(fp_motif))))
 
             plotted_image, plotted_image_file = plot_motif_match(
-                skyline_app, metric, metric_timestamp, fp_id, full_duration,
+                skyline_app, use_base_name, metric_timestamp, fp_id, full_duration,
                 generation_str, motif_id, index, size, distance, type_id,
                 fp_motif, not_anomalous_motif_sequence, graph_image_file,
                 on_demand_motif_analysis)
@@ -5745,10 +6704,31 @@ human_date          :: %s
         return matched_details, True, fail_msg, trace, matched_details_object, graph_image_file
 
     if not path.isfile(graph_image_file):
-        logger.info('getting Graphite graph for match - from_timestamp - %s, until_timestamp - %s' % (str(from_timestamp), str(until_timestamp)))
-        graph_image = get_graphite_metric(
-            skyline_app, metric, from_timestamp, until_timestamp, 'image',
-            graph_image_file)
+        if data_source == 'graphite':
+            logger.info('getting Graphite graph for match - from_timestamp - %s, until_timestamp - %s' % (str(from_timestamp), str(until_timestamp)))
+            graph_image = get_graphite_metric(
+                skyline_app, metric, from_timestamp, until_timestamp, 'image',
+                graph_image_file)
+        if data_source == 'victoriametrics':
+            logger.info('getting victoriametrics graph for match - from_timestamp - %s, until_timestamp - %s' % (str(from_timestamp), str(until_timestamp)))
+            metric_data = None
+            title = 'Matched fp_id: %s, match_id: %s\n%s' % (
+                str(fp_id), str(matched_id), str(use_base_name))
+            plot_parameters = {
+                'title': title, 'line_color': 'green', 'bg_color': 'black',
+                'figsize': (8, 4)
+            }
+            try:
+                # get_victoriametrics_metric automatically applies the rate and
+                # step required no downsampling or nonNegativeDerivative is
+                # required.
+                graph_image = get_victoriametrics_metric(
+                    skyline_app, metric, from_timestamp, until_timestamp, 'image',
+                    graph_image_file, metric_data, plot_parameters)
+            except Exception as err:
+                logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                    err))
+
         if not graph_image:
             logger.error('failed getting Graphite graph')
             graph_image_file = None
@@ -5759,13 +6739,13 @@ human_date          :: %s
     # to their size, create a matplotlib graph for the DB fp time
     # series data for more accurate validation
     fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
-        metric_data_dir, metric, str(fp_id))
+        metric_data_dir, use_base_name, str(fp_id))
     if not path.isfile(fp_ts_graph_file):
         try:
             no_timeseries = []
-            created_fp_ts_graph = create_fp_ts_graph('webapp', metric_data_dir, metric, int(fp_id), int(metric_timestamp), no_timeseries)
+            created_fp_ts_graph = create_fp_ts_graph('webapp', metric_data_dir, use_base_name, int(fp_id), int(metric_timestamp), no_timeseries)
             if created_fp_ts_graph:
-                logger.info('get_matched_id_resources :: created_fp_ts_graph for %s fp id %s' % (metric, str(fp_id)))
+                logger.info('get_matched_id_resources :: created_fp_ts_graph for %s fp id %s' % (use_base_name, str(fp_id)))
         except:
             trace = traceback.format_exc()
             logger.error(traceback.format_exc())
@@ -5796,7 +6776,10 @@ def get_features_profiles_to_validate(base_name):
     :rtype:  [[int, int, str, int, int, int, int, int, str, str, str, str, int, str, str, int, int]]
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: get_feature_profiles_validate'
 
@@ -5848,6 +6831,24 @@ def get_features_profiles_to_validate(base_name):
             if int(fp_full_duration) > int(maximum_full_duration):
                 maximum_full_duration = int(fp_full_duration)
 
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Look up base_name for labelled_metrics and determine base_name if the
+    # metric_id is passed.
+    labelled_metric_name = None
+    labelled_metric_base_name = None
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metric_name = str(base_name)
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+            if metric_name:
+                labelled_metric_base_name = str(metric_name)
+                logger.info('base_name looked up from labelled_metric_name: %s, base_name: %s' % (
+                    labelled_metric_name, labelled_metric_base_name))
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+
     # @added 20220304 - Task #4486: Review Ionosphere learn from learn duration
     #                   Feature #2484: FULL_DURATION feature profiles
     #                   Feature #3380: Create echo features profile when a Mirage features profile is created
@@ -5856,7 +6857,11 @@ def get_features_profiles_to_validate(base_name):
     # [FULL_DURATION, SECOND_ORDER_RESOLUTION_SECONDS, IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS]
     # this only impacts the metadata displayed on the validate features profiles
     # page.
-    metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+    if not labelled_metric_base_name:
+        metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+    else:
+        metric_id = get_metric_id_from_base_name(skyline_app, labelled_metric_base_name)
+
     all_full_durations = []
     metric_fp_ids = get_ionosphere_fp_ids_for_full_duration(skyline_app, metric_id, full_duration=0, enabled=True)
     for i_fp_id in list(metric_fp_ids.keys()):
@@ -6068,7 +7073,10 @@ def get_metrics_with_features_profiles_to_validate():
     :rtype:  [[int, str, int]]
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: get_metrics_with_features_profiles_to_validate'
 
@@ -6148,6 +7156,18 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
         base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
     else:
         base_name = data_for_metric
+
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+            if metric_id:
+                base_name = 'labelled_metrics.%s' % str(metric_id)
+        except Exception as err:
+            logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                base_name, err))
 
     log_context = 'features profile data show graphs'
     logger.info('%s requested for %s at %s' % (
@@ -6267,7 +7287,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
     if not message_context_known:
         fail_msg = 'error :: webapp_update_slack_thread :: unknown message context - %s' % str(message_context)
         logger.error('%s' % fail_msg)
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     update_for_message_context = True
     message_context_not_updating_log_message = False
@@ -6312,7 +7332,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
     if throw_exception_on_default_channel:
         fail_msg = 'error :: webapp_update_slack_thread :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
         logger.error('%s' % fail_msg)
-        raise  # to webapp to return in the UI
+        raise ValueError(fail_msg)  # to webapp to return in the UI
 
     if not update_slack_thread:
         return False
@@ -6325,7 +7345,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             if not channel:
                 fail_msg = 'error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
                 logger.error('%s' % fail_msg)
-                raise  # to webapp to return in the UI
+                raise ValueError(fail_msg)  # to webapp to return in the UI
             slack_response = slack_post_message(skyline_app, channel, None, message)
         except:
             trace = traceback.format_exc()
@@ -6338,9 +7358,8 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             logger.error('%s' % fail_msg)
             logger.error('%s' % str(slack_response))
             return False
-        else:
-            logger.info('posted slack update to %s, %s features profiles were validated for %s' % (
-                channel, str(validated_count), base_name))
+        logger.info('posted slack update to %s, %s features profiles were validated for %s' % (
+            channel, str(validated_count), base_name))
         return True
 
     use_anomaly_timestamp = int(metric_timestamp)
@@ -6359,9 +7378,13 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         trace = 'none'
         fail_msg = 'error :: webapp_update_slack_thread :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
 
-    if message_context != 'snab_result' and message_context != 'snab_result_changed':
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Merged comparisons
+    # if message_context != 'snab_result' and message_context != 'snab_result_changed':
+    if message_context not in ['snab_result', 'snab_result_changed']:
         try:
             ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
             logger.info(log_msg)
@@ -6437,7 +7460,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
 
-    if message_context == 'snab_result' or message_context == 'snab_result_changed':
+    if message_context in ['snab_result', 'snab_result_changed']:
         try:
             snab_table, log_msg, trace = snab_table_meta(skyline_app, engine)
             logger.info(log_msg)
@@ -6543,7 +7566,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         if not channel:
             fail_msg = 'error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
             logger.error('%s' % fail_msg)
-            raise  # to webapp to return in the UI
+            raise ValueError(fail_msg)  # to webapp to return in the UI
         slack_response = slack_post_message(skyline_app, channel, str(slack_thread_ts), message)
     except:
         trace = traceback.format_exc()
@@ -6566,7 +7589,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
     # @added 20200929 - Task #3748: POC SNAB
     #                   Branch #3068: SNAB
     if message_context == 'snab_result':
-        if snab_result == 'tP' or snab_result == 'tN' or snab_result == 'NULL':
+        if snab_result in ['tP', 'tN', 'NULL']:
             reaction_emoji = 'heavy_check_mark'
         elif snab_result == 'unsure':
             reaction_emoji = 'question'
@@ -6578,7 +7601,7 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         if not channel_id:
             fail_msg = 'error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'
             logger.error('%s' % fail_msg)
-            raise  # to webapp to return in the UI
+            raise ValueError(fail_msg)  # to webapp to return in the UI
         slack_response = slack_post_reaction(skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
     except:
         trace = traceback.format_exc()
@@ -6627,7 +7650,7 @@ def validate_ionosphere_match(match_id, validate_context, match_validated, user_
         trace = 'none'
         fail_msg = 'error :: validate_ionosphere_match :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
 
     if validate_context == 'ionosphere_matched':
         try:
@@ -6795,7 +7818,7 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
 
     try:
         metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
@@ -6814,9 +7837,22 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
     metric_ids = []
     logger.info('label_anomalies :: %s metrics passed' % str(len(metrics)))
     for metric in metrics:
+
+        # @added 20220802 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        use_metric = str(metric)
+        if metric.startswith('labelled_metrics.'):
+            try:
+                metric_name = get_base_name_from_labelled_metrics_name(skyline_app, metric)
+                if metric_name:
+                    use_metric = str(metric_name)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    metric, err))
+
         try:
             connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.metric == str(metric))
+            stmt = select([metrics_table]).where(metrics_table.c.metric == str(use_metric))
             result = connection.execute(stmt)
             for row in result:
                 metric_id = row['id']
@@ -6824,7 +7860,7 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
             connection.close()
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not determine metric id from metrics for metric %s' % str(metric))
+            logger.error('error :: could not determine metric id from metrics for metric %s' % str(use_metric))
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal and raise
             if engine:
@@ -6855,10 +7891,10 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
                 # Use namespace_like
                 # results = connection.execute(metrics_like_query, like_string=str(namespace))
                 results = connection.execute(metrics_like_query, like_string=str(namespace_like))
-                connection.close()
                 for row in results:
                     metric_id = str(row[0])
                     metric_ids.append(int(metric_id))
+                connection.close()
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -6991,7 +8027,7 @@ def expected_features_profiles_dirs():
         trace = 'none'
         fail_msg = 'error :: engine not obtained'
         logger.error(fail_msg)
-        raise
+        raise ValueError(fail_msg)
     try:
         ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
         logger.info(log_msg)
@@ -7047,8 +8083,7 @@ def expected_features_profiles_dirs():
     if last_fp_dir:
         logger.info('features_profiles_dirs - no new features profile ids, all known return %s items' % str(len(features_profile_dirs_dict)))
         return features_profile_dirs_dict
-    else:
-        logger.info('features_profiles_dirs - new features profile ids found determing new dirs, %s currently known dirs' % str(len(features_profile_dirs_dict)))
+    logger.info('features_profiles_dirs - new features profile ids found determing new dirs, %s currently known dirs' % str(len(features_profile_dirs_dict)))
 
     fps = {}
     try:
@@ -7102,7 +8137,7 @@ def expected_features_profiles_dirs():
     # features_profiles_dirs_error_logged = False
     added_fps = 0
     if fps and metrics:
-        for fp_id in fps:
+        for fp_id in list(fps.keys()):
             fp_dir = None
             if features_profile_dirs_dict:
                 try:
@@ -7120,6 +8155,14 @@ def expected_features_profiles_dirs():
                     metric = metrics[metric_id]['metric']
                     timestamp = fps[fp_id]['anomaly_timestamp']
                     metric_timeseries_dir = metric.replace('.', '/')
+
+                    # @added 20230511 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    # Handle labelled_metrics
+                    if '_tenant_id="' in metric:
+                        labelled_metric = 'labelled_metrics.%s' % str(metric_id)
+                        metric_timeseries_dir = labelled_metric.replace('.', '/')
+
                     fp_dir = '%s/%s/%s' % (
                         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
                         str(timestamp))
@@ -7152,7 +8195,10 @@ def get_matched_motifs(
     :rtype: list
 
     """
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'ionoshere_backend.py :: get_motif_matches'
     logger.info('%s :: with parameters :: %s, %s, %s, %s' % (
@@ -7179,6 +8225,31 @@ def get_matched_motifs(
         logger.error(fail_msg)
         return False, fail_msg, trace
 
+    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: failed to get ionosphere_table meta - %s' % (
+            function_str, err))
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    try:
+        motifs_matched_table, log_msg, trace = motifs_matched_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: failed to get motifs_matched_table meta - %s' % (
+            function_str, err))
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    query_stmt = select([motifs_matched_table])
+
     query_string = 'SELECT * FROM motifs_matched'
     needs_and = False
 
@@ -7193,12 +8264,22 @@ def get_matched_motifs(
                 engine_disposal(engine)
             return False, fail_msg, trace
 
-        fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id=%s' % str(metric_id)
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id=%s' % str(metric_id)
+        fp_ids_list = []
+
         fp_ids = ''
         try:
             connection = engine.connect()
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            fp_ids_stmt = select([ionosphere_table.c.id]).where(ionosphere_table.c.metric_id == int(metric_id))
+
             results = connection.execute(fp_ids_stmt)
-            connection.close()
             for row in results:
                 fp_id = str(row[0])
                 if fp_ids == '':
@@ -7206,17 +8287,34 @@ def get_matched_motifs(
                 else:
                     new_fp_ids = '%s, %s' % (fp_ids, fp_id)
                     fp_ids = new_fp_ids
-        except Exception as e:
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                fp_ids_list.append(row['id'])
+
+            connection.close()
+        except Exception as err:
             trace = traceback.format_exc()
             logger.error(trace)
-            logger.error('error :: %s :: could not determine fp ids from ionosphere table' % function_str)
+            logger.error('error :: %s :: could not determine fp ids from ionosphere table - %s' % (
+                function_str, err))
             dev_null = e
             if engine:
                 engine_disposal(engine)
             return False, fail_msg, trace
         logger.info('%s :: fp_ids set to %s' % (function_str, str(fp_ids)))
-        query_string = 'SELECT * FROM motifs_matched WHERE fp_id in (%s)' % str(fp_ids)
+
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # query_string = 'SELECT * FROM motifs_matched WHERE fp_id in (%s)' % str(fp_ids)
+        query_string = ''
         needs_and = True
+
+        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        query_stmt = select([motifs_matched_table], motifs_matched_table.c.fp_id.in_(fp_ids_list))
 
     if metric_like:
         if metric_like and metric_like != 'all':
@@ -7227,24 +8325,48 @@ def get_matched_motifs(
                 logger.error('error :: %s :: failed to get metric ids from metric_ids_from_metric_like: %s' % (function_str, e))
                 return False
 
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            metric_ids_list = [0]
+
             metric_ids = '0'
             if db_metric_ids:
                 metric_ids = ''
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                metric_ids_list = []
+
                 for db_metric_id in db_metric_ids:
                     if metric_ids == '':
                         metric_ids = '%s' % str(db_metric_id)
                     else:
                         metric_ids = '%s, %s' % (metric_ids, str(db_metric_id))
+                    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    metric_ids_list.append(db_metric_id)
             else:
                 # Get nothing
                 metric_ids = '0'
 
-            fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id IN (%s)' % str(metric_ids)
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # fp_ids_stmt = 'SELECT id FROM ionosphere WHERE metric_id IN (%s)' % str(metric_ids)
+            fp_ids_list = []
+
             fp_ids = ''
             try:
+
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                fp_ids_stmt = select([ionosphere_table.c.id], ionosphere_table.c.metric_id.in_(metric_ids_list))
+
                 connection = engine.connect()
                 results = connection.execute(fp_ids_stmt)
-                connection.close()
                 for row in results:
                     fp_id = str(row[0])
                     if fp_ids == '':
@@ -7252,6 +8374,12 @@ def get_matched_motifs(
                     else:
                         new_fp_ids = '%s, %s' % (fp_ids, fp_id)
                         fp_ids = new_fp_ids
+                    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    fp_ids_list.append(row['id'])
+
+                connection.close()
             except Exception as e:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -7261,14 +8389,27 @@ def get_matched_motifs(
                 if engine:
                     engine_disposal(engine)
                 return False, fail_msg, trace
-            query_string = 'SELECT * FROM motifs_matched WHERE fp_id in (%s)' % str(fp_ids)
+
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # query_string = 'SELECT * FROM motifs_matched WHERE fp_id in (%s)' % str(fp_ids)
+            query_string = ''
             needs_and = True
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            query_stmt = select([motifs_matched_table], motifs_matched_table.c.fp_id.in_(fp_ids_list))
 
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
         if from_timestamp and from_timestamp != 'all':
             if ":" in from_timestamp:
-                import datetime
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # datetime import defined in outer scope
+                # import datetime
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
                 from_timestamp = str(int(new_from_timestamp))
 
@@ -7290,12 +8431,20 @@ def get_matched_motifs(
                 new_query_string = '%s WHERE metric_timestamp >= %s' % (query_string, from_timestamp)
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            new_query_stmt = query_stmt.where(motifs_matched_table.c.metric_timestamp >= int(from_timestamp))
+            query_stmt = new_query_stmt
 
     if 'until_timestamp' in request.args:
         until_timestamp = request.args.get('until_timestamp', None)
         if until_timestamp and until_timestamp != 'all':
             if ":" in until_timestamp:
-                import datetime
+                # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # datetime import defined in outer scope
+                # import datetime
                 new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
                 until_timestamp = str(int(new_until_timestamp))
 
@@ -7307,6 +8456,11 @@ def get_matched_motifs(
                 new_query_string = '%s WHERE metric_timestamp <= %s' % (query_string, until_timestamp)
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            new_query_stmt = query_stmt.where(motifs_matched_table.c.metric_timestamp <= int(until_timestamp))
+            query_stmt = new_query_stmt
 
     if 'validated_equals' in request.args:
         filter_matches = False
@@ -7331,6 +8485,11 @@ def get_matched_motifs(
                 new_query_string = '%s WHERE validated = %s' % (query_string, str(filter_match_validation))
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            new_query_stmt = query_stmt.where(motifs_matched_table.c.validate == int(filter_match_validation))
+            query_stmt = new_query_stmt
 
     if 'primary_match' in request.args:
         filter_matches = False
@@ -7352,6 +8511,11 @@ def get_matched_motifs(
                 new_query_string = '%s WHERE primary_match = %s' % (query_string, str(filter_primary_validation))
                 query_string = new_query_string
                 needs_and = True
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            new_query_stmt = query_stmt.where(motifs_matched_table.c.primary_match == int(filter_primary_validation))
+            query_stmt = new_query_stmt
 
     # @added 20210415 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
@@ -7360,6 +8524,23 @@ def get_matched_motifs(
     if sort_by:
         new_query_string = '%s ORDER BY %s' % (query_string, sort_by)
         query_string = new_query_string
+
+        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        if sort_by == 'id':
+            new_query_stmt = query_stmt.order_by(motifs_matched_table.c.id)
+        if sort_by == 'distance':
+            new_query_stmt = query_stmt.order_by(motifs_matched_table.c.distance)
+        if sort_by == 'size':
+            new_query_stmt = query_stmt.order_by(motifs_matched_table.c.size)
+        if sort_by == 'metric_id':
+            new_query_stmt = query_stmt.order_by(motifs_matched_table.c.metric_id)
+        if sort_by == 'fp_id':
+            new_query_stmt = query_stmt.order_by(motifs_matched_table.c.fp_id)
+        if sort_by == 'metric_timestamp':
+            new_query_stmt = query_stmt.order_by(motifs_matched_table.c.metric_timestamp)
+        query_stmt = new_query_stmt
 
     ordered_by = 'ASC'
     if 'order_by' in request.args:
@@ -7377,9 +8558,37 @@ def get_matched_motifs(
         if not sort_by:
             new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
             query_string = new_query_string
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            if ordered_by == 'ASC':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.id.asc())
+            else:
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.id.desc())
+            query_stmt = new_query_stmt
+
         else:
             new_query_string = '%s %s' % (query_string, ordered_by)
             query_string = new_query_string
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Without declaring all the above sort by twice
+            if sort_by == 'id':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.id.desc())
+            if sort_by == 'distance':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.distance.desc())
+            if sort_by == 'size':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.size.desc())
+            if sort_by == 'metric_id':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.metric_id.desc())
+            if sort_by == 'fp_id':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.fp_id.desc())
+            if sort_by == 'metric_timestamp':
+                new_query_stmt = query_stmt.order_by(motifs_matched_table.c.metric_timestamp.desc())
+            query_stmt = new_query_stmt
 
     limit = 100
     if 'limit' in request.args:
@@ -7390,6 +8599,12 @@ def get_matched_motifs(
                 new_query_string = '%s LIMIT %s' % (query_string, str(limit))
                 query_string = new_query_string
                 logger.info('%s :: test_limit tested OK with %s' % (function_str, (test_limit)))
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                new_query_stmt = query_stmt.limit(int(limit))
+                query_stmt = new_query_stmt
+
         except Exception as e:
             logger.error('error :: %s :: limit is not an integer - %s - %s' % (function_str, str(limit), e))
             new_query_string = '%s LIMIT 100' % (query_string)
@@ -7467,7 +8682,14 @@ def get_matched_motifs(
         try:
             connection = engine.connect()
             stmt = query_string
-            logger.info('%s :: executing %s' % (function_str, stmt))
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # logger.info('%s :: executing %s' % (function_str, stmt))
+            stmt = query_stmt
+            # logger.info('%s :: executing query_stmt: %s' % (function_str, str(query_stmt)))
+
             results = connection.execute(stmt)
             connection.close()
         except Exception as e:
@@ -7542,8 +8764,10 @@ def get_matched_motif_id(fp_id, timestamp, index, size):
     Return the matched_motif_id, motif_validated, ionosphere_matched_id for a
     motif
     """
-
-    logger = logging.getLogger(skyline_app_logger)
+    # @modified 20230108 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Removed definition of logger which defined in outer scope
+    # logger = logging.getLogger(skyline_app_logger)
 
     function_str = 'get_matched_motif_id'
     logger.info('%s :: with parameters :: fp_id: %s, timestamp: %s, index: %s, size: %s' % (
@@ -7551,24 +8775,103 @@ def get_matched_motif_id(fp_id, timestamp, index, size):
     matched_motif_id = None
     motif_validated = None
     ionosphere_matched_id = None
+
+    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    logger.info('%s :: getting MySQL engine' % function_str)
     try:
-        query = 'SELECT id,validated FROM motifs_matched WHERE fp_id=%s AND metric_timestamp=%s AND `index`=%s AND size=%s' % (
-            str(fp_id), str(timestamp), str(index), str(size))
-        results = mysql_select(skyline_app, query)
-        for result in results:
-            matched_motif_id = int(result[0])
-            motif_validated = int(result[1])
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
     except Exception as e:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, e)
+        logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: %s :: engine not obtained' % function_str
+        logger.error(fail_msg)
+        return False, fail_msg, trace
+    try:
+        ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: failed to get ionosphere_matched_table meta - %s' % (
+            function_str, err))
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    try:
+        motifs_matched_table, log_msg, trace = motifs_matched_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: %s :: failed to get motifs_matched_table meta - %s' % (
+            function_str, err))
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    try:
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # query = 'SELECT id,validated FROM motifs_matched WHERE fp_id=%s AND metric_timestamp=%s AND `index`=%s AND size=%s' % (
+        #     str(fp_id), str(timestamp), str(index), str(size))
+        # results = mysql_select(skyline_app, query)
+        # for result in results:
+        #     matched_motif_id = int(result[0])
+        #     motif_validated = int(result[1])
+        query = select([motifs_matched_table.c.id, motifs_matched_table.c.validated]).\
+            where(motifs_matched_table.c.fp_id == int(fp_id)).\
+            where(motifs_matched_table.c.metric_timestamp == int(timestamp)).\
+            where(motifs_matched_table.c.index == int(index)).\
+            where(motifs_matched_table.c.size == int(size))
+        connection = engine.connect()
+        results = connection.execute(query)
+        for row in results:
+            matched_motif_id = row['id']
+            motif_validated = row['validated']
+        connection.close()
+        logger.info('%s :: matched_motif_id: %s, motif_validated: %s' % (
+            function_str, str(matched_motif_id), str(motif_validated)))
+
+    except Exception as err:
         logger.error('error :: %s :: failed to get motifs_matched id and validated from the database for fp_id %s - %s' % (
-            function_str, (fp_id), e))
+            function_str, (fp_id), err))
     if matched_motif_id:
         try:
-            query = 'SELECT id FROM ionosphere_matched WHERE fp_id=%s AND metric_timestamp=%s AND motifs_matched_id=%s' % (
-                str(fp_id), str(timestamp), str(matched_motif_id))
-            results = mysql_select(skyline_app, query)
-            for result in results:
-                ionosphere_matched_id = int(result[0])
-        except Exception as e:
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # query = 'SELECT id FROM ionosphere_matched WHERE fp_id=%s AND metric_timestamp=%s AND motifs_matched_id=%s' % (
+            #     str(fp_id), str(timestamp), str(matched_motif_id))
+            # results = mysql_select(skyline_app, query)
+            # for result in results:
+            #     ionosphere_matched_id = int(result[0])
+            query = select([ionosphere_matched_table.c.id]).\
+                where(ionosphere_matched_table.c.fp_id == int(fp_id)).\
+                where(ionosphere_matched_table.c.metric_timestamp == int(timestamp)).\
+                where(ionosphere_matched_table.c.motifs_matched_id == int(matched_motif_id))
+            connection = engine.connect()
+            results = connection.execute(query)
+            for row in results:
+                ionosphere_matched_id = row['id']
+            connection.close()
+            logger.info('%s :: ionosphere_matched_id: %s' % (
+                function_str, str(ionosphere_matched_id)))
+
+        except Exception as err:
             logger.error('error :: %s :: failed to get ionosphere_matched_id from the database for fp_id %s - %s' % (
-                function_str, (fp_id), e))
+                function_str, (fp_id), err))
+
+    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    if engine:
+        engine_disposal(engine)
+
     return matched_motif_id, motif_validated, ionosphere_matched_id

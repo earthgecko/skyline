@@ -2,6 +2,7 @@
 api_get_analysed_events.py
 """
 import logging
+from time import time
 from flask import request
 
 from settings import REMOTE_SKYLINE_INSTANCES
@@ -30,28 +31,42 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
-    from_timestamp = None
+    period = None
     try:
-        from_timestamp = int(request.args.get('from_timestamp'))
-        current_logger.info('api_get_analysed_events :: with from_timestamp: %s' % str(from_timestamp))
-    except Exception as err:
-        current_logger.error('error :: api get_analysed_events request no from_timestamp argument - %s' % err)
-        # @modified 20220509 - Feature #4530: namespace.analysed_events
-        #                      Release #4562 - v3.0.4
-        # Does not have the desired result
-        # return 'Bad Request', 400
-        return 400
-    until_timestamp = None
-    try:
-        until_timestamp = int(request.args.get('until_timestamp'))
-        current_logger.info('api_get_analysed_events :: with until_timestamp: %s' % str(until_timestamp))
-    except Exception as err:
-        current_logger.error('error :: api get_analysed_events request no until_timestamp argument - %s' % err)
-        # @modified 20220509 - Feature #4530: namespace.analysed_events
-        #                      Release #4562 - v3.0.4
-        # Does not have the desired result
-        # return 'Bad Request', 400
-        return 400
+        period = request.args.get('period')
+        current_logger.info('api_get_analysed_events :: with period: %s' % str(period))
+    except:
+        period = None
+    # @added 20220721 - Feature #4530: namespace.analysed_events
+    if period == 'None':
+        period = None
+
+    if not period:
+        from_timestamp = None
+        try:
+            from_timestamp = int(request.args.get('from_timestamp'))
+            current_logger.info('api_get_analysed_events :: with from_timestamp: %s' % str(from_timestamp))
+        except Exception as err:
+            current_logger.error('error :: api get_analysed_events request no from_timestamp argument - %s' % err)
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            #                      Release #4562 - v3.0.4
+            # Does not have the desired result
+            # return 'Bad Request', 400
+            return 400
+        until_timestamp = None
+        try:
+            until_timestamp = int(request.args.get('until_timestamp'))
+            current_logger.info('api_get_analysed_events :: with until_timestamp: %s' % str(until_timestamp))
+        except Exception as err:
+            current_logger.error('error :: api get_analysed_events request no until_timestamp argument - %s' % err)
+            # @modified 20220509 - Feature #4530: namespace.analysed_events
+            #                      Release #4562 - v3.0.4
+            # Does not have the desired result
+            # return 'Bad Request', 400
+            return 400
+    else:
+        from_timestamp = 0
+        until_timestamp = int(time())
 
     namespace = None
     try:
@@ -61,7 +76,7 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
         namespace = None
 
     try:
-        analysed_events_dict = get_analysed_events(current_skyline_app, from_timestamp, until_timestamp, namespace)
+        analysed_events_dict = get_analysed_events(current_skyline_app, period, from_timestamp, until_timestamp, namespace)
     except Exception as err:
         current_logger.error('error ::  %s :: get_analysed_events failed - %s' % (
             function_str, err))
@@ -77,14 +92,14 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
             # @modified 20220509 - Feature #4530: namespace.analysed_events
             #                      Release #4562 - v3.0.4
             # Correct parameters append _timestamp
-            api_uri = 'get_analysed_events=true&from_timestamp=%s&until_timestamp=%s&namespace=%s&cluster_call=true' % (
-                from_timestamp, until_timestamp, namespace)
+            api_uri = 'get_analysed_events=true&period=%s&from_timestamp=%s&until_timestamp=%s&namespace=%s&cluster_call=true' % (
+                period, from_timestamp, until_timestamp, namespace)
         else:
             # @modified 20220509 - Feature #4530: namespace.analysed_events
             #                      Release #4562 - v3.0.4
             # Correct parameters append _timestamp
-            api_uri = 'get_analysed_events=true&from_timestamp=%s&until_timestamp=%s&cluster_data=false&cluster_call=true' % (
-                from_timestamp, until_timestamp)
+            api_uri = 'get_analysed_events=true&period=%s&from_timestamp=%s&until_timestamp=%s&cluster_data=false&cluster_call=true' % (
+                period, from_timestamp, until_timestamp)
         try:
             remote_analysed_events = get_cluster_data(api_uri, 'analysed_events')
         except Exception as err:

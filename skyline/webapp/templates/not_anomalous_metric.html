@@ -9,6 +9,16 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if labelled_metric_name %}
+  {% set use_metric = labelled_metric_name %}
+{% else %}
+  {% set use_metric = metric %}
+{% endif %}
+{% if labelled_metric_base_name %}
+  {% set use_base_name = labelled_metric_base_name %}
+{% else %}
+  {% set use_base_name = metric %}
+{% endif %}
 
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -21,7 +31,7 @@
 		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
 		  <li class="active"><a href="?not_anomalous_metric=true&metric={{ metric }}&from_timestamp={{ from_timestamp }}&until_timestamp={{ until_timestamp }}"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous metric</span></span></a></li>
-		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></a></li>
+		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="not_anomalous_metric">
@@ -36,6 +46,20 @@
   </div>
 
   <h4><span class="logo"><span class="sky">Not ::</span> <span class="re">anomalous ::</span></span> {{ metric }}</h4>
+  {% if labelled_metric_base_name %}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>{{ metric }} - Full metric name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="word-break:break-all;"><smallcode>{{ labelled_metric_base_name }}</smallcode></td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
 
       <img src="panorama_images?image={{ not_anomalous_plot }}" alt="{{ metric }} - not anomalous timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ not_anomalous_plot }}<br><br>
@@ -46,6 +70,11 @@ Image file: {{ not_anomalous_plot }}<br><br>
       <img src="panorama_images?image={{ anomalies_plot }}" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ anomalies_plot }}<br><br>
   {% endif %}
+
+{% if timeseries_dict %}
+      <h4><span class="logo"><span class="sky">Timeseries data</span> <span class="re">{{ use_metric }}</span></span></h4>
+      {{ timeseries_dict }}
+{% endif %}
 
       </div>
     </div>

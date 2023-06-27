@@ -111,8 +111,13 @@
       {% for key in cloudburst_keys %}
         {% set value = cloudbursts_dict[cloudburst_id][key] %}
           {% if key == 'id' %}
-            <td onclick="window.location='?plot_cloudburst=true&cloudburst_id={{ value }}&metric={{ cloudbursts_dict[cloudburst_id]['metric'] }}'">
-              <a href="?plot_cloudburst=true&cloudburst_id={{ value }}&metric={{ cloudbursts_dict[cloudburst_id]['metric'] }}">{{ value }}</a>
+            {% if '_tenant_id="' in cloudbursts_dict[cloudburst_id]['metric'] %}
+              {% set use_metric = 'labelled_metrics.' + cloudbursts_dict[cloudburst_id]['metric_id']|string %}
+            {% else %}
+              {% set use_metric = cloudbursts_dict[cloudburst_id]['metric'] %}
+            {% endif %}
+            <td onclick="window.location='?plot_cloudburst=true&cloudburst_id={{ value }}&metric={{ use_metric }}'">
+              <a href="?plot_cloudburst=true&cloudburst_id={{ value }}&metric={{ use_metric }}">{{ value }}</a>
           {% else %}
             <td>
               {{ value }}
