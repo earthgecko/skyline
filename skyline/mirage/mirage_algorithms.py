@@ -8,6 +8,8 @@ from time import time
 import os.path
 import sys
 from os import getpid
+import copy
+
 import pandas
 import numpy as np
 import scipy
@@ -68,6 +70,35 @@ if CUSTOM_ALGORITHMS:
         from custom_algorithms import run_custom_algorithm_on_timeseries
     except:
         run_custom_algorithm_on_timeseries = None
+    # @added 20230112 - Task #4786: Switch from matrixprofile to stumpy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Call the loaded and compiled skyline_matrixprofile directly
+    # as incurring the stump jit compile every time without
+    # njit cache (not available on stumpy - https://github.com/TDAmeritrade/stumpy/issues/699)
+    # which makes using stumpy as a replacement for matrixprofile
+    # not straightforward.  It does not lends itself to
+    # performance in terms of once off initialisation speed.  In
+    # terms of running as an isolated, new process under the
+    # run_custom_algorithm_on_timeseries context it means the
+    # compile overhead is incurred every run, which makes it
+    # unfeasible to run as a custom_algorithm.  Initialisation
+    # and compile overhead can take > 30 seconds on a loaded
+    # running, analysing Skyline server. In Jypter, once the
+    # first stump run has occurred in Jupyter it drops to the
+    # between 0.09471047855913639 and 0.2464532721787691 seconds
+    # range.  Although the use of the matrixprofile algorithm is
+    # now very mature in Skyline and skyline_matrixprofile has
+    # run for a few years now and its output and functioning has
+    # been stable, fun and reliable, with a new library/implementation
+    # things change even the discords themselves vary slightly
+    # between matrixprofile-foundation/matrixprofile and stumpy.
+    # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # This incurs overhead in mirage_labelled_metrics too...
+    try:
+        from custom_algorithms.skyline_matrixprofile import skyline_matrixprofile
+    except Exception as err:
+        skyline_matrixprofile = None
 
 """
 This is no man's land. Do anything you want in here,
@@ -192,15 +223,31 @@ def first_hour_average(timeseries, second_order_resolution_seconds):
     are outside of three standard deviations of this value.
     """
     try:
-        last_hour_threshold = time() - (second_order_resolution_seconds - 3600)
+
+        # @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution
+        # last_hour_threshold = time() - (second_order_resolution_seconds - 3600)
+        last_hour_threshold = timeseries[-1][0] - 86400
+
         # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
         # Calculate the "equivalent" of hour and handle daily frequency data
         # Handle daily data
-        resolution = (timeseries[-1][0] - timeseries[-2][0])
+        # @modified 20230102 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # resolution = (timeseries[-1][0] - timeseries[-2][0])
+        try:
+            resolution = (timeseries[-1][0] - timeseries[-2][0])
+        except IndexError:
+            traceback_format_exc_string = 'IndexError on first_hour_average determining resolution for timeseries - %s' % str(timeseries[-5:])
+            algorithm_name = str(get_function_name())
+            record_algorithm_error(algorithm_name, traceback_format_exc_string)
+            return False
+
         if resolution > 80000 and resolution < 90000:
             last_hour_threshold = timeseries[-1][0] - ((resolution * 7) - resolution)
 
-        series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        # @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution
+        # series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        last_hour_threshold_end = last_hour_threshold + 3600
+        series = pandas.Series([x[1] for x in timeseries if x[0] > last_hour_threshold and x[0] < last_hour_threshold_end])
         mean = (series).mean()
         stdDev = (series).std()
         t = tail_avg(timeseries, second_order_resolution_seconds)
@@ -403,7 +450,16 @@ def ks_test(timeseries, second_order_resolution_seconds):
 
         # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
         # Calculate the "equivalent" of hour and handle daily frequency data
-        resolution = (timeseries[-1][0] - timeseries[-2][0])
+        # @modified 20230102 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # resolution = (timeseries[-1][0] - timeseries[-2][0])
+        try:
+            resolution = (timeseries[-1][0] - timeseries[-2][0])
+        except IndexError:
+            traceback_format_exc_string = 'IndexError on ks_test determining resolution for timeseries - %s' % str(timeseries[-5:])
+            algorithm_name = str(get_function_name())
+            record_algorithm_error(algorithm_name, traceback_format_exc_string)
+            return False
+
         if resolution > 80000 and resolution < 90000:
             hour_ago = timeseries[-1][0] - (86400 * 90)
             ten_minutes_ago = timeseries[-1][0] - (86400 * 30)
@@ -580,7 +636,10 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 # @modified 20210304 - Feature #3642: Anomaly type classification
 #                      Feature #3970: custom_algorithm - adtk_level_shift
 # Added triggered_algorithms
-def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present, triggered_algorithms):
+# @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
+#                      Task #4778: v4.0.0 - update dependencies
+# Added current_func
+def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func=None):
     """
     Run selected algorithms
     """
@@ -610,7 +669,15 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # @added 20220111 - Feature #3566: custom_algorithms
     # Set default values
     base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+
+    # @added 20220822 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if metric_name.startswith('labelled_metrics.'):
+        base_name = str(metric_name)
+
     custom_algorithms_to_run = {}
+
+    c_time = int(time())
 
     # @added 20220218 - Bug #4308: matrixprofile - fN on big drops
     check_trigger_history_enabled = False
@@ -633,9 +700,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
                 str(err)))
 
+    custom_algorithms_to_run = {}
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
-        custom_algorithms_to_run = {}
+        # @added 20220822 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        if metric_name.startswith('labelled_metrics.'):
+            base_name = str(metric_name)
+
         try:
             custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
             if DEBUG_CUSTOM_ALGORITHMS:
@@ -644,6 +716,32 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
         except:
             logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
             custom_algorithms_to_run = {}
+
+    if custom_algorithms_to_run or check_trigger_history_enabled:
+        from skyline_functions import get_redis_conn_decoded
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
+                str(err)))
+
+    # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+    #                   Feature #4702: numba optimisations
+    # Use start up key and allow numba cache files to be created
+    # it took mirage 246 seconds to build the numba cache files
+    max_custom_algorithm_execution_time = 0
+    if custom_algorithms_to_run:
+        start_key = '%s.starting' % skyline_app
+        try:
+            starting = redis_conn_decoded.exists('mirage.starting')
+            if starting:
+                max_custom_algorithm_execution_time = 300
+        except Exception as err:
+            logger.error('error :: exists failed on Redis mirage.starting key - %s' % (
+                err))
+
+    if custom_algorithms_to_run:
         for custom_algorithm in list(custom_algorithms_to_run.keys()):
             debug_logging = False
             try:
@@ -682,15 +780,19 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 logger.debug('debug :: mirage_algorithms :: running custom algorithm %s on %s' % (
                     str(custom_algorithm), str(base_name)))
                 start_debug_timer = timer()
-            run_custom_algorithm_on_timeseries = None
-            try:
-                from custom_algorithms import run_custom_algorithm_on_timeseries
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: mirage_algorithms :: loaded run_custom_algorithm_on_timeseries')
-            except:
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries')
+            # @modified 20230112 - Task #4778: v4.0.0 - update dependencies
+            # Load run_custom_algorithm_on_timeseries once.  HOWEVER I am not
+            # 100% certain if this will have the desired effect when multiple
+            # custom algorithms are run .... TODO check
+            # run_custom_algorithm_on_timeseries = None
+            # try:
+            #     from custom_algorithms import run_custom_algorithm_on_timeseries
+            #     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+            #         logger.debug('debug :: mirage_algorithms :: loaded run_custom_algorithm_on_timeseries')
+            # except:
+            #     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+            #         logger.error(traceback.format_exc())
+            #         logger.error('error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries')
             result = None
             anomalyScore = None
 
@@ -703,8 +805,19 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 # @added 20211125 - Feature #3566: custom_algorithms
                 custom_algorithms_run.append(custom_algorithm)
 
+                # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+                #                   Feature #4702: numba optimisations
+                # Use start up key and allow numba cache files to be created
+                if max_custom_algorithm_execution_time:
+                    custom_algorithms_to_run[custom_algorithm]['max_execution_time'] = max_custom_algorithm_execution_time
+                    logger.info('mirage_algorithms :: mirage.starting key exists so max_custom_algorithm_execution_time set to %s' % (
+                        str(max_custom_algorithm_execution_time)))
+
                 try:
-                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
+                    # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Added current_func
+                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
@@ -875,7 +988,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             if history_timestamp < prune_older_than:
                 pruned_histories += 1
                 continue
-            new_trigger_history[history_timestamp] = trigger_history[history_timestamp]
+            new_trigger_history[history_timestamp] = copy.deepcopy(trigger_history[history_timestamp])
         if pruned_histories:
             logger.info('mirage_algorithms :: pruned %s old entries from trigger_history for %s' % (
                 str(pruned_histories), base_name))
@@ -887,11 +1000,17 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             'final_ensemble': tmp_final_ensemble,
             'final_ensemble_true_count': tmp_final_ensemble.count(True),
             'algorithms_run': algorithms_run,
+            'timestamp': timeseries[-1][0],
             'value': timeseries[-1][1],
             'resolution': metric_resolution
         }
         last_timestamp = int(timeseries[-1][0])
-        trigger_history[last_timestamp] = trigger_dict
+        # @modified 20221205 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        # Use the current timestamp not the timeseries timestamp value because
+        # that timestamp will be the same each time for the downsampled period
+        # with the introduction of resampling Graphite and Redis data
+        # trigger_history[last_timestamp] = trigger_dict
+        trigger_history[c_time] = trigger_dict
         # @added 20220416 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         # When checking downsampled FULL_DURATION data and merged Graphite data
@@ -1013,15 +1132,19 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 logger.debug('debug :: mirage_algorithms :: running custom algorithm %s on %s' % (
                     str(custom_algorithm), str(base_name)))
                 start_debug_timer = timer()
-            run_custom_algorithm_on_timeseries = None
-            try:
-                from custom_algorithms import run_custom_algorithm_on_timeseries
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: mirage_algorithms :: loaded run_custom_algorithm_on_timeseries')
-            except:
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries')
+            # @modified 20230112 - Task #4778: v4.0.0 - update dependencies
+            # Load run_custom_algorithm_on_timeseries once.  HOWEVER I am not
+            # 100% certain if this will have the desired effect when multiple
+            # custom algorithms are run .... TODO check
+            # run_custom_algorithm_on_timeseries = None
+            # try:
+            #     from custom_algorithms import run_custom_algorithm_on_timeseries
+            #     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+            #         logger.debug('debug :: mirage_algorithms :: loaded run_custom_algorithm_on_timeseries')
+            # except:
+            #     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+            #         logger.error(traceback.format_exc())
+            #         logger.error('error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries')
             result = None
             anomalyScore = None
 
@@ -1030,8 +1153,38 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 use_debug_logging = True
 
             if run_custom_algorithm_on_timeseries:
+
+                # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+                #                   Feature #4702: numba optimisations
+                # Use start up key and allow numba cache files to be created
+                if max_custom_algorithm_execution_time:
+                    custom_algorithms_to_run[custom_algorithm]['max_execution_time'] = max_custom_algorithm_execution_time
+                    logger.info('mirage_algorithms :: mirage.starting key exists so max_custom_algorithm_execution_time set to %s' % (
+                        str(max_custom_algorithm_execution_time)))
+
                 try:
-                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
+                    # @modified 20230117 - Task #4786: Switch from matrixprofile to stumpy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Import skyline_matrixprofile and handle differently as
+                    # the stumpy implementation has long initial initialisation
+                    if custom_algorithm != 'skyline_matrixprofile':
+                        # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Added current_func
+                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
+                    else:
+                        # logger.debug('debug :: mirage_algorithms :: running skyline_matrixprofile')
+                        custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump', 'stumpy.stump', 'stump']
+                        algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                        if len(algorithm_modules_loaded) > 0:
+                            logger.debug('debug :: mirage_algorithms :: running skyline_matrixprofile, not importing stumpy as it is present in sys.modules')
+                        else:
+                            logger.debug('debug :: mirage_algorithms :: running skyline_matrixprofile, will import stumpy as it is not present in sys.modules')
+                        start_skmp = time()
+                        if current_func:
+                            custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['context'] = current_func
+                        result, anomalyScore = skyline_matrixprofile(skyline_app, getpid(), timeseries, custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+                        logger.debug('debug :: mirage_algorithms :: skyline_matrixprofile took %s seconds to run' % str(time() - start_skmp))
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
@@ -1116,12 +1269,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                                 str(err)))
                     recent_trigger_history = {}
                     last_timestamp = int(timeseries[-1][0])
-                    oldest_trigger_timestamp = last_timestamp - (metric_resolution * (trigger_history_override + 1))
+                    # oldest_trigger_timestamp = last_timestamp - (metric_resolution * (trigger_history_override + 1))
+                    oldest_trigger_timestamp = c_time - (metric_resolution * (trigger_history_override + 1))
                     # Self clean trigger_history
                     for trigger_timestamp in list(trigger_history.keys()):
                         if trigger_timestamp < oldest_trigger_timestamp:
                             continue
-                        recent_trigger_history[trigger_timestamp] = trigger_history[trigger_timestamp]
+                        recent_trigger_history[trigger_timestamp] = copy.deepcopy(trigger_history[trigger_timestamp])
+
                     logger.info('mirage_algorithms :: %s trigger_history count after removing entries older than %s: %s' % (
                         base_name, str(oldest_trigger_timestamp), str(len(recent_trigger_history))))
                     tmp_final_ensemble = ensemble + final_after_custom_ensemble
@@ -1131,10 +1286,16 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         'final_ensemble': tmp_final_ensemble,
                         'final_ensemble_count': tmp_final_ensemble.count(True),
                         'algorithms_run': algorithms_run,
+                        'timestamp': timeseries[-1][0],
                         'value': timeseries[-1][1],
                         'resolution': metric_resolution
                     }
-                    recent_trigger_history[last_timestamp] = trigger_dict
+                    # @modified 20221205 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                    # Use the current timestamp not the timeseries timestamp value because
+                    # that timestamp will be the same each time for the downsampled period
+                    # with the introduction of resampling Graphite and Redis data
+                    # recent_trigger_history[last_timestamp] = trigger_dict
+                    recent_trigger_history[c_time] = trigger_dict
                     try:
                         redis_conn_decoded.hset('mirage.trigger_history', base_name, str(recent_trigger_history))
                         logger.info('mirage_algorithms :: added event for %s to mirage.trigger_history: %s' % (base_name, str(trigger_dict)))
