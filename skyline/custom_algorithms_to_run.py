@@ -44,6 +44,19 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
         if namespaces:
             for namespace in namespaces:
                 if not run_custom_algorithm:
+
+                    # @added 20230616 - Feature #3566: custom_algorithms
+                    # Make a fast match for wildcards so that if a wildcard
+                    # is added for a custom_algorithm in analyzer, there is no
+                    # point in incurring the computational overhead of
+                    # matched_or_regexed_in_list
+                    if namespace in ['*', '.*']:
+                        run_custom_algorithm = True
+                        if debug:
+                            current_logger.debug('debug :: get_custom_algorithms_to_run :: %s - matched wildcard namespace - %s' % (
+                                base_name, str(namespace)))
+                        break
+
                     try:
                         run_custom_algorithm, run_custom_algorithm_matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, [namespace])
                     except:
@@ -58,6 +71,18 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                 algorithm_source = custom_algorithms[custom_algorithm]['algorithm_source']
             except:
                 algorithm_source = None
+
+            # @added 20230113 - Feature #4808: custom_algorithms - numba_cache_dirs
+            #                   Task #4786: Switch from matrixprofile to stumpy
+            #                   Task #4778: v4.0.0 - update dependencies
+            #                   Feature #4702: numba optimisations
+            #                   Task #4806: Manage NUMBA_CACHE_DIR
+            #                   Feature #3566: custom_algorithms
+            try:
+                numba_cache_dirs = custom_algorithms[custom_algorithm]['numba_cache_dirs']
+            except:
+                numba_cache_dirs = []
+
             try:
                 algorithm_parameters = custom_algorithms[custom_algorithm]['algorithm_parameters']
             except:
@@ -124,6 +149,13 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                 custom_algorithms_to_run[custom_algorithm] = {
                     'namespaces': namespaces,
                     'algorithm_source': algorithm_source,
+                    # @added 20230113 - Feature #4808: custom_algorithms - numba_cache_dirs
+                    #                   Task #4786: Switch from matrixprofile to stumpy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    #                   Feature #4702: numba optimisations
+                    #                   Task #4806: Manage NUMBA_CACHE_DIR
+                    #                   Feature #3566: custom_algorithms
+                    'numba_cache_dirs': numba_cache_dirs,
                     'algorithm_parameters': algorithm_parameters,
                     'max_execution_time': max_execution_time,
                     'consensus': consensus,

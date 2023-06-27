@@ -10,7 +10,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     from validate_settings import validate_settings_variables
 
-LOG_PATH = '/tmp'
+# @modified 20230107 - Task #4778: v4.0.0 - update dependencies
+# Added nosec for bandit B108:hardcoded_tmp_directory - Probable insecure usage of temp file/directory
+LOG_PATH = '/tmp'  # nosec B108
 skyline_app = 'test_settings'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)

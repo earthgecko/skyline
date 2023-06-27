@@ -19,6 +19,12 @@
 # @modified 20220506 - Release #4552: v3.0.2
 # @modified 20220509 - Release #4552: v3.0.3
 # @modified 20220511 - Release #4562: v3.0.4
+# @modified 20220611 - Branch #4300: prometheus
+# @modified 20230204 - Task #4778: v4.0.0 - update dependencies
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4964: dawn - redis-stack-server
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+# @modified 20230626 - Task #4962: Build and test skyline v4.0.0
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -59,12 +65,29 @@ REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
 # @modified 20220506 - Release #4552: v3.0.2
 # @modified 20220509 - Release #4552: v3.0.3
 # @modified 20220511 - Release #4562: v3.0.4
-SKYLINE_RELEASE="v3.0.4"                                   # The Skyline release to deploy
+SKYLINE_RELEASE="v4.0.0"                                   # The Skyline release to deploy
 # @added 20191016 - Branch #3262: py3
 INSTALL_GRAPHITE=1                                         # Install Graphite 0 = no, 1 = yes (CentOS 8 only)
+# @added 20230625 - Task #4962: Build and test skyline v4.0.0
+# Add the ability to install Prometheus and VictoriaMetrics
+# for testing purposes
+INSTALL_PROMETHEUS=0                                        # Install Prometheus 0 = no, 1 = yes (CentOS 8 only)
+PROMETHEUS_VERSION="2.45.0"
+INSTALL_VICTORIAMETRICS=0                                   # Install VictoriaMetric 0 = no, 1 = yes (CentOS 8 only)
+VICTORIAMETRICS_VERSION="1.87.6"
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 FLUX_SELF_API_KEY="$(echo ${HOSTNAME}_YOURown32charSkylineAPIkeySecret | sed 's/[^a-zA-Z0-9]//g' | head -c 32)"
-GRAPHITE_VERSION="1.1.8"
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+#GRAPHITE_VERSION="1.1.8"
+GRAPHITE_VERSION="1.1.10"
+# @added 20230624 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+#REDIS_BINARY="redis-server"
+REDIS_BINARY="redis-stack-server"
+# @added 20230624 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+# Options are repo, source, download
+REDIS_INSTALL_METHOD="download"
 
 COLOUR_OFF='\033[0m'  # Text Reset
 
@@ -106,7 +129,14 @@ fi
 # done
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 #REDIS_VERSION="redis-5.0.8"
-REDIS_VERSION="redis-5.0.14"
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4964: dawn - redis-stack-server
+#REDIS_VERSION="redis-5.0.14"
+REDIS_VERSION="redis-6.2.12"
+
+# @added 20230624 - Task #4964: dawn - redis-stack-server
+#                   Task #4962: Build and test skyline v4.0.0
+REDIS_STACK_VERSION="redis-stack-server-6.2.6-v7"
 
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to Python-2.7.16
@@ -119,7 +149,11 @@ REDIS_VERSION="redis-5.0.14"
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 #PYTHON_VERSION="3.8.6"
 #PYTHON_MAJOR_VERSION="3.8"
-PYTHON_VERSION="3.8.13"
+# @modified 20230204 - Task #4778: v4.0.0 - update dependencies
+#PYTHON_VERSION="3.8.13"
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+#PYTHON_VERSION="3.8.16"
+PYTHON_VERSION="3.8.17"
 PYTHON_MAJOR_VERSION="3.8"
 
 PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
@@ -129,9 +163,14 @@ PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 #PROJECT="skyline-py376"
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 #PROJECT="skyline-py386"
-PROJECT="skyline-py3813"
+# @modified 20230204 - Task #4778: v4.0.0 - update dependencies
+#PROJECT="skyline-py3813"
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+#PROJECT="skyline-py3816"
+PROJECT="skyline-py3817"
 #VIRTUALENV_VERSION="15.2.0"
 # @modified 20201016 - Branch #3068: SNAB
+# This is specifically for Graphite
 #VIRTUALENV_VERSION="16.7.9"
 VIRTUALENV_VERSION="16.7.10"
 
@@ -189,10 +228,19 @@ if [ -f /etc/lsb-release ]; then
     fi
     if [ "$DISTRIB_RELEASE" == "20.04" ]; then
       OS_MAJOR_VERSION="$DISTRIB_RELEASE"
+      CODENAME="focal"
+    fi
+# @added 20230625 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+# Added ubuntu 22.04
+    if [ "$DISTRIB_RELEASE" == "22.04" ]; then
+      OS_MAJOR_VERSION="$DISTRIB_RELEASE"
+      CODENAME="jammy"
     fi
   fi
 fi
 
+CENTOS_8=0
 if [ -f /etc/redhat-release ]; then
   CENTOS=$(cat /etc/redhat-release | grep -c "CentOS")
   if [ $CENTOS -eq 1 ]; then
@@ -226,12 +274,23 @@ if [ "$OS_MAJOR_VERSION" == "unknown" ]; then
   exit 1
 fi
 
-echo -e "\e[96m####    INSTALLING SKYLINE    #### $COLOUR_OFF"
+echo -e "\e[96m####    INSTALLING \e[31mSky\e[96mline     #### $COLOUR_OFF"
 echo "This will take 20-30 minutes on a cloud server"
 sleep 5
 
+# @added 20230624 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+# Do the user a favour if they are on Digitalocean otherwise
+# yum will fail
+if [ $CENTOS_8 -eq 1 ]; then
+# Actually just do it on any CentOS 8 node
+#  if [ -d /opt/digitalocean ]; then
+    dnf -y update rpm
+#  fi
+fi
+
 #### yum ####
-echo -e "\e[96m####    INSTALLING OS UPDATES    #### $COLOUR_OFF"
+echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING OS UPDATES    #### $COLOUR_OFF"
 sleep 1
 if [ "$OS" == "CentOS" ]; then
   if [ ! -f /tmp/skyline.dawn.yum.update.run.txt ]; then
@@ -266,9 +325,9 @@ if [ "$OS" == "Ubuntu" ]; then
 fi
 
 
-#### MySQL ####
+#### MariaDB ####
 if [ "$OS" == "CentOS" ]; then
-  echo -e "\e[96m####    INSTALLING MariaDB    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING MariaDB    #### $COLOUR_OFF"
   sleep 1
   if [ "$OS_MAJOR_VERSION" == "6" ]; then
     if [ ! -f /tmp/skyline.dawn.yum.mysql-server.install.run.txt ]; then
@@ -351,7 +410,7 @@ if [ "$OS" == "Ubuntu" ]; then
     fi
 
     if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
-      echo -e "\e[96m####    INSTALLING MariaDB REPO    #### $COLOUR_OFF"
+      echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING MariaDB REPO    #### $COLOUR_OFF"
       sleep 1
       cd /root || exit 1
       wget https://downloads.mariadb.com/MariaDB/mariadb_repo_setup
@@ -360,8 +419,12 @@ if [ "$OS" == "Ubuntu" ]; then
       ./mariadb_repo_setup --mariadb-server-version="mariadb-10.5"
     fi
 
-    if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
-        echo -e "\e[96m####    INSTALLING MariaDB    #### $COLOUR_OFF"
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+# Added ubuntu 22.04
+#    if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
+    if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "22.04" ]]; then
+        echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING MariaDB    #### $COLOUR_OFF"
         sleep 1
         echo "Installing mariadb-server"
         sleep 1
@@ -378,7 +441,7 @@ if [ "$OS" == "Ubuntu" ]; then
   fi
 fi
 
-#### Secure MySQL ####
+#### Secure MariaDB ####
 if [ ! -f /tmp/skyline.dawn.secure.mysql.txt ]; then
   echo "Securing MySQL"
   sleep 1
@@ -455,89 +518,99 @@ else
 fi
 
 #### Redis ####
-if [ ! -f /tmp/skyline.dawn.redis.make.txt ]; then
-  echo -e "\e[96m####    INSTALLING Redis build dependencies    #### $COLOUR_OFF"
-  sleep 1
-  echo "Installing requirements to build Redis from source and making"
-  sleep 1
-  if [ "$OS" == "CentOS" ]; then
-    yum -y install wget make gcc
-    # @added 20190822 - Branch #3002: docker
-# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
-#    if [ "$OS_MAJOR_VERSION" == "7" ]; then
-    if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
-      yum -y install gcc-c++ kernel-devel
+# @added 20230624 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+# Allow to use redis-stack-server
+if [ "$REDIS_BINARY" == "redis-server" ]; then
+  if [ ! -f /tmp/skyline.dawn.redis.make.txt ]; then
+    echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING Redis build dependencies    #### $COLOUR_OFF"
+    sleep 1
+    echo "Installing requirements to build Redis from source and making"
+    sleep 1
+    if [ "$OS" == "CentOS" ]; then
+      yum -y install wget make gcc net-tools
+      # @added 20190822 - Branch #3002: docker
+  # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+  #    if [ "$OS_MAJOR_VERSION" == "7" ]; then
+      if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
+        # IF redis 6 systemd-devel - https://github.com/redis/redis/issues/7217
+        yum -y install gcc-c++ kernel-devel systemd-devel
+      fi
+    else
+      # IF redis 6 systemd-devel - https://github.com/redis/redis/issues/7217
+      apt-get -y install wget make gcc libsystemd-dev pkg-config
     fi
+
+    mkdir -p /var/dump  # For Redis dumps, not required by skyline user
+    mkdir -p /opt/redis
+    cd /opt/redis || exit 1
+    if [ ! -f "/opt/redis/${REDIS_VERSION}.tar.gz" ]; then
+      echo -e "\e[96m####    Sky\e[31mline\e[96m - BUILDING AND INSTALLING Redis $REDIS_VERSION    #### $COLOUR_OFF"
+      sleep 2
+      echo "Fetching http://download.redis.io/releases/${REDIS_VERSION}.tar.gz"
+      wget "http://download.redis.io/releases/${REDIS_VERSION}.tar.gz"
+
+  #    https://packages.redis.io/redis-stack/redis-stack-server-6.2.6-v7.rhel8.x86_64.tar.gz
+
+      WGET_EXIT_CODE=$?
+      if [ $WGET_EXIT_CODE -ne 0 ]; then
+        echo -e "error :: failed to download Redis source from http://download.redis.io/releases/${REDIS_VERSION}.tar.gz - \e[31mFAIL $COLOUR_OFF"
+        exit 1
+      fi
+    fi
+    if [ ! -f "/opt/redis/${REDIS_VERSION}.tar.gz" ]; then
+      echo -e "error :: Redis source not found - /opt/redis/${REDIS_VERSION}.tar.gz - \e[31mFAIL $COLOUR_OFF"
+      exit 1
+    fi
+    if [ ! -d "/opt/redis/${REDIS_VERSION}" ]; then
+      echo "unpacking Redis source tarball /opt/redis/${REDIS_VERSION}.tar.gz"
+      tar xzf "${REDIS_VERSION}.tar.gz"
+      TAR_EXIT_CODE=$?
+      if [ $TAR_EXIT_CODE -ne 0 ]; then
+        echo -e "error :: tar failed to unpack Redis source - /opt/redis/${REDIS_VERSION}.tar.gz - \e[31mFAIL $COLOUR_OFF"
+        exit 1
+      fi
+    fi
+    cd "/opt/redis/${REDIS_VERSION}" || exit 1
+    echo "Running make in /opt/redis/${REDIS_VERSION}"
+    # IF redis 6 - https://github.com/redis/redis/issues/7217
+    make -j2 BUILD_WITH_SYSTEMD=yes USE_SYSTEMD=yes
+    MAKE_EXIT_CODE=$?
+    if [ $MAKE_EXIT_CODE -ne 0 ]; then
+      echo -e "error :: failed to make Redis in /opt/redis/${REDIS_VERSION} - \e[31mFAIL $COLOUR_OFF"
+      exit 1
+    fi
+    # Optionally here if you have the time or interest you can run
+    # make test
+    echo "True" > /tmp/skyline.dawn.redis.make.txt
   else
-    apt-get -y install wget make gcc
+    echo -e "Skipping installing requirements to build Redis from source and making, already done - \e[32mOK $COLOUR_OFF"
+    sleep 1
   fi
 
-  mkdir -p /var/dump  # For Redis dumps, not required by skyline user
-  mkdir -p /opt/redis
-  cd /opt/redis || exit 1
-  if [ ! -f "/opt/redis/${REDIS_VERSION}.tar.gz" ]; then
-    echo -e "\e[96m####    BUILDING AND INSTALLING Redis $REDIS_VERSION    #### $COLOUR_OFF"
-    sleep 2
-    echo "Fetching http://download.redis.io/releases/${REDIS_VERSION}.tar.gz"
-    wget "http://download.redis.io/releases/${REDIS_VERSION}.tar.gz"
-    WGET_EXIT_CODE=$?
-    if [ $WGET_EXIT_CODE -ne 0 ]; then
-      echo -e "error :: failed to download Redis source from http://download.redis.io/releases/${REDIS_VERSION}.tar.gz - \e[31mFAIL $COLOUR_OFF"
+  if [ ! -f /tmp/skyline.dawn.redis.make.install.txt ]; then
+    cd "/opt/redis/${REDIS_VERSION}" || exit 1
+    echo "Running make install in /opt/redis/${REDIS_VERSION}"
+    sleep 1
+    make install
+    MAKE_INSTALL_EXIT_CODE=$?
+    if [ $MAKE_INSTALL_EXIT_CODE -ne 0 ]; then
+      echo -e "error :: failed to make install for Redis in /opt/redis/${REDIS_VERSION} - \e[31mFAIL $COLOUR_OFF"
       exit 1
     fi
+    # Optionally here if you have the time or interest you can run
+    # make test
+    echo "True" > /tmp/skyline.dawn.redis.make.install.txt
+  else
+    echo -e "Skipping running make install in /opt/redis/${REDIS_VERSION}, already done - \e[32mOK $COLOUR_OFF"
+    sleep 1
   fi
-  if [ ! -f "/opt/redis/${REDIS_VERSION}.tar.gz" ]; then
-    echo -e "error :: Redis source not found - /opt/redis/${REDIS_VERSION}.tar.gz - \e[31mFAIL $COLOUR_OFF"
-    exit 1
-  fi
-  if [ ! -d "/opt/redis/${REDIS_VERSION}" ]; then
-    echo "unpacking Redis source tarball /opt/redis/${REDIS_VERSION}.tar.gz"
-    tar xzf "${REDIS_VERSION}.tar.gz"
-    TAR_EXIT_CODE=$?
-    if [ $TAR_EXIT_CODE -ne 0 ]; then
-      echo -e "error :: tar failed to unpack Redis source - /opt/redis/${REDIS_VERSION}.tar.gz - \e[31mFAIL $COLOUR_OFF"
-      exit 1
-    fi
-  fi
-  cd "/opt/redis/${REDIS_VERSION}" || exit 1
-  echo "Running make in /opt/redis/${REDIS_VERSION}"
-  make -j
-  MAKE_EXIT_CODE=$?
-  if [ $MAKE_EXIT_CODE -ne 0 ]; then
-    echo -e "error :: failed to make Redis in /opt/redis/${REDIS_VERSION} - \e[31mFAIL $COLOUR_OFF"
-    exit 1
-  fi
-  # Optionally here if you have the time or interest you can run
-  # make test
-  echo "True" > /tmp/skyline.dawn.redis.make.txt
-else
-  echo -e "Skipping installing requirements to build Redis from source and making, already done - \e[32mOK $COLOUR_OFF"
-  sleep 1
-fi
 
-if [ ! -f /tmp/skyline.dawn.redis.make.install.txt ]; then
-  cd "/opt/redis/${REDIS_VERSION}" || exit 1
-  echo "Running make install in /opt/redis/${REDIS_VERSION}"
-  sleep 1
-  make install
-  MAKE_INSTALL_EXIT_CODE=$?
-  if [ $MAKE_INSTALL_EXIT_CODE -ne 0 ]; then
-    echo -e "error :: failed to make install for Redis in /opt/redis/${REDIS_VERSION} - \e[31mFAIL $COLOUR_OFF"
-    exit 1
-  fi
-  # Optionally here if you have the time or interest you can run
-  # make test
-  echo "True" > /tmp/skyline.dawn.redis.make.install.txt
-else
-  echo -e "Skipping running make install in /opt/redis/${REDIS_VERSION}, already done - \e[32mOK $COLOUR_OFF"
-  sleep 1
-fi
-
-if [ ! -f /tmp/skyline.dawn.redis.install_server.txt ]; then
-  echo "Installing Redis, running /opt/redis/${REDIS_VERSION}/utils/install_server.sh"
-  sleep 1
-  # NOTE: there are suppposed to be six BLANK line here, they represent Enter X 6
-  /opt/redis/${REDIS_VERSION}/utils/install_server.sh <<EOF
+  if [ ! -f /tmp/skyline.dawn.redis.install_server.txt ]; then
+    echo "Installing Redis, running /opt/redis/${REDIS_VERSION}/utils/install_server.sh"
+    sleep 1
+    # NOTE: there are suppposed to be six BLANK line here, they represent Enter X 6
+    /opt/redis/${REDIS_VERSION}/utils/install_server.sh <<EOF
 
 
 
@@ -545,41 +618,173 @@ if [ ! -f /tmp/skyline.dawn.redis.install_server.txt ]; then
 
 
 EOF
-  REDIS_INSTALL_EXIT_CODE=$?
-EOF  # uncomment for the linter
-  if [ $REDIS_INSTALL_EXIT_CODE -ne 0 ]; then
-    echo -e "error :: /opt/redis/${REDIS_VERSION}/utils/install_server.sh failed - \e[31mFAIL $COLOUR_OFF"
+    REDIS_INSTALL_EXIT_CODE=$?
+  EOF  # uncomment for the linter
+    if [ $REDIS_INSTALL_EXIT_CODE -ne 0 ]; then
+      echo -e "error :: /opt/redis/${REDIS_VERSION}/utils/install_server.sh failed - \e[31mFAIL $COLOUR_OFF"
+      exit 1
+    fi
+    cat /etc/redis/6379.conf > /etc/redis/6379.conf.original.no.unixsocket
+    cat /etc/redis/6379.conf.original.no.unixsocket \
+      | sed -e 's/# unixsocketperm 700/# unixsocketperm 700\nunixsocket \/tmp\/redis\.sock\nunixsocketperm 777/1' \
+      | sed -e 's/# requirepass foobared/# requirepass foobared\nrequirepass '$REDIS_PASSWORD'/1' \
+      > /etc/redis/6379.conf
+    sed -i 's/CLIEXEC -p/CLIEXEC -a '$REDIS_PASSWORD' -p/g' /etc/init.d/redis_6379
+    /etc/init.d/redis_6379 stop
+    systemctl start redis_6379
+    REDIS_START_EXIT_CODE=$?
+    if [ $REDIS_START_EXIT_CODE -ne 0 ]; then
+      echo -e "error :: Redis failed to start with systemctl start redis_6379 - \e[31mFAIL $COLOUR_OFF"
+      exit 1
+    fi
+    systemctl enable redis_6379
+    echo "Checking Redis is running"
+    REDIS_PROCESS=$(ps aux | grep -v grep | grep -c "/usr/local/bin/redis-server 127.0.0.1:6379")
+    if [ $REDIS_PROCESS -eq 0 ]; then
+      echo -e "error :: Redis is not running - \e[31mFAIL $COLOUR_OFF"
+      exit 1
+    fi
+    echo "True" > /tmp/skyline.dawn.redis.install_server.txt
+  else
+    echo -e "Skipping installing Redis by running /opt/redis/${REDIS_VERSION}/utils/install_server.sh, already done - \e[32mOK $COLOUR_OFF"
+    sleep 1
+  fi
+fi
+
+# @added 20230624 - Task #4962: Build and test skyline v4.0.0
+#                   Task #4964: dawn - redis-stack-server
+# redis-stack-server
+# Create the file /etc/yum.repos.d/redis.repo with the following contents
+if [ "$REDIS_BINARY" == "redis-stack-server" ]; then
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING redis-stack-server and dependencies    #### $COLOUR_OFF"
+  mkdir -p /opt/redis-stack-server
+
+  CREATED=$(date)
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+    if [ "$REDIS_INSTALL_METHOD" == "repo" ]; then
+      echo "# @created $CREATED
+# @source /opt/skyline/github/skyline/utils/dawn/skyline.dawn.sh
+# The official Redis rpm
+[Redis]
+name=Redis
+baseurl=http://packages.redis.io/rpm/rhel${OS_MAJOR_VERSION}
+enabled=1
+gpgcheck=1" >> /etc/yum.repos.d/redis.repo
+      if [ ! -f /opt/redis-stack-server/redis.repo.gpg.key ]; then
+        wget -O /opt/redis-stack-server/redis.repo.gpg.key https://packages.redis.io/gpg
+        rpm --import /opt/redis-stack-server/redis.repo.gpg.key
+      fi
+    fi
+
+    # epel-release is required before all the build deps as it provide python-pip
+    yum -y install epel-release
+
+    yum -y install wget make gcc net-tools
+    # IF redis 6 systemd-devel - https://github.com/redis/redis/issues/7217
+    yum -y install gcc-c++ kernel-devel systemd-devel
+
+    yum -y install jemalloc-devel
+
+    if [ "$REDIS_INSTALL_METHOD" == "repo" ]; then
+      yum -y install redis-stack-server
+    fi
+  fi
+# Options are repo, source, download
+# REDIS_INSTALL_METHOD="download"
+#REDIS_STACK_VERSION="redis-stack-server-6.2.6-v7"
+  if [ "$REDIS_INSTALL_METHOD" == "download" ]; then
+    if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "8" ]]; then
+      REDIS_GROUP="nobody"
+      if [ ! -f "/opt/redis-stack-server/${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz" ]; then
+        echo "Downloading ${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+        wget -O "/opt/redis-stack-server/${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz" "https://packages.redis.io/redis-stack/${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+      fi
+      if [ ! -d "/opt/redis-stack-server/${REDIS_STACK_VERSION}" ]; then
+        echo "Unpacking ${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+        cd /opt/redis-stack-server
+        tar -zxvf "${REDIS_STACK_VERSION}.rhel8.x86_64.tar.gz"
+      fi
+    fi
+    if [[ "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "22.04" ]]; then
+      REDIS_GROUP="nogroup"
+      if [ ! -f "/opt/redis-stack-server/${REDIS_STACK_VERSION}.${CODENAME}.x86_64.tar.gz" ]; then
+        echo "Downloading ${REDIS_STACK_VERSION}.${CODENAME}.x86_64.tar.gz"
+        wget -O "/opt/redis-stack-server/${REDIS_STACK_VERSION}.${CODENAME}.x86_64.tar.gz" "https://packages.redis.io/redis-stack/${REDIS_STACK_VERSION}.${CODENAME}.x86_64.tar.gz"
+      fi
+      if [ ! -d "/opt/redis-stack-server/${REDIS_STACK_VERSION}" ]; then
+        echo "Unpacking ${REDIS_STACK_VERSION}.${CODENAME}.x86_64.tar.gz"
+        cd /opt/redis-stack-server
+        tar -zxvf "${REDIS_STACK_VERSION}.${CODENAME}.x86_64.tar.gz"
+      fi
+    fi
+    # Deploy as the yum package would deploy
+    mkdir -p /opt/redis-stack
+    chown nobody:$REDIS_GROUP /opt/redis-stack
+    rsync -az "/opt/redis-stack-server/${REDIS_STACK_VERSION}/" /opt/redis-stack/
+    chown -R nobody:$REDIS_GROUP /opt/redis-stack
+    mkdir -p /var/lib/redis-stack
+    chown -R nobody:$REDIS_GROUP /var/lib/redis-stack
+    if [ ! -f /etc/systemd/system/redis-stack-server.service ]; then
+      echo "[Unit]
+Description=Redis stack server
+Documentation=https://redis.io/
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+ExecStart=/opt/redis-stack/bin/redis-server /etc/redis-stack.conf
+WorkingDirectory=/var/lib/redis-stack
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/redis-stack-server.service
+        systemctl daemon-reload
+    fi
+
+  fi
+
+  DEPLOY_REDIS_STACK_SERVER_CONFIG=0
+  if [ -f /etc/redis-stack.conf ]; then
+    if [ ! -f /etc/redis-stack.conf.${REDIS_STACK_VERSION}.bak ]; then
+      cp /etc/redis-stack.conf /etc/redis-stack.conf.${REDIS_STACK_VERSION}.bak
+      DEPLOY_REDIS_STACK_SERVER_CONFIG=1
+    fi
+  else
+    DEPLOY_REDIS_STACK_SERVER_CONFIG=1
+  fi
+  if [ ! -f /opt/redis-stack-server/redis.6.2.github.conf ]; then
+    wget -O /opt/redis-stack-server/redis.6.2.github.conf https://raw.githubusercontent.com/redis/redis/6.2/redis.conf
+  fi
+
+  if [ $DEPLOY_REDIS_STACK_SERVER_CONFIG -eq 1 ]; then
+    cat /opt/redis-stack-server/redis.6.2.github.conf \
+      | sed -e 's/# unixsocketperm 700/# unixsocketperm 700\nunixsocket \/tmp\/redis\.sock\nunixsocketperm 777/1' \
+      | sed -e 's/# requirepass foobared/# requirepass foobared\nrequirepass '$REDIS_PASSWORD'/1' \
+      | sed -e 's/# loadmodule \/path\/to\/other_module.so/# loadmodule \/path\/to\/other_module\.so\nloadmodule \/opt\/redis-stack\/lib\/redistimeseries\.so/1' \
+      | sed -e 's/bind 127\.0\.0\.1 -::1/# bind 127\.0\.0\.1 -::1\nbind 127\.0\.0\.1/1' \
+      | sed -e 's/# supervised auto/# supervised auto\nsupervised systemd/1' \
+      | sed -e 's/dir \.\//# dir \.\/\ndir \/var\/lib\/redis-stack/1' \
+      | sed -e 's/# maxmemory-policy noeviction/# maxmemory-policy noeviction\nmaxmemory-policy noeviction/1' \
+      | sed -e 's/appendonly no/# appendonly no\nappendonly yes/1' \
+      | sed -e 's/# save 60 10000/# save 60 10000\n# Skyline reduce save I\/O\nsave 300 1\n save 60 200000\nsave 10 500000/1' \
+      > /opt/redis-stack-server/skyline.redis.6.2.conf
+    cat /opt/redis-stack-server/skyline.redis.6.2.conf > /etc/redis-stack.conf
+  fi
+
+  systemctl start redis-stack-server
+  REDIS_STACK_SERVER_INIT_EXIT_CODE=$?
+  if [ $REDIS_STACK_SERVER_INIT_EXIT_CODE -ne  0 ]; then
+    echo -e "error :: systemctl failed to start redis-stack-server - \e[31mFAIL $COLOUR_OFF"
     exit 1
   fi
-  cat /etc/redis/6379.conf > /etc/redis/6379.conf.original.no.unixsocket
-  cat /etc/redis/6379.conf.original.no.unixsocket \
-    | sed -e 's/# unixsocketperm 700/# unixsocketperm 700\nunixsocket \/tmp\/redis\.sock\nunixsocketperm 777/1' \
-    | sed -e 's/# requirepass foobared/# requirepass foobared\nrequirepass '$REDIS_PASSWORD'/1' \
-    > /etc/redis/6379.conf
-  sed -i 's/CLIEXEC -p/CLIEXEC -a '$REDIS_PASSWORD' -p/g' /etc/init.d/redis_6379
-  /etc/init.d/redis_6379 stop
-  systemctl start redis_6379
-  REDIS_START_EXIT_CODE=$?
-  if [ $REDIS_START_EXIT_CODE -ne 0 ]; then
-    echo -e "error :: Redis failed to start with systemctl start redis_6379 - \e[31mFAIL $COLOUR_OFF"
-    exit 1
-  fi
-  systemctl enable redis_6379
-  echo "Checking Redis is running"
-  REDIS_PROCESS=$(ps aux | grep -v grep | grep -c "/usr/local/bin/redis-server 127.0.0.1:6379")
-  if [ $REDIS_PROCESS -eq 0 ]; then
-    echo -e "error :: Redis is not running - \e[31mFAIL $COLOUR_OFF"
-    exit 1
-  fi
-  echo "True" > /tmp/skyline.dawn.redis.install_server.txt
-else
-  echo -e "Skipping installing Redis by running /opt/redis/${REDIS_VERSION}/utils/install_server.sh, already done - \e[32mOK $COLOUR_OFF"
-  sleep 1
+  echo "True" > /tmp/skyline.dawn.redis-stack-server.install.txt
+  systemctl enable redis-stack-server
 fi
 
 #### memcached ####
 if [ ! -f /tmp/skyline.dawn.memcached.install.txt ]; then
-  echo -e "\e[96m####    INSTALLING memcached    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING memcached    #### $COLOUR_OFF"
   sleep 2
   echo "Installing and starting memcached"
   sleep 1
@@ -616,9 +821,9 @@ else
   sleep 1
 fi
 
-#### Python virtualenv #####
+#### Python and virtualenv #####
 if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" ]; then
-  echo -e "\e[96m####    INSTALLING Python build dependencies    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING Python build dependencies    #### $COLOUR_OFF"
   sleep 2
   echo "Installing alternative Python $PYTHON_VERSION, this take a little while"
   sleep 4
@@ -645,6 +850,8 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
 # @added 20200104 - Branch #3262: py3
 #                   Info #2826: pandas and numpy no longer supporting Python 2.7
     yum -y install libffi-devel
+# @added 20220611 - Branch #4300: prometheus
+    yum -y install --enablerepo=powertools snappy-devel snappy
   fi
   if [ "$OS" == "Ubuntu" ]; then
     apt-get -y install build-essential
@@ -655,10 +862,13 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
 # On Ubuntu 16.04 Python 3.7 requires libffi-dev as per
 # https://github.com/pyenv/pyenv/issues/1183
     apt-get -y install libffi-dev
-    if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" ]]; then
+    if [[ "$OS_MAJOR_VERSION" == "18.04" || "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "22.04" ]]; then
       apt-get -y install python3-dev python3-pip build-essential nginx apache2-utils \
         lzma lzma-dev liblzma-dev
     fi
+# @added 20220611 - Branch #4300: prometheus
+# For google snappy decompression of Prometheus data
+    apt-get -y install libsnappy-dev
   fi
 
 # @added 20200104 - Branch #3262: py3
@@ -720,7 +930,7 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
   mkdir -p "${PYTHON_VIRTUALENV_DIR}/projects"
   cd "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}" || exit 1
 
-  echo -e "\e[96m####    BUILDING AND INSTALLING Python $PYTHON_VERSION    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - BUILDING AND INSTALLING Python $PYTHON_VERSION    #### $COLOUR_OFF"
   sleep 2
 
   wget -q "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
@@ -789,7 +999,7 @@ fi
 # Added the skyline user
 SKYLINE_USER=$(cat /etc/passwd | grep -c skyline)
 if [ $SKYLINE_USER -eq 0 ]; then
-  echo -e "\e[96m####    Creating skyline user    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - Creating skyline user    #### $COLOUR_OFF"
   echo "Creating the skyline /sbin/nologin user"
   sleep 2
   if [ "$OS" == "CentOS" ]; then
@@ -805,7 +1015,7 @@ fi
 
 #### Create a Skyline Python virtualenv ####
 if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/bin/python${PYTHON_MAJOR_VERSION}" ]; then
-  echo -e "\e[96m####    CREATING skyline virtualenv    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - CREATING skyline virtualenv    #### $COLOUR_OFF"
   echo "Setting up the Skyline virtualenv with permissions for the skyline user"
   sleep 2
   cd "${PYTHON_VIRTUALENV_DIR}/projects" || exit 1
@@ -854,7 +1064,7 @@ if [ -d /opt/skyline/github/skyline/skyline ]; then
   CLONE=0
 fi
 if [ $CLONE -eq 1 ]; then
-  echo -e "\e[96m####    CLONING skyline    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - CLONING skyline    #### $COLOUR_OFF"
   sleep 2
   mkdir -p /opt/skyline/github
   cd /opt/skyline/github || exit 1
@@ -905,7 +1115,7 @@ fi
 
 
 if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
-  echo -e "\e[96m####    INSTALLING skyline dependencies in the virtualenv    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING skyline dependencies in the virtualenv    #### $COLOUR_OFF"
   echo "Installing Skyline requirements.txt"
   sleep 2
 
@@ -920,10 +1130,13 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
 #  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==")
 # @modified 20220506 - Release #4552: v3.0.2
 # Changed pip to --use-deprecated=legacy-resolver
-  cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
-  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.1.txt
-  cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==" > /tmp/requirements.2.txt
-  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.2.txt
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+# With the switch from matrixprofile to stumpy these steps are no
+# longer required
+#  cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
+#  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.1.txt
+#  cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==" > /tmp/requirements.2.txt
+#  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.2.txt
 
   # @added 20190412 - Task #2926: Update dependencies
   #                   Bug #2590: mysql-connector-python - use_pure
@@ -945,13 +1158,17 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
 # Currently matrixprofile protobuf version conflicts with the opentelemetry
 # required version
 #  bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
-  cat /opt/skyline/github/skyline/requirements.txt | grep -v "^opentelemetry" > /tmp/requirements.3.txt
-  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.3.txt
-  cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep -v "1.11.1" > /tmp/requirements.4.txt
-  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.4.txt
-# Handle conflict between opentelemetry contrib packages and opentelemetry main
-  cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep "1.11.1" > /tmp/requirements.5.txt
-  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.5.txt
+# @modified 20230624 - Task #4962: Build and test skyline v4.0.0
+# With the switch from matrixprofile to stumpy these steps are no
+# longer required
+#  cat /opt/skyline/github/skyline/requirements.txt | grep -v "^opentelemetry" > /tmp/requirements.3.txt
+#  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.3.txt
+#  cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep -v "1.11.1" > /tmp/requirements.4.txt
+#  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.4.txt
+## Handle conflict between opentelemetry contrib packages and opentelemetry main
+#  cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep "1.11.1" > /tmp/requirements.5.txt
+#  "bin/pip${PYTHON_MAJOR_VERSION}" --use-deprecated=legacy-resolver install -r /tmp/requirements.5.txt
+  "bin/pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
 
   if [ $? -ne 0 ]; then
     echo -e "error :: failed to install Skyline requirements.txt - \e[31mFAIL $COLOUR_OFF"
@@ -962,15 +1179,17 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
 # @added 20180915 - Feature #2550: skyline.dawn.sh
 # Added permissions for skyline user
   chown skyline:skyline -R "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+  echo -e "\e[96mSky\e[31mline\e[96m${COLOUR_OFF} - installed a VERY BIG data science Python stack - \e[32mOK $COLOUR_OFF"
+  sleep 2
 else
   echo -e "Skipping installing Skyline requirements.txt, already done - \e[32mOK $COLOUR_OFF"
 fi
 
-#### Apache ####
+#### nginx ####
 cd /tmp || exit 1
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 # Change nginx
-echo -e "\e[96m####    INSTALLING nginx    #### $COLOUR_OFF"
+echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING nginx    #### $COLOUR_OFF"
 sleep 2
 if [ "$OS" == "CentOS" ]; then
 
@@ -1019,7 +1238,7 @@ else
   APACHE_NAME="apache2"
 fi
 
-# Self signed ssl cert
+####  Self signed ssl cert  ####
 # @modified 20220423 - Task #4534: Build and test skyline v3.0.0
 # Changed nginx
 #mkdir -p /etc/$APACHE_NAME/ssl
@@ -1080,6 +1299,7 @@ fi
 # @added 20220423 - Task #4534: Build and test skyline v3.0.0
 # Changed to nginx
 SKYLINE_HTTP_CONF_FILE="/etc/nginx/conf.d/skyline.conf"
+APACHE_NAME="nginx"
 
 if [ ! -f $SKYLINE_HTTP_CONF_FILE ]; then
   echo "Creating nginx config - $SKYLINE_HTTP_CONF_FILE"
@@ -1179,7 +1399,7 @@ if [ ! -f /opt/skyline/github/skyline/skyline/settings.py ]; then
 fi
 
 if [ ! -f /opt/skyline/github/skyline/skyline/settings.py.original ]; then
-  echo -e "\e[96m####    DEPLOYING skyline settings    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - DEPLOYING skyline settings    #### $COLOUR_OFF"
   echo "Populating variables in the Skyline settings.py"
   sleep 2
   cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.original
@@ -1245,9 +1465,9 @@ else
   sleep 1
 fi
 
-# Bug #2692: python-daemon does not support Python 3
+# Bug #2692: python-daemon does not support Python 3 buffer method
 if [ ! -f "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.skyline" ]; then
-  echo -e "\e[96m####    UPDATING python-daemon runner    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - UPDATING python-daemon runner    #### $COLOUR_OFF"
   sleep 2
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
@@ -1304,7 +1524,7 @@ if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "8" ]]; then
     fi
   fi
 fi
-if [[ "$OS_MAJOR_VERSION" == "18.04" ||  "$OS_MAJOR_VERSION" == "20.04" ]]; then
+if [[ "$OS_MAJOR_VERSION" == "18.04" ||  "$OS_MAJOR_VERSION" == "20.04"  ||  "$OS_MAJOR_VERSION" == "22.04" ]]; then
   if [ -z "$INSTALL_GRAPHITE" ]; then
     echo "Not installing Graphite"
   else
@@ -1316,7 +1536,7 @@ if [[ "$OS_MAJOR_VERSION" == "18.04" ||  "$OS_MAJOR_VERSION" == "20.04" ]]; then
 fi
 
 if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
-  echo -e "\e[96m####    INSTALLING Graphite build dependencies    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING Graphite build dependencies    #### $COLOUR_OFF"
   sleep 2
 
   if [ "$OS_MAJOR_VERSION" == "6" ]; then
@@ -1345,7 +1565,7 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
 
   #### Create a Graphite Python virtualenv ####
   if [ ! -f "/opt/graphite/bin/python${PYTHON_MAJOR_VERSION}" ]; then
-    echo -e "\e[96m####    CREATING Graphite virtualenv    #### $COLOUR_OFF"
+    echo -e "\e[96m####    Sky\e[31mline\e[96m - CREATING Graphite virtualenv    #### $COLOUR_OFF"
     sleep 2
     cd /opt || exit 1
 
@@ -1363,7 +1583,7 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
   fi
 
   if [ ! -f /opt/graphite/webapp/graphite/local_settings.py ]; then
-    echo -e "\e[96m####    INSTALLING Graphite    #### $COLOUR_OFF"
+    echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING Graphite    #### $COLOUR_OFF"
     echo "Installing Graphite"
     sleep 2
     cd /opt/graphite || exit 1
@@ -1384,6 +1604,22 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
 
     bin/"pip${PYTHON_MAJOR_VERSION}" install gunicorn
 
+    # @added 20230624 - Task #4962: Build and test skyline v4.0.0
+    # As of Python 3.8.17 and GRAPHITE_VERSION 1.1.10 (last was 1.1.8)
+    # the carbon and graphite-web no longer install in the correct location.
+    # This is a hack to move them as Graphite may be moving to another install
+    # method as per the long standing  https://github.com/graphite-project/graphite-web/issues/2566
+    if [ -d /opt/graphite/lib/python3.8/site-packages/opt/graphite/webapp/graphite ]; then
+      mv /opt/graphite/lib/python3.8/site-packages/opt/graphite/webapp/graphite /opt/graphite/webapp/
+    fi
+    if [ -d /opt/graphite/lib/python3.8/site-packages/opt/graphite/lib/carbon ]; then
+      mv /opt/graphite/lib/python3.8/site-packages/opt/graphite/lib/carbon /opt/graphite/lib/
+    fi
+    if [ -d /opt/graphite/lib/python3.8/site-packages/opt/graphite/lib/twisted ]; then
+      mv /opt/graphite/lib/python3.8/site-packages/opt/graphite/lib/twisted /opt/graphite/lib/
+    fi
+    mkdir -p /opt/graphite/storage/log/webapp
+
     sed "s/#SECRET_KEY.*/SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 64)'/g" \
       /opt/graphite/webapp/graphite/local_settings.py.example > /opt/graphite/webapp/graphite/local_settings.py
 
@@ -1394,8 +1630,10 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     # As per https://github.com/graphite-project/graphite-web/issues/2566
     deactivate
     cd
-    pip${PYTHON_MAJOR_VERSION} uninstall -y virtualenv
-    pip${PYTHON_MAJOR_VERSION} install virtualenv
+#    pip${PYTHON_MAJOR_VERSION} uninstall -y virtualenv
+#    pip${PYTHON_MAJOR_VERSION} install virtualenv
+    pip3 uninstall -y virtualenv
+    pip3 install virtualenv
   fi
 
   if [ "$OS" == "CentOS" ]; then
@@ -1428,7 +1666,7 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     fi
   fi
 
-  echo -e "\e[96m####    DEPLOYING Graphite nginx config    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - DEPLOYING Graphite nginx config    #### $COLOUR_OFF"
   sleep 2
 
   echo "upstream graphite {
@@ -1495,7 +1733,7 @@ server {
     systemctl restart nginx
   fi
 
-  echo -e "\e[96m####    DEPLOYING Graphite configs    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - DEPLOYING Graphite configs    #### $COLOUR_OFF"
   sleep 2
 
   cat /opt/skyline/github/skyline/utils/dawn/carbon.conf > /opt/graphite/conf/carbon.conf
@@ -1513,7 +1751,7 @@ server {
       echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-realy.py start" >> /etc/rc.d/rc.local
     fi
   fi
-  echo -e "\e[96m####    STARTING Graphite    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - STARTING Graphite    #### $COLOUR_OFF"
   sleep 2
 
   if [ "$OS" == "CentOS" ]; then
@@ -1526,7 +1764,7 @@ server {
   if [[ "$OS" == "Ubuntu" || "$OS" == "CentOS" ]]; then
 #      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
 #    if [[ "$OS_MAJOR_VERSION" == "16.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
-    if [[ "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
+    if [[ "$OS_MAJOR_VERSION" == "22.04" || "$OS_MAJOR_VERSION" == "20.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
       echo "[Unit]
 Description=carbon-cache instance %i (Graphite)
 
@@ -1592,7 +1830,7 @@ fi
 
 GRAPHITE_HOST_NOT_SET=$(cat /opt/skyline/github/skyline/skyline/settings.py | grep -c "GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'")
 if [ $GRAPHITE_HOST_NOT_SET -eq 1 ]; then
-  echo -e "\e[96m####    UPDATING skyline settings with Graphite variables    #### $COLOUR_OFF"
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - UPDATING skyline settings with Graphite variables    #### $COLOUR_OFF"
   sleep 2
 
   cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST
@@ -1605,9 +1843,333 @@ if [ $GRAPHITE_HOST_NOT_SET -eq 1 ]; then
     | sed -e "s/SKYLINE_METRICS_CARBON_PORT = .*/SKYLINE_METRICS_CARBON_PORT = 2003/g" \
     | sed -e "s/SERVER_METRICS_NAME = 'YOUR_HOSTNAME'/SERVER_METRICS_NAME = '$HOSTNAME'/g" > /opt/skyline/github/skyline/skyline/settings.py
 fi
+
 SKYLINE_SERVER_FQDN_IN_HOSTS=$(cat /etc/hosts | grep -c "$YOUR_SKYLINE_SERVER_FQDN")
 if [ $SKYLINE_SERVER_FQDN_IN_HOSTS -eq 0 ]; then
   echo "$YOUR_SERVER_IP_ADDRESS $YOUR_SKYLINE_SERVER_FQDN" >> /etc/hosts
+fi
+
+# @added 20230625 - Task #4962: Build and test skyline v4.0.0
+# Add the ability to install Prometheus and VictoriaMetrics
+# for testing purposes
+if [ $INSTALL_PROMETHEUS -eq 1 ]; then
+
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING VictoriaMetrics (TESTING ONLY)    #### $COLOUR_OFF"
+  mkdir -p /opt/victoriametrics
+
+  VM_USER=$(cat /etc/passwd | grep -c victoriametrics)
+  if [ $VM_USER -eq 0 ]; then
+    echo -e "\e[96m####    Sky\e[31mline\e[96m - Creating victoriametrics user    #### $COLOUR_OFF"
+    echo "Creating the victoriametrics /sbin/nologin user"
+    sleep 2
+    if [ "$OS" == "CentOS" ]; then
+      adduser --system --shell /sbin/nologin --home-dir /var/lib/victoria-metrics-data victoriametrics
+    fi
+    if [ "$OS" == "Ubuntu" ]; then
+      useradd --system --shell /sbin/nologin --home-dir /var/lib/victoria-metrics-data victoriametrics
+    fi
+  else
+    echo -e "Skipping, creating the victoriametrics /sbin/nologin user, already exists - \e[32mOK $COLOUR_OFF"
+    sleep 1
+  fi
+  mkdir -p /var/lib/victoria-metrics-data
+  chown -R victoriametrics:victoriametrics /var/lib/victoria-metrics-data
+  if [ ! -f "/opt/victoriametrics/victoria-metrics-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz" ]; then
+    wget -O "/opt/victoriametrics/victoria-metrics-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz" "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v${VICTORIAMETRICS_VERSION}/victoria-metrics-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz"
+  fi
+  if [ ! -f "/opt/victoriametrics/victoria-metrics-prod-v${VICTORIAMETRICS_VERSION}" ]; then
+    cd /opt/victoriametrics
+    tar -zxvf "victoria-metrics-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz"
+    mv victoria-metrics-prod victoria-metrics-prod-v${VICTORIAMETRICS_VERSION}
+    ln -sf "/opt/victoriametrics/victoria-metrics-prod-v${VICTORIAMETRICS_VERSION}" "/usr/local/bin/victoria-metrics-prod"
+  fi
+  if [ ! -f "/opt/victoriametrics/vmutils-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz" ]; then
+    wget -O "/opt/victoriametrics/vmutils-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz" "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v${VICTORIAMETRICS_VERSION}/vmutils-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz"
+  fi
+  if [ ! -f "/opt/victoriametrics/vmagent-prod-v${VICTORIAMETRICS_VERSION}" ]; then
+    cd /opt/victoriametrics
+    tar -zxvf "vmutils-linux-amd64-v${VICTORIAMETRICS_VERSION}.tar.gz"
+    APPS="vmagent
+vmalert
+vmauth
+vmbackup
+vmctl
+vmrestore"
+    for app in $APPS
+    do
+      mv ${app}-prod ${app}-prod-v${VICTORIAMETRICS_VERSION}
+      ln -sf "/opt/victoriametrics/${app}-prod-v${VICTORIAMETRICS_VERSION}" "/usr/local/bin/${app}-prod"
+    done
+  fi
+  echo "####    victoriametrics.service    ####
+[Unit]
+Description=High-performance, cost-effective and scalable time series database, long-term remote storage for Prometheus
+After=network.target
+
+[Service]
+Type=simple
+StartLimitBurst=5
+StartLimitInterval=0
+Restart=on-failure
+RestartSec=1
+User=victoriametrics
+Group=victoriametrics
+ExecStart=/usr/local/bin/victoria-metrics-prod -storageDataPath=/var/lib/victoria-metrics-data -retentionPeriod=30d -selfScrapeInterval=0s -httpListenAddr=127.0.0.1:8428 -loggerFormat=json
+ExecStop=/bin/kill -s SIGTERM \$MAINPID
+LimitNOFILE=65536
+LimitNPROC=32000
+
+[Install]
+WantedBy=multi-user.target" > /opt/victoriametrics/victoriametrics.service
+  ln -sf /opt/victoriametrics/victoriametrics.service /etc/systemd/system/victoriametrics.service
+  systemctl daemon-reload
+  systemctl start victoriametrics
+
+  echo "####   victoriametrics.conf   ####
+
+upstream victoriametrics {
+    server 127.0.0.1:8428 fail_timeout=1;
+    keepalive 10;
+}
+
+server {
+    listen 8886 default_server;
+
+    server_name $YOUR_SKYLINE_SERVER_FQDN;
+
+    allow $YOUR_OTHER_IP_ADDRESS/32;
+    allow $YOUR_SERVER_IP_ADDRESS/32;
+    deny all;
+
+
+    access_log /var/log/nginx/victoriametrics.access.log;
+    error_log  /var/log/nginx/victoriametrics.error.log;
+
+    gzip on;
+    gzip_types  text/plain application/javascript application/x-javascript text/javascript text/xml text/css text/html application/json application/x-font-ttf font/opentype image/svg+xml image/x-icon;
+    gzip_proxied    no-cache no-store private expired auth;
+    gzip_min_length 1000;
+
+    location = /favicon.ico {
+        return 204;
+    }
+
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+
+    location / {
+        # Allow from self
+        allow 127.0.0.1;
+        allow $YOUR_OTHER_IP_ADDRESS/32;
+        allow $YOUR_SERVER_IP_ADDRESS/32;
+        deny all;
+
+        gzip_types *;
+        proxy_pass         http://victoriametrics/;
+        proxy_connect_timeout 10;
+        proxy_read_timeout 60;
+        proxy_set_header Host              \$host;
+        proxy_set_header X-Real-IP         \$remote_addr;
+        proxy_set_header X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host   \$host;
+        proxy_set_header X-Forwarded-Server \$host;
+        proxy_set_header X-Forwarded-Port 8428;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+    }
+}" > /etc/nginx/conf.d/victoriametrics.conf
+  if [ "$OS" == "CentOS" ]; then
+    semanage port -a -t http_port_t  -p tcp 8886
+  fi
+  systemctl daemon-reload
+  nginx -t
+  systemctl restart nginx
+
+  # Prometheus
+  echo -e "\e[96m####    Sky\e[31mline\e[96m - INSTALLING Prometheus (TESTING ONLY)    #### $COLOUR_OFF"
+
+  cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.prometheus
+  cat /opt/skyline/github/skyline/skyline/settings.py.no.prometheus \
+    | sed -e "s/VICTORIAMETRICS_ENABLED = False/VICTORIAMETRICS_ENABLED = True/g" \
+    | sed -e "s/PROMETHEUS_INGESTION = False/PROMETHEUS_INGESTION = True/g" > /opt/skyline/github/skyline/skyline/settings.py
+
+  mkdir -p /opt/prometheus/prometheus
+  if [ ! -f "/opt/prometheus/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz" ]; then
+    echo "Downloading prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz"
+    wget -O "/opt/prometheus/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz" "https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz"
+  fi
+  if [ ! -d "prometheus-${PROMETHEUS_VERSION}" ]; then
+    cd /opt/prometheus
+    tar -xvf "prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz"
+    rsync -az /opt/prometheus/prometheus-${PROMETHEUS_VERSION}.linux-amd64/ /opt/prometheus/prometheus/
+  fi
+  PROMETHEUS_USER=$(cat /etc/passwd | grep -c prometheus)
+  if [ $PROMETHEUS_USER -eq 0 ]; then
+    echo -e "\e[96m####    Sky\e[31mline\e[96m - Creating prometheus user    #### $COLOUR_OFF"
+    echo "Creating the prometheus /sbin/nologin user"
+    sleep 2
+    if [ "$OS" == "CentOS" ]; then
+      adduser --system --shell /sbin/nologin --no-create-home prometheus
+    fi
+    if [ "$OS" == "Ubuntu" ]; then
+      useradd --system --shell /sbin/nologin --no-create-home prometheus
+    fi
+  else
+    echo -e "Skipping, creating the prometheus /sbin/nologin user, already exists - \e[32mOK $COLOUR_OFF"
+    sleep 1
+  fi
+  mkdir -p /etc/prometheus
+  mkdir -p /var/lib/prometheus
+  chown -R prometheus:prometheus /etc/prometheus
+  chown -R prometheus:prometheus /var/lib/prometheus
+  chown prometheus:prometheus /opt/prometheus/prometheus/prometheus
+  chown prometheus:prometheus /opt/prometheus/prometheus/promtool
+  ln -sf /opt/prometheus/prometheus/prometheus /usr/local/bin/prometheus
+  ln -sf /opt/prometheus/prometheus/promtool /usr/local/bin/promtool
+  sudo chown -R prometheus:prometheus /opt/prometheus/prometheus/consoles
+  sudo chown -R prometheus:prometheus /opt/prometheus/prometheus/console_libraries
+  ln -sf /opt/prometheus/prometheus/consoles /etc/prometheus/consoles
+  ln -sf /opt/prometheus/prometheus/console_libraries /etc/prometheus/console_libraries
+  echo "global:
+  scrape_interval: 60s
+  evaluation_interval: 1m
+  external_labels:
+    monitor: master
+scrape_configs:
+- job_name: prometheus
+  scrape_interval: 60s
+  scrape_timeout: 10s
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:9090
+  metrics_path: /metrics
+  metric_relabel_configs:
+  - source_labels:
+    - __name__
+    regex: (flag|go_.*|info_.*|prometheus_build_info{)
+    action: drop
+- job_name: victoria-metrics
+  scrape_interval: 60s
+  scrape_timeout: 10s
+  scheme: http
+  static_configs:
+  - targets:
+    - localhost:8428
+  metrics_path: /metrics
+  metric_relabel_configs:
+  - source_labels:
+    - __name__
+    regex: (flag|go_.*|info_.*)
+    action: drop
+remote_write:
+- url: https://$YOUR_SKYLINE_SERVER_FQDN/flux/prometheus/write
+  tls_config:
+    # Disable validation of the server certificate
+    insecure_skip_verify: true
+  queue_config:
+    max_samples_per_send: 8000
+  write_relabel_configs:
+  headers:
+    key: $FLUX_SELF_API_KEY
+    x-tenant-id: 1
+    x-server-id: 1
+    x-server-url: http://$YOUR_SKYLINE_SERVER_FQDN:9090
+    dropLabels: \"[['monitor','master'],['another_label_to_drop','with_value_of_*']]\"
+  metadata_config:
+    send: true
+    send_interval: 1m
+    max_samples_per_send: 1000" > /etc/prometheus/prometheus.yml
+  chown prometheus:prometheus /etc/prometheus/prometheus.yml
+  echo "[Unit]
+Description=Prometheus Monitoring framework
+Wants=basic.target
+After=basic.target network.target
+
+[Service]
+User=prometheus
+Group=prometheus
+ExecStart=/usr/local/bin/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --web.listen-address=127.0.0.1:9090 \
+  --web.console.templates=/etc/prometheus/consoles \
+  --web.console.libraries=/etc/prometheus/console_libraries \
+  --storage.tsdb.path=/var/lib/prometheus \
+  --storage.tsdb.retention.time=15d \
+  --log.format=json
+ExecReload=/bin/kill -HUP \$MAINPID
+KillMode=process
+Restart=always
+NoNewPrivileges=true
+ProtectHome=true
+ProtectSystem=full
+ProtectHostname=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+LockPersonality=true
+RestrictRealtime=yes
+RestrictNamespaces=yes
+MemoryDenyWriteExecute=yes
+PrivateDevices=yes
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/prometheus.service
+  systemctl daemon-reload
+  systemctl restart prometheus
+
+  echo "####   prometheus.conf   ####
+
+upstream @prometheus {
+    server 127.0.0.1:9090;
+}
+
+server {
+    listen 8887 default_server;
+
+    server_name $YOUR_SKYLINE_SERVER_FQDN;
+
+    allow $YOUR_OTHER_IP_ADDRESS/32;
+    allow $YOUR_SERVER_IP_ADDRESS/32;
+    deny all;
+
+  keepalive_timeout 75s 75s;
+
+  access_log /var/log/nginx/prometheus.access.log;
+  error_log  /var/log/nginx/prometheus.error.log;
+
+  location = /favicon.ico {
+      return 204;
+  }
+
+  root /usr/share/nginx/html;
+  index index.html index.htm;
+
+  location / {
+      # Allow from self
+      allow 127.0.0.1;
+      allow $YOUR_OTHER_IP_ADDRESS/32;
+      allow $YOUR_SERVER_IP_ADDRESS/32;
+      deny all;
+
+      gzip_types *;
+      proxy_pass         http://@prometheus/;
+      proxy_set_header   Host              \$host;
+      proxy_set_header   X-Real-IP         \$remote_addr;
+      proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
+      proxy_set_header   X-Forwarded-Host   \$host;
+      proxy_set_header   X-Forwarded-Server \$host;
+      proxy_set_header   X-Forwarded-Port 8887;
+      proxy_set_header   X-Forwarded-Proto \$scheme;
+
+  }
+}" > /etc/nginx/conf.d/prometheus.conf
+  if [ "$OS" == "CentOS" ]; then
+    semanage port -a -t http_port_t  -p tcp 8887
+  fi
+  nginx -t
+  systemctl restart nginx
 fi
 
 SKYLINE_SERVICES="horizon
@@ -1634,7 +2196,14 @@ systemctl daemon-reload
 mkdir -p /opt/skyline/github/skyline/skyline/webapp/static/dump
 chown skyline:skyline -R /opt/skyline/github
 
-echo -e "\e[96m####    STARTING skyline horizon service to seed data to    #### $COLOUR_OFF"
+# @added 20230625 - Task #4962: Build and test skyline v4.0.0
+# Add the ability to install Prometheus and VictoriaMetrics
+# for testing purposes
+if [ $INSTALL_PROMETHEUS -eq 1 ]; then
+  systemctl stop prometheus
+fi
+
+echo -e "\e[96m####    Sky\e[31mline\e[96m - STARTING skyline horizon service to seed data to    #### $COLOUR_OFF"
 sleep 2
 START_ERRORS=0
 systemctl start horizon
@@ -1648,7 +2217,7 @@ fi
 # @modified 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
 # Moved to before Graphite install if it is done so that carbon-relay does not
 # block the seed_data socket connection
-echo -e "\e[96m####    SEEDING skyline with data    #### $COLOUR_OFF"
+echo -e "\e[96m####    Sky\e[31mline\e[96m - SEEDING skyline with data    #### $COLOUR_OFF"
 if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
   echo "Stopping carbon-relay so it does not block the seed_data socket connection"
   systemctl stop carbon-relay
@@ -1663,7 +2232,7 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
   systemctl start carbon-relay
 fi
 
-echo -e "\e[96m####    STARTING skyline services    #### $COLOUR_OFF"
+echo -e "\e[96m####    Sky\e[31mline\e[96m - STARTING skyline services    #### $COLOUR_OFF"
 sleep 2
 for skyline_app in $SKYLINE_SERVICES
 do
@@ -1700,6 +2269,23 @@ do
   sudo -u skyline $i_service status
 done
 
+# @added 20230624 - Task #4962: Build and test skyline v4.0.0
+# To prevent /etc/systemd/system/carbon-relay.service:6: Invalid environment assignment, ignoring: /opt/graphite/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
+  systemctl restart carbon-cache
+  systemctl restart carbon-relay
+  systemctl restart graphite
+fi
+
+# @added 20230625 - Task #4962: Build and test skyline v4.0.0
+# Add the ability to install Prometheus and VictoriaMetrics
+# for testing purposes
+if [ $INSTALL_PROMETHEUS -eq 1 ]; then
+  systemctl restart prometheus
+fi
+
+echo -e "\e[96m####    Sky\e[31mline\e[96m - DEPLOYED!!!! \o/    #### $COLOUR_OFF"
+
 echo -e "Skyline is deployed and running - \e[32mOK $COLOUR_OFF"
 echo "Please visit https://$YOUR_SKYLINE_SERVER_FQDN"
 echo "And view the logs in /var/log/skyline"
@@ -1723,33 +2309,55 @@ echo "started at :: $STARTED"
 echo "ended at :: $ENDED"
 echo ""
 echo ""
-echo -e "\e[93mREMEMBER THIS IS A TEST DEPLOYMENT AND SHOULD BE DESTROYED OR RECONFIGURED AND HARDENED FOR PRODUCTION USE $COLOUR_OFF"
 # @modified 20180915 - Feature #2550: skyline.dawn.sh
 # Use the skyline user
 # echo "and Skyline is running as root"
 # @added 20191016 - Branch #3262: py3
 #echo "There is no GRAPHITE_HOST configured and there are some errors expected in the logs"
 #echo "related to no rows in MySQL tables and memcache, etc"
+echo ""
+echo -e "\e[32m############################### $COLOUR_OFF"
+echo -e "\e[32m#                             # $COLOUR_OFF"
+echo -e "\e[32m#       CONGRATULATIONS       # $COLOUR_OFF"
+echo -e "\e[32m#                             # $COLOUR_OFF"
+echo -e "\e[32m############################### $COLOUR_OFF"
+echo ""
+echo -e "\e[93mREMEMBER THIS IS A TEST DEPLOYMENT AND SHOULD BE DESTROYED OR RECONFIGURED AND HARDENED FOR PRODUCTION USE $COLOUR_OFF"
+echo ""
+echo "FIRST add the following record to you hosts file:"
+echo -e "\e[93m$YOUR_SERVER_IP_ADDRESS $YOUR_SKYLINE_SERVER_FQDN${COLOUR_OFF}"
+echo ""
+echo -e "Then visit \e[93mhttps://$YOUR_SKYLINE_SERVER_FQDN${COLOUR_OFF} (rememeber to add it to your hosts file and accept the self-signed SSL cert)"
+echo -e "In the \e[96msky\e[31mline${COLOUR_OFF}/Panaroma tab shortly you should see an anomaly (but there will be no graph)"
+echo -e "In the \e[96msky\e[31mline${COLOUR_OFF}/rebrow tab you should see Redis keys"
+echo -e "For \e[96msky\e[31mline${COLOUR_OFF}/rebrow your Redis password is $REDIS_PASSWORD"
 if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
-  echo "Graphite is available at http://$YOUR_SKYLINE_SERVER_FQDN:8888 from IP address $YOUR_OTHER_IP_ADDRESS"
-  echo "There are some errors expected in the logs related to no rows in MySQL tables and memcache, etc"
+  echo "Skyline should be sending its own metrics to Graphite"
+echo -e "To access Graphite visit \e[93mhttp://$YOUR_SKYLINE_SERVER_FQDN:8888 $COLOUR_OFF which is available from YOUR IP address $YOUR_OTHER_IP_ADDRESS"
 else
   echo "There is no GRAPHITE_HOST configured and there are some errors expected in the logs"
-  echo "related to no rows in MySQL tables and memcache, etc"
+fi
+if [ $INSTALL_PROMETHEUS -eq 1 ]; then
+  echo -e "To access Prometheus visit \e[93mhttp://$YOUR_SKYLINE_SERVER_FQDN:8887 $COLOUR_OFF which is available from YOUR IP address $YOUR_OTHER_IP_ADDRESS"
+  echo -e "To access VictoriaMetrics visit \e[93mhttp://$YOUR_SKYLINE_SERVER_FQDN:8886 $COLOUR_OFF which is available from YOUR IP address $YOUR_OTHER_IP_ADDRESS"
+fi
+echo "There are some errors expected in the logs related to no rows in MySQL tables and memcache, etc"
+echo "Skyline is installed in /opt/skyline/github/skyline and the deployed settings can be"
+echo "found in /opt/skyline/github/skyline/skyline/settings.py"
+echo "The $REDIS_BINARY conf is in /etc/redis-stack.conf (or /etc/redis/6379.conf if you opted for redis-server)"
+echo "nginx confs are in /etc/nginx/conf.d/"
+if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
+  echo "Graphite configs are available in /opt/graphite/conf"
 fi
 echo ""
-echo -e "\e[96m####    CONGRATULATIONS    #### $COLOUR_OFF"
-echo "Please visit https://$YOUR_SKYLINE_SERVER_FQDN (rememeber to add it to your hosts file)"
-echo "In the Panaroma tab shortly you should see an anomaly (not there will be no graph)"
-echo "In the rebrow tab you should see Redis keys"
-echo "For rebrow your Redis password is $REDIS_PASSWORD"
-echo ""
-echo "To stop the Skyline processes run:"
+echo "To stop the Skyline processes run you can run:"
+echo "systemctl stop <service>"
+echo "Or:"
 echo "kill \$(ps aux | grep -v grep | grep skyline | tr -s ' ' ',' | cut -d',' -f2 | tr '\n' ' ')"
 echo "Or for each service run:"
 echo "sudo -u skyline /opt/skyline/github/skyline/bin/<service>.d stop"
 echo ""
-echo -e "\e[93mNOT SUITABLE FOR PRODUCTION WITHOUT RECONFIGURATION AND HARDENED!!!! $COLOUR_OFF"
+echo -e "\e[93mNOT SUITABLE FOR PRODUCTION WITHOUT RECONFIGURATION AND HARDENING!!!! $COLOUR_OFF"
 echo ""
 echo ""
 # @added 20190412 - Task #2926: Update dependencies
@@ -1766,3 +2374,12 @@ if [ "$OS" == "CentOS" ]; then
     echo "       You have been advised, so now you know"
   fi
 fi
+
+echo -e "\e[96m####    Sky\e[31mline\e[96m - probably the best (OSS) anomaly detection stack in the world    #### $COLOUR_OFF"
+echo ""
+echo "Say goodbye to vendor algorithm tie-in and say hello to the most suitable, realtime, SOTA anomaly"
+echo "detection algortihms backed by the latest Python data science libraries and methods."
+echo ""
+echo "Here be numbas ..."
+echo ""
+echo ""

@@ -55,7 +55,14 @@ CREATE TABLE IF NOT EXISTS `sources` (
 
 CREATE TABLE IF NOT EXISTS `metrics` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'metric unique id',
+
+/*
+# @modified 20220622 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# Increase the column size to handle metric names and labels
   `metric` VARCHAR(255) NOT NULL COMMENT 'metric name',
+*/
+  `metric` VARCHAR(4096) NOT NULL COMMENT 'metric name',
 /*
 # @modified 20190501 - Task #2980: Change DB defaults from NULL
   `ionosphere_enabled` tinyint(1) DEFAULT NULL COMMENT 'are ionosphere rules enabled 1 or not enabled 0 on the metric',
@@ -83,7 +90,13 @@ CREATE TABLE IF NOT EXISTS `metrics` (
 # Added inactive and ionosphere_enabled to the index
   INDEX `metric` (`id`,`metric`)) ENGINE=MyISAM;
 */
+/*
+# @modified 20220622 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# Increase the column size and change engine to handle metric names and labels
   INDEX `metric` (`id`,`metric`,`ionosphere_enabled`,`inactive`)) ENGINE=MyISAM;
+*/
+  INDEX `metric` (`id`,`metric`(255),`ionosphere_enabled`,`inactive`)) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `anomalies` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'anomaly unique id',
@@ -723,8 +736,9 @@ CREATE TABLE IF NOT EXISTS `sql_versions` (
 /* INSERT INTO `sql_versions` (version) VALUES ('2.1.0-patch-dev-3978-3642'); */
 /* INSERT INTO `sql_versions` (version) VALUES ('2.1.0-patch-dev-4014'); */
 /* INSERT INTO `sql_versions` (version) VALUES ('2.1.0-patch-4164'); */
+/* INSERT INTO `sql_versions` (version) VALUES ('2.1.0'); */
 
-INSERT INTO `sql_versions` (version) VALUES ('2.1.0');
+INSERT INTO `sql_versions` (version) VALUES ('3.1.0');
 
 /*
 # mariadb
