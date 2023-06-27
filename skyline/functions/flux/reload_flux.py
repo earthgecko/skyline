@@ -3,7 +3,14 @@ reload_flux.py
 """
 import logging
 import os
-import subprocess
+# @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                      Task #4778: v4.0.0 - update dependencies
+# Added nosec for bandit B404:blacklist
+# Consider possible security implications associated with the subprocess module (CWE-78)
+# The subprocess is not using any parameter passed by an external user.  It is
+# simply being passed the flux pid file which is determined from settings.PID_PATH
+# in metrics_manager.py which is the only thing calling reload_flux
+import subprocess  # nosec B404
 from time import sleep
 
 
@@ -19,7 +26,6 @@ def reload_flux(current_skyline_app, flux_pid_file):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     current_pids = []
-
     current_logger.info('%s :: initiating flux reload' % function_str)
     flux_pid = 0
     if os.path.isfile(flux_pid_file):
@@ -43,17 +49,30 @@ def reload_flux(current_skyline_app, flux_pid_file):
     original_pids = subprocess.getoutput("ps aux | grep flux | grep gunicorn | tr -s ' ' ',' | cut -d',' -f2").split('\n')
     current_logger.info('%s :: original_pids: %s' % (function_str, str(original_pids)))
     kill_usr2_main_pid = subprocess.getstatusoutput('/usr/bin/kill -s USR2 %s' % str(flux_pid))
+
+    # @added 20220512 - Feature #4376: webapp - update_external_settings
+    # Write the pid of the current process to the flux.pid file to prevent
+    # service controls such as monit not finding the pid file during reload.
+    # This gets replaced by the new main process as soon as it is started.
+    try:
+        with open(flux_pid_file, 'w') as f:
+            f.write(str(os.getpid()))
+    except Exception as err:
+        current_logger.info('error :: %s :: failed to write the current process pid to %s - %s' % (
+            function_str, flux_pid_file, err))
+
     current_logger.info('%s :: pid: %s,  kill_usr2_main_pid: %s' % (function_str, str(flux_pid), str(kill_usr2_main_pid)))
     new_pids = subprocess.getoutput("ps aux | grep flux | grep gunicorn | tr -s ' ' ',' | cut -d',' -f2").split('\n')
     current_logger.info('%s :: new_pids: %s' % (function_str, str(new_pids)))
-    new_flux_pid = []
+    new_flux_pids = []
     for new_pid in new_pids:
         if new_pid in original_pids:
             continue
-        new_flux_pid.append(new_pid)
-    current_logger.info('%s :: new_flux_pid: %s' % (function_str, str(new_flux_pid)))
+        new_flux_pids.append(new_pid)
+    new_flux_pids.sort()
+    current_logger.info('%s :: new_flux_pid: %s' % (function_str, str(new_flux_pids)))
     with open(flux_pid_file, 'w') as fh:
-        fh.write(new_flux_pid[0])
+        fh.write(str(new_flux_pids[0]))
     for child_pid in worker_processes:
         kill_usr2_child_pid = subprocess.getstatusoutput('/usr/bin/kill -s USR2 %s' % str(child_pid))
         current_logger.info('%s :: child_pid: %s, kill_usr2_child_pid: %s' % (function_str, str(child_pid), str(kill_usr2_child_pid)))
@@ -79,6 +98,21 @@ def reload_flux(current_skyline_app, flux_pid_file):
                 current_logger.info('%s :: pid: %s, kill_kill_child_pid: %s' % (function_str, str(pid), str(kill_kill_child_pid)))
             except Exception as err:
                 current_logger.error('error :: %s :: pid: %s, err: %s' % (function_str, str(pid), err))
+
+    # @added 20220512 - Feature #4376: webapp - update_external_settings
+    # Added kill -9
+    sleep(1)
+    current_pids = subprocess.getoutput("ps aux | grep flux | grep gunicorn | tr -s ' ' ',' | cut -d',' -f2").split('\n')
+    kill_minus_9_pids_str = ''
+    for pid in original_pids:
+        if pid in current_pids:
+            kill_minus_9_pids_str = '%s %s' % (kill_minus_9_pids_str, str(pid))
+    if kill_minus_9_pids_str != '':
+        try:
+            kill_minus_9_pids = subprocess.getstatusoutput('/usr/bin/kill -9 %s' % str(kill_minus_9_pids_str))
+            current_logger.info('%s :: kill_minus_9_pids %s: %s' % (function_str, kill_minus_9_pids_str, str(kill_minus_9_pids)))
+        except Exception as err:
+            current_logger.error('error :: %s :: kill_minus_9_pids - %s, err: %s' % (function_str, kill_minus_9_pids_str, err))
 
     current_pids = subprocess.getoutput("ps aux | grep flux | grep gunicorn | tr -s ' ' ',' | cut -d',' -f2").split('\n')
 
