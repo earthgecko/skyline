@@ -11,6 +11,10 @@ from functions.database.queries.get_cloudburst_row import get_cloudburst_row
 from functions.graphite.get_metrics_timeseries import get_metrics_timeseries
 from database import get_engine, engine_disposal, cloudburst_table_meta
 
+# @added 20221103 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -81,13 +85,36 @@ def get_cloudburst_plot(cloudburst_id, base_name, shift, all_in_period=False):
         summarize_func = 'median'
         metrics_functions[base_name]['functions'] = {'summarize': {'intervalString': summarize_intervalString, 'func': summarize_func}}
 
-    try:
-        metrics_timeseries = get_metrics_timeseries(skyline_app, metrics_functions, from_timestamp, until_timestamp, log=False)
-    except Exception as err:
-        logger.error(traceback.format_exc())
-        logger.error('error :: %s :: get_metrics_timeseries failed - %s' % (
-            function_str, err))
-        raise
+    # @added 20221103 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    labelled_metric = False
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metric = True
+        timeseries = []
+        try:
+            timeseries = get_victoriametrics_metric(
+                skyline_app, base_name, from_timestamp, until_timestamp,
+                'list', 'object')
+        except Exception as err:
+            logger.error('error :: %s :: get_victoriametrics_metric failed for %s - %s' % (
+                function_str, base_name, err))
+            raise
+        if timeseries:
+            metrics_timeseries = {}
+            metrics_timeseries[base_name] = {}
+            metrics_timeseries[base_name]['timeseries'] = timeseries
+        else:
+            logger.warning('warning :: %s :: failed to retrieve timeseries from VictoriaMetrics for %s' % (
+                function_str, base_name))
+
+    if not labelled_metric:
+        try:
+            metrics_timeseries = get_metrics_timeseries(skyline_app, metrics_functions, from_timestamp, until_timestamp, log=False)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: get_metrics_timeseries failed - %s' % (
+                function_str, err))
+            raise
 
     try:
         timeseries = metrics_timeseries[base_name]['timeseries']
@@ -153,6 +180,16 @@ def get_cloudburst_plot(cloudburst_id, base_name, shift, all_in_period=False):
     try:
         cloudburst_anomalies = [item for item in timeseries if int(item[0]) >= cloudburst_dict['timestamp'] and int(item[0]) <= cloudburst_dict['end']]
         anomalies = anomalies + cloudburst_anomalies
+        logger.info(
+            'get_cloudburst_plot - adding %s cloudbursts: %s' % (
+                str(len(anomalies)), str(anomalies)))
+        aligned_timeseries = []
+        for ts, value in timeseries:
+            # aligned_timeseries.append([int(int(ts) // 600 * 600), value])
+            aligned_timeseries.append([int(int(ts) // resolution * resolution), value])
+        if aligned_timeseries:
+            timeseries = list(aligned_timeseries)
+
         df = pd.DataFrame(timeseries, columns=['date', 'value'])
         df['date'] = pd.to_datetime(df['date'], unit='s')
         datetime_index = pd.DatetimeIndex(df['date'].values)
@@ -167,6 +204,10 @@ def get_cloudburst_plot(cloudburst_id, base_name, shift, all_in_period=False):
         # anomaly_timestamps = [(int(item[0]) + (resolution * 4)) for item in anomalies]
         # anomaly_timestamps = [(int(item[0]) + (resolution * 3)) for item in anomalies]
         anomaly_timestamps = [(int(item[0]) + (resolution * shift)) for item in anomalies]
+
+        # anomaly_timestamps = [int(item[0]) for item in anomalies]
+        anomaly_timestamps = [int(int(ts) // resolution * resolution) for ts in anomaly_timestamps]
+
         for item in timeseries:
             if int(item[0]) in anomaly_timestamps:
                 anomalies_data.append(1)
