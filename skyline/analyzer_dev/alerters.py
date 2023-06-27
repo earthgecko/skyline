@@ -91,7 +91,7 @@ def alert_smtp(alert, metric):
         try:
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            image_data = urllib2.urlopen(link).read()  # nosec
+            image_data = urllib2.urlopen(link).read()  # nosec B310
         except urllib2.URLError:
             image_data = None
 
