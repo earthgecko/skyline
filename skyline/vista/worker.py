@@ -24,12 +24,19 @@ from numpy import format_float_positional
 
 import settings
 from skyline_functions import (
-    send_graphite_metric,
+    # @modified 20220726 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # send_graphite_metric,
     # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     get_redis_conn, get_redis_conn_decoded)
 # @added 20220429 - Feature #4536: Handle Redis failure
 from functions.flux.get_last_metric_data import get_last_metric_data
+
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'worker'
@@ -513,13 +520,11 @@ class Worker(Process):
                                 success = True
                             elif response.status_code == 204:
                                 success = True
-                        except:
+                        except Exception as err:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: worker :: failed to request %s' % str(flux_url))
+                            logger.error('error :: worker :: failed to request %s - %s' % (str(flux_url), err))
                         if not success:
-                            logger.error('error :: worker :: http status code - %s, reason - %s from %s' % (
-                                str(response.status_code), str(response.reason),
-                                str(flux_url)))
+                            logger.warning('warning :: worker :: failed to submit data to flux')
                             logger.debug('debug :: timeseries - %s' % str(timeseries))
 
                     if success:
@@ -568,7 +573,7 @@ class Worker(Process):
                 logger.info('worker :: metrics sent_to_flux in last 60 seconds - %s' % str(metrics_sent_to_flux))
                 send_metric_name = '%s.metrics_sent_to_flux' % skyline_app_graphite_namespace
                 try:
-                    send_graphite_metric(parent_skyline_app, send_metric_name, str(metrics_sent_to_flux))
+                    send_graphite_metric(self, parent_skyline_app, send_metric_name, str(metrics_sent_to_flux))
                     last_sent_to_graphite = int(time())
                     metrics_sent_to_flux = 0
                 except:
@@ -594,7 +599,7 @@ class Worker(Process):
                 logger.info('worker :: vista.fetcher.metrics.json Redis set count - %s' % str(len(metrics_data_list)))
                 send_metric_name = '%s.vista.fetcher.metrics.json' % skyline_app_graphite_namespace
                 try:
-                    send_graphite_metric(parent_skyline_app, send_metric_name, str(len(metrics_data_list)))
+                    send_graphite_metric(self, parent_skyline_app, send_metric_name, str(len(metrics_data_list)))
                     last_sent_to_graphite = int(time())
                 except:
                     logger.error(traceback.format_exc())
