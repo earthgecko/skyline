@@ -9,7 +9,12 @@ import tempfile
 from ast import literal_eval
 import re
 
-import unittest2 as unittest
+# @modified 20230110 - Task #4800: Deprecate unittest2
+#                      Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1
+# import unittest2 as unittest
+import unittest
+
 from mock import Mock, patch
 import os.path
 import numpy as np
@@ -43,11 +48,14 @@ if TSFRESH_BASELINE_VERSION == '0.1.1.post0.dev62+ng0f1b4c7':
     # various local version.
     TSFRESH_BASELINE_VERSION = '0.3.0'
 if 'post' in TSFRESH_BASELINE_VERSION:
-    travis_tsfresh_version = re.sub('\.post.*', '', TSFRESH_BASELINE_VERSION)
+    travis_tsfresh_version = re.sub('\\.post.*', '', TSFRESH_BASELINE_VERSION)
     TSFRESH_BASELINE_VERSION = travis_tsfresh_version
 
 # Directly declared every version hardcoded
-TSFRESH_BASELINE_VERSION = '0.17.9'
+# @modified 20230111 - Branch #4456: v0.19.1
+#                      Task #4778: v4.0.0 - update dependencies
+# TSFRESH_BASELINE_VERSION = '0.17.9'
+TSFRESH_BASELINE_VERSION = '0.19.1'
 
 python_version = int(sys.version_info[0])
 baseline_dir = os.path.dirname(os.path.realpath(__file__))
@@ -156,11 +164,9 @@ class TestTsfreshBaseline(unittest.TestCase):
         # Catch when df_created is None
         except AttributeError:
             self.assertTrue(df_created)
-            pass
         # Catch if not defined
         except NameError:
             self.assertTrue(df_created)
-            pass
 
         # Transpose, because we are humans
         df_t = None
@@ -175,15 +181,17 @@ class TestTsfreshBaseline(unittest.TestCase):
         # Catch when df_t_created is None
         except AttributeError:
             self.assertTrue(df_t_created)
-            pass
         # Catch if not defined
         except NameError:
             self.assertTrue(df_t_created)
-            pass
 
         # Write the transposed csv
         df_t.to_csv(t_fname_out)
         self.df_trans = df_features.transpose()
+
+        t_fname_out_always = '%s/baseline/last_run.%s.py%s.data.json.features.transposed.csv' % (
+            baseline_dir, str(tsfresh_version), str(python_version))
+        df_t.to_csv(t_fname_out_always)
 
         self.assertTrue(os.path.isfile(t_fname_out))
         return True
@@ -338,22 +346,20 @@ python skyline/tsfresh_features/generate_tsfresh_features.py'''
                 for oid, oname in sorted_tsfresh_features:
                     if int(oid) == int(nid):
                         if str(oname) != str(nname):
-                            '''
-# @added 20161204 - Task #1778: Update to tsfresh-0.3.0
-# Tests failing not tsfresh fault, no idea what it is, probably
-# something I am not doing correctly.  Questioning how complicated these
-# tests appear to be now, they were fine on tsfresh-0.1.2 and I can and
-# have visually determined that all is good in all the data, it should
-# pass but... this is the "that test should have passed meme"
-                        if str(oname) != str(nname):
-                            fail_msg = 'I have no idea why this is failing'
->                           self.assertEqual(str(oname), str(nname))
-E                           AssertionError: 'value__mean_abs_change_quantiles__qh_1.0__ql_0.0' != 'value__first_location_of_maximum'
-E                           - value__mean_abs_change_quantiles__qh_1.0__ql_0.0
-E                           + value__first_location_of_maximum
-
-tests/tsfresh_features_test.py:204: AssertionError
-'''
+                            # @added 20161204 - Task #1778: Update to tsfresh-0.3.0
+                            # Tests failing not tsfresh fault, no idea what it is, probably
+                            # something I am not doing correctly.  Questioning how complicated these
+                            # tests appear to be now, they were fine on tsfresh-0.1.2 and I can and
+                            # have visually determined that all is good in all the data, it should
+                            # pass but... this is the "that test should have passed meme"
+                            #                         if str(oname) != str(nname):
+                            #                             fail_msg = 'I have no idea why this is failing'
+                            # >                           self.assertEqual(str(oname), str(nname))
+                            # E                           AssertionError: 'value__mean_abs_change_quantiles__qh_1.0__ql_0.0' != 'value__first_location_of_maximum'
+                            # E                           - value__mean_abs_change_quantiles__qh_1.0__ql_0.0
+                            # E                           + value__first_location_of_maximum
+                            #
+                            # tests/tsfresh_features_test.py:204: AssertionError
                             fail_msg = 'I have no idea why this is failing, but a sort seemed to sort it out list time'
 
                             # @added 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
@@ -397,6 +403,13 @@ tests/tsfresh_features_test.py:204: AssertionError
         baseline_features = sorted(df_baseline_features, key=lambda row: row[0], reverse=True)
 
         dataframes_equal = df_t.equals(df_baseline)
+
+        # @modified 20230110 - Branch #4456: v0.19.1
+        #                      Task #4778: v4.0.0 - update dependencies
+        # fail_msg = 'calculated_features != baseline_features:\ncalculated_features: %s\nbaseline_features: %s' % (
+        #     str(calculated_features), str(baseline_features))
+        # self.assertEqual(calculated_features, baseline_features, msg=fail_msg)
+
         # NOT used better output with a list than a Dataframes comparison only
         # here for future reference if the pattern is needed at some point.
         dataframes_equal = True
@@ -433,6 +446,51 @@ export USE_TSFRESH_BASELINE=%s
 NOT in baseline   :: %s
 
 NOT in calculated :: %s''' % (t_fname_out_fail, t_fname_out_fail, str(not_in_baseline), str(not_in_calculated))
+
+        # @added 20230106 - Task #4778: v4.0.0 - update dependencies
+        #                   Branch #4456: v0.19.1
+        # It must be noted that the results of the features calculations will
+        # change in decimal precision or decimal values between Python versions
+        # and even machines.  These changes are acceptable from a Skyline
+        # perspective and are `np.is_close` close enough.  This has always been
+        # the case but only now getting around to adding a block to verify that
+        # rather than manually eyeball and comparing the baseline and calculated
+        # in jupyter.
+        if not features_equal:
+            decimal_changes = False
+            comparsion_dict = {}
+            missing_features = False
+            not_equal = False
+            for index, item in enumerate(not_in_baseline):
+                is_close = False
+                feature = item[0]
+                try:
+                    value = literal_eval(item[1])
+                except:
+                    value = np.nan
+                c_item = not_in_calculated[index]
+                if c_item[0] != feature:
+                    missing_features = True
+                    not_equal = True
+                    c_value = 'ERROR: feature not present'
+                else:
+                    try:
+                        c_value = literal_eval(c_item[1])
+                    except:
+                        value = np.nan
+                    is_close = np.isclose(np.array([value]), np.array([c_value]), rtol=1e-05, atol=1e-08, equal_nan=False)
+                    if not is_close:
+                        not_equal = True
+                    else:
+                        if value != c_value:
+                            decimal_changes = True
+                comparsion_dict[feature] = {'is_close': is_close, 'baseline': value, 'calculated': c_value}
+                if not not_equal and decimal_changes:
+                    print('%s - values are np.is_close (decimal changes only) - baseline: %s, calculated: %s - OK' % (
+                        feature, str(value), str(c_value)))
+                    features_equal = True
+                # Output warning or info with unittest
+
         if not features_equal:
             shutil.move(t_fname_out, t_fname_out_fail)
         self.assertTrue(features_equal, msg=fail_msg)
