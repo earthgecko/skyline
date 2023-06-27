@@ -1,11 +1,17 @@
 """
-non_derivative_metrics_list
+correlate_or_relate_with.py
 """
 import logging
 import traceback
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import settings
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+
+# @added 20220909 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.prometheus.metric_name_labels_parser import metric_name_labels_parser
 
 
 # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
@@ -42,13 +48,26 @@ def correlate_or_relate_with(
     except:
         correlate_namespaces_only = []
     try:
-        LUMINOSITY_CORRELATION_MAPS = settings.LUMINOSITY_CORRELATION_MAPS.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # LUMINOSITY_CORRELATION_MAPS = settings.LUMINOSITY_CORRELATION_MAPS.copy()
+        LUMINOSITY_CORRELATION_MAPS = copy.deepcopy(settings.LUMINOSITY_CORRELATION_MAPS)
     except:
         LUMINOSITY_CORRELATION_MAPS = {}
 
     # @added 20220504 - Task #4544: Handle EXTERNAL_SETTINGS in correlate_or_relate_with
     # Override with external_settings if they exist
     metric_namespace = metric.split('.')[0]
+
+    # @added 20220909 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handled labelled_metrics
+    metric_dict = {}
+    if '_tenant_id="' in metric:
+        try:
+            metric_dict = metric_name_labels_parser(current_skyline_app, metric)
+        except:
+            pass
+
     external_correlate_namespaces_only = []
     external_correlation_maps = {}
     if external_settings:
@@ -61,8 +80,24 @@ def correlate_or_relate_with(
             if not namespace:
                 continue
             if namespace:
-                if namespace != metric_namespace:
-                    continue
+
+                # @modified 20220909 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Handled labelled_metrics
+                # if namespace != metric_namespace:
+                #     continue
+                if not metric_dict:
+                    if namespace != metric_namespace:
+                        continue
+                else:
+                    matched = False
+                    for label in list(metric_dict['labels'].keys()):
+                        if namespace in [label, metric_dict['labels'][label]]:
+                            matched = True
+                            break
+                    if not matched:
+                        continue
+
                 # Set a default
                 try:
                     external_correlate_namespaces_only = external_settings[config_id]['correlate_namespaces_only']

@@ -1,5 +1,7 @@
 import logging
 import traceback
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import settings
 from matched_or_regexed_in_list import matched_or_regexed_in_list
@@ -52,7 +54,9 @@ def custom_stale_period(
 
     custom_stale_period_dict = {}
     try:
-        custom_stale_period_dict = settings.CUSTOM_STALE_PERIOD.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # custom_stale_period_dict = settings.CUSTOM_STALE_PERIOD.copy()
+        custom_stale_period_dict = copy.deepcopy(settings.CUSTOM_STALE_PERIOD)
     except AttributeError:
         stale_period = 500
         custom_stale_period_dict = {}
@@ -132,7 +136,24 @@ def custom_stale_period(
     if sorted_custom_stale_period_namespaces:
         custom_stale_period_namespaces = [x[0] for x in sorted_custom_stale_period_namespaces]
 
-    pattern_match, matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, custom_stale_period_namespaces, False)
+    # @added 20230411 - Task #4872: Optimise luminosity for labelled_metrics
+    all_custom_stale_period_namespaces = []
+    for custom_stale_period_namespace in custom_stale_period_namespaces:
+        tenant_id_str = None
+        if '.' not in custom_stale_period_namespace:
+            tenant_id_str = '"%s"' % custom_stale_period_namespace
+            all_custom_stale_period_namespaces.append(tenant_id_str)
+            custom_stale_period_dict[tenant_id_str] = custom_stale_period_dict[custom_stale_period_namespace]
+        if not custom_stale_period_namespace.endswith('.'):
+            dotted_custom_stale_period_namespace = '%s.' % custom_stale_period_namespace
+            custom_stale_period_dict[dotted_custom_stale_period_namespace] = custom_stale_period_dict[custom_stale_period_namespace]
+            all_custom_stale_period_namespaces.append(dotted_custom_stale_period_namespace)
+        else:
+            all_custom_stale_period_namespaces.append(custom_stale_period_namespace)
+        
+    # @modified 20230411 - Task #4872: Optimise luminosity for labelled_metrics
+    # pattern_match, matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, custom_stale_period_namespaces, False)
+    pattern_match, matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, all_custom_stale_period_namespaces, False)
     if pattern_match:
         try:
             matched_namespace = matched_by['matched_namespace']

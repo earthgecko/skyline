@@ -80,6 +80,15 @@ def get_all_active_db_metric_names(current_skyline_app, with_ids=False):
         current_logger.error('error :: %s :: no metric names returned from the DB' % (
             function_str))
 
+    # @added 20230202 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+    #                   Feature #4838: functions.metrics.get_namespace_metric.count
+    # Return a unique list as metric_names being a list can have multiple entries
+    # for the same metric, whereas metric_names_with_ids is a dict so can only
+    # have 1.  This just ensures that the metric_names and metric_names_with_ids
+    # are the same length to aviod any confusion.
+    if metric_names:
+        metric_names = list(set(metric_names))
+
     if with_ids:
         return metric_names, metric_names_with_ids
 

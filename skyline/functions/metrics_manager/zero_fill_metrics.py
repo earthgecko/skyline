@@ -17,7 +17,7 @@ logger = logging.getLogger(skyline_app_logger)
 def zero_fill_metrics(self, external_settings, unique_base_names):
     """
     Returns a list of base_names that are metrics that defined in
-    LAST_KNOWN_VALUE_NAMESPACES
+    ZERO_FILL_NAMESPACES and declared in any external_settings.
 
     :param current_skyline_app: the app calling the function
     :param external_settings: the external_settings dict
@@ -44,6 +44,9 @@ def zero_fill_metrics(self, external_settings, unique_base_names):
                 zero_fill_metric_namespaces = zero_fill_metric_namespaces + external_settings_zero_fill_metric_namespaces
         except KeyError:
             continue
+        except Exception as err:
+            logger.error('error :: metrics_manager :: zero_fill_metrics :: failed to interpolate external_settings for config_id %s - %s' % (
+                str(config_id), err))
 
     for i_base_name in unique_base_names:
         if not zero_fill_metric_namespaces:

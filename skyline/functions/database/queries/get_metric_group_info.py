@@ -3,6 +3,9 @@ Get anomalies for a metric id
 """
 import logging
 import traceback
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
 from sqlalchemy.sql import select
 
 from database import get_engine, engine_disposal, metric_group_info_table_meta
@@ -136,7 +139,9 @@ def get_metric_group_info(current_skyline_app, metric_id=0, params={'namespaces'
                 current_logger.error('error :: %s :: get_metric_group_info :: matched_or_regexed_in_list failed to determine if matched in namespaces: %s - %s' % (
                     current_skyline_app, str(namespaces), str(err)))
     if filtered_metric_groups_info:
-        metric_groups_info = filtered_metric_groups_info.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # metric_groups_info = filtered_metric_groups_info.copy()
+        metric_groups_info = copy.deepcopy(filtered_metric_groups_info)
 
     if engine:
         engine_disposal(current_skyline_app, engine)
