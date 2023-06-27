@@ -17,7 +17,22 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     import settings
     from mirage import Mirage
+
+    # @added 20220716 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from mirage_labelled_metrics import MirageLabelledMetrics
+
+    # @added 20221126 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    try:
+        VORTEX_ENABLED = settings.VORTEX_ENABLED
+    except:
+        VORTEX_ENABLED = True
+    if VORTEX_ENABLED:
+        from mirage_vortex import MirageVortex
+
     from mirage_algorithms import *
+
     from validate_settings import validate_settings_variables
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
@@ -41,6 +56,20 @@ class MirageAgent():
     def run(self):
         logger.info('agent starting skyline %s' % skyline_app)
         Mirage(getpid()).start()
+        # @added 20220716 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        try:
+            PROMETHEUS_INGESTION = settings.PROMETHEUS_INGESTION
+        except:
+            PROMETHEUS_INGESTION = False
+        if PROMETHEUS_INGESTION:
+            logger.info('agent starting skyline %s_labelled_metrics' % skyline_app)
+            MirageLabelledMetrics(getpid()).start()
+
+        # @added 20221125 - Feature #4734: mirage_vortex
+        if VORTEX_ENABLED:
+            logger.info('agent starting skyline mirage_vortex')
+            MirageVortex(getpid()).start()
 
         while 1:
             sleep(100)
