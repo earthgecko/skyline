@@ -324,7 +324,7 @@ class SNAB_flux_load_test(Thread):
         while len(snab_flux_load_test_metrics) < SNAB_FLUX_LOAD_TEST_METRICS:
             new_uuid = str(uuid.uuid4())
             new_metric_uuid = new_uuid.replace('-', '.')
-            slot = str(round(random.random(), 2))  # nosec
+            slot = str(round(random.random(), 2))  # nosec B311
             new_metric = '%s.%s.%s' % (SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX, slot, new_metric_uuid)
             snab_flux_load_test_metrics.append(new_metric)
             # Add to the snab_flux_load_test_metrics_set Redis set
@@ -390,7 +390,7 @@ class SNAB_flux_load_test(Thread):
                     'metrics': []
                 }
             if post_count < SNAB_FLUX_LOAD_TEST_METRICS_PER_POST:
-                post_data_dict['metrics'].append({'metric': metric, 'timestamp': str(epoch_timestamp), 'value': str(round(random.random(), 2))})  # nosec
+                post_data_dict['metrics'].append({'metric': metric, 'timestamp': str(epoch_timestamp), 'value': str(round(random.random(), 2))})  # nosec B311
                 post_count += 1
             if post_count == SNAB_FLUX_LOAD_TEST_METRICS_PER_POST:
                 response = None
