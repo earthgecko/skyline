@@ -17,6 +17,8 @@ def add_illuminance_entries(self, current_skyline_app, timestamp, illuminance_di
     :param timestamp: the timestamp to use as the hash key
     :param illuminance_dict: the illuminance_dict, which is a dict like, example
         {'test.metric.1': {'timestamp': 1651645359, 'value': 14.89}, 'test.metric.2': {'timestamp': 1651645379, 'value': 3.2}}
+        For an illuminance.all entry the 'triggered_algorithms' key is also
+        passed.
     :type self: object
     :type current_skyline_app: str
     :type timestamp: int
@@ -30,7 +32,23 @@ def add_illuminance_entries(self, current_skyline_app, timestamp, illuminance_di
     function_str = 'functions.illuminance.add_illuminance_entries'
 
     date_string = str(strftime('%Y-%m-%d', gmtime()))
-    illuminance_redis_hash = '%s.illuminance.%s' % (current_skyline_app, date_string)
+
+    # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+    # Check a dict item to see if it is an illuminance.all entry or a normal
+    # illuminance entry
+    illuminance_all = False
+    for metric in list(illuminance_dict.keys()):
+        if 'a' in illuminance_dict[metric].keys():
+            if isinstance(illuminance_dict[metric]['a'], list):
+                illuminance_all = True
+        break
+
+    # @modified 20220919 - Feature #4676: analyzer - illuminance.all key
+    # illuminance_redis_hash = '%s.illuminance.%s' % (current_skyline_app, date_string)
+    if illuminance_all:
+        illuminance_redis_hash = '%s.illuminance.all.%s' % (current_skyline_app, date_string)
+    else:
+        illuminance_redis_hash = '%s.illuminance.%s' % (current_skyline_app, date_string)
 
     try:
         hash_key = int(int(timestamp) // 60 * 60)
@@ -78,7 +96,11 @@ def add_illuminance_entries(self, current_skyline_app, timestamp, illuminance_di
             logger.error('error :: %s :: failed to hset %s in %s - %s' % (
                 function_str, str(hash_key), illuminance_redis_hash, err))
         try:
-            self.redis_conn_decoded.expire(illuminance_redis_hash, (86400 * 90))
+            # @modified 20220919 - Feature #4676: analyzer - illuminance.all key
+            if illuminance_all:
+                self.redis_conn_decoded.expire(illuminance_redis_hash, 90900)
+            else:
+                self.redis_conn_decoded.expire(illuminance_redis_hash, (86400 * 90))
         except Exception as err:
             logger.error('error :: %s :: failed set expire on %s - %s' % (
                 function_str, illuminance_redis_hash, err))
