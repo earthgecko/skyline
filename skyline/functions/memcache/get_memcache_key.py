@@ -56,6 +56,10 @@ def get_memcache_key(current_skyline_app, key):
         except Exception as err:
             current_skyline_app_logger = current_skyline_app + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.error('error :: %s :: failed to literal_eval the memcache key data for %s - %s' % (
-                function_str, key, err))
+            if 'malformed node or string' in str(err):
+                current_logger.warning('warning :: %s :: failed to literal_eval the memcache key data for %s - %s' % (
+                    function_str, key, err))
+            else:
+                current_logger.error('error :: %s :: failed to literal_eval the memcache key data for %s - %s' % (
+                    function_str, key, err))
     return data
