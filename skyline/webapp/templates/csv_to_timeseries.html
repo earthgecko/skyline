@@ -1,0 +1,98 @@
+{% block csv_to_timeseries_block %}
+
+<!-- BEGIN /utilities csv_to_timeseries_block block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities csv_to_timeseries_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+		  <li><a href="/utilities?mute_alerts_on"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></a></li>
+      <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
+      <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+      <li><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
+      <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+      <li><a href="/utilities?labelled_metrics_names"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></a></li>
+      <li><a href="/utilities?timeseries_graph"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></a></li>
+      <li class="active"><a href="/utilities?csv_to_timeseries"><span class="logo"><span class="sky">csv</span> - <span class="re">to timeseries</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Convert ::</span> <span class="re">csv to timeseries</span></h4>
+
+        Convert a csv file to a timeseries list.  Returns the timeseries in the json reponse in the data timeseries object e.g.<br>
+        <code>{"data":{"timeseries":[[1670147613,1.3],[1670147673,1.2],[1670147733,1.3],[1670147793,2.4],[1670147853,2.5]]},"status":{"succes":true}}</code><br>
+
+        The csv file must be of format:<br>
+        <code>timestamp,value</code><br>
+        <code>1670147613,1.3</code><br>
+        <code>1670147673,1.2</code><br>
+        or<br>
+        <code>timestamp,value</code><br>
+        <code>2022-12-04 09:54:22,1.3</code><br>
+        <code>2022-12-04 09:55:22,1.2</code><br>
+        <strong>Most date valid formats/strings will be coerced to UTC timestamps</strong><br>
+        <br>
+
+        <form action="csv_to_timeseries" method=post enctype=multipart/form-data>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Upload csv</td>
+  		        <td><select name="csv_to_timeseries">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>key <code>[required]</code></td>
+  		        <td><input type="text" name="key" value="{{ temporary_upload_key }}" />
+              The key to use to upload with, a temporary 10 minute key is provided in this upload page, but you can replace it with a real <code>settings.FLUX_UPLOADS_KEYS</code> parent_metric_namespace key if you wish.
+              </td>
+  		      </tr>
+  		      <tr>
+              <td>data file <code>[required]</code></td>
+              <td><input type="file" name="data_file" /></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Upload csv">
+      </form>
+
+  </div>
+
+	</div>
+	</div>
+	</div>
+
+<!-- END labelled_metrics_names_block -->
+{% endblock %}
