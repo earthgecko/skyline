@@ -3,16 +3,20 @@ import logging
 from time import time
 from os import getpid
 from timeit import default_timer as timer
+import traceback
 
 # @added 20200117 - Feature #3400: Identify air gaps in the metric data
 from collections import Counter
 from ast import literal_eval
+import copy
 
 import pandas
 import numpy as np
 import scipy
 import statsmodels.api as sm
-import traceback
+
+# @added 20221019 - Feature #4702: numba optimisations
+from numba import jit
 
 from settings import (
     ALGORITHMS,
@@ -64,6 +68,17 @@ if CUSTOM_ALGORITHMS:
         from custom_algorithms import run_custom_algorithm_on_timeseries
     except:
         run_custom_algorithm_on_timeseries = None
+    # @added 20230616 - Feature #3566: custom_algorithms
+    # Filter out only the ones in which analyzer is
+    # declared in use_with
+    ASSIGNED_CUSTOM_ALGORITHMS = {}
+    for custom_algorithm in CUSTOM_ALGORITHMS:
+        try:
+            if 'analyzer' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
+                ASSIGNED_CUSTOM_ALGORITHMS[custom_algorithm] = copy.deepcopy(CUSTOM_ALGORITHMS[custom_algorithm])
+        except:
+            pass
+    CUSTOM_ALGORITHMS = copy.deepcopy(ASSIGNED_CUSTOM_ALGORITHMS)
 
 # @added 20200604 - Mirage - populate_redis
 try:
@@ -141,6 +156,9 @@ if IDENTIFY_AIRGAPS:
     if CHECK_AIRGAPS:
         from skyline_functions import is_check_airgap_metric
 
+# @added 20221019 - Feature #4702: numba optimisations
+USE_NUMBA = True
+
 """
 This is no man's land. Do anything you want in here,
 as long as you return a boolean that determines whether the input timeseries is
@@ -156,7 +174,7 @@ To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
 """
 
 
-def tail_avg(timeseries):
+def tail_avg(timeseries, series):
     """
     This is a utility function used to calculate the average of the last three
     datapoints in the series as a measure, instead of just the last datapoint.
@@ -170,14 +188,55 @@ def tail_avg(timeseries):
         return timeseries[-1][1]
 
 
-def median_absolute_deviation(timeseries):
+# @added 20221020 - Feature #4702: numba optimisations
+# Added the numba_median_absolute_deviation function
+@jit(nopython=True, cache=True)
+def numba_median_absolute_deviation(y_np_array):
+    """
+    This is a numba implementation of median_absolute_deviation, it speeds up
+    the computation on a 1000 timeseries from 1.593684 seconds to
+    0.029051 seconds.
+    """
+    median = np.median(y_np_array)
+    demedianed = np.abs(y_np_array - median)
+    median_deviation = np.median(demedianed)
+
+    # The test statistic is infinite when the median is zero,
+    # so it becomes super sensitive. We play it safe and skip when this happens.
+    if median_deviation == 0:
+        return False
+    test_statistic = demedianed[-1] / median_deviation
+    # Completely arbitary...triggers if the median deviation is
+    # 6 times bigger than the median
+    if test_statistic > 6:
+        return True
+    return False
+
+
+# @modified 20221019 - Feature #4700: algorithms - single series
+# def median_absolute_deviation(timeseries):
+def median_absolute_deviation(timeseries, series):
     """
     A timeseries is anomalous if the deviation of its latest datapoint with
     respect to the median is X times larger than the median of deviations.
     """
     # logger.info('Running ' + str(get_function_name()))
+
+    # @added 20221020 - Feature #4702: numba optimisations
+    if USE_NUMBA:
+        try:
+            y_np_array = np.array([x[1] for x in timeseries], dtype=float)
+            result = numba_median_absolute_deviation(y_np_array)
+            return result
+        except:
+            traceback_format_exc_string = traceback.format_exc()
+            algorithm_name = str(get_function_name())
+            record_algorithm_error(algorithm_name, traceback_format_exc_string)
+            return None
+
     try:
-        series = pandas.Series([x[1] for x in timeseries])
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # series = pandas.Series([x[1] for x in timeseries])
         median = series.median()
         demedianed = np.abs(series - median)
         median_deviation = demedianed.median()
@@ -220,7 +279,7 @@ def median_absolute_deviation(timeseries):
     return False
 
 
-def grubbs(timeseries):
+def grubbs(timeseries, series):
     """
     A timeseries is anomalous if the Z score is greater than the Grubb's score.
     """
@@ -233,7 +292,9 @@ def grubbs(timeseries):
         # standard deviation which is more appropriate for time series data
         # series = scipy.array([x[1] for x in timeseries])
         # stdDev = scipy.std(series)
-        series = pandas.Series(x[1] for x in timeseries)
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # series = pandas.Series(x[1] for x in timeseries)
+
         stdDev = series.std()
 
         # Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27
@@ -245,7 +306,7 @@ def grubbs(timeseries):
             return False
 
         mean = np.mean(series)
-        tail_average = tail_avg(timeseries)
+        tail_average = tail_avg(timeseries, series)
         z_score = (tail_average - mean) / stdDev
         len_series = len(series)
         threshold = scipy.stats.t.isf(.05 / (2 * len_series), len_series - 2)
@@ -260,7 +321,7 @@ def grubbs(timeseries):
         return None
 
 
-def first_hour_average(timeseries):
+def first_hour_average(timeseries, series):
     """
     Calcuate the simple average over one hour, FULL_DURATION seconds ago.
     A timeseries is anomalous if the average of the last three datapoints
@@ -268,11 +329,16 @@ def first_hour_average(timeseries):
     """
 
     try:
-        last_hour_threshold = time() - (FULL_DURATION - 3600)
-        series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        # @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution
+        # last_hour_threshold = time() - (FULL_DURATION - 3600)
+        # series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        last_hour_threshold = timeseries[-1][0] - FULL_DURATION
+        last_hour_threshold_end = last_hour_threshold + 3600
+        series = pandas.Series([x[1] for x in timeseries if x[0] > last_hour_threshold and x[0] < last_hour_threshold_end])
+
         mean = (series).mean()
         stdDev = (series).std()
-        t = tail_avg(timeseries)
+        t = tail_avg(timeseries, series)
 
         return abs(t - mean) > 3 * stdDev
     except:
@@ -282,7 +348,16 @@ def first_hour_average(timeseries):
         return None
 
 
-def stddev_from_average(timeseries):
+@jit(nopython=True)
+def numba_stddev_from_average(series, t):
+    """
+    """
+    mean = np.mean(series)
+    stdDev = np.std(series)
+    return abs(t - mean) > 3 * stdDev
+
+
+def stddev_from_average(timeseries, series):
     """
     A timeseries is anomalous if the absolute value of the average of the latest
     three datapoint minus the moving average is greater than three standard
@@ -291,10 +366,11 @@ def stddev_from_average(timeseries):
     """
 
     try:
-        series = pandas.Series([x[1] for x in timeseries])
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # series = pandas.Series([x[1] for x in timeseries])
         mean = series.mean()
         stdDev = series.std()
-        t = tail_avg(timeseries)
+        t = tail_avg(timeseries, series)
 
         return abs(t - mean) > 3 * stdDev
     except:
@@ -304,7 +380,7 @@ def stddev_from_average(timeseries):
         return None
 
 
-def stddev_from_moving_average(timeseries):
+def stddev_from_moving_average(timeseries, series):
     """
     A timeseries is anomalous if the absolute value of the average of the latest
     three datapoint minus the moving average is greater than three standard
@@ -312,13 +388,18 @@ def stddev_from_moving_average(timeseries):
     respect to the short term trends.
     """
     try:
-        series = pandas.Series([x[1] for x in timeseries])
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # series = pandas.Series([x[1] for x in timeseries])
         if PANDAS_VERSION < '0.18.0':
             expAverage = pandas.stats.moments.ewma(series, com=50)
             stdDev = pandas.stats.moments.ewmstd(series, com=50)
         else:
             expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=50).mean()
             stdDev = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=50).std(bias=False)
+
+        # @added 20221019 - Feature #4702: numba optimisations
+        # Evaluated some numba implementations of ewm.mean() and created a .std()
+        # one and they were slower that pandas ewm
 
         if PANDAS_VERSION < '0.17.0':
             return abs(series.iget(-1) - expAverage.iget(-1)) > 3 * stdDev.iget(-1)
@@ -332,7 +413,21 @@ def stddev_from_moving_average(timeseries):
         return None
 
 
-def mean_subtraction_cumulation(timeseries):
+# @added 20221019 - Feature #4702: numba optimisations
+# Added the numba_mean_subtraction_cumulation function
+@jit(nopython=True, cache=True)
+def numba_mean_subtraction_cumulation(y_np_array):
+    """
+    This is a numba implementation of mean_subtraction_cumulation, it speeds up
+    the computation on a 1000 timeseries from 7.042794 seconds to
+    0.041275 seconds.
+    """
+    series_out = y_np_array - np.mean(y_np_array[0:len(y_np_array) - 1])
+    stdDev = np.std(series_out[0:len(series_out) - 1])
+    return abs(series_out[-1]) > 3 * stdDev
+
+
+def mean_subtraction_cumulation(timeseries, series):
     """
     A timeseries is anomalous if the value of the next datapoint in the
     series is farther than three standard deviations out in cumulative terms
@@ -340,20 +435,27 @@ def mean_subtraction_cumulation(timeseries):
     """
 
     try:
-        series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])
-        series = series - series[0:len(series) - 1].mean()
-        stdDev = series[0:len(series) - 1].std()
-        # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
-        # This expAverage is unused
-        # if PANDAS_VERSION < '0.18.0':
-        #     expAverage = pandas.stats.moments.ewma(series, com=15)
-        # else:
-        #     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
 
-        if PANDAS_VERSION < '0.17.0':
-            return abs(series.iget(-1)) > 3 * stdDev
+        if not USE_NUMBA:
+            series = pandas.Series([x[1] if x[1] else 0 for x in timeseries])
+            series = series - series[0:len(series) - 1].mean()
+            stdDev = series[0:len(series) - 1].std()
+            # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
+            # This expAverage is unused
+            # if PANDAS_VERSION < '0.18.0':
+            #     expAverage = pandas.stats.moments.ewma(series, com=15)
+            # else:
+            #     expAverage = pandas.Series.ewm(series, ignore_na=False, min_periods=0, adjust=True, com=15).mean()
+
+            if PANDAS_VERSION < '0.17.0':
+                return abs(series.iget(-1)) > 3 * stdDev
+            else:
+                return abs(series.iat[-1]) > 3 * stdDev
         else:
-            return abs(series.iat[-1]) > 3 * stdDev
+            series = np.array([x[1] if x[1] else 0 for x in timeseries], dtype=np.float64)
+            result = numba_mean_subtraction_cumulation(series)
+            return result
+
     except:
         traceback_format_exc_string = traceback.format_exc()
         algorithm_name = str(get_function_name())
@@ -361,7 +463,28 @@ def mean_subtraction_cumulation(timeseries):
         return None
 
 
-def least_squares(timeseries):
+# @added 20221019 - Feature #4702: numba optimisations
+# Added the numba_projected_errors function
+@jit(nopython=True, cache=True)
+def numba_projected_errors(x, y, m, c):
+    """
+    This is a numba implementation of the original calculation of the errors
+    loop.  It speeds up the loop on a 1000 timeseries from 8.727679 seconds to
+    2.785311 seconds.
+    """
+    errors = []
+    # Evaluate append once, not every time in the loop - this gains ~0.020 s on
+    # every timeseries potentially @earthgecko #1310
+    append_error = errors.append
+    for i, value in enumerate(y):
+        projected = m * x[i] + c
+        error = value - projected
+        # errors.append(error) # @earthgecko #1310
+        append_error(error)
+    return errors
+
+
+def least_squares(timeseries, series):
     """
     A timeseries is anomalous if the average of the last three datapoints
     on a projected least squares model is greater than three sigma.
@@ -393,20 +516,37 @@ def least_squares(timeseries):
         # m, c = np.linalg.lstsq(A, y)[0]
         m, c = np.linalg.lstsq(A, y, rcond=-1)[0]
 
-        errors = []
-        # Evaluate append once, not every time in the loop - this gains ~0.020 s on
-        # every timeseries potentially @earthgecko #1310
-        append_error = errors.append
+        # @added 20221019 - Feature #4702: numba optimisations
+        # Although numba supports np.linalg testing converting the above function
+        # to use a jit function resulted in a massive slowdown.  Firstly there
+        # are problems with using np.vstack without converting the np array lists
+        # to a tuple (which is "reflection" in numba speak and is to be deprecated
+        # soon).  Secondly this implemented on a 1000 loop takes
+        # least_squares 1000 loop run took 8.727679 seconds
+        # The numba implementation takes
+        # nb_least_squares_and_nb_errors 1000 loop run took 64.184817 seconds!!!
+        # A vast improvement was found in creating a numba function to replace
+        # the errors function/iteration below
+        # least_squares_and_nb_errors_only 1000 loop run took 2.785311 seconds
 
-        # Further a question exists related to performance and accruracy with
-        # regards to how many datapoints are in the sample, currently all datapoints
-        # are used but this may not be the ideal or most efficient computation or
-        # fit for a timeseries... @earthgecko is checking graphite...
-        for i, value in enumerate(y):
-            projected = m * x[i] + c
-            error = value - projected
-            # errors.append(error) # @earthgecko #1310
-            append_error(error)
+        # @modified 20221019 - Feature #4702: numba optimisations
+        if not USE_NUMBA:
+            errors = []
+            # Evaluate append once, not every time in the loop - this gains ~0.020 s on
+            # every timeseries potentially @earthgecko #1310
+            append_error = errors.append
+
+            # Further a question exists related to performance and accruracy with
+            # regards to how many datapoints are in the sample, currently all datapoints
+            # are used but this may not be the ideal or most efficient computation or
+            # fit for a timeseries... @earthgecko is checking graphite...
+            for i, value in enumerate(y):
+                projected = m * x[i] + c
+                error = value - projected
+                # errors.append(error) # @earthgecko #1310
+                append_error(error)
+        else:
+            errors = numba_projected_errors(x, y, m, c)
 
         if len(errors) < 3:
             return False
@@ -430,7 +570,86 @@ def least_squares(timeseries):
         return None
 
 
-def histogram_bins(timeseries):
+# @added 20221019 - Feature #4702: numba optimisations
+# Added the numba get_bin_edges, compute_bin and numba_histogram functions
+# based on https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html
+@jit(nopython=True, cache=True)
+def get_bin_edges(a, bins):
+    """
+    https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html
+    """
+    bin_edges = np.zeros((bins + 1,), dtype=np.float64)
+    a_min = a.min()
+    a_max = a.max()
+    delta = (a_max - a_min) / bins
+    for i in range(bin_edges.shape[0]):
+        bin_edges[i] = a_min + i * delta
+
+    bin_edges[-1] = a_max  # Avoid roundoff error on last point
+    return bin_edges
+
+
+@jit(nopython=True, cache=True)
+def compute_bin(x, bin_edges):
+    """
+    https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html
+    """
+    # assuming uniform bins for now
+    n = bin_edges.shape[0] - 1
+    a_min = bin_edges[0]
+    a_max = bin_edges[-1]
+
+    # special case to mirror NumPy behavior for last bin
+    if x == a_max:
+        return n - 1  # a_max always in last bin
+
+    n_bin = int(n * (x - a_min) / (a_max - a_min))
+
+    if n_bin < 0 or n_bin >= n:
+        return None
+    return n_bin
+
+
+@jit(nopython=True, cache=True)
+def numba_histogram(a, bins):
+    """
+    https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html
+    """
+    hist = np.zeros((bins,), dtype=np.intp)
+    bin_edges = get_bin_edges(a, bins)
+
+    for x in a.flat:
+        n_bin = compute_bin(x, bin_edges)
+        if n_bin is not None:
+            hist[int(n_bin)] += 1
+
+    return hist, bin_edges
+
+
+# @added 20221019 - Feature #4702: numba optimisations
+# Added the numba_histogram_bins to iterate the bins generated by numba_histogram
+# The original histogram_bins 1000 loop run took 1.790279 seconds
+# The numba_histogram_bins 1000 loop run took 0.021249 seconds
+@jit(nopython=True, cache=True)
+def numba_histogram_bins(t, y_np_array):
+    """
+    Pass the tail average and the y np array
+    """
+    h = numba_histogram(y_np_array, bins=15)
+    bins = h[1]
+    for index, bin_size in enumerate(h[0]):
+        if bin_size <= 20:
+            # Is it in the first bin?
+            if index == 0:
+                if t <= bins[0]:
+                    return True
+            # Is it in the current bin?
+            elif t >= bins[index] and t < bins[index + 1]:
+                return True
+    return False
+
+
+def histogram_bins(timeseries, series):
     """
     A timeseries is anomalous if the average of the last three datapoints falls
     into a histogram bin with less than 20 other datapoints (you'll need to tweak
@@ -441,22 +660,35 @@ def histogram_bins(timeseries):
     """
 
     try:
+
         # @modified 20210420 - Support #4026: Change from scipy array to numpy array
         # Deprecation of scipy.array
         # series = scipy.array([x[1] for x in timeseries])
-        series = np.array([x[1] for x in timeseries])
-        t = tail_avg(timeseries)
-        h = np.histogram(series, bins=15)
-        bins = h[1]
-        for index, bin_size in enumerate(h[0]):
-            if bin_size <= 20:
-                # Is it in the first bin?
-                if index == 0:
-                    if t <= bins[0]:
+        # @modified 20221019 - Feature #4702: numba optimisations
+        # Added dtype for numba
+        # series = np.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries], dtype=np.float64)
+
+        t = tail_avg(timeseries, series)
+
+        if not USE_NUMBA:
+            h = np.histogram(series, bins=15)
+            bins = h[1]
+            for index, bin_size in enumerate(h[0]):
+                if bin_size <= 20:
+                    # Is it in the first bin?
+                    if index == 0:
+                        if t <= bins[0]:
+                            return True
+                    # Is it in the current bin?
+                    elif t >= bins[index] and t < bins[index + 1]:
                         return True
-                # Is it in the current bin?
-                elif t >= bins[index] and t < bins[index + 1]:
-                    return True
+        else:
+            # @added 20221019 - Feature #4702: numba optimisations
+            # Added the numba_histogram_bins to iterate the bins generated by
+            # numba_histogram
+            result = numba_histogram_bins(t, series)
+            return result
 
         return False
     except:
@@ -466,7 +698,7 @@ def histogram_bins(timeseries):
         return None
 
 
-def ks_test(timeseries):
+def ks_test(timeseries, series):
     """
     A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
     that data distribution for last 10 minutes is different from last hour.
@@ -732,6 +964,11 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics, airgapped_metri
             return [], unordered_timeseries
         if airgaps_present:
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+            # @added 20220822 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if metric_name.startswith('labelled_metrics.'):
+                base_name = str(metric_name)
+
             # logger.info('airgaps present in %s - %s' % (base_name, str(ordered_timestamp_resolutions_count)))
             airgaps = []
             last_timestamp = None
@@ -831,13 +1068,15 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics, airgapped_metri
 
 
 # @added 20200423 - Feature #3508: ionosphere.untrainable_metrics
-def negatives_present(timeseries):
+def negatives_present(timeseries, series):
     """
     Determine if there are negative number present in a time series
     """
 
     try:
-        np_array = pandas.Series([x[1] for x in timeseries])
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # np_array = pandas.Series([x[1] for x in timeseries])
+        np_array = series
     except:
         return False
     try:
@@ -956,6 +1195,12 @@ def run_selected_algorithm(
         try:
             metric_name = str(metric_name)
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+
+            # @added 20220822 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if metric_name.startswith('labelled_metrics'):
+                base_name = str(metric_name)
+
             USE_STALE_PERIOD = float(custom_stale_metrics_dict[base_name])
             USE_ALERT_ON_STALE_PERIOD = USE_STALE_PERIOD - int(USE_STALE_PERIOD / 4)
         except:
@@ -1030,9 +1275,21 @@ def run_selected_algorithm(
     if check_for_timeseries_exceptions:
         # Get rid of short series
         if len(timeseries) < MIN_TOLERABLE_LENGTH:
+
+            # @added 20220715 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Do not populate labelled_metrics
+            if '{' in metric_name or 'labelled_metric.' in metric_name:
+                raise TooShort()
+
             # @added 20200604 - Mirage - populate_redis
             if MIRAGE_AUTOFILL_TOOSHORT:
                 base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+                # @added 20220822 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                if metric_name.startswith('labelled_metrics.'):
+                    base_name = str(metric_name)
+
                 redis_populated = False
                 redis_populated_key = 'mirage.redis_populated.%s' % base_name
                 try:
@@ -1222,6 +1479,11 @@ def run_selected_algorithm(
 
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+        # @added 20220822 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        if metric_name.startswith('labelled_metrics.'):
+            base_name = str(metric_name)
+
         custom_algorithms_to_run = {}
         try:
             custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
@@ -1374,6 +1636,17 @@ def run_selected_algorithm(
     # ensemble = []
     ensemble = final_custom_ensemble
 
+    # @added 20221019 - Feature #4700: algorithms - single series
+    # This optimisation is added to save microseconds on interpolating the
+    # pandas series individually in the median_absolute_deviation,
+    # mean_subtraction_cumulation, stddev_from_moving_average and
+    # stddev_from_average algorithms.  The pandas series is interpolated once
+    # here and passed to all the algorithms.
+    series = pandas.Series(x[1] for x in timeseries)
+
+    # @added 20221019 - Feature #4702: numba optimisations
+    y_np_array = np.array([x[1] for x in timeseries], dtype=np.float64)
+
     # @modified 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
     # Check run_3sigma_algorithms as well to the conditional
     # if not custom_consensus_override:
@@ -1394,7 +1667,9 @@ def run_selected_algorithm(
                 if send_algorithm_run_metrics:
                     start = timer()
                 try:
-                    algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
+                    # @modified 20221019 - Feature #4700: algorithms - single series
+                    # algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
+                    algorithm_result = [globals()[test_algorithm](timeseries, series) for test_algorithm in run_algorithm]
                 except:
                     # logger.error('%s failed' % (algorithm))
                     algorithm_result = [None]
@@ -1519,6 +1794,14 @@ def run_selected_algorithm(
             result = None
             anomalyScore = None
             if run_custom_algorithm_on_timeseries:
+
+                # @added 20230616 - Feature #3566: custom_algorithms
+                # Send custom_algorithm timings
+                if send_algorithm_run_metrics:
+                    algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, custom_algorithm)
+                    algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, custom_algorithm)
+                    start = timer()
+
                 try:
                     result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
                     algorithm_result = [result]
@@ -1532,6 +1815,16 @@ def run_selected_algorithm(
                             custom_algorithm, base_name))
                     result = None
                     algorithm_result = [None]
+
+                # @added 20230616 - Feature #3566: custom_algorithms
+                # Send custom_algorithm timings
+                if send_algorithm_run_metrics:
+                    end = timer()
+                    with open(algorithm_count_file, 'a') as f:
+                        f.write('1\n')
+                    with open(algorithm_timings_file, 'a') as f:
+                        f.write('%.6f\n' % (end - start))
+
             else:
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                     logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
@@ -1618,7 +1911,9 @@ def run_selected_algorithm(
             # is no need to check unless it is related to an anomaly
             if run_negatives_present:
                 try:
-                    negatives_found = negatives_present(timeseries)
+                    # @modified 20221019 - Feature #4700: algorithms - single series
+                    # negatives_found = negatives_present(timeseries)
+                    negatives_found = negatives_present(timeseries, series)
                 except:
                     logger.error('Algorithm error: negatives_present :: %s' % traceback.format_exc())
                     negatives_found = False
