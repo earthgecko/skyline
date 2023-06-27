@@ -3,11 +3,16 @@ Description=snab_flux_load_test instance (Skyline)
 After=network.target
 
 [Service]
-Environment=PATH=/opt/python_virtualenv/projects/skyline/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin
-Environment=VIRTUAL_ENV=/opt/python_virtualenv/projects/skyline
+Environment=PATH=/opt/python_virtualenv/projects/skyline-py3817/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin
+Environment=VIRTUAL_ENV=/opt/python_virtualenv/projects/skyline-py3817
 Type=forking
 User=skyline
 Group=skyline
+# This is required to create the /var/run/skyline directory on reboot
+PermissionsStartOnly=True
+RuntimeDirectory=skyline
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
 ExecStart=/opt/skyline/github/skyline/bin/snab_flux_load_test.d start
 ExecStop=/opt/skyline/github/skyline/bin/snab_flux_load_test.d stop
 PIDFile=/var/run/skyline/snab_flux_load_test.pid
