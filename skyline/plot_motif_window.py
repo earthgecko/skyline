@@ -12,6 +12,10 @@ if True:
     # import matplotlib.image as mpimg
     from matplotlib.pylab import rcParams
     from matplotlib.dates import DateFormatter
+    # @added 20230626 - Task #4962: Build and test skyline v4.0.0
+    #                   Task #4778: v4.0.0 - update dependencies
+    # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+    from matplotlib import __version__ as matplotlib_version
 
 
 def plot_motif_window(
@@ -45,7 +49,7 @@ def plot_motif_window(
 
     try:
         current_logger.info('plot_motif_window - creating graph image - %s' % output_file)
-        matched_timeseries_length = len(not_anomalous_timeseries)
+        matched_timeseries_length = len(matched_timeseries)
 
         # Ensure timesereis are same length
         if len(fp_values) > matched_timeseries_length:
@@ -92,7 +96,11 @@ def plot_motif_window(
         #     xfmt = DateFormatter('%H:%M:%S')
         # else:
         #     xfmt = DateFormatter('%H:%M')
-        xfmt = DateFormatter('%H:%M:%S')
+        # xfmt = DateFormatter('%H:%M:%S')
+        if graph_period_seconds > 87000:
+            xfmt = DateFormatter('%m/%d')
+        else:
+            xfmt = DateFormatter('%H:%M')
 
         plt.gca().xaxis.set_major_formatter(xfmt)
         ax.xaxis.set_major_formatter(xfmt)
@@ -126,8 +134,16 @@ def plot_motif_window(
                   fancybox=True, shadow=True, ncol=2, fontsize='small')
         plt.rc('lines', lw=1, color='black')
         plt.grid(True)
-        ax.grid(b=True, which='both', axis='both', color='lightgray',
-                linestyle='solid', alpha=0.5, linewidth=0.6)
+        # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
+        #                      Task #4778: v4.0.0 - update dependencies
+        # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+        if matplotlib_version < '3.7.0':
+            ax.grid(b=True, which='both', axis='both', color='lightgray',
+                    linestyle='solid', alpha=0.5, linewidth=0.6)
+        else:
+            ax.grid(visible=True, which='both', axis='both', color='lightgray',
+                    linestyle='solid', alpha=0.5, linewidth=0.6)
+
         if hasattr(ax, 'set_facecolor'):
             ax.set_facecolor('white')
         else:
