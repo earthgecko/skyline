@@ -12,7 +12,9 @@ __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 # Add the shared settings file to namespace.
 sys.path.insert(0, join(__location__, '..', 'skyline'))
 import settings
-settings.LOG_PATH = '/tmp'
+# @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+# Added nosec B108 for bandit
+settings.LOG_PATH = '/tmp'  # nosec B108
 logging.basicConfig()
 
 parser = OptionParser()
