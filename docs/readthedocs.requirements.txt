@@ -172,13 +172,13 @@ mock==5.0.2
 # @modified 20211220 - Task #4344: Update dependencies
 #numpy==1.19.4
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
-#numpy==1.21.5
+#numpy==1.22.0
 # @modified 20220206 - Feature #4416: settings - additional SMTP_OPTS
 # numpy 1.22.0 not available on readthedocs
 #numpy==1.22.0
 # @modified 20220422 - Task #4452: Update dependencies
 # numpy 1.22.0 stil not available on readthedocs
-#numpy==1.21.5
+#numpy==1.22.0
 #numpy==1.22.3
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
