@@ -5,331 +5,234 @@
 Overview
 ========
 
-Welcome to Skyline.
+Skyline is a Python based time series analysis and performance monitoring application
+that helps you to monitor and better understand complex systems and their
+interactions.  Skyline provides a unique kind of performance monitoring by using
+real time anomaly detection, threshold and dynamic threshold analysis, user
+input/training for machine learning with various correlation methods, to provide
+structured data sets of significant changes within metric populations.
 
-What is Skyline?
-----------------
+Features
+--------
 
-Skyline is your ears and eyes, it is remarkably good at telling you when a state
-changes.  It does not just chew bubblegum, it blows bubbles too.
+- Skyline use the most appropriate state of the art algorithms for real time
+  anomaly detection.
+- Uses multi stage analysis and filtering to allow for the use of more time complex
+  algorithms to be applied in the real time domain.
+- Puts the user in control of false positive detections by allowing for
+  simple user input to provide explainable ML methods with training data which
+  massively reduce false positive detections and provides the system with data
+  to begin learning with.
+-
 
-But really Skyline is ...
-For those interested in anomaly detection and deflection in streamed time series
-data.
+**What is anomaly detection and time series analysis performance monitoring good for?**
 
-Anomaly deflection.  The obvious next evolution in the use of all the anomaly
-detection data?
+It is extremely useful in the operations and development arenas, to highlight a
+few use cases:
 
-Skyline is a Python based anomaly detection/deflection stack that analyses,
-anomaly detects, deflects, fingerprints and learns vast amounts of streamed
-time series data.  Skyline has a number of isolated modules/apps that:
+- In operations monitoring to provide a real time feed of significant changes
+  and related events in your systems, the good, the bad and the unknown and
+  unseen.
+- Enabling developers to monitor components of their development environment
+  helping them to build for performance by giving them a real time view of any
+  performance related impacts any new feature may introduce.  For example a
+  developer may create a new feature that periodically runs analysis on some
+  data from a MySQL database.  The developer builds the feature, tests it to
+  ensure that it provides the required functionality and releases the feature.
+  The feature works but it introduces an additional 225K of
+  `mysql.handler_read_next` operations on every run, which were not there before
+  the feature was released.  The developer method works, but it could work much
+  better.  Skyline provides the developer with information to enable them to be
+  the best they can be in terms of performance and understanding impacts, in a
+  areas where they may have zero or little domain knowledge, such as the
+  internal metrics of MySQL/MariaDB.
 
-- ingests streamed metric time series data - skyline/horizon
-- use a ```CONSENSUS``` of 3-sigma algorithms to detect anomalies on
-  batch processed, streamed metric time series data - skyline/analyzer - anomaly
-  detector
-- Handle large and small seasonality in the data - skyline/mirage - anomaly
-  deflector and detector
-- You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
-  anomaly deflector
-- It records all your anomalies - skyline/panorama - anomaly memory
-- It shows you all your data - skyline/webapp - anomaly view
+.. figure:: images/mysql.handler_read_next.png
+   :alt: mysql.handler_read_next
 
-Seeing as we desire our metrics to be not anomalous most of the time and we want
-to know when they ARE anomalous and given the fact that we try and build systems
-that try to behave within not anomalous bounds so they perform well, due to
-this we have:
+Our work can always be better.
 
-- A lot of metric time series data that are not anomalous most of the time.
-- A lot of data to train a system on what is NOT anomalous given a time series
-  data set, rather than simply focusing on what is anomalous, also focusing on
-  what is not anomalous.
+The question is why are we **NOT** doing anomaly detection on our things?
+Shouldn't we be analysing our observability data?
+If the 3 pillars of observability are:
 
-To achieve this Skyline implements a novel time series similarities comparison
-algorithm and a boundary layers methodology that generates fingerprints of time
-series data using the sum of the values of features of the time series which
-have been extracted using the tsfresh features extraction package -
-https://github.com/blue-yonder/tsfresh and evaluation against boundary layer
-algorithms to determine whether a 3-sigma triggered anomaly is actually a normal,
-known pattern in the data.
+- logs
+- metrics
+- traces
 
-The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm -
-SITTSSCA first coined here :) compares the generated fingerprints of the two
-time series and can determine if they closely resemble each other in terms of:
+What do pillars hold up?
 
-- of the amount of "power/energy", range and "movement" there is within the time
-  series data set somewhat like RMS - Erol Kalkan from United States Geological Survey,
-  “Another approach to compute the differences between two time series is moving
-  window root-mean-square. RMS can be run for both series separately. This way,
-  you can compare the similarities in energy (gain) level of time series. You
-  may vary the window length for best resolution.”
-  (https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value)
-  http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy
+Data analysis is the next generation of the observability stack, observabilty 1.0
+was about collection, storage, retrieval and presentation.  Anomaly detection is
+is a part of the next generation of observability, putting all that data to use
+in real time - analysis.
 
-The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm
-compares how close the fingerprint values are as a percentage and
-varying this percentage variable will either focus the algorithm with greater
-precision, the closer to 0% the parameter gets, the perfect match (or possibly
-a mirror match too - unkonwn/untested) or it will incrementally increase the
-tolerance as the percentage variable increases and the matching will become
-less and less reliable.
+**What can Skyline be compared to**
 
-However there is a sweet spot and here SITTSSCA works extremely well :)
+Although it may seem that there are various services and applications that might
+be compared to Skyline, in reality most of them are not comparable, for a variety
+of reason.
 
-Added to SITTSSCA is an optional layer of simple boundary algorithms that are
-user defined during the operator training interaction with Skyline, where the
-operator augments the SITTSSCA results with boundaries that describe the
-expected norm within the time series.  Very similar to being able to describe
-the Active Brownian Motion of a time series -
-https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801
+Google, AWS and Azure all have some kind of anomaly detection service for timeseries
+data, but those services are generally one trick ponies or one or two trick black
+boxes.
 
-In addition to these two methods of similarity search Skline also uses `mass_ts`
-to find similar motifs in trained patterns.
+What none of those are is a dedicated, multi stage analysis pipeline with first and
+foremost human in the loop in terms of configuration, choice and model training.
 
-This results in an anomaly detection/deflection system which enables the user to
-very simply label time series and train Skyline on the peaks and troughs and the
-expected Active Brownian Motion or best effort thereof.
+Skyline currently allows for 12 analysis stages by default implementing a number
+of different analysis methods:
 
-However it takes a little effort on your part to train Skyline, however with the
-effort, Skyline is very good at doing anomaly detection and deflection.
+1. analyzer - 3-sigma (to stage 2 if anomalous at 24h)
+2. mirage - 3-sigma (to stage 3 if anomalous at 7d)
+3. mirage - matrixprofile (to stage 4 if anomalous at 7d)
+4. mirage - anomalous_daily_peaks (to stage 5 if not a normal daily peak)
+5. mirage - irregular_unstable (to stage 6 if true or to stage 7 if not true and trained instances available)
+6. mirage - 3-sigma/matrixprofile/spectral_residual (to stage 7 if anomalous at 30d and trained instances available)
+7. ionosphere - motif matching on 24h trained data (to stage 8 if no matches found)
+8. ionosphere - motif matching on 7d trained data (to stage 9 if no matches found)
+9. ionosphere - features extracted and compared to 24h trained data (to stage 10 if no matches found)
+10. ionosphere - minmax features extracted and compared to 24h minmax trained data (to stage 11 if no matches found)
+11. ionosphere - features extracted and compared to 7d trained data (to stage 12 if no matches found)
+12. ionosphere - minmax features extracted and compared to 7d minmax trained data
 
-With your help.  There is no easy anomaly detection or deflection, but there is
-some reward with a bit of effort.
+Skyline is unique.  It is the only real open source anomaly detection system, that
+allows for state of the art (SOTA) on realtime data and plugs into our existing
+telemetry systems to enable realtime anomaly detection on your metrics and even
+traces (converted to metrics).
 
-What you need
--------------
+Skyline allows you to specify what algorithms to run, and even allows you to add
+your own, it allows you to provide the system with valid training data with the
+click of a button.  It records all anomalies, analysis results and reports on
+performance on a per metric basis.  You can even evaluate your own or other
+algorithms in the real time pipeline, without having them influence the outcome
+of any existing analysis.  This allows for benchmarking the actual performance of
+algorithms on your own real data.
 
-You must be interested in doing real time anomaly detection on vast amounts of
-time series data streams on a reasonable Linux VM (or in a container/s if you
-were really committed).
+And it is cluster ready for production.
 
-You are still here.
+**human-in-the-loop**
 
-You use Graphite as your time series data source?  No?
+The use multi-stage analysis and multiple algorithms decreases false positive
+detections.  However false positives are inevitable so the user can easily train
+Skyline, which enables massive reductions in false positives by utilising
+extracted features and shapelets/motifs from the user trained time series and running
+various state of the art similarity search methods against potentially anomalous
+instances of data.  These methods are **extremely accurate** and achieving a False
+negative rate of ~0.34% on a sample of 1000 matches from 246799 matches
+achieved over a period a 55 month period on the real time analysis of production
+system and application metrics.  Meaning that the system flagged an instance of
+data as matching a trained instance of data incorrectly only 838 times and it
+matched correctly 245961 times over the 55 month period.
 
-Currently Skyline needs Graphite, if you do not already have Graphite please
-consider setting Graphite up and if you like that, come back.
+**Your** input is more **valuable** than you know or even imagine!
+Even though you may think you know nothing or very little about metrics, you and
+your brain can be magnificent.
 
-If you are still here and reading this, then maybe you are serious about
-installing and trying Skyline.  In which case a word of warning, continuing from
-this point forward, will require a LOT of hours of your time.
+In the world of machine learning achieving a 0.34% error rate on classifications
+is not bad, whether that be unsupervised, semi-supervised or a supervised
+machine learning algorithm, 0.34% is **not** bad, it is within acceptable
+limits in the context of what it is doing.
 
-Skyline is not some Python data science anomaly detection library, it is a full
-blown production grade anomaly detection stack.  Although certain aspects of
-Skyline may have interest to the data science community.
+It must be caveated that this error rate can be affected by data quality,
+currently no checks are implemented to ensure that the potentially anomalous
+timeseries being checked is the same length or at least similar length to the
+trained data set to which it is being compared.  Although the SITTSSCA method is
+fairly robust to some missing data, more dissimilar length timeseries will
+produce increasingly dissimilar features and the chance of them matching
+decreases quite rapidly.
+
+**Skyline is built for speed.**
+
+The analysis stages move from very simple and efficient algorithms, to more
+complex and specialised algorithms through the analysis pipeline. This ensures
+that more computationally expensive analysis is only carried out when it is
+needed and all analysis is conducted as fast as possible.
+
+Every optimisation that can be found is implemented, whether that be optimising
+a 0.077915 second operation to 0.005692 seconds with the use of bottleneck
+rather than pandas or finding optimisations in the algorithmic methodologies and
+pipeline and gaining wherever possible on suitable algorithms/methods with numba
+JIT compiled algorithms, every millisecond counts.  We are not talking about
+nanoseconds here because we are dealing with big data sets, so we must be realistic.
+
+Unfortunately no single anomaly detection algorithm or method or service is
+perfect.  Using any a single method to do anomaly detection is a flawed
+approach and achieves suboptimal long term results.  Anomaly detection is a
+constantly shifting space with new methodologies/papers/libraries published
+almost daily.  However the truth is that real world, real time implementations
+of high volume and high frequency metrics of many of these new
+methodologies/papers/libraries published are very few and far between.  And
+often they do not fit into the real time space, for many reasons, a few are:
+
+- computational time complexity
+- need for tuned hyperparameters on different types of data sets
+- need for labelled data
+
+Skyline attempts to implement methods that work with zero domain knowledge, as
+the system runs and records data, it uses the data it creates itself to do zero
+knowledge discovery of relationships in the metrics and learn about them.
+
+Anomaly detection is not simply about fault detection and identifying problems,
+anomaly detection is about describing significant changes.  Skyline creates a
+real time event stream of significant changes to inform the user of what is
+happening on their systems, applications and metrics of interest. Do not think
+of Skyline as an alerting system, think of it as an event stream that can be
+trained.
+
+Skyline teaches you about your systems and allows you to train it on what is
+normal.  You can even configure it to try and learn for its self from what you
+trained it on.
+
+Skyline runs on Linux on commodity hardware or a cloud instance.
+
+At its core Skyline can currently makes use of the uses the following algorithms
+(or modifications thereof):
+- 9 three-sigma based algorithms, derived from Shewhart's statistical process
+- SITTSSCA - Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison
+  Algorithm
+- `MASS`_ - Mueen's Algorithm for Similarity Search (`mass-ts`_)
+- matrixprofile
+- various `adtk`_ algorithms - level shift, volatility shift and persist
+- spectral_residual
+- DBSCAN
+- Local Outlier Factor (lof)
+- PCA - Principal Component Analysis
+- Isolation Forest
+- Prophet
+- One Class SVM
+- MSTL
+- Spectral Entropy
+- Moving Average Convergence/Divergence
+- m66
+- AutoARIMA
+- Any custom algorithm you want it to run, a bit like a lamdba function.
 
 Too much effort?
 ----------------
 
 `anomify`_ offer a managed version of Skyline for people that do not have a vast
 amount of time to spare.  You'll get access to unreleased features and support
-from developers that have honed numerous Skyline integrations to alert on
-important metrics.
+from developers that have honed numerous Skyline integrations.
 
 Anomify are looking for further test partners with various types of data and
 data sources, if you think you may have interesting metrics send an email to
 hello@anomify.ai and get in touch.
 
-A brief history
----------------
+The main objectives are:
 
-Skyline was originally open sourced by `Etsy`_ as a real-time anomaly detection
-system. It was originally built to enable passive monitoring of hundreds of
-thousands of metrics, without the need to configure a model/thresholds for each
-one, as you might do with Nagios.  It was designed to be used wherever there are
-a large quantity of high-resolution time series which need constant monitoring.
-Once a metric stream was set up from Graphite, additional metrics are
-automatically added to Skyline for analysis, anomaly detection, alerting and
-briefly published in the Webapp frontend.  `github/etsy`_ stopped actively
-maintaining Skyline in 2014.
+- Provide an application that helps people monitor 10000s of metrics.
+- Provide an application that allows the user to EASILY use their own valuable
+  domain specific knowledge to create training data to improve analysis by
+  introducing human-in-the-loop feedback.
+- Computational efficiency
+- Accuracy
+- Reliability
+- Maximise the usage of user trained data.
+- Ongoing development, testing and implementation of relevant and applicable
+  state of the art methods which have proven to result in improvements.
+- Low cost in terms of user time and money (compute and storage)
 
-Skyline - as a work in progress
--------------------------------
-
-`Etsy`_ found the "one size fits all approach" to anomaly detection wasn't
-actually proving all that useful to them.
-
-There is **some truth** in that in terms of the one size fits all methodology that
-Skyline was framed around.  With hundreds of thousands of metrics this does make
-Skyline fairly hard to tame, in terms of how useful it is and tuning the noise
-is difficult.  Tuning the noise to make it constantly useful and not just noisy,
-removes the "without the need to configure a model/thresholds" element somewhat.
-
-It has been generally accepted now that a basic 3-sigma anomaly detection
-implementation is not generally useful in the operations and machine metrics
-space.
-
-:David Gildeh: "I still remember taking Skyline and applying it to one of our
-  customer's metrics, and turning 100,000 metrics into 10,000 anomalies. It just
-  created more noise from the noise." https://blog.outlyer.com/what-good-is-anomaly-detection
-
-This is still true of Skyline today, it will still detect the 10000 anomalies
-and it **should**.  Detecting anomalies and alerting are two entirely different
-things.
-
-So why continue developing Skyline?
-
-To try and make it better and more useful.  3-sigma anomaly detection works,
-but it works too well.  Therefore there is an opportunity to see if it is
-possible to augment 3-sigma methods with additional analyses with new and
-different techniques, including the use of historic data in real time, to be
-more useful and provide additional insight into related time series data.  One
-of the key paradigm shifts that is perhaps needed is to change the mindset that
-anomaly detection and alerting are synonymous with each other or related in any
-way, which seems to be general public opinion.  Skyline does anomaly detection,
-anomaly deflection, training and learning, and alerting is simply a byproduct of
-this analysis pipeline, if you want to enable it.
-
-The first way to make Skyline MUCH better than the manner it was implemented and
-framed by Etsy, is to **NOT** try and use it to alert on 1000s of metrics in the
-first place.  Using Skyline as a scapel for alerting and a sword for anomaly
-detecting, rather than using it as a sword for anomaly detecting AND alerting.
-
-Within in this paradigm, Skyline is still essentially 3-sigma based, however
-now being augmented with additional analysis and methods, Skyline has been
-much improved in many ways and is very useful at doing anomaly detection,
-recording anomalies, correlating and alerting and training on your KEY metrics.
-The ongoing development of Skyline has been focused on improving Skyline in the
-following ways:
-
-- Improving the anomaly detection methodologies used in the 3-sigma context.
-- Extending Skyline's 3-sigma methodology to enable the operator and Skyline to
-  handle seasonality in metrics.
-- The addition of an anomalies database for learning and root cause analysis.
-- Adding the ability for the operator to teach Skyline and have Skyline learn
-  things that are NOT anomalous using a time series similarities comparison
-  method based on features extraction and comparison using the `tsfresh`_
-  package.  With Ionosphere we are training Skyline on what is NOT anomalous,
-  rather than focusing on what is anomalous.  Ionosphere allows us to train
-  Skyline as to what is normal, even if normal includes spikes and dips and
-  seasonality.  After all we have some expectation that most of our metrics
-  would be NOT anomalous most of the time, rather than anomalous most of the
-  time.  So training Skyline what is NOT ANOMALOUS is more efficient than trying
-  to label anomalies.
-- Adding the ability to Skyline to determine what other metrics are related to
-  an anomaly event using cross correlation analysis of all the metrics using
-  Linkedin's `luminol`_ library when an anomaly event is triggered and
-  recording these in the database to assist in root cause analysis.
-
-And...
-
-The architecture/pipeline works very well at doing what it does.  It is solid
-and battle tested.
-
-Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of time series in
-near real time.  In the world of Python, data analysis, R and most machine
-learning, Skyline is FAST.  Processing and analysing 1000s and 1000s of
-constantly changing time series, every minute of every day and it can do it in
-multiple resolutions, on a fairly low end commodity server.
-
-Is Skyline better than other things at anomaly detection?  Unknown.  The
-development of Skyline is not focused on making it be better than other things
-or the best, it is focused on trying to make Skyline better than it was and
-currently is.  Unfortunately Skyline no longer fits the NAB benchmark method as
-it's methods operate exclusively in the real time arena on real time data,
-historic data and trained patterns and this could not be bolted into a NAB test
-and would violate the NAB benchmark requirements.
-
-The new look of Skyline apps
-----------------------------
-
-* Horizon - feed metrics to Redis via a pickle input from Graphite/s
-* Analyzer - analyses metrics with 3-sigma algorithms
-* Mirage - analyses specific metrics at a custom time range with 3-sigma algorithms
-* Boundary - analyses specific time series for specific conditions
-* Crucible - store anomalous time series resources and adhoc analysis of any
-  time series
-* Panorama - anomalies database, historical views and root cause analysis
-* Webapp - frontend to view current and historical anomalies, training data,
-  features profiles, layers, matches and can browse Redis with
-  :red:`re`:brow:`brow` and you manage Skyline's learning with it
-* Ionosphere - time series fingerprinting and learning
-* Luminosity - Cross correlation of metrics for root cause analysis
-
-Skyline is still a near real time anomaly detection system, however it has
-various modes of operation that are modular and self contained, so that only the
-desired apps need to be enabled, although the stack is now much more useful with
-them all running.  This modular nature also isolated the apps from one another
-in terms of operation, meaning an error or failure in one does not necessarily
-affect others.
-
-Skyline can now be feed/query and analyse time series on an ad hoc basis, on the
-fly.  This means Skyline can now be used to analyse and process static data too,
-it is no longer just a machine/app metric fed system, if anyone wanted to use
-it to analyse historic data.
-
-A simplified workflow of Skyline
---------------------------------
-
-This is a bit out of date.
-
-.. figure:: images/skyline.simplified.workflow.annotated.gif
-   :alt: A simplified workflow of Skyline
-
-`Fullsize image <_images/skyline.simplified.workflow.annotated.gif>`_ for a clearer picture.
-
-What's new
-----------
-
-See `whats-new <whats-new.html>`__ for a comprehensive overview and description
-of the latest version/s of Skyline.
-
-What's old
-----------
-
-It must be stated the original core of Skyline has not been altered in any way,
-other than some fairly minimal Pythonic performance improvements, a bit of
-optimization in terms of the logic used to reach :mod:`settings.CONSENSUS` and a
-package restructure.  In terms of the original Skyline Analyzer, it does the
-same things just a little differently, hopefully better and a bit more.
-
-There is little point in trying to improve something as simple and elegant in
-methodology and design as Skyline, which has worked so outstandingly well to
-date.  This is a testament to a number of things, in fact the sum of all it's
-parts, `Etsy`_, Abe and co. did a great job in the conceptual design,
-methodology and actual implementation of Skyline and they did it with very good
-building blocks from the scientific community.
-
-The architecture in a nutshell
-------------------------------
-Skyline uses to following technologies and libraries at its core:
-
-1. **Python** - the main skyline application language - `Python`_
-2. **Redis** - `Redis`_ an in-memory data structure store
-3. **numpy** - `NumPy`_ is the fundamental package for scientific computing with Python
-4. **scipy** - `SciPy`_ Library - Fundamental library for scientific computing
-5. **pandas** - `pandas`_ - Python Data Analysis Library
-6. **mysql/mariadb** - a database - `MySQL`_ or `MariaDB`_
-7. :red:`re`:brow:`brow` - Skyline uses a modified port of Marian
-   Steinbach's excellent `rebrow`_
-8. **tsfresh** - `tsfresh`_ - Automatic extraction of relevant features from time series
-9. **memcached** - `memcached`_ - memory object caching system
-10. **pymemcache** - `pymemcache`_ - A comprehensive, fast, pure-Python memcached client
-11. **luminol** - `luminol`_ - Anomaly Detection and Correlation library
-12. **falcon** - `falcon`_ - bare-metal web API framework for Python
-13. **adtk** - `adtk`_ - Anomaly detection toolkit
-14. **matrixprofile** - `matrixprofile`_ - time series data mining tasks,
-    utilizing matrix profile algorithms
-15. **mass-ts** - `mass_ts`_ - MASS (Mueen's Algorithm for Similarity Search) -
-    library for searching time series sub-sequences under z-normalized Euclidean distance for similarity.
-
-.. _Etsy: https://www.etsy.com/
-.. _github/etsy: https://github.com/etsy/skyline
-.. _whats-new: ../html/whats-new.html
-.. _Python: https://www.python.org/
-.. _Redis: http://Redis.io/
-.. _NumPy: http://www.numpy.org/
-.. _SciPy: http://scipy.org/
-.. _pandas: http://pandas.pydata.org/
-.. _MySQL: https://www.mysql.com/
-.. _rebrow: https://github.com/marians/rebrow
-.. _MariaDB: https://mariadb.org/
-.. _tsfresh: https://github.com/blue-yonder/tsfresh
-.. _memcached: https://memcached.org/
-.. _pymemcache: https://github.com/pinterest/pymemcache
-.. _luminol: https://github.com/linkedin/luminol
-.. _falcon: https://falconframework.org
+.. _MASS: https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html
 .. _mass-ts: https://github.com/matrix-profile-foundation/mass-ts
-.. _matrixprofile: https://github.com/matrix-profile-foundation/matrixprofile
 .. _adtk: https://github.com/arundo/adtk
-.. _anomify: https://anomify.ai
