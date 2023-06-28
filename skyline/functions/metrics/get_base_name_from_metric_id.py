@@ -40,8 +40,8 @@ def get_base_name_from_metric_id(current_skyline_app, metric_id):
     try:
         base_name = redis_conn_decoded.hget(redis_key, metric_id)
         # DEBUG
-        current_logger.info('debug :: %s :: %s :: hget(%s, %s)' % (
-            current_skyline_app, function_str, redis_key, str(metric_id)))
+        # current_logger.info('debug :: %s :: %s :: hget(%s, %s)' % (
+        #     current_skyline_app, function_str, redis_key, str(metric_id)))
     except Exception as err:
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
@@ -51,8 +51,10 @@ def get_base_name_from_metric_id(current_skyline_app, metric_id):
 
     if not base_name:
         try:
-            base_name = base_name_from_metric_id(current_skyline_app, metric_id, False)
+            # base_name = base_name_from_metric_id(current_skyline_app, metric_id, False)
+            base_name = base_name_from_metric_id(current_skyline_app, metric_id, log=True)
         except Exception as err:
+            current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s :: %s :: base_name_from_metric_id falied to determine base_name from metric_id: %s - %s' % (
                 current_skyline_app, function_str, str(metric_id), str(err)))
 

@@ -3,7 +3,12 @@ set_metrics_as_inactive.py
 """
 import logging
 import traceback
-from time import time
+# @added 20220811 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# from time import time
+import datetime
+import time
+from sqlalchemy.sql import select
 
 from database import get_engine, engine_disposal, metrics_table_meta
 from functions.metrics.get_base_name_from_metric_id import get_base_name_from_metric_id
@@ -51,7 +56,7 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
     for metric_id in metric_ids:
         base_name = None
         try:
-            base_name = get_base_name_from_metric_id(current_skyline_app, metric_id, False)
+            base_name = get_base_name_from_metric_id(current_skyline_app, metric_id)
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s :: base_name_from_metric_id failed - %s' % (
@@ -124,13 +129,54 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
             raise
         return []
 
+    # @added 20220811 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics for which a timeseries is not recorded until the
+    # metric is assigned an id which can result in redistimeseries_roomba
+    # setting the metric to inactive BEFORE it even has a timeseries key
+    valid_metric_ids_to_set_as_inactive = []
+    new_metric_ids = []
+    try:
+        connection = engine.connect()
+        stmt = select([metrics_table], metrics_table.c.id.in_(metric_ids))
+        results = connection.execute(stmt)
+        for row in results:
+            metric_id = row['id']
+            created_timestamp_datetime = row['created_timestamp']
+            created_timestamp = int(time.mktime(created_timestamp_datetime.timetuple()))
+            if created_timestamp > (int(time.time()) - 900):
+                new_metric_ids.append(metric_id)
+            else:
+                valid_metric_ids_to_set_as_inactive.append(metric_id)
+        connection.close()
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: failed to get data from metric_table to determine created_timestamp for metric_ids: %s - %s' % (
+            function_str, str(metric_ids), str(err)))
+        if engine:
+            engine_disposal(current_skyline_app, engine)
+        if current_skyline_app == 'webapp':
+            # Raise to webapp
+            raise
+        return []
+    current_logger.info('%s :: of the %s metrics passed to set as inactive, %s metrics were removed as they are new and %s will be set as inactive' % (
+        function_str, str(len(metrics_set_as_inactive)),
+        str(len(new_metric_ids)), str(len(valid_metric_ids_to_set_as_inactive))))
+
     if not dry_run:
         try:
             connection = engine.connect()
+            # @modified 20220811 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Handle new labelled_metrics
+            # stmt = metrics_table.update().values(
+            #     inactive=1, inactive_at=int(time())).\
+            #     where(metrics_table.c.id.in_(metric_ids))
             stmt = metrics_table.update().values(
-                inactive=1, inactive_at=int(time())).\
-                where(metrics_table.c.id.in_(metric_ids))
+                inactive=1, inactive_at=int(time.time())).\
+                where(metrics_table.c.id.in_(valid_metric_ids_to_set_as_inactive))
             connection.execute(stmt)
+            connection.close()
             metrics_set_as_inactive = list(metrics_to_set_as_inactive)
         except Exception as err:
             current_logger.error(traceback.format_exc())
@@ -151,6 +197,10 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
         engine_disposal(current_skyline_app, engine)
 
     current_logger.info('%s :: %s metrics set as inactive %s' % (
-        function_str, str(len(metrics_set_as_inactive)), dry_run_str))
+        # @modified 20220811 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Handle new labelled_metrics
+        # function_str, str(len(metrics_set_as_inactive)), dry_run_str))
+        function_str, str(len(valid_metric_ids_to_set_as_inactive)), dry_run_str))
 
     return metrics_to_set_as_inactive

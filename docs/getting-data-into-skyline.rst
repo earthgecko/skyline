@@ -6,7 +6,7 @@ Firstly a note on time snyc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Although it may seems obvious, it is important to note that any metrics
-coming into Graphite and Skyline should come from synchronised sources.
+coming into Skyline should come from synchronised sources.
 If there is more than 60 seconds (or highest resolution metric), certain
 things in Skyline will start to become less predictable, in terms of the
 functioning of certain algorithms which expect very recent datapoints.
@@ -17,7 +17,7 @@ time synchronisation will suffice.
 Secondly a note on the reliability of metric data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There are many ways to get data to Graphite and Skyline, however some are better
+There are many ways to get data to Skyline, however some are better
 than others.  The first and most important point is that your metric pipeline
 should be transported via TCP, from source, to Graphite, to Skyline.  Although
 the original Skyline set up in the days of statsd UDP only and where UDP
@@ -32,6 +32,36 @@ points as possible.
 Although collectd is great it ships via UDP, which is not great.  So ensure that
 your metric pipeline is fully TCP transported.  statsd now has a TCP listener,
 there is telegraf, sensu, etc there are lots of options.
+
+Third, a note on renaming metrics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is not possible to rename metrics internally in Skyline.
+
+This is because changing a set of metric names from something to something_else
+internally may or may not algin with changes to metric names in the data store,
+whether that be Graphite, Prometheus or VictoriaMetrics.
+Although this would be very useful at times, seeing as Skyline cannot guarantee
+that the source data will be renamed and Skyline is not authoritative for the
+source data, renaming of metrics is not a function that is provided.
+
+That does not mean it would not be a useful feature.  It is a tradeoff not
+providing this function.  There are too many external dependencies to ensure it
+would function currently.  It requires ordered orchestration of 3rd party
+applications to ensure it had the desired effect.
+
+Therefore if you rename, relabel or change labels or metric names in anyway,
+they just become new metrics and the original metrics go stale and will expire,
+along with any training on those metrics.
+
+Lead time to starting analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Any metric submitted will only start to be analysed when it has
+:mod:`settings.MIN_TOLERABLE_LENGTH` data points to analyse.  That means when
+you start sending data, Skyline will only start analysing it
+:mod:`settings.MIN_TOLERABLE_LENGTH` minutes later (if you are sending 1 data
+point a minute).
 
 Now getting the data in
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,8 +152,10 @@ below, see the `Flux <flux.html>`__ page
 Flux
 ====
 
-Metrics can be submitted to Flux via HTTP/S which feeds Graphite with pickles to
-Skyline, see the `Flux <flux.html>`__ page.
+Metrics can be submitted to Flux via HTTP/S which forwards data to Graphite or
+RedisTimeseries and VictoriaMetrics.  Flux can accept data from Prometheus,
+VictoriaMetrics, telegraf and generic HTTP JSON see the `Flux <flux.html>`__
+page.
 
 upload_data to Flux
 ~~~~~~~~~~~~~~~~~~~
@@ -140,7 +172,7 @@ Adding a Listener
 =================
 
 If none of these methods are acceptable, it's easy enough to extend
-them. Add a method in listen.py and add a line in the horizon-agent that
+them. Add a method in listen.py and add a line in the horizon/agent.py that
 points to your new listener.
 
 :mod:`settings.FULL_DURATION`

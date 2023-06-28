@@ -19,7 +19,7 @@
 		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li class="active"><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
-		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></a></li>
+		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -55,11 +55,12 @@
           </div>
           <p>
 {% if not_anomalous_dict %}
-          <div class="container search_results_container"></p>
+          <div class="container search_results_container">
             <h4><span class="logo"><span class="sky">Found</span> <span class="re">not anomalous</span></span></h4>
       			<table class="table table-hover">
       				<thead>
                 <tr>
+                    <th>metric_id</th>
                     <th>metric</th>
                     <th>not anomalous analysis count</th>
   {% if anomalies_metrics_dict %}
@@ -69,8 +70,18 @@
       				</thead>
       				<tbody>
   {% for current_metric in not_anomalous_metrics_dict %}
+    {% if not_anomalous_metrics_dict[current_metric]['labelled_metric_base_name']|string != 'None' %}
+      {% set use_current_metric = not_anomalous_metrics_dict[current_metric]['labelled_metric_base_name'] %}
+    {% else %}
+      {% set use_current_metric = current_metric %}
+    {% endif %}
                 <tr>
+                    <td>{{ not_anomalous_metrics_dict[current_metric]['metric_id'] }}</td>
+    {% if not_anomalous_metrics_dict[current_metric]['labelled_metric_base_name']|string != 'None' %}
+                    <td style="word-break:break-all;"><smallcode>{{ not_anomalous_metrics_dict[current_metric]['labelled_metric_base_name'] }}</smallcode></td>
+    {% else %}
                     <td><code>{{ current_metric }}</code></td>
+    {% endif %}
     {% if anomalies_metrics_dict %}
                     <td onclick="window.location='?not_anomalous_metric=true&metric={{ current_metric }}&from_timestamp={{ not_anomalous_metrics_dict[current_metric]['from'] }}&until_timestamp={{ not_anomalous_metrics_dict[current_metric]['until'] }}&anomalies=true'">
                       <a href="?not_anomalous_metric=true&metric={{ current_metric }}&from_timestamp={{ not_anomalous_metrics_dict[current_metric]['from'] }}&until_timestamp={{ not_anomalous_metrics_dict[current_metric]['until'] }}&anomalies=true">{{ not_anomalous_metrics_dict[current_metric]['count'] }}</a>

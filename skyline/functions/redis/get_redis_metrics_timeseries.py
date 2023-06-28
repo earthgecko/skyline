@@ -7,6 +7,11 @@ from skyline_functions import (
     get_redis_conn, get_redis_conn_decoded, nonNegativeDerivative,
     sort_timeseries)
 
+# @added 20220808 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Handle labelled_metrics.
+from functions.redis.get_metric_redistimeseries import get_metric_redistimeseries
+
 
 # @added 20211008 - Feature #4264: luminosity - cross_correlation_relationships
 # Add a global method to get a metrics timeseries from Redis

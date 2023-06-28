@@ -14,13 +14,14 @@ function validate_to_process_submission()
 {
     var source = document.forms["process_metrics"]["source"];
     var training_data_json = document.forms["process_metrics"]["training_data_json"];
-    if (source.value == "training_data") and (training_data_json.value == "")
+    //if (source.value == "training_data") and (training_data_json.value == "")
+    if (source.value == "training_data" && training_data_json.value == "")
     {
-        window.alert("Please enter the training_data json file");
+        window.alert("Please enter the training_data json file, training_data: " + source.value + ", training_data_json: " + training_data_json.value);
         training_data_json.focus();
         return false;
     }
-    if (source.value == "training_data") and (add_to_panaroma.value == "true")
+    if (source.value == "training_data" && add_to_panaroma.value == "true")
     {
         window.alert("You cannot add anomalies from training data to Panorama");
         add_to_panaroma.focus();
@@ -128,7 +129,7 @@ function validate_to_process_submission()
   		      </tr>
   		      <tr>
   		        <td>data source</td>
-  		        <td><select name="data_source">
+  		        <td><select name="source">
                 <option value="graphite">graphite</option>
 <!--
 # Graphite is the only option currently
@@ -139,6 +140,10 @@ function validate_to_process_submission()
                 <option value="upload_csv">upload_csv</option>
                 <option value="file">file</option>
               </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>summarise</td>
+  		        <td><input type="number" name="summarise" value="0" /> whether to summarise/downsample the data, default is 0 (no downsampling) but accepts a summarise period in seconds e.g. 600</td>
   		      </tr>
   		      <tr>
   		        <td>training_data_json</td>

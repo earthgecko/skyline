@@ -31,12 +31,10 @@ second on average (with 250k distinct metrics). They used a 32 core Sandy Bridge
 box, with 64 gb of memory. We experience bursts of up to 70k TPS on Redis. Here
 are their relevant settings:
 
-```
 CHUNK_SIZE: 7000
 WORKER_PROCESSES: 2
 ANALYZER_PROCESSES: 25
 FULL_DURATION: 86400
-```
 
 Smaller deployments
 -------------------
@@ -50,10 +48,10 @@ and :mod:`settings.ANALYZER_OPTIMUM_RUN_DURATION` if you are only processing a f
 1000 metrics with a datapoint every minute then the optimum settings will most
 likely be something similar to:
 
-```
-ANALYZER_PROCESSES = 1
-ANALYZER_OPTIMUM_RUN_DURATION = 60
-```
+.. code-block:: python
+
+    ANALYZER_PROCESSES = 1
+    ANALYZER_OPTIMUM_RUN_DURATION = 60
 
 Reliability
 -----------

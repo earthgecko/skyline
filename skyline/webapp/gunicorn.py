@@ -1,3 +1,11 @@
+"""
+gunicorn.py
+"""
+# @added 20221206 - Feature #4756: Use gevent gunicorn worker_class
+#                   Feature #4732: flux vortex
+from gevent import monkey
+monkey.patch_all()
+
 import sys
 import os.path
 import logging
@@ -49,6 +57,14 @@ if True:
         #     PeriodicExportingMetricReader,
         # )
 
+# @added 20221206 - Feature #4756: Use gevent gunicorn worker_class
+#                   Feature #4732: flux vortex
+# Switch to using gevent instead of default sync worker type to allow for slow
+# requests and fast requests to be handled.  This results in an immediate
+# improvement in page load times specifically noticable on Ionosphere features
+# profile pages.
+worker_class = 'gevent'
+
 bind = '%s:%s' % (settings.WEBAPP_IP, str(settings.WEBAPP_PORT))
 # @modified 20201011 - Reduce the number of workers on machine with lots of
 #                      CPUs
@@ -58,11 +74,22 @@ bind = '%s:%s' % (settings.WEBAPP_IP, str(settings.WEBAPP_PORT))
 try:
     workers = settings.WEBAPP_GUNICORN_WORKERS
 except:
-    workers = 4
+    workers = 2
+
+# @added 20221209 - Feature #4756: Use gevent gunicorn worker_class
+#                   Feature #4732: flux vortex
+# Since switching to using gevent instead of default sync worker type there is
+# no need for more than 2 workers with the default worker_connections of 1000
+# 2 workers will allow for 2000 concurrent connections to be served at once.
+if workers > 2:
+    print('settings.WEBAPP_GUNICORN_WORKERS is set to %s, decreased to 2 as more than 2 are not required with the gevent worker_class' % (
+        str(settings.WEBAPP_GUNICORN_WORKERS)))
+    workers = 2
+
 try:
     backlog = settings.WEBAPP_GUNICORN_BACKLOG
 except:
-    backlog = 254
+    backlog = 2048
 
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
@@ -99,7 +126,6 @@ redis_error_log_handler = RedisErrorLogHandler(skyline_app)
 redis_error_log_handler.setLevel(logging.ERROR)
 redis_error_log_handler.setFormatter(formatter)
 logger.addHandler(redis_error_log_handler)
-
 
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces

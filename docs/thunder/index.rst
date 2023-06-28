@@ -13,8 +13,6 @@ Thunder
 Thunder
 =======
 
-WORK IN PROGRESS
-
 What monitors Skyline and how do you monitor Skyline?  What are the key things
 that need to be monitored? What are the expected values?  All good questions.
 
@@ -24,7 +22,7 @@ significant changes to any of these components.  Thunder also monitors
 operational changes in terms of volumes of metrics received, app run times, etc
 and also notifies on these aspects.
 
-Although Skyline will monitors all of these things via the normal analysis of
+Although Skyline will monitor all of these things via the normal analysis of
 its own metrics, Thunder ensures that the key the operational aspects of all
 the parts of the Skyline stack are performing as expected without the user
 needing to configure alerts for lots metrics which they do not know.

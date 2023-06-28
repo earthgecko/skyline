@@ -68,10 +68,12 @@ def engine_disposal(engine):
 # def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json):
 # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
 # Added run_algorithms
+# @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+# Added summarise option
 def submit_crucible_job(
         from_timestamp, until_timestamp, metrics_list, namespaces_list, source,
         alert_interval, user_id, user, add_to_panorama, pad_timeseries,
-        training_data_json, run_algorithms):
+        training_data_json, run_algorithms, summarise):
     """
     Get a list of all the metrics passed and generate Crucible check files for
     each
@@ -91,6 +93,7 @@ def submit_crucible_job(
     :param training_data_json: the full path to the training_data json file if
         source is training_data
     :param run_algorithms: list of algorithms to run
+    :param summarise: the number of seconds to summarise data at
     :type from_timestamp: int
     :type until_timestamp: int
     :type metrics_list: list
@@ -103,6 +106,7 @@ def submit_crucible_job(
     :type pad_timeseries: str
     :type training_data_json: str
     :type run_algorithms: list
+    :type summarise: int
     :return: tuple of lists
     :rtype:  (list, list, list, list)
 
@@ -214,6 +218,18 @@ def submit_crucible_job(
             target = 'nonNegativeDerivative(%s)' % base_name
         else:
             target = base_name
+
+        # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+        # Added summarise option
+        if summarise:
+            try:
+                target = 'summarize(%s,"%ss")' % (target, str(summarise))
+                logger.info('summarize time series at %s seconds - %s' % (
+                    str(summarise), str(target)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to construct graphite_override_uri_parameters with summarise %s' % str(summarise))
+
         # Generate a metric job directory
         crucible_anomaly_dir = '%s/%s' % (crucible_job_dir, sane_metricname)
         try:
@@ -275,6 +291,8 @@ def submit_crucible_job(
         # Added add_to_panorama
         # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
         # Added training_data_json
+        # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
+        # Added summarise option
         crucible_anomaly_data = 'metric = \'%s\'\n' \
                                 'value = \'%s\'\n' \
                                 'from_timestamp = \'%s\'\n' \
@@ -289,14 +307,16 @@ def submit_crucible_job(
                                 'graphite_override_uri_parameters = \'%s\'\n' \
                                 'alert_interval = \'%s\'\n' \
                                 'add_to_panorama = %s\n' \
-                                'training_data_json = %s\n' \
+                                'training_data_json = \'%s\'\n' \
+                                'summarise = %s\n' \
             % (base_name, str(datapoint), str(from_timestamp),
                # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
                # str(until_timestamp), str(settings.ALGORITHMS),
                str(until_timestamp), str(algorithms),
                triggered_algorithms, crucible_anomaly_dir, str(graphite_metric),
                skyline_app, str(added_at), str(graphite_override_uri_parameters),
-               str(alert_interval), str(add_to_panorama), str(training_data_json))
+               str(alert_interval), str(add_to_panorama), str(training_data_json),
+               str(summarise))
 
         # Create an anomaly file with details about the anomaly
         crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, sane_metricname)

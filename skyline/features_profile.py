@@ -1,3 +1,6 @@
+"""
+features_profile.py
+"""
 import logging
 import os
 # import sys
@@ -9,7 +12,7 @@ from ast import literal_eval
 import traceback
 # import json
 from timeit import default_timer as timer
-# import numpy as np
+import numpy as np
 import pandas as pd
 
 from tsfresh.feature_extraction import (
@@ -29,6 +32,11 @@ from skyline_functions import historical_data_dir_exists
 # however it may be used in one of the tests in some way, I shall have to search
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
+# @added 20220731 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
 skyline_version = skyline_version.__absolute_version__
 
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -40,6 +48,12 @@ try:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
 except:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
+
+# @added 20220915 - Feature #4658: ionosphere.learn_repetitive_patterns
+try:
+    IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE = float(settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE)
+except:
+    IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE = 100.0
 
 
 def feature_name_id(current_skyline_app, feature_name):
@@ -118,11 +132,49 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     if context == 'ionosphere_echo_check':
         log_context = 'ionosphere :: echo check'
 
+    # @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns
+    if context == 'adhoc':
+        log_context = 'ionosphere :: adhoc'
+    if context == 'learn_repetitive_patterns':
+        log_context = 'ionosphere :: learn_repetitive_patterns'
+    # @added 20220915 - Feature #4658: ionosphere.learn_repetitive_patterns
+    if context == 'find_repetitive_patterns':
+        log_context = 'ionosphere :: find_repetitive_patterns'
+
     current_logger.info('%s feature profile creation requested for %s at %s' % (
         log_context, base_name, timestamp))
 
-    timeseries_dir = base_name.replace('.', '/')
-    if context == 'training_data' or context == 'ionosphere':
+    # @added 20220731 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name
+    use_base_name = str(base_name)
+    labelled_metric_name = None
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
+        except Exception as err:
+            current_logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metric_name = str(base_name)
+        current_logger.info('calculate_features_profile :: labelled_metric_name: %s' % labelled_metric_name)
+        try:
+            base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, labelled_metric_name)
+            if base_name:
+                labelled_metric_base_name = str(base_name)
+                base_name = str(labelled_metric_base_name)
+        except Exception as err:
+            current_logger.error('error :: calculate_features_profile :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
+
+    timeseries_dir = use_base_name.replace('.', '/')
+
+    # if context == 'training_data' or context == 'ionosphere':
+    if context in ['training_data', 'ionosphere']:
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, timestamp, timeseries_dir)
 
@@ -144,8 +196,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
                     if context == 'training_data':
                         # Raise to webbapp I believe to provide traceback to user in UI
                         raise
-                    else:
-                        return False, False, False, fail_msg, trace
+                    return False, False, False, fail_msg, trace
 
     if context == 'features_profiles':
         metric_data_dir = '%s/%s/%s' % (
@@ -158,28 +209,34 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
     # Added ionosphere_echo and ionosphere_echo_check
-    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    # if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    if context in ['ionosphere_echo', 'ionosphere_echo_check']:
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, timestamp, timeseries_dir)
 
-    features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
-        metric_data_dir, str(timestamp), base_name)
+    # @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns
+    if context in ['adhoc', 'learn_repetitive_patterns', 'find_repetitive_patterns']:
+        metric_data_dir = '%s/%s/%s' % (
+            settings.SKYLINE_TMP_DIR, timestamp, timeseries_dir)
 
+    features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
+        metric_data_dir, str(timestamp), use_base_name)
     features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
-        metric_data_dir, str(timestamp), base_name)
+        metric_data_dir, str(timestamp), use_base_name)
 
     # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
     if context == 'ionosphere_echo_check':
         features_profile_created_file = '%s/%s.%s.echo.fp.created.txt' % (
-            metric_data_dir, str(timestamp), base_name)
+            metric_data_dir, str(timestamp), use_base_name)
         features_profile_details_file = '%s/%s.%s.echo.fp.details.txt' % (
-            metric_data_dir, str(timestamp), base_name)
+            metric_data_dir, str(timestamp), use_base_name)
 
     # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
     # Added metric_check_file and ts_full_duration is needed to be determined
     # and added the to features_profile_details_file as it was not added here on
     # the 20170104 when it was added the webapp and ionosphere
-    metric_var_filename = '%s.txt' % str(base_name)
+    metric_var_filename = '%s.txt' % str(use_base_name)
+
     anomaly_check_file = '%s/%s' % (metric_data_dir, metric_var_filename)
     ts_full_duration = int(settings.FULL_DURATION)
     if os.path.isfile(anomaly_check_file):
@@ -192,18 +249,19 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
                     full_duration_array = literal_eval(_ts_full_duration)
                     ts_full_duration = str(int(full_duration_array[1]))
 
-    anomaly_json = '%s/%s.json' % (metric_data_dir, base_name)
+    anomaly_json = '%s/%s.json' % (metric_data_dir, use_base_name)
 
     # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
-    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    # if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    if context in ['ionosphere_echo', 'ionosphere_echo_check']:
         ts_full_duration = str(settings.FULL_DURATION)
         full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
-        anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_data_dir, base_name, str(full_duration_in_hours))
+        anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_data_dir, use_base_name, str(full_duration_in_hours))
 
-    ts_csv = '%s/%s.tsfresh.input.csv' % (metric_data_dir, base_name)
+    ts_csv = '%s/%s.tsfresh.input.csv' % (metric_data_dir, use_base_name)
     # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
     if context == 'ionosphere_echo_check':
-        ts_csv = '%s/%s.echo.tsfresh.input.csv' % (metric_data_dir, base_name)
+        ts_csv = '%s/%s.echo.tsfresh.input.csv' % (metric_data_dir, use_base_name)
 
 #    anomaly_json = '/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.json'
 #    ts_csv = '/opt/skyline/ionosphere/data/1480104000/stats/statsd/graphiteStats/calculationtime/stats.statsd.graphiteStats.calculationtime.tsfresh.input.csv'
@@ -314,12 +372,49 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
 
     del datapoints
 
+    # @added 20220910 - Feature #4658: ionosphere.learn_repetitive_patterns
+    # if context in ['adhoc', 'learn_repetitive_patterns', 'find_repetitive_patterns']:
+    if context == 'adhoc':
+        values_list = [item[1] for item in converted]
+        avg_value = sum(values_list) / len(values_list)
+        del values_list
+        # if avg_value >= IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE:
+        if avg_value >= 100000:
+            minmax_timeseries = []
+            minmax_values = [x[1] for x in converted]
+            x_np = np.asarray(minmax_values)
+            # Min-Max scaling
+            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            for (ts, v) in zip(converted, np_minmax):
+                minmax_timeseries.append([ts[0], v])
+            if minmax_timeseries:
+                converted = list(minmax_timeseries)
+                del minmax_timeseries
+
+    # @added 20220822 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Only allow for fp creation if there is sufficient data
+    last_timestamp = int(converted[-1][0])
+    first_timestamp = int(converted[0][0])
+    offset = 7200
+    if int(ts_full_duration) > 86400:
+        offset = 14400
+    timestamp_limit = last_timestamp - (int(ts_full_duration) - offset)
+    if first_timestamp > timestamp_limit:
+        trace = 'None'
+        fail_msg = 'warning :: %s :: insufficient data to create profile, last_timestamp: %s, ts_full_duration: %s, first_timestamp: %s, timestamp_limit: %s' % (
+            log_context, str(last_timestamp), str(ts_full_duration),
+            str(first_timestamp), str(timestamp_limit))
+        current_logger.warning('%s' % fail_msg)
+        return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+
     if os.path.isfile(ts_csv):
         os.remove(ts_csv)
 
     for ts, value in converted:
         # print('%s,%s' % (str(int(ts)), str(value)))
-        utc_ts_line = '%s,%s,%s\n' % (metric, str(int(ts)), str(value))
+        # utc_ts_line = '%s,%s,%s\n' % (metric, str(int(ts)), str(value))
+        utc_ts_line = '%s,%s,%s\n' % (use_base_name, str(int(ts)), str(value))
         with open(ts_csv, 'a') as fh:
             fh.write(utc_ts_line)
 
@@ -404,7 +499,6 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         # Disable tqdm progress bar
         # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
         # tsf_settings.disable_progressbar = True
-
         df_features = extract_features(
             # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
             # df, column_id='metric', column_sort='timestamp', column_kind=None,
@@ -417,7 +511,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         current_logger.info('%s :: features extracted from %s data' % (
             log_context, ts_csv))
     except:
-        trace = traceback.print_exc()
+        trace = traceback.format_exc()
         current_logger.debug(trace)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context
@@ -458,7 +552,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         # Added log_context to report the context
         current_logger.info('%s :: features transposed' % log_context)
     except:
-        trace = traceback.print_exc()
+        trace = traceback.format_exc()
         current_logger.debug(trace)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context
@@ -479,7 +573,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     try:
         df_t.to_csv(t_fname_out)
     except:
-        trace = traceback.print_exc()
+        trace = traceback.format_exc()
         current_logger.debug(trace)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context
@@ -505,7 +599,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         df_sum['feature_name'] = df_sum['feature_name'].astype(str)
         df_sum['value'] = df_sum['value'].astype(float)
     except:
-        trace = traceback.print_exc()
+        trace = traceback.format_exc()
         current_logger.error(trace)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context
@@ -513,7 +607,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     try:
         features_count = len(df_sum['value'])
     except:
-        trace = traceback.print_exc()
+        trace = traceback.format_exc()
         current_logger.debug(trace)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context
@@ -522,7 +616,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     try:
         features_sum = df_sum['value'].sum()
     except:
-        trace = traceback.print_exc()
+        trace = traceback.format_exc()
         current_logger.debug(trace)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context

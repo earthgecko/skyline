@@ -1,9 +1,13 @@
+"""
+ionosphere.py
+"""
 from __future__ import division
 import logging
 import os
 from os import kill, getpid, listdir
 from os.path import join, isfile
 from sys import version_info
+from sys import exit as sys_exit
 
 # @modified 20191115 - Branch #3262: py3
 # try:
@@ -41,6 +45,10 @@ from sqlalchemy.sql import select
 #                   Branch #2270: luminosity
 from sqlalchemy.sql import desc
 
+# @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import Table, MetaData
+
 # @added 20161213 - Branch #1790: test_tsfresh
 # To match the new order introduced via the test_tsfresh method
 import numpy as np
@@ -62,7 +70,11 @@ from tsfresh.feature_extraction import (
 
 import settings
 from skyline_functions import (
-    fail_check, mysql_select, write_data_to_file, send_graphite_metric,
+    # @modified 20220726 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # fail_check, mysql_select, write_data_to_file, send_graphite_metric,
+    fail_check, mysql_select, write_data_to_file,
     # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
     # @modified 20190408 - Feature #2484: FULL_DURATION feature profiles
     # Moved to common_functions
@@ -126,6 +138,22 @@ from echo import ionosphere_echo
 
 # @added 20210702 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
+# @added 20220731 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
+# @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+from learn_repetitive_patterns import ionosphere_learn_repetitive_patterns
+
+# @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data
+from functions.ionosphere.get_fp_minmax_scaled_data import get_fp_minmax_scaled_data
+from functions.ionosphere.add_fp_minmax_scaled_data import add_fp_minmax_scaled_data
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -250,6 +278,17 @@ try:
 except:
     VERBOSE_LOGGING = False
 
+# @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+try:
+    LEARN_REPETITIVE_PATTERNS = settings.IONOSPHERE_LEARN_REPETITIVE_PATTERNS
+except:
+    LEARN_REPETITIVE_PATTERNS = True
+
+try:
+    VORTEX_ENABLED = settings.VORTEX_ENABLED
+except:
+    VORTEX_ENABLED = False
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 max_age_seconds = settings.IONOSPHERE_CHECK_MAX_AGE
@@ -339,7 +378,7 @@ class Ionosphere(Thread):
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
             logger.warning('warning :: parent or current process dead')
-            exit(0)
+            sys_exit(0)
 
     # These are the ionosphere mysql functions used to surface and input
     # ionosphere data for timeseries.
@@ -416,8 +455,19 @@ class Ionosphere(Thread):
         # Added occassional logging for monitoring
         last_log_time = int(time_now)
 
+        # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+        # Abort this function if work queues up
+        abort_for_work = False
+
         try:
             for path, folders, files in os.walk(dir_path):
+
+                # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # Abort this function if work queues up and reset the training_data_list
+                if abort_for_work:
+                    training_data_list = []
+                    break
+
                 for folder in folders[:]:
                     # @added 20200625 - Feature #3472: ionosphere.training_data Redis set
                     #                   Feature #3474: webapp api - training_data
@@ -442,9 +492,23 @@ class Ionosphere(Thread):
                         except:
                             logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
+                    # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                    # Abort this function if work queues up and reset the training_data_list
+                    check_files = None
+                    try:
+                        check_files = [f for f in listdir(settings.IONOSPHERE_CHECK_PATH) if isfile(join(settings.IONOSPHERE_CHECK_PATH, f))]
+                    except:
+                        logger.error('error :: failed to list files in check dir')
+                        logger.info(traceback.format_exc())
+                    if check_files:
+                        abort_for_work = True
+                        training_data_list = []
+                        logger.info('aborting purging ionosphere training data because %s check files have been added' % str(len(check_files)))
+                        break
+
                     folder_path = os.path.join(path, folder)
                     # Only timestamped directories are removed
-                    if re.match('\d{10}', folder):
+                    if re.match('\\d{10}', folder):
                         if ENABLE_IONOSPHERE_DEBUG:
                             logger.info('debug :: matched - %s' % folder_path)
 
@@ -596,7 +660,7 @@ class Ionosphere(Thread):
                                     metric = metric_file.replace('.txt', '', 1)
                                     path_elements = metric_file_path.split(os.sep)
                                     for element in path_elements:
-                                        if re.match('\d{10}', element):
+                                        if re.match('\\d{10}', element):
                                             timestamp = int(element)
                                 if metric and timestamp:
                                     # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
@@ -678,7 +742,7 @@ class Ionosphere(Thread):
                                     metric = metric_file.replace('.txt', '', 1)
                                     path_elements = metric_file_path.split(os.sep)
                                     for element in path_elements:
-                                        if re.match('\d{10}', element):
+                                        if re.match('\\d{10}', element):
                                             timestamp = int(element)
                                 if metric and timestamp:
                                     resolution_seconds = settings.FULL_DURATION
@@ -833,6 +897,8 @@ class Ionosphere(Thread):
             logger.error('error :: MySQL engine not obtained for ionosphere_enabled_metrics')
             return False
 
+        errors = []
+
         # Determine the metrics that have ionosphere_enabled
         # @added 20170103 - Task #1658: Patterning Skyline Ionosphere
         # TODO: We need 2 sets not just ionosphere.unique_metrics otherwise
@@ -847,17 +913,33 @@ class Ionosphere(Thread):
         ionosphere_metrics_count = 0
         query_ok = False
         try:
-            stmt = 'select metric from metrics where ionosphere_enabled=1'
+            # @modified 20220803 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Handle labelled_metrics
+            # stmt = 'select metric from metrics where ionosphere_enabled=1'
+            stmt = 'select id, metric from metrics where ionosphere_enabled=1'
             connection = engine.connect()
             for row in engine.execute(stmt):
                 metric_basename = row['metric']
                 metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric_basename))
+                # @added 20220803 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metrics
+                if '_tenant_id="' in metric_basename:
+                    try:
+                        metric_name = 'labelled_metrics.%s' % str(row['id'])
+                    except Exception as err:
+                        errors.append(['determining metric id for', metric_basename, str(err)])
                 ionosphere_enabled_metrics.append(metric_name)
             connection.close()
             query_ok = True
-        except:
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not determine ionosphere_enabled metrics from the DB to manage ionosphere.unique_metrics Redis set')
+            logger.error('error :: could not determine ionosphere_enabled metrics from the DB to manage ionosphere.unique_metrics Redis set - %s' % err)
+
+        if errors:
+            logger.error('error :: errors reported in determining ionosphere_enabled_metrics, last error: %s' % str(errors[-1]))
+            errors = []
 
         ionosphere_metrics_count = len(ionosphere_enabled_metrics)
         logger.info('db has %s ionosphere_enabled metrics' % (str(ionosphere_metrics_count)))
@@ -875,17 +957,30 @@ class Ionosphere(Thread):
                 manage_ionosphere_unique_metrics = False
 
         if manage_ionosphere_unique_metrics:
-            for metric_name in ionosphere_enabled_metrics:
+            do_individually = False
+            if do_individually:
+                for metric_name in ionosphere_enabled_metrics:
+                    try:
+                        self.redis_conn.sadd('ionosphere.new_unique_metrics', metric_name)
+                        # logger.info('added %s to ionosphere.new_unique_metrics Redis set' % metric_name)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.info('error :: failed to add %s to ionosphere.new_unique_metrics Redis set' % metric_name)
+                    try:
+                        self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
+                    except:
+                        logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
+            if ionosphere_enabled_metrics:
                 try:
-                    self.redis_conn.sadd('ionosphere.new_unique_metrics', metric_name)
-                    # logger.info('added %s to ionosphere.new_unique_metrics Redis set' % metric_name)
+                    self.redis_conn.sadd('ionosphere.new_unique_metrics', *ionosphere_enabled_metrics)
                 except:
                     logger.error(traceback.format_exc())
-                    logger.info('error :: failed to add %s to ionosphere.new_unique_metrics Redis set' % metric_name)
+                    logger.info('error :: failed to add %s metrics to ionosphere.new_unique_metrics Redis set' % str(len(ionosphere_enabled_metrics)))
                 try:
                     self.redis_conn.setex('ionosphere.manage_ionosphere_unique_metrics', 300, time())
                 except:
                     logger.error('error :: failed to set key :: ionosphere.manage_ionosphere_unique_metrics')
+
             try:
                 logger.info('replacing Redis ionosphere.unique_metrics via rename of ionosphere.new_unique_metrics')
                 self.redis_conn.rename('ionosphere.new_unique_metrics', 'ionosphere.unique_metrics')
@@ -975,7 +1070,7 @@ class Ionosphere(Thread):
                     str(metric_vars_file)))
         else:
             logger.error(
-                'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                'error :: ionosphere :: loading metric variables from metric_check_file - file not found - %s' % (
                     str(metric_vars_file)))
             return False
 
@@ -1049,7 +1144,10 @@ class Ionosphere(Thread):
 # and bulking up ionosphere.py with more learn parameter to spin_process etc
 # ionosphere.py works, as good as it gets, so extended with learn.py.  This uses
 # the same no memory leak pattern that was adopted for smtp_alerts.
-    def spawn_learn_process(self, i, timestamp):
+# @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+# Added learn_job_context to enable handling learn_repetitive_patterns
+#    def spawn_learn_process(self, i, timestamp):
+    def spawn_learn_process(self, i, timestamp, learn_job_context):
         """
         Spawn a process to learn.
 
@@ -1064,7 +1162,14 @@ class Ionosphere(Thread):
         # @modified 20170117 - Feature #1854: Ionosphere learn - generations
         # Renamed the function from simple learn to the meme it has become
         # learn(timestamp)
-        ionosphere_learn(timestamp)
+        # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+        logger.info('spawn_learn_process running %s' % learn_job_context)
+        if learn_job_context == 'learn':
+            ionosphere_learn(timestamp)
+        elif learn_job_context == 'learn_repetitive_patterns':
+            ionosphere_learn_repetitive_patterns(timestamp)
+        else:
+            logger.error('error :: spawn_learn_process not called with valid learn_job_context')
 
     # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
     def process_ionosphere_echo(self, i, metric_check_file):
@@ -1142,6 +1247,13 @@ class Ionosphere(Thread):
             # match
             # if not metric in ionosphere_unique_metrics:
             metric_name = '%s%s' % (str(settings.FULL_NAMESPACE), str(metric))
+
+            # @added 20220803 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Handle labelled_metrics
+            if metric.startswith('labelled_metrics.'):
+                metric_name = str(metric)
+
             # @modified 20190522: Task #3034: Reduce multiprocessing Manager list usage
             # if not metric_name in ionosphere_unique_metrics:
             if metric_name not in ionosphere_unique_metrics:
@@ -1216,7 +1328,34 @@ class Ionosphere(Thread):
         # Remove the metric from the waterfall_alerts Redis set
         # [metric, timestamp, value, added_to_waterfall_timestamp]
         # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
-        def remove_waterfall_alert(added_by, metric_timestamp, base_name):
+        # @modified 20221203 - Feature #4734: mirage_vortex
+        #                      Feature #4732: flux vortex
+        # Added matched
+        def remove_waterfall_alert(added_by, metric_timestamp, base_name, matched=None):
+
+            # @added 20221203 - Feature #4734: mirage_vortex
+            #                   Feature #4732: flux vortex
+            if added_by == 'mirage_vortex':
+                if matched:
+                    vortex_anomalous = False
+                else:
+                    vortex_anomalous = True
+                vortex_data = {
+                    'metric': base_name,
+                    'anomalous': vortex_anomalous,
+                    'metric_timestamp': metric_timestamp,
+                    'matched': matched,
+                }
+                vortex_key = '%s.%s' % (str(metric_timestamp), base_name)
+                try:
+                    self.redis_conn_decoded.hset('ionosphere.vortex_results', vortex_key, str(vortex_data))
+                    logger.info('vortex metric anomalous: %s, added %s to ionosphere.vortex_results' % (
+                        str(vortex_anomalous), vortex_key))
+                except Exception as err:
+                    logger.error('error :: vortex metric anomalous: %s, failed to add %s to ionosphere.vortex_results - %s' % (
+                        str(vortex_anomalous), vortex_key, err))
+                return
+
             redis_waterfall_alert_set = '%s.waterfall_alerts.sent_to_ionosphere' % added_by
             literal_waterfall_alerts = []
             try:
@@ -1258,8 +1397,29 @@ class Ionosphere(Thread):
         # so this needs to be sent to Ionosphere so Ionosphere
         # can send it back on an alert.
         def return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run):
-            cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
-            cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration, algorithms_run]
+
+            # @added 20221203 - Feature #4734: mirage_vortex
+            #                   Feature #4732: flux vortex
+            # Nothing is done here because Ionosphere always sends the result
+            # back to mirage_vortex in the remove_waterfall_alert function.
+            if added_by == 'mirage_vortex':
+                return
+
+            use_base_name = str(base_name)
+            if '_tenant_id="' in base_name:
+                try:
+                    metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                    if metric_id:
+                        use_base_name = 'labelled_metrics.%s' % str(metric_id)
+                except Exception as err:
+                    logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                        base_name, err))
+
+            # cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+            cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, use_base_name)
+
+            # cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration, algorithms_run]
+            cache_key_value = [float(anomalous_value), use_base_name, int(metric_timestamp), triggered_algorithms, full_duration, algorithms_run]
             try:
                 self.redis_conn.setex(cache_key, 300, str(cache_key_value))
                 logger.info('added Redis alert key - %s - %s' % (
@@ -1294,6 +1454,62 @@ class Ionosphere(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis hash %s - %s' % (
                     str(data), str(redis_hash), e))
+
+        # @added 20221102 - Feature #4712: Reset mirage trigger_history on Ionosphere match
+        #                   Bug #4308: matrixprofile - fN on big drops
+        def reset_mirage_trigger_history(metric, layers=False):
+            """
+            If a match is found then Ionosphere removes the Mirage trigger
+            history entry for the metric.  A match infers that nothing is
+            anomalous in the recent history of the metric.  This allows for the
+            results of custom algorithms with a trigger override set to be
+            consider on the next analysis of the metric.  Not resetting the
+            trigger history results in custom algorithms not being considered
+            until such a time as the trigger history entries have cleared or a
+            match is not achieved.  Further to this if the trigger history is
+            not cleared, Ionosphere will be made to check every instance of
+            where a metric is in a state of change, even if a custom algorithm
+            like matrixprofile would override the 3-sigma results.
+            """
+            removed_history = None
+            if not layers:
+                try:
+                    removed_history = self.redis_conn_decoded.hdel('mirage.trigger_history', metric)
+                except Exception as err:
+                    logger.error('error :: reset_mirage_trigger_history failed to remove %s from mirage.trigger_history - %s' % (
+                        str(metric), err))
+                if isinstance(removed_history, int):
+                    logger.info('reset_mirage_trigger_history removed trigger history for %s' % metric)
+            else:
+                # For layers only clean the very recent history, as in 10 mins.
+                # This is a guesstimate because having evaluated how difficult
+                # it would be to determine the length of period the layer
+                # covered, it is easier to generalise because layers normally
+                # consider a small number of data points.
+                trigger_history = {}
+                try:
+                    raw_trigger_history = self.redis_conn_decoded.hget('mirage.trigger_history', metric)
+                    if raw_trigger_history:
+                        trigger_history = literal_eval(raw_trigger_history)
+                except Exception as err:
+                    logger.error('error :: reset_mirage_trigger_history failed to evaluate data from mirage.trigger_history Redis hash key for %s - %s' % (
+                        metric, str(err)))
+                recent_trigger_history = {}
+                current_timestamp = int(time())
+                remove_trigger_timestamp = current_timestamp - 600
+                for trigger_timestamp in list(trigger_history.keys()):
+                    if trigger_timestamp > remove_trigger_timestamp:
+                        continue
+                    recent_trigger_history[trigger_timestamp] = trigger_history[trigger_timestamp]
+                removed_history = len(trigger_history) - len(recent_trigger_history)
+                logger.info('reset_mirage_trigger_history removed %s recent entries for layer matched on %s' % (
+                    str(removed_history), metric))
+                try:
+                    self.redis_conn_decoded.hset('mirage.trigger_history', metric, str(recent_trigger_history))
+                except Exception as err:
+                    logger.error('error :: reset_mirage_trigger_history failed to set key in mirage.trigger_history Redis hash key for %s - %s' % (
+                        metric, str(err)))
+            return removed_history
 
         child_process_pid = os.getpid()
         logger.info('child_process_pid - %s' % str(child_process_pid))
@@ -1386,8 +1602,14 @@ class Ionosphere(Thread):
             # are either bytes, strings or numbers.  Added cache_key_value
             # self.redis_conn.setex(
             #   ionosphere_check_cache_key, 300, [check_process_start])
+            # @modified 20221206 - Feature #4732: flux vortex
+            #                     Feature #4734: mirage_vortex
+            # Changed the TTL for 300 to 3960 to allow for orphaned
+            # mirage_vortex.sent_to_ionosphere entries to clear and ensure that
+            # Ionosphere does not do the the work on these again before they are
+            # removed from the Redis hash after 3600 seconds by metrics_manager
             self.redis_conn.setex(
-                ionosphere_check_cache_key, 300, check_process_start)
+                ionosphere_check_cache_key, 3960, check_process_start)
             logger.info(
                 'added Redis check key - %s' % (ionosphere_check_cache_key))
         except:
@@ -1437,6 +1659,29 @@ class Ionosphere(Thread):
             logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
+
+        # @added 20220727 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metric name
+        use_base_name = str(base_name)
+        labelled_metric_name = None
+        if base_name.startswith('labelled_metrics.'):
+            labelled_metric_name = str(base_name)
+            logger.info('passed labelled_metric_name: %s' % labelled_metric_name)
+            try:
+                metric = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+                if metric:
+                    labelled_metric_base_name = str(metric)
+                    logger.info('metric looked up from labelled_metric_name: %s, metric: %s' % (
+                        labelled_metric_name, base_name))
+                    logger.info('labelled_metric_base_name: %s' % (
+                        labelled_metric_base_name))
+                    base_name = str(labelled_metric_base_name)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    base_name, err))
+        if labelled_metric_name:
+            use_base_name = str(labelled_metric_name)
 
         value = None
         try:
@@ -1559,6 +1804,11 @@ class Ionosphere(Thread):
             else:
                 algorithms_run = settings.ALGORITHMS
 
+        # @added 20221203 - Feature #4734: mirage_vortex
+        #                   Feature #4732: flux vortex
+        # Return the matched fp id in the vortex results
+        matched_fp_id = None
+
         # @added 20170117 - Feature #1854: Ionosphere learn - generations
         if str(added_by) == 'ionosphere_learn':
             logger.info('debug :: metric variable - added_by - %s' % added_by)
@@ -1579,7 +1829,7 @@ class Ionosphere(Thread):
             # @added 20200908 - Feature #3734: waterfall alerts
             # Remove waterfall alert item
             if added_by != 'ionosphere_learn':
-                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
 
             self.remove_metric_check_file(str(metric_check_file))
             return
@@ -1651,7 +1901,7 @@ class Ionosphere(Thread):
 
             # @added 20170101 - Feature #1830: Ionosphere alerts
             # Remove check file if an alert key exists
-            cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+            cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, use_base_name)
             last_alert = False
             try:
                 last_alert = self.redis_conn.get(cache_key)
@@ -1663,7 +1913,7 @@ class Ionosphere(Thread):
                 logger.info('removing check - alert cache key exists - %s' % cache_key)
                 # @added 20200908 - Feature #3734: waterfall alerts
                 # Remove any waterfall_alert items
-                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
 
                 self.remove_metric_check_file(str(metric_check_file))
                 return
@@ -1676,7 +1926,7 @@ class Ionosphere(Thread):
                 # Is this a analyzer_batch related anomaly?
                 analyzer_batch_anomaly = None
                 analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
-                    str(metric_timestamp), metric)
+                    str(metric_timestamp), use_base_name)
                 try:
                     analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
                 except Exception as e:
@@ -1689,7 +1939,7 @@ class Ionosphere(Thread):
                 else:
                     logger.info('batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
 
-            if analyzer_batch_anomaly:
+            if analyzer_batch_anomaly or added_by == 'mirage_vortex':
                 logger.info('batch anomaly not checking max_age_seconds for %s' % analyzer_batch_metric_anomaly_key)
             else:
                 # @modified 20200413 - Feature #3486: analyzer_batch
@@ -1731,10 +1981,10 @@ class Ionosphere(Thread):
         # @modified 20190325 - Feature #2484: FULL_DURATION feature profiles
         # Moved get_metrics_db_object block to common_functions.py
         try:
-            metrics_db_object = get_metrics_db_object(base_name)
+            metrics_db_object = get_metrics_db_object(use_base_name)
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not determine metrics_db_object from get_metrics_db_object for %s' % base_name)
+            logger.error('error :: could not determine metrics_db_object from get_metrics_db_object for %s' % use_base_name)
 
         if metrics_db_object:
             metrics_id = None
@@ -1744,7 +1994,7 @@ class Ionosphere(Thread):
                 # @added 20190509 - Bug #2984: Ionosphere - could not determine values from metrics_db_object
                 # Added a traceback here to debug an issue
                 logger.error(traceback.format_exc())
-                logger.error('error :: could not determine id from metrics_db_object for %s' % base_name)
+                logger.error('error :: could not determine id from metrics_db_object for %s' % use_base_name)
                 metrics_id = None
                 metric_ionosphere_enabled = None
                 training_metric = True
@@ -1753,10 +2003,12 @@ class Ionosphere(Thread):
                 # metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
                 metric_ionosphere_enabled = None
                 try:
-                    metric_ionosphere_enabled = metrics_db_object['ionosphere_enabled']
+                    metric_ionosphere_enabled_str = metrics_db_object['ionosphere_enabled']
+                    if metric_ionosphere_enabled_str:
+                        metric_ionosphere_enabled = int(metric_ionosphere_enabled_str)
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: could not determine ionosphere_enabled from metrics_db_object for %s' % base_name)
+                    logger.error('error :: could not determine ionosphere_enabled from metrics_db_object for %s' % use_base_name)
                 if metric_ionosphere_enabled is not None:
                     training_metric = False
                 else:
@@ -1769,9 +2021,11 @@ class Ionosphere(Thread):
             metrics_id = None
             metric_ionosphere_enabled = None
             training_metric = True
-            logger.error('error :: could not determine metric id from memcache or metrics tables for %s' % base_name)
+            logger.error('error :: could not determine metric id from memcache or metrics tables for %s' % use_base_name)
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
+
+        logger.info('training_metric: %s - %s' % (str(training_metric), use_base_name))
 
         # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
         # Do not run checks if namespace has matched multiple times in the
@@ -1811,7 +2065,7 @@ class Ionosphere(Thread):
                         logger.info('%s matched DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES, will analyse' % base_name)
 
             if feedback_metric:
-                cache_key = 'ionosphere.feedback_metric.checked.%s' % (base_name)
+                cache_key = 'ionosphere.feedback_metric.checked.%s' % (use_base_name)
                 logger.info('feedback metric identified adding Redis key with 600 TTL - %s' % cache_key)
                 try:
                     self.redis_conn.setex(cache_key, 600, int(time()))
@@ -1861,7 +2115,7 @@ class Ionosphere(Thread):
         if training_metric:
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # if base_name in self.ionosphere_non_smtp_alerter_metrics:
-            if base_name in ionosphere_non_smtp_alerter_metrics:
+            if use_base_name in ionosphere_non_smtp_alerter_metrics:
 
                 # @modified 20191114 - Feature #: forward_alert
                 # Allow ionosphere to check any metrics that have an alerter other than smtp set, apart from syslog
@@ -1876,7 +2130,7 @@ class Ionosphere(Thread):
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # self.training_metrics.append(base_name)
             redis_set = 'ionosphere.training_metrics'
-            data = str(base_name)
+            data = str(use_base_name)
             try:
                 self.redis_conn.sadd(redis_set, data)
             except:
@@ -1897,7 +2151,7 @@ class Ionosphere(Thread):
         # @added 20161210 - Branch #922: ionosphere
         #                   Task #1658: Patterning Skyline Ionosphere
         # Only continue if there is a training data json timeseries file
-        metric_timeseries_dir = base_name.replace('.', '/')
+        metric_timeseries_dir = use_base_name.replace('.', '/')
 
         # @modified 20170115 - Feature #1854: Ionosphere learn
         # Allowing the bifurcation of the metric_training_data_dir based on
@@ -1928,7 +2182,10 @@ class Ionosphere(Thread):
                 settings.IONOSPHERE_LEARN_FOLDER, metric_timestamp,
                 metric_timeseries_dir)
 
-        anomaly_json = '%s/%s.json' % (metric_training_data_dir, base_name)
+        anomaly_json = '%s/%s.json' % (metric_training_data_dir, use_base_name)
+        if labelled_metric_name:
+            anomaly_json = '%s/%s.json' % (metric_training_data_dir, labelled_metric_name)
+
         if os.path.isfile(anomaly_json):
             logger.info('training data ts json available - %s' % (anomaly_json))
         else:
@@ -1937,13 +2194,13 @@ class Ionosphere(Thread):
             # @added 20200908 - Feature #3734: waterfall alerts
             # Return to sender to alert
             if added_by != 'ionosphere_learn':
-                remove_waterfall_alert(added_by, metric_timestamp, base_name)
-                logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
+                logger.info('sending %s back to %s to alert' % (use_base_name, added_by))
                 # @added 20201001 - Task #3748: POC SNAB
                 # Added algorithms_run required to determine the anomalyScore
                 # so this needs to be sent to Ionosphere so Ionosphere
                 # can send it back on an alert.
-                return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+                return_to_sender_to_alert(added_by, metric_timestamp, use_base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
 
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             if engine:
@@ -1974,7 +2231,9 @@ class Ionosphere(Thread):
             # possible, FULL_DURATION data, wherever possible.
             try:
                 full_duration_hours = str(int(settings.FULL_DURATION / 3600))
-                redis_anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, base_name, full_duration_hours)
+                redis_anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, use_base_name, full_duration_hours)
+                if labelled_metric_name:
+                    redis_anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, labelled_metric_name, full_duration_hours)
                 if os.path.isfile(redis_anomaly_json):
                     logger.info('training data Redis full duration ts json available - %s' % (redis_anomaly_json))
                 else:
@@ -1999,7 +2258,7 @@ class Ionosphere(Thread):
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 if engine:
                     engine_disposal(engine)
-                return False
+                return
 
             # @added 20170101 - Feature #1836: ionosphere - local features profiles disk cache
             # Cache fp ids for 300 seconds?
@@ -2055,6 +2314,11 @@ class Ionosphere(Thread):
             result = None
             fp_layers_ids = []
             fp_layers_present = False
+
+            # @added 20221203 - Feature #4734: mirage_vortex
+            #                   Feature #4732: flux vortex
+            # Return the matched fp id in the vortex results
+            fp_layers_id_dict = {}
 
             # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
             # After the features profile evaluations this fps_db_object will
@@ -2112,6 +2376,10 @@ class Ionosphere(Thread):
                     if fp_layers_id > 0:
                         if fp_layers_id not in fp_layers_ids:
                             fp_layers_ids.append(fp_layers_id)
+                            # @added 20221203 - Feature #4734: mirage_vortex
+                            #                   Feature #4732: flux vortex
+                            # Return the matched fp id in the vortex results
+                            fp_layers_id_dict[fp_layers_id] = fp_id
 
                     # @added 20170108 - Feature #1842: Ionosphere - Graphite now graphs
                     # Added all_fp_ids
@@ -2122,7 +2390,7 @@ class Ionosphere(Thread):
                         # Handle ionosphere_learn
                         if added_by != 'ionosphere_learn':
                             fp_ids.append(int(fp_id))
-                            logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                            logger.info('using fp id %s matched full_duration %s - %s' % (str(fp_id), str(full_duration), use_base_name))
                         else:
                             # @added 20170116 - Feature #1854: Ionosphere learn - generations
                             # If this is added_by ionosphere_learn the id is only
@@ -2140,23 +2408,23 @@ class Ionosphere(Thread):
                                     logger.info(
                                         'valid ionosphere_learn generation %s - fp id %s matched full_duration %s - %s' % (
                                             str(current_fp_generation), str(fp_id),
-                                            str(full_duration), base_name))
+                                            str(full_duration), use_base_name))
                                 else:
                                     logger.info(
                                         'ionosphere_learn cannot check due to max_generations of %s would be exceeded, current generation %s - fp id %s matched full_duration %s - %s' % (
                                             str(metric_max_generations), str(current_fp_generation), str(fp_id),
-                                            str(full_duration), base_name))
+                                            str(full_duration), use_base_name))
                             except:
                                 logger.error(traceback.format_exc())
                                 logger.error(
                                     'error :: ionosphere_learn check could not determine the fp generation of fp id %s from the row object for %s' % (
-                                        str(fp_id), base_name))
+                                        str(fp_id), use_base_name))
                     else:
                         # @modified 20200717 - Bug #3382: Prevent ionosphere.learn loop edge cases
                         # Added the fp full_duration for clarity sake
                         # logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
                         logger.info('not using fp id %s of full_duration %s as does not match full_duration %s - %s' % (
-                            str(fp_id), str(row['full_duration']), str(full_duration), base_name))
+                            str(fp_id), str(row['full_duration']), str(full_duration), use_base_name))
 
                 # @added 20170115 - Feature #1854: Ionosphere learn - generations
                 # Create the fp_ids_db_object so it is available throughout
@@ -2166,14 +2434,14 @@ class Ionosphere(Thread):
                 # fp_ids_db_object = row
                 connection.close()
                 fp_count = len(fp_ids)
-                logger.info('determined %s fp ids for %s' % (str(fp_count), base_name))
+                logger.info('determined %s fp ids for %s' % (str(fp_count), use_base_name))
                 # @added 20170309 - Feature #1960: ionosphere_layers
                 fp_layers_count = len(fp_layers_ids)
-                logger.info('determined %s layers ids for %s' % (str(fp_layers_count), base_name))
+                logger.info('determined %s layers ids for %s' % (str(fp_layers_count), use_base_name))
 
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: could not determine fp ids from DB for %s' % base_name)
+                logger.error('error :: could not determine fp ids from DB for %s' % use_base_name)
                 fp_count = 0
                 # @added 20170309 - Feature #1960: ionosphere_layers
                 fp_layers_count = 0
@@ -2188,13 +2456,13 @@ class Ionosphere(Thread):
             #     fp_ids_db_object = result
 
             if len(fp_ids) == 0:
-                logger.info('there are no fp ids that match full duration for %s' % base_name)
+                logger.info('there are no fp ids that match full duration for %s' % use_base_name)
                 # @added 20200908 - Feature #3734: waterfall alerts
                 # If any layers are found but any fps for analysis have been
                 # discarded because of echo rate limiting or they do not match
                 # the fulll duration, still check any enabed layers
                 if fp_layers_count:
-                    logger.info('there are %s fp layers for %s' % (str(fp_layers_count), base_name))
+                    logger.info('there are %s fp layers for %s' % (str(fp_layers_count), use_base_name))
                     fp_ids_found = True
 
             else:
@@ -2210,12 +2478,12 @@ class Ionosphere(Thread):
             # TODO
 
             if not fp_ids_found:
-                logger.info('no fp ids were found for %s at %s' % (base_name, str(full_duration)))
+                logger.info('no fp ids were found for %s at %s' % (use_base_name, str(full_duration)))
                 # @modified 20170108 - Feature #1842: Ionosphere - Graphite now graphs
                 # Use all_fp_ids so that we can handle multiple durations
                 # fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 if len(all_fp_ids) == 0:
-                    logger.error('error :: Ionosphere is enabled on %s but has no feature_profiles' % (base_name))
+                    logger.error('error :: Ionosphere is enabled on %s but has no feature_profiles' % (use_base_name))
                     # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
                     # If there are no features profiles enabled for the metric
                     # send it back to the source to alert and update the DB with
@@ -2224,7 +2492,7 @@ class Ionosphere(Thread):
                     # any layers the metric has will be disabled as well
                     if added_by != 'ionosphere_learn':
                         logger.info('%s has been willy nillied, all its features profiles have been disabled, but it is still flagged as ionosphere_enabled' % (base_name))
-                        logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                        logger.info('sending %s back to %s to alert' % (use_base_name, added_by))
                         # @modified 20200908 - Feature #3734: waterfall alerts
                         # Use common return_to_sender_to_alert function
                         # cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
@@ -2239,13 +2507,13 @@ class Ionosphere(Thread):
                         #         'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
                         #         (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
                         #             str(triggered_algorithms), str(full_duration)))
-                        remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                        remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
 
                         # @modified 20201001 - Task #3748: POC SNAB
                         # Added algorithms_run required to determine the anomalyScore
                         # so this needs to be sent to Ionosphere so Ionosphere
                         # can send it back on an alert.
-                        return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+                        return_to_sender_to_alert(added_by, metric_timestamp, use_base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
 
                         # Update DB as to the fact that the metric is an ionosphere
                         # metric, all its fps have been disabled, it has been willy
@@ -2253,7 +2521,7 @@ class Ionosphere(Thread):
                         try:
                             metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
                             logger.info(log_msg)
-                            logger.info('ionosphere_table OK')
+                            logger.info('metrics_table OK')
                             connection = engine.connect()
                             connection.execute(
                                 metrics_table.update(
@@ -2265,7 +2533,7 @@ class Ionosphere(Thread):
                             logger.info('%s has been unwilly nillied' % (base_name))
                         except:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: could not update matched_count and last_matched for %s ' % str(fp_id))
+                            logger.error('error :: could not update ionosphere_enabled for %s ' % str(metrics_id))
 
                     fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 else:
@@ -2280,9 +2548,9 @@ class Ionosphere(Thread):
                         # Panorama.  Below is duplicated code from the send to
                         # at the end after deemed anomalous as no fps or layers
                         # matched.
-                        logger.info('anomalous - handling edge case on %s which has fps, is enabled, but has no fps of the required duration' % (base_name))
+                        logger.info('anomalous - handling edge case on %s which has fps, is enabled, but has no fps of the required duration' % (use_base_name))
                         redis_set = 'ionosphere.anomalous_metrics'
-                        data = base_name
+                        data = use_base_name
                         try:
                             self.redis_conn.sadd(redis_set, data)
                         except:
@@ -2292,7 +2560,7 @@ class Ionosphere(Thread):
                         # Send to panorama as Analyzer and Mirage will only alert on the
                         # anomaly, they will not push it to Panorama
                         if settings.PANORAMA_ENABLED:
-                            logger.info('handling edge case on %s of no same duration fps, sending to panorama.' % (base_name))
+                            logger.info('handling edge case on %s of no same duration fps, sending to panorama.' % (use_base_name))
                             if not os.path.exists(settings.PANORAMA_CHECK_PATH):
                                 mkdir_p(settings.PANORAMA_CHECK_PATH)
                             # Note:
@@ -2305,6 +2573,19 @@ class Ionosphere(Thread):
                             # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
                             added_at = str(int(time()))
                             source = 'graphite'
+
+                            # @added 20221103 - Task #2732: Prometheus to Skyline
+                            #                   Branch #4300: prometheus
+                            if '_tenant_id="' in base_name:
+                                source = 'victoriametrics'
+                            if base_name.startswith('labelled_metrics.'):
+                                source = 'victoriametrics'
+
+                            # @added 20221203 - Feature #4734: mirage_vortex
+                            #                   Feature #4732: flux vortex
+                            if added_by == 'mirage_vortex':
+                                source = 'vortex'
+
                             panorama_anomaly_data = 'metric = \'%s\'\n' \
                                                     'value = \'%s\'\n' \
                                                     'from_timestamp = \'%s\'\n' \
@@ -2315,14 +2596,14 @@ class Ionosphere(Thread):
                                                     'source = \'%s\'\n' \
                                                     'added_by = \'%s\'\n' \
                                                     'added_at = \'%s\'\n' \
-                                % (base_name, str(anomalous_value), str(int(from_timestamp)),
+                                % (use_base_name, str(anomalous_value), str(int(from_timestamp)),
                                    str(int(metric_timestamp)), str(settings.ALGORITHMS),
                                    str(triggered_algorithms), skyline_app, source,
                                    this_host, added_at)
                             # Create an anomaly file with details about the anomaly
                             panorama_anomaly_file = '%s/%s.%s.txt' % (
                                 settings.PANORAMA_CHECK_PATH, added_at,
-                                base_name)
+                                use_base_name)
                             try:
                                 write_data_to_file(
                                     skyline_app, panorama_anomaly_file, 'w',
@@ -2332,7 +2613,7 @@ class Ionosphere(Thread):
                                 logger.error('error :: failed to add panorama anomaly file :: %s' % (panorama_anomaly_file))
                                 logger.info(traceback.format_exc())
                             redis_set = 'ionosphere.sent_to_panorama'
-                            data = base_name
+                            data = use_base_name
                             try:
                                 self.redis_conn.sadd(redis_set, data)
                             except:
@@ -2342,15 +2623,15 @@ class Ionosphere(Thread):
 
                         # @added 20200908 - Feature #3734: waterfall alerts
                         # Return to sender to alert
-                        remove_waterfall_alert(added_by, metric_timestamp, base_name)
-                        logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                        remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
+                        logger.info('sending %s back to %s to alert' % (use_base_name, added_by))
                         # @added 20200930 - Feature #3734: waterfall alerts
                         # Send to Panorama as Mirage and Analyzer will not.
                         # @modified 20201001 - Task #3748: POC SNAB
                         # Added algorithms_run required to determine the anomalyScore
                         # so this needs to be sent to Ionosphere so Ionosphere
                         # can send it back on an alert.
-                        return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+                        return_to_sender_to_alert(added_by, metric_timestamp, use_base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
                 if engine:
                     engine_disposal(engine)
                 return
@@ -2359,7 +2640,10 @@ class Ionosphere(Thread):
         # anomaly so the the use does not have to do it and wait for the
         # features to be calculated.
         # Check the features were calculated by the webapp
-        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, use_base_name)
+        if labelled_metric_name:
+            calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, labelled_metric_name)
+
         calculated_feature_file_found = False
         if os.path.isfile(calculated_feature_file):
             logger.info('calculated features available - %s' % (calculated_feature_file))
@@ -2379,7 +2663,8 @@ class Ionosphere(Thread):
                 return
 
         if not calculated_feature_file_found:
-            if training_metric:
+            # if training_metric:
+            if training_metric and added_by != 'mirage_vortex':
                 # Allow Graphite resources to be created if they are not an alert
                 # was not sent therefore features do not need to be calculated
                 check_time = int(time())
@@ -2394,13 +2679,13 @@ class Ionosphere(Thread):
                     # @added 20200908 - Feature #3734: waterfall alerts
                     # Return to sender to alert
                     if added_by != 'ionosphere_learn':
-                        remove_waterfall_alert(added_by, metric_timestamp, base_name)
-                        logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                        remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
+                        logger.info('sending %s back to %s to alert' % (use_base_name, added_by))
                         # @modified 20201001 - Task #3748: POC SNAB
                         # Added algorithms_run required to determine the anomalyScore
                         # so this needs to be sent to Ionosphere so Ionosphere
                         # can send it back on an alert.
-                        return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+                        return_to_sender_to_alert(added_by, metric_timestamp, use_base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
 
                     if engine:
                         engine_disposal(engine)
@@ -2418,9 +2703,9 @@ class Ionosphere(Thread):
                 try:
                     logger.info('calling inference to find matching similar motif')
                     start_inference = timer()
-                    matched_motifs, fps_checked_for_motifs = ionosphere_motif_inference(base_name, metric_timestamp)
+                    matched_motifs, fps_checked_for_motifs = ionosphere_motif_inference(use_base_name, metric_timestamp)
                     end_inference = timer()
-                    logger.info('inference found %s matching similar motifs, checked %s fps in %6f seconds' % (
+                    logger.info('inference found %s matching similar motifs, checked %s fps in %.6f seconds' % (
                         str(len(matched_motifs)), str(len(fps_checked_for_motifs)),
                         (end_inference - start_inference)))
                 except Exception as e:
@@ -2513,7 +2798,7 @@ class Ionosphere(Thread):
             if matching_motif:
                 if not IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY:
                     redis_set = 'ionosphere.not_anomalous'
-                    data = base_name
+                    data = use_base_name
                     try:
                         self.redis_conn.sadd(redis_set, data)
                     except:
@@ -2542,7 +2827,7 @@ class Ionosphere(Thread):
                     logger.info('motifs_matched_table OK')
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to get ionosphere_matched_table meta for %s' % base_name)
+                    logger.error('error :: failed to get ionosphere_matched_table meta for %s' % use_base_name)
                 # Add all motif_matches to the DB
                 try:
                     motifs_matched_table, log_msg, trace = motifs_matched_table_meta(skyline_app, engine)
@@ -2550,7 +2835,7 @@ class Ionosphere(Thread):
                     logger.info('motifs_matched_table OK')
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to get motifs_matched_table meta for %s' % base_name)
+                    logger.error('error :: failed to get motifs_matched_table meta for %s' % use_base_name)
 
                 # @added 20210414 - Feature #4014: Ionosphere - inference
                 #                   Branch #3590: inference
@@ -2561,13 +2846,19 @@ class Ionosphere(Thread):
                     logger.info('not_anomalous_motifs_table OK')
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to get not_anomalous_motifs_table meta for %s' % base_name)
+                    logger.error('error :: failed to get not_anomalous_motifs_table meta for %s' % use_base_name)
 
                 new_motifs_matched_ids = []
                 for matched_motif in ordered_matched_motifs:
                     primary_match = 0
                     if matching_motif == matched_motif:
                         primary_match = 1
+
+                    # @added 20221203 - Feature #4734: mirage_vortex
+                    #                   Feature #4732: flux vortex
+                    # Return the matched fp id in the vortex results
+                    matched_fp_id = int(matched_motif[1])
+
                     # Only a single ionosphere_matched record is created for
                     # the most similar motif (primary_match=1) HOWEVER
                     # DO NOTE that EVERY motif match that is surfaced is
@@ -2683,13 +2974,13 @@ class Ionosphere(Thread):
                                 # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
                                 # every metric that is found to be not anomalous.
                                 try:
-                                    add_not_anomalous_to_redis_hash(base_name, metric_timestamp, anomalous_value, full_duration)
+                                    add_not_anomalous_to_redis_hash(use_base_name, metric_timestamp, anomalous_value, full_duration)
                                 except Exception as e:
                                     logger.error('error :: failed calling add_not_anomalous_to_redis_hash - %s' % e)
 
                 if not IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY:
                     profile_id_matched_file = '%s/%s.profile_id_matched.fp_id' % (
-                        metric_training_data_dir, base_name)
+                        metric_training_data_dir, use_base_name)
                     if not os.path.isfile(profile_id_matched_file):
                         try:
                             write_data_to_file(skyline_app, profile_id_matched_file, 'w', str(matching_motif[1]))
@@ -2699,21 +2990,44 @@ class Ionosphere(Thread):
                             logger.info(traceback.format_exc())
                             logger.error('error :: adding motif matched fp_id %s - %s' % (
                                 str(matching_motif[1]), profile_id_matched_file))
-                    remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
+                    # @added 20221102 - Feature #4712: Reset mirage trigger_history on Ionosphere match
+                    #                   Bug #4308: matrixprofile - fN on big drops
+                    logger.info('removing any mirage.trigger_history data for %s' % (
+                        use_base_name))
+                    try:
+                        trigger_history_reset = reset_mirage_trigger_history(use_base_name)
+                        if isinstance(trigger_history_reset, int):
+                            if trigger_history_reset == 1:
+                                logger.info('removed mirage.trigger_history data for %s' % (
+                                    use_base_name))
+                    except Exception as err:
+                        logger.error('error :: reset_mirage_trigger_history failed for %s - %s' % (
+                            str(use_base_name), err))
+
+                    # @modified 20221203 - Feature #4734: mirage_vortex
+                    #                      Feature #4732: flux vortex
+                    # Added matched
+                    remove_waterfall_alert(added_by, metric_timestamp, use_base_name, matching_motif[1])
                     self.remove_metric_check_file(str(metric_check_file))
                     if engine:
                         engine_disposal(engine)
                     return
         # Continue with normal features profile matching if no motifs were matched
 
+        # @added 20230104 - Feature #4734: mirage_vortex
+        #                   Feature #4732: flux vortex
+        # Handle insufficient data to create profile
+        log_msg = 'none'
+
         context = skyline_app
         f_calc = None
         if not calculated_feature_file_found:
             try:
-                fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, context)
-            except:
+                fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, use_base_name, context)
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to calculate features')
+                logger.error('error :: failed to calculate features - %s' % err)
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 if engine:
                     engine_disposal(engine)
@@ -2726,7 +3040,7 @@ class Ionosphere(Thread):
                 send_metric_name = '%s.features_calculation_time' % skyline_app_graphite_namespace
                 f_calc_time = '%.2f' % float(f_calc)
                 try:
-                    send_graphite_metric(skyline_app, send_metric_name, f_calc_time)
+                    send_graphite_metric(self, skyline_app, send_metric_name, f_calc_time)
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to send calculate features')
@@ -2735,7 +3049,7 @@ class Ionosphere(Thread):
                 logger.info('training metric done')
 
                 # @added 20200908 -
-                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
 
                 self.remove_metric_check_file(str(metric_check_file))
                 # TODO: make ionosphere more useful, compare any other
@@ -2746,8 +3060,21 @@ class Ionosphere(Thread):
                 return
 
         if not calculated_feature_file_found:
-            logger.error('error :: calculated features file not available - %s' % (calculated_feature_file))
-            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+
+            # @added 20230104 - Feature #4734: mirage_vortex
+            #                   Feature #4732: flux vortex
+            # Handle insufficient data to create profile and just remove the
+            # check rather than failing it as reporting an error
+            if log_msg and 'insufficient data to create profile' in log_msg:
+                logger.warning('warning :: calculated features file not available as insufficient date')
+                self.remove_metric_check_file(str(metric_check_file))
+            else:
+                logger.error('error :: calculated features file not available - %s' % (calculated_feature_file))
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+
+            if added_by == 'mirage_vortex':
+                remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
+
             if engine:
                 engine_disposal(engine)
             return
@@ -2786,7 +3113,7 @@ class Ionosphere(Thread):
         echo_calculated_features = []
         echo_fp_ids = []
         echo_anomalous_timeseries = None
-        if added_by == 'mirage':
+        if added_by in ['mirage', 'mirage_vortex']:
             try:
                 echo_enabled = settings.IONOSPHERE_ECHO_ENABLED
             except:
@@ -2826,13 +3153,13 @@ class Ionosphere(Thread):
                 # Ionosphere will alternate between normal Ionosphere features
                 # profiles (Mirage duration) and Ionosphere echo features
                 # profiles (FULL_DURATION) comparison.
-                echo_ionosphere_check_cache_key = 'ionosphere_echo.ionosphere.check.%s' % base_name
+                echo_ionosphere_check_cache_key = 'ionosphere_echo.ionosphere.check.%s' % use_base_name
                 echo_ionosphere_check_key = False
                 try:
                     echo_ionosphere_check_key = self.redis_conn.get(echo_ionosphere_check_cache_key)
                 except Exception as e:
                     logger.error('error :: could not query Redis for cache_key: %s' % e)
-                echo_ionosphere_echo_check_cache_key = 'ionosphere_echo.echo.check.%s' % base_name
+                echo_ionosphere_echo_check_cache_key = 'ionosphere_echo.echo.check.%s' % use_base_name
                 echo_ionosphere_echo_check_key = False
                 try:
                     echo_ionosphere_echo_check_key = self.redis_conn.get(echo_ionosphere_echo_check_cache_key)
@@ -2901,15 +3228,15 @@ class Ionosphere(Thread):
                         if int(row['full_duration']) == int(settings.FULL_DURATION):
                             fp_ids.append(int(row['id']))
                             echo_fp_ids.append(int(row['id']))
-                            logger.info('appending ionosphere_echo fp id %s matched full_duration  of %s - %s' % (str(row['id']), str(settings.FULL_DURATION), base_name))
+                            logger.info('appending ionosphere_echo fp id %s matched full_duration  of %s - %s' % (str(row['id']), str(settings.FULL_DURATION), use_base_name))
                 fp_count_with_echo = len(fp_ids)
                 echo_fp_count = len(echo_fp_ids)
                 if echo_fp_count == 0:
                     echo_check = False
                 if echo_fp_count > 0:
-                    logger.info('added an additional %s echo fp ids for %s' % (str(echo_fp_count), base_name))
-                    logger.info('determined a total of %s fp ids (incl. echo) for %s' % (str(fp_count_with_echo), base_name))
-                    echo_calculated_feature_file = '%s/%s.echo.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+                    logger.info('added an additional %s echo fp ids for %s' % (str(echo_fp_count), use_base_name))
+                    logger.info('determined a total of %s fp ids (incl. echo) for %s' % (str(fp_count_with_echo), use_base_name))
+                    echo_calculated_feature_file = '%s/%s.echo.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, use_base_name)
                     if os.path.isfile(echo_calculated_feature_file):
                         logger.info('echo calculated features available - %s' % (echo_calculated_feature_file))
                         echo_calculated_feature_file_found = True
@@ -2917,7 +3244,7 @@ class Ionosphere(Thread):
                         use_context = 'ionosphere_echo_check'
                         f_calc = None
                         try:
-                            fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, base_name, use_context)
+                            fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, metric_timestamp, use_base_name, use_context)
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to calculate features')
@@ -2946,7 +3273,7 @@ class Ionosphere(Thread):
                     fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                     if engine:
                         engine_disposal(engine)
-                    return False
+                    return
 
                 # @added 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
                 #                   Feature #2484: FULL_DURATION feature profiles
@@ -3041,9 +3368,26 @@ class Ionosphere(Thread):
 
                 if not fp_features:
                     try:
+
+                        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                   Task #4778: v4.0.0 - update dependencies
+                        # Use the MetaData autoload and sqlalchemy rather than string-based query construction
+                        try:
+                            use_table_meta = MetaData()
+                            use_table = Table(metric_fp_table, use_table_meta, autoload=True, autoload_with=engine)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: use_table Table failed on %s table - %s' % (
+                                metric_fp_table, err))
+
                         # @modified 20170913 - Task #2160: Test skyline with bandit
                         # Added nosec to exclude from bandit tests
-                        stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s' % (metric_fp_table, str(fp_id))  # nosec
+                        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Use sqlalchemy rather than string-based query construction
+                        # stmt = 'SELECT feature_id, value FROM %s WHERE fp_id=%s' % (metric_fp_table, str(fp_id))  # nosec
+                        stmt = select([use_table.c.feature_id, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+
                         connection = engine.connect()
                         for row in engine.execute(stmt):
                             fp_feature_id = int(row['feature_id'])
@@ -3179,6 +3523,10 @@ class Ionosphere(Thread):
                     # This broke it, no variable was interpolated
                     # logger.info('common features sums are almost equal, not anomalous' % str(relevant_fp_feature_values_count))
                     logger.info('common features sums are almost equal, not anomalous')
+                    # @added 20221203 - Feature #4734: mirage_vortex
+                    #                   Feature #4732: flux vortex
+                    # Return the matched fp id in the vortex results
+                    matched_fp_id = int(fp_id)
 
                 # @added 20161229 - Feature #1830: Ionosphere alerts
                 # Update the features profile checked count and time
@@ -3234,13 +3582,18 @@ class Ionosphere(Thread):
                 if percent_different < use_percent_similar:
                     not_anomalous = True
                     # log
-                    logger.info('not anomalous - features profile match - %s' % base_name)
+                    logger.info('not anomalous - features profile match - %s' % use_base_name)
                     logger.info(
                         'calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
                         (str(use_percent_similar),
                             str(fp_id), str(percent_different)))
+                    # @added 20221203 - Feature #4734: mirage_vortex
+                    #                   Feature #4732: flux vortex
+                    # Return the matched fp id in the vortex results
+                    matched_fp_id = int(fp_id)
+
                     if check_type == 'ionosphere_echo_check':
-                        logger.info('ionosphere_echo_check - not anomalous with fp id %s for %s' % (str(fp_id), base_name))
+                        logger.info('ionosphere_echo_check - not anomalous with fp id %s for %s' % (str(fp_id), use_base_name))
 
                 # @added 20180617 - Feature #2404: Ionosphere - fluid approximation
                 # Now if not matched use Min-Max scaling as per
@@ -3267,11 +3620,54 @@ class Ionosphere(Thread):
 
                 if minmax_check:
                     logger.info('running minmax scaling')
+
+                    # @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data
+                    start_minmax_scaling = time()
+
                     # First check to determine if the z_ts_<mertic_id> for the fp
                     # has data in memcache before querying the database
                     metric_fp_ts_table = 'z_ts_%s' % str(metrics_id)
                     fp_id_metric_ts = []
-                    if settings.MEMCACHE_ENABLED:
+
+                    # @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data
+                    fp_minmax_cache_data = False
+                    minmax_fp_ts = []
+                    min_fp_value = None
+                    max_fp_value = None
+                    minmax_fp_ts_values_count = None
+                    minmax_fp_features_count = None
+                    minmax_fp_features_sum = None
+                    fp_minmax_scaled_dict = {}
+                    try:
+                        fp_minmax_scaled_dict = get_fp_minmax_scaled_data(skyline_app, fp_id)
+                        if fp_minmax_scaled_dict:
+                            logger.info('got minmax data for fp id %s, fp_minmax_scaled_dict: %s' % (
+                                str(fp_id), str(fp_minmax_scaled_dict)))
+                    except Exception as err:
+                        logger.error('error :: get_fp_minmax_scaled_data failed on %s - %s' % (
+                            str(fp_id), err))
+                    if fp_minmax_scaled_dict:
+                        if 'id' in fp_minmax_scaled_dict:
+                            if fp_minmax_scaled_dict['id'] == fp_id:
+                                try:
+                                    fp_minmax_cache_data = True
+                                    fp_id_metric_ts = True
+                                    minmax_fp_ts = True
+                                    min_fp_value = float(fp_minmax_scaled_dict['min_fp_value'])
+                                    max_fp_value = float(fp_minmax_scaled_dict['max_fp_value'])
+                                    minmax_fp_ts_values_count = fp_minmax_scaled_dict['values_count']
+                                    minmax_fp_features_count = fp_minmax_scaled_dict['features_count']
+                                    minmax_fp_features_sum = float(fp_minmax_scaled_dict['features_sum'])
+                                except Exception as err:
+                                    logger.error('error :: failed to interpolated minmax data from memcache data - %s' % (
+                                        err))
+                                    fp_minmax_cache_data = False
+                                    fp_minmax_scaled_dict = {}
+
+                    # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                    # Use fp minmax data from memcache if available
+                    # if settings.MEMCACHE_ENABLED:
+                    if settings.MEMCACHE_ENABLED and not fp_minmax_cache_data:
                         # @added 20200421 - Task #3304: py3 - handle pymemcache bytes not str
                         # Explicitly set the fp_id_metric_ts_object so it
                         # always exists to be evaluated
@@ -3314,7 +3710,24 @@ class Ionosphere(Thread):
                         if LOCAL_DEBUG:
                             logger.debug('debug :: getting data from %s database table for fp id %s to populate the fp_id_metric_ts list' % (metric_fp_ts_table, str(fp_id)))
                         try:
-                            stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))  # nosec
+
+                            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                            #                   Task #4778: v4.0.0 - update dependencies
+                            # Use the MetaData autoload and sqlalchemy rather than string-based query construction
+                            try:
+                                use_table_meta = MetaData()
+                                use_table = Table(metric_fp_ts_table, use_table_meta, autoload=True, autoload_with=engine)
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: use_table Table failed on %s table - %s' % (
+                                    metric_fp_ts_table, err))
+
+                            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                            #                      Task #4778: v4.0.0 - update dependencies
+                            # Use sqlalchemy rather than string-based query construction
+                            # stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))  # nosec
+                            stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+
                             connection = engine.connect()
                             for row in engine.execute(stmt):
                                 fp_id_ts_timestamp = int(row['timestamp'])
@@ -3322,7 +3735,7 @@ class Ionosphere(Thread):
                                 fp_id_metric_ts.append([fp_id_ts_timestamp, fp_id_ts_value])
                             connection.close()
                             values_count = len(fp_id_metric_ts)
-                            logger.info('determined %s values for the fp_id time series %s for %s' % (str(values_count), str(fp_id), str(base_name)))
+                            logger.info('determined %s values for the fp_id time series %s for %s' % (str(values_count), str(fp_id), str(use_base_name)))
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: could not determine timestamps and values from %s' % metric_fp_ts_table)
@@ -3350,11 +3763,16 @@ class Ionosphere(Thread):
                         except:
                             logger.info('anomalous_timeseries is not defined loading from anomaly json')
 
-                        timeseries_dir = base_name.replace('.', '/')
+                        timeseries_dir = use_base_name.replace('.', '/')
+                        if labelled_metric_name:
+                            timeseries_dir = labelled_metric_name.replace('.', '/')
+
                         metric_data_dir = '%s/%s/%s' % (
                             settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
                             timeseries_dir)
-                        anomaly_json = '%s/%s.json' % (metric_data_dir, base_name)
+                        anomaly_json = '%s/%s.json' % (metric_data_dir, use_base_name)
+                        if labelled_metric_name:
+                            anomaly_json = '%s/%s.json' % (metric_data_dir, labelled_metric_name)
 
                         # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
                         # Bifurcate for ionosphere_echo_check
@@ -3424,13 +3842,16 @@ class Ionosphere(Thread):
                     lower_range_similar = False
                     upper_range_similar = False
                     if check_range:
-                        try:
-                            minmax_fp_values = [x[1] for x in fp_id_metric_ts]
-                            min_fp_value = min(minmax_fp_values)
-                            max_fp_value = max(minmax_fp_values)
-                        except:
-                            min_fp_value = False
-                            max_fp_value = False
+                        # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                        # Only calculate if not using memcache fp_minmax_cache_data
+                        if not fp_minmax_cache_data:
+                            try:
+                                minmax_fp_values = [x[1] for x in fp_id_metric_ts]
+                                min_fp_value = min(minmax_fp_values)
+                                max_fp_value = max(minmax_fp_values)
+                            except:
+                                min_fp_value = False
+                                max_fp_value = False
                         try:
                             minmax_anomalous_values = [x2[1] for x2 in use_anomalous_timeseries]
                             min_anomalous_value = min(minmax_anomalous_values)
@@ -3499,36 +3920,47 @@ class Ionosphere(Thread):
                     else:
                         logger.info('the ranges of fp_id_metric_ts and anomalous_timeseries differ significantly Min-Max scaling will be skipped')
 
-                    minmax_fp_ts = []
-                    # if fp_id_metric_ts:
-                    if range_similar:
-                        if LOCAL_DEBUG:
-                            logger.debug('debug :: creating minmax_fp_ts from minmax scaled fp_id_metric_ts')
-                        try:
-                            minmax_fp_values = [x[1] for x in fp_id_metric_ts]
-                            x_np = np.asarray(minmax_fp_values)
-                            # Min-Max scaling
-                            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
-                            for (ts, v) in zip(fp_id_metric_ts, np_minmax):
-                                minmax_fp_ts.append([ts[0], v])
-                            logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: could not minmax scale fp id %s time series for %s' % (str(fp_id), str(base_name)))
-                        if not minmax_fp_ts:
-                            logger.error('error :: minmax_fp_ts list not populated')
+                    # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                    # Only calculate if not using memcache fp_minmax_cache_data
+                    if not fp_minmax_cache_data:
+
+                        minmax_fp_ts = []
+                        # if fp_id_metric_ts:
+                        if range_similar:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: creating minmax_fp_ts from minmax scaled fp_id_metric_ts')
+                            try:
+                                minmax_fp_values = [x[1] for x in fp_id_metric_ts]
+                                x_np = np.asarray(minmax_fp_values)
+                                # Min-Max scaling
+                                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                                for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                                    minmax_fp_ts.append([ts[0], v])
+                                logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: could not minmax scale fp id %s time series for %s' % (str(fp_id), str(use_base_name)))
+                            if not minmax_fp_ts:
+                                logger.error('error :: minmax_fp_ts list not populated')
 
                     minmax_anomalous_ts = []
                     if minmax_fp_ts:
-                        # Only process if they are approximately the same length
-                        minmax_fp_ts_values_count = len(minmax_fp_ts)
+
+                        # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                        # Only calculate if not using memcache fp_minmax_cache_data
+                        if not fp_minmax_cache_data:
+                            # Only process if they are approximately the same length
+                            minmax_fp_ts_values_count = len(minmax_fp_ts)
+
                         if minmax_fp_ts_values_count - anomalous_ts_values_count in range(-14, 14):
                             try:
                                 minmax_anomalous_values = [x2[1] for x2 in use_anomalous_timeseries]
                                 x_np = np.asarray(minmax_anomalous_values)
                                 # Min-Max scaling
                                 np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
-                                for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                                # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                                # for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                                for (ts, v) in zip(use_anomalous_timeseries, np_minmax):
                                     minmax_anomalous_ts.append([ts[0], v])
                             except:
                                 logger.error(traceback.format_exc())
@@ -3541,147 +3973,201 @@ class Ionosphere(Thread):
                             logger.info('minmax scaled check will be skipped - anomalous_ts_values_count is %s and minmax_fp_ts is %s' % (str(anomalous_ts_values_count), str(minmax_fp_ts_values_count)))
 
                     minmax_fp_ts_csv = '%s/fpid.%s.%s.minmax_fp_ts.tsfresh.input.std.csv' % (
-                        settings.SKYLINE_TMP_DIR, str(fp_id), base_name)
+                        settings.SKYLINE_TMP_DIR, str(fp_id), use_base_name)
+                    if labelled_metric_name:
+                        minmax_fp_ts_csv = '%s/fpid.%s.%s.minmax_fp_ts.tsfresh.input.std.csv' % (
+                            settings.SKYLINE_TMP_DIR, str(fp_id), labelled_metric_name)
+
                     minmax_fp_fname_out = minmax_fp_ts_csv + '.transposed.csv'
                     anomalous_ts_csv = '%s/%s.%s.minmax_anomalous_ts.tsfresh.std.csv' % (
-                        settings.SKYLINE_TMP_DIR, metric_timestamp, base_name)
+                        settings.SKYLINE_TMP_DIR, str(metric_timestamp), use_base_name)
+                    if labelled_metric_name:
+                        anomalous_ts_csv = '%s/%s.%s.minmax_anomalous_ts.tsfresh.std.csv' % (
+                            settings.SKYLINE_TMP_DIR, str(metric_timestamp), labelled_metric_name)
                     anomalous_fp_fname_out = anomalous_ts_csv + '.transposed.csv'
 
                     # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
                     # tsf_settings = ReasonableFeatureExtractionSettings()
                     # tsf_settings.disable_progressbar = True
 
-                    minmax_fp_features_sum = None
+                    # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                    # Only calculate if not using memcache fp_minmax_cache_data
+                    # minmax_fp_features_sum = None
+                    if not fp_minmax_cache_data:
+                        minmax_fp_features_sum = None
+
                     minmax_anomalous_features_sum = None
                     if minmax_anomalous_ts and minmax_fp_ts:
                         if LOCAL_DEBUG:
                             logger.debug('debug :: analyzing minmax_fp_ts and minmax_anomalous_ts')
-                        if not os.path.isfile(minmax_fp_ts_csv):
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: creating %s from minmax_fp_ts' % minmax_fp_ts_csv)
-                            datapoints = minmax_fp_ts
-                            converted = []
-                            for datapoint in datapoints:
-                                try:
-                                    new_datapoint = [float(datapoint[0]), float(datapoint[1])]
-                                    converted.append(new_datapoint)
-                                # @added 20210425 - Task #4030: refactoring
-                                except TypeError:
-                                    # This allows for the handling when the
-                                    # entry has a value of None
-                                    continue
-                                # @modified 20210425 - Task #4030: refactoring
-                                # except:  # nosec
-                                except Exception as e:
-                                    logger.error('error :: could not create converted timeseries from minmax_fp_ts - %s' % e)
-                                    continue
 
-                            del datapoints
+                        # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                        # Only calculate if not using memcache fp_minmax_cache_data
+                        if not fp_minmax_cache_data:
+                            if not os.path.isfile(minmax_fp_ts_csv):
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: creating %s from minmax_fp_ts' % minmax_fp_ts_csv)
+                                datapoints = minmax_fp_ts
+                                converted = []
+                                for datapoint in datapoints:
+                                    try:
+                                        new_datapoint = [float(datapoint[0]), float(datapoint[1])]
+                                        converted.append(new_datapoint)
+                                    # @added 20210425 - Task #4030: refactoring
+                                    except TypeError:
+                                        # This allows for the handling when the
+                                        # entry has a value of None
+                                        continue
+                                    # @modified 20210425 - Task #4030: refactoring
+                                    # except:  # nosec
+                                    except Exception as err:
+                                        logger.error('error :: could not create converted timeseries from minmax_fp_ts - %s' % err)
+                                        continue
+
+                                del datapoints
+                                if LOCAL_DEBUG:
+                                    if len(converted) > 0:
+                                        logger.debug('debug :: converted is populated')
+                                    else:
+                                        logger.debug('debug :: error :: converted is not populated')
+                                for ts, value in converted:
+                                    try:
+                                        utc_ts_line = '%s,%s,%s\n' % (use_base_name, str(int(ts)), str(value))
+                                        with open(minmax_fp_ts_csv, 'a') as fh:
+                                            fh.write(utc_ts_line)
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: could not write to file %s' % (str(minmax_fp_ts_csv)))
+                                del converted
+                            else:
+                                logger.info('file found %s, using for data' % minmax_fp_ts_csv)
+
+                            if not os.path.isfile(minmax_fp_ts_csv):
+                                logger.error('error :: file not found %s' % minmax_fp_ts_csv)
+                            else:
+                                logger.info('file exists to create the minmax_fp_ts data frame from - %s' % minmax_fp_ts_csv)
+
+                            try:
+                                df = pd.read_csv(minmax_fp_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
+                                df.columns = ['metric', 'timestamp', 'value']
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to created data frame from %s' % (str(minmax_fp_ts_csv)))
+                            try:
+                                df_features = extract_features(
+                                    # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+                                    # df, column_id='metric', column_sort='timestamp', column_kind=None,
+                                    # column_value=None, feature_extraction_settings=tsf_settings)
+                                    df, default_fc_parameters=EfficientFCParameters(),
+                                    column_id='metric', column_sort='timestamp', column_kind=None,
+                                    column_value=None, disable_progressbar=True)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to created df_features from %s' % (str(minmax_fp_ts_csv)))
+                            del df
+                            # Create transposed features csv
+                            if not os.path.isfile(minmax_fp_fname_out):
+                                # Transpose
+                                df_t = df_features.transpose()
+                                df_t.to_csv(minmax_fp_fname_out)
+                                del df_t
+                            else:
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: file exists - %s' % minmax_fp_fname_out)
+
+                            # @added 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                            # Add calc_time
+                            start_calc_time = time()
+                            try:
+                                # Calculate the count and sum of the features values
+                                df_sum = pd.read_csv(
+                                    minmax_fp_fname_out, delimiter=',', header=0,
+                                    names=['feature_name', 'value'])
+                                df_sum.columns = ['feature_name', 'value']
+                                df_sum['feature_name'] = df_sum['feature_name'].astype(str)
+                                df_sum['value'] = df_sum['value'].astype(float)
+                                minmax_fp_features_count = len(df_sum['value'])
+                                minmax_fp_features_sum = df_sum['value'].sum()
+                                logger.info('minmax_fp_ts - features_count: %s, features_sum: %s' % (str(minmax_fp_features_count), str(minmax_fp_features_sum)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to created df_sum from %s' % (str(minmax_fp_fname_out)))
+                            # @added 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                            # Add calc_time
+                            calc_time = time() - start_calc_time
+
+                        if minmax_fp_features_count > 0:
                             if LOCAL_DEBUG:
-                                if len(converted) > 0:
-                                    logger.debug('debug :: converted is populated')
-                                else:
-                                    logger.debug('debug :: error :: converted is not populated')
-                            for ts, value in converted:
+                                logger.debug('debug :: minmax_fp_features_count of the minmax_fp_ts is %s' % str(minmax_fp_features_count))
+
+                            # @added 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
+                            # Add the fp minmax data to the DB and memcache
+                            if not fp_minmax_cache_data:
+                                logger.info('adding minmax data to DB and memcache for fp id %s' % str(fp_id))
+                                add_fp_minmax_success = False
                                 try:
-                                    utc_ts_line = '%s,%s,%s\n' % (base_name, str(int(ts)), str(value))
-                                    with open(minmax_fp_ts_csv, 'a') as fh:
-                                        fh.write(utc_ts_line)
-                                except:
+                                    fp_minmax_scaled_dict = {
+                                        'id': fp_id,
+                                        'min_fp_value': min_fp_value,
+                                        'max_fp_value': max_fp_value,
+                                        'values_count': minmax_fp_ts_values_count,
+                                        'features_count': minmax_fp_features_count,
+                                        'features_sum': minmax_fp_features_sum,
+                                        'tsfresh_version': tsfresh_version,
+                                        'calc_time': calc_time,
+                                    }
+                                    add_fp_minmax_success = add_fp_minmax_scaled_data(skyline_app, fp_minmax_scaled_dict)
+                                except Exception as err:
                                     logger.error(traceback.format_exc())
-                                    logger.error('error :: could not write to file %s' % (str(minmax_fp_ts_csv)))
-                            del converted
-                        else:
-                            logger.info('file found %s, using for data' % minmax_fp_ts_csv)
+                                    logger.error('error :: add_fp_minmax_scaled_data failed - %s' % err)
+                                logger.info('minmax data added to DB and memcache for fp id %s - %s' % (
+                                    str(fp_id), str(add_fp_minmax_success)))
 
-                        if not os.path.isfile(minmax_fp_ts_csv):
-                            logger.error('error :: file not found %s' % minmax_fp_ts_csv)
                         else:
-                            logger.info('file exists to create the minmax_fp_ts data frame from - %s' % minmax_fp_ts_csv)
+                            logger.error('error :: minmax_fp_features_count is %s' % str(minmax_fp_features_count))
+
+                        if not os.path.isfile(anomalous_ts_csv):
+                            try:
+                                datapoints = minmax_anomalous_ts
+                                converted = []
+                                for datapoint in datapoints:
+                                    try:
+                                        new_datapoint = [float(datapoint[0]), float(datapoint[1])]
+                                        converted.append(new_datapoint)
+                                    # @added 20210425 - Task #4030: refactoring
+                                    except TypeError:
+                                        # This allows for the handling when the
+                                        # entry has a value of None
+                                        continue
+                                    # @modified 20210425 - Task #4030: refactoring
+                                    # except:  # nosec
+                                    except Exception as e:
+                                        logger.error('error :: could not create converted timeseries from minmax_anomalous_ts - %s' % e)
+                                        continue
+                                del datapoints
+                                for ts, value in converted:
+                                    utc_ts_line = '%s,%s,%s\n' % (use_base_name, str(int(ts)), str(value))
+                                    with open(anomalous_ts_csv, 'a') as fh:
+                                        fh.write(utc_ts_line)
+                                del converted
+                            except Exception as err:
+                                logger.error('error :: failed to create %s - %s' % (str(anomalous_ts_csv), err))
 
                         try:
-                            df = pd.read_csv(minmax_fp_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
+                            df = pd.read_csv(anomalous_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
                             df.columns = ['metric', 'timestamp', 'value']
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to created data frame from %s' % (str(minmax_fp_ts_csv)))
-                        try:
-                            df_features = extract_features(
+                            df_features_current = extract_features(
                                 # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
                                 # df, column_id='metric', column_sort='timestamp', column_kind=None,
                                 # column_value=None, feature_extraction_settings=tsf_settings)
                                 df, default_fc_parameters=EfficientFCParameters(),
                                 column_id='metric', column_sort='timestamp', column_kind=None,
                                 column_value=None, disable_progressbar=True)
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to created df_features from %s' % (str(minmax_fp_ts_csv)))
-                        del df
-                        # Create transposed features csv
-                        if not os.path.isfile(minmax_fp_fname_out):
-                            # Transpose
-                            df_t = df_features.transpose()
-                            df_t.to_csv(minmax_fp_fname_out)
-                            del df_t
-                        else:
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: file exists - %s' % minmax_fp_fname_out)
-                        try:
-                            # Calculate the count and sum of the features values
-                            df_sum = pd.read_csv(
-                                minmax_fp_fname_out, delimiter=',', header=0,
-                                names=['feature_name', 'value'])
-                            df_sum.columns = ['feature_name', 'value']
-                            df_sum['feature_name'] = df_sum['feature_name'].astype(str)
-                            df_sum['value'] = df_sum['value'].astype(float)
-                            minmax_fp_features_count = len(df_sum['value'])
-                            minmax_fp_features_sum = df_sum['value'].sum()
-                            logger.info('minmax_fp_ts - features_count: %s, features_sum: %s' % (str(minmax_fp_features_count), str(minmax_fp_features_sum)))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to created df_sum from %s' % (str(minmax_fp_fname_out)))
 
-                        if minmax_fp_features_count > 0:
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: minmax_fp_features_count of the minmax_fp_ts is %s' % str(minmax_fp_features_count))
-                        else:
-                            logger.error('error :: minmax_fp_features_count is %s' % str(minmax_fp_features_count))
-
-                        if not os.path.isfile(anomalous_ts_csv):
-                            datapoints = minmax_anomalous_ts
-                            converted = []
-                            for datapoint in datapoints:
-                                try:
-                                    new_datapoint = [float(datapoint[0]), float(datapoint[1])]
-                                    converted.append(new_datapoint)
-                                # @added 20210425 - Task #4030: refactoring
-                                except TypeError:
-                                    # This allows for the handling when the
-                                    # entry has a value of None
-                                    continue
-                                # @modified 20210425 - Task #4030: refactoring
-                                # except:  # nosec
-                                except Exception as e:
-                                    logger.error('error :: could not create converted timeseries from minmax_anomalous_ts - %s' % e)
-                                    continue
-                            del datapoints
-                            for ts, value in converted:
-                                utc_ts_line = '%s,%s,%s\n' % (base_name, str(int(ts)), str(value))
-                                with open(anomalous_ts_csv, 'a') as fh:
-                                    fh.write(utc_ts_line)
-                            del converted
-
-                        df = pd.read_csv(anomalous_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
-                        df.columns = ['metric', 'timestamp', 'value']
-                        df_features_current = extract_features(
-                            # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
-                            # df, column_id='metric', column_sort='timestamp', column_kind=None,
-                            # column_value=None, feature_extraction_settings=tsf_settings)
-                            df, default_fc_parameters=EfficientFCParameters(),
-                            column_id='metric', column_sort='timestamp', column_kind=None,
-                            column_value=None, disable_progressbar=True)
-
-                        del df
+                            del df
+                        except Exception as err:
+                            logger.error('error :: df or extract_features failed - %s' % err)
+                            continue
 
                         # Create transposed features csv
                         if not os.path.isfile(anomalous_fp_fname_out):
@@ -3736,6 +4222,10 @@ class Ionosphere(Thread):
                             if almost_equal:
                                 minmax_not_anomalous = True
                                 logger.info('minmax scaled common features sums are almost equal, not anomalous')
+                                # @added 20221203 - Feature #4734: mirage_vortex
+                                #                   Feature #4732: flux vortex
+                                # Return the matched fp id in the vortex results
+                                matched_fp_id = int(fp_id)
 
                             # if diff_in_sums <= 1%:
                             if percent_different < 0:
@@ -3757,19 +4247,30 @@ class Ionosphere(Thread):
                             if percent_different < mm_use_percent_similar:
                                 minmax_not_anomalous = True
                                 # log
-                                logger.info('not anomalous - minmax scaled features profile match - %s - %s' % (base_name, str(minmax_not_anomalous)))
+                                logger.info('not anomalous - minmax scaled features profile match - %s - %s' % (use_base_name, str(minmax_not_anomalous)))
                                 logger.info(
                                     'minmax scaled calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
                                     (str(mm_use_percent_similar),
                                         str(fp_id), str(percent_different)))
+                                # @added 20221203 - Feature #4734: mirage_vortex
+                                #                   Feature #4732: flux vortex
+                                # Return the matched fp id in the vortex results
+                                matched_fp_id = int(fp_id)
+
                                 if check_type == 'ionosphere_echo_check':
-                                    logger.info('ionosphere_echo_check :: not anomalous - minmax scaled features profile match - %s' % (base_name))
+                                    logger.info('ionosphere_echo_check :: not anomalous - minmax scaled features profile match - %s' % (use_base_name))
 
                             if minmax_not_anomalous:
                                 not_anomalous = True
                                 minmax = 1
                                 # Created time series resources for graphing in
                                 # the matched page
+
+                                # @added 20221203 - Feature #4734: mirage_vortex
+                                #                   Feature #4732: flux vortex
+                                # Return the matched fp id in the vortex results
+                                matched_fp_id = int(fp_id)
+
                             try:
                                 if os.path.isfile(minmax_fp_ts_csv):
                                     self.remove_metric_check_file(str(minmax_fp_ts_csv))
@@ -3784,13 +4285,13 @@ class Ionosphere(Thread):
                 # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
                 # Clean up echo files
                 if echo_check:
-                    echo_calculated_feature_file = '%s/%s.echo.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+                    echo_calculated_feature_file = '%s/%s.echo.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, use_base_name)
                     try:
                         if os.path.isfile(echo_calculated_feature_file):
                             self.remove_metric_check_file(str(echo_calculated_feature_file))
                     except:
                         pass
-                    echo_features_file = '%s/%s.%s.echo.fp.details.txt' % (metric_training_data_dir, str(metric_timestamp), base_name)
+                    echo_features_file = '%s/%s.%s.echo.fp.details.txt' % (metric_training_data_dir, str(metric_timestamp), use_base_name)
                     try:
                         if os.path.isfile(echo_features_file):
                             self.remove_metric_check_file(str(echo_features_file))
@@ -3815,17 +4316,35 @@ class Ionosphere(Thread):
                         logger.info('no anomalous_fp_fname_out file to clean up')
                 # END - Feature #2404: Ionosphere - fluid approximation
 
+                    # @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data
+                    logger.info('minmax_check of fp %s took %.6f seconds' % (
+                        str(fp_id), (time() - start_minmax_scaling)))
+
                 if not_anomalous:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # self.not_anomalous.append(base_name)
                     redis_set = 'ionosphere.not_anomalous'
-                    data = base_name
+                    data = use_base_name
                     try:
                         self.redis_conn.sadd(redis_set, data)
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add %s to Redis set %s' % (
                             str(data), str(redis_set)))
+
+                    # @added 20221102 - Feature #4712: Reset mirage trigger_history on Ionosphere match
+                    #                   Bug #4308: matrixprofile - fN on big drops
+                    logger.info('removing any mirage.trigger_history data for %s' % (
+                        use_base_name))
+                    try:
+                        trigger_history_reset = reset_mirage_trigger_history(use_base_name)
+                        if isinstance(trigger_history_reset, int):
+                            if trigger_history_reset == 1:
+                                logger.info('removed mirage.trigger_history data for %s' % (
+                                    use_base_name))
+                    except Exception as err:
+                        logger.error('error :: reset_mirage_trigger_history failed for %s - %s' % (
+                            str(use_base_name), err))
 
                     # update matched_count in ionosphere_table
                     matched_timestamp = int(time())
@@ -3878,7 +4397,7 @@ class Ionosphere(Thread):
                         logger.info('ionosphere_matched_table OK')
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to get ionosphere_matched_table meta for %s' % base_name)
+                        logger.error('error :: failed to get ionosphere_matched_table meta for %s' % use_base_name)
 
                     # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
                     # Added minmax scaling values
@@ -3948,7 +4467,7 @@ class Ionosphere(Thread):
                     # training data for feature profile matches too.
                     if not_anomalous:
                         profile_id_matched_file = '%s/%s.profile_id_matched.fp_id' % (
-                            metric_training_data_dir, base_name)
+                            metric_training_data_dir, use_base_name)
                         if not os.path.isfile(profile_id_matched_file):
                             try:
                                 write_data_to_file(skyline_app, profile_id_matched_file, 'w', str(fp_id))
@@ -3963,7 +4482,7 @@ class Ionosphere(Thread):
                         # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
                         # every metric that is found to be not anomalous.
                         try:
-                            add_not_anomalous_to_redis_hash(base_name, metric_timestamp, anomalous_value, full_duration)
+                            add_not_anomalous_to_redis_hash(use_base_name, metric_timestamp, anomalous_value, full_duration)
                         except Exception as e:
                             logger.error('error :: failed calling add_not_anomalous_to_redis_hash - %s' % e)
 
@@ -3975,7 +4494,7 @@ class Ionosphere(Thread):
                 # @added 20161214 - Add a between timeframe option, e.g. if
                 # fp match, only see this as not anomalous if hour (and or min)
                 # is between x and y - handle rollovers, cron log archives, etc.
-                logger.info('debug :: %s is a features profile for %s' % (str(fp_id), base_name))
+                logger.info('debug :: %s is a features profile for %s' % (str(fp_id), use_base_name))
 
             # @added 20170115 - Feature #1854: Ionosphere learn - generations
             # If this is an ionosphere_learn check them we handle it before
@@ -3984,6 +4503,16 @@ class Ionosphere(Thread):
             if added_by == 'ionosphere_learn':
                 if not_anomalous:
                     logger.info('an ionosphere_learn metric has been found to be not anomalous before')
+
+                    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    try:
+                        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+                        logger.info(log_msg)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get ionosphere_table meta')
 
                     # @added 20170607 - Feature #2010: Ionosphere learn - rate limiting profile learning
                     learning_rate_limited = False
@@ -3996,13 +4525,23 @@ class Ionosphere(Thread):
                         connection = engine.connect()
                         # @modified 20170913 - Task #2160: Test skyline with bandit
                         # Added nosec to exclude from bandit tests
-                        result = connection.execute(
-                            'SELECT * FROM ionosphere WHERE metric_id=%s AND created_timestamp > \'%s\' AND generation > 1' % (str(metrics_id), str(after_datetime)))  # nosec
-                        for row in result:
+                        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Use sqlalchemy rather than string-based query construction
+                        # result = connection.execute(
+                        #     'SELECT * FROM ionosphere WHERE metric_id=%s AND created_timestamp > \'%s\' AND generation > 1' % (str(metrics_id), str(after_datetime)))  # nosec
+                        # for row in result:
+                        stmt = select([ionosphere_table]).\
+                            where(ionosphere_table.c.metric_id == int(metrics_id)).\
+                            where(ionosphere_table.c.created_timestamp > after_datetime).\
+                            where(ionosphere_table.c.generation > 1)
+                        for row in engine.execute(stmt):
                             last_full_duration = row['full_duration']
                             if int(full_duration) <= int(last_full_duration):
                                 learning_rate_limited = True
                                 break
+                        connection.close()
+
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: determining whether learning should be rate limited')
@@ -4021,7 +4560,12 @@ class Ionosphere(Thread):
                     try:
                         # @modified 20170913 - Task #2160: Test skyline with bandit
                         # Added nosec to exclude from bandit tests
-                        stmt = 'SELECT generation FROM ionosphere WHERE id=%s' % str(fp_id)  # nosec
+                        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Use sqlalchemy rather than string-based query construction
+                        # stmt = 'SELECT generation FROM ionosphere WHERE id=%s' % str(fp_id)  # nosec
+                        stmt = select([ionosphere_table.c.generation]).where(ionosphere_table.c.id == int(fp_id))
+
                         connection = engine.connect()
                         for row in engine.execute(stmt):
                             matched_fp_generation = int(row['generation'])
@@ -4036,7 +4580,7 @@ class Ionosphere(Thread):
 
                     logger.info(
                         'ionosphere_learn metric matches the generation %s features profile id %s - %s' % (
-                            str(current_fp_generation), str(fp_id), base_name))
+                            str(current_fp_generation), str(fp_id), use_base_name))
                     # Added Redis to work_set, learn will then go off and create
                     # the features profile with the parent training data if
                     # less than max_generations, although ionosphere_learn
@@ -4048,17 +4592,17 @@ class Ionosphere(Thread):
                     try:
                         logger.info(
                             'LEARNT :: adding work to Redis ionosphere.learn.work set - [\'%s\', \'%s\', %s, \'%s\', %s, %s] to create a learnt features profile' % (
-                                work_deadline, str(ionosphere_job), str(metric_timestamp), base_name,
+                                work_deadline, str(ionosphere_job), str(metric_timestamp), use_base_name,
                                 str(fp_id), str(current_fp_generation)))
                         # modified 20190412 - Task #2824: Test redis-py upgrade
                         #                     Task #2926: Update dependencies
                         # self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)])
-                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, int(fp_id), int(current_fp_generation)]))
+                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), use_base_name, int(fp_id), int(current_fp_generation)]))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
                             'error :: failed adding work to Redis ionosphere.learn.work set - [\'%s\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
-                                work_deadline, str(ionosphere_job), str(metric_timestamp), base_name,
+                                work_deadline, str(ionosphere_job), str(metric_timestamp), use_base_name,
                                 str(fp_id), str(current_fp_generation)))
 
                 # Exit the ionosphere_learn check
@@ -4090,12 +4634,12 @@ class Ionosphere(Thread):
             if check_layers_algorithms and fp_layers_present:
                 full_duration_in_hours = int(settings.FULL_DURATION) / 3600
                 mirage_full_duration_json_file = '%s/%s.mirage.redis.%sh.json' % (
-                    metric_training_data_dir, base_name,
+                    metric_training_data_dir, use_base_name,
                     str(int(full_duration_in_hours)))
                 if os.path.isfile(mirage_full_duration_json_file):
                     full_duration_json_file = mirage_full_duration_json_file
                 else:
-                    full_duration_json_file = '%s/%s.json' % (metric_training_data_dir, base_name)
+                    full_duration_json_file = '%s/%s.json' % (metric_training_data_dir, use_base_name)
 
                 anomalous_timeseries = None
                 if os.path.isfile(full_duration_json_file):
@@ -4108,14 +4652,14 @@ class Ionosphere(Thread):
                         anomalous_timeseries = literal_eval(timeseries_array_str)
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: could not load json for layers check - %s' % (base_name))
+                        logger.error('error :: could not load json for layers check - %s' % (use_base_name))
                     logger.info('data points surfaced for layers check - %s' % (len(anomalous_timeseries)))
                 else:
                     logger.error('error :: full duration ts json for layers was not found - %s' % (full_duration_json_file))
 
                 matched_layers_id = None
                 for layers_id in fp_layers_ids:
-                    if not_anomalous:
+                    if not not_anomalous:
                         logger.info('checking layers_id %s - %s layers profiles of %s possible layers' % (
                             str(layers_id), str(layers_checked_count), str(fp_layers_count)))
                     if not_anomalous:
@@ -4159,6 +4703,12 @@ class Ionosphere(Thread):
                             not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries, fp_layers_count, layers_checked_count)
                             if not_anomalous:
                                 matched_layers_id = layers_id
+
+                                # @added 20221203 - Feature #4734: mirage_vortex
+                                #                   Feature #4732: flux vortex
+                                # Return the matched fp id in the vortex results
+                                matched_fp_id = fp_layers_id_dict[layers_id]
+
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: run_layer_algorithms failed for layers_id - %s' % (str(layers_id)))
@@ -4169,7 +4719,7 @@ class Ionosphere(Thread):
                             logger.info('still anomalous :: layers_id %s was NOT matched after checking %s layers profiles of %s possible layers' % (
                                 str(layers_id), str(layers_checked_count), str(fp_layers_count)))
                 if not not_anomalous:
-                    logger.info('anomalous - no features profiles layers were matched - %s' % base_name)
+                    logger.info('anomalous - no features profiles layers were matched - %s' % use_base_name)
 
                 # @added 20170308 - Feature #1960: ionosphere_layers
                 #                   Feature #1854: Ionosphere learn
@@ -4181,7 +4731,7 @@ class Ionosphere(Thread):
                 # that exist even if a layer matched as not_anomalous.
                 if not_anomalous:
                     layers_id_matched_file = '%s/%s.layers_id_matched.layers_id' % (
-                        metric_training_data_dir, base_name)
+                        metric_training_data_dir, use_base_name)
                     if not os.path.isfile(layers_id_matched_file):
                         try:
                             write_data_to_file(skyline_app, layers_id_matched_file, 'w', str(matched_layers_id))
@@ -4196,9 +4746,22 @@ class Ionosphere(Thread):
                     # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
                     # every metric that is found to be not anomalous.
                     try:
-                        add_not_anomalous_to_redis_hash(base_name, metric_timestamp, anomalous_value, full_duration)
+                        add_not_anomalous_to_redis_hash(use_base_name, metric_timestamp, anomalous_value, full_duration)
                     except Exception as e:
                         logger.error('error :: failed calling add_not_anomalous_to_redis_hash - %s' % e)
+
+                    # @added 20221102 - Feature #4712: Reset mirage trigger_history on Ionosphere match
+                    #                   Bug #4308: matrixprofile - fN on big drops
+                    logger.info('removing any mirage.trigger_history data for %s' % (
+                        use_base_name))
+                    try:
+                        trigger_history_removed = reset_mirage_trigger_history(use_base_name, layers=True)
+                        if isinstance(trigger_history_removed, int):
+                            logger.info('removed %s recent entries from mirage.trigger_history data for %s' % (
+                                str(trigger_history_removed), use_base_name))
+                    except Exception as err:
+                        logger.error('error :: reset_mirage_trigger_history failed on layers for %s - %s' % (
+                            str(use_base_name), err))
 
             else:
                 logger.info('no layers algorithm check required')
@@ -4208,10 +4771,13 @@ class Ionosphere(Thread):
             # Remove the metric from the waterfall_alerts Redis set
             # [metric, timestamp, value, added_to_waterfall_timestamp]
             # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
-            remove_waterfall_alert(added_by, metric_timestamp, base_name)
+            # @modified 20221203 - Feature #4734: mirage_vortex
+            #                      Feature #4732: flux vortex
+            # Added matched
+            remove_waterfall_alert(added_by, metric_timestamp, use_base_name, matched_fp_id)
 
             if not not_anomalous:
-                logger.info('anomalous - no feature profiles were matched - %s' % base_name)
+                logger.info('anomalous - no feature profiles were matched - %s' % use_base_name)
 
                 # @added 20170116 - Feature #1854: Ionosphere learn
                 # If this is an ionosphere_learn check an Ionosphere alert will
@@ -4227,7 +4793,7 @@ class Ionosphere(Thread):
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # self.anomalous_metrics.append(base_name)
                 redis_set = 'ionosphere.anomalous_metrics'
-                data = base_name
+                data = use_base_name
                 try:
                     self.redis_conn.sadd(redis_set, data)
                 except:
@@ -4250,6 +4816,19 @@ class Ionosphere(Thread):
                     # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
                     added_at = str(int(time()))
                     source = 'graphite'
+
+                    # @added 20221103 - Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if '_tenant_id="' in base_name:
+                        source = 'victoriametrics'
+                    if base_name.startswith('labelled_metrics.'):
+                        source = 'victoriametrics'
+
+                    # @added 20221203 - Feature #4734: mirage_vortex
+                    #                   Feature #4732: flux vortex
+                    if added_by == 'mirage_vortex':
+                        source = 'vortex'
+
                     panorama_anomaly_data = 'metric = \'%s\'\n' \
                                             'value = \'%s\'\n' \
                                             'from_timestamp = \'%s\'\n' \
@@ -4260,7 +4839,7 @@ class Ionosphere(Thread):
                                             'source = \'%s\'\n' \
                                             'added_by = \'%s\'\n' \
                                             'added_at = \'%s\'\n' \
-                        % (base_name, str(anomalous_value), str(int(from_timestamp)),
+                        % (use_base_name, str(anomalous_value), str(int(from_timestamp)),
                            str(int(metric_timestamp)), str(settings.ALGORITHMS),
                            str(triggered_algorithms), skyline_app, source,
                            this_host, added_at)
@@ -4268,7 +4847,7 @@ class Ionosphere(Thread):
                     # Create an anomaly file with details about the anomaly
                     panorama_anomaly_file = '%s/%s.%s.txt' % (
                         settings.PANORAMA_CHECK_PATH, added_at,
-                        base_name)
+                        use_base_name)
                     try:
                         write_data_to_file(
                             skyline_app, panorama_anomaly_file, 'w',
@@ -4282,7 +4861,7 @@ class Ionosphere(Thread):
                         logger.info(traceback.format_exc())
                     # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     redis_set = 'ionosphere.sent_to_panorama'
-                    data = base_name
+                    data = use_base_name
                     try:
                         self.redis_conn.sadd(redis_set, data)
                     except:
@@ -4296,11 +4875,14 @@ class Ionosphere(Thread):
             #     OR send back to app via Redis
                 # @modified 20170116 - Feature #1854: Ionosphere learn
                 # Only do the cache_key if not ionosphere_learn
-                if added_by != 'ionosphere_learn':
+                # @modified 20221203 - Feature #4734: mirage_vortex
+                #                      Feature #4732: flux vortex
+                # if added_by != 'ionosphere_learn':
+                if added_by not in ['ionosphere_learn', 'mirage_vortex']:
 
                     # @added 20200908 - Feature #3734: waterfall alerts
                     # Remove any waterfall_alert items
-                    remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                    remove_waterfall_alert(added_by, metric_timestamp, use_base_name)
 
                     # @modified 20200908 - Feature #3734: waterfall alerts
                     # Use common return_to_sender_to_alert function
@@ -4330,7 +4912,7 @@ class Ionosphere(Thread):
                     # Added algorithms_run required to determine the anomalyScore
                     # so this needs to be sent to Ionosphere so Ionosphere
                     # can send it back on an alert.
-                    return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+                    return_to_sender_to_alert(added_by, metric_timestamp, use_base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
 
                 # @added 20170116 - Feature #1854: Ionosphere learn
                 # Added an ionosphere_learn job for the timeseries that did not
@@ -4339,22 +4921,22 @@ class Ionosphere(Thread):
                     ionosphere_job = 'learn_fp_generation'
                     logger.info(
                         'adding an ionosphere_learn %s job for the timeseries that did not match any profiles - %s' % (
-                            ionosphere_job, base_name))
+                            ionosphere_job, use_base_name))
                     try:
                         logger.info(
                             'adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', None, None] to make a learn features profile later' % (
                                 str(ionosphere_job), str(int(metric_timestamp)),
-                                base_name))
+                                use_base_name))
                         # modified 20190412 - Task #2824: Test redis-py upgrade
                         #                     Task #2926: Update dependencies
                         # self.redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None])
-                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), base_name, None, None]))
+                        self.redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(metric_timestamp), use_base_name, None, None]))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error(
                             'error :: failed adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', None, None] to make a learn features profile later' % (
                                 str(ionosphere_job), str(int(metric_timestamp)),
-                                base_name))
+                                use_base_name))
 
                 self.remove_metric_check_file(str(metric_check_file))
                 if engine:
@@ -4552,16 +5134,57 @@ class Ionosphere(Thread):
                     logger.info('using memcache %s key data' % hosts_id_key)
                     logger.info('host_id: %s' % str(host_id))
 
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload and sqlalchemy rather than string-based query construction
+            hosts_table_loaded = False
+            got_an_engine = False
+
             if not host_id:
+
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use the MetaData autoload and sqlalchemy rather than string-based query construction
+                try:
+                    engine, log_msg, trace = get_engine(skyline_app)
+                    got_an_engine = True
+                except:
+                    logger.error(traceback.format_exc())
+                    log_msg = 'error :: failed to get MySQL engine'
+                    logger.error('error :: failed to get MySQL engine')
+                try:
+                    use_table_meta = MetaData()
+                    use_table = Table('hosts', use_table_meta, autoload=True, autoload_with=engine)
+                    hosts_table_loaded = True
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: use_table Table failed on hosts table - %s' % (
+                        err))
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'select id FROM hosts WHERE host=\'%s\'' % this_host  # nosec
-                results = mysql_select(skyline_app, query)
-                if results:
-                    host_id = results[0][0]
-                    logger.info('host_id: %s' % str(host_id))
-                else:
-                    logger.info('failed to determine host id of %s' % this_host)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # query = 'select id FROM hosts WHERE host=\'%s\'' % this_host  # nosec
+                # results = mysql_select(skyline_app, query)
+                # if results:
+                #     host_id = results[0][0]
+                #     logger.info('host_id: %s' % str(host_id))
+                # else:
+                #     logger.info('failed to determine host id of %s' % this_host)
+                try:
+                    stmt = select([use_table.c.id]).where(use_table.c.host == this_host)
+                    connection = engine.connect()
+                    for row in engine.execute(stmt):
+                        host_id = row['id']
+                        break
+                    connection.close()
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to find id of %s in hosts table - %s' % (
+                        this_host, err))
+
                 if host_id and settings.MEMCACHE_ENABLED:
                     try:
                         self.memcache_client.set(hosts_id_key, int(host_id))
@@ -4578,12 +5201,58 @@ class Ionosphere(Thread):
             # if not known - INSERT hostname INTO host
             if not host_id:
                 logger.info('inserting %s into hosts table' % this_host)
+
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use the MetaData autoload and sqlalchemy rather than string-based query construction
+                if not got_an_engine:
+                    try:
+                        engine, log_msg, trace = get_engine(skyline_app)
+                        got_an_engine = True
+                    except:
+                        logger.error(traceback.format_exc())
+                        log_msg = 'error :: failed to get MySQL engine'
+                        logger.error('error :: failed to get MySQL engine')
+                if not hosts_table_loaded:
+                    try:
+                        use_table_meta = MetaData()
+                        use_table = Table('hosts', use_table_meta, autoload=True, autoload_with=engine)
+                        hosts_table_loaded = True
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: use_table Table failed on hosts table - %s' % (
+                            err))
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'insert into hosts (host) VALUES (\'%s\')' % this_host  # nosec
-                host_id = self.mysql_insert(query)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # query = 'insert into hosts (host) VALUES (\'%s\')' % this_host  # nosec
+                # host_id = self.mysql_insert(query)
+                try:
+                    connection = engine.connect()
+                    ins = use_table.insert().values(host=this_host)
+                    result = connection.execute(ins)
+                    connection.close()
+                    host_id = result.inserted_primary_key[0]
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to insert host into hosts table - %s' % (
+                        err))
+
                 if host_id:
                     logger.info('new host_id: %s' % str(host_id))
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload and sqlalchemy rather than string-based query construction
+            if got_an_engine:
+                try:
+                    engine.dispose()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: calling engine.dispose()')
 
             if not host_id:
                 logger.error(
@@ -4591,6 +5260,31 @@ class Ionosphere(Thread):
                     this_host)
                 sleep(30)
                 continue
+
+            # @added 20221025 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+            # Only check and refresh Redis data if Ionosphere is not busy so set
+            # initially so these exists
+            unique_metrics = []
+            try:
+                unique_metrics = list(self.redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not get the unique_metrics list from Redis')
+                unique_metrics = []
+            ionosphere_smtp_alerter_metrics = []
+            try:
+                ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
+                ionosphere_smtp_alerter_metrics = []
+            ionosphere_non_smtp_alerter_metrics = []
+            try:
+                ionosphere_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set')
+                ionosphere_non_smtp_alerter_metrics = []
 
             # Determine if any metric has been added to add
             # while True:
@@ -4760,8 +5454,35 @@ class Ionosphere(Thread):
                                     logger.error('error :: killing all %s processes for ionosphere.echo.work item' % function_name)
 
                 if not metric_var_files:
-                    logger.info('sleeping 20 no metric check files')
-                    sleep(20)
+                    logger.info('sleeping 10 no metric check files')
+                    if VORTEX_ENABLED:
+                        for i in list(range(0, 10)):
+                            vortex_work = 0
+                            vortex_work_queue = {}
+                            try:
+                                vortex_work_queue = self.redis_conn_decoded.hgetall('mirage_vortex.sent_to_ionosphere')
+                            except Exception as err:
+                                logger.error('error :: failed to get hkeys from mirage_vortex.sent_to_ionosphere - %s' % (
+                                    err))
+                            for request_id in list(vortex_work_queue.keys()):
+                                try:
+                                    work_dict = literal_eval(vortex_work_queue[request_id])
+                                    w_timestamp = work_dict['timestamp']
+                                    w_metric = work_dict['metric']
+                                    ionosphere_check_cache_key = 'ionosphere.check.%s.%s.txt' % (str(w_timestamp), w_metric)
+                                    if self.redis_conn_decoded.exists(ionosphere_check_cache_key):
+                                        continue
+                                except Exception as err:
+                                    logger.error('error :: failed to determine if work has been done for %s from mirage_vortex.sent_to_ionosphere - %s' % (
+                                        request_id, err))
+                                vortex_work += 1
+                            if not vortex_work:
+                                sleep(1)
+                            else:
+                                logger.info('waking from sleep as mirage_vortex added')
+                                break
+                    else:
+                        sleep(10)
                     up_now = time()
                     # Report app up
                     try:
@@ -4853,7 +5574,7 @@ class Ionosphere(Thread):
                         not_anomalous = '0'
                     logger.info('not_anomalous      :: %s' % not_anomalous)
                     send_metric_name = '%s.not_anomalous' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
+                    send_graphite_metric(self, skyline_app, send_metric_name, not_anomalous)
 
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -4867,7 +5588,7 @@ class Ionosphere(Thread):
                         total_anomalies = '0'
                     logger.info('total_anomalies    :: %s' % total_anomalies)
                     send_metric_name = '%s.total_anomalies' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, total_anomalies)
+                    send_graphite_metric(self, skyline_app, send_metric_name, total_anomalies)
 
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -4875,12 +5596,14 @@ class Ionosphere(Thread):
                         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
                         #                      Branch #3262: py3
                         # training_metrics = str(len(list(self.redis_conn.smembers('ionosphere.training_metrics'))))
-                        training_metrics = str(len(list(self.redis_conn_decoded.smembers('ionosphere.training_metrics'))))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # training_metrics = str(len(list(self.redis_conn_decoded.smembers('ionosphere.training_metrics'))))
+                        training_metrics = str(self.redis_conn_decoded.scard('ionosphere.training_metrics'))
                     except:
                         training_metrics = '0'
                     logger.info('training metrics   :: %s' % training_metrics)
                     send_metric_name = '%s.training_metrics' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, training_metrics)
+                    send_graphite_metric(self, skyline_app, send_metric_name, training_metrics)
 
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -4888,15 +5611,17 @@ class Ionosphere(Thread):
                         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
                         #                      Branch #3262: py3
                         # features_profiles_checked = str(len(list(self.redis_conn.smembers('ionosphere.features_profiles_checked'))))
-                        features_profiles_checked = str(len(list(self.redis_conn_decoded.smembers('ionosphere.features_profiles_checked'))))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # features_profiles_checked = str(len(list(self.redis_conn_decoded.smembers('ionosphere.features_profiles_checked'))))
+                        features_profiles_checked = str(self.redis_conn_decoded.scard('ionosphere.features_profiles_checked'))
                     except:
                         features_profiles_checked = '0'
                     logger.info('fps checked count  :: %s' % features_profiles_checked)
                     send_metric_name = '%s.fps_checked' % skyline_app_graphite_namespace
                     # @modified 20170306 - Feature #1960: ionosphere_layers
                     # Corrected namespace
-                    # send_graphite_metric(skyline_app, send_metric_name, not_anomalous)
-                    send_graphite_metric(skyline_app, send_metric_name, features_profiles_checked)
+                    # send_graphite_metric(self, skyline_app, send_metric_name, not_anomalous)
+                    send_graphite_metric(self, skyline_app, send_metric_name, features_profiles_checked)
 
                     # @added 20170306 - Feature #1960: ionosphere_layers
                     try:
@@ -4909,7 +5634,7 @@ class Ionosphere(Thread):
                         str_layers_checked = '0'
                     logger.info('layers checked count  :: %s' % str_layers_checked)
                     send_metric_name = '%s.layers_checked' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, str_layers_checked)
+                    send_graphite_metric(self, skyline_app, send_metric_name, str_layers_checked)
 
                     if settings.PANORAMA_ENABLED:
                         try:
@@ -4923,7 +5648,7 @@ class Ionosphere(Thread):
                             sent_to_panorama = '0'
                         logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
                         send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
-                        send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+                        send_graphite_metric(self, skyline_app, send_metric_name, sent_to_panorama)
 
                     sent_graphite_metrics_now = int(time())
                     try:
@@ -4967,6 +5692,10 @@ class Ionosphere(Thread):
 
                 ionosphere_job = False
                 learn_job = False
+
+                # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                # Default the new learn_job_context variable
+                learn_job_context = 'learn'
 
                 # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
                 # Do not run checks if the namespace is a declared SKYLINE_FEEDBACK_NAMESPACES
@@ -5179,6 +5908,32 @@ class Ionosphere(Thread):
                         work_queue_items = len(learn_work)
                         if work_queue_items > 0:
                             learn_job = True
+                            # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                            learn_job_context = 'learn'
+
+                # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                # Use the learn process to handle learn_repetitive_patterns
+                if LEARN_REPETITIVE_PATTERNS:
+                    last_evaluation_timestamp = 0
+                    try:
+                        last_evaluation_timestamp_data = self.redis_conn_decoded.get('ionosphere.learn_repetitive_patterns.last_evaluation_timestamp')
+                        if last_evaluation_timestamp_data:
+                            last_evaluation_timestamp = int(last_evaluation_timestamp_data)
+                    except Exception as err:
+                        logger.error('error :: failed to get ionosphere.learn_repetitive_patterns.last_evaluation_timestamp from Redis - %s' % (
+                            err))
+                    run_learn_repetitive_patterns = False
+                    if last_evaluation_timestamp:
+                        next_evaluation = last_evaluation_timestamp + 3600
+                        if int(time()) >= next_evaluation:
+                            run_learn_repetitive_patterns = True
+                    else:
+                        run_learn_repetitive_patterns = True
+                    if run_learn_repetitive_patterns:
+                        learn_job = True
+                        work_queue_items = 1
+                        learn_job_context = 'learn_repetitive_patterns'
+
                 if learn_job:
                     break
 
@@ -5209,144 +5964,203 @@ class Ionosphere(Thread):
                 if metric_var_files_count > 4:
                     ionosphere_busy = True
 
-            # @added 20170108 - Feature #1830: Ionosphere alerts
-            # Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics
-            # Timed this takes 0.013319 seconds on 689 unique_metrics
-            unique_metrics = []
+            # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+            sets_recently_done = False
             try:
-                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
-                unique_metrics = list(self.redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not get the unique_metrics list from Redis')
-                unique_metrics = []
+                sets_recently_done = self.redis_conn_decoded.exists('ionosphere.sets_recently_done')
+            except Exception as err:
+                logger.error('error :: exists failed on ionosphere.sets_recently_done - %s' % err)
+            if sets_recently_done:
+                logger.info('skipping Ionosphere Redis set refresh as sets_recently_done exists')
+            method_still_used = False
 
-            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-            # The Redis analyzer.smtp_alerter_metrics list is created here to
-            # replace the self.ionosphere_smtp_alerter_metrics Manager.list in the below
-            # section
-            ionosphere_smtp_alerter_metrics = []
-            try:
-                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
-                ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
-                ionosphere_smtp_alerter_metrics = []
-            redis_sets_to_rename = [
-                'ionosphere.ionosphere_smtp_alerter_metrics',
-                'ionosphere.ionosphere_non_smtp_alerter_metrics'
-            ]
-            for current_redis_set in redis_sets_to_rename:
-                new_redis_set = '%s.old' % current_redis_set
-                try:
-                    self.redis_conn.rename(current_redis_set, new_redis_set)
-                except Exception as e:
-                    if str(e) == 'no such key':
-                        logger.info('could not rename Redis set %s to %s: %s' % (
-                            current_redis_set, new_redis_set, str(e)))
-                    else:
-                        logger.error('error :: could not rename Redis set %s to %s: %s' % (
-                            current_redis_set, new_redis_set, str(e)))
-
-            for metric_name in unique_metrics:
-                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
-                # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                if metric_name.startswith(settings.FULL_NAMESPACE):
-                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                else:
-                    base_name = metric_name
-
-                for alert in settings.ALERTS:
-                    pattern_match = False
-                    if str(alert[1]) == 'smtp':
-                        ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = base_name
-                        pattern_match = False
-                        try:
-                            # Match by regex
-                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                            if pattern_match:
-                                pattern_match = True
-                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                # if base_name not in self.ionosphere_smtp_alerter_metrics:
-                                if base_name not in ionosphere_smtp_alerter_metrics:
-                                    # self.ionosphere_smtp_alerter_metrics.append(base_name)
-                                    redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
-                                    data = base_name
-                                    try:
-                                        self.redis_conn.sadd(redis_set, data)
-                                    except:
-                                        logger.info(traceback.format_exc())
-                                        logger.error('error :: failed to add %s to Redis set %s' % (
-                                            str(data), str(redis_set)))
-                        except:
-                            pattern_match = False
-
-                        if not pattern_match:
-                            # Match by substring
-                            if alert[0] in base_name:
-                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                # if base_name not in self.ionosphere_smtp_alerter_metrics:
-                                #     self.ionosphere_smtp_alerter_metrics.append(base_name)
-                                if base_name not in ionosphere_smtp_alerter_metrics:
-                                    redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
-                                    data = base_name
-                                    try:
-                                        self.redis_conn.sadd(redis_set, data)
-                                    except:
-                                        logger.info(traceback.format_exc())
-                                        logger.error('error :: failed to add %s to Redis set %s' % (
-                                            str(data), str(redis_set)))
-
-                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                # if base_name not in self.ionosphere_smtp_alerter_metrics:
-                #     if base_name not in self.ionosphere_smtp_alerter_metrics:
-                #         self.ionosphere_non_smtp_alerter_metrics.append(base_name)
-                if base_name not in ionosphere_smtp_alerter_metrics:
-                    redis_set = 'ionosphere.ionosphere_non_smtp_alerter_metrics'
-                    data = base_name
+            if method_still_used:
+                # @added 20170108 - Feature #1830: Ionosphere alerts
+                # Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics
+                # Timed this takes 0.013319 seconds on 689 unique_metrics
+                # @modified 20221025 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # Only check and refresh Redis data if Ionosphere is not busy
+                # @modified 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # if not ionosphere_busy:
+                if not ionosphere_busy and not sets_recently_done:
+                    unique_metrics = []
                     try:
-                        self.redis_conn.sadd(redis_set, data)
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                        unique_metrics = list(self.redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not get the unique_metrics list from Redis')
+                        unique_metrics = []
+
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # The Redis analyzer.smtp_alerter_metrics list is created here to
+                    # replace the self.ionosphere_smtp_alerter_metrics Manager.list in the below
+                    # section
+                    ionosphere_smtp_alerter_metrics = []
+                    try:
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                        ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
                     except:
                         logger.info(traceback.format_exc())
-                        logger.error('error :: failed to add %s to Redis set %s' % (
-                            str(data), str(redis_set)))
+                        logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
+                        ionosphere_smtp_alerter_metrics = []
 
-            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-            # The Redis lists are used here to replace the self.ionosphere_
-            # Manager().list()
-            ionosphere_smtp_alerter_metrics = []
-            try:
-                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
-                ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
-                ionosphere_smtp_alerter_metrics = []
-            ionosphere_non_smtp_alerter_metrics = []
-            try:
-                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
-                ionosphere_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set')
-                ionosphere_non_smtp_alerter_metrics = []
+                    redis_sets_to_rename = [
+                        'ionosphere.ionosphere_smtp_alerter_metrics',
+                        'ionosphere.ionosphere_non_smtp_alerter_metrics'
+                    ]
 
-            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-            # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.ionosphere_smtp_alerter_metrics)))
-            # logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
-            logger.info('smtp_alerter_metrics     :: %s' % str(len(ionosphere_smtp_alerter_metrics)))
-            logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(ionosphere_non_smtp_alerter_metrics)))
+                # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # Manage the sets in a single sadd operation
+                add_to_ionosphere_ionosphere_smtp_alerter_metrics = []
+                add_to_ionosphere_ionosphere_non_smtp_alerter_metrics = []
+
+                # @modified 20221015 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # The refreshing of Redis sets can take between 6 and 20 seconds so
+                # only do this if Ionosphere is not busy
+                if ionosphere_busy:
+                    logger.info('skipping Ionosphere Redis set refresh as ionosphere_busy')
+
+                if not ionosphere_busy and not sets_recently_done:
+                    for current_redis_set in redis_sets_to_rename:
+                        new_redis_set = '%s.old' % current_redis_set
+                        try:
+                            self.redis_conn.rename(current_redis_set, new_redis_set)
+                        except Exception as e:
+                            if str(e) == 'no such key':
+                                logger.info('could not rename Redis set %s to %s: %s' % (
+                                    current_redis_set, new_redis_set, str(e)))
+                            else:
+                                logger.error('error :: could not rename Redis set %s to %s: %s' % (
+                                    current_redis_set, new_redis_set, str(e)))
+
+                    # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                    try:
+                        self.redis_conn_decoded.setex('ionosphere.sets_recently_done', 300, 1)
+                    except Exception as err:
+                        logger.error('error :: setex failed on ionosphere.sets_recently_done - %s' % err)
+
+                    for metric_name in unique_metrics:
+                        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                        # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                        if metric_name.startswith(settings.FULL_NAMESPACE):
+                            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                        else:
+                            base_name = metric_name
+
+                        for alert in settings.ALERTS:
+                            pattern_match = False
+                            if str(alert[1]) == 'smtp':
+                                ALERT_MATCH_PATTERN = alert[0]
+                                METRIC_PATTERN = base_name
+                                pattern_match = False
+                                try:
+                                    # Match by regex
+                                    alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                                    pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                                    if pattern_match:
+                                        pattern_match = True
+                                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                        # if base_name not in self.ionosphere_smtp_alerter_metrics:
+                                        if base_name not in ionosphere_smtp_alerter_metrics:
+                                            # self.ionosphere_smtp_alerter_metrics.append(base_name)
+                                            redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
+                                            data = base_name
+                                            try:
+                                                self.redis_conn.sadd(redis_set, data)
+                                            except:
+                                                logger.info(traceback.format_exc())
+                                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                                    str(data), str(redis_set)))
+                                except:
+                                    pattern_match = False
+
+                                if not pattern_match:
+                                    # Match by substring
+                                    if alert[0] in base_name:
+                                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                        # if base_name not in self.ionosphere_smtp_alerter_metrics:
+                                        #     self.ionosphere_smtp_alerter_metrics.append(base_name)
+                                        if base_name not in ionosphere_smtp_alerter_metrics:
+                                            redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
+                                            data = base_name
+                                            try:
+                                                self.redis_conn.sadd(redis_set, data)
+                                            except:
+                                                logger.info(traceback.format_exc())
+                                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                                    str(data), str(redis_set)))
+
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # if base_name not in self.ionosphere_smtp_alerter_metrics:
+                        #     if base_name not in self.ionosphere_smtp_alerter_metrics:
+                        #         self.ionosphere_non_smtp_alerter_metrics.append(base_name)
+                        if base_name not in ionosphere_smtp_alerter_metrics:
+                            redis_set = 'ionosphere.ionosphere_non_smtp_alerter_metrics'
+                            data = base_name
+                            try:
+                                self.redis_conn.sadd(redis_set, data)
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                    str(data), str(redis_set)))
+
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # The Redis lists are used here to replace the self.ionosphere_
+                    # Manager().list()
+
+                # @added 20230606 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # Manage the sets in a single sadd operation
+                if add_to_ionosphere_ionosphere_smtp_alerter_metrics:
+                    redis_set = 'ionosphere.ionosphere_smtp_alerter_metrics'
+                    try:
+                        self.redis_conn.sadd(redis_set, *set(add_to_ionosphere_ionosphere_smtp_alerter_metrics))
+                    except Exception as err:
+                        logger.error('error :: failed to add %s metrics to Redis set %s - %s' % (
+                            str(len(add_to_ionosphere_ionosphere_smtp_alerter_metrics)),
+                            str(redis_set), err))
+                if add_to_ionosphere_ionosphere_non_smtp_alerter_metrics:
+                    redis_set = 'ionosphere.ionosphere_non_smtp_alerter_metrics'
+                    try:
+                        self.redis_conn.sadd(redis_set, *set(add_to_ionosphere_ionosphere_non_smtp_alerter_metrics))
+                    except Exception as err:
+                        logger.error('error :: failed to add %s metrics to Redis set %s - %s' % (
+                            str(len(add_to_ionosphere_ionosphere_non_smtp_alerter_metrics)),
+                            str(redis_set), err))
+
+                # @modified 20221025 - Task #4698: Optimise Ionosphere Redis sets refresh when busy
+                # Only check and refresh Redis data if Ionosphere is not busy
+                if not ionosphere_busy:
+                    ionosphere_smtp_alerter_metrics = []
+                    try:
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                        ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
+                        ionosphere_smtp_alerter_metrics = []
+                    ionosphere_non_smtp_alerter_metrics = []
+                    try:
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+                        ionosphere_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set')
+                        ionosphere_non_smtp_alerter_metrics = []
+
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.ionosphere_smtp_alerter_metrics)))
+                # logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(self.ionosphere_non_smtp_alerter_metrics)))
+                logger.info('smtp_alerter_metrics     :: %s' % str(len(ionosphere_smtp_alerter_metrics)))
+                logger.info('ionosphere_non_smtp_alerter_metrics :: %s' % str(len(ionosphere_non_smtp_alerter_metrics)))
 
             if ionosphere_job:
 
@@ -5462,7 +6276,13 @@ class Ionosphere(Thread):
             # use_full_duration_days features profile valid_learning_duration (e.g.
             # 3361) later.
             if learn_job:
-                logger.info('processing - learn work queue - %s' % str(work_queue_items))
+                # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                # Added learn_job_context for spawn_learn_process to handle
+                # learn_repetitive_patterns as well
+                if learn_job_context == 'learn':
+                    logger.info('processing - learn work queue - %s' % str(work_queue_items))
+                if learn_job_context == 'learn_repetitive_patterns':
+                    logger.info('processing - learn_repetitive_patterns')
                 function_name = 'spawn_learn_process'
 
             # Spawn processes
@@ -5504,7 +6324,11 @@ class Ionosphere(Thread):
                 # @added 20170113 - Feature #1854: Ionosphere learn - Redis ionosphere.learn.work namespace
                 if learn_job:
                     try:
-                        p = Process(target=self.spawn_learn_process, args=(i, int(now)))
+                        # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                        # Added learn_job_context for spawn_learn_process to
+                        # handle learn_repetitive_patterns as well
+                        # p = Process(target=self.spawn_learn_process, args=(i, int(now)))
+                        p = Process(target=self.spawn_learn_process, args=(i, int(now), learn_job_context))
                         pids.append(p)
                         pid_count += 1
                         logger.info(
@@ -5520,6 +6344,9 @@ class Ionosphere(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to start %s' % function_name)
                         continue
+                    # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                    # learn should only ever run one process
+                    break
 
             # Self monitor processes and terminate if any spin_process has run
             # for to long
@@ -5534,6 +6361,12 @@ class Ionosphere(Thread):
                 ionosphere_max_runtime = settings.IONOSPHERE_MAX_RUNTIME
             except:
                 ionosphere_max_runtime = 120
+
+            # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+            # Allow for longer for learn_repetitive_patterns job
+            if learn_job and learn_job_context == 'learn_repetitive_patterns job':
+                ionosphere_max_runtime = 120
+
             while time() - p_starts <= ionosphere_max_runtime:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU

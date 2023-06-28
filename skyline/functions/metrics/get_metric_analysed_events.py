@@ -7,6 +7,11 @@ from time import time
 from skyline_functions import get_redis_conn_decoded, get_graphite_metric
 from functions.redis.get_metric_timeseries import get_metric_timeseries
 from functions.timeseries.determine_data_frequency import determine_data_frequency
+# @added 20220915 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
 
 
 # @added 20220503 - Feature #4530: namespace.analysed_events
@@ -49,10 +54,40 @@ def get_metric_analysed_events(
         current_logger.error('error :: %s :: get_redis_conn_decoded failed - %s' % (
             function_str, err))
 
+    # @added 20220915 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    graphite = True
+    labelled_metrics_name = None
+    use_base_name = str(base_name)
+    tsdb_base_name = str(base_name)
+    if base_name.startswith('labelled_metrics.'):
+        graphite = False
+        current_logger.info('%s :: looking up base_name for %s' % (function_str, base_name))
+        try:
+            tsdb_base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, base_name)
+            analysed_events['metric_name'] = tsdb_base_name
+            current_logger.info('%s :: base_name: %s' % (function_str, tsdb_base_name))
+        except Exception as err:
+            current_logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                function_str, base_name, err))
+    if 'tenant_id="' in base_name:
+        graphite = False
+        current_logger.info('%s :: looking up metric id for %s' % (function_str, base_name))
+        try:
+            metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
+        except Exception as err:
+            current_logger.error('error :: %s :: get_metric_id_from_base_name failed for %s - %s' % (
+                function_str, base_name, err))
+        current_logger.info('%s :: looked up metric id as %s' % (function_str, str(metric_id)))
+        if metric_id:
+            use_base_name = 'labelled_metrics.%s' % str(metric_id)
+            labelled_metrics_name = str(use_base_name)
+            analysed_events['labelled_metric'] = use_base_name
+
     resolution = 60
     resolution_str = None
     try:
-        resolution_str = redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', base_name)
+        resolution_str = redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', use_base_name)
     except Exception as err:
         current_logger.error('error :: %s :: %s :: get_graphite_metric failed - %s' % (
             current_skyline_app, function_str, str(err)))
@@ -67,10 +102,19 @@ def get_metric_analysed_events(
     long_duration_timeseries = []
     if from_timestamp < last_day_timestamp:
         try:
-            long_duration_timeseries = get_graphite_metric(current_skyline_app, base_name, from_timestamp, until_timestamp, 'list', 'object')
+            # @modified 20220915 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if graphite:
+                long_duration_timeseries = get_graphite_metric(current_skyline_app, base_name, from_timestamp, until_timestamp, 'list', 'object')
+            else:
+                long_duration_timeseries = get_victoriametrics_metric(current_skyline_app, tsdb_base_name, from_timestamp, until_timestamp, 'list', 'object')
         except Exception as err:
-            current_logger.error('error :: %s :: %s :: get_graphite_metric failed - %s' % (
-                current_skyline_app, function_str, str(err)))
+            if graphite:
+                current_logger.error('error :: %s :: %s :: get_graphite_metric failed - %s' % (
+                    current_skyline_app, function_str, str(err)))
+            else:
+                current_logger.error('error :: %s :: %s :: get_victoriametrics_metric failed - %s' % (
+                    current_skyline_app, function_str, str(err)))
 
     # Count data older than today
     if long_duration_timeseries:

@@ -20,7 +20,7 @@ from ast import literal_eval
 # @added 20201019 - Feature #3790: flux - pickle to Graphite
 # bandit [B403:blacklist] Consider possible security implications associated
 # with pickle module.  These have been considered.
-import pickle  # nosec
+import pickle  # nosec B403
 import socket
 import struct
 
@@ -42,12 +42,18 @@ load_settings = True
 if load_settings:
     import settings
     from skyline_functions import (
-        send_graphite_metric,
+        # @modified 20220726 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Moved send_graphite_metric
+        # send_graphite_metric,
         # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         get_redis_conn, get_redis_conn_decoded)
     # @added 20220429 - Feature #4536: Handle Redis failure
     from functions.flux.get_last_metric_data import get_last_metric_data
+    # @added 20220726 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.graphite.send_graphite_metric import send_graphite_metric
 
 # @added 20220428 - Feature #4536: Handle Redis failure
 if settings.MEMCACHE_ENABLED:
@@ -338,7 +344,7 @@ class Worker(Process):
 
         primary_worker_key = 'flux.primary_worker_pid.%s' % str(main_process_pid)
         logger.info('worker :: starting primary_worker election using primary_worker_key: %s' % primary_worker_key)
-        sleep_for = random.uniform(0.1, 1.5)
+        sleep_for = random.uniform(0.1, 1.5)  # nosec B311
         logger.info('worker :: starting primary_worker election - sleeping for %s' % str(sleep_for))
         sleep(sleep_for)
         primary_worker_pid = 0
@@ -755,10 +761,12 @@ class Worker(Process):
                             # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
                             # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                             # Better handle multiple workers get count from the key
-                            # send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
+                            # send_graphite_metric(self, skyline_app, skyline_metric, metrics_sent_to_graphite)
                             all_metrics_sent_to_graphite = int(metrics_sent_to_graphite)
                             try:
-                                all_metrics_sent_to_graphite = len(list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent')))
+                                # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                                # all_metrics_sent_to_graphite = len(list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent')))
+                                all_metrics_sent_to_graphite = self.redis_conn_decoded.scard('flux.workers.metrics_sent')
                                 # @modified 20220427 - Feature #4536: Handle Redis failure
                                 # Add flux required data to memcache as well
                                 # self.redis_conn.delete('flux.workers.metrics_sent')
@@ -791,7 +799,7 @@ class Worker(Process):
                                         logger.error('error :: worker :: failed to get memcache key flux.workers.metrics_sent - %s' % (
                                             err))
                                         all_metrics_sent_to_graphite = int(metrics_sent_to_graphite)
-                            send_graphite_metric(skyline_app, skyline_metric, all_metrics_sent_to_graphite)
+                            send_graphite_metric(self, skyline_app, skyline_metric, all_metrics_sent_to_graphite)
                             logger.info('worker :: all_metrics_sent_to_graphite in last 60 seconds - %s' % str(all_metrics_sent_to_graphite))
                             last_sent_to_graphite = int(time())
                             metrics_sent_to_graphite = 0
@@ -818,7 +826,9 @@ class Worker(Process):
                         discarded_already_received = 0
                         skyline_metric = '%s.discarded.already_received' % skyline_app_graphite_namespace
                         try:
-                            discarded_already_received = len(list(self.redis_conn_decoded.smembers('flux.workers.discarded.already_received')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # discarded_already_received = len(list(self.redis_conn_decoded.smembers('flux.workers.discarded.already_received')))
+                            discarded_already_received = self.redis_conn_decoded.scard('flux.workers.discarded.already_received')
                             self.redis_conn.delete('flux.workers.discarded.already_received')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -837,7 +847,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, discarded_already_received)
+                            send_graphite_metric(self, skyline_app, skyline_metric, discarded_already_received)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -846,7 +856,9 @@ class Worker(Process):
                         listen_discarded_invalid_timestamp = 0
                         skyline_metric = '%s.discarded.invalid_timestamp' % listen_graphite_namespace
                         try:
-                            listen_discarded_invalid_timestamp = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_timestamp')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # listen_discarded_invalid_timestamp = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_timestamp')))
+                            listen_discarded_invalid_timestamp = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_timestamp')
                             self.redis_conn.delete('flux.listen.discarded.invalid_timestamp')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -865,7 +877,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_timestamp)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_timestamp)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -874,7 +886,9 @@ class Worker(Process):
                         listen_discarded_metric_name = 0
                         skyline_metric = '%s.discarded.metric_name' % listen_graphite_namespace
                         try:
-                            listen_discarded_metric_name = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.metric_name')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # listen_discarded_metric_name = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.metric_name')))
+                            listen_discarded_metric_name = self.redis_conn_decoded.scard('flux.listen.discarded.metric_name')
                             self.redis_conn.delete('flux.listen.discarded.metric_name')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -893,7 +907,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_metric_name)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_metric_name)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -902,7 +916,9 @@ class Worker(Process):
                         listen_discarded_invalid_value = 0
                         skyline_metric = '%s.discarded.invalid_value' % listen_graphite_namespace
                         try:
-                            listen_discarded_invalid_value = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_value')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # listen_discarded_invalid_value = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_value')))
+                            listen_discarded_invalid_value = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_value')
                             self.redis_conn.delete('flux.listen.discarded.invalid_value')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -922,7 +938,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_value)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_value)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -931,7 +947,9 @@ class Worker(Process):
                         listen_discarded_invalid_key = 0
                         skyline_metric = '%s.discarded.invalid_key' % listen_graphite_namespace
                         try:
-                            listen_discarded_invalid_key = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_key')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # listen_discarded_invalid_key = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_key')))
+                            listen_discarded_invalid_key = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_key')
                             self.redis_conn.delete('flux.listen.discarded.invalid_key')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -950,7 +968,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_key)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_key)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -959,7 +977,9 @@ class Worker(Process):
                         listen_discarded_invalid_parameters = 0
                         skyline_metric = '%s.discarded.invalid_parameters' % listen_graphite_namespace
                         try:
-                            listen_discarded_invalid_parameters = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_parameters')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # listen_discarded_invalid_parameters = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_parameters')))
+                            listen_discarded_invalid_parameters = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_parameters')
                             self.redis_conn.delete('flux.listen.discarded.invalid_parameters')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -978,7 +998,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_parameters)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_parameters)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -988,12 +1008,16 @@ class Worker(Process):
                         skyline_metric = '%s.added_to_queue' % listen_graphite_namespace
                         try:
                             listen_added_to_queue_str = None
-                            listen_added_to_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_queue', 0)
+                            # @modified 20230205 - Task #4844: Replace Redis getset with set with get
+                            # As of Redis version 6.2.0, this command is regarded as deprecated.
+                            # It can be replaced by SET with the GET argument when migrating or writing new code.
+                            # listen_added_to_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_queue', 0)
+                            listen_added_to_queue_str = self.redis_conn_decoded.set('flux.listen.added_to_queue', 0, get=True)
                             if listen_added_to_queue_str:
                                 listen_added_to_queue = int(listen_added_to_queue_str)
                         except Exception as e:
                             if not failed_over_to_memcache:
-                                logger.error('error :: worker :: failed to get Redis set flux.listen.added_to_queue - %s' % e)
+                                logger.error('error :: worker :: failed to get Redis key flux.listen.added_to_queue - %s' % e)
                             # @added 20220428 - Feature #4536: Handle Redis failure
                             if settings.MEMCACHE_ENABLED:
                                 try:
@@ -1025,7 +1049,7 @@ class Worker(Process):
                         # Send to the Graphite that collects skyline metrics not
                         # via flux queue which could send to a different Graphite
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_added_to_queue)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_added_to_queue)
                         except Exception as e:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1079,7 +1103,7 @@ class Worker(Process):
 
                             logger.info('worker :: listen namespaces over_quota metric count in last 60 seconds - %s' % str(over_quota_count))
                             try:
-                                send_graphite_metric(skyline_app, skyline_metric, over_quota_count)
+                                send_graphite_metric(self, skyline_app, skyline_metric, over_quota_count)
                             except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1095,7 +1119,7 @@ class Worker(Process):
                                 logger.error('error :: worker :: failed to get Redis set flux.listen.dropped_non_numeric_metrics - %s' % err)
                         logger.info('worker :: listen dropped_non_numeric_metrics count in last 60 seconds - %s' % str(dropped_non_numeric_metrics_count))
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, dropped_non_numeric_metrics_count)
+                            send_graphite_metric(self, skyline_app, skyline_metric, dropped_non_numeric_metrics_count)
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1106,7 +1130,13 @@ class Worker(Process):
                         skyline_metric = '%s.added_to_aggregation_queue' % listen_graphite_namespace
                         try:
                             listen_added_to_aggregation_queue = None
-                            listen_added_to_aggregation_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_aggregation_queue', 0)
+
+                            # @modified 20230205 - Task #4844: Replace Redis getset with set with get
+                            # As of Redis version 6.2.0, this command is regarded as deprecated.
+                            # It can be replaced by SET with the GET argument when migrating or writing new code.
+                            # listen_added_to_aggregation_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_aggregation_queue', 0)
+                            listen_added_to_aggregation_queue_str = self.redis_conn_decoded.set('flux.listen.added_to_aggregation_queue', 0, get=True)
+
                             if listen_added_to_aggregation_queue_str:
                                 listen_added_to_aggregation_queue = int(listen_added_to_aggregation_queue_str)
                         except Exception as err:
@@ -1114,7 +1144,7 @@ class Worker(Process):
                                 logger.error('error :: worker :: failed to get Redis set flux.listen.added_to_aggregation_queue - %s' % err)
                         logger.info('worker :: listen added_to_aggregation_queue in last 60 seconds - %s' % str(listen_added_to_aggregation_queue))
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, listen_added_to_aggregation_queue)
+                            send_graphite_metric(self, skyline_app, skyline_metric, listen_added_to_aggregation_queue)
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1130,7 +1160,7 @@ class Worker(Process):
                     skyline_metric = '%s.httpMetricDataQueue.size' % skyline_app_graphite_namespace
                     if primary_worker:
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, metric_data_queue_size)
+                            send_graphite_metric(self, skyline_app, skyline_metric, metric_data_queue_size)
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
@@ -1795,10 +1825,12 @@ class Worker(Process):
                         # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
                         # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                         # Better handle multiple workers get count from the key
-                        # send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
+                        # send_graphite_metric(self, skyline_app, skyline_metric, metrics_sent_to_graphite)
                         all_metrics_sent_to_graphite = int(metrics_sent_to_graphite)
                         try:
-                            all_metrics_sent_to_graphite = len(list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent')))
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # all_metrics_sent_to_graphite = len(list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent')))
+                            all_metrics_sent_to_graphite = self.redis_conn_decoded.scard('flux.workers.metrics_sent')
                             self.redis_conn.delete('flux.workers.metrics_sent')
                         except Exception as e:
                             if not failed_over_to_memcache:
@@ -1823,7 +1855,7 @@ class Worker(Process):
                                         err))
                                     all_metrics_sent_to_graphite = int(metrics_sent_to_graphite)
 
-                        send_graphite_metric(skyline_app, skyline_metric, all_metrics_sent_to_graphite)
+                        send_graphite_metric(self, skyline_app, skyline_metric, all_metrics_sent_to_graphite)
                         logger.info('worker :: all_metrics_sent_to_graphite in last 60 seconds - %s' % str(all_metrics_sent_to_graphite))
                         last_sent_to_graphite = int(time())
                         metrics_sent_to_graphite = 0
@@ -1851,7 +1883,9 @@ class Worker(Process):
                     discarded_already_received = 0
                     skyline_metric = '%s.discarded.already_received' % skyline_app_graphite_namespace
                     try:
-                        discarded_already_received = len(list(self.redis_conn_decoded.smembers('flux.workers.discarded.already_received')))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # discarded_already_received = len(list(self.redis_conn_decoded.smembers('flux.workers.discarded.already_received')))
+                        discarded_already_received = self.redis_conn_decoded.scard('flux.workers.discarded.already_received')
                         self.redis_conn.delete('flux.workers.discarded.already_received')
                     except Exception as e:
                         if not failed_over_to_memcache:
@@ -1870,7 +1904,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, discarded_already_received)
+                        send_graphite_metric(self, skyline_app, skyline_metric, discarded_already_received)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1879,7 +1913,9 @@ class Worker(Process):
                     listen_discarded_invalid_timestamp = 0
                     skyline_metric = '%s.discarded.invalid_timestamp' % listen_graphite_namespace
                     try:
-                        listen_discarded_invalid_timestamp = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_timestamp')))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # listen_discarded_invalid_timestamp = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_timestamp')))
+                        listen_discarded_invalid_timestamp = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_timestamp')
                         self.redis_conn.delete('flux.listen.discarded.invalid_timestamp')
                     except Exception as e:
                         if not failed_over_to_memcache:
@@ -1898,7 +1934,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_timestamp)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_timestamp)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1907,7 +1943,9 @@ class Worker(Process):
                     listen_discarded_metric_name = 0
                     skyline_metric = '%s.discarded.metric_name' % listen_graphite_namespace
                     try:
-                        listen_discarded_metric_name = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.metric_name')))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # listen_discarded_metric_name = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.metric_name')))
+                        listen_discarded_metric_name = self.redis_conn_decoded.scard('flux.listen.discarded.metric_name')
                         self.redis_conn.delete('flux.listen.discarded.metric_name')
                     except Exception as e:
                         if not failed_over_to_memcache:
@@ -1926,7 +1964,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_metric_name)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_metric_name)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1935,7 +1973,9 @@ class Worker(Process):
                     listen_discarded_invalid_value = 0
                     skyline_metric = '%s.discarded.invalid_value' % listen_graphite_namespace
                     try:
-                        listen_discarded_invalid_value = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_value')))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # listen_discarded_invalid_value = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_value')))
+                        listen_discarded_invalid_value = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_value')
                         self.redis_conn.delete('flux.listen.discarded.invalid_value')
                     except Exception as e:
                         if not failed_over_to_memcache:
@@ -1955,7 +1995,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_value)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_value)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1964,7 +2004,9 @@ class Worker(Process):
                     listen_discarded_invalid_key = 0
                     skyline_metric = '%s.discarded.invalid_key' % listen_graphite_namespace
                     try:
-                        listen_discarded_invalid_key = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_key')))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # listen_discarded_invalid_key = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_key')))
+                        listen_discarded_invalid_key = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_key')
                         self.redis_conn.delete('flux.listen.discarded.invalid_key')
                     except Exception as e:
                         if not failed_over_to_memcache:
@@ -1983,7 +2025,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_key)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_key)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -1992,7 +2034,9 @@ class Worker(Process):
                     listen_discarded_invalid_parameters = 0
                     skyline_metric = '%s.discarded.invalid_parameters' % listen_graphite_namespace
                     try:
-                        listen_discarded_invalid_parameters = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_parameters')))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # listen_discarded_invalid_parameters = len(list(self.redis_conn_decoded.smembers('flux.listen.discarded.invalid_parameters')))
+                        listen_discarded_invalid_parameters = self.redis_conn_decoded.scard('flux.listen.discarded.invalid_parameters')
                         self.redis_conn.delete('flux.listen.discarded.invalid_parameters')
                     except Exception as e:
                         if not failed_over_to_memcache:
@@ -2011,7 +2055,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_parameters)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_discarded_invalid_parameters)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -2021,7 +2065,12 @@ class Worker(Process):
                     skyline_metric = '%s.added_to_queue' % listen_graphite_namespace
                     try:
                         listen_added_to_queue_str = None
-                        listen_added_to_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_queue', 0)
+                        # @modified 20230205 - Task #4844: Replace Redis getset with set with get
+                        # As of Redis version 6.2.0, this command is regarded as deprecated.
+                        # It can be replaced by SET with the GET argument when migrating or writing new code.
+                        # listen_added_to_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_queue', 0)
+                        listen_added_to_queue_str = self.redis_conn_decoded.set('flux.listen.added_to_queue', 0, get=True)
+
                         if listen_added_to_queue_str:
                             listen_added_to_queue = int(listen_added_to_queue_str)
                     except Exception as e:
@@ -2058,7 +2107,7 @@ class Worker(Process):
                     # Send to the Graphite that collects skyline metrics not
                     # via flux queue which could send to a different Graphite
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_added_to_queue)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_added_to_queue)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -2105,7 +2154,7 @@ class Worker(Process):
 
                         logger.info('worker :: listen namespaces over_quota metric count in last 60 seconds - %s' % str(over_quota_count))
                         try:
-                            send_graphite_metric(skyline_app, skyline_metric, over_quota_count)
+                            send_graphite_metric(self, skyline_app, skyline_metric, over_quota_count)
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -2121,7 +2170,7 @@ class Worker(Process):
                             logger.error('error :: worker :: failed to get Redis set flux.listen.dropped_non_numeric_metrics - %s' % err)
                     logger.info('worker :: listen dropped_non_numeric_metrics count in last 60 seconds - %s' % str(dropped_non_numeric_metrics_count))
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, dropped_non_numeric_metrics_count)
+                        send_graphite_metric(self, skyline_app, skyline_metric, dropped_non_numeric_metrics_count)
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -2132,7 +2181,12 @@ class Worker(Process):
                     skyline_metric = '%s.added_to_aggregation_queue' % listen_graphite_namespace
                     try:
                         listen_added_to_aggregation_queue = None
-                        listen_added_to_aggregation_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_aggregation_queue', 0)
+                        # @modified 20230205 - Task #4844: Replace Redis getset with set with get
+                        # As of Redis version 6.2.0, this command is regarded as deprecated.
+                        # It can be replaced by SET with the GET argument when migrating or writing new code.
+                        # listen_added_to_aggregation_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_aggregation_queue', 0)
+                        listen_added_to_aggregation_queue_str = self.redis_conn_decoded.set('flux.listen.added_to_aggregation_queue', 0, get=True)
+
                         if listen_added_to_aggregation_queue_str:
                             listen_added_to_aggregation_queue = int(listen_added_to_aggregation_queue_str)
                     except Exception as err:
@@ -2140,7 +2194,7 @@ class Worker(Process):
                             logger.error('error :: worker :: failed to get Redis set flux.listen.added_to_aggregation_queue - %s' % err)
                     logger.info('worker :: listen added_to_aggregation_queue in last 60 seconds - %s' % str(listen_added_to_aggregation_queue))
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, listen_added_to_aggregation_queue)
+                        send_graphite_metric(self, skyline_app, skyline_metric, listen_added_to_aggregation_queue)
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
@@ -2156,7 +2210,7 @@ class Worker(Process):
                 skyline_metric = '%s.httpMetricDataQueue.size' % skyline_app_graphite_namespace
                 if primary_worker:
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, metric_data_queue_size)
+                        send_graphite_metric(self, skyline_app, skyline_metric, metric_data_queue_size)
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
@@ -2179,42 +2233,53 @@ class Worker(Process):
                 if metrics_data_sent_strs:
                     try:
                         self.redis_conn.sadd('flux.metrics_data_sent', *set(metrics_data_sent_strs))
+                        # @added 20220706 - Feature #3790: flux - pickle to Graphite
+                        # Added expire because if there are multiple workers and
+                        # the primary worker does not process any requests and
+                        # the other workers do, this set will not be managed.
+                        self.redis_conn.expire('flux.metrics_data_sent', 600)
+
                         logger.info('worker :: added %s items to the flux.metrics_data_sent Redis set' % str(len(metrics_data_sent)))
                     except:
                         if not failed_over_to_memcache:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to determine size of flux.queue Redis set')
                     metrics_data_sent = []
-                    try:
-                        new_set = 'aet.flux.metrics_data_sent.%s' % str(self.current_pid)
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: failed to current_pid for aet.flux.metrics_data_sent Redis set name')
-                        new_set = 'aet.flux.metrics_data_sent'
 
-                    if primary_worker:
-                        try:
-                            self.redis_conn.rename('flux.metrics_data_sent', new_set)
-                            logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
-                        # @modified 20201128 - Feature #3820: HORIZON_SHARDS
-                        # With metrics that come in at a frequency of less
-                        # than 60 seconds, it is possible that this key will
-                        # not exist as flux has not been sent metric data
-                        # so this operation will error with no such key
-                        except Exception as err:
-                            traceback_str = traceback.format_exc()
-                            if not failed_over_to_memcache:
-                                if 'no such key' in str(err):
-                                    logger.warn('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
-                                else:
-                                    logger.error(traceback_str)
-                                    logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
-                        try:
-                            self.redis_conn.expire(new_set, 600)
-                        except:
-                            if not failed_over_to_memcache:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: worker :: failed to set 600 seconds TTL on %s Redis set' % new_set)
+                # @modified 20220706 - Feature #3790: flux - pickle to Graphite
+                # Unindented out of if metrics_data_sent_strs because if there
+                # are multiple workers and the primary worker does not process
+                # any requests and the other workers do, this set will not be
+                # managed.
+                try:
+                    new_set = 'aet.flux.metrics_data_sent.%s' % str(self.current_pid)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: worker :: failed to current_pid for aet.flux.metrics_data_sent Redis set name')
+                    new_set = 'aet.flux.metrics_data_sent'
+                if primary_worker:
+                    try:
+                        self.redis_conn.rename('flux.metrics_data_sent', new_set)
+                        logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
+                    # @modified 20201128 - Feature #3820: HORIZON_SHARDS
+                    # With metrics that come in at a frequency of less
+                    # than 60 seconds, it is possible that this key will
+                    # not exist as flux has not been sent metric data
+                    # so this operation will error with no such key
+                    except Exception as err:
+                        traceback_str = traceback.format_exc()
+                        if not failed_over_to_memcache:
+                            if 'no such key' in str(err):
+                                logger.warn('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
+                            else:
+                                logger.error(traceback_str)
+                                logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
+                    try:
+                        self.redis_conn.expire(new_set, 600)
+                    except:
+                        if not failed_over_to_memcache:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to set 600 seconds TTL on %s Redis set' % new_set)
 
                 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
                 if FLUX_PERSIST_QUEUE:

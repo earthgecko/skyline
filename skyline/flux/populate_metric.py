@@ -195,7 +195,7 @@ class PopulateMetric(object):
             return
 
         if LOCAL_DEBUG:
-            resp.body = json.dumps(postData)
+            resp.text = json.dumps(postData)
             resp.status = falcon.HTTP_200
         else:
             resp.status = falcon.HTTP_204

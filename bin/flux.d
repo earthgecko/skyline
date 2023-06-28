@@ -163,12 +163,14 @@ start () {
     fi
 
     rm -f "$BASEDIR/skyline/${SERVICE_NAME}/*.pyc"
-    if [ -f "$LOG_PATH/${SERVICE_NAME}.log" ]; then
-      cat "$LOG_PATH/${SERVICE_NAME}.log" > "$LOG_PATH/${SERVICE_NAME}.log.last"
-    fi
 
-    touch "$LOG_PATH/${SERVICE_NAME}.log.lock"
-    touch "$LOG_PATH/${SERVICE_NAME}.log.wait"
+    # @modified 20230122 - Feature #4756: Use gevent gunicorn worker_class
+    # No longer managing log on flux
+    # if [ -f "$LOG_PATH/${SERVICE_NAME}.log" ]; then
+    #   cat "$LOG_PATH/${SERVICE_NAME}.log" > "$LOG_PATH/${SERVICE_NAME}.log.last"
+    # fi
+    # touch "$LOG_PATH/${SERVICE_NAME}.log.lock"
+    # touch "$LOG_PATH/${SERVICE_NAME}.log.wait"
 
     if [ -f "$BASEDIR/skyline/settings.pyc" ]; then
       rm -f "$BASEDIR/skyline/settings.pyc"

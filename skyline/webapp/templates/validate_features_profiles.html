@@ -120,9 +120,16 @@
     {% for item in metrics_with_features_profiles_to_validate %}
           <tr>
             <td>{{ item[0] }}</td>
+      {% if '_tenant_id="' in item[1] %}
+        {% set use_metric = 'labelled_metrics.' + item[0]|string %}
+            <td onclick="window.location='?fp_validate=true&metric={{ use_metric }}&validated_equals=false&limit=0&order=DESC'">
+              <a href="?fp_validate=true&metric={{ use_metric }}&validated_equals=false&limit=0&order=DESC">{{ item[1] }}</a>
+            </td>
+      {% else %}
             <td onclick="window.location='?fp_validate=true&metric={{ item[1] }}&validated_equals=false&limit=0&order=DESC'">
               <a href="?fp_validate=true&metric={{ item[1] }}&validated_equals=false&limit=0&order=DESC">{{ item[1] }}</a>
             </td>
+      {% endif %}
             <td>{{ item[2] }}</td>
           </tr>
     {% endfor %}
@@ -135,14 +142,24 @@
 {% if not features_profiles_to_validate %}
   {% if for_metric != 'all' %}
 	  <div class="tab-pane active" id="validate">
+    {% if labelled_metric_name %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ labelled_metric_name }} - {{ labelled_metric_base_name }} -
+          there were no features profiles found that require validating</h4>
+    {% else %}
       <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ for_metric }} -
           there were no features profiles found that require validating</h4>
+    {% endif %}
 
 <!-- @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page -->
       {% if all_validated %}
         {% if validated_count > 0 %}
     	  <div class="alert alert-success">
+          {% if labelled_metric_name %}
+    	    <strong>Validated</strong>: {{ validated_count }} features profiles for {{ labelled_metric_name }} - {{ labelled_metric_base_name }} - OK
+          {% else %}
     	    <strong>Validated</strong>: {{ validated_count }} features profiles for {{ for_metric }} - OK
+          {% endif %}
+
     	  </div>
         {% endif %}
       {% endif %}
@@ -152,8 +169,14 @@
 
 {% if features_profiles_to_validate %}
 	  <div class="tab-pane active" id="validate">
+  {% if labelled_metric_name %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ labelled_metric_name }} - {{ labelled_metric_base_name }} -
+          limited by {{ features_profiles_to_validate|length }} features profiles ordered by {{ order }}</h4>
+  {% else %}
       <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ for_metric }} -
           limited by {{ features_profiles_to_validate|length }} features profiles ordered by {{ order }}</h4>
+  {% endif %}
+
 
 <!-- @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
 # Allow the operator to validate all learnt features profiles that are to be
@@ -166,6 +189,13 @@
 		      </tr>
 		    </thead>
 		    <tbody>
+  {% if labelled_metric_name %}
+    {% set use_metric = labelled_metric_name %}
+    {% set use_metric_name = labelled_metric_name + ' - ' + labelled_metric_base_name %}
+  {% else %}
+    {% set use_metric = for_metric %}
+    {% set use_metric_name = for_metric %}
+  {% endif %}
 		      <tr>
 		        <td>You can validate ALL the learnt features profiles in one action.
             This will validate all the features profiles listed below.  Please
@@ -173,8 +203,8 @@
             profiles below that you <strong>do not want to valdated</strong> and
             <strong>refresh</strong> this page before you use Validate ALL.
             This action simply validates ALL enabled features profiles for
-            {{ for_metric }} that are not validated.</td>
-		        <td><a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC&validate_all=true&metric_id={{ features_profiles_to_validate[0][1] }}">
+            {{ use_metric_name }} that are not validated.</td>
+		        <td><a href="?fp_validate=true&metric={{ use_metric }}&validated_equals=false&limit=0&order=DESC&validate_all=true&metric_id={{ features_profiles_to_validate[0][1] }}">
             <button type="button">Validate ALL</button></a></td>
 		      </tr>
 		    </tbody>
@@ -215,9 +245,14 @@
 				</thead>
 				<tbody>
   {% for item in features_profiles_to_validate %}
+    {% if '_tenant_id="' in item[2] %}
+      {% set use_metric = 'labelled_metrics.' + item[1]|string %}
+    {% else %}
+      {% set use_metric = item[2] %}
+    {% endif %}
           <tr>
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
-              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[0] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}'">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}">{{ item[0] }}</a>
             </td>
 <!-- # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
 # Added generation -->
@@ -226,30 +261,31 @@
     {% else %}
             <td>{{ item[17] }}<br><span class="logo"><span class="sky">trained</span></span></td>
     {% endif %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}'">
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[5] }}&metric={{ use_metric }}'">
     {% if item[18] > 1 %}
-              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}">{{ item[5] }}<br><span class="logo"><span class="re">learnt</span></span></a>
+              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ use_metric }}">{{ item[5] }}<br><span class="logo"><span class="re">learnt</span></span></a>
     {% else %}
-              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ item[2] }}">{{ item[5] }}<br><span class="logo"><span class="sky">trained</span></span></a>
+              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ use_metric }}">{{ item[5] }}<br><span class="logo"><span class="sky">trained</span></span></a>
     {% endif %}
             </td>
     {% if item[12] != 'none' %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[12] }}&metric={{ item[2] }}'">
-              <a href="?fp_view=true&fp_id={{ item[12] }}&metric={{ item[2] }}">{{ item[12] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[12] }}&metric={{ use_metric }}'">
+              <a href="?fp_view=true&fp_id={{ item[12] }}&metric={{ use_metric }}">{{ item[12] }}</a>
             </td>
     {% else %}
             <td>{{ item[12] }}</td>
     {% endif %}
-            <td><code>{{ item[2] }}</code></td>
+<!--            <td><code>{{ item[2] }}</code></td> -->
+            <td><code>{{ use_metric }}</code></td>
             <td>{{ item[3] }}</td>
             <td>
               <input type="checkbox" name="disable" />&nbsp;
-              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}&disable_fp={{ item[0] }}" target="_blank">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}&disable_fp={{ item[0] }}" target="_blank">
               <button type="button">Disable</button></a>
             </td>
             <td>
               <input type="checkbox" name="validate" />&nbsp;
-              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}&validate_fp=true" target="_blank">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}&validate_fp=true" target="_blank">
               <button type="button">Validate</button></a>
             </td>
             <td>
