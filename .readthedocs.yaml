@@ -24,5 +24,3 @@ sphinx:
 python:
   install:
   - requirements: docs/readthedocs.requirements.txt
-
-formats: all
