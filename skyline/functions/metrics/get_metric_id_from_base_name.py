@@ -2,6 +2,9 @@ import logging
 import traceback
 
 from skyline_functions import get_redis_conn_decoded
+# @added 20220714 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.database.queries.metric_id_from_base_name import metric_id_from_base_name
 
 
 def get_metric_id_from_base_name(current_skyline_app, base_name):
@@ -37,8 +40,8 @@ def get_metric_id_from_base_name(current_skyline_app, base_name):
     try:
         metric_id_str = redis_conn_decoded.hget(redis_key, base_name)
         # DEBUG
-        current_logger.info('debug :: %s :: %s :: hget(%s, %s)' % (
-            current_skyline_app, function_str, redis_key, str(base_name)))
+        # current_logger.info('debug :: %s :: %s :: hget(%s, %s)' % (
+        #     current_skyline_app, function_str, redis_key, str(base_name)))
         if metric_id_str:
             metric_id = int(str(metric_id_str))
     except Exception as err:
@@ -47,5 +50,19 @@ def get_metric_id_from_base_name(current_skyline_app, base_name):
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: %s :: failed to get metric_id for %s: %s' % (
             current_skyline_app, function_str, base_name, str(err)))
+
+    # @added 20220714 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Due to the fact that labelled metrics can churn quickly and reappear
+    # check the database if not found as active in Redis hash
+    if not metric_id:
+        try:
+            metric_id = metric_id_from_base_name(current_skyline_app, base_name)
+        except Exception as err:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: %s :: metric_id_from_base_name failed for %s: %s' % (
+                current_skyline_app, function_str, base_name, str(err)))
 
     return metric_id

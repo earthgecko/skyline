@@ -36,7 +36,7 @@ docs-requirements.txt (as per documented `Running in Python virtualenv
 
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py383"
+    PROJECT="skyline-py3816"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -85,7 +85,7 @@ Build
 
   PYTHON_MAJOR_VERSION="3.8"
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py386"
+  PROJECT="skyline-py3817"
   CURRENT_BRANCH="SNAB"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
@@ -144,7 +144,9 @@ Build
     # [B110:try_except_pass] Try, Except, Pass detected.
     # [B112:try_except_continue] Try, Except, Continue detected.
     # bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py"
-    bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py" --skip B110,B112
+    # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+    # bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py" --skip B110,B112
+    bandit -r "$APPDIR" -x "*/settings.py" --skip B110,B112
 
     cd "$APPDIR/docs"
     echo "Building Skyline documentation - in $APPDIR/docs"
@@ -175,7 +177,7 @@ Build
 
   # Usage: build_docs <app_dir>
   # e.g.
-  # cd /opt/python_virtualenv/projects/skyline-py386/
+  # cd /opt/python_virtualenv/projects/skyline-py3816/
   # build_docs /home/gary/sandbox/of/github/earthgecko/skyline/$CURRENT_BRANCH/skyline
 
 

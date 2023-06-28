@@ -74,7 +74,7 @@
   		      </tr>
   		      <tr>
   		        <td>Metric like</td>
-  		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		        <td><input type="text" name="metric_like" value="all"> <br>(wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%<br>for labelled metrics you can only search by metric name or key or value)</td>
   		      </tr>
   		      <tr>
   		        <td>from_timestamp</td>
@@ -159,10 +159,14 @@
     {% for matched_motif_id in matched_motifs %}
           <tr>
             <td>{{ matched_motifs[matched_motif_id]['human_date'] }}</td>
-            <td>{{ matched_motifs[matched_motif_id]['metric'] }}</td>
+      {% if matched_motifs[matched_motif_id]['metric']|length < 150 %}
+            <td><code>{{ matched_motifs[matched_motif_id]['metric'] }}<code></td>
+      {% else %}
+            <td><smallcode>{{ matched_motifs[matched_motif_id]['metric'] }}<smallcode></td>
+      {% endif %}
             <td>{{ matched_motifs[matched_motif_id]['fp_id'] }}</td>
-            <td onclick="window.location='?fp_view=true&fp_id={{ matched_motifs[matched_motif_id]['fp_id'] }}&metric={{ matched_motifs[matched_motif_id]['metric'] }}&matched_motif_id={{ matched_motif_id }}'">
-              <a href="?fp_view=true&fp_id={{ matched_motifs[matched_motif_id]['fp_id'] }}&metric={{ matched_motifs[matched_motif_id]['metric'] }}&matched_motif_id={{ matched_motif_id }}">{{ matched_motif_id }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ matched_motifs[matched_motif_id]['fp_id'] }}&metric_id={{ matched_motifs[matched_motif_id]['metric_id'] }}&matched_motif_id={{ matched_motif_id }}'">
+              <a href="?fp_view=true&fp_id={{ matched_motifs[matched_motif_id]['fp_id'] }}&metric_id={{ matched_motifs[matched_motif_id]['metric_id'] }}&matched_motif_id={{ matched_motif_id }}">{{ matched_motif_id }}</a>
             </td>
             <td>{{ matched_motifs[matched_motif_id]['index'] }}</td>
             <td>{{ matched_motifs[matched_motif_id]['size'] }}</td>

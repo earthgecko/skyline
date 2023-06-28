@@ -9,6 +9,7 @@ from functions.redis.get_metric_timeseries import get_metric_timeseries
 from functions.thunder.send_event import thunder_send_event
 from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 from functions.settings.get_external_settings import get_external_settings
+from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
 
 
 # @added 20210518 - Branch #1444: thunder
@@ -87,7 +88,38 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: failed to get Redis hash key %s - %s' % (
             function_str, hash_key, e))
-    if not metrics_last_timestamp_dict:
+
+    # @added 20230329 - Feature #4882: labelled_metrics - resolution and data sparsity
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    ids_with_base_names = {}
+    try:
+        ids_with_base_names = get_metric_ids_and_base_names(current_skyline_app)
+    except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: get_metric_ids_and_base_names failed - %s' % (
+            function_str, err))
+    labelled_metrics_last_timestamp_dict = {}
+    hash_key = 'analyzer_labelled_metrics.last_timeseries_timestamp'
+    try:
+        labelled_metrics_last_timestamp_dict = redis_conn_decoded.hgetall(hash_key)
+    except Exception as e:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: failed to get Redis hash key %s - %s' % (
+            function_str, hash_key, e))
+    if labelled_metrics_last_timestamp_dict:
+        for key, value in labelled_metrics_last_timestamp_dict.items():
+            metrics_last_timestamp_dict[int(float(key))] = value
+
+    # @modified 20230406 - Feature #4882: labelled_metrics - resolution and data sparsity
+    # if not metrics_last_timestamp_dict:
+    if not metrics_last_timestamp_dict and not labelled_metrics_last_timestamp_dict:
         return namespace_stale_metrics_dict, namespace_recovered_metrics_dict
 
     # Do not send stale alerts for any identified sparsely populated metrics
@@ -118,6 +150,32 @@ def thunder_stale_metrics(current_skyline_app, log=True):
             if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
                 sparsely_populated_metrics.append(base_name)
         del metrics_sparsity_dict
+
+    # @added 20230406 - Feature #4882: labelled_metrics - resolution and data sparsity
+    labelled_metrics_sparsity_dict = {}
+    data_sparsity_hash_key = 'labelled_metrics.data_sparsity'
+    try:
+        labelled_metrics_sparsity_dict = redis_conn_decoded.hgetall(data_sparsity_hash_key)
+    except Exception as e:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: failed to get Redis hash key %s - %s' % (
+            function_str, data_sparsity_hash_key, e))
+    if labelled_metrics_sparsity_dict:
+        metric_ids_of_known_sparsity = list(labelled_metrics_sparsity_dict.keys())
+        for metric_id_str in metric_ids_of_known_sparsity:
+            try:
+                metric_id = int(float(metric_id_str))
+                base_name = ids_with_base_names[metric_id]
+            except:
+                continue
+            base_names_of_known_sparsity.append(base_name)
+            sparsity = labelled_metrics_sparsity_dict[metric_id_str]
+            if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
+                sparsely_populated_metrics.append(base_name)
+        del labelled_metrics_sparsity_dict
 
     # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
     # On webapp report on sparsely populated metrics as well
@@ -180,6 +238,9 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     try:
         metrics_manager_do_not_alert_on_stale_metrics = list(redis_conn_decoded.smembers('metrics_manager.do_not_alert_on_stale_metrics'))
     except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error('error :: %s :: failed to get metrics_manager.do_not_alert_on_stale_metrics Redis set - %s' % (
             function_str, str(err)))
         metrics_manager_do_not_alert_on_stale_metrics = []
@@ -192,17 +253,28 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     error_count = 0
     for base_name in unique_base_names:
 
+        # @added 20230411 - Feature #4882: labelled_metrics - resolution and data sparsity
+        use_base_name = str(base_name)
+        if isinstance(base_name, int):
+            try:
+                use_base_name = ids_with_base_names[base_name]
+            except:
+                # Inactive metric
+                continue
+
         # @added 20220410 - Task #4514: Integrate opentelemetry
         #                   Feature #4516: flux - opentelemetry traces
         # Remove metrics in DO_NOT_SKIP_LISTs
-        if base_name in metrics_manager_do_not_alert_on_stale_metrics:
+        # if base_name in metrics_manager_do_not_alert_on_stale_metrics:
+        if use_base_name in metrics_manager_do_not_alert_on_stale_metrics:
             continue
 
         try:
-            parent_namespace = base_name.split('.')[0]
-            metrics_last_timestamps.append([base_name, int(metrics_last_timestamp_dict[base_name])])
-            if len(parent_namespace) > 0:
-                parent_namespaces.append(parent_namespace)
+            if base_name == use_base_name:
+                parent_namespace = base_name.split('.')[0]
+                if len(parent_namespace) > 0:
+                    parent_namespaces.append(parent_namespace)
+            metrics_last_timestamps.append([use_base_name, int(metrics_last_timestamp_dict[base_name])])
         except Exception as e:
             last_traceback = traceback.format_exc()
             last_error = e
@@ -227,6 +299,17 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     do_not_alert_on_namespaces = []
 
     parent_namespaces = list(set(parent_namespaces))
+
+    # @added 20230411 - Task #4872: Optimise luminosity for labelled_metrics
+    # Use metrics_manager.luminosity.namespaces for parent_namespaces
+    try:
+        parent_namespaces = redis_conn_decoded.hkeys('metrics_manager.luminosity.namespaces')
+    except Exception as err:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: hkeys failed on metrics_manager.luminosity.namespaces Redis hash - %s' % (
+            function_str, str(err)))
 
     # @added 20210620 - Branch #1444: thunder
     #                   Feature #4076: CUSTOM_STALE_PERIOD
@@ -294,14 +377,18 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         sorted_custom_stale_period_namespaces = sorted(custom_stale_period_namespaces_elements_list, key=lambda x: (x[1]), reverse=True)
         if sorted_custom_stale_period_namespaces:
             custom_stale_period_namespaces = [x[0] for x in sorted_custom_stale_period_namespaces]
+
     # Order by setting priority
     parent_namespaces = external_parent_namespaces + custom_stale_period_namespaces + parent_namespaces
 
-    for parent_namespace in parent_namespaces:
+    for parent_namespace in list(set(parent_namespaces)):
 
         # @added 20220208 - Feature #4376: webapp - update_external_settings
         # If alert_on_stale_metrics is not enabled do not alert
         if parent_namespace in do_not_alert_on_namespaces:
+            if log:
+                current_logger.info('%s :: not checking stale metrics in the \'%s\' namespace as set not to alert on' % (
+                    function_str, parent_namespace))
             continue
 
         parent_namespace_stale_metrics_count = 0
@@ -312,7 +399,18 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         namespace_recovered_metrics_dict[parent_namespace]['metrics'] = {}
 
         # metrics that are in the parent namespace
-        parent_namespace_metrics = [item for item in metrics_last_timestamps if str(item[0]).startswith(parent_namespace)]
+        # @modified 20220706 - Branch #1444: thunder
+        #                      Feature #4076: CUSTOM_STALE_PERIOD
+        # parent_namespace_metrics = [item for item in metrics_last_timestamps if str(item[0]).startswith(parent_namespace)]
+        parent_namespace_element = '%s.' % parent_namespace
+        parent_namespace_metrics = [item for item in metrics_last_timestamps if str(item[0]).startswith(parent_namespace_element)]
+
+        # @added 20230411 - Task #4872: Optimise luminosity for labelled_metrics
+        tenant_id_str = '_tenant_id="%s"' % parent_namespace
+        parent_namespace_labelled_metrics = [item for item in metrics_last_timestamps if tenant_id_str in str(item[0])]
+        if parent_namespace_labelled_metrics:
+            parent_namespace_metrics = parent_namespace_metrics + parent_namespace_labelled_metrics
+
         unfiltered_parent_namespace_metrics_count = len(parent_namespace_metrics)
         # @added 20210620 - Branch #1444: thunder
         #                   Feature #4076: CUSTOM_STALE_PERIOD

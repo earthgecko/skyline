@@ -20,7 +20,7 @@ Upgrade notes
 - There are no changes to settings.py in v3.0.3
 
 How to update from v3.0.0/v3.0.2
--------------------------
+--------------------------------
 
 - Download the new release tag or clone/update to get it to a temp location,
   ready to be deployed.

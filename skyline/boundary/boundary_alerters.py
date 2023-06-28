@@ -16,13 +16,14 @@ import re
 import datetime
 import os.path
 import sys
+import syslog
 
 # @added 20181126 - Task #2742: Update Boundary
 #                   Feature #2618: alert_slack
 # Added dt, redis, gmtime and strftime
 # import datetime as dt
 # import redis
-from time import (time, gmtime, strftime)
+from time import time, gmtime, strftime, sleep
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 from os import uname
@@ -99,6 +100,13 @@ if True:
     from functions.settings.get_sms_recipients import get_sms_recipients
     # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
     from functions.smtp.determine_smtp_server import determine_smtp_server
+    # @added 20230222 - Feature #4854: boundary - labelled_metrics
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+    from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+    from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+    from functions.metrics.get_dotted_representation import get_dotted_representation
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -207,6 +215,23 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         app_alert_context = settings.CUSTOM_ALERT_OPTS['boundary_alert_heading']
     except:
         app_alert_context = 'Boundary'
+
+    # @added 20230222 - Feature #4854: boundary - labelled_metrics
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle getting data from Graphite and victoriametrics
+    data_source = 'graphite'
+    use_base_name = str(base_name)
+    if base_name.startswith('labelled_metrics.'):
+        data_source = 'victoriametrics'
+        try:
+            use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                str(base_name), err))
+    if '_tenant_id="' in base_name:
+        data_source = 'victoriametrics'
+        use_base_name = str(base_name)
 
     # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
     # Use alert_context
@@ -335,7 +360,47 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         settings.SKYLINE_TMP_DIR, skyline_app, str(until_timestamp),
         metric_name)
     if settings.BOUNDARY_SMTP_OPTS.get('embed-images'):
-        image_data = get_graphite_graph_image(skyline_app, link, image_file)
+
+        # @modified 20230222 - Feature #4854: boundary - labelled_metrics
+        #                      Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Handle getting data from Graphite and victoriametrics
+        if data_source == 'graphite':
+            image_data = get_graphite_graph_image(skyline_app, link, image_file)
+
+        # @added 20230222 - Feature #4854: boundary - labelled_metrics
+        #                      Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Handle getting data from Graphite and victoriametrics
+        if data_source == 'victoriametrics':
+            metric_data = None
+            step = 600
+            timeseries_duration = int(until_timestamp) - int(from_timestamp)
+            target_hours = int(timeseries_duration / 3600)
+            logger.info('alert_smtp - getting victoriametrics data for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+            # Report correct days for new metrics
+            days = round((timeseries_duration / 86400), 1)
+            if days == 7.0:
+                days = 7
+            if timeseries_duration <= 86401:
+                step = 60
+                title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
+            else:
+                title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+            plot_parameters = {
+                'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                'figsize': (8, 4)
+            }
+            try:
+                # get_victoriametrics_metric automatically applies the rate and
+                # step required no downsampling or nonNegativeDerivative is
+                # required.
+                graphite_image_file = get_victoriametrics_metric(
+                    skyline_app, use_base_name, from_timestamp, until_timestamp, 'image',
+                    graphite_image_file, metric_data, plot_parameters)
+            except Exception as err:
+                logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                    err))
 
     if settings.BOUNDARY_SMTP_OPTS.get('embed-images_disabled3290'):
         # @modified 20191021 - Task #3290: Handle urllib2 in py3
@@ -600,14 +665,23 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
 
 def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
     if settings.SYSLOG_ENABLED:
-        import sys
-        import syslog
         syslog_ident = settings.SYSLOG_OPTS['ident']
         # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
         # message = str('Boundary - Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
         message = 'Boundary - Anomalous metric: %s (value: %s) - %s with %s %s times' % (
             metric_name, str(datapoint), algorithm, str(metric_trigger),
             str(alert_threshold))
+
+        # @added 20230215 - Task #4852:Allow for level to be passed in SYSLOG_OPTS
+        syslog_level = 'warn'
+        try:
+            syslog_level = settings.SYSLOG_OPTS['level']
+            if syslog_level not in ['warn', 'notice', 'info']:
+                logger.warning('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
+                syslog_level = 'warn'
+        except:
+            syslog_level = 'warn'
+
         if sys.version_info[:2] == (2, 6):
             syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
         elif sys.version_info[:2] == (2, 7):
@@ -615,8 +689,24 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
         elif sys.version_info[:1] == (3):
             syslog.openlog(ident='skyline', logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
         else:
-            syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
-        syslog.syslog(4, message)
+            # @modified 20230215 - Task #4852:Allow for level to be passed in SYSLOG_OPTS
+            # syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
+            if syslog_level == 'warn':
+                syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
+            if syslog_level == 'notice':
+                syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL5)
+            if syslog_level == 'info':
+                syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL6)
+
+        # @modified 20230215 - Task #4852:Allow for level to be passed in SYSLOG_OPTS
+        # syslog.syslog(4, message)
+        if syslog_level == 'warn':
+            syslog.syslog(4, message)
+        if syslog_level == 'notice':
+            syslog.syslog(5, message)
+        if syslog_level == 'info':
+            syslog.syslog(6, message)
+
     else:
         return False
 
@@ -648,6 +738,23 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     base_name = metric
     alert_algo = str(algorithm)
     alert_context = alert_algo.upper()
+
+    # @added 20230222 - Feature #4854: boundary - labelled_metrics
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle getting data from Graphite and victoriametrics
+    data_source = 'graphite'
+    use_base_name = str(base_name)
+    if base_name.startswith('labelled_metrics.'):
+        data_source = 'victoriametrics'
+        try:
+            use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                str(base_name), err))
+    if '_tenant_id="' in base_name:
+        data_source = 'victoriametrics'
+        use_base_name = str(base_name)
 
     # The known_derivative_metric state is determine in case we need to surface
     # the png image from Graphite if the Ionosphere image is not available for
@@ -893,8 +1000,43 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 logger.error('error :: boundary_alerters :: alert_slack :: failed to urlopen with system parameter added %s' % str(link))
                 image_data = None
 
-    # @added 20191025 -
-    image_data = get_graphite_graph_image(skyline_app, link, image_file)
+    # @added 20230222 - Feature #4854: boundary - labelled_metrics
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle getting data from Graphite and victoriametrics
+    if data_source == 'graphite':
+        # @added 20191025 -
+        image_data = get_graphite_graph_image(skyline_app, link, image_file)
+
+    if data_source == 'victoriametrics':
+        metric_data = None
+        step = 600
+        timeseries_duration = int(until_timestamp) - int(from_timestamp)
+        target_hours = int(timeseries_duration / 3600)
+        logger.info('alert_smtp - getting victoriametrics data for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+        # Report correct days for new metrics
+        days = round((timeseries_duration / 86400), 1)
+        if days == 7.0:
+            days = 7
+        if timeseries_duration <= 86401:
+            step = 60
+            title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
+        else:
+            title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+        plot_parameters = {
+            'title': title, 'line_color': 'orange', 'bg_color': 'black',
+            'figsize': (8, 4)
+        }
+        try:
+            # get_victoriametrics_metric automatically applies the rate and
+            # step required no downsampling or nonNegativeDerivative is
+            # required.
+            image_data = get_victoriametrics_metric(
+                skyline_app, use_base_name, from_timestamp, until_timestamp, 'image',
+                image_file, metric_data, plot_parameters)
+        except Exception as err:
+            logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                err))
 
     if image_data == 'disabled_for_testing':
         image_file = '%s/%s.%s.graphite.%sh.png' % (
@@ -1113,6 +1255,8 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
         except:
             pass
 
+        REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+
         source = 'boundary'
         metric_alert_dict = {}
         alert_data_dict = {}
@@ -1142,6 +1286,25 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 "token": alerter_token
             }
 
+            # @added 20221208 - Feature #3772: Add the anomaly_id to the http_alerter json
+            anomaly_id = 0
+            anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                str(int(timestamp_str)), metric_name)
+            try_get_anomaly_id_redis_key_count = 0
+            while try_get_anomaly_id_redis_key_count < 20:
+                try_get_anomaly_id_redis_key_count += 1
+                try:
+                    anomaly_id = int(REDIS_HTTP_ALERTER_CONN_DECODED.get(anomaly_id_redis_key))
+                    break
+                except:
+                    sleep(1)
+            if not anomaly_id:
+                logger.error('error :: alert_http - failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                anomaly_id = 0
+            else:
+                logger.info('alert_http - determined anomaly_id as %s, appending to alert' % str(anomaly_id))
+            metric_alert_dict['anomaly_id'] = str(anomaly_id)
+
             # @added 20220301 - Feature #4482: Test alerts
             if algorithm == 'testing':
                 metric_alert_dict['test alert'] = True
@@ -1168,11 +1331,26 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
         redis_set = '%s.http_alerter.queue' % str(source)
         resend_queue = None
         previous_attempts = 0
-        REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
         try:
-            resend_queue = REDIS_HTTP_ALERTER_CONN_DECODED.smembers(redis_set)
+            # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+            #                      Feature #4652: http_alerter - dotted_representation
+            # Change to a hash
+            # resend_queue = REDIS_HTTP_ALERTER_CONN_DECODED.smembers(redis_set)
+            resend_queue = []
         except Exception as e:
             logger.error('error :: alert_http :: could not query Redis for %s - %s' % (redis_set, e))
+
+        # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+        #                   Feature #4652: http_alerter - dotted_representation
+        # Change to a hash
+        redis_alert_queue_hash = '%s.http_alerter.queue.hash' % str(source)
+        resend_queue_dict = {}
+        try:
+            resend_queue_dict = REDIS_HTTP_ALERTER_CONN_DECODED.hgetall(redis_alert_queue_hash)
+        except Exception as err:
+            logger.error('error :: alert_http :: could not query Redis for %s - %s' % (
+                redis_alert_queue_hash, err))
+
         if REDIS_HTTP_ALERTER_CONN_DECODED:
             try:
                 del REDIS_HTTP_ALERTER_CONN_DECODED
@@ -1197,14 +1375,62 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: alert_http failed iterate to resend_queue')
+
+        # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+        #                   Feature #4652: http_alerter - dotted_representation
+        # Change to a hash
+        in_resend_queue_dict = False
+        if resend_queue_dict:
+            try:
+                for resend_item in list(resend_queue_dict.keys()):
+                    resend_item_list = literal_eval(resend_queue_dict[resend_item])
+                    # resend_alert = resend_item_list[0]
+                    # resend_metric = resend_item_list[1]
+                    # resend_metric_alert_dict = resend_item_list[2]
+                    resend_metric_alert_dict = resend_item_list[7]
+
+                    if resend_metric_alert_dict['metric'] == metric_name:
+                        if int(resend_metric_alert_dict['timestamp']) == int(metric_timestamp):
+                            previous_attempts = int(resend_metric_alert_dict['attempts'])
+                            in_resend_queue_dict = True
+                            break
+            except Exception as err:
+                logger.error('error :: alert_http failed iterate to resend_queue_dict: %s - %s' % (str(resend_queue_dict), err))
+
         # REDIS_HTTP_ALERTER_CONN = None
         # if in_resend_queue:
         #     REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)
         REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)
 
+        REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+
         add_to_resend_queue = False
         fail_alerter = False
         if alert_data_dict and alerter_endpoint:
+
+            # @added 20221212 - Feature #3772: Add the anomaly_id to the http_alerter json
+            try:
+                if alert_data_dict['data']['anomaly_id'] == '0':
+                    anomaly_id = 0
+                    anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                        str(int(alert_data_dict['data']['timestamp'])), alert_data_dict['data']['metric'])
+                    try_get_anomaly_id_redis_key_count = 0
+                    while try_get_anomaly_id_redis_key_count < 20:
+                        try_get_anomaly_id_redis_key_count += 1
+                        try:
+                            anomaly_id = int(REDIS_HTTP_ALERTER_CONN_DECODED.get(anomaly_id_redis_key))
+                            break
+                        except:
+                            sleep(1)
+                    if not anomaly_id:
+                        logger.error('error :: alert_http - failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                        anomaly_id = 0
+                    else:
+                        logger.info('alert_http - determined anomaly_id as %s, appending to alert' % str(anomaly_id))
+                    alert_data_dict['data']['anomaly_id'] = str(anomaly_id)
+            except Exception as err:
+                logger.error('error :: alert_http failed to determine anomaly_id for %s - %s' % (str(alert_data_dict), err))
+
             # @modified 20200403 - Feature #3396: http_alerter
             # Changed timeouts from 2, 2 to 5, 20
             connect_timeout = 5
@@ -1237,6 +1463,21 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                         # str(resend_item), redis_set))
                         str(item_to_resend), redis_set))
 
+            # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+            #                   Feature #4652: http_alerter - dotted_representation
+            # Change to a hash
+            if in_resend_queue_dict:
+                hash_key = '%s.%s' % (
+                    str(resend_metric_alert_dict['timestamp']),
+                    str(resend_metric_alert_dict['anomaly_id']))
+                try:
+                    REDIS_HTTP_ALERTER_CONN_DECODED.hdel(redis_alert_queue_hash, hash_key)
+                    logger.info('alert_http :: alert removed from %s' % (
+                        str(redis_alert_queue_hash)))
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to remove %s from Redis hash %s - %s' % (
+                        hash_key, redis_alert_queue_hash, err))
+
             # @added 20200310 - Feature #3396: http_alerter
             # When the response code is 401 the response object appears to be
             # False, although the response.code and response.reason are set
@@ -1258,8 +1499,19 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                     if in_resend_queue:
                         logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
                             str(redis_set), str(previous_attempts)))
+                    # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                    #                   Feature #4652: http_alerter - dotted_representation
+                    # Change to a hash
+                    if in_resend_queue_dict:
+                        logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
+                            str(redis_alert_queue_hash), str(previous_attempts)))
+
                     try:
                         del REDIS_HTTP_ALERTER_CONN
+                    except:
+                        pass
+                    try:
+                        del REDIS_HTTP_ALERTER_CONN_DECODED
                     except:
                         pass
 
@@ -1287,16 +1539,36 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
             number_of_send_attempts = previous_attempts + 1
             metric_alert_dict['attempts'] = number_of_send_attempts
             if add_to_resend_queue:
-                data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, str(metric_alert_dict)]
+
+                # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                #                      Feature #4652: http_alerter - dotted_representation
+                # Change to a hash
+                # data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, str(metric_alert_dict)]
+                # logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
+                #     str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
+                # try:
+                #     # redis_conn.sadd(redis_set, str(metric_alert_dict))
+                #     REDIS_HTTP_ALERTER_CONN.sadd(redis_set, str(data))
+                # except:
+                #     logger.error(traceback.format_exc())
+                #     logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
+                #         str(metric_alert_dict), redis_set))
+
+                # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                #                   Feature #4652: http_alerter - dotted_representation
+                # Change to a hash
+                data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, metric_alert_dict]
                 logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
-                    str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
+                    str(redis_alert_queue_hash), str(number_of_send_attempts),
+                    str(metric_alert_dict)))
+                hash_key = '%s.%s' % (
+                    str(metric_alert_dict['timestamp']),
+                    str(metric_alert_dict['anomaly_id']))
                 try:
-                    # redis_conn.sadd(redis_set, str(metric_alert_dict))
-                    REDIS_HTTP_ALERTER_CONN.sadd(redis_set, str(data))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
-                        str(metric_alert_dict), redis_set))
+                    REDIS_HTTP_ALERTER_CONN_DECODED.hset(redis_alert_queue_hash, hash_key, str(data))
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to add %s to Redis hash %s - %s' % (
+                        str(metric_alert_dict), redis_alert_queue_hash, err))
 
             # Create a Redis if there was a bad or no response from the
             # alerter_endpoint, to ensure that Boundary does not loop through
@@ -1315,6 +1587,10 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                         logger.error('error :: failed to set Redis key %s' % alerter_endpoint_cache_key)
         try:
             del REDIS_HTTP_ALERTER_CONN
+        except:
+            pass
+        try:
+            del REDIS_HTTP_ALERTER_CONN_DECODED
         except:
             pass
     else:

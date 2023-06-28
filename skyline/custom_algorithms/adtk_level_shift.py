@@ -164,7 +164,6 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     For metrics with a different resolution/frequency may require different
     values appropriate for metric resolution.
 
-    :
     Example CUSTOM_ALGORITHMS configuration:
 
     'adtk_level_shift': {
@@ -201,6 +200,19 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     return_anomalies = False
     anomalies = []
     realtime_analysis = True
+
+    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+    # Changed the adtk algorithms to return a results dict
+    # like other custom algorithms that vortex can run
+    anomalyScore_list = []
+    adtk_scores = []
+    results_anomalies = {}
+    results = {
+        'anomalous': anomalous,
+        'anomalies': results_anomalies,
+        'anomalyScore_list': anomalyScore_list,
+        'scores': adtk_scores,
+    }
 
     current_logger = None
 
@@ -319,6 +331,23 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
         current_logger.debug('debug :: algorithm_parameters :: %s' % (
             str(algorithm_parameters)))
 
+    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+    # Changed the adtk algorithms to return a results dict
+    # like other custom algorithms that vortex can run
+    return_results = False
+    try:
+        return_results = algorithm_parameters['return_results']
+    except KeyError:
+        return_results = False
+    except Exception as e:
+        record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+        dev_null = e
+    anomaly_window = 1
+    try:
+        anomaly_window = int(algorithm_parameters['anomaly_window'])
+    except:
+        anomaly_window = 1
+
     try:
         base_name = algorithm_parameters['base_name']
     except:
@@ -331,6 +360,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
         # spewing tons of errors into the log e.g. analyzer.log
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         # Return None and None as the algorithm could not determine True or False
+
+        # @added 20230613 - Feature #4948: vortex - adtk algorithms
+        # Changed the adtk algorithms to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
+
         if return_anomalies:
             return (False, None, anomalies)
         else:
@@ -355,6 +391,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
             if debug_logging:
                 current_logger.debug('debug :: %s :: run_every period is not over yet, skipping base_name - %s' % (
                     algorithm_name, str(base_name)))
+
+            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+            # Changed the adtk algorithms to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
+
             if return_anomalies:
                 return (False, None, anomalies)
             else:
@@ -386,6 +429,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                 if debug_logging:
                     current_logger.debug('debug :: %s :: skipping as not sharded into this run - %s' % (
                         algorithm_name, str(base_name)))
+            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+            # Changed the adtk algorithms to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
+
             if return_anomalies:
                 return (False, None, anomalies)
             else:
@@ -449,6 +498,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                 if debug_logging:
                     current_logger.debug('debug_logging :: %s :: SystemExit called, exiting - %s' % (
                         algorithm_name, e))
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
+
                 if return_anomalies:
                     return (anomalous, anomalyScore, anomalies)
                 else:
@@ -462,6 +517,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                         algorithm_name))
                 timeseries = []
             if not timeseries:
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
+
                 if return_anomalies:
                     return (anomalous, anomalyScore, anomalies)
                 else:
@@ -484,6 +545,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     if debug_logging:
                         current_logger.debug('debug :: %s :: time series does not have sufficient data' % (
                             algorithm_name))
+                    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                    # Changed the adtk algorithms to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
+
                     if return_anomalies:
                         return (anomalous, anomalyScore, anomalies)
                     else:
@@ -492,6 +559,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                 if debug_logging:
                     current_logger.debug('debug_logging :: %s :: SystemExit called, exiting - %s' % (
                         algorithm_name, e))
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
+
                 if return_anomalies:
                     return (anomalous, anomalyScore, anomalies)
                 else:
@@ -503,6 +576,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     current_logger.error(traceback_msg)
                     current_logger.error('error :: debug_logging :: %s :: falied to determine if time series has sufficient data' % (
                         algorithm_name))
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
+
                 if return_anomalies:
                     return (anomalous, anomalyScore, anomalies)
                 else:
@@ -541,6 +620,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     if debug_logging:
                         current_logger.debug('debug_logging :: %s :: SystemExit called, exiting - %s' % (
                             algorithm_name, e))
+                    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                    # Changed the adtk algorithms to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
+
                     if return_anomalies:
                         return (anomalous, anomalyScore, anomalies)
                     else:
@@ -565,6 +650,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                         current_logger.debug('debug :: %s :: time series does not have sufficient data, minimum_datapoints required is %s and time series has %s' % (
                             algorithm_name, str(minimum_datapoints),
                             str(total_datapoints)))
+                    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                    # Changed the adtk algorithms to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
+
                     if return_anomalies:
                         return (anomalous, anomalyScore, anomalies)
                     else:
@@ -581,6 +672,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     current_logger.debug('debug :: %s :: time series does not have sufficient data, minimum_percentage_sparsity required is %s and time series has %s' % (
                         algorithm_name, str(minimum_percentage_sparsity),
                         str(sparsity)))
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
+
                 if return_anomalies:
                     return (anomalous, anomalyScore, anomalies)
                 else:
@@ -590,6 +687,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     current_logger.debug('debug :: %s :: time series does not have sufficient variability, all the values are the same' % algorithm_name)
                 anomalous = False
                 anomalyScore = 0.0
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
+
                 if return_anomalies:
                     return (anomalous, anomalyScore, anomalies)
                 else:
@@ -606,6 +709,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                 current_logger.debug('debug :: %s :: LevelShiftAD not run as no data' % (
                     algorithm_name))
             anomalies = []
+            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+            # Changed the adtk algorithms to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
+
             if return_anomalies:
                 return (anomalous, anomalyScore, anomalies)
             else:
@@ -619,12 +728,22 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
             if debug_logging:
                 current_logger.debug('debug :: %s :: time series does not have sufficient data' % (
                     algorithm_name))
+            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+            # Changed the adtk algorithms to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
+
             if return_anomalies:
                 return (anomalous, anomalyScore, anomalies)
             else:
                 return (anomalous, anomalyScore)
 
         start_analysis = timer()
+        if debug_logging:
+            current_logger.debug('debug :: %s :: starting analysis' % (
+                algorithm_name))
+
         try:
             df = pd.DataFrame(timeseries, columns=['date', 'value'])
             df['date'] = pd.to_datetime(df['date'], unit='s')
@@ -638,6 +757,11 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
             anomaly_df = level_shift_ad.fit_detect(s)
             anomalies = anomaly_df.loc[anomaly_df['value'] > 0]
             anomalous = False
+
+            if debug_logging:
+                current_logger.debug('debug :: %s :: analysis run, anomalies found %s' % (
+                    algorithm_name, str(len(anomalies))))
+
             if len(anomalies) > 0:
                 anomaly_timestamps = list(anomalies.index.astype(np.int64) // 10**9)
                 if realtime_analysis:
@@ -662,11 +786,42 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                     anomalies_dict['algorithm'] = algorithm_name
                     anomalies_dict['anomalies'] = {}
 
-                    for ts, value in timeseries:
+                    # @modified 20230613 - Feature #4948: vortex - adtk algorithms
+                    # Changed the adtk algorithms to return a results dict
+                    # like other custom algorithms that vortex can run
+                    # for ts, value in timeseries:
+                    for index, item in enumerate(timeseries):
+                        ts = item[0]
+                        value = item[1]
                         if int(ts) in anomaly_timestamps:
                             anomalies_list.append([int(ts), value])
                             anomalies_dict['anomalies'][int(ts)] = value
+                            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                            # Changed the adtk algorithms to return a results dict
+                            # like other custom algorithms that vortex can run
+                            results_anomalies[int(item[0])] = {'value': item[1], 'index': index, 'score': 1}
+                            anomalyScore_list.append(1)
+                        else:
+                            anomalyScore_list.append(0)
+
                     anomalies = list(anomalies_list)
+
+                    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                    # Changed the adtk algorithms to return a results dict
+                    # like other custom algorithms that vortex can run
+                    adtk_scores = list(anomalyScore_list)
+                    if return_results:
+                        anomaly_sum = sum(anomalyScore_list[-anomaly_window:])
+                        if anomaly_sum > 0:
+                            anomalous = True
+                        else:
+                            anomalous = False
+                        results = {
+                            'anomalous': anomalous,
+                            'anomalies': results_anomalies,
+                            'anomalyScore_list': anomalyScore_list,
+                            'scores': adtk_scores,
+                        }
 
                     # @added 20210316 - Feature #3978: luminosity - classify_metrics
                     #                   Feature #3642: Anomaly type classification
@@ -716,6 +871,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                             if debug_logging:
                                 current_logger.debug('debug_logging :: %s :: SystemExit called during save plot, exiting - %s' % (
                                     algorithm_name, e))
+                            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                            # Changed the adtk algorithms to return a results dict
+                            # like other custom algorithms that vortex can run
+                            if return_results:
+                                return (anomalous, anomalyScore, results)
+
                             if return_anomalies:
                                 return (anomalous, anomalyScore, anomalies)
                             else:
@@ -840,6 +1001,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
             if debug_logging:
                 current_logger.debug('debug_logging :: %s :: SystemExit called, during analysis, exiting - %s' % (
                     algorithm_name, e))
+
+            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+            # Changed the adtk algorithms to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
+
             if return_anomalies:
                 return (anomalous, anomalyScore, anomalies)
             else:
@@ -851,6 +1019,12 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
                 current_logger.error(traceback_msg)
                 current_logger.error('error :: debug_logging :: %s :: failed to run on ts' % (
                     algorithm_name))
+            # @added 20230613 - Feature #4948: vortex - adtk algorithms
+            # Changed the adtk algorithms to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
+
             if return_anomalies:
                 return (anomalous, anomalyScore, anomalies)
             else:
@@ -881,6 +1055,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
             del timeseries
         except:
             pass
+
+        # @added 20230613 - Feature #4948: vortex - adtk algorithms
+        # Changed the adtk algorithms to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
+
         if return_anomalies:
             return (anomalous, anomalyScore, anomalies)
         else:
@@ -890,6 +1071,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
         if debug_logging:
             current_logger.debug('debug_logging :: %s :: SystemExit called (before StopIteration), exiting - %s' % (
                 algorithm_name, e))
+
+        # @added 20230613 - Feature #4948: vortex - adtk algorithms
+        # Changed the adtk algorithms to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
+
         if return_anomalies:
             return (anomalous, anomalyScore, anomalies)
         else:
@@ -902,6 +1090,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
         # anything to the log, so the pythonic except is used to "sample" any
         # algorithm errors to a tmp file and report once per run rather than
         # spewing tons of errors into the log e.g. analyzer.log
+
+        # @added 20230613 - Feature #4948: vortex - adtk algorithms
+        # Changed the adtk algorithms to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
+
         if return_anomalies:
             return (False, None, anomalies)
         else:
@@ -909,10 +1104,23 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     except:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         # Return None and None as the algorithm could not determine True or False
+
+        # @added 20230613 - Feature #4948: vortex - adtk algorithms
+        # Changed the adtk algorithms to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
+
         if return_anomalies:
             return (False, None, anomalies)
         else:
             return (False, None)
+
+    # @added 20230613 - Feature #4948: vortex - adtk algorithms
+    # Changed the adtk algorithms to return a results dict
+    # like other custom algorithms that vortex can run
+    if return_results:
+        return (anomalous, anomalyScore, results)
 
     if return_anomalies:
         return (anomalous, anomalyScore, anomalies)

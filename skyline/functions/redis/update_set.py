@@ -1,3 +1,6 @@
+"""
+update_set.py
+"""
 import logging
 import traceback
 
@@ -75,6 +78,11 @@ def update_redis_set(
                 current_skyline_app_logger = current_skyline_app + 'Log'
                 current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s :: failed to update item in Redis set %s - %s' % (
+            # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Modified for nosec for bandit B608:hardcoded_sql_expressions as bandit
+            # incorecctly sees this an a SQL type string
+            # current_logger.error('error :: %s :: failed to update item in Redis set %s - %s' % (
+            current_logger.error('error :: %s :: failed to add item in Redis set %s - %s' % (
                 function_str, redis_set, e))
     return

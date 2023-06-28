@@ -17,7 +17,7 @@ import random
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
 # bandit [B403:blacklist] Consider possible security implications associated
 # with pickle module.  These have been considered.
-import pickle  # nosec
+import pickle  # nosec B403
 import struct
 
 # Get the current working directory of this file.
@@ -102,14 +102,16 @@ def seed():
     #                      seed_data.py testing with UDP does not work GH77
     # The use of a UDP socket test is flawed as it will always pass and never
     # except unless Horizon is bound to all.
-    if settings.HORIZON_IP == '0.0.0.0':
+    # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+    # Added nosec B104 for bandit
+    if settings.HORIZON_IP == '0.0.0.0':  # nosec B104
         test_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             test_sock.sendto(packet, (socket.gethostname(), settings.UDP_PORT))
             horizon_params_ok = True
             print('notice :: Horizon parameters OK')
-        except Exception as e:
-            print('warning :: there is an issue with the Horizon parameters')
+        except Exception as err:
+            print('warning :: there is an issue with the Horizon parameters - %s' % err)
             traceback.print_exc()
             print('info   :: this is possibly a hostname related issue')
             print('notice :: trying on 127.0.0.1')
@@ -176,7 +178,7 @@ def seed():
                 # bandit B311 blacklist - Standard pseudo-random generators are
                 # not suitable for security/cryptographic purposes, this is not
                 # for security/cryptographic purposes
-                add_random = random.randint(18500, 24000)  # nosec
+                add_random = random.randint(18500, 24000)  # nosec B311
                 original_value = int(datapoint[1])
                 anomalous_datapoint = original_value + add_random
                 datapoint[1] = float(anomalous_datapoint)
@@ -294,7 +296,7 @@ def seed():
                 # bandit B311 blacklist - Standard pseudo-random generators are
                 # not suitable for security/cryptographic purposes, this is not
                 # for security/cryptographic purposes
-                add_random = random.randint(500, 2000)  # nosec
+                add_random = random.randint(500, 2000)  # nosec B311
                 original_value = int(datapoint[1])
                 if initial == (end_timestamp - 10):
                     anomalous_datapoint = int(datapoint[1]) + 8000
@@ -386,8 +388,8 @@ def seed():
         # @modified 20180915 - Feature #2550: skyline.dawn.sh
         # Added metric name and views to the output
         # print ('info :: at %s' % str(settings.SKYLINE_URL))
-        print ('info ::  triggered anomaly and data for the %s metric in the' % metric)
-        print ('info ::  now, then, Panorama and rebrow views at %s' % str(settings.SKYLINE_URL))
+        print('info ::  triggered anomaly and data for the %s metric in the' % metric)
+        print('info ::  now, then, Panorama and rebrow views at %s' % str(settings.SKYLINE_URL))
     except NoDataException:
         print('error :: Woops, looks like the data did not make it into Horizon. Try again?')
         print('info :: please check your settings.py and ensure that the Horizon and Redis settings are correct.')

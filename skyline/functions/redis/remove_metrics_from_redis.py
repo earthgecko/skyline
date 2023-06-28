@@ -11,6 +11,9 @@ from skyline_functions import get_redis_conn_decoded
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
 from settings import FULL_NAMESPACE
+# @added 20220803 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 
 
 # @added 20220224 - Feature #4468: flux - remove_namespace_quota_metrics
@@ -92,10 +95,35 @@ def remove_metrics_from_redis(current_skyline_app, metrics, patterns, dry_run):
         full_uniques = '%sunique_metrics' % FULL_NAMESPACE
         unique_remove_metrics = []
         for base_name in metrics_to_remove:
-            metric_name = '%s%s' % (FULL_NAMESPACE, base_name)
+
+            # @added 20220803 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Handle labelled_metrics
+            metric_name = None
+            if base_name.startswith('labelled_metrics.'):
+                metric_name = str(base_name)
+                metric_id_str = metric_name.replace('labelled_metrics.', '', 1)
+                try:
+                    metric_id = int(float(metric_id_str))
+                    if metric_id:
+                        metric_ids_to_remove.append(metric_id)
+                except:
+                    pass
+                labelled_metric_base_name = None
+                try:
+                    labelled_metric_base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, metric_name)
+                except Exception as err:
+                    current_logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                        function_str, metric_name, err))
+                if labelled_metric_base_name:
+                    unique_remove_metrics.append(labelled_metric_base_name)
+
+            if not metric_name:
+                metric_name = '%s%s' % (FULL_NAMESPACE, base_name)
+                namespace_elements = base_name.split('.')
+                metric_specific_namespaces.append('.'.join(namespace_elements[0:-1]))
+
             unique_remove_metrics.append(metric_name)
-            namespace_elements = base_name.split('.')
-            metric_specific_namespaces.append('.'.join(namespace_elements[0:-1]))
 
         remove_from_sets = [
             'analyzer.batch_processing_metrics',
@@ -277,25 +305,118 @@ def remove_metrics_from_redis(current_skyline_app, metrics, patterns, dry_run):
     # it only removes base_name and metrics.base_name keys from any hash keys or
     # sets in which those keys exist.
     all_names_to_remove = metrics_to_remove + unique_remove_metrics
+
     all_keys = list(redis_conn_decoded.keys('*'))
+    # @modified 20230330 - Feature #4468: flux - remove_namespace_quota_metrics
+    # Use scan_iter
+    # all_keys = []
+    # try:
+    #     for key in redis_conn_decoded.scan_iter('*'):
+    #         all_keys.append(key)
+    # except Exception as err:
+    #     current_logger.error('error :: %s :: failed to scan_iter Redis - %s' % (
+    #         function_str, err))
+
+    # @modified 20230330 - Feature #4468: flux - remove_namespace_quota_metrics
+    # Reduce keys to check
+    current_logger.info('%s :: determining keys, hashes and sets from %s Redis keys' % (
+        function_str, str(len(all_keys))))
+    skip_keys = [
+        'aet.horizon.metrics_received',
+        'horizon.metrics_received',
+        'flux.aggregator.queue',
+        'flux.metrics_data_sent',
+        'flux.prometheus_metrics',
+        'flux.workers.',
+        'horizon.prometheus_metrics.',
+        'luminosity.cloudburst.',
+        'flux.prometheus_metadata',
+        'flux.prometheus_namespace_cardinality.last',
+        'vista.',
+        'analyzer_labelled_metrics.last_3sigma_anomalous.',
+        'namespace.analysed_events.',
+        'horizon.worker',
+        'ionosphere.learn_repetitive_patterns.',
+        'aet.metrics_manager.inactive_metric_ids',
+        'luminosity.classify_anomalies',
+        'analyzer_labelled_metrics.last_mad_anomalous.',
+        'aet.',
+        'metrics_manager.prometheus.metrics_type.',
+        'analyzer_labelled_metrics.boring.',
+        'analyzer_labelled_metrics.stale.',
+        'analyzer_labelled_metrics.no_new_data_metrics.',
+        'analyzer_labelled_metrics.tooshort_metrics.',
+        'analyzer.boring',
+        'analyzer.too_short',
+        'analyzer.run_time',
+        'analyzer.real_anomalous_metrics',
+        'luminosity.dropped_correlations.',
+        'analyzer.total_analyzed',
+        'analyzer.not_anomalous_metrics',
+        'thunder.alerted_on.stale_metrics',
+        'ionosphere.panorama.not_anomalous_metrics',
+        'webapp.remove_namespace_quota_metrics.',
+        'mirage_labelled_metrics.1.',
+        'mirage_labelled_metrics.2.',
+        'mirage_labelled_metrics.3.',
+        'mirage_labelled_metrics.4.',
+        'mirage_labelled_metrics.5.',
+        'mirage_labelled_metrics.6.',
+        'mirage_labelled_metrics.7.',
+        'mirage_labelled_metrics.8.',
+        'metrics_manager.algorithms.ids',
+        'luminosity.metric_group.last_updated',
+        'analyzer.illuminance.all.',
+    ]
+
     hashes_and_sets = {}
     redis_keys_to_remove = []
     for key in all_keys:
         if key in keys_processed:
             continue
-        key_type = redis_conn_decoded.type(key)
+        # @modified 20230330 - Feature #4468: flux - remove_namespace_quota_metrics
+        # Reduce keys to check
+        if '.illuminance.2' in key:
+            continue
+        key_type = None
+        if FULL_NAMESPACE:
+            if key.startswith(FULL_NAMESPACE):
+                key_type = 'string'
+        if key.startswith('labelled_metrics.'):
+            key_type = 'TSDB-TYPE'
+        if not key_type:
+            skip = False
+            skip_key_list = [1 for skip_key in skip_keys if key.startswith(skip_key)]
+            if sum(skip_key_list):
+                skip = True
+            if skip:
+                continue
+        if not key_type:
+            key_type = redis_conn_decoded.type(key)
+
         if key_type in ['hash', 'set']:
             hashes_and_sets[key] = key_type
+            # @added 20230330 - Feature #4468: flux - remove_namespace_quota_metrics
+            # Continue if it is a hash or set because no individual metric will
+            # have a has or set specifically dedicated to the metric
+            continue
+
         # Remove metrics specific keys
-        for metric in all_names_to_remove:
-            # Specific metric related keys
-            if key.endswith(metric):
-                redis_keys_to_remove.append(key)
-                continue
-            # If the metric name is in the key name at all it is a metric
-            # related key
-            if metric in key:
-                redis_keys_to_remove.append(key)
+        # @modified 20230330 - Feature #4468: flux - remove_namespace_quota_metrics
+        # Use list comprehensions
+        # for metric in all_names_to_remove:
+        #     # Specific metric related keys
+        #     if key.endswith(metric):
+        #         redis_keys_to_remove.append(key)
+        #         break
+        #     # If the metric name is in the key name at all it is a metric
+        #     # related key
+        #     if metric in key:
+        #         redis_keys_to_remove.append(key)
+        #         break
+        in_keys = [metric for metric in all_names_to_remove if metric in key]
+        if in_keys:
+            redis_keys_to_remove = redis_keys_to_remove + in_keys
 
     current_logger.info('%s :: best effort removing metrics from %s other Redis hash keys and sets' % (
         function_str, str(len(hashes_and_sets))))

@@ -40,5 +40,5 @@ monitor.
 Thunder
 =======
 
-The Skyline Thunder app monitors the basic Skyline internals and is a WORK IN
-PROGRESS.  See the `Thunder <thunder/index.html>`__ section.
+The Skyline Thunder app monitors the basic Skyline internals.  See the
+`Thunder <thunder/index.html>`__ section.

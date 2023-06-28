@@ -13,7 +13,7 @@ import socket
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
 # bandit [B403:blacklist] Consider possible security implications associated
 # with pickle module.  These have been considered.
-import pickle  # nosec
+import pickle  # nosec B403
 
 import struct
 import shutil
@@ -215,7 +215,7 @@ class UploadedDataWorker(Process):
 
             # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
             # Better handle multiple workers
-            sleep_for = random.uniform(0.1, 1.5)
+            sleep_for = random.uniform(0.1, 1.5)  # nosec B311
             sleep(sleep_for)
 
             try:
@@ -232,7 +232,7 @@ class UploadedDataWorker(Process):
                 # Better handle multiple workers
                 # logger.info('uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds')
                 # sleep(30)
-                sleep_for = random.uniform(0.1, 1.5)
+                sleep_for = random.uniform(0.1, 1.5)  # nosec B311
                 logger.info('uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds and some random %s seconds' % str(sleep_for))
                 sleep((30 + sleep_for))
                 continue

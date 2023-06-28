@@ -6,6 +6,8 @@ import os
 from os import kill, getpid
 import traceback
 from sqlalchemy.sql import select
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import settings
 from skyline_functions import (
@@ -48,6 +50,8 @@ class Cloudbursts(Thread):
     cloudburst that have been identified by significant changepoints using the
     m66 algorithm.
     """
+
+    #### NOT USED ####
 
     def __init__(self, parent_pid):
         """
@@ -185,7 +189,11 @@ class Cloudbursts(Thread):
                 if cloudburst_from_timestamp == working_from_timestamp:
                     metric_id = new_cloudbursts[cloudburst_id]['metric_id']
                     # base_name = base_name_from_metric_id(skyline_app, metric_id, False)
-                    base_name = get_base_name_from_metric_id(skyline_app, metric_id, False)
+                    # @modified 20230116 - Bug #4816: Handle error in sqlalchemy change
+                    #                      Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Removed False argument
+                    base_name = get_base_name_from_metric_id(skyline_app, metric_id)
                     source_metrics.append(base_name)
             continue
 
@@ -210,7 +218,9 @@ class Cloudbursts(Thread):
                         source_metric,
                         base_name,
                     ]
-                    current_metrics_timeseries = source_metrics_timeseries.copy()
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # current_metrics_timeseries = source_metrics_timeseries.copy()
+                    current_metrics_timeseries = copy.deepcopy(source_metrics_timeseries)
                     timeseries = []
                     for r_base_name in metrics:
                         if r_base_name == source_metric:
@@ -290,7 +300,9 @@ class Cloudbursts(Thread):
                 sorted_related_metrics = sorted(unsorted_related_metrics, key=lambda x: x[1], reverse=True)
                 source_df = timeseries_to_datetime_indexed_df(skyline_app, metrics_timeseries[source_metric]['timeseries'], False)
                 for base_name, ppscores in sorted_related_metrics:
-                    current_metrics_timeseries = source_metrics_timeseries.copy()
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # current_metrics_timeseries = source_metrics_timeseries.copy()
+                    current_metrics_timeseries = copy.deepcopy(source_metrics_timeseries)
                     x_timeseries = []
                     x = []
                     y_timeseries = []

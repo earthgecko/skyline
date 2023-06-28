@@ -1,3 +1,6 @@
+"""
+listen.py
+"""
 import socket
 from os import kill, getpid
 try:
@@ -6,7 +9,6 @@ except ImportError:
     from queue import Full
 from multiprocessing import Process
 from struct import Struct, unpack
-from msgpack import unpackb
 import sys
 from time import time, sleep
 import traceback
@@ -14,8 +16,17 @@ import traceback
 import logging
 import os.path
 from os import remove as os_remove
+
+from msgpack import unpackb
+
 import settings
-from skyline_functions import send_graphite_metric
+# @modified 20220726 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# Moved send_graphite_metric
+# from skyline_functions import send_graphite_metric
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
 
 parent_skyline_app = 'horizon'
 child_skyline_app = 'listen'
@@ -58,10 +69,10 @@ if python_version == 3:
 try:
     # @modified 20170913 - Task #2160: Test skyline with bandit
     # Added nosec to exclude from bandit tests
-    import cPickle as pickle  # nosec
+    import cPickle as pickle  # nosec B403
     USING_CPICKLE = True
 except:
-    import pickle  # nosec
+    import pickle  # nosec B403
     USING_CPICKLE = False
 
 # @added 20191016 - Task #3278: py3 handle bytes and not str in pickles
@@ -99,9 +110,9 @@ if USING_CPICKLE:
             #                      Branch #3262: py3
             # pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec
             if python_version == 2:
-                pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec
+                pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec B301
             if python_version == 3:
-                pickle_obj = pickle.Unpickler(BytesIO(pickle_string))  # nosec
+                pickle_obj = pickle.Unpickler(BytesIO(pickle_string))  # nosec B301
 
             pickle_obj.find_global = cls.find_class
             return pickle_obj.load()
@@ -138,7 +149,7 @@ class Listen(Process):
     """
     The listener is responsible for listening on a port.
     """
-    def __init__(self, port, queue, parent_pid, type="pickle"):
+    def __init__(self, port, queue, parent_pid, d_type="pickle"):
         super(Listen, self).__init__()
         try:
             self.ip = settings.HORIZON_IP
@@ -150,7 +161,7 @@ class Listen(Process):
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
-        self.type = type
+        self.d_type = d_type
 
         # Use the safe unpickler that comes with carbon rather than standard python pickle/cpickle
         self.unpickler = SafeUnpickler
@@ -226,7 +237,7 @@ class Listen(Process):
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
             logger.warning('warning :: parent or current process dead')
-            exit(0)
+            sys.exit(0)
 
     def listen_pickle(self):
         """
@@ -291,7 +302,7 @@ class Listen(Process):
 #                                            'skyline.horizon.' + SERVER_METRIC_PATH + 'pickle_chunks_dropped',
 #                                            chunks_dropped)
                                         send_metric_name = '%s.pickle_chunks_dropped' % skyline_app_graphite_namespace
-                                        send_graphite_metric(skyline_app, send_metric_name, chunks_dropped)
+                                        send_graphite_metric(self, skyline_app, send_metric_name, chunks_dropped)
                                         chunk[:] = []
 
                     except Exception as e:
@@ -356,7 +367,7 @@ class Listen(Process):
                                 '%s :: UDP queue is full, dropping %s datapoints'
                                 % (skyline_app, chunks_dropped))
                             send_metric_name = '%s.udp_chunks_dropped' % skyline_app_graphite_namespace
-                            send_graphite_metric(skyline_app, send_metric_name, chunks_dropped)
+                            send_graphite_metric(self, skyline_app, send_metric_name, chunks_dropped)
                             chunk[:] = []
 
             except Exception as e:
@@ -375,7 +386,6 @@ class Listen(Process):
                 os_remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -394,15 +404,14 @@ class Listen(Process):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
         logger.info('%s :: started listener' % skyline_app)
 
-        if self.type == 'pickle':
+        if self.d_type == 'pickle':
             self.listen_pickle()
-        elif self.type == 'udp':
+        elif self.d_type == 'udp':
             self.listen_udp()
         else:
             logger.error('%s :: unknown listener format' % skyline_app)

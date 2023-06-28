@@ -105,15 +105,15 @@ dygraph-1.1.1 */
         var src = PANORAMA_GRAPH_URL + '/render/?width=1400&from=' + fetch_from_timestamp + '&until=' + fetch_until_timestamp + '&target=' + name
 
         // Add a space after the metric name to make each unique
-        to_append = "<div class='sub'><a target='_blank' href='" + src + "'><div class='anomaly_id'>" + anomaly_id + " </div></a>&nbsp;&nbsp;"
-        to_append += "<div class='metric_name'>" + name + "</div>";
+        to_append = "<div class='container-fluid'><div class='sub'><a target='_blank' href='" + src + "'><div class='anomaly_id'>" + anomaly_id + " </div></a>&nbsp;&nbsp;"
+        to_append += "<div class='metric_name'><smallcode>" + name + "</smallcode></div>";
         to_append += "<div class='selected_anomaly_id'>" + parseInt(metric[0]) + "</div>";
         to_append += "<div class='count'>" + parseInt(metric[2]) + "</div>";
         to_append += "<div class='from_timestamp'>" + from_timestamp + "</div>";
         to_append += "<div class='until_timestamp'>" + until_timestamp + "</div>";
         to_append += "<div class='full_duration'>" + full_duration + "</div>";
         to_append += "<div class='created_date'>" + created_date + "</div>";
-        to_append += "<div class='time_shift'>" + time_shift + "</div>";
+        to_append += "<div class='time_shift'>" + time_shift + "</div></div>";
         $('#metrics_listings').append(to_append);
     }
 

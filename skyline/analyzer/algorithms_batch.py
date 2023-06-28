@@ -3,6 +3,7 @@ import logging
 from time import time
 from os import getpid
 from timeit import default_timer as timer
+import copy
 
 import pandas
 import numpy as np
@@ -49,6 +50,20 @@ if CUSTOM_ALGORITHMS:
         from custom_algorithms import run_custom_algorithm_on_timeseries
     except:
         run_custom_algorithm_on_timeseries = None
+    # @added 20230616 - Feature #3566: custom_algorithms
+    # Filter out only the ones in which analyzer is
+    # declared in use_with
+    # @added 20230616 - Feature #3566: custom_algorithms
+    # Filter out only the ones in which analyzer is
+    # declared in use_with
+    ASSIGNED_CUSTOM_ALGORITHMS = {}
+    for custom_algorithm in CUSTOM_ALGORITHMS:
+        try:
+            if 'analyzer' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
+                ASSIGNED_CUSTOM_ALGORITHMS[custom_algorithm] = copy.deepcopy(CUSTOM_ALGORITHMS[custom_algorithm])
+        except:
+            pass
+    CUSTOM_ALGORITHMS = copy.deepcopy(ASSIGNED_CUSTOM_ALGORITHMS)
 
 # @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
 #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
@@ -221,13 +236,20 @@ def first_hour_average(timeseries, use_full_duration):
         # Calculate the "equivalent" of the last hour and handle daily frequency
         # data
         # last_hour_threshold = time() - (use_full_duration - 3600)
-        last_hour_threshold = timeseries[-1][0] - (use_full_duration - 3600)
+        # @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution
+        # last_hour_threshold = timeseries[-1][0] - (use_full_duration - 3600)
+        last_hour_threshold = timeseries[-1][0] - use_full_duration
+
         # Handle daily data
         resolution = (timeseries[-1][0] - timeseries[-2][0])
         if resolution > 80000 and resolution < 90000:
             last_hour_threshold = timeseries[-1][0] - ((resolution * 7) - resolution)
 
-        series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        # @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution
+        # series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        last_hour_threshold_end = last_hour_threshold + 3600
+        series = pandas.Series([x[1] for x in timeseries if x[0] > last_hour_threshold and x[0] < last_hour_threshold_end])
+
         mean = (series).mean()
         stdDev = (series).std()
         # @modified 20200904 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS

@@ -156,7 +156,11 @@ def determine_data_frequency(current_skyline_app, timeseries, log=False):
         # Handle the slight variances that occur in real time
         # metric streams
         if metric_resolution and metric_resolution != 60:
-            if metric_resolution in range(51, 69):
+            # @modified 20230223 - Feature #3870: metrics_manager - check_data_sparsity
+            # Set to a sensible resolution because python protobuf remote_pb2 for Prometheus remote_write does
+            # not serialise 0s for gauges ...
+            # if metric_resolution in range(51, 69):
+            if metric_resolution in range(1, 69):
                 metric_resolution = 60
                 if log:
                     current_logger.info('%s :: %s :: resolution in range(51, 69) - resolution adjusted to %s' % (

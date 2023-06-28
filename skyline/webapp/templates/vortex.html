@@ -1,0 +1,255 @@
+{% extends "layout.html" %}
+{% block body %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/vortex">Vortex</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Analysis</span> <span class="re">data</span></li>
+    </div>
+	</ol>
+
+{% if results %}
+  <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">analysis ::</span></span> results</h4>
+{% else %}
+  <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">analysis ::</span></span> submit data</h4>
+{% endif %}
+
+  This Vortex page is a UI interface to posting data to the <code>/flux/vortex</code>, it allows you to
+  submit a metric timeseries and analyse it with the algorithms selected.  For detailed information on
+  Skyline Vortex see https://earthgecko-skyline.readthedocs.io/en/latest/vortex.html
+  <br>
+  The metric and timeseries data can be local to Skyline or any arbitrary timeseries csv.
+  You can analyse local Skyline metrics and check the performance and output of the various algorithms on an adhoc basis.
+  This can be done without trigging anomalies or Ionosphere processing, however those can be done too.
+  If a metric is a local metric, specify the metric name and the local data source to use.
+  <br>
+  The output from the analysis will be saved in a normal Ionosphere training data page for review, optionally you can request json output
+  and the results will be output in json format and returned directly, just like a normal skyline/flux/vortex request would do,
+  with the addition of a training data page URL appended to the results data.
+  <br>
+
+{% if results %}
+  <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#process_options">Show process options</button>
+  <div id="process_options" class="collapse">
+{% else %}
+  <div id="process_options">
+{% endif %}
+    <form action="vortex" method=post enctype=multipart/form-data>
+	  <table class="table table-hover">
+	    <thead>
+	      <tr>
+	        <th>Option</th>
+	        <th>value</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+	        <td>Process metrics</td>
+	        <td><select name="process_metric">
+            <option value="true">true</option>
+          </select></td>
+	      </tr>
+	      <tr>
+	        <td>metric</td>
+	        <td><input type="text" name="metric" value="" />  [<code>required</code>]</td>
+	      </tr>
+	      <tr>
+	        <td>data source</td>
+	        <td><select name="data_source">
+            <option value="graphite">graphite</option>
+            <option value="victoriametrics">victoriametrics</option>
+            <option value="redis">redis</option>
+            <option value="training_data">training_data</option>
+            <option value="csv">csv</option>
+          </select>  [<code>required</code>]</td>
+	      </tr>
+	      <tr>
+	        <td>training_data_json</td>
+	        <td><input type="text" name="training_data_json" value="" /> [optional] for data_source type training_data, the full path to training_data or saved trianing data json, if data_source is set to training_data</td>
+	      </tr>
+	      <tr>
+          <td>csv file</td>
+          <td><input type="file" name="csv_file" />  [optional] for data_source type csv only</td>
+	      </tr>
+	      <tr>
+          <td>from_timestamp</td>
+          <td><input type="number" name="from_timestamp" value="" /> [<code>required</code>]  unix timestamp (if not provided defaults to -7days) - (<strong>optional</strong> if a csv or training_data data source is used)</td>
+	      </tr>
+	      <tr>
+          <td>until_timestamp</td>
+          <td><input type="number" name="until_timestamp" value="" /> [<code>required</code>]   unix timestamp (if not provided defaults to the current timestamp, e.g. now) - (<strong>optional</strong> if a csv or training_data data source is used)</td>
+	      </tr>
+	      <tr>
+          <td>run_algorithms</td>
+          <td>
+          Tick the algorithms you wish to run against the timeseries.  The values populated in the parameters fields
+          are the default values for the algorithm.  Only consider changing the <code>anomaly_window</code> value, unless
+          you wish to evaluate changes made to the default parameters for the algorithm to see how the different hyperparameters
+          affect the algorithm performance.
+          <br>
+          The <code>anomaly_window</code> value specifies how many of the last data points should be considered when determining
+          if the metric is anomalous.  Only the last <code>anomaly_window</code> data points in the timeseries will be used to
+          determine if the metric is anomalous.  The algorithms (except <code>sigma</code>) will still score every data point
+          as anomalous or not, but the metric will only be judged as anomalous on the last <code>anomaly_window</code> data points.
+          <br>
+          Whether the metric is anomalous or not will only be based on if any of the last <code>anomaly_window</code> data points
+          being anomalous.
+          <br>
+  {% for algorithm in vortex_algorithms %}
+            <input type="checkbox" id="{{ algorithm }}" name="{{ algorithm }}" value="{{ algorithm }}"> <strong>{{ algorithm }}</strong> ::
+    {% for parameter in vortex_algorithms[algorithm]['algorithm_parameters'] %}
+      {% set value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
+        {% if parameter == 'return_results' %}
+	      <input type="hidden" name="{{ algorithm }}_{{ parameter }}" value="true">
+        {% elif parameter == 'realtime_analysis' %}
+	      <input type="hidden" name="{{ algorithm }}_{{ parameter }}" value="false">
+        {% elif parameter == 'feature' and algorithm == 'macd' %}
+	      {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="macd">macd</option>
+          <option value="macd_signal">macd_signal</option><option value="macd_histogram">macd_histogram</option></select>
+        {% else %}
+        {{ parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}" value="{{ value }}" step="any" size="5" />
+      {% endif %}
+    {% endfor %}
+    {% if algorithm == 'mstl' %}
+    <strong>the mstl algorithm is very long running and not suited for realtime analysis</strong>
+    {% endif %}
+
+            <br>
+  {% endfor %}
+          </td>
+        </tr>
+	      <tr>
+	        <td>consensus</td>
+	        <td>
+          Define what algorithms or groups of algorithms should trigger to signify the data as anomalous.  This is applied to the
+          <code>anomaly_window</code> <strong>only</strong>.  Replace the example with your desired consensus.
+          <br>
+          Each consensus group defined must be a list, even if it is one algorithm, some examples:
+          <br>
+          <code>[['spectral_residual','lof'],['pca']]</code> in this example the metric would be considered anomalous if both <code>spectral_residual</code> and <code>lof</code> returned True or if <code>pca</code> returned True.
+          <br>
+          <code>[['lof'],['pca']]</code> in this example the metric would be considered anomalous if <code>lof</code> returned True or if <code>pca</code> returned True.
+          <br>
+          If you want ALL the selected algorithms to run, just set consensus to the last algorithm you ticked in run_algorithms input above for example if your last algorithm selected above was
+          pca then setting consensus to <code>[['pca']]</code> will result in all the selected algorithms running.
+          <br>
+          <input type="text" size="100" name="consensus" value="[['default'],['some_algo','another_algo'],['default','another_algo']]" />  [<code>required</code>] - an example is shown, please define the consensus you would like.
+          </td>
+	      </tr>
+	      <tr>
+	        <td>consensus_count</td>
+          <td>
+          As an addition to the consensus method above, you can choose a consensus_count method on which to determine anomalies.
+          The consensus_count method works similar to the normal Analyzer method, if a consensus_count number of algorithms trigger as
+          anomalous for a data point it will be classed as anomalous.  If this is set to anything > 0 Check all consensuses (below) will
+          automatically be enabled.
+          <br>
+	        <input type="number" name="consensus_count" value="0" />[optional]</td>
+	      </tr>
+	      <tr>
+	        <td>Check all consensuses</td>
+          Vortex automatically exits once a consensus is achieved, if you want to check all consensuses set this to true.
+	        <td><select name="check_all_consensuses">
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select>  [<code>required</code>]</td>
+	      </tr>
+	      <tr>
+	        <td>No downsample</td>
+          Vortex automatically downsamples data longer than 24 hours to a resolution of 600 seconds and 24 hour data to 60 seconds.
+          If you do not want the data downsampled then specifically set this value to true.
+	        <td><select name="no_downsample">
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select>  [<code>required</code>]</td>
+	      </tr>
+	      <tr>
+	        <td>Override 7 day limit</td>
+          Vortex automatically trims timeseries data to 24 hours or 7 days.  This is so that training data from the Vortex analysis can
+          be created at a suitable length to be used to training with.  If you would like to override this limit and says analyse 30 days
+          or data set this to true.  However training data will not be valid.
+	        <td><select name="override_7_day_limit">
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select>  [<code>required</code>]</td>
+	      </tr>
+        <tr>
+	        <td>Reference</td>
+	        <td><input type="text" name="reference" value="none" />  [optional] - A reference string or label
+          </td>
+	      </tr>
+	      <tr>
+	        <td>Return json</td>
+	        <td><select name="json_output">
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select></td>
+	      </tr>
+      </tbody>
+    </table>
+    <br>
+    <input type="submit" value="Process metric">
+    </form>
+  </div>
+  <br>
+
+{% if results %}
+  <h4><span class="logo"><span class="sky">Result ::</span> <span class="re">anomalous </span></span> <strong>{{ results['results']['anomalous'] }}</strong></h4>
+
+  <strong>Algorithm results</strong> - for the anomaly window<br>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Algorithm</th>
+        <th>anomaly_window</th>
+        <th>anomalous</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% for algo in results['results']['algorithms_run'] %}
+    {% set result = results['results']['algorithms'][algo]['anomalous'] %}
+    {% set unreliable = results['results']['algorithms'][algo]['unreliable'] %}
+    {% set anomaly_window = results['algorithms'][algo]['algorithm_parameters']['anomaly_window'] %}
+      <tr>
+        <td>{{ algo }}</td>
+        <td>last {{ anomaly_window }} data points</td>
+      {% if result|string == 'True' %}
+        <td><span class="logo"><span class="re">{{ result }}</span></span></td>
+      {% elif result|string == 'False' %}
+        <td><span class="logo"><span class="sky">{{ result }}</span></span></td>
+      {% else %}
+        {% if unreliable == True %}
+        <td><strong>{{ result }}</strong> <span class="logo"><span class="re">Unreliable results</span></span></td>
+        {% else %}
+        <td><strong>{{ result }}</strong></td>
+        {% endif %}
+      {% endif %}
+      </tr>
+  {% endfor %}
+    </tbody>
+  </table>
+
+  <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data </span></span> URL</h4>
+  <br>
+  <a target='_blank' href="{{ results['training_data_url'] }}">{{ results['training_data_url'] }}</a> (opens in new tab)
+  <br>
+
+  <h4><span class="logo"><span class="sky">Algorithm ::</span> <span class="re">graphs</span></span></h4>
+  <br>
+
+  {% if results['results']['image_files'] %}
+    {% for image in results['results']['image_files'] %}
+      {% if 'vortex.algorithm.' in image %}
+        <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  <p style="clear: both;">
+{% endif %}
+
+{% if results %}
+  <h4><span class="logo"><span class="sky">Results ::</span> <span class="re">{{ metric }}</span></span></h4>
+<code>{{ results }}</code>
+{% endif %}
+
+{% endblock %}

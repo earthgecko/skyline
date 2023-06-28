@@ -4,6 +4,9 @@ matched_or_regexed_in_list
 import logging
 import traceback
 import re
+# @added 20221025 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_labelled_metric_dict import get_labelled_metric_dict
 
 
 # @added 20200423 - Feature #3512: matched_or_regexed_in_list function
@@ -62,7 +65,23 @@ def matched_or_regexed_in_list(current_skyline_app, base_name, match_list, debug
     matched_by = {}
 
     try:
+
         base_name_namespace_elements = base_name.split('.')
+
+        # @added 20220801 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # This a simple representation of a labelled metric name as dotted
+        # elements.  It may not be ideal long term but does the job for now.
+        if '_tenant_id' in base_name:
+            try:
+                metric_dict = get_labelled_metric_dict(current_skyline_app, base_name)
+                base_name_namespace_elements = []
+                base_name_namespace_elements.append(metric_dict['metric'])
+                base_name_namespace_elements = base_name_namespace_elements + list(metric_dict['labels'].keys())
+                base_name_namespace_elements = base_name_namespace_elements + list(metric_dict['labels'].values())
+            except:
+                base_name_namespace_elements = base_name.split('.')
+
         for match_namespace in match_list:
 
             last_match_namespace = match_namespace
@@ -112,6 +131,10 @@ def matched_or_regexed_in_list(current_skyline_app, base_name, match_list, debug
                         if debug_matched_or_regexed_in_list:
                             current_logger.info('%s - matched_or_regexed_in_list - namespace - %s matched by regex of %s' % (
                                 current_skyline_app, base_name, match_namespace))
+                        # @added 20220801 - Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        # break on regex match
+                        break
                 except:
                     matched = False
 

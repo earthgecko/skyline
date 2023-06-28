@@ -1,8 +1,12 @@
+"""
+luminosity.py
+"""
 from __future__ import division
 import logging
 import os
 from os import kill, getpid
 from sys import version_info
+from sys import exit as sys_exit
 from ast import literal_eval
 
 # @modified 20191115 - Branch #3262: py3
@@ -20,20 +24,51 @@ from threading import Thread
 from multiprocessing import Process
 # from redis import StrictRedis
 import traceback
-import mysql.connector
+# @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                      Task #4778: v4.0.0 - update dependencies
+# Use sqlalchemy rather than string-based query construction
+# Deprecated mysql_insert so mysql.connector no longer needed
+# import mysql.connector
 from pymemcache.client.base import Client as pymemcache_Client
+
+# @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import select
 
 import settings
 from skyline_functions import (
-    mysql_select, send_graphite_metric,
+    # @modified 20220726 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # mysql_select, send_graphite_metric,
+    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Deprecated mysql_select, use sqlalchemy rather than string-based query construction
+    # mysql_select,
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded)
 
-from database import get_engine
+
+# @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                      Task #4778: v4.0.0 - update dependencies
+# Added missing engine_disposal (responsable for aborted_connections?) and
+# anomalies_table_meta, metrics_table_meta and luminosity_table_meta
+from database import (
+    get_engine, engine_disposal, anomalies_table_meta, metrics_table_meta,
+    luminosity_table_meta)
+
 # from process_correlations import *
+
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
+# @added 20220810 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 
 skyline_app = 'luminosity'
 skyline_app_logger = '%sLog' % skyline_app
@@ -152,7 +187,10 @@ class Luminosity(Thread):
         do that.
 
         """
-        super(Luminosity, self).__init__()
+        # @modified 20230107 - Task #4778: v4.0.0 - update dependencies
+        # Changed to Python 3 style super () without arguments
+        # super(Luminosity, self).__init__()
+        super().__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
@@ -185,7 +223,12 @@ class Luminosity(Thread):
         # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
         # self.metrics_checked_for_correlation = Manager().list()
         # self.runtimes = Manager().list()
-        self.mysql_conn = mysql.connector.connect(**config)
+        # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # Deprecated mysql_insert
+        # self.mysql_conn = mysql.connector.connect(**config)
+
         if settings.MEMCACHE_ENABLED:
             self.memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
         else:
@@ -202,56 +245,60 @@ class Luminosity(Thread):
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
             logger.warning('warning :: parent or current process dead')
-            exit(0)
+            sys_exit(0)
 
-    def mysql_insert(self, insert):
-        """
-        Insert data into mysql table
-
-        :param insert: the insert string
-        :type insert: str
-        :return: int
-        :rtype: int or boolean
-
-        - **Example usage**::
-
-            query = 'insert into host (host) VALUES (\'this_host\')'
-            result = self.mysql_insert(query)
-
-        .. note::
-            - If the MySQL query fails a boolean will be returned not a tuple
-                * ``False``
-                * ``None``
-
-        """
-
-        try:
-            cnx = mysql.connector.connect(**config)
-        except mysql.connector.Error as err:
-            logger.error('error :: mysql error - %s' % str(err))
-            logger.error('error :: failed to connect to mysql')
-            raise
-
-        if cnx:
-            try:
-                cursor = cnx.cursor()
-                cursor.execute(insert)
-                inserted_id = cursor.lastrowid
-                # Make sure data is committed to the database
-                cnx.commit()
-                cursor.close()
-                cnx.close()
-                return inserted_id
-            except mysql.connector.Error as err:
-                logger.error('error :: mysql error - %s' % str(err))
-                logger.error('Failed to insert record')
-                cnx.close()
-                raise
-        else:
-            cnx.close()
-            return False
-
-        return False
+    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    # Deprecated mysql_insert
+    # def mysql_insert(self, insert):
+    #     """
+    #     Insert data into mysql table
+    #
+    #     :param insert: the insert string
+    #     :type insert: str
+    #     :return: int
+    #     :rtype: int or boolean
+    #
+    #     - **Example usage**::
+    #
+    #         query = 'insert into host (host) VALUES (\'this_host\')'
+    #         result = self.mysql_insert(query)
+    #
+    #     .. note::
+    #         - If the MySQL query fails a boolean will be returned not a tuple
+    #             * ``False``
+    #             * ``None``
+    #
+    #     """
+    #
+    #     try:
+    #         cnx = mysql.connector.connect(**config)
+    #     except mysql.connector.Error as err:
+    #         logger.error('error :: mysql error - %s' % str(err))
+    #         logger.error('error :: failed to connect to mysql')
+    #         raise
+    #
+    #     if cnx:
+    #         try:
+    #             cursor = cnx.cursor()
+    #             cursor.execute(insert)
+    #             inserted_id = cursor.lastrowid
+    #             # Make sure data is committed to the database
+    #             cnx.commit()
+    #             cursor.close()
+    #             cnx.close()
+    #             return inserted_id
+    #         except mysql.connector.Error as err:
+    #             logger.error('error :: mysql error - %s' % str(err))
+    #             logger.error('Failed to insert record')
+    #             cnx.close()
+    #             raise
+    #     else:
+    #         cnx.close()
+    #         return False
+    #
+    #     return False
 
     # @added 20210323 - Feature #3642: Anomaly type classification
     def classify_anomalies(self, i, classify_anomalies_set, start_timestamp, max_run_seconds):
@@ -276,13 +323,13 @@ class Luminosity(Thread):
         ran = False
 
         try:
-            from classify_anomalies import classify_anomalies
+            from classify_anomalies import classify_anomalies as luminosity_classify_anomalies
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: importing classify_anomalies')
 
         try:
-            ran = classify_anomalies(i, classify_anomalies_set, start_timestamp, max_run_seconds)
+            ran = luminosity_classify_anomalies(i, classify_anomalies_set, start_timestamp, max_run_seconds)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: running classify_anomalies')
@@ -343,24 +390,30 @@ class Luminosity(Thread):
             logger.error(traceback.format_exc())
             logger.error('error :: importing process_correlations')
 
-        def get_an_engine():
-            try:
-                engine, log_msg, trace = get_engine(skyline_app)
-                return engine, log_msg, trace
-            except:
-                logger.error(traceback.format_exc())
-                log_msg = 'error :: failed to get MySQL engine in spin_process'
-                logger.error('error :: failed to get MySQL engine in spin_process')
-                return None, log_msg, trace
+        # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Deprecated use database.get_engine
+        # def get_an_engine():
+        #     try:
+        #         engine, log_msg, trace = get_engine(skyline_app)
+        #         return engine, log_msg, trace
+        #     except:
+        #         logger.error(traceback.format_exc())
+        #         log_msg = 'error :: failed to get MySQL engine in spin_process'
+        #         logger.error('error :: failed to get MySQL engine in spin_process')
+        #         return None, log_msg, trace
 
-        def engine_disposal(engine):
-            if engine:
-                try:
-                    engine.dispose()
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: calling engine.dispose()')
-            return
+        # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Deprecated use database.get_engine
+        # def engine_disposal(engine):
+        #     if engine:
+        #         try:
+        #             engine.dispose()
+        #         except:
+        #             logger.error(traceback.format_exc())
+        #             logger.error('error :: calling engine.dispose()')
+        #     return
 
         if settings.MEMCACHE_ENABLED:
             try:
@@ -385,21 +438,8 @@ class Luminosity(Thread):
             logger.error('error :: processing correlations')
             return False
 
-        # @added 20180414 - Bug #2352: Luminosity no metrics MySQL error
-        # Do not query with an empty string
-        if not correlated_metrics:
-            logger.info('no correlations found for %s anomaly id %s' % (
-                base_name, str(anomaly_id)))
-            return False
-        else:
-            logger.info('%s correlations found for %s anomaly id %s' % (
-                str(len(correlated_metrics)), base_name, str(anomaly_id)))
-
-        # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
-        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-        # self.metrics_checked_for_correlation.append(metrics_checked_for_correlation)
-        # self.runtimes.append(runtime)
-        redis_set = 'luminosity.correlations'
+        data = str(metrics_checked_for_correlation)
+        redis_set = 'luminosity.metrics_checked_for_correlation'
         data = str(metrics_checked_for_correlation)
         try:
             self.redis_conn.sadd(redis_set, data)
@@ -416,27 +456,126 @@ class Luminosity(Thread):
             logger.error('error :: failed to add %s to Redis set %s' % (
                 str(data), str(redis_set)))
 
+        # @added 20180414 - Bug #2352: Luminosity no metrics MySQL error
+        # Do not query with an empty string
+        if not correlated_metrics:
+            logger.info('no correlations found for %s anomaly id %s' % (
+                base_name, str(anomaly_id)))
+            return False
+
+        logger.info('%s correlations found for %s anomaly id %s' % (
+            str(len(correlated_metrics)), base_name, str(anomaly_id)))
+
+        # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
+        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+        # self.metrics_checked_for_correlation.append(metrics_checked_for_correlation)
+        # self.runtimes.append(runtime)
+        redis_set = 'luminosity.correlations'
+        data = str(len(correlated_metrics))
+        try:
+            self.redis_conn.sadd(redis_set, data)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to add %s to Redis set %s' % (
+                str(data), str(redis_set)))
+
+        correlated_metrics_list = []
+
+        # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        metrics_strs = []
+
         metrics_str = ''
         for metric_name in correlated_metrics:
+            # @added 20220810 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if metric_name.startswith('labelled_metrics.'):
+                try:
+                    metric = get_base_name_from_labelled_metrics_name(skyline_app, metric_name)
+                except Exception as err:
+                    logger.error('error :: get_base_name_from_labelled_metrics_name failed on %s - %s' % (
+                        str(metric_name), err))
+                if metric:
+                    try:
+                        metric_id_str = metric_name.replace('labelled_metrics.', '', 1)
+                        metric_id = int(float(metric_id_str))
+                        correlated_metrics_list.append([metric_id, str(metric), metric_name])
+                    except Exception as err:
+                        logger.error('error :: failed to add %s, %s to correlated_metrics_list - %s' % (
+                            str(metric_id), str(metric), err))
+                continue
+
             if metrics_str == '':
                 new_metrics_str = "'%s'" % metric_name
+                # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                metrics_strs.append(metric_name)
             else:
                 new_metrics_str = "%s,'%s'" % (metrics_str, metric_name)
+                # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                metrics_strs.append(metric_name)
             metrics_str = new_metrics_str
         # metrics_str
 
-        query = 'SELECT id,metric FROM metrics WHERE metric in (%s)' % str(metrics_str)
+        # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        engine = None
         try:
-            results = mysql_select(skyline_app, query)
-        except:
+            engine, fail_msg, trace = get_engine(skyline_app)
+            if fail_msg != 'got MySQL engine':
+                logger.error('error :: could not get a MySQL engine fail_msg - %s' % str(fail_msg))
+            if trace != 'none':
+                logger.error('error :: could not get a MySQL engine trace - %s' % str(trace))
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: querying MySQL - SELECT id,metric FROM metrics WHERE metric in (%s)' % str(metrics_str))
-            return False
+            logger.error('error :: could not get a MySQL engine - %s' % str(err))
 
-        correlated_metrics_list = []
-        for metric_id, metric in results:
-            correlated_metrics_list.append([int(metric_id), str(metric)])
-        logger.info('number of metric ids determined from the metrics tables - %s' % str(len(correlated_metrics_list)))
+        if metrics_str != '':
+
+            # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                metrics_table, fail_msg, trace = metrics_table_meta(skyline_app, engine)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get metrics_table meta - %s' % err)
+
+            # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # query = 'SELECT id,metric FROM metrics WHERE metric in (%s)' % str(metrics_str)
+
+            try:
+                # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # results = mysql_select(skyline_app, query)
+                stmt = select([metrics_table.c.id, metrics_table.c.metric], metrics_table.c.metric.in_(metrics_strs))
+                connection = engine.connect()
+                results = connection.execute(stmt)
+                for row in results:
+                    correlated_metrics_list.append([int(row['id']), row['metric'], None])
+                connection.close()
+
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # logger.error('error :: querying MySQL - SELECT id,metric FROM metrics WHERE metric in (%s)' % str(metrics_str))
+                logger.error('error :: querying metrics table for %s - %s' % (str(metrics_strs), err))
+                return False
+
+            # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Now interpolated above in results
+            # for metric_id, metric in results:
+            #     correlated_metrics_list.append([int(metric_id), str(metric), None])
+
+            logger.info('number of metric ids determined from the metrics tables - %s' % str(len(correlated_metrics_list)))
+
+        logger.info('total number of metric ids determined - %s' % str(len(correlated_metrics_list)))
 
         correlations_shifted_too_far = 0
         if sorted_correlations:
@@ -444,20 +583,47 @@ class Luminosity(Thread):
             if LOCAL_DEBUG or ENABLE_LUMINOSITY_DEBUG:
                 logger.debug('debug :: sorted_correlations :: %s' % str(sorted_correlations))
             luminosity_correlations = []
-            for metric, coefficient, shifted, shifted_coefficient in sorted_correlations:
-                for metric_id, metric_name in correlated_metrics_list:
-                    if metric == metric_name:
-                        if shifted < 2:
-                            luminosity_correlations.append([anomaly_id, int(metric_id), coefficient, shifted, shifted_coefficient])
-                        else:
-                            correlations_shifted_too_far += 1
+            try:
+                for metric, coefficient, shifted, shifted_coefficient in sorted_correlations:
+                    # for metric_id, metric_name in correlated_metrics_list:
+                    #     if metric == metric_name:
+                    for metric_id, metric_name, labelled_metric_name in correlated_metrics_list:
+                        if metric in [metric_name, labelled_metric_name]:
+                            if shifted < 2:
+                                luminosity_correlations.append([anomaly_id, int(metric_id), coefficient, shifted, shifted_coefficient])
+                            else:
+                                correlations_shifted_too_far += 1
+            except Exception as err:
+                logger.error('error :: spin_process :: iterating sorted_correlations: %s, err: %s' % (
+                    str(sorted_correlations), err))
+
             logger.info('number of correlations shifted too far - %s' % str(correlations_shifted_too_far))
             first_value_not_added = True
-            values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES '
+            # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES '
+            values_string = ''
 
             # @added 20180420 - Branch #2270: luminosity
             # Only try and insert if there are values present
             values_present = False
+
+            # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                luminosity_table, fail_msg, trace = luminosity_table_meta(skyline_app, engine)
+                if fail_msg != 'luminosity_table meta reflected OK':
+                    logger.error('error :: could not get luminosity_table_meta fail_msg - %s' % str(fail_msg))
+                if trace != 'none':
+                    logger.error('error :: could not get luminosity_table_meta trace - %s' % str(trace))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: luminosity_table_meta - %s' % str(err))
+
+            new_inserted_ids = []
+            luminosity_populated = False
 
             number_of_correlations_in_insert = 0
             for anomaly_id, metric_id, coefficient, shifted, shifted_coefficient in luminosity_correlations:
@@ -485,23 +651,61 @@ class Luminosity(Thread):
                                                    str(round(shifted_coefficient, 5)))
                 if first_value_not_added:
                     first_value_not_added = False
-                    values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES %s' % ins_values
+                    # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                   Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # values_string = 'INSERT INTO luminosity (id, metric_id, coefficient, shifted, shifted_coefficient) VALUES %s' % ins_values
+                    values_string = ''
                 else:
                     new_values_string = '%s,%s' % (values_string, ins_values)
                     values_string = new_values_string
+
+                # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Use sqlalchemy insert
+                try:
+                    connection = engine.connect()
+                    ins = luminosity_table.insert().values(
+                        id=int(anomaly_id),
+                        metric_id=int(metric_id),
+                        coefficient=round(coefficient, 5),
+                        shifted=shifted,
+                        shifted_coefficient=round(shifted_coefficient, 5))
+                    result = connection.execute(ins)
+                    connection.close()
+                    new_inserted_ids.append(anomaly_id)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add record to luminosity table for %s - %s' % (
+                        ins_values, err))
+
             new_values_string = '%s;' % values_string
             values_string = new_values_string
             # logger.info('debug insert string :: %s' % str(values_string))
             # 'INSERT INTO luminosity (anomaly_id, metric_id, coefficient, shifted, shifted_coefficient) VALUES (68882,619,1.0,0,1.0),...,(68882,489,1.0,0,1.0);'
             # Needs a mysql_insert not SQLAlchemy
-            luminosity_populated = False
-            if luminosity_correlations and values_present:
-                try:
-                    self.mysql_insert(values_string)
-                    luminosity_populated = True
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: MySQL insert - %s' % str(values_string))
+            # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Using sqlalchemy inserts deprecate mysql_insert
+            # luminosity_populated = False
+            # if luminosity_correlations and values_present:
+            #     try:
+            #         self.mysql_insert(values_string)
+            #         luminosity_populated = True
+            #     except:
+            #         logger.error(traceback.format_exc())
+            #         logger.error('error :: MySQL insert - %s' % str(values_string))
+            if new_inserted_ids:
+                luminosity_populated = True
+
+        # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Will this missing engine_disposal clear up the aborted_connections?
+        if engine:
+            engine_disposal(skyline_app, engine)
+
         if luminosity_populated:
             logger.info('%s correlations added to database for %s anomaly id %s' % (
                 str(number_of_correlations_in_insert), base_name, str(anomaly_id)))
@@ -523,7 +727,6 @@ class Luminosity(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -542,7 +745,6 @@ class Luminosity(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -668,20 +870,57 @@ class Luminosity(Thread):
                     else:
                         logger.info('memcache not enabled not checking for last_processed_anomaly_id key')
 
+                # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                engine = None
+                try:
+                    engine, fail_msg, trace = get_engine(skyline_app)
+                    if fail_msg != 'got MySQL engine':
+                        logger.error('error :: could not get a MySQL engine fail_msg - %s' % str(fail_msg))
+                    if trace != 'none':
+                        logger.error('error :: could not get a MySQL engine trace - %s' % str(trace))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not get a MySQL engine - %s' % str(err))
+
                 if not last_processed_anomaly_id:
-                    query = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
+
+                    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # query = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
+                    stmt = 'SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1'
+
                     results = None
                     try:
-                        results = mysql_select(skyline_app, query)
-                    except:
+                        # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Use sqlalchemy rather than string-based query construction
+                        # results = mysql_select(skyline_app, query)
+                        connection = engine.connect()
+                        results = connection.execute(stmt)
+                        for row in results:
+                            last_processed_anomaly_id = row['id']
+                            break
+                        connection.close()
+
+                    except Exception as err:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: MySQL quey failed - %s' % query)
-                    if results:
-                        try:
-                            last_processed_anomaly_id = int(results[0][0])
-                            logger.info('last_processed_anomaly_id found from DB - %s' % str(last_processed_anomaly_id))
-                        except:
-                            logger.error(traceback.format_exc())
+                        # logger.error('error :: MySQL quey failed - %s' % query)
+                        logger.error('error :: database quey failed - %s - %s' % (stmt, err))
+
+                    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # Now interpolated above
+                    # if results:
+                    #     try:
+                    #         last_processed_anomaly_id = int(results[0][0])
+                    #     except:
+                    #         logger.error(traceback.format_exc())
+                    if last_processed_anomaly_id:
+                        logger.info('last_processed_anomaly_id found from DB - %s' % str(last_processed_anomaly_id))
 
                         if last_processed_anomaly_id and settings.MEMCACHE_ENABLED:
                             if not memcache_last_processed_anomaly_id_data:
@@ -696,23 +935,58 @@ class Luminosity(Thread):
                                 except:
                                     logger.error('error :: failed to close memcache_client')
 
+                # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use the MetaData autoload rather than string-based query construction
+                try:
+                    anomalies_table, fail_msg, trace = anomalies_table_meta(skyline_app, engine)
+                    if fail_msg != 'anomalies_table meta reflected OK':
+                        logger.error('error :: could not get a MySQL engine fail_msg - %s' % str(fail_msg))
+                    if trace != 'none':
+                        logger.error('error :: could not get a MySQL engine trace - %s' % str(trace))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: anomalies_table_meta - %s' % str(err))
+
                 if not last_processed_anomaly_id:
                     # Check MySQL
                     now = int(time())
                     after = now - 600
+
                     # @modified 20210525 - https://github.com/earthgecko/skyline/pull/429
                     #                      Task #4102: Merge luminosity.PR429
                     # More efficient query, although it is only getting a few rows from the DB
                     # every little helps (thanks @ashemez)
                     # query = 'SELECT * FROM anomalies WHERE anomaly_timestamp > \'%s\'' % str(after)  # nosec
-                    query = 'SELECT id FROM anomalies WHERE anomaly_timestamp > \'%s\'' % str(after)  # nosec
+                    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # query = 'SELECT id FROM anomalies WHERE anomaly_timestamp > \'%s\'' % str(after)  # nosec
+                    process_anomaly_id = 0
+
                     results = None
                     try:
-                        results = mysql_select(skyline_app, query)
-                    except:
-                        logger.error('error :: MySQL quey failed - %s' % query)
-                    if results:
-                        process_anomaly_id = int(results[0][0])
+                        # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # Use sqlalchemy rather than string-based query construction
+                        # results = mysql_select(skyline_app, query)
+                        stmt = select(anomalies_table.c.id).where(anomalies_table.c.anomaly_timestamp > int(after))
+                        connection = engine.connect()
+                        results = connection.execute(stmt)
+                        for row in results:
+                            process_anomaly_id = row['id']
+                            break
+                        connection.close()
+                    except Exception as err:
+                        # logger.error('error :: MySQL quey failed - %s' % query)
+                        logger.error('error :: database quey failed determining new anomalies after timestamp - %s' % err)
+
+                    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # if results:
+                    #     process_anomaly_id = int(results[0][0])
+                    if process_anomaly_id:
                         logger.info('found new anomaly id to process from the DB - %s' % str(process_anomaly_id))
                         # Handle the first one
                         last_processed_anomaly_id = process_anomaly_id - 1
@@ -731,19 +1005,45 @@ class Luminosity(Thread):
                 # More efficient query, although it is only getting a few rows from the DB
                 # every little helps (thanks @ashemez)
                 # query = 'SELECT * FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
-                query = 'SELECT id FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
+                # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # query = 'SELECT id FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
+
                 results = None
                 try:
-                    results = mysql_select(skyline_app, query)
-                except:
-                    logger.error('error :: MySQL quey failed - %s' % query)
-                if results:
-                    try:
-                        process_anomaly_id = int(results[0][0])
-                        logger.info('found the next new anomaly id to process from the DB - %s' % str(process_anomaly_id))
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: from query - %s' % query)
+                    # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # results = mysql_select(skyline_app, query)
+                    stmt = select(anomalies_table.c.id).where(anomalies_table.c.id > last_processed_anomaly_id)
+                    connection = engine.connect()
+                    results = connection.execute(stmt)
+                    for row in results:
+                        process_anomaly_id = row['id']
+                        break
+                    connection.close()
+                except Exception as err:
+                    # logger.error('error :: MySQL quey failed - %s' % query)
+                    logger.error('error :: database query failed to determine process_anomaly_id - %s' % err)
+
+                # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                if engine:
+                    engine_disposal(skyline_app, engine)
+
+                # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # if results:
+                #     try:
+                #         process_anomaly_id = int(results[0][0])
+                #         logger.info('found the next new anomaly id to process from the DB - %s' % str(process_anomaly_id))
+                #     except:
+                #         logger.error(traceback.format_exc())
+                #         logger.error('error :: from query - %s' % query)
+                if process_anomaly_id:
+                    logger.info('found the next new anomaly id to process from the DB - %s' % str(process_anomaly_id))
                 else:
                     logger.info('no new anomalies in the anomalies table')
 
@@ -772,9 +1072,9 @@ class Luminosity(Thread):
                         classify_anomalies_set = {}
                         try:
                             classify_anomalies_set = self.redis_conn_decoded.smembers('luminosity.classify_anomalies')
-                        except:
+                        except Exception as err:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: from query - %s' % query)
+                            logger.error('error :: failed to determine classify_anomalies_set - %s' % err)
                         if len(classify_anomalies_set) > 0:
                             current_now = int(time())
                             classify_for = 19
@@ -796,7 +1096,7 @@ class Luminosity(Thread):
                             # Self monitor processes and terminate if any classify_anomalies
                             # that has run for too long
                             p_starts = time()
-                            while time() - p_starts <= classify_for:
+                            while time() - p_starts <= (classify_for + 2):
                                 if any(p.is_alive() for p in pids):
                                     # Just to avoid hogging the CPU
                                     sleep(.1)
@@ -821,7 +1121,10 @@ class Luminosity(Thread):
                             for p in pids:
                                 if p.is_alive():
                                     logger.info('stopping classify_anomalies - %s' % (str(p.is_alive())))
-                                    p.join()
+                                    try:
+                                        p.join()
+                                    except:
+                                        pass
                             logger.info('classify_anomalies - complete')
                             up_now = time()
                             # Report app up
@@ -913,12 +1216,14 @@ class Luminosity(Thread):
                         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
                         #                      Branch #3262: py3
                         # correlations = str(len(list(self.redis_conn.smembers('luminosity.correlations'))))
-                        correlations = str(len(list(self.redis_conn_decoded.smembers('luminosity.correlations'))))
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # correlations = str(len(list(self.redis_conn_decoded.smembers('luminosity.correlations'))))
+                        correlations = str(self.redis_conn_decoded.scard('luminosity.correlations'))
                     except:
                         correlations = '0'
                     logger.info('correlations       :: %s' % correlations)
                     send_metric_name = '%s.correlations' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, correlations)
+                    send_graphite_metric(self, skyline_app, send_metric_name, correlations)
 
                     # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     try:
@@ -926,8 +1231,11 @@ class Luminosity(Thread):
                         #                      Branch #3262: py3
                         # runtimes = list(self.redis_conn.smembers('luminosity.runtimes'))
                         runtimes = list(self.redis_conn_decoded.smembers('luminosity.runtimes'))
+                        if runtimes:
+                            runtimes = [float(x) for x in runtimes]
                     except:
-                        runtimes = []
+                        runtimes = [0]
+                    logger.info('runtimes       :: %s' % str(runtimes))
 
                     # @added 20180720 - Task #2462: Implement useful metrics for Luminosity
                     #                   Branch #2270: luminosity
@@ -947,19 +1255,22 @@ class Luminosity(Thread):
                         avg_runtime = '0'
                     logger.info('avg_runtime       :: %s' % str(avg_runtime))
                     send_metric_name = '%s.avg_runtime' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, str(avg_runtime))
+                    send_graphite_metric(self, skyline_app, send_metric_name, str(avg_runtime))
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))
                         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
                         #                      Branch #3262: py3
                         # metrics_checked_for_correlation = str(len(list(self.redis_conn.smembers('luminosity.metrics_checked_for_correlation'))))
-                        metrics_checked_for_correlation = str(len(list(self.redis_conn_decoded.smembers('luminosity.metrics_checked_for_correlation'))))
+                        # metrics_checked_for_correlation = str(len(list(self.redis_conn_decoded.smembers('luminosity.metrics_checked_for_correlation'))))
+                        metrics_checked_for_correlation = list(self.redis_conn_decoded.smembers('luminosity.metrics_checked_for_correlation'))
+                        metrics_checked_for_correlation = [int(x) for x in metrics_checked_for_correlation]
+                        metrics_checked_for_correlation = sum(metrics_checked_for_correlation)
                     except:
                         metrics_checked_for_correlation = '0'
                     logger.info('metrics_checked_for_correlation   :: %s' % metrics_checked_for_correlation)
                     send_metric_name = '%s.metrics_checked_for_correlation' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, metrics_checked_for_correlation)
+                    send_graphite_metric(self, skyline_app, send_metric_name, metrics_checked_for_correlation)
 
                     # @added 20210308 - Feature #3978: luminosity - classify_metrics
                     #                   Feature #3642: Anomaly type classification
@@ -980,7 +1291,7 @@ class Luminosity(Thread):
                         metrics_proceessed = sum(metrics_proceessed_counts)
                         logger.info('classify_metrics_proceessed   :: %s' % metrics_proceessed)
                         send_metric_name = '%s.classify_metrics.proceessed' % skyline_app_graphite_namespace
-                        send_graphite_metric(skyline_app, send_metric_name, str(metrics_proceessed))
+                        send_graphite_metric(self, skyline_app, send_metric_name, str(metrics_proceessed))
                         metrics_classified_counts = []
                         classify_metrics_classified = []
                         try:
@@ -997,7 +1308,7 @@ class Luminosity(Thread):
                         metrics_classified = sum(metrics_classified_counts)
                         logger.info('classify_metrics_classified   :: %s' % metrics_classified)
                         send_metric_name = '%s.classify_metrics.classified' % skyline_app_graphite_namespace
-                        send_graphite_metric(skyline_app, send_metric_name, str(metrics_classified))
+                        send_graphite_metric(self, skyline_app, send_metric_name, str(metrics_classified))
 
                     sent_graphite_metrics_now = int(time())
                     try:
@@ -1112,9 +1423,9 @@ class Luminosity(Thread):
                         p.terminate()
                         # p.join()
                         logger.info('killed spin_process process')
-                    except:
+                    except Exception as err:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: killing all spin_process processes')
+                        logger.error('error :: killing all spin_process processes - %s' % err)
 
             for p in pids:
                 if p.is_alive():
@@ -1124,14 +1435,30 @@ class Luminosity(Thread):
             current_now = time()
             process_runtime = current_now - now
 
-            if process_runtime < 10:
-                sleep_for = (10 - process_runtime)
-                logger.info('sleeping for %.2f seconds due to low run time...' % sleep_for)
-                sleep(sleep_for)
+            # @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            # If timestamps are old do not sleep
+            timestamp_old = None
+            try:
+                timestamp_old = self.redis_conn_decoded.exists('luminosity.process_correlations.old_timestamp')
+            except Exception as err:
+                logger.error('error :: failed to query Redis for luminosity.process_correlations.old_timestamp - %s' % err)
+            if timestamp_old:
                 try:
-                    del sleep_for
-                except:
-                    logger.error('error :: failed to del sleep_for')
+                    self.redis_conn_decoded.delete('luminosity.process_correlations.old_timestamp')
+                except Exception as err:
+                    logger.error('error :: failed to delete Redis key luminosity.process_correlations.old_timestamp - %s' % err)
+
+            # @modified 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            # Only sleep if timestamp is not old
+            if not timestamp_old:
+                if process_runtime < 10:
+                    sleep_for = (10 - process_runtime)
+                    logger.info('sleeping for %.2f seconds due to low run time...' % sleep_for)
+                    sleep(sleep_for)
+                    try:
+                        del sleep_for
+                    except:
+                        logger.error('error :: failed to del sleep_for')
             try:
                 del process_runtime
             except:

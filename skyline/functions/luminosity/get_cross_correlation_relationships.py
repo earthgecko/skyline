@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import operator
+from time import time
 from timeit import default_timer as timer
 import traceback
 from collections import Counter
@@ -43,6 +44,7 @@ def get_cross_correlation_relationships(base_name, metric_names_with_ids={}):
     cross_correlation_relationships = {}
     cross_correlation_relationships[base_name] = {}
     cross_correlation_relationships[base_name]['cross_correlation_relationships'] = {}
+    redis_conn_decoded = None
 
     metric_id = 0
     try:
@@ -139,7 +141,12 @@ def get_cross_correlation_relationships(base_name, metric_names_with_ids={}):
             except KeyError:
                 try:
                     # metric_base_name = base_name_from_metric_id(skyline_app, c_metric_id, False)
-                    metric_base_name = get_base_name_from_metric_id(skyline_app, c_metric_id, False)
+                    # @modified 20230116 - Bug #4816: Handle error in sqlalchemy change
+                    #                      Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Removed False argument
+                    # metric_base_name = get_base_name_from_metric_id(skyline_app, c_metric_id, False)
+                    metric_base_name = get_base_name_from_metric_id(skyline_app, c_metric_id)
                     metric_db_name_requests += 1
                 except Exception as err:
                     logger.error(traceback.format_exc())
@@ -154,23 +161,40 @@ def get_cross_correlation_relationships(base_name, metric_names_with_ids={}):
 
     start_cross_correlated_metrics_summary = timer()
     sorted_cross_correlated_metrics_list = []
+
+    # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+    # Reduce logging every drop due to not meeting conditions
+    dropped_min_correlation_count_percentile = []
+    dropped_min_correlations_count = []
+
     if cross_correlated_metrics_list:
         sorted_cross_correlated_metrics_list = sorted(cross_correlated_metrics_list, key=operator.itemgetter(2, 3), reverse=True)
     if sorted_cross_correlated_metrics_list:
         np_array = np.array(correlation_counts)
-        min_correlation_count = np.percentile(np_array, settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE)
+        # @modified 20230122 - Task #4820: Deprecation of numpy asscalar function in luminol
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Changed variable name and log entry from min_correlation_count to
+        # min_correlation_count_percentile just to be specifically explicit in
+        # the log otherwise this is an unclear reference in the log
+        min_correlation_count_percentile = np.percentile(np_array, settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE)
         for item in sorted_cross_correlated_metrics_list:
             # Only class a metric as having a cross correlation relationship if
             # it has correlated within the 95th percentile times
-            if item[2] < min_correlation_count:
-                logger.info('related_metrics :: get_cross_correlation_relationships :: dropping as number of correlations %s is less than min_correlation_count %s - %s' % (
-                    str(item[2]), str(min_correlation_count), str(item)))
+            if item[2] < min_correlation_count_percentile:
+                # @modified 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+                # Reduce logging every drop due to not meeting conditions
+                # logger.info('related_metrics :: get_cross_correlation_relationships :: dropping as number of correlations %s is less than min_correlation_count_percentile %s - %s' % (
+                #     str(item[2]), str(min_correlation_count_percentile), str(item)))
+                dropped_min_correlation_count_percentile.append(item)
                 continue
             if item[2] < settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT:
                 # if item[3] < 0.98:
                 #     continue
-                logger.info('related_metrics :: get_cross_correlation_relationships :: dropping as number of correlations %s is less than LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT %s - %s' % (
-                    str(item[2]), str(settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT), str(item)))
+                # @modified 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+                # Reduce logging every drop due to not meeting conditions
+                # logger.info('related_metrics :: get_cross_correlation_relationships :: dropping as number of correlations %s is less than LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT %s - %s' % (
+                #     str(item[2]), str(settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT), str(item)))
+                dropped_min_correlations_count.append(item)
                 continue
             metric_base_name = item[0]
             metric_dict = {
@@ -181,6 +205,35 @@ def get_cross_correlation_relationships(base_name, metric_names_with_ids={}):
                 'avg_shifted_coefficient': item[5],
             }
             cross_correlated_metrics_summary[metric_base_name] = metric_dict
+
+    # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+    # Reduce logging every drop due to not meeting conditions
+    if dropped_min_correlation_count_percentile or dropped_min_correlations_count:
+        logger.info('related_metrics :: get_cross_correlation_relationships :: dropped %s correlations as number of correlations was less than min_correlation_count_percentile %s' % (
+            str(len(dropped_min_correlation_count_percentile)), str(str(min_correlation_count_percentile))))
+        logger.info('related_metrics :: get_cross_correlation_relationships :: dropped %s correlations as number of correlations was less than LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT %s' % (
+            str(len(dropped_min_correlations_count)), str(settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT)))
+        redis_hash = 'luminosity.dropped_correlations.%s' % str(time())
+        data_dict = {
+            'dropped_min_correlation_count_percentile': str(dropped_min_correlation_count_percentile),
+            'dropped_min_correlations_count': str(dropped_min_correlations_count),
+        }
+        if not redis_conn_decoded:
+            try:
+                redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: related_metrics :: get_cross_correlation_relationships :: get_redis_conn_decoded failed - %s' % str(err))
+        try:
+            redis_conn_decoded.hset(redis_hash, mapping=data_dict)
+            redis_conn_decoded.expire(redis_hash, 300)
+            logger.info('related_metrics :: get_cross_correlation_relationships :: recorded drops in Redis hash %s' % (
+                redis_hash))
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: related_metrics :: get_cross_correlation_relationships :: failed to create Redis %s - %s' % (
+                redis_hash, str(err)))
+
     end_cross_correlated_metrics_summary = timer()
     cross_correlation_relationships[base_name]['cross_correlated_metrics_summary_duration'] = (end_cross_correlated_metrics_summary - start_cross_correlated_metrics_summary)
 

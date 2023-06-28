@@ -19,7 +19,7 @@ import socket
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
 # bandit [B403:blacklist] Consider possible security implications associated
 # with pickle module.  These have been considered.
-import pickle  # nosec
+import pickle  # nosec B403
 
 import struct
 
@@ -43,7 +43,10 @@ load_settings = True
 if load_settings:
     import settings
     from skyline_functions import (
-        send_graphite_metric,
+        # @added 20220726 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Moved send_graphite_metric
+        # send_graphite_metric,
         # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         get_redis_conn,
@@ -58,6 +61,9 @@ if load_settings:
         encode_graphite_metric_name)
     # @added 20220429 - Feature #4536: Handle Redis failure
     from functions.flux.get_last_metric_data import get_last_metric_data
+    # @added 20220726 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.graphite.send_graphite_metric import send_graphite_metric
 
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
@@ -526,11 +532,53 @@ class PopulateMetricWorker(Process):
                     if response.status_code == 200:
                         success = True
                         logger.info('populate_metric_worker :: got responses from %s' % str(fetch_url))
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: populate_metric_worker :: http status code - %s, reason - %s' % (
-                        str(response.status_code), str(response.reason)))
-                    logger.error('error :: populate_metric_worker :: failed to get data from %s' % str(fetch_url))
+                except Exception as err:
+                    # @modified 2023024 - Task #4824: vista - warn on remote_error
+                    remote_error = False
+                    if 'Failed to establish a new connection' in str(err):
+                        remote_error = True
+                    if 'Errno 111' in str(err):
+                        remote_error = True
+                    if 'Connection refused' in str(err):
+                        remote_error = True
+                    if 'Connection aborted' in str(err):
+                        remote_error = True
+                    if 'RemoteDisconnected' in str(err):
+                        remote_error = True
+                    if 'Remote end closed connection without response' in str(err):
+                        remote_error = True
+                    if remote_error:
+                        logger.warning('warning :: fetcher :: failed to get data from %s - %s' % (
+                            str(fetch_url), err))
+                    else:
+                        logger.error(traceback.format_exc())
+                        # @modified 20230118 - Feature #4756: Use gevent gunicorn worker_class
+                        #                      Feature #4732: flux vortex
+                        #                      Task #4778: v4.0.0 - update dependencies
+                        # This can causes the process to hang on a failure
+                        # and results in a [CRITICAL] WORKER TIMEOUT which seemingly
+                        # was not experienced the same way with the sync worker
+                        # class as the gevent worker class. Loki reports that
+                        # although [CRITICAL] WORKER TIMEOUT instances were
+                        # experienced pre 20221206 when gevent was introduced, sync
+                        # never resulted in the error of:
+                        #  str(response.status_code), str(response.reason)))
+                        # UnboundLocalError: local variable 'response' referenced before assignment
+                        # causing monit to fail checks and restarted the flux service.  Since the
+                        # switch to gevent this error causing the [CRITICAL] WORKER TIMEOUT
+                        # now results in monit restarting flux every time this was
+                        # experienced around 11 min 30 secs later.  It appears as if
+                        # the sync worker just exited the process and spawned a new
+                        # one, but with gevent this causes the monit check on
+                        # [127.0.0.1]:8000/metric_data?status=true [TCP/IP] -- HTTP: Error receiving data -- Resource temporarily unavailable (attempt 1/5)
+                        # to fail 5 times and monit restarts flux.  So fixing as it
+                        # has always been incorrect, just never resulted in occasional
+                        # service failures as it was handled differently.
+                        # logger.error('error :: populate_metric_worker :: http status code - %s, reason - %s' % (
+                        #     str(response.status_code), str(response.reason)))
+                        logger.error('error :: populate_metric_worker :: requests reports - %s' % (
+                            err))
+                        logger.warning('warning :: populate_metric_worker :: failed to get data from %s' % str(fetch_url))
 
                 if not success:
                     continue
@@ -934,7 +982,7 @@ class PopulateMetricWorker(Process):
                 skyline_metric = '%s.datapoints_sent_to_graphite' % (skyline_app_graphite_namespace)
                 # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
                 # graphyte.send(skyline_metric, float(sent_to_graphite), int(time()))
-                send_graphite_metric(skyline_app, skyline_metric, float(sent_to_graphite))
+                send_graphite_metric(self, skyline_app, skyline_metric, float(sent_to_graphite))
                 logger.info('populate_metric_worker :: submitted %s to Graphite for %s' % (
                     str(float(sent_to_graphite)), skyline_metric))
             except:
