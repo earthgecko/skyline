@@ -98,7 +98,7 @@ click==8.1.3
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #Flask==2.0.2
-Flask==2.3.2
+Flask==2.2.5
 
 # @modified 20211220 - Task #4344: Update dependencies
 #simplejson==3.17.2
