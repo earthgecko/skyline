@@ -85,7 +85,7 @@ Build
 
   PYTHON_MAJOR_VERSION="3.8"
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py3816"
+  PROJECT="skyline-py3817"
   CURRENT_BRANCH="SNAB"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
