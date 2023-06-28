@@ -21,6 +21,7 @@ Contents:
   upgrading/index.rst
   getting-data-into-skyline
   alert-testing
+  skyline_metrics
   alerts
   slack
   monotonic-metrics
@@ -36,13 +37,17 @@ Contents:
   ionosphere
   ionosphere_echo
   ionosphere_inference
+  ionosphere_learn_repetitive_patterns
   tsfresh
   luminosity
   flux
   upload-data-to-flux
+  prometheus
+  vortex
   thunder/index.rst
   vista
   SNAB
+  external_settings
   redis-integration
   rebrow
   running-multiple-skylines
@@ -50,6 +55,7 @@ Contents:
   logging
   tuning-tips
   monitoring-skyline
+  opentelemetry
   troubleshooting
   deprecated-docs/index.rst
   releases

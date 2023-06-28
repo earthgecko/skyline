@@ -14,6 +14,10 @@ if load_libraries:
     # import matplotlib.image as mpimg
     from matplotlib.pylab import rcParams
     from matplotlib.dates import DateFormatter
+    # @added 20230626 - Task #4962: Build and test skyline v4.0.0
+    #                   Task #4778: v4.0.0 - update dependencies
+    # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+    from matplotlib import __version__ as matplotlib_version
 
 
 # @added 20220317 - Feature #4540: Plot matched timeseries
@@ -95,7 +99,11 @@ def plot_fp_match(
         #     xfmt = DateFormatter('%H:%M:%S')
         # else:
         #     xfmt = DateFormatter('%H:%M')
-        xfmt = DateFormatter('%H:%M:%S')
+        # xfmt = DateFormatter('%H:%M:%S')
+        if graph_period_seconds > 87000:
+            xfmt = DateFormatter('%m/%d')
+        else:
+            xfmt = DateFormatter('%H:%M:%S')
 
         plt.gca().xaxis.set_major_formatter(xfmt)
         ax.xaxis.set_major_formatter(xfmt)
@@ -108,18 +116,18 @@ def plot_fp_match(
             ax.plot(
                 datetimes, not_anomalous_motif, label=not_anomalous_label,
                 color=not_anomalous_line_color, lw=1, linestyle='solid',
-                zorder=3)
+                zorder=4)
         else:
             ax.plot(
                 datetimes, not_anomalous_motif, 'ro', label=not_anomalous_label,
                 color=not_anomalous_line_color, lw=1, marker='o', linestyle='solid',
-                markersize=4, zorder=3)
+                markersize=4, zorder=4)
         ax.tick_params(axis='both', labelsize='small')
         matched_label = 'fp_id %s - similar pattern' % (str(fp_id))
         if strip_prefix:
             matched_label = 'trained pattern %s - similar' % (str(fp_id))
 
-        ax.plot(datetimes, fp_values, lw=1, label=matched_label, color='blue', ls='--', zorder=4, alpha=0.4)
+        ax.plot(datetimes, fp_values, lw=1, label=matched_label, color='blue', ls='--', zorder=3, alpha=0.5)
         ax.get_yaxis().get_major_formatter().set_useOffset(False)
         ax.get_yaxis().get_major_formatter().set_scientific(False)
         box = ax.get_position()
@@ -129,8 +137,16 @@ def plot_fp_match(
                   fancybox=True, shadow=True, ncol=2, fontsize='small')
         plt.rc('lines', lw=1, color='black')
         plt.grid(True)
-        ax.grid(b=True, which='both', axis='both', color='lightgray',
-                linestyle='solid', alpha=0.5, linewidth=0.6)
+        # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
+        #                      Task #4778: v4.0.0 - update dependencies
+        # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+        if matplotlib_version < '3.7.0':
+            ax.grid(b=True, which='both', axis='both', color='lightgray',
+                    linestyle='solid', alpha=0.5, linewidth=0.6)
+        else:
+            ax.grid(visible=True, which='both', axis='both', color='lightgray',
+                    linestyle='solid', alpha=0.5, linewidth=0.6)
+
         if hasattr(ax, 'set_facecolor'):
             ax.set_facecolor('white')
         else:

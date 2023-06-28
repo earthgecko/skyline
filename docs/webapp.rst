@@ -96,7 +96,15 @@ Firewall rules
 The Webapp **should** be secured with proper firewall rules that restrict access
 to the :mod:`settings.WEBAPP_IP` and :mod:`settings.WEBAPP_PORT` (and/or just
 the reverse proxy port for gunicorn if being used) from trusted IP
-addresses only.
+addresses only.  It is best to keep the :mod:`settings.WEBAPP_IP` set to
+127.0.0.1 and access it via the reverse proxy.  Note that the webapp will bind
+to the :mod:`settings.WEBAPP_PORT` and :mod:`settings.WEBAPP_PORT` + 1.  This is
+because the main webapp runs gunicorn with a gevent worker_class and there are
+some problems running some multiprocessing functions with gevent in the webapp
+layout, therefore the webapp also starts another gunicorn process that has the
+sync worker_class for handling functions that require multiprocessing.  So if
+your :mod:`settings.WEBAPP_PORT` is set to 1500, webapp will bind to
+127.0.0.1:1500 and 127.0.0.1:1501.
 
 Basic security
 --------------

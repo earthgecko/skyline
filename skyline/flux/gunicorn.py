@@ -1,3 +1,11 @@
+"""
+gunicorn.py
+"""
+# @added 20221206 - Feature #4756: Use gevent gunicorn worker_class
+#                   Feature #4732: flux vortex
+from gevent import monkey
+monkey.patch_all()
+
 import sys
 import os.path
 from os import getpid
@@ -27,6 +35,16 @@ else:
     delete_memcache_key = None
 
 bind = '%s:%s' % (settings.FLUX_IP, str(settings.FLUX_PORT))
+
+# @added 20221205 - Feature #4756: Use gevent gunicorn worker_class
+#                   Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+# Switch to using gevent instead of default sync worker type to allow for slow
+# /flux/vortex_results requests which can wait for a while for results.  This
+# improves load testing response times and number of requests handled
+# dramatically
+worker_class = 'gevent'
+
 # workers = multiprocessing.cpu_count() * 2 + 1
 workers = settings.FLUX_WORKERS
 backlog = settings.FLUX_BACKLOG

@@ -15,8 +15,20 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if labelled_metric_name %}
+  {% set use_for_metric = labelled_metric_name %}
+{% else %}
+  {% set use_for_metric = for_metric %}
+{% endif %}
+
   {% if correlations != False %}
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">cross correlations ::</span></span> {{ correlations|length }} (listed strongest 1.0000 to weakest 0.0)</h4>
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode>
+    {% else %}
+    <smallcode>{{ for_metric }}</smallcode>
+    {% endif %}
+
 <!-- # @added 20180723 - Feature #2470: Correlations Graphite graph links
 #                        Branch #2270: luminosity
 # Added Graphite graph links to Correlations block
@@ -26,7 +38,7 @@
       they are not necessarily all <strong>contextually related</strong>, but the <strong>contextually related</strong>
       correlations may be listed here if there are any.  These are simply the <strong>numeric</strong> correlations it is currently
       up to the operator to review them.  As it is assumed that the operator may know which metrics are likely to correlate
-      with this anomaly on {{ for_metric }}, until such a time as Skyline can, something on the roadmap.
+      with this anomaly on {{ use_for_metric }}, until such a time as Skyline can, something on the roadmap.
 	  </div>
 		  <table class="table table-hover">
 		    <thead>
@@ -45,7 +57,11 @@
 # Added Graphite graph links to the Correlations block in training_data and
 # features_profile pages
 		        <td>{{ correlation_item[0] }}</td>-->
-		        <td><a target='_blank' href="{{ correlation_item[4] }}">{{ correlation_item[0] }}</a></td>
+    {% if correlation_item[0]|length < 150 %}
+		        <td style="word-break:break-all;"><a target='_blank' href="{{ correlation_item[4] }}"><code>{{ correlation_item[0] }}</code></a></td>
+    {% else %}
+		        <td style="word-break:break-all;"><a target='_blank' href="{{ correlation_item[4] }}"><smallcode>{{ correlation_item[0] }}</smallcode></a></td>
+    {% endif %}
  		        <td>{{ correlation_item[1] }}</td>
 		        <td>{{ correlation_item[2] }}</td>
 		        <td>{{ correlation_item[3] }}</td>
@@ -61,13 +77,18 @@
 #                        Branch #2270: luminosity
 # Added Graphite graph links to Related block
 -->
-  {% if related != False %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related anomalies ::</span></span> {{ related|length }}</h4>
+  {% if related_with_graph_links != False %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related anomalies ::</span></span> {{ related_with_graph_links|length }}</h4>
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode>
+    {% else %}
+    <smallcode>{{ for_metric }}</smallcode>
+    {% endif %}
 	  <div class="alert alert-warning">
       These are the time related anomalies from the entire metric population that fall within 2 minutes either side of the anomaly,
       they are not necessarily all <strong>related</strong>, but anomalies that occurred in the same time frame
       are listed here.  It is currently up to the operator to review them.  As it is assumed that the operator may
-      know which metrics are likely to be related with this anomaly on {{ for_metric }}.
+      know which metrics are likely to be related with this anomaly on {{ use_for_metric }}.
 	  </div>
 		  <table class="table table-hover">
 		    <thead>
@@ -82,8 +103,16 @@
 		    <tbody>
     {% for related_item in related_with_graph_links %}
 		      <tr>
+      {% if related_item[5] != 'None' %}
 		        <td><a target='_blank' href="{{ related_item[5] }}">{{ related_item[0] }}</a></td>
- 		        <td>{{ related_item[1] }}</td>
+      {% else %}
+		        <td>{{ related_item[0] }}</td>
+      {% endif %}
+      {% if related_item[1]|length < 150 %}
+		        <td style="word-break:break-all;"><code>{{ related_item[1] }}</code></td>
+      {% else %}
+		        <td style="word-break:break-all;"><smallcode>{{ related_item[1] }}</smallcode></td>
+      {% endif %}
 		        <td>{{ related_item[2] }}</td>
 		        <td>{{ related_item[3] }}</td>
 		        <td>{{ related_item[4] }}</td>
@@ -97,11 +126,16 @@
 
   {% if related_matches != False %}
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related matches ::</span></span> {{ related_matches|length }}</h4>
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode>
+    {% else %}
+    <smallcode>{{ for_metric }}</smallcode>
+    {% endif %}
 	  <div class="alert alert-warning">
       These are the time related matches from the Ionosphere metric population that fall within 2 minutes either side of the anomaly,
       they are not necessarily all <strong>related</strong>, but the matches occurred in the same time frame
       are listed here.  It is currently up to the operator to review them.  As it is assumed that the operator may
-      know which metrics are likely to be related with this anomaly on {{ for_metric }}.
+      know which metrics are likely to be related with this anomaly on {{ use_for_metric }}.
 	  </div>
 		  <table class="table table-hover">
 				<thead>
@@ -109,7 +143,7 @@
 <!-- # @modified 20210413 - Feature #4014: Ionosphere - inference
 #                           Branch #3590: inference
 # Added related_motifs_matched_id
-[human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, timestamp, matched_motif_id]
+[human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, timestamp, matched_motif_id, metric_id]
 -->
             <th>match id</th>
             <th>metric</th>
@@ -125,21 +159,23 @@
           <tr>
       {% if 'features profile' in item[2]  %}
         {% if item[7] == 2 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_fp_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
             </td>
         {% elif item[7] == 1 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_fp_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
             </td>
         {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% endif %}
-
-            <td>{{ item[5] }}</td>
-
+        {% if item[5]|length < 150 %}
+		        <td style="word-break:break-all;"><code>{{ item[5] }}</code></td>
+        {% else %}
+		        <td style="word-break:break-all;"><smallcode>{{ item[5] }}</smallcode></td>
+        {% endif %}
         {% if 'echo' in item[2]  %}
           {% if 'minmax' in item[2]  %}
             <td><span class="logo"><span class="sky">features profile - minmax <span class="re">echo</span></span></td>
@@ -153,56 +189,63 @@
 <!-- # @modified 20210413 - Feature #4014: Ionosphere - inference -->
       {% elif 'motif' in item[2] %}
         {% if item[7] == 2 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=2'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=2">{{ item[1] }}</a>
             </td>
         {% elif item[7] == 1 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=1'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=1">{{ item[1] }}</a>
             </td>
         {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&matched_motif_id={{ item[9] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&matched_motif_id={{ item[9] }}">{{ item[1] }}</a>
             </td>
         {% endif %}
-            <td>{{ item[5] }}</td>
+        {% if item[5]|length < 150 %}
+		        <td style="word-break:break-all;"><code>{{ item[5] }}</code></td>
+        {% else %}
+		        <td style="word-break:break-all;"><smallcode>{{ item[5] }}</smallcode></td>
+        {% endif %}
             <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
-
       {% else %}
         {% if item[7] == 2 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_layer_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
             </td>
         {% elif item[7] == 1 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_layer_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
             </td>
         {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% endif %}
-            <td>{{ item[5] }}</td>
+        {% if item[5]|length < 150 %}
+		        <td style="word-break:break-all;"><code>{{ item[5] }}</code></td>
+        {% else %}
+		        <td style="word-break:break-all;"><smallcode>{{ item[5] }}</smallcode></td>
+        {% endif %}
             <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
       {% endif %}
 
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[3] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}">{{ item[3] }}</a>
             </td>
 
       {% if item[4] == 'None' %}
             <td>{{ item[4] }}</td>
       {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[4] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}">{{ item[4] }}</a>
             </td>
       {% endif %}
 <!-- # @modified 20210413 - Feature #4014: Ionosphere - inference -->
       {% if item[9] == 0 %}
             <td>None</td>
       {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}">{{ item[9] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}">{{ item[9] }}</a>
             </td>
       {% endif %}
 
@@ -216,5 +259,57 @@
 	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related matches ::</span></span> None</h4>
   {% endif %}
 
+<!-- # @added 20220516 - Feature #2580: illuminance -->
+  {% if illuminance_events_dict != False %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related events </span></span> {{ illuminance_events_count }}</h4>
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode>
+    {% else %}
+    <smallcode>{{ for_metric }}</smallcode>
+    {% endif %}
+	  <div class="alert alert-warning">
+      These are the time related events from the Skyline apps that fall within 2 minutes either side of the anomaly,
+      they are not necessarily <strong>related</strong>, but occurred in the same time frame.
+      It is currently up to the operator to review them.  Although <code>CONSENSUS</code> was achieved on these
+      they may not have been recorded as anomalies because thet could have been in the expiry period or they
+      could have been matched.  It is assumed that the operator may know which metrics are likely to be
+      related with this anomaly on {{ use_for_metric }}.
+	  </div>
+
+<!--    DEBUG: {{ illuminance_events_dict }} -->
+
+		  <table class="table table-hover">
+				<thead>
+					<tr>
+            <th>date</th>
+            <th>metric_id</th>
+            <th>metric</th>
+            <th>value</th>
+            <th>triggered algorithm count</th>
+            <th>app</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for date_str, date_str_dict in illuminance_events_dict.items() %}
+    {% for ill_metric, ill_metric_dict in date_str_dict.items() %}
+          <tr>
+            <td>{{ date_str }}</td>
+            <td>{{ ill_metric_dict['metric_id'] }}</td>
+        {% if ill_metric|length < 150 %}
+		        <td style="word-break:break-all;"><code>{{ill_metric }}</code></td>
+        {% else %}
+		        <td style="word-break:break-all;"><smallcode>{{ ill_metric }}</smallcode></td>
+        {% endif %}
+            <td>{{ ill_metric_dict['value'] }}</td>
+            <td>{{ ill_metric_dict['triggered_algorithms_count'] }}</td>
+            <td>{{ ill_metric_dict['app'] }}</td>
+          </tr>
+    {% endfor %}
+  {% endfor %}
+				</tbody>
+			</table>
+  {% else %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related events </span></span>  None</h4>
+  {% endif %}
 
 {% endblock %}

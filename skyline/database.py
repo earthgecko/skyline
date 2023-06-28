@@ -1,4 +1,6 @@
-# coding=utf-8
+"""
+database.py
+"""
 import logging
 import traceback
 from sqlalchemy import (
@@ -14,7 +16,7 @@ try:
     OTEL_ENABLED = settings.OTEL_ENABLED
 except AttributeError:
     OTEL_ENABLED = False
-except Exception as err:
+except Exception as outer_err:
     OTEL_ENABLED = False
 
 
@@ -25,6 +27,12 @@ def get_engine(current_skyline_app):
     # Use SQLAlchemy, mysql.connector is still around but starting the
     # move to SQLAlchemy now that all the webapp Ionosphere SQLAlchemy patterns
     # work
+
+    Initialize a sqlalchemy engine.
+
+    :param current_skyline_app: the app calling the function
+    :type current_skyline_app: str
+
     '''
     try:
 
@@ -42,9 +50,24 @@ def get_engine(current_skyline_app):
         # @added 20220405 - Task #4514: Integrate opentelemetry
         #                   Feature #4516: flux - opentelemetry traces
         if OTEL_ENABLED and current_skyline_app == 'webapp':
-            SQLAlchemyInstrumentor().instrument(
-                engine=engine,
-            )
+
+            # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+            instrumented = False
+            try:
+                instrumented = SQLAlchemyInstrumentor().is_instrumented_by_opentelemetry
+            except Exception as err:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error('error :: get_engine - SQLAlchemyInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+                    err))
+            if not instrumented:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.info('get_engine - starting SQLAlchemyInstrumentor')
+
+                SQLAlchemyInstrumentor().instrument(
+                    engine=engine,
+                )
 
         return engine, 'got MySQL engine', 'none'
     except:
@@ -60,6 +83,14 @@ def get_engine(current_skyline_app):
 # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
 # Add a global engine_disposal method
 def engine_disposal(current_skyline_app, engine):
+    """
+    Dispose of the sqlalchemy engine.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    """
     if engine:
         try:
             engine.dispose()
@@ -72,7 +103,17 @@ def engine_disposal(current_skyline_app, engine):
 
 
 def ionosphere_table_meta(current_skyline_app, engine):
+    """
+    Autoload the ionosphere table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -124,7 +165,17 @@ def ionosphere_table_meta(current_skyline_app, engine):
 
 
 def metrics_table_meta(current_skyline_app, engine):
+    """
+    Autoload the metrics table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -142,7 +193,17 @@ def metrics_table_meta(current_skyline_app, engine):
 
 
 def anomalies_table_meta(current_skyline_app, engine):
+    """
+    Autoload the anomalies table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -166,7 +227,17 @@ def anomalies_table_meta(current_skyline_app, engine):
 # be reviewed.  It could get big and perhaps should be optional
 
 def ionosphere_matched_table_meta(current_skyline_app, engine):
+    """
+    Autoload the ionosphere_matched table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -185,7 +256,17 @@ def ionosphere_matched_table_meta(current_skyline_app, engine):
 
 # @added 20170305 - Feature #1960: ionosphere_layers
 def ionosphere_layers_table_meta(current_skyline_app, engine):
+    """
+    Autoload the ionosphere_layers table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -203,7 +284,17 @@ def ionosphere_layers_table_meta(current_skyline_app, engine):
 
 
 def layers_algorithms_table_meta(current_skyline_app, engine):
+    """
+    Autoload the layers_algorithms table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -221,7 +312,17 @@ def layers_algorithms_table_meta(current_skyline_app, engine):
 
 
 def ionosphere_layers_matched_table_meta(current_skyline_app, engine):
+    """
+    Autoload the ionosphere_layers_matched table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -240,7 +341,17 @@ def ionosphere_layers_matched_table_meta(current_skyline_app, engine):
 
 # @added 20180414 - Branch #2270: luminosity
 def luminosity_table_meta(current_skyline_app, engine):
+    """
+    Autoload the luminosity table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -260,7 +371,17 @@ def luminosity_table_meta(current_skyline_app, engine):
 # @added 20200928 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
 def snab_table_meta(current_skyline_app, engine):
+    """
+    Autoload the snab table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -280,7 +401,17 @@ def snab_table_meta(current_skyline_app, engine):
 # @added 20210412 - Feature #4014: Ionosphere - inference
 #                   Branch #3590: inference
 def motifs_matched_table_meta(current_skyline_app, engine):
+    """
+    Autoload the motifs_matched table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -300,7 +431,17 @@ def motifs_matched_table_meta(current_skyline_app, engine):
 # @added 20210414 - Feature #4014: Ionosphere - inference
 #                   Branch #3590: inference
 def not_anomalous_motifs_table_meta(current_skyline_app, engine):
+    """
+    Autoload the not_anomalous_motifs table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -319,7 +460,17 @@ def not_anomalous_motifs_table_meta(current_skyline_app, engine):
 
 # @added 20210805 - Feature #4164: luminosity - cloudbursts
 def cloudburst_table_meta(current_skyline_app, engine):
+    """
+    Autoload the cloudburst table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -338,7 +489,17 @@ def cloudburst_table_meta(current_skyline_app, engine):
 
 # @added 20210805 - Feature #4164: luminosity - cloudbursts
 def cloudbursts_table_meta(current_skyline_app, engine):
+    """
+    Autoload the cloudbursts table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -357,7 +518,17 @@ def cloudbursts_table_meta(current_skyline_app, engine):
 
 # @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
 def metric_group_table_meta(current_skyline_app, engine):
+    """
+    Autoload the metric_group table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -376,7 +547,17 @@ def metric_group_table_meta(current_skyline_app, engine):
 
 # @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
 def metric_group_info_table_meta(current_skyline_app, engine):
+    """
+    Autoload the metric_group_info table.
 
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -389,5 +570,35 @@ def metric_group_info_table_meta(current_skyline_app, engine):
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: failed to reflect the metric_group_info table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data
+# Added table to store the results of minmax scaled features profiles.
+def ionosphere_minmax_table_meta(current_skyline_app, engine):
+    """
+    Autoload the ionosphere_minmax table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the ionosphere_minmax_info table MetaData
+    try:
+        ionosphere_minmax_meta = MetaData()
+        ionosphere_minmax_table = Table('ionosphere_minmax', ionosphere_minmax_meta, autoload=True, autoload_with=engine)
+        return ionosphere_minmax_table, 'ionosphere_minmax meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the ionosphere_minmax table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace

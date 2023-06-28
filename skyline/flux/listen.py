@@ -3,7 +3,7 @@ listen.py
 """
 import sys
 import os
-from time import time
+from time import time, sleep
 import json
 import traceback
 # from multiprocessing import Queue
@@ -13,6 +13,15 @@ from ast import literal_eval
 # @added 20220209 - Feature #4284: flux - telegraf
 from timeit import default_timer as timer
 import gzip
+
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
+# @added 20221118 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+import uuid
+
+import requests
 
 from logger import set_up_logging
 
@@ -69,7 +78,9 @@ except:
     pass
 FLUX_API_KEYS = {}
 try:
-    FLUX_API_KEYS = settings.FLUX_API_KEYS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # FLUX_API_KEYS = settings.FLUX_API_KEYS.copy()
+    FLUX_API_KEYS = copy.deepcopy(settings.FLUX_API_KEYS)
 except:
     pass
 if FLUX_API_KEYS:
@@ -100,7 +111,9 @@ except:
 
 # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
 try:
-    FLUX_AGGREGATE_NAMESPACES = settings.FLUX_AGGREGATE_NAMESPACES.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # FLUX_AGGREGATE_NAMESPACES = settings.FLUX_AGGREGATE_NAMESPACES.copy()
+    FLUX_AGGREGATE_NAMESPACES = copy.deepcopy(settings.FLUX_AGGREGATE_NAMESPACES)
     # aggregate_namespaces = list(FLUX_AGGREGATE_NAMESPACES.keys())
 except:
     FLUX_AGGREGATE_NAMESPACES = {}
@@ -110,12 +123,55 @@ try:
 except:
     FLUX_EXTERNAL_AGGREGATE_NAMESPACES = False
 
+# @added 20221129 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+try:
+    VORTEX_TIMESERIES_JSON_TO_DISK = settings.VORTEX_TIMESERIES_JSON_TO_DISK
+except:
+    VORTEX_TIMESERIES_JSON_TO_DISK = True
+try:
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
+except:
+    HORIZON_SHARDS = {}
+try:
+    HORIZON_SHARD_DEBUG = settings.HORIZON_SHARD_DEBUG
+except:
+    HORIZON_SHARD_DEBUG = True
+number_of_horizon_shards = 0
+this_host = str(os.uname()[1])
+HORIZON_SHARD = 0
+if HORIZON_SHARDS:
+    number_of_horizon_shards = len(HORIZON_SHARDS)
+    HORIZON_SHARD = HORIZON_SHARDS[this_host]
+number_of_horizon_test_shards = 0
+HORIZON_TEST_SHARD = 0
+try:
+    HORIZON_TEST_SHARDS = copy.deepcopy(settings.HORIZON_TEST_SHARDS)
+except:
+    HORIZON_TEST_SHARDS = {}
+if HORIZON_TEST_SHARDS:
+    number_of_horizon_shards = len(HORIZON_TEST_SHARDS)
+    HORIZON_TEST_SHARD = HORIZON_TEST_SHARDS[this_host]
+if HORIZON_SHARDS or HORIZON_TEST_SHARDS:
+    import zlib
+try:
+    VORTEX_ALLOWED_SHARD_TEST_KEYS = settings.VORTEX_ALLOWED_SHARD_TEST_KEYS
+except:
+    VORTEX_ALLOWED_SHARD_TEST_KEYS = ['URG3U7IrNo18VheSZwP7Jyvg0jWs55Sn']
+try:
+    VORTEX_MAX_ALGORITHMS = settings.VORTEX_MAX_ALGORITHMS
+except:
+    VORTEX_MAX_ALGORITHMS = 3
+
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
 # logger = set_up_logging('listen')
 logger = set_up_logging(None)
 
 LOCAL_DEBUG = False
+# @added 20230531 - SAVE_DEBUG_INFO
+SAVE_DEBUG_INFO = False
+
 # @added 20220210 - Feature #4284: flux - telegraf
 # This is a debug feature that allows to enable timing of functions to ensure
 # performance is maintained as much as possible
@@ -319,7 +375,7 @@ except Exception as outer_err:
         try:
             aggregate_namespaces_dict = get_memcache_key('flux', 'metrics_manager.flux.aggregate_namespaces')
             if aggregate_namespaces_dict:
-                logger.info('listen :: there are %s items in the namespace_quotas_dict memcache dict' % (
+                logger.info('listen :: there are %s items in the aggregate_namespaces_dict memcache dict' % (
                     str(len(aggregate_namespaces_dict))))
             else:
                 aggregate_namespaces_dict = {}
@@ -345,7 +401,9 @@ def check_validate_key_update(caller):
         pass
     UPDATED_FLUX_API_KEYS = {}
     try:
-        UPDATED_FLUX_API_KEYS = settings.FLUX_API_KEYS.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # UPDATED_FLUX_API_KEYS = settings.FLUX_API_KEYS.copy()
+        UPDATED_FLUX_API_KEYS = copy.deepcopy(settings.FLUX_API_KEYS)
     except:
         pass
     if UPDATED_FLUX_API_KEYS:
@@ -770,7 +828,9 @@ class MetricData(object):
         # Added status parameter so that the flux listen process can be monitored
         # @modified 20200206 - Feature #3444: Allow flux to backfill
         # Added the fill parameter
-        validGetArguments = ['key', 'metric', 'value', 'timestamp', 'status', 'fill']
+        # @modified 20230223 - Feature #4840: flux - prometheus - x-test-only header
+        # Added test argument
+        validGetArguments = ['key', 'metric', 'value', 'timestamp', 'status', 'fill', 'test']
 
         payload = {}
         payload['query_string'] = str(req.query_string)
@@ -816,7 +876,7 @@ class MetricData(object):
                     # @added 20220118 - Feature #4380: flux - return reason with 400
                     message = 'Invalid parameter received - %s' % str(request_param_key)
                     body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
@@ -838,7 +898,7 @@ class MetricData(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'Invalid parameters'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
@@ -855,10 +915,10 @@ class MetricData(object):
                     try:
                         redis_conn.setex('flux.listen', 120, int(time()))
                     except Exception as err:
-                        logger.error('error :: listen :: set flux-listen failed - %s' % err)
+                        logger.error('error :: listen :: set flux.listen failed - %s' % err)
 
                     body = {"status": "ok"}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     resp.status = falcon.HTTP_200
                     return
             except:
@@ -894,7 +954,7 @@ class MetricData(object):
                         # @added 20220118 - Feature #4380: flux - return reason with 400
                         message = 'invalid key'
                         body = {"code": 401, "message": message}
-                        resp.body = json.dumps(body)
+                        resp.text = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
 
                         # @modified 20210909
@@ -917,7 +977,7 @@ class MetricData(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'invalid key'
                 body = {"code": 401, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
                 # @modified 20210909 - Feature #4380: flux - return reason with 400
@@ -962,7 +1022,7 @@ class MetricData(object):
                         # Added reason
                         message = 'invalid timestamp - %s - %s' % (str(request_param_value), str(reason))
                         body = {"code": 400, "message": message}
-                        resp.body = json.dumps(body)
+                        resp.text = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
@@ -990,7 +1050,7 @@ class MetricData(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'invalid timestamp'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
@@ -1025,7 +1085,7 @@ class MetricData(object):
                     # Added reason
                     message = 'invalid metric - %s - %s' % (str(request_param_value), str(reason))
                     body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
@@ -1055,7 +1115,7 @@ class MetricData(object):
                     # @added 20220118 - Feature #4380: flux - return reason with 400
                     message = 'invalid value - %s' % str(request_param_value)
                     body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: %s, returning 400' % message)
 
                     resp.status = falcon.HTTP_400
@@ -1080,7 +1140,7 @@ class MetricData(object):
             # @added 20220118 - Feature #4380: flux - return reason with 400
             message = 'no key parameter passed'
             body = {"code": 400, "message": message}
-            resp.body = json.dumps(body)
+            resp.text = json.dumps(body)
             logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
@@ -1101,7 +1161,7 @@ class MetricData(object):
             # @added 20220118 - Feature #4380: flux - return reason with 400
             message = 'no metric parameter passed'
             body = {"code": 400, "message": message}
-            resp.body = json.dumps(body)
+            resp.text = json.dumps(body)
             logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
@@ -1124,7 +1184,7 @@ class MetricData(object):
             # @added 20220118 - Feature #4380: flux - return reason with 400
             message = 'no value parameter passed'
             body = {"code": 400, "message": message}
-            resp.body = json.dumps(body)
+            resp.text = json.dumps(body)
             logger.info('listen :: %s, returning 400' % message)
 
             resp.status = falcon.HTTP_400
@@ -1228,7 +1288,7 @@ class MetricData(object):
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: error building 400 body, %s' % err)
-            resp.body = json.dumps(body)
+            resp.text = json.dumps(body)
             logger.info('listen :: %s, returning 400 on metric_namespace_prefix: %s' % (
                 message, str(check_namespace_quota)))
             resp.status = falcon.HTTP_400
@@ -1277,6 +1337,79 @@ class MetricData(object):
             payload['metric_data'] = str(metric_data)
         except Exception as e:
             logger.error('error :: listen :: failed to add metric_data to payload - %s' % str(e))
+
+        # @added 20230223 - Feature #4840: flux - prometheus - x-test-only header
+        test_only = False
+        test_only_metrics_submitted = []
+        try:
+            test_only_str = req.get_header('x-test-only')
+            if test_only_str:
+                test_only = True
+        except Exception as err:
+            logger.error('listen :: get_header(\'x-test-only\') error - %s' % str(err))
+        for request_param_key, request_param_value in req.params.items():
+            if not test_only:
+                try:
+                    if str(request_param_key) == 'test':
+                        test_only_str = str(request_param_value)
+                        if test_only_str == 'true':
+                            test_only = True
+                except Exception as err:
+                    logger.error('listen :: get_header(\'x-test-only\') error - %s' % str(err))
+        if test_only:
+            logger.info('listen :: test_only request')
+            test_only_metrics_submitted.append(metric)
+            current_aligned_ts = int(int(time()) // 60 * 60)
+            test_only_redis_key = 'flux.prometheus.test_only.%s.%s' % (str(metric_namespace_prefix), str(current_aligned_ts))
+            test_only_data = {}
+            try:
+                test_only_data = redis_conn_decoded.hgetall(test_only_redis_key)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: failed to hgetall %s Redis hash - %s' % (
+                    test_only_redis_key, err))
+            if test_only_data:
+                existing_test_metrics = []
+                try:
+                    existing_test_metrics = literal_eval(test_only_data['metrics'])
+                except:
+                    existing_test_metrics = []
+                all_test_metrics = test_only_metrics_submitted + existing_test_metrics
+                test_metrics_that_would_be_ingested = list(set(all_test_metrics))
+                existing_dropped_metrics = []
+                try:
+                    existing_dropped_metrics = literal_eval(test_only_redis_key['dropped'])
+                except:
+                    existing_dropped_metrics = []
+                all_dropped_metrics = existing_dropped_metrics
+                test_metrics_that_would_be_dropped = list(set(all_dropped_metrics))
+            else:
+                test_metrics_that_would_be_ingested = test_only_metrics_submitted
+                test_metrics_that_would_be_dropped = []
+            ingest_count = len(test_metrics_that_would_be_ingested)
+            drop_count = len(test_metrics_that_would_be_dropped)
+            test_only_data = {
+                'namespace': str(metric_namespace_prefix),
+                'message': 'metric ingestion test, no metrics were ingested only counts are reported',
+                'ingest_count': ingest_count,
+                'drop_count': drop_count,
+                'metrics': str(test_metrics_that_would_be_ingested),
+                'dropped': str(test_metrics_that_would_be_dropped),
+            }
+            logger.info('listen :: test_only creating Redis hash %s with ingest_count: %s, drop_count: %s' % (
+                test_only_redis_key, str(ingest_count),
+                str(drop_count)))
+            try:
+                redis_conn_decoded.hset(test_only_redis_key, mapping=test_only_data)
+                redis_conn.expire(test_only_redis_key, 300)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: failed to hset %s Redis hash - %s' % (
+                    test_only_redis_key, err))
+            logger.info('listen :: test_only request completed')
+            resp.text = json.dumps(test_only_data)
+            resp.status = falcon.HTTP_200
+            return
 
         # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
         # Add to data to the flux.queue Redis set
@@ -1352,7 +1485,7 @@ class MetricData(object):
 
             # @modified 20201207 - Task #3864: flux - try except everything
             try:
-                resp.body = json.dumps(payload)
+                resp.text = json.dumps(payload)
                 resp.status = falcon.HTTP_200
             except Exception as e:
                 logger.error('error :: listen :: failed to json.dumps(payload) - %s' % str(e))
@@ -1453,7 +1586,7 @@ class MetricDataPost(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'invalid json data'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
@@ -1487,7 +1620,7 @@ class MetricDataPost(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'no POST data received'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
@@ -1585,7 +1718,7 @@ class MetricDataPost(object):
                             'code': status_code,
                             'data': data,
                         }
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: status - status_code test: %s' % (
                         str(body)))
                     # logger.debug('debug :: listen :: %s' % str(body))
@@ -1612,7 +1745,7 @@ class MetricDataPost(object):
                         logger.error('error :: listen :: setex on flux.listen failed - %s' % err)
 
                     body = {"status": "ok"}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     resp.status = falcon.HTTP_200
                     return
                 except Exception as err:
@@ -1639,7 +1772,7 @@ class MetricDataPost(object):
                     # @added 20220118 - Feature #4380: flux - return reason with 400
                     message = 'no key passed'
                     body = {"code": 400, "message": message}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: %s, returning 400' % message)
                     resp.status = falcon.HTTP_400
                     return
@@ -1681,7 +1814,7 @@ class MetricDataPost(object):
                     # @added 20220118 - Feature #4380: flux - return reason with 400
                     message = 'invalid key'
                     body = {"code": 401, "message": message}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.warning('warning :: listen :: %s, returning 401' % message)
 
                     # @modified 20210909
@@ -1713,7 +1846,7 @@ class MetricDataPost(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'invalid key'
                 body = {"code": 401, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.warning('warning :: listen :: %s, returning 401' % message)
 
                 # @modified 20210909
@@ -1735,13 +1868,32 @@ class MetricDataPost(object):
             if validated_key:
                 try:
                     body = {"status": "key valid"}
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: validate_key returning 200')
                     resp.status = falcon.HTTP_200
                     return
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: failed to response to validate_key request - %s' % str(err))
+
+            # @added 20230223 - Feature #4840: flux - prometheus - x-test-only header
+            test_only = False
+            test_only_metrics_submitted = []
+            try:
+                test_only_str = req.get_header('x-test-only')
+                if test_only_str:
+                    test_only = True
+            except Exception as err:
+                logger.error('listen :: get_header(\'x-test-only\') error - %s' % str(err))
+            if not test_only:
+                try:
+                    test_only = postData['test']
+                    logger.info('listen :: test: %s' % str(test_only))
+                except KeyError:
+                    test_only = False
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: failed to determine test - %s' % str(err))
 
             # @added 20200818 - Feature #3694: flux - POST multiple metrics
             # Determine if the POST data is for a single metric or multiple metrics
@@ -1775,7 +1927,7 @@ class MetricDataPost(object):
                 # @added 20220118 - Feature #4380: flux - return reason with 400
                 message = 'invalid metrics element'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
 
                 resp.status = falcon.HTTP_400
@@ -1792,9 +1944,32 @@ class MetricDataPost(object):
                         'timestamp': postData['timestamp'],
                         'value': postData['value']
                     }
+                    # @added 20230208 - Feature #3444: Allow flux to backfill
+                    # Add the fill key if it is passed on a single metric
+                    try:
+                        if 'fill' in metric_data:
+                            fill = str(metric_data['fill'])
+                            if fill in ['true', 'True']:
+                                metric_data['fill'] = 'true'
+                    except:
+                        pass
+
                     metrics.append(metric_data)
                 except Exception as err:
                     logger.error('error :: listen :: failed to get metric data from POST to create metric_data and add to metrics - %s' % err)
+                    # @added 20230531 - SAVE_DEBUG_INFO
+                    if SAVE_DEBUG_INFO:
+                        debug_time_now = time()
+                        current_aligned_ts = int(int(debug_time_now) // 60 * 60)
+                        hash_key = 'flux.debug.bad.posts.%s' % str(current_aligned_ts)
+                        try:
+                            redis_conn_decoded.hset(hash_key, str(debug_time_now), str(postData))
+                            redis_conn_decoded.expire(hash_key, 900)
+                            logger.debug('debug :: listen :: postData from failed POST saved to Redis hash %s, postData: %s' % (
+                                str(hash_key), str(postData)))
+                        except Exception as err:
+                            logger.error('error :: listen :: postData from failed POST saved to Redis hash %s, postData: %s' % (
+                                str(hash_key), str(postData), err))
 
             # @added 20211018 - Feature #4284: flux - telegraf
             # Allow the key to be passed as a HTTP header rather than in the json
@@ -1895,7 +2070,7 @@ class MetricDataPost(object):
             if not metrics:
                 message = 'no metric data passed'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
@@ -2028,6 +2203,12 @@ class MetricDataPost(object):
                         check_namespace_quota = received_namespaces[0]
                 if check_namespace_quota in namespaces_with_quotas:
                     namespace_quota = get_namespace_quota(check_namespace_quota)
+
+                # @added 20230223 - Feature #4840: flux - prometheus - x-test-only header
+                # Do not check namespace_quota for test metrics
+                if test_only:
+                    namespace_quota = 0
+
                 if namespace_quota:
                     namespace_quota_key_reference_timestamp = (int(time()) // 60 * 60)
                     namespace_quota_redis_key = 'flux.namespace_quota.%s.%s' % (
@@ -2141,7 +2322,9 @@ class MetricDataPost(object):
                                     # updating all the skipped metrics key every
                                     # submission would incur unnecessary Redis
                                     # overhead
-                                    original_redis_skipped_metrics_dict[received_namespace] = namespace_skipped_metrics_dict.copy()
+                                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                                    # original_redis_skipped_metrics_dict[received_namespace] = namespace_skipped_metrics_dict.copy()
+                                    original_redis_skipped_metrics_dict[received_namespace] = copy.deepcopy(namespace_skipped_metrics_dict)
                                     if not skipped_metrics_dict:
                                         skipped_metrics_dict = {}
                                     for metric in list(namespace_skipped_metrics_dict.keys()):
@@ -2193,7 +2376,9 @@ class MetricDataPost(object):
                                     # updating all the skipped metrics key every
                                     # submission would incur unnecessary Redis
                                     # overhead
-                                    original_redis_skipped_metrics_dict[received_namespace] = skipped_metrics_dict.copy()
+                                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                                    # original_redis_skipped_metrics_dict[received_namespace] = skipped_metrics_dict.copy()
+                                    original_redis_skipped_metrics_dict[received_namespace] = copy.deepcopy(skipped_metrics_dict)
 
                         if skipped_metrics_dict:
                             for base_name in not_found_in_not_skipped:
@@ -2382,7 +2567,7 @@ class MetricDataPost(object):
                             # message = 'invalid metric - %s - %s' % (str(metric_data['metric']), str(reason))
                             message = 'invalid metric - %s - %s' % (str(metric_data), str(reason))
                             body = {"code": 400, "message": message}
-                            resp.body = json.dumps(body)
+                            resp.text = json.dumps(body)
                             logger.info('listen :: %s, returning 400' % message)
 
                             resp.status = falcon.HTTP_400
@@ -2413,7 +2598,7 @@ class MetricDataPost(object):
                         # message = 'invalid metric'
                         message = 'invalid metric - %s' % str(metric_data)
                         body = {"code": 400, "message": message}
-                        resp.body = json.dumps(body)
+                        resp.text = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
@@ -2468,7 +2653,7 @@ class MetricDataPost(object):
 
                     try:
                         fill = str(metric_data['fill'])
-                        if fill == 'true':
+                        if fill in ['true', 'True']:
                             backfill = True
                     except:
                         backfill = False
@@ -2505,7 +2690,7 @@ class MetricDataPost(object):
                                 # message = 'invalid timestamp - %s - %s' % (str(timestamp_present), str(reason))
                                 message = 'invalid timestamp - %s - %s - %s' % (str(timestamp_present), str(reason), str(metric_data))
                                 body = {"code": 400, "message": message}
-                                resp.body = json.dumps(body)
+                                resp.text = json.dumps(body)
                                 logger.info('listen :: %s, returning 400' % message)
 
                                 resp.status = falcon.HTTP_400
@@ -2531,7 +2716,7 @@ class MetricDataPost(object):
                             # message = 'invalid timestamp'
                             message = 'invalid timestamp - %s' % str(metric_data)
                             body = {"code": 400, "message": message}
-                            resp.body = json.dumps(body)
+                            resp.text = json.dumps(body)
                             logger.info('listen :: %s, returning 400' % message)
 
                             resp.status = falcon.HTTP_400
@@ -2587,7 +2772,7 @@ class MetricDataPost(object):
                             # message = 'invalid value - %s' % str(metric_data['value'])
                             message = 'invalid value - %s' % str(metric_data)
                             body = {"code": 400, "message": message}
-                            resp.body = json.dumps(body)
+                            resp.text = json.dumps(body)
                             logger.info('listen :: %s, returning 400' % message)
 
                             resp.status = falcon.HTTP_400
@@ -2614,7 +2799,7 @@ class MetricDataPost(object):
                         # message = 'invalid metric'
                         message = 'invalid metric - %s' % str(metric_data)
                         body = {"code": 400, "message": message}
-                        resp.body = json.dumps(body)
+                        resp.text = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
@@ -2647,7 +2832,7 @@ class MetricDataPost(object):
                             # message = 'invalid value'
                             message = 'invalid value - %s' % str(metric_data)
                         body = {"code": 400, "message": message}
-                        resp.body = json.dumps(body)
+                        resp.text = json.dumps(body)
                         logger.info('listen :: %s, returning 400' % message)
 
                         resp.status = falcon.HTTP_400
@@ -2655,9 +2840,15 @@ class MetricDataPost(object):
                     if not timestamp:
                         timestamp = int(time())
 
+                    # @added 20230223 - Feature #4840: flux - prometheus - x-test-only header
+                    if test_only:
+                        test_only_metrics_submitted.append(original_base_name)
+                        continue
+
                     # Queue the metric
                     try:
                         metric_data = [metric, value, timestamp, backfill]
+
                         # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
                         # Add to data to the flux.queue Redis set
                         if FLUX_PERSIST_QUEUE and metric_data:
@@ -2739,6 +2930,61 @@ class MetricDataPost(object):
                     end_metrics_processing_timer = timer()
                     logger.debug('debug :: listen :: metrics_processing took %.6f seconds' % (end_metrics_processing_timer - start_metrics_processing_timer))
 
+            # @added 20230223 - Feature #4840: flux - prometheus - x-test-only header
+            if test_only:
+                logger.info('listen :: test_only request')
+                current_aligned_ts = int(int(time()) // 60 * 60)
+                test_only_redis_key = 'flux.prometheus.test_only.%s.%s' % (str(metric_namespace_prefix), str(current_aligned_ts))
+                test_only_data = {}
+                try:
+                    test_only_data = redis_conn_decoded.hgetall(test_only_redis_key)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: failed to hgetall %s Redis hash - %s' % (
+                        test_only_redis_key, err))
+                if test_only_data:
+                    existing_test_metrics = []
+                    try:
+                        existing_test_metrics = literal_eval(test_only_data['metrics'])
+                    except:
+                        existing_test_metrics = []
+                    all_test_metrics = test_only_metrics_submitted + existing_test_metrics
+                    test_metrics_that_would_be_ingested = list(set(all_test_metrics))
+                    existing_dropped_metrics = []
+                    try:
+                        existing_dropped_metrics = literal_eval(test_only_redis_key['dropped'])
+                    except:
+                        existing_dropped_metrics = []
+                    all_dropped_metrics = existing_dropped_metrics
+                    test_metrics_that_would_be_dropped = list(set(all_dropped_metrics))
+                else:
+                    test_metrics_that_would_be_ingested = test_only_metrics_submitted
+                    test_metrics_that_would_be_dropped = []
+                ingest_count = len(test_metrics_that_would_be_ingested)
+                drop_count = len(test_metrics_that_would_be_dropped)
+                test_only_data = {
+                    'namespace': str(metric_namespace_prefix),
+                    'message': 'metric ingestion test, no metrics were ingested only counts are reported',
+                    'ingest_count': ingest_count,
+                    'drop_count': drop_count,
+                    'metrics': str(list(set(test_metrics_that_would_be_ingested))),
+                    'dropped': str(test_metrics_that_would_be_dropped),
+                }
+                logger.info('listen :: test_only creating Redis hash %s with ingest_count: %s, drop_count: %s' % (
+                    test_only_redis_key, str(ingest_count),
+                    str(drop_count)))
+                try:
+                    redis_conn_decoded.hset(test_only_redis_key, mapping=test_only_data)
+                    redis_conn.expire(test_only_redis_key, 300)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: failed to hset %s Redis hash - %s' % (
+                        test_only_redis_key, err))
+                logger.info('listen :: test_only request completed')
+                resp.text = json.dumps(test_only_data)
+                resp.status = falcon.HTTP_200
+                return
+
             if rejected_metrics_over_quota:
                 try:
                     message = 'over quota - this account is allowed %s metrics and an additional %s new metrics were posted that have been rejected' % (
@@ -2808,7 +3054,9 @@ class MetricDataPost(object):
                     # Create a log_body for debugging because logging at
                     # telegraf 5s flush_interval is VERB-OVERISTY and
                     # overservability
-                    log_body = body.copy()
+                    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                    # log_body = body.copy()
+                    log_body = copy.deepcopy(body)
                     try:
                         log_body['data'] = 'redacted'
                         log_body['rejected metrics'] = 'redacted'
@@ -2918,7 +3166,7 @@ class MetricDataPost(object):
                         except Exception as err:
                             logger.error('error :: listen :: failed to incrby to Redis key flux.listen.added_to_aggregation_queue - %s' % err)
 
-                    resp.body = json.dumps(body)
+                    resp.text = json.dumps(body)
                     logger.info('listen :: %s, returning %s on metric_namespace_prefix: %s' % (
                         message, str(return_code), str(check_namespace_quota)))
                     # logger.debug('debug :: listen :: %s' % str(body))
@@ -3116,7 +3364,9 @@ class MetricDataPost(object):
                             # 'skipped_metrics': skipped_metrics,
                             'defined skipped_metrics_count': len(skipped_metrics)
                         }
-                        log_body = body.copy()
+                        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                        # log_body = body.copy()
+                        log_body = copy.deepcopy(body)
                         try:
                             log_body['data'] = 'redacted'
                             log_body['dropped non-numeric metrics'] = 'redacted'
@@ -3125,12 +3375,12 @@ class MetricDataPost(object):
                             del devnull
 
                         try:
-                            resp.body = json.dumps(body)
+                            resp.text = json.dumps(body)
                         except Exception as err:
                             logger.error(traceback.format_exc())
                             logger.error('error :: listen :: failed to json.dumps body: %s - %s' % (
                                 str(body), err))
-                            resp.body = {"dropped string value metrics count": len(dropped_telegraf_non_numeric_value_base_names)}
+                            resp.text = {"dropped string value metrics count": len(dropped_telegraf_non_numeric_value_base_names)}
                             return_code = 200
                         if return_code == 200:
                             resp.status = falcon.HTTP_200
@@ -3153,14 +3403,14 @@ class MetricDataPost(object):
 
             if LOCAL_DEBUG:
                 try:
-                    resp.body = json.dumps(postData)
+                    resp.text = json.dumps(postData)
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     # @modified 20220222 - Feature #4284: flux - telegraf
                     # Never log POST data as it can be massive
                     # logger.error('error :: listen :: failed to json.dumps postData - %s' % str(postData))
                     logger.error('error :: listen :: failed to json.dumps postData - %s' % err)
-                    resp.body = {"postData": "None"}
+                    resp.text = {"postData": "None"}
                 resp.status = falcon.HTTP_200
                 logger.info('listen :: returning 200 on metric_data_post request for metric_namespace_prefix: %s' % str(metric_namespace_prefix))
             else:
@@ -3190,7 +3440,7 @@ class OTLPTracePost(object):
         if not FLUX_OTEL_ENABLED:
             message = 'otel traces not enabled'
             body = {"code": 400, "message": message}
-            resp.body = json.dumps(body)
+            resp.text = json.dumps(body)
             logger.info('listen :: OTLPTracePost :: %s, returning 400' % message)
             resp.status = falcon.HTTP_400
             return
@@ -3211,7 +3461,7 @@ class OTLPTracePost(object):
             if status:
                 message = 'OK'
                 body = {"code": 200, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: OTLPTracePost :: %s, returning 200' % message)
                 resp.status = falcon.HTTP_200
                 return
@@ -3224,7 +3474,7 @@ class OTLPTracePost(object):
             if not key:
                 message = 'no key passed'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.info('listen :: OTLPTracePost :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
@@ -3242,7 +3492,7 @@ class OTLPTracePost(object):
                     key))
                 message = 'invalid key'
                 body = {"code": 401, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.warning('warning :: listen :: OTLPTracePost :: %s, returning 401' % message)
                 resp.status = falcon.HTTP_401
                 return
@@ -3276,7 +3526,7 @@ class OTLPTracePost(object):
             if not trace:
                 message = 'invalid OLTP trace data'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.warning('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
@@ -3289,7 +3539,7 @@ class OTLPTracePost(object):
                 logger.error('error :: listen :: OTLPTracePost :: could not parse trace[\'resourceSpans\']')
                 message = 'invalid OLTP trace data no resourceSpans'
                 body = {"code": 400, "message": message}
-                resp.body = json.dumps(body)
+                resp.text = json.dumps(body)
                 logger.warning('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
@@ -3430,3 +3680,1129 @@ class OTLPTracePost(object):
 
         resp.status = falcon.HTTP_204
         return
+
+
+# @added 20221118 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+class VortexDataPost(object):
+
+    def on_post(self, req, resp):
+        """
+        The /flux/vortex endpoint is called via a POST with a json
+        object as defined below, with the optional fill parameter to allow
+        flux to backfill airgap data for a metric:
+
+        For example::
+
+            {
+                "key": "apikey|str",                        # required
+                "metric": "metric|str",                     # required
+                "timeout": seconds|int,                     # required
+                "timeseries": timeseries|[list,dict],       # required
+                "algorithms": {
+                    "default": {},
+                    "sigma": {"consensus": 6},
+                    "matrixprofile": {"window": },
+                    "spectral_residual": {},
+                    "dbscan": {},
+                    "lof": {},
+                },                                          # optional
+                "consensus": [["sigma", "sr"], ["sigma", "matrixprofile"]],
+                "consensus_count": 0,                       # optional
+                "check_all_consensuses": false,
+                "reference": "a reference id for you|str"   # optional
+            }
+
+        For example::
+
+            {
+                "algorithms": {"default": {}},
+                "key": "1234567890abcdefghijklmnop",
+                "metric": "prometheus_http_requests_total{alias=\\"Prometheus\\", code=\\"200\\", handler=\\"/api/v1/query_range\\", instance=\\"localhost:9090\\", job=\\"prometheus\\"}",
+                "timeout": 45,
+                "timeseries": [[1668689060, 23.3], ..., [1668689120, 20.9]],
+            }
+
+        """
+
+        # @modified 20230502 Feature #4732: flux vortex
+        #                    Feature #4734: mirage_vortex
+        # Handle cluster fqdn being different from the hostname
+        # by determining the URL FQDN from REMOTE_SKYLINE_INSTANCES
+        # def shard_host(metric, check_horizon_shards):
+        def shard_host(metric, check_horizon_shards, return_fqdn=False):
+            """
+            Return the shard host to which a metric belongs.
+            """
+            if not check_horizon_shards:
+                return this_host
+            metric_as_bytes = str(metric).encode()
+            value = zlib.adler32(metric_as_bytes)
+            modulo_result = value % len(check_horizon_shards)
+            for shost in check_horizon_shards:
+                if modulo_result == check_horizon_shards[shost]:
+
+                    # @added 20230502 - Feature #4732: flux vortex
+                    #                   Feature #4734: mirage_vortex
+                    # Handle cluster fqdn being different from the hostname
+                    # by determining the URL FQDN from REMOTE_SKYLINE_INSTANCES
+                    if return_fqdn:
+                        for item in settings.REMOTE_SKYLINE_INSTANCES:
+                            if shost in item[3]:
+                                return item[0]
+
+                    return shost
+
+        try:
+            postData = None
+
+            post_req_start = time()
+            request_id = '%s.%s' % (str(post_req_start), str(uuid.uuid4()))
+
+            # @added 20220210 - Feature #4284: flux - telegraf
+            start_request_timer = timer()
+
+            # @added 20210512 - Feature #4060: skyline.flux.worker.discarded metrics
+            # Preserve the request for debugging
+            postData_obj = None
+            try:
+                postData_obj = req.stream.read()
+            except Exception as err:
+                logger.error('error :: listen :: vortex :: req.stream.read() failed - %s' % err)
+
+            # Allow for gzip data
+            # DEBUG
+            # all_headers = None
+            # try:
+            #     all_headers = str(req.headers)
+            # except Exception as err:
+            #     logger.error('listen :: req.headers() error - %s' % str(err))
+            # logger.info('debug :: listen :: headers - %s' % str(all_headers))
+            content_encoding = None
+            try:
+                content_encoding = req.get_header('content-encoding')
+            except Exception as err:
+                logger.error('listen :: get_header(\'content-encoding\') error - %s' % str(err))
+            # if content_encoding:
+            #     logger.info('debug :: listen :: content_encoding: %s' % str(content_encoding))
+            # else:
+            #     logger.info('debug :: listen :: no content_encoding: %s' % str(content_encoding))
+            if content_encoding == 'gzip':
+                if TIMINGS:
+                    logger.info('debug :: listen :: vortex :: content_encoding: %s, decompressing' % str(content_encoding))
+                    start_gzip_timer = timer()
+                try:
+                    postData_obj = gzip.decompress(postData_obj)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: vortex :: gzip.decompress(postData_obj) failed - %s' % err)
+                if TIMINGS:
+                    end_gzip_timer = timer()
+                    logger.debug('debug :: listen :: vortex :: gzip decompression took %.6f seconds' % (end_gzip_timer - start_gzip_timer))
+
+            try:
+                postData = json.loads(postData_obj)
+            except json.decoder.JSONDecodeError:
+                logger.debug('debug :: listen :: vortex :: postData_obj: %s' % str(postData_obj))
+                message = 'invalid json data'
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('listen :: vortex :: %s, returning 400' % message)
+                resp.status = falcon.HTTP_400
+                return
+            except Exception as err:
+                logger.error('error :: listen :: vortex :: invalid post data - %s' % err)
+                # logger.debug('debug :: listen :: vortex :: postData_obj: %s' % str(postData_obj))
+
+            if LOCAL_DEBUG:
+                logger.debug('debug :: listen :: vortex :: request arguments and POST data - %s - %s' % (
+                    str(req.query_string), str(postData)))
+
+            if not postData:
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: listen :: vortex :: no POST data recieved')
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_parameters', request_id)
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: vortex :: added %s to Redis set flux.listen.discarded.invalid_parameters no POST data' % request_id)
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters no POST data- %s' % err)
+
+                try:
+                    redis_conn.set('flux.listen.discarded.invalid_post_data', str(postData_obj))
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to data to Redis set flux.listen.discarded.invalid_post_data - %s' % err)
+
+                # @added 20220118 - Feature #4380: flux - return reason with 400
+                message = 'no POST data received'
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('listen :: vortex :: %s, returning 400' % message)
+
+                resp.status = falcon.HTTP_400
+                return
+
+            key = None
+
+            # @added 20211018 - Feature #4284: flux - telegraf
+            # Allow the key to be passed as a HTTP header rather than in the json
+            # payload
+            header_apikey = None
+            try:
+                header_apikey = req.get_header('key')
+            except Exception as err:
+                logger.error('listen :: vortex :: get_header(\'key\') error - %s' % str(err))
+
+            status = None
+            try:
+                status = str(postData['status'])
+            except KeyError:
+                status = False
+            if status:
+                try:
+                    logger.info('listen :: vortex :: POST status - ok')
+                    try:
+                        redis_conn.setex('flux.listen.vortex', 120, int(time()))
+                    except Exception as err:
+                        logger.error('error :: listen :: vortex :: setex on flux.listen failed - %s' % err)
+                    body = {"status": "ok"}
+                    resp.text = json.dumps(body)
+                    resp.status = falcon.HTTP_200
+                    return
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: could not validate the status key POST request argument - %s - %s' % (
+                        str(req.query_string), err))
+                    resp.status = falcon.HTTP_500
+                    return
+
+            # @added 20200818 - Feature #3694: flux - POST multiple metrics
+            metric_namespace_prefix = None
+
+            # Allow the key to be passed as a HTTP header rather than in the json
+            # payload
+            if header_apikey:
+                key = header_apikey
+            else:
+                key = None
+                try:
+                    key = str(postData['key'])
+                except KeyError:
+                    key = None
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'no key passed'
+                    body = {"code": 400, "message": message}
+                    resp.text = json.dumps(body)
+                    logger.info('listen :: vortex :: %s, returning 400' % message)
+                    resp.status = falcon.HTTP_400
+                    return
+                except Exception as err:
+                    # Never log POST data as it can be massive
+                    logger.error('error :: listen :: could not determine the key from POST data - %s' % (
+                        err))
+
+            try:
+                # Added metric_namespace_prefix
+                keyValid, metric_namespace_prefix = validate_key('listen :: MetricDataPOST POST', key)
+                if not keyValid:
+                    logger.error('error :: listen :: vortex :: invalid key in POST data - %s' % (
+                        str(key)))
+                    unique_value = '%s' % str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: vortex :: added %s to Redis set flux.listen.discarded.invalid_key' % request_id)
+                    except Exception as e:
+                        logger.error('error :: listen :: vortex :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+                    message = 'invalid key'
+                    body = {"code": 401, "message": message}
+                    resp.text = json.dumps(body)
+                    logger.warning('warning :: listen :: vortex :: %s, returning 401' % message)
+                    # Return 401 if bad key
+                    resp.status = falcon.HTTP_401
+                    return
+
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: listen :: vortex :: valid key, metric_namespace_prefix set to %s' % str(metric_namespace_prefix))
+            except Exception as err:
+                logger.error('error :: listen :: could not validate the key from POST data - %s' % (
+                    err))
+                unique_value = '%s' % str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: vortex :: added %s to Redis set flux.listen.discarded.invalid_key' % request_id)
+                except Exception as e:
+                    logger.error('error :: listen :: vortex :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+                message = 'invalid key'
+                body = {"code": 401, "message": message}
+                resp.text = json.dumps(body)
+                logger.warning('warning :: listen :: vortex :: %s, returning 401' % message)
+                resp.status = falcon.HTTP_401
+                return
+
+            # Allow FLUX_SELF_API_KEY requests to set the metric_namespace_prefix
+            if key == FLUX_SELF_API_KEY:
+                try:
+                    metric_namespace_prefix = postData['metric_namespace_prefix']
+                except:
+                    pass
+
+            request_id = '%s.%s' % (request_id, str(metric_namespace_prefix))
+
+            validated_key = False
+            try:
+                validated_key = postData['validate_key']
+                logger.info('listen :: validate_key: %s' % str(validated_key))
+            except KeyError:
+                validated_key = False
+            except Exception as err:
+                logger.error('error :: listen :: vortex :: failed to determine validated_key - %s' % str(err))
+            if validated_key:
+                try:
+                    body = {"status": "key valid"}
+                    resp.text = json.dumps(body)
+                    logger.info('listen :: validate_key returning 200')
+                    resp.status = falcon.HTTP_200
+                    return
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to response to validate_key request - %s' % str(err))
+
+            valid_post_keys = [
+                'algorithms', 'key', 'metric', 'timeout', 'timeseries',
+                'reference', 'consensus', 'no_downsample',
+                # @added 20230129
+                'override_7_day_limit',
+                # @added 20230613 - Feature #4948: vortex - adtk algorithms
+                # Changed the adtk algorithms to return a results dict
+                # like other custom algorithms that vortex can run
+                'realtime_analysis', 'return_results', 'check_all_consensuses',
+                # @added 20230616 - Feature #4952: vortex - consensus_count
+                'consensus_count',
+            ]
+            # Allow FLUX_SELF_API_KEY requests to pass additional parameters
+            if key == FLUX_SELF_API_KEY:
+                valid_post_keys.append('save_training_data_on_false')
+                valid_post_keys.append('shard_test')
+                valid_post_keys.append('metric_namespace_prefix')
+                valid_post_keys.append('send_to_ionosphere')
+                valid_post_keys.append('return_image_urls')
+                valid_post_keys.append('trigger_anomaly')
+                valid_post_keys.append('algorithms_test_only')
+                valid_post_keys.append('processing_shard_url')
+
+            metric = 'none'
+            invalid_post_key = None
+            for post_key in list(postData.keys()):
+                invalid = False
+                if post_key not in valid_post_keys:
+                    invalid = True
+                    invalid_post_key = post_key
+                    continue
+                if not invalid:
+                    if post_key == 'algorithms':
+                        if not isinstance(postData[post_key], dict):
+                            invalid = True
+                            invalid_post_key = post_key
+                            break
+                    if post_key in ['key', 'metric', 'reference']:
+                        if not isinstance(postData[post_key], str):
+                            invalid = True
+                            invalid_post_key = post_key
+                            break
+                        if post_key == 'metric':
+                            metric = str(postData[post_key])
+                    if post_key == 'timeseries':
+                        if not isinstance(postData[post_key], list):
+                            if not isinstance(postData[post_key], dict):
+                                invalid = True
+                                invalid_post_key = post_key
+                                break
+
+            if invalid:
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_parameters', request_id)
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: vortex :: added %s to Redis set flux.listen.discarded.invalid_parameters' % request_id)
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % err)
+                message = 'invalid POST element passed - %s' % str(invalid_post_key)
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('listen :: vortex :: %s, returning 400' % message)
+                resp.status = falcon.HTTP_400
+                return
+
+            # Determine if the number of algorithms declared breaches the
+            # maximum
+            algorithms_err = None
+            algorithms_count = 0
+            try:
+                algorithms_count = len(postData['algorithms'])
+            except:
+                algorithms_count = 0
+            if not algorithms_count:
+                algorithms_err = 'no algorithms passed in POST data'
+            if algorithms_count > VORTEX_MAX_ALGORITHMS:
+                algorithms_err = '%s algorithms passed in POST data, max allowed %s' % (
+                    str(algorithms_count), str(VORTEX_MAX_ALGORITHMS))
+            # Allow FLUX_SELF_API_KEY requests to breach maximum
+            if key == FLUX_SELF_API_KEY:
+                algorithms_err = None
+            if algorithms_err:
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_parameters', request_id)
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: vortex :: added %s to Redis set flux.listen.discarded.invalid_parameters' % request_id)
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % err)
+                message = algorithms_err
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('listen :: vortex :: request_id: %s, %s, returning 400' % (request_id, message))
+                resp.status = falcon.HTTP_400
+                return
+
+            # Determine if the POST data has a metric and timeseries element
+            invalid_timestamp_err_message = None
+            for post_key in ['metric', 'timeseries']:
+                bad_element = False
+                bad_format = False
+                invalid_time_format = False
+                timeseries_list = False
+                timeseries_dict = False
+                try:
+                    value = postData[post_key]
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: listen :: vortex :: %s is set in the POST data' % str(post_key))
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: %s was not passed in the request POST data - returning 400 - %s' % (
+                        post_key, err))
+                    bad_element = True
+                if not bad_element and post_key == 'timeseries':
+                    if not isinstance(value, list):
+                        if not isinstance(value, dict):
+                            bad_element = True
+                            logger.error('error :: listen :: vortex :: %s was not passed as a list or dict - returning 400' % (
+                                post_key))
+                    if isinstance(value, list):
+                        timeseries_list = True
+                    if isinstance(value, dict):
+                        timeseries_dict = True
+                    if not bad_element:
+                        try:
+                            if timeseries_list:
+                                first_timestamp = int(value[0][0])
+                            if timeseries_dict:
+                                first_timestamp = int(list(value.keys())[0])
+                        except Exception as err:
+                            invalid_time_format = True
+                            bad_element = True
+                            invalid_timestamp_err_message = 'invalid timestamps in %s, expected unix timestamps' % (
+                                str(post_key))
+                            logger.error('error :: listen :: vortex :: %s does not contain unix timestamps - returning 400 - %s' % (
+                                post_key, err))
+                if bad_element:
+                    unique_value = '%s' % str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_parameters', request_id)
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: vortex :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
+                    except Exception as err:
+                        logger.error('error :: listen :: vortex :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % err)
+                    message = 'invalid %s element' % str(post_key)
+                    if invalid_time_format:
+                        message = str(invalid_timestamp_err_message)
+                    body = {"code": 400, "message": message}
+                    resp.text = json.dumps(body)
+                    logger.info('listen :: vortex :: %s, returning 400' % message)
+                    resp.status = falcon.HTTP_400
+                    return
+
+            logger.info('listen :: vortex :: handling request_id %s' % request_id)
+            original_request_id = None
+            try:
+                original_request_id = postData['request_id']
+            except:
+                pass
+            postData['request_id'] = request_id
+            postData['metric_namespace_prefix'] = metric_namespace_prefix
+            added_at = time()
+
+            shard_test = False
+            if key in VORTEX_ALLOWED_SHARD_TEST_KEYS:
+                try:
+                    shard_test = postData['shard_test']
+                    if shard_test:
+                        logger.info('listen :: vortex :: shard_test: %s' % str(shard_test))
+                        postData['shard_test'] = shard_test
+                except KeyError:
+                    shard_test = False
+                except:
+                    shard_test = False
+
+            postData['added'] = added_at
+            postData['source_app'] = 'flux'
+
+            wait_for = 60
+            try:
+                wait_for = postData['timeout']
+            except KeyError:
+                wait_for = 60
+            except:
+                wait_for = 60
+
+            local_metric = True
+            shost = this_host
+
+            authorized_shard_request = False
+            shard_request = False
+            try:
+                shard_request = postData['shard_request']
+            except:
+                shard_request = False
+            if shard_request:
+                if shard_request == FLUX_SELF_API_KEY:
+                    authorized_shard_request = True
+                else:
+                    try:
+                        del postData['timeseries']
+                    except:
+                        pass
+                    logger.warning('warning :: listen :: vortex :: unauthorized shard request made - postData (excl. timeseries):  %s' % str(postData))
+                    resp.status = falcon.HTTP_403
+                    return
+                try:
+                    del postData['shard_request']
+                except Exception as err:
+                    resp.status = falcon.HTTP_500
+                    return
+            if authorized_shard_request and original_request_id:
+                logger.info('listen :: vortex :: authorized_shard_request so switching back to the original_request_id: %s' % str(original_request_id))
+                request_id = str(original_request_id)
+                postData['request_id'] = request_id
+
+            processing_shard = 0
+            shost = this_host
+            if not authorized_shard_request:
+                if HORIZON_SHARDS or HORIZON_TEST_SHARDS or shard_test:
+                    if HORIZON_SHARDS:
+                        postData['originating_shard'] = HORIZON_SHARD
+                        shost = shard_host(metric, HORIZON_SHARDS)
+                        processing_shard = HORIZON_SHARDS[shost]
+                    if HORIZON_TEST_SHARDS and shard_test:
+                        postData['horizon_test_shard'] = True
+                        postData['originating_shard'] = HORIZON_TEST_SHARD
+                        shost = shard_host(metric, HORIZON_TEST_SHARDS)
+                        processing_shard = HORIZON_TEST_SHARDS[shost]
+                    if shost != this_host:
+                        local_metric = False
+                    postData['processing_shard'] = processing_shard
+                    postData['shard_host'] = shost
+                    postData['origin_host'] = req.host
+                    postData['origin_scheme'] = req.scheme
+                    postData['shard_request'] = FLUX_SELF_API_KEY
+
+#            postData['local_metric'] = local_metric
+#            postData['origin_host'] = req.host
+#            postData['origin_scheme'] = req.scheme
+#            postData['origin_uri'] = req.uri
+#            postData['origin_url'] = req.url
+
+            if VORTEX_TIMESERIES_JSON_TO_DISK and local_metric:
+                jsonfile = '%s/flux/vortex/data/%s.json' % (settings.SKYLINE_DIR, request_id)
+                try:
+                    # Using a JSON string
+                    with open(jsonfile, 'w') as outfile:
+                        json.dump(postData, outfile)
+                    try:
+                        postData['timeseries'] = jsonfile
+                    except:
+                        pass
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to save request json to %s - %s' % (
+                        jsonfile, err))
+
+            shard_results_url = None
+            added = False
+            if local_metric:
+                try:
+                    added = redis_conn_decoded.hset('flux.vortex', request_id, str(postData))
+                    if added:
+                        logger.info('listen :: vortex :: added %s to flux.vortex' % request_id)
+                except Exception as err:
+                    try:
+                        del postData['timeseries']
+                    except:
+                        pass
+                    logger.error('error :: listen :: vortex :: failed to add entry to Redis hash flux.vortex - %s, postData (excl timeseries): %s' % (
+                        err, str(postData)))
+                    logger.info('listen :: vortex :: returning 500')
+                    resp.status = falcon.HTTP_500
+                    return
+            else:
+                # Send request to shardOffload to shard
+                origin_host = str(req.host)
+                origin_hostname = origin_host.split('.', maxsplit=1)[0]
+                origin_fqdn = origin_host.split('.', maxsplit=1)[1]
+                original_url = str(req.url)
+                processing_shard_url = original_url.replace(origin_hostname, shost)
+
+                # @added 20230502 - Feature #4732: flux vortex
+                #                   Feature #4734: mirage_vortex
+                # Handle cluster fqdn being different from the hostname
+                # by determining the URL FQDN from REMOTE_SKYLINE_INSTANCES
+                if HORIZON_SHARDS:
+                    processing_shard_fqdn_url = shard_host(metric, HORIZON_SHARDS, return_fqdn=True)
+                    processing_shard_url = '%s/flux/vortex' % processing_shard_fqdn_url
+                if HORIZON_TEST_SHARDS and shard_test:
+                    processing_shard_fqdn_url = shard_host(metric, HORIZON_TEST_SHARDS, return_fqdn=True)
+                    processing_shard_url = '%s/flux/vortex' % processing_shard_fqdn_url
+
+                # Handle reverse proxy stripping flux
+                if 'flux/vortex' not in processing_shard_url:
+                    processing_shard_url = processing_shard_url.replace('vortex', 'flux/vortex')
+                postData['shard_host'] = shost
+                postData['processing_shard_url'] = processing_shard_url
+                r = None
+                logger.info('listen :: vortex :: making shard processing request to %s' % str(processing_shard_url))
+                try:
+                    headers = {'content-encoding': 'gzip', "content-type": "application/json"}
+                    request_body = gzip.compress(json.dumps(postData).encode('utf-8'))
+                    r_timeout = wait_for - 5
+                    r = requests.post(processing_shard_url, data=request_body, headers=headers, timeout=r_timeout)
+                    logger.info('listen :: vortex :: shard processing request got response with code %s' % str(r.status_code))
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to make shard request to %s - %s' % (
+                        str(processing_shard_url), err))
+                    logger.info('listen :: vortex :: returning 500')
+                    resp.status = falcon.HTTP_500
+                    return
+                if r:
+                    try:
+                        response_json = r.json()
+                        shard_results_url = response_json['results_url']
+                        retries = -1
+                        logger.info('listen :: vortex :: got shard_results_url: %s' % str(shard_results_url))
+                        sleep(10)
+                    except Exception as err:
+                        logger.error('error :: listen :: vortex :: failed to get results_url from shard response - %s' % (
+                            err))
+                        logger.info('listen :: vortex :: returning 500')
+                        resp.status = falcon.HTTP_500
+                        return
+                    if shard_results_url:
+                        added = True
+
+            if not added:
+                try:
+                    del postData['timeseries']
+                except:
+                    pass
+                if local_metric:
+                    logger.error('error :: listen :: vortex :: failed to add entry to Redis hash flux.vortex, postData (excl timeseries): %s' % (
+                        str(postData)))
+                else:
+                    logger.error('error :: listen :: vortex :: failed to add shard processing request, postData (excl timeseries): %s' % (
+                        str(postData)))
+                logger.info('listen :: vortex :: returning 500')
+                resp.status = falcon.HTTP_500
+                return
+
+            time_now = int(time())
+            results = {}
+            errors = []
+
+            if local_metric and authorized_shard_request:
+                end_request_timer = timer()
+                try:
+                    logger.info('listen :: vortex :: accepted shard request took %.6f seconds' % (
+                        (end_request_timer - start_request_timer)))
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to calculate request time - %s' % err)
+                try:
+                    results_url = '%s://%s/flux/vortex_results?request_id=%s&retries=-1&timeout=%s&shard=%s' % (
+                        req.scheme, req.host, request_id, str(wait_for - 5),
+                        str(postData['processing_shard']))
+                    results = {'results_url': results_url}
+                    resp.text = json.dumps(results)
+                    resp.status = falcon.HTTP_200
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: vortex :: failed to return results_url - %s' % err)
+                    resp.status = falcon.HTTP_500
+                    return
+                return
+
+            # Return immediately, do not hold the request open waiting for the
+            # result as this causes all the workers to be unavailable.  Return
+            # the 303 redirect to /flux/vortex_results
+            end_request_timer = timer()
+            try:
+                logger.info('listen :: vortex :: request took %.6f seconds to process' % (
+                    (end_request_timer - start_request_timer)))
+            except Exception as err:
+                logger.error('error :: listen :: vortex :: failed to calculate request time - %s' % err)
+            uri = '/flux/vortex_results?request_id=%s&retries=1&timeout=%s' % (request_id, str(wait_for))
+            if authorized_shard_request:
+                uri = '%s&shard=%s' % (uri, str(postData['processing_shard']))
+            if shard_results_url:
+                if 'shard=' not in uri:
+                    uri = '%s&shard=%s' % (uri, str(postData['processing_shard']))
+
+            logger.info('listen :: vortex :: returning request_id: %s, redirecting to %s' % (
+                request_id, uri))
+            try:
+                resp.request_id = request_id
+                resp.retries = 1
+                resp.timeout = wait_for
+                resp.location = uri
+                resp.status = falcon.HTTP_303
+                # raise falcon.HTTPSeeOther('/flux/vortex_results', headers={'request_id': request_id, 'retries': 1, 'timeout': wait_for})
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: vortex :: raise falcon.HTTPSeeOther - %s' % err)
+                resp.status = falcon.HTTP_500
+                return
+            return
+
+            while time_now < (post_req_start + wait_for - 2):
+                result_str = None
+                if local_metric:
+                    try:
+                        result_str = redis_conn_decoded.hget('mirage.vortex', request_id)
+                    except Exception as err:
+                        errors.append(err)
+                    if result_str:
+                        try:
+                            results = literal_eval(result_str)
+                        except Exception as err:
+                            logger.error('error :: listen :: vortex :: failed to literal_eval %s data from mirage.vortex - %s' % (
+                                request_id, err))
+                            try:
+                                del postData['timeseries']
+                            except:
+                                pass
+                            logger.error('error :: listen :: vortex :: failed to get results for %s, postData (excl timeseries): %s' % (
+                                request_id, str(postData)))
+                            logger.info('listen :: vortex :: returning 500')
+                            resp.status = falcon.HTTP_500
+                            return
+                    if results:
+                        break
+                    sleep(1)
+                    time_now = int(time())
+                else:
+                    r = None
+                    try:
+                        retries += 1
+                        url = '%s://%s%s/flux/vortex_results?request_id=%s&retries=-1&timeout=%s&shard=%s' % (
+                            req.scheme, shost, origin_fqdn, request_id, str(wait_for - 5),
+                            str(processing_shard))
+                        new_shard_results_url = '%s&retries=%s' % (shard_results_url, str(retries))
+                        r = requests.get(new_shard_results_url, timeout=r_timeout)
+                    except Exception as err:
+                        logger.error('error :: listen :: vortex :: failed to request shard_results_url: %s - %s' % (
+                            str(shard_results_url), err))
+                        try:
+                            del postData['timeseries']
+                        except:
+                            pass
+                        logger.error('error :: listen :: vortex :: failed to get results for %s, postData (excl timeseries): %s' % (
+                            request_id, str(postData)))
+                        logger.info('listen :: vortex :: returning 500')
+                        resp.status = falcon.HTTP_500
+                        return
+                    if r:
+                        try:
+                            results = r.json()
+                            if 'results' in results:
+                                break
+                        except Exception as err:
+                            logger.error('error :: listen :: vortex :: failed to get results from response from shard_results_url: %s - %s' % (
+                                str(shard_results_url), err))
+                    sleep(1)
+                    time_now = int(time())
+
+            if not results:
+                end_request_timer = timer()
+                try:
+                    logger.info('listen :: vortex :: request took %.6f seconds to process' % (
+                        (end_request_timer - start_request_timer)))
+                except Exception as err:
+                    logger.error('error :: listen :: vortex :: failed to calculate request time - %s' % err)
+                uri = '/flux/vortex_results?request_id=%s&retries=1&timeout=%s' % (request_id, str(wait_for))
+                if authorized_shard_request:
+                    uri = '%s&shard=%s' % (uri, str(postData['processing_shard']))
+                logger.info('listen :: vortex :: no results for request_id: %s, redirecting to %s' % (
+                    request_id, uri))
+                try:
+                    resp.request_id = request_id
+                    resp.retries = 1
+                    resp.timeout = wait_for
+                    resp.location = uri
+                    resp.status = falcon.HTTP_303
+                    # raise falcon.HTTPSeeOther('/flux/vortex_results', headers={'request_id': request_id, 'retries': 1, 'timeout': wait_for})
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: vortex :: raise falcon.HTTPSeeOther - %s' % err)
+                    resp.status = falcon.HTTP_500
+                    return
+                return
+
+            try:
+                del postData['timeseries']
+            except:
+                pass
+            postData['results'] = results['results']
+
+            if results:
+                # Remove the key
+                try:
+                    redis_conn_decoded.hdel('mirage.vortex', request_id)
+                except Exception as err:
+                    logger.error('error :: vortex :: failed to hdel %s from mirage.vortex - %s' % (request_id, err))
+
+                postData_keys = list(postData.keys())
+                for key in list(results.keys()):
+                    if key not in postData_keys:
+                        postData[key] = copy.deepcopy(results[key])
+
+                remove_keys = [
+                    'shard_request', 'processing_shard_url', 'shard_host',
+                    'origin_host', 'origin_scheme', 'local_metric', 'origin_uri',
+                    'origin_url', 'shard_test', 'key',
+                ]
+                for remove_key in remove_keys:
+                    try:
+                        del postData[remove_key]
+                    except:
+                        pass
+                    try:
+                        del postData['results'][remove_key]
+                    except:
+                        pass
+
+            resp.text = json.dumps(postData)
+
+            end_request_timer = timer()
+            try:
+                logger.info('listen :: vortex :: request_id: %s, took %.6f seconds to process' % (
+                    request_id, (end_request_timer - start_request_timer)))
+            except Exception as err:
+                logger.error('error :: vortex :: failed to calculate request time - %s' % err)
+
+            resp.status = falcon.HTTP_200
+            return
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: vortex :: request failed - %s' % (
+                err))
+            logger.info('listen :: vortex :: returning 500')
+            resp.status = falcon.HTTP_500
+            return
+
+        resp.status = falcon.HTTP_204
+        return
+
+
+# @added 20221118 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+class VortexResults(object):
+
+    def on_get(self, req, resp):
+        """
+        The /flux/vortex_results endpoint is called via a GET with headers and a
+        URI parameter of retries.
+        """
+
+        # @modified 20230510 Feature #4732: flux vortex
+        #                    Feature #4734: mirage_vortex
+        # Handle cluster fqdn being different from the hostname
+        # by determining the URL FQDN from REMOTE_SKYLINE_INSTANCES
+        # def shard_host(metric, check_horizon_shards):
+        def shard_fqdn(shard):
+            """
+            Return the fqdn of the shard
+            """
+            for shost in list(HORIZON_SHARDS.keys()):
+                if shard == HORIZON_SHARDS[shost]:
+                    break
+            
+            for item in settings.REMOTE_SKYLINE_INSTANCES:
+                if shost in item[3]:
+                    return item[0]
+
+        start_request_timer = timer()
+        start_request = int(time())
+
+        validGetArguments = ['request_id', 'retries', 'timeout', 'shard']
+        request_id = None
+        retries = 0
+        timeout = 29
+        shard = None
+
+        try:
+            payload = {}
+            payload['query_string'] = str(req.query_string)
+
+            for request_param_key, request_param_value in req.params.items():
+                try:
+                    if str(request_param_key) not in validGetArguments:
+                        logger.error('error :: listen :: vortex_results :: invalid key in request arguments - %s - %s' % (
+                            str(request_param_key), str(req.query_string)))
+                        unique_value = '%s' % str(time())
+                        try:
+                            redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: vortex_results :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
+                        except Exception as err:
+                            logger.error('error :: listen :: vortex_results :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % err)
+
+                        # @added 20220118 - Feature #4380: flux - return reason with 400
+                        message = 'Invalid parameter received - %s' % str(request_param_key)
+                        body = {"code": 400, "message": message}
+                        resp.text = json.dumps(body)
+                        logger.info('listen :: vortex_results :: %s, returning 400' % message)
+
+                        resp.status = falcon.HTTP_400
+                        return
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: vortex_results :: validating request arguments - %s' % (
+                        str(req.query_string)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    unique_value = '%s' % str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: vortex_results :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
+                    except Exception as e:
+                        logger.error('error :: listen :: vortex_results :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+
+                    # @added 20220118 - Feature #4380: flux - return reason with 400
+                    message = 'Invalid parameters'
+                    body = {"code": 400, "message": message}
+                    resp.text = json.dumps(body)
+                    logger.info('listen :: vortex_results :: %s, returning 400' % message)
+
+                    resp.status = falcon.HTTP_400
+                    return
+
+                try:
+                    if str(request_param_key) == 'request_id':
+                        request_id = str(request_param_value)
+                    if str(request_param_key) == 'retries':
+                        retries = int(str(request_param_value[-1]))
+                    if str(request_param_key) == 'timeout':
+                        wait_for = int(str(request_param_value))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: vortex_results :: could not validate the %s key in the GET request argument - %s' % (
+                        str(request_param_key), str(req.query_string)))
+                    resp.status = falcon.HTTP_400
+                    return
+                try:
+                    if str(request_param_key) == 'shard':
+                        shard = int(str(request_param_value))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: vortex_results :: could not validate the %s key in the GET request argument - %s' % (
+                        str(request_param_key), str(req.query_string)))
+                    resp.status = falcon.HTTP_400
+                    return
+
+            if not request_id:
+                logger.info('listen :: vortex_results :: request - %s' % str(req.query_string))
+                message = 'no request_id'
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('listen :: vortex_results :: %s, returning 400' % message)
+                resp.status = falcon.HTTP_400
+                return
+
+            retries += 1
+
+            shard_request = False
+            local_shard_number = None
+            shost = this_host
+            if isinstance(shard, int):
+                shard_request = True
+            if shard_request:
+                if HORIZON_SHARDS or HORIZON_TEST_SHARDS:
+                    if HORIZON_SHARDS:
+                        local_shard_number = HORIZON_SHARDS[this_host]
+                        if local_shard_number != shard:
+                            for hshost in HORIZON_SHARDS:
+                                if HORIZON_SHARDS[hshost] == shard:
+                                    shost = hshost
+                                    break
+                    if HORIZON_TEST_SHARDS:
+                        local_shard_number = HORIZON_TEST_SHARDS[this_host]
+                        if local_shard_number != shard:
+                            for hshost in HORIZON_TEST_SHARDS:
+                                if HORIZON_TEST_SHARDS[hshost] == shard:
+                                    shost = hshost
+                                    break
+                        if shost != this_host:
+                            shost = this_host
+
+            if not shard_request:
+                logger.info('listen :: vortex_results :: request_id: %s, retries: %s, timeout: %s' % (
+                    str(request_id), str(retries), str(wait_for)))
+            else:
+                logger.info('listen :: vortex_results :: request_id: %s, retries: %s, timeout: %s, shard: %s' % (
+                    str(request_id), str(retries), str(wait_for), str(shard)))
+
+            time_now = int(time())
+            results = {}
+            errors = []
+            while time_now < (start_request + wait_for - 2):
+                result_str = None
+                if shost == this_host:
+                    try:
+                        result_str = redis_conn_decoded.hget('mirage.vortex', request_id)
+                    except Exception as err:
+                        errors.append(err)
+                    if result_str:
+                        try:
+                            results = literal_eval(result_str)
+                        except Exception as err:
+                            logger.error('error :: listen :: vortex_results :: failed to literal_eval %s data from mirage.vortex - %s' % (
+                                request_id, err))
+                            logger.info('listen :: vortex_results :: returning 500')
+                            resp.status = falcon.HTTP_500
+                            return
+                else:
+                    origin_host = str(req.host)
+                    origin_hostname = origin_host.split('.', maxsplit=1)[0]
+                    # origin_fqdn = origin_host.split('.', maxsplit=1)[1]
+                    original_url = str(req.url)
+                    processing_shard_url = original_url.replace(origin_hostname, shost)
+
+                    # @added 20230502 - Feature #4732: flux vortex
+                    #                   Feature #4734: mirage_vortex
+                    # Handle cluster fqdn being different from the hostname
+                    # by determining the URL FQDN from REMOTE_SKYLINE_INSTANCES
+                    origin_host_url = '%s://%s' % (req.scheme, req.host)
+                    if shard_request:
+                        processing_shard_fqdn_url = shard_fqdn(shard)
+                        processing_shard_url = original_url.replace(origin_host_url, processing_shard_fqdn_url)
+
+                    if 'flux/vortex' not in processing_shard_url:
+                        processing_shard_url = processing_shard_url.replace('vortex', 'flux/vortex')
+                    if retries == 1 and HORIZON_TEST_SHARDS:
+                        r_timeout = 3
+                    else:
+                        r_timeout = wait_for - 5
+                    r = None
+                    try:
+                        r = requests.get(processing_shard_url, timeout=r_timeout)
+                    except Exception as err:
+                        logger.error('error :: listen :: vortex_results :: failed to request processing_shard_url: %s - %s' % (
+                            str(processing_shard_url), err))
+                        logger.info('listen :: vortex_results :: returning 500')
+                        resp.status = falcon.HTTP_500
+                        return
+                    if r:
+                        try:
+                            results = r.json()
+                            if 'results' in results:
+                                break
+                        except Exception as err:
+                            logger.error('error :: listen :: vortex :: failed to get results from response from processing_shard_url: %s - %s' % (
+                                str(processing_shard_url), err))
+
+                if results:
+                    # Remove the key
+                    try:
+                        redis_conn_decoded.hdel('mirage.vortex', request_id)
+                    except Exception as err:
+                        errors.append(err)
+
+                    remove_keys = [
+                        'shard_request', 'processing_shard_url', 'shard_host',
+                        'origin_host', 'origin_scheme', 'local_metric', 'origin_uri',
+                        'origin_url', 'shard_test', 'key',
+                    ]
+                    for remove_key in remove_keys:
+                        try:
+                            del results[remove_key]
+                        except:
+                            pass
+                        try:
+                            del results['results'][remove_key]
+                        except:
+                            pass
+
+                    break
+                sleep(1)
+                time_now = int(time())
+
+            if not results:
+                end_request_timer = timer()
+                try:
+                    logger.info('listen :: vortex_results :: request took %.6f seconds to process before redirection' % (
+                        (end_request_timer - start_request_timer)))
+                except Exception as err:
+                    logger.error('error :: listen :: vortex_results :: failed to calculate request time - %s' % err)
+                if retries >= 3:
+                    retry_url = '%s://%s/flux/vortex_results?request_id=%s&timeout=%s' % (
+                        req.scheme, req.host, request_id, str(wait_for))
+                    results = {
+                        'request_id': request_id,
+                        'results': None,
+                        'reason': 'No results were returned . The request can be retried later, results will be available for 1 hour.',
+                        'retry_url': retry_url}
+                    resp.text = json.dumps(results)
+                    end_request_timer = timer()
+                    try:
+                        logger.info('listen :: vortex_results :: request_id: %s no results returned after 3 retries, took %.6f seconds to process' % (
+                            request_id, (end_request_timer - start_request_timer)))
+                    except Exception as err:
+                        logger.error('error :: listen :: failed to calculate request time - %s' % err)
+                    resp.status = falcon.HTTP_200
+                    return
+
+                uri = '/flux/vortex_results?request_id=%s&retries=%s&timeout=%s' % (request_id, str(retries), str(wait_for))
+                if shard_request:
+                    uri = '%s&shard=%s' % (uri, str(shard))
+                logger.info('listen :: vortex_results :: no results for request_id: %s, redirecting to %s' % (
+                    request_id, uri))
+                resp.request_id = request_id
+                resp.retries = 1
+                resp.timeout = wait_for
+                resp.location = uri
+                resp.status = falcon.HTTP_303
+                return
+
+            status_code = 200
+            try:
+                status_code = results['status_code']
+            except:
+                status_code = 200
+
+            resp.text = json.dumps(results)
+            end_request_timer = timer()
+            try:
+                logger.info('listen :: vortex_results :: request_id: %s results returned, took %.6f seconds to process' % (
+                    request_id, (end_request_timer - start_request_timer)))
+            except Exception as err:
+                logger.error('error :: listen :: failed to calculate request time - %s' % err)
+
+            if status_code == 200:
+                resp.status = falcon.HTTP_200
+            elif status_code == 400:
+                resp.status = falcon.HTTP_400
+            else:
+                resp.status = falcon.HTTP_500
+            return
+
+        except Exception as err:
+            logger.error('error :: listen :: vortex_results :: request failed - %s' % (
+                err))
+            logger.info('listen :: vortex_results :: returning 500')
+            resp.status = falcon.HTTP_500
+            return

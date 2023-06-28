@@ -12,6 +12,16 @@
 # @modified 20220422 - Task #4452: Update dependencies
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
+
+# @added 20230628 - Task #4962: Build and test skyline v4.0.0
+#Sphinx==5.3.0
+#sphinx-rtd-theme==1.1.1
+#recommonmark==0.7.1
+#Sphinx==7.0.1  # sphinx-rtd-theme 1.2.2 depends on sphinx<7 and >=1.6
+Sphinx==6.2.1
+sphinx-rtd-theme==1.2.2
+recommonmark
+
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
 setuptools
 wheel
@@ -21,13 +31,33 @@ wheel
 #redis==4.0.2
 # @modified 20220422 - Task #4452: Update dependencies
 #redis==4.1.0
-redis==4.2.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#redis==4.2.2
+# @modified 20230331 - Support #4884: Update dependencies - redis-py - CVE-2023-28858
+#redis==4.4.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#redis==4.4.4
+redis==4.6.0
+
+# @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
+#hiredis==1.0.1
 # @modified 20211220 - Task #4344: Update dependencies
 #hiredis==1.1.0
 hiredis==2.0.0
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #docutils==0.16
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#docutils==0.18.1
+# readthedocs error 
+# The user requested docutils==0.20.1
+# sphinx 6.2.1 depends on docutils<0.20 and >=0.18.1
+#docutils==0.20.1
+#docutils==0.19
+# sphinx-rtd-theme 1.2.2 depends on docutils<0.19
 docutils==0.18.1
+
 lockfile==0.12.2
 # @modified 20211220 - Task #4344: Update dependencies
 #python-daemon==2.2.4
@@ -52,22 +82,40 @@ itsdangerous==2.1.2
 # from jinja2 import FileSystemLoader, BaseLoader, TemplateNotFound, \
 # ImportError: cannot import name 'contextfunction' from 'jinja2' (/home/docs/checkouts/readthedocs.org/user_builds/earthgecko-skyline/envs/latest/lib/python3.7/site-packages/jinja2/__init__.py)
 #Jinja2==3.1.1
-Jinja2==3.0.3
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Jinja2==3.0.3
+Jinja2==3.1.2
+
 # @modified 20211220 - Task #4344: Update dependencies
 #MarkupSafe==1.1.1
 # @modified 20220422 - Task #4452: Update dependencies
 #MarkupSafe==2.0.1
-MarkupSafe==2.1.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#MarkupSafe==2.1.1
+MarkupSafe==2.1.3
 # @modified 20211220 - Task #4344: Update dependencies
 #Werkzeug==1.0.1
 # @modified 20220422 - Task #4452: Update dependencies
 #Werkzeug==2.0.2
-Werkzeug==2.1.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Werkzeug==2.1.1
+# readthedocs build error
+#ERROR: pip's legacy dependency resolver does not consider dependency conflicts when selecting packages. This behaviour is the source of the following dependency conflicts.
+#dash 2.11.0 requires Flask<2.3.0,>=1.0.4, but you'll have flask 2.3.2 which is incompatible.
+#dash 2.11.0 requires Werkzeug<2.3.0, but you'll have werkzeug 2.3.6 which is incompatible.
+#Werkzeug==2.3.6
+Werkzeug==2.2.3
+
 # @modified 20211220 - Task #4344: Update dependencies
 #click==7.1.2
 # @modified 20220422 - Task #4452: Update dependencies
 #click==8.0.3
-click==8.1.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#click==8.1.2
+click==8.1.3
 # @modified 20211220 - Task #4344: Update dependencies
 #Flask==1.1.2
 # @modified 20220422 - Task #4452: Update dependencies
@@ -75,24 +123,52 @@ click==8.1.2
 # @modified 20220430 - Task #4452: Update dependencies
 # readthedocs error
 #Flask==2.1.1
-Flask==2.0.2
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Flask==2.0.2
+# readthedocs build error
+#ERROR: pip's legacy dependency resolver does not consider dependency conflicts when selecting packages. This behaviour is the source of the following dependency conflicts.
+#dash 2.11.0 requires Flask<2.3.0,>=1.0.4, but you'll have flask 2.3.2 which is incompatible.
+#dash 2.11.0 requires Werkzeug<2.3.0, but you'll have werkzeug 2.3.6 which is incompatible.
+#Flask==2.3.2
+Flask==2.2.2
+
 # @modified 20211220 - Task #4344: Update dependencies
 #simplejson==3.17.2
-simplejson==3.17.6
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#simplejson==3.17.6
+simplejson==3.19.1
+
 # @modified 20211220 - Task #4344: Update dependencies
 #six==1.15.0
 six==1.16.0
+# @modified 20230110 - Task #4800: Deprecate unittest2
+#                      Task #4778: v4.0.0 - update dependencies
+# Use built in unittest, deprecated linecache2, traceback2, argparse and unittest2
+# @modified 20230119 - Task #4800: Deprecate unittest2
+#                      Task #4778: v4.0.0 - update dependencies
+# argparse is left as it is required for pipdeptree
 argparse==1.4.0
-linecache2==1.0.0
-traceback2==1.4.0
-unittest2==1.1.0
+#linecache2==1.0.0
+#traceback2==1.4.0
+#unittest2==1.1.0
+
 funcsigs==1.0.2
 # @modified 20211220 - Task #4344: Update dependencies
 #pbr==5.5.1
 # @modified 20220422 - Task #4452: Update dependencies
 #pbr==5.8.0
-pbr==5.8.1
-mock==4.0.3
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pbr==5.8.1
+pbr==5.11.1
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#mock==4.0.3
+mock==5.0.2
+
 # @modified 20211220 - Task #4344: Update dependencies
 #numpy==1.19.4
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
@@ -104,10 +180,18 @@ mock==4.0.3
 # numpy 1.22.0 stil not available on readthedocs
 #numpy==1.21.5
 #numpy==1.22.3
-numpy==1.21.5
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#numpy==1.21.5
+numpy==1.23.5
+
 # @modified 20211220 - Task #4344: Update dependencies
 #scipy==1.5.4
-scipy==1.7.3
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#scipy==1.7.3
+scipy==1.10.1
+
 # @modified 20211220 - Task #4344: Update dependencies
 #python-dateutil==2.8.1
 python-dateutil==2.8.2
@@ -115,7 +199,11 @@ python-dateutil==2.8.2
 #pytz==2020.5
 # @modified 20220422 - Task #4452: Update dependencies
 #pytz==2021.3
-pytz==2022.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pytz==2022.1
+pytz==2023.3
+
 # @modified 20211220 - Task #4344: Update dependencies
 #cycler==0.10.0
 cycler==0.11.0
@@ -123,7 +211,11 @@ cycler==0.11.0
 #pyparsing==2.4.7
 # @modified 20220422 - Task #4452: Update dependencies
 #pyparsing==3.0.6
-pyparsing==3.0.8
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pyparsing==3.0.8
+pyparsing==3.1.0
+
 # @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 #Pillow==8.1.2
 # @modified 20211110 - Task #4282: Update dependencies
@@ -135,10 +227,18 @@ pyparsing==3.0.8
 #Pillow==8.4.0
 # @modified 20220422 - Task #4452: Update dependencies
 #Pillow==9.0.0
-Pillow==9.1.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Pillow==9.1.0
+Pillow==9.5.0
+
 # @modified 20220217 - Task #4452: Update dependencies
 #matplotlib==3.3.3
-matplotlib==3.5.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#matplotlib==3.5.1
+matplotlib==3.7.1
+
 # @modified 20211220 - Task #4344: Update dependencies
 #pandas==1.2.0
 # @modified 20220422 - Task #4452: Update dependencies
@@ -146,24 +246,45 @@ matplotlib==3.5.1
 # @modified 20220430 - Task #4452: Update dependencies
 # pandas 1.4.2 not available on readthedocs
 #pandas==1.4.2
-pandas==1.3.5
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pandas==1.3.5
+pandas==1.5.2
+
 # @modified 20211220 - Task #4344: Update dependencies
 #patsy==0.5.1
-patsy==0.5.2
-statsmodels==0.12.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#patsy==0.5.2
+patsy==0.5.3
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#statsmodels==0.12.1
+statsmodels==0.13.5
+
 msgpack-python==0.5.6
+
 # @modified 20211220 - Task #4344: Update dependencies
 #requests==2.25.1
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #requests==2.26.0
-requests==2.27.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#requests==2.27.1
+requests==2.31.0
+
 #python-simple-hipchat==0.4.0
 pygerduty==0.38.3
 # @modified 20211220 - Task #4344: Update dependencies
 #mysql-connector-python==8.0.22
 # @modified 20220422 - Task #4452: Update dependencies
 #mysql-connector-python==8.0.27
-mysql-connector-python==8.0.28
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#mysql-connector-python==8.0.28
+mysql-connector-python==8.0.33
+
 # @modified 20211220 - Task #4344: Update dependencies
 #gunicorn==20.0.4
 gunicorn==20.1.0
@@ -171,7 +292,11 @@ gunicorn==20.1.0
 #pipdeptree==2.0.0
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #pipdeptree==2.2.0
-pipdeptree==2.2.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pipdeptree==2.2.1
+pipdeptree==2.9.3
+
 # @added 20210614 - Task #4140: deps updates
 #                   Branch #1444: thunder
 # https://snyk.io/vuln/SNYK-PYTHON-PIP-1278135
@@ -186,10 +311,26 @@ pipdeptree==2.2.1
 #scikit-learn==0.24.2
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #scikit-learn==1.0.1
-scikit-learn==1.0.2
-future==0.18.2
-tsfresh==0.17.0
-termcolor==1.1.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#scikit-learn==1.0.2
+scikit-learn==1.2.2
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#future==0.18.2
+future==0.18.3
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#tsfresh==0.17.0
+git+https://github.com/earthgecko/tsfresh@3d5a320#egg=tsfresh
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#termcolor==1.1.0
+termcolor==2.3.0
+
 # @modified 20211220 - Task #4344: Update dependencies
 #py==1.10.0
 py==1.11.0
@@ -197,23 +338,44 @@ py==1.11.0
 #pytest==6.2.1
 # @modified 20220422 - Task #4452: Update dependencies
 #pytest==6.2.5
-pytest==7.1.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pytest==7.1.1
+pytest==7.4.0
+
 # @modified 20211220 - Task #4344: Update dependencies
 #SQLAlchemy==1.3.22
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #SQLAlchemy==1.4.28
 # @modified 20220422 - Task #4452: Update dependencies
 #SQLAlchemy==1.4.29
-SQLAlchemy==1.4.35
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#SQLAlchemy==1.4.35
+SQLAlchemy==1.4.48
+
 # @modified 20211220 - Task #4344: Update dependencies
 #pymemcache==3.4.0
 # @modified 20220422 - Task #4452: Update dependencies
 #pymemcache==3.5.0
 pymemcache==3.5.2
+
 # @modified 20211220 - Task #4344: Update dependencies
 #PyJWT==1.7.1
-PyJWT==2.4.0
-slackclient==2.9.3
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#PyJWT==2.3.0
+PyJWT==2.7.0
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#slackclient==2.9.3
+slackclient==2.9.4
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+aiohttp==3.8.4
+
 # @modified 20210614 - Task #4140: deps updates
 #                      Branch #1444: thunder
 # https://github.com/earthgecko/skyline/pull/431
@@ -224,16 +386,31 @@ slackclient==2.9.3
 #urllib3==1.26.7
 # @modified 20220422 - Task #4452: Update dependencies
 #urllib3==1.26.8
-urllib3==1.26.9
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#urllib3==1.26.9
+urllib3==1.26.16
+
 # @modified 20211220 - Task #4344: Update dependencies
 #graphyte==1.6.0
-graphyte==1.7.0
-statsd==3.3.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#graphyte==1.7.0
+graphyte==1.7.1
+
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#statsd==3.3.0
+statsd==4.0.1
+
 # @modified 20211220 - Task #4344: Update dependencies
 #falcon==2.0.0
 # @modified 20220422 - Task #4452: Update dependencies
 #falcon==3.0.1
-falcon==3.1.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#falcon==3.1.0
+falcon==3.1.1
 
 xlrd==1.2.0
 # @modified 20220422 - Task #4452: Update dependencies
@@ -245,13 +422,21 @@ pandas_log==0.1.6
 timeout-decorator==0.5.0
 # @modified 20211220 - Task #4344: Update dependencies
 #matrixprofile==1.1.4
-matrixprofile==1.1.10
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+# The matrix-profile-foundation/matrixprofile library is no longer maintained and
+# this has been replaced with the stumpy matrixprofile implementation
+#matrixprofile==1.1.10
+
+adtk
+
 mass-ts==0.1.4
 # @modified 20220422 - Task #4452: Update dependencies
 #boto3==1.20.24
-boto3==1.21.44
-
-adtk
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#boto3==1.21.44
+boto3==1.26.160
 
 # @added 20220110 - Feature #4180: custom_algorithm - m66
 #                   Feature #4164: luminosity - cloudbursts
@@ -261,7 +446,10 @@ bottleneck==1.3.2
 #                   Feature #3538: webapp - upload_data endpoint
 #                   Task #4362: snyk - numpy and pillow updates
 # New dependency for pandas reading xls
-openpyxl==3.0.9
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#openpyxl==3.0.9
+openpyxl==3.1.2
 
 # @added 20220422 - Task #4452: Update dependencies
 # @modified 20220430 - Task #4452: Update dependencies
@@ -281,3 +469,15 @@ openpyxl==3.0.9
 #opentelemetry-sdk==1.11.1
 #opentelemetry-semantic-conventions==0.29b0
 #opentelemetry-util-http==0.29b0
+
+# @added 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+prometheus-client==0.17.0
+memray==1.8.0
+numba==0.56.4
+kneed==0.8.3
+gevent==22.10.2
+prophet==1.1.4
+protobuf==3.20.1
+stumpy==1.11.1
+statsforecast==1.5.0

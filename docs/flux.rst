@@ -5,15 +5,27 @@ Flux
 ====
 
 Flux enables Skyline to receive metrics via HTTP GET and POST requests and
-submits them to Graphite, so they can be pickled to Skyline for analysis in near
-real time via the normal Skyline pipeline.
+submits them to Graphite so they can be pickled to Skyline.  Flux can also
+forward labelled metric data from Prometheus remote_write to RedisTimeseries and
+VictoriaMetrics, for analysis in real time via the normal Skyline pipeline.
 
-Flux uses falcon the bare-metal web API framework for Python to serve the API
-via gunicorn.  The normal nginx reverse proxy Skyline vhost is used to serve the
-/flux endpoint and proxy requests to flux.
+Flux uses falcon, the bare-metal web API framework for Python to serve the API
+via gunicorn/gevent.  The normal nginx reverse proxy Skyline vhost is used to
+serve the /flux endpoint and proxy requests to flux.
 
 It is preferable to use the POST Flux endpoint to submit metrics so that the
 Skyline flux API key can be encrypted via SSL in the POST data.
+
+Flux can accept data in the following formats:
+
+- HTTP JSON
+- telegraf json format
+- Prometheus protobuf data
+
+Sending metrics from Prometheus
+-------------------------------
+
+See the `Prometheus <prometheus.html>`__ page
 
 Flux is **not** an aggregator
 -----------------------------
@@ -144,6 +156,7 @@ request.
 
   curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 
+
 Here is an example of the data a multiple metrics POST requires and an example
 POST request for multiple metrics:
 
@@ -172,7 +185,32 @@ POST request for multiple metrics:
 
   curl -v -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":1478021700,"value":0.2}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 
-It is possible to backfill old data via flux, using the ``"fill": "true"``
+It is possible to test what metrics would be ingested BEFORE submitting them for
+real.  You can add the test key and Flux will simply receive the metrics and
+report what metrics would be ingested, without actually sending the metrics to
+the backend store/s.  For example:
+
+.. code-block:: json
+
+  {
+  	"key": "YOURown32charSkylineAPIkeySecret",
+    "test": true,
+    "metrics": [
+      {
+      	"metric": "vista.nodes.skyline-1.cpu.user",
+      	"timestamp": 1374341700,
+      	"value": 1.5,
+      },
+      {
+      	"metric": "vista.nodes.skyline-1.cpu.system",
+      	"timestamp": 1374341700,
+      	"value": 0.5,
+      }
+    ]
+  }
+
+
+It is also possible to backfill old data via flux, using the ``"fill": "true"``
 element in the json.  By default flux checks timestamps to see if they are
 sensible and valid, however if ``"fill": "true"`` is present in the metric
 json, these checks will be skipped and the data will be submitted to Graphite
@@ -325,50 +363,50 @@ teleraf data to flux.
 
 .. code-block:: ini
 
-# Configuration for telegraf agent
-[agent]
-  ## Default data collection interval for all inputs
-  ## IDEALLY for Skyline and Flux change 10s to 60s
-  # interval = "10s"
-  interval = "60s"
+  # Configuration for telegraf agent
+  [agent]
+    ## Default data collection interval for all inputs
+    ## IDEALLY for Skyline and Flux change 10s to 60s
+    # interval = "10s"
+    interval = "60s"
 
-  ## Rounds collection interval to 'interval'
-  ## ie, if interval="10s" then always collect on :00, :10, :20, etc.
-  round_interval = true
+    ## Rounds collection interval to 'interval'
+    ## ie, if interval="10s" then always collect on :00, :10, :20, etc.
+    round_interval = true
 
-  ## Telegraf will send metrics to outputs in batches of at most
-  ## metric_batch_size metrics.
-  ## This controls the size of writes that Telegraf sends to output plugins.
-  metric_batch_size = 1000
+    ## Telegraf will send metrics to outputs in batches of at most
+    ## metric_batch_size metrics.
+    ## This controls the size of writes that Telegraf sends to output plugins.
+    metric_batch_size = 1000
 
-  ## Maximum number of unwritten metrics per output.  Increasing this value
-  ## allows for longer periods of output downtime without dropping metrics at the
-  ## cost of higher maximum memory usage.
-  metric_buffer_limit = 10000
+    ## Maximum number of unwritten metrics per output.  Increasing this value
+    ## allows for longer periods of output downtime without dropping metrics at the
+    ## cost of higher maximum memory usage.
+    metric_buffer_limit = 10000
 
-  ## Collection jitter is used to jitter the collection by a random amount.
-  ## Each plugin will sleep for a random time within jitter before collecting.
-  ## This can be used to avoid many plugins querying things like sysfs at the
-  ## same time, which can have a measurable effect on the system.
-  ## IDEALLY for your own devices change this from 0s to 5s
-  # collection_jitter = "0s"
-  collection_jitter = "5s"
+    ## Collection jitter is used to jitter the collection by a random amount.
+    ## Each plugin will sleep for a random time within jitter before collecting.
+    ## This can be used to avoid many plugins querying things like sysfs at the
+    ## same time, which can have a measurable effect on the system.
+    ## IDEALLY for your own devices change this from 0s to 5s
+    # collection_jitter = "0s"
+    collection_jitter = "5s"
 
-  ## Collection offset is used to shift the collection by the given amount.
-  ## This can be be used to avoid many plugins querying constraint devices
-  ## at the same time by manually scheduling them in time.
-  # collection_offset = "0s"
+    ## Collection offset is used to shift the collection by the given amount.
+    ## This can be be used to avoid many plugins querying constraint devices
+    ## at the same time by manually scheduling them in time.
+    # collection_offset = "0s"
 
-  ## Default flushing interval for all outputs. Maximum flush_interval will be
-  ## flush_interval + flush_jitter
-  ## IDEALLY for Skyline and Flux change 10s to 60s
-  # flush_interval = "10s"
-  flush_interval = "60s"
-  ## Jitter the flush interval by a random amount. This is primarily to avoid
-  ## large write spikes for users running a large number of telegraf instances.
-  ## ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
-  ## IDEALLY for Skyline and Flux change 0s to 5s
-  flush_jitter = "5s"
+    ## Default flushing interval for all outputs. Maximum flush_interval will be
+    ## flush_interval + flush_jitter
+    ## IDEALLY for Skyline and Flux change 10s to 60s
+    # flush_interval = "10s"
+    flush_interval = "60s"
+    ## Jitter the flush interval by a random amount. This is primarily to avoid
+    ## large write spikes for users running a large number of telegraf instances.
+    ## ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s
+    ## IDEALLY for Skyline and Flux change 0s to 5s
+    flush_jitter = "5s"
 
 
 populate_metric endpoint

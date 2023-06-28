@@ -7,17 +7,15 @@ This is going to take some time.
 Intended audience
 -----------------
 
-Skyline is not really a ``localhost`` application, it needs lots of data, unless
-you have a ``localhost`` Graphite or pickle Graphite to your localhost, however
-Skyline and all its components could be run on localhost if you wanted but it
-is not recommended.
+Skyline is not a ``localhost`` application that runs on your laptop it is a
+server application.
 
 Given the specific nature of Skyline, it is assumed that the audience will have
 a certain level of technical knowledge, e.g. it is assumed that the user will be
 familiar with the installation, configuration, operation and security practices
 and considerations relating to the following components:
 
-- Graphite
+- Graphite (and/or VictoriaMetrics)
 - Redis
 - MariaDB
 - nginx
@@ -30,7 +28,7 @@ configurations of things that are directly related Skyline.  Although it cannot
 possibly cover all possible set ups or scenarios, it does describe
 recommendations in terms of configurations of the various components and how and
 where they should be run in relation to Skyline.  There are no cfengine, puppet,
-chef or ansible patterns here.
+chef or ansible patterns here, nor helm charts, yaml or dockerfiles.
 
 There are two methods of installation described here:
 
@@ -40,11 +38,19 @@ There are two methods of installation described here:
 The documentation is aimed at installing Skyline securely by default.  It is
 possible to run Skyline very insecurely, however this documentation does not
 specify how to do that.  Both the set up and documentation are verbose.  Setting
-up Skyline takes a while, the quickstart installation script takes about 30
-minutes to run.
+up Skyline takes a while.
+
+The quickstart installation script takes about 30 minutes to run.  It downloads
+and builds Python, creates a skyline system user, provisions a virtualenv,
+downloads, builds, configures and installs Redis, installs and configures
+MariaDB, install memcached, nginx, clone skyline, install all the deps, deploys
+the DB schema, installs all the components of Graphite, deploys a nginx reverse
+proxy config for Skyline and Graphite, provisions systemd unit files and starts
+the Skyline and Graphite services.  Optionally it can also install Prometheus
+and VictoriaMetrics as well.
 
 Skyline's default settings and documentation are aimed to run behind a SSL
-terminated and authenticated reverse proxy and use Redis authentication.  This
+terminated and authenticated reverse proxy and uses Redis authentication.  This
 makes the installation process more tedious, but it means that all these
 inconvenient factors are not left as an after thought or added to some TODO list
 or issue when you decide after trying Skyline, "Yes! I want Skyline, this is
@@ -56,13 +62,16 @@ the end of this page.
 What the components do
 ----------------------
 
-- Graphite - is a TSDB that receives metrics for machines and applications,
-  stores the metric data and sends the metric data to Skyline Horizon via a
-  pickle (Python object serialization).  Graphite is a separate application that
-  will probably be running on another server in a large production deployment,
-  although Graphite can run on the same server as Skyline.  Graphite is not part
-  of Skyline, however the standalone build script does install Graphite by
-  default.
+- Graphite - is a timeseries database (TSDB) that receives metrics for machines
+  and applications, stores the metric data and sends the metric data to the
+  Skyline Horizon app via a pickle (Python object serialization).  Graphite is a
+  separate application that will probably be running on another server in a
+  large production deployment, although Graphite can run on the same server as
+  Skyline.  Graphite is not part of Skyline, however the standalone build script
+  does install Graphite by default.
+- VictoriaMetrics - (optional) if Skyline is receiving and analysing Prometheus
+  format or labelled metrics via Skyline flux, VictoriaMetrics is used as the
+  store.  Skyline can used both Graphite and VictoriaMetrics simultaneously.
 - Redis - stores :mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
   of time series data that Graphite sends to Skyline Horizon and Horizon writes
   the data to Redis.  Skyline Analyzer pulls the data from Redis for analysis.
@@ -78,18 +87,20 @@ What the components do
 - memcached - caches Ionosphere SQL data, memcached should ideally be run on
   the same host as Skyline.
 
+
 Skyline configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
 All Skyline configuration is handled in ``skyline/settings.py`` and in this
 documentation configuration options are referred to via their docstrings name
-e.g. :mod:`settings.FULL_DURATION` which links to their description in the
+e.g. :mod:`settings.FULL_DURATION` which links to their description in this
 documentation.
 
-There are lots of settings in ``settings.py`` do not feel intimidated by this.
-The default settings should be adequate and reasonable for starting out with.
-The settings that you must change and take note of are all documented further on
-this page and labelled with ``[USER_DEFINED]`` in the settings.py
+There are lots of settings in ``settings.py``, 342 at last count, do not feel
+intimidated by this. The default settings should be adequate and reasonable for
+starting out with. The settings that you must change and take note of are all
+documented further on this page and are labelled with ``[USER_DEFINED]`` in
+the ``settings.py``.
 
 .. note:: You will encounter settings that are described as ADVANCED
   FEATURE or EXPERIMENTAL.  Many of these settings are not necessarily fully
@@ -111,15 +122,15 @@ Ouickstart - Dawn
   and Graphite instance, it is for testing purposes and if used to deploy a
   permanent instance the recommendations regarding security and configuration
   should be followed, see `Dawn <development/dawn.html>`__ section.
-- Or should you wish to just review the build steps, component builds and installs
-  described below, the convenience build script you can review
-  `utils/dawn/skyline.dawn.sh` and see `Dawn <development/dawn.html>`__ section.
+- Or if you just wish to review the build steps, component builds and installs
+  described below, the steps of the build script steps are described in
+  `Dawn <development/dawn.html>`__ section.
 
 Manual Installation
 -------------------
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-3.8.13 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-3.8.17 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
 
@@ -138,7 +149,7 @@ Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
 - The first part of the installation is to build Python and create a
-  Python-3.8.13 virtualenv for Skyline to run in.  For this first step in the
+  Python-3.8.17 virtualenv for Skyline to run in.  For this first step in the
   installation process see and follow the steps laid out in
   `Running Skyline in a Python virtualenv <running-in-python-virtualenv.html>`__
 
@@ -176,7 +187,13 @@ Firewall
 Redis
 ~~~~~
 
-- Install Redis - see `Redis.io <http://redis.io/>`__
+- Install Redis - see `Redis.io <https://redis.io/>`__ or Redis Stack Server (see
+  `Redis.io Redis Stack Server <https://redis.io/docs/stack/get-started/>`__) if
+  you want to handle labelled metrics, like InfluxDB or Prometheus metrics.
+- Note Redis is a primary component of Skyline and if you choose to install Redis
+  via yum/dnf or apt using the Redis packages.redis.io repos these can often
+  provide release candidate (RC) packages.  It is advisable to use a stable
+  version wherever possible.
 - Ensure that you review https://redis.io/topics/security
 - Ensure Redis has socket enabled **with the following permissions** in your
   redis.conf
@@ -261,7 +278,7 @@ Skyline and dependencies install
     chown skyline:skyline -R /opt/skyline/github/skyline/skyline/webapp/static/dump
 
 
-- Once again using the Python-3.8.13 virtualenv,  install the requirements using
+- Once again using the Python-3.8.17 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -285,29 +302,11 @@ Skyline and dependencies install
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
-
-    # As of statsmodels 0.9.0 numpy, et al need to be installed before
-    # statsmodels in requirements
-    # https://github.com/statsmodels/statsmodels/issues/4654
-    cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
-    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.1.txt
-    cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==" > /tmp/requirements.2.txt
-    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.2.txt
-    # Currently matrixprofile protobuf version conflicts with the opentelemetry
-    # required version
-    cat /opt/skyline/github/skyline/requirements.txt | grep -v "^opentelemetry" > /tmp/requirements.3.txt
-    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.3.txt
-    # Handle conflict between opentelemetry contrib packages and opentelemetry
-    # main because opentelemetry contibs are behind main
-    cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep -v "1.11.1" > /tmp/requirements.4.txt
-    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.4.txt
-    # opentelemetry main
-    cat /opt/skyline/github/skyline/requirements.txt | grep "^opentelemetry" | grep "1.11.1" > /tmp/requirements.5.txt
-    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.5.txt
-
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
+    
     deactivate
 
-    # Fix python-daemon=>2.2.4 - which fails to run on Python 3 (numerous PRs are waiting
+    # Fix python-daemon=>2.x - which fails to run on Python 3 (numerous PRs are waiting
     # to fix it https://pagure.io/python-daemon/pull-requests), however will not be
     # as runner is to be deprecated, so in the future an alternative solution will be
     # implemented
@@ -327,7 +326,7 @@ Skyline and dependencies install
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py3813/bin/python3.8``
+  ``/opt/python_virtualenv/projects/skyline-py3817/bin/python3.8``
 
 .. code-block:: bash
 
@@ -492,9 +491,6 @@ Required changes to settings.py follow.
   `Ionosphere <ionosphere.html>`__) after you have the other Skyline apps up and
   running.
 
-- If you are **upgrading**, at this point return to the
-  `Upgrading <upgrading/index.html>`__ or Release notes page.
-
 Starting and testing the Skyline installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -517,6 +513,9 @@ Starting and testing the Skyline installation
     systemctl start ionosphere
     systemctl start luminosity
     systemctl start webapp
+    systemctl start flux
+    systemctl start boundary
+
     # You can also start thunder - Skyline's internal monitoring but it may
     # fire a few alerts until you have some metrics being fed in, but that is
     # OK.
@@ -524,11 +523,12 @@ Starting and testing the Skyline installation
 
     # Alternatively at a later point you can start any other Skyline services
     # you may wish to use
-    # systemctl start boundary
-    # systemctl start flux
     # systemctl start analyzer_batch
     # systemctl start snab
     # systemctl start crucible
+
+    # For any services you start remember to issue
+    # systemctl enable <SERVICE>
 
 
 - Check the log files to ensure things started OK and are running and there are
@@ -599,8 +599,16 @@ Configure Graphite to send data to Skyline
 
 - Now you can configure your Graphite to pickle data to Skyline see
   `Getting data into Skyline <getting-data-into-skyline.html>`__
-- If you have opted to not set up Panorama, later see set up
-  `Panorama <panorama.html>`__
+
+Lead time to starting analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Any metric submitted will only start to be analysed when it has
+:mod:`settings.MIN_TOLERABLE_LENGTH` data points to analyse.  That means when
+you start sending data, Skyline will only start analysing it
+:mod:`settings.MIN_TOLERABLE_LENGTH` minutes later (if you are sending 1 data
+point a minute).
+
 
 Other Skyline components
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -609,7 +617,9 @@ Other Skyline components
 - For Flux set up see `Flux <flux.html>`__
 - For more in-depth Ionosphere set up see `Ionosphere <ionosphere.html>`__
   however Ionosphere is only relevant once Skyline has at least
-  :mod:`settings.FULL_DURATION` data in Redis.
+  :mod:`settings.FULL_DURATION` data in Redis.  But really only consider
+  starting use Ionosphere and training after the Skyline has 7 days of data at
+  least.
 
 Automation and configuration management notes
 ---------------------------------------------

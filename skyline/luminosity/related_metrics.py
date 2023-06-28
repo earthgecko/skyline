@@ -116,6 +116,21 @@ class RelatedMetrics(Thread):
                     str(err)))
                 metrics_to_process = []
 
+            # @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            active_labelled_metrics = []
+            try:
+                active_labelled_metrics = self.redis_conn_decoded.hkeys('aet.metrics_manager.active_labelled_metrics_with_id')
+            except Exception as err:
+                logger.error('error :: related_metrics :: hkeys on aet.metrics_manager.active_labelled_metrics_with_id Redis hash - %s' % (
+                    str(err)))
+            if active_labelled_metrics:
+                logger.info('related_metrics :: find_related :: adding %s labelled_metrics to the %s metrics_to_process' % (
+                    str(len(active_labelled_metrics)), str(len(metrics_to_process))))
+                all_metrics_to_process = active_labelled_metrics + metrics_to_process
+                metrics_to_process = list(all_metrics_to_process)
+                del all_metrics_to_process
+                del active_labelled_metrics
+
         metrics_to_process_count = len(metrics_to_process)
         # Get through the population once per day
         optimal_metrics_per_minute = metrics_to_process_count / 1440
@@ -180,6 +195,12 @@ class RelatedMetrics(Thread):
                     metric_id = int(metric_id_str)
             except KeyError:
                 metric_id = 0
+                # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+                # The metric_names_with_ids is based on active metrics, if there is
+                # a KeyError the metric was not added to metric_names_with_ids so
+                # continue as it cannot be correlated if it is inactive, rather
+                # than erroring below.
+                continue
             if not metric_id:
                 logger.error('error :: related_metrics :: find_related :: failed to get determine metric id for %s from Redis hash data aet.metrics_manager.metric_names_with_ids' % str(base_name))
                 continue

@@ -5,6 +5,17 @@
 Redis integration
 =================
 
+Redis is core to Skyline, it is used to store and query time series data and to
+store and its own internal data.
+
+Skyline stores time series data for traditional metrics in msgpack in Redis keys.
+labelled metrics - Skyline utilises the RedisTimeseries module to store time
+series for key/value style labelled metrics.
+
+If you wish to process labelled metrics, there is a minimum requirement of Redis
+server 6.2.x if you wish to load the redistimeseries.so module, or a requirement
+of redis-stack-server 6.2.x with redistimeseries.so loaded.
+
 Redis Security
 --------------
 
@@ -12,7 +23,9 @@ First please take the time to read and understand Redis security as described
 at https://redis.io/topics/security
 
 It is important that you understand factors relating to the default Redis
-security model.
+security model.  **UPDATE** the default security model in Redis has changed
+quite significantly and it is no longer insecure by default but rather the
+opposite.
 
 .. warning:: With the introduction of :red:`re`:brow:`brow` and Luminosity it
   is very important that Redis and your environment are configured correctly in
@@ -28,10 +41,9 @@ There are two different types of Skyline implementations:
 
 - A single Skyline instance, Redis only needs to bind to 127.0.0.1
 - Multiple Skyline instances running in a distributed fashion Redis still
-  only needs to bind to 127.0.0.1 but stunnel need to be implmented to allow
-  each Skyline server to connect to other Redis instances on Skyline servers via
-  a stunnel SSL encrypted connection.  See `Running multiple Skyline instances
-  <running-multiple-skylines.html>`__
+  only need to bind to 127.0.0.1 and each Skyline node in the cluster accesses
+  the required shared Redis data via specific API calls through webapp.  See
+  `Running multiple Skyline instances<running-multiple-skylines.html>`__
 
 How are time series stored in Redis?
 ------------------------------------
@@ -50,20 +62,22 @@ strings. We may one day switch to an alternative storage design as proposed by
 Antirez - see https://github.com/antirez/redis-timeseries - but for now, this is
 how it is. And given that the last update to that repo was in 10 Oct 2012, it is
 highly probable that normal Redis will be used for the forseenable future.
+**UPDATE** the future is here.
 
-Using the default mod:`settings.FULL_DURATION` of 86400 (24 hours) ensures that
+Using the default :mod:`settings.FULL_DURATION` of 86400 (24 hours) ensures that
 Redis does not hit performance issues in most cases.  Now where Skyline needs
-greater than mod:`settings.FULL_DURATION` data to analyse in Mirage and
-Ionosphere, Skyline fetches that data from Graphite directly when required.
-This overcomes any Redis performance issues and the use of Graphite data removes
-the limitation of Skyline only being able to analyse data and be useful in the
-24 hour time window.
+greater than :mod:`settings.FULL_DURATION` data to analyse in Mirage and
+Ionosphere, Skyline fetches that data from Graphite or VictoriaMetrics directly
+when required.  This overcomes any Redis performance issues and the use of Graphite
+data removes the limitation of Skyline only being able to analyse data and be useful
+in the 24 hour time window.
 
 What other data are stored in Redis?
 ------------------------------------
 
 In addition to all the metrics, there are a number of specialized Redis sets and
-keys:
+keys which Skyline uses for metric management and fast querying, e.g. what is the
+id of this metrics?  Skyline periodically calculates:
 
 - ``metrics.unique_metrics`` and ``mini.unique_metrics`` These contain every key
   that exists in Redis, and they are used by the Analyzer to make it easier for
@@ -84,9 +98,8 @@ keys:
 - <skyline_app>.last_alert.<alerter>.<metric> keys
 - panorama.mysql_ids.* keys
 - rebrow.client.key.* keys - expiring rebrow Redis password JWT encoded tokens
-- etc, etc, feel free to browser Redis with :red:`re`:brow:`brow` and take a
-  look and please free feel to PR update this doc if you find some that are
-  missing here.
+- etc, etc, feel free to browse Redis with :red:`re`:brow:`brow` and take a
+  look.
 
 What's with the 'mini' and 'metrics' namespaces?
 ------------------------------------------------

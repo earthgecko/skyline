@@ -1,0 +1,84 @@
+{% block timeseries_graph_block %}
+
+<!-- BEGIN /utilities match_metric block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities timeseries_graph_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+		  <li><a href="/utilities?mute_alerts_on"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></a></li>
+      <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
+      <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+      <li><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
+      <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+      <li><a href="/utilities?labelled_metrics_names"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></a></li>
+      <li class="active"><a href="/utilities?timeseries_graph"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></a></li>
+      <li><a href="/utilities?csv_to_timeseries"><span class="logo"><span class="sky">csv</span> - <span class="re">to timeseries</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Graph ::</span> <span class="re">timeseries</span></h4>
+
+      <form action="utilities">
+        <label>timeseries_graph:</label><select name="timeseries_graph">
+            <option value="true">true</option>
+        </select><br>
+        <label>metric:</label><input type="text" name="metric" value="" /><br>
+        <label>from_timestamp:</label><input type="text" name="from_timestamp" value=""> (unix timestamp or %Y-%m-%d %H:%M)<br>
+        <label>until_timestamp:</label><input type="text" name="until_timestamp" value=""> (unix timestamp or %Y-%m-%d %H:%M)<br>
+        <label>data_source:</label>
+        <select name="data_source">
+            <option value="graphite">Graphite</option>
+            <option value="victoriametrics">VictoriaMetrics</option>
+            <option value="redis">Redis</option>
+        </select> the data source for the plot<br>
+        <label>downsample_at:</label><input type="number" name="downsample_at" value="0"> the number of seconds to downsample the data to. 0 means no downsampling<br>
+        <label>downsample_by:</label>
+        <select name="downsample_by">
+            <option value="mean">mean</option>
+            <option value="sum">sum</option>
+        </select> the aggregation method to use for downsampling, defaults to mean<br>
+        <br>
+        <input type="submit" value="Submit">
+      </form>
+
+  </div>
+
+  {% if timeseries_graph_image %}
+	  <h3><span class="logo"><span class="sky">Graph ::</span> <span class="re"> timeseries</span></h3>
+
+      <img src="ionosphere_images?image={{ timeseries_graph_image }}" alt="timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ timeseries_graph_image }}<br>
+
+  {% endif %}
+
+	</div>
+	</div>
+	</div>
+
+<!-- END labelled_metrics_names_block -->
+{% endblock %}

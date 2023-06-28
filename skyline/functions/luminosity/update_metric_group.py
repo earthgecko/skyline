@@ -100,6 +100,12 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
                         str(new_avg_coefficient)))
                     update_related_metric_ids.append(related_metric_id)
                     metric_group_to_be_updated = True
+            # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            # The ids_with_metric_names is based on active metrics, if there is
+            # a KeyError the metric was not added to ids_with_metric_names so
+            # remove it as it cannot be correlated if it is inactive
+            except KeyError:
+                remove_related_metric_ids.append(related_metric_id)
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: related_metrics :: update_metric_group :: could not get determine while to update related_metric_id %s in metric_group - %s' % (
@@ -154,9 +160,16 @@ def update_metric_group(base_name, metric_id, cross_correlation_relationships, i
                 base_name, str(metric_id), str(remove_related_metric_ids)))
 
             for related_metric_id in remove_related_metric_ids:
-                related_metric = ids_with_metric_names[related_metric_id]
-                logger.info('debug :: related_metrics :: update_metric_group :: removing entry from %s metric_group for %s: %s' % (
-                    base_name, related_metric, str(metric_group[related_metric_id])))
+                try:
+                    related_metric = ids_with_metric_names[related_metric_id]
+                    logger.info('debug :: related_metrics :: update_metric_group :: removing entry from %s metric_group for %s: %s' % (
+                        base_name, related_metric, str(metric_group[related_metric_id])))
+                # @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics
+                # The ids_with_metric_names is based on active metrics, if there is
+                # a KeyError the metric was not added to ids_with_metric_names so
+                # remove it as it cannot be correlated if it is inactive
+                except KeyError:
+                    related_metric = None
 
             try:
                 stmt = metric_group_table.delete().\

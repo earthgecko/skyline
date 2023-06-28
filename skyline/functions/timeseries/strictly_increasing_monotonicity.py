@@ -30,13 +30,13 @@ def strictly_increasing_monotonicity(timeseries):
 
     values = []
     for item in timeseries:
+        # Skip nans and None
+        if not isinstance(item[1], float):
+            continue
         # This only identifies and handles positive, strictly increasing
         # monotonic timeseries
         if item[1] < 0.0:
             return is_strictly_increasing_monotonically
-        # Skip nans and None
-        if not isinstance(item[1], float):
-            continue
         values.append(item[1])
     values_array = np.asarray(values)
     diffs = list(np.diff(values_array))
@@ -117,6 +117,11 @@ def strictly_increasing_monotonicity(timeseries):
             counter_resets.append(False)
     if counter_resets.count(True) == len(counter_resets):
         is_strictly_increasing_monotonically = True
+        return is_strictly_increasing_monotonically
+
+    # @added 20230523
+    # Added for up down labelled_metrics
+    if counter_resets.count(False) == len(counter_resets):
         return is_strictly_increasing_monotonically
 
     # Check the monotonicity of each subsequence, which is alwasy going to be

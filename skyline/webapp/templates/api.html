@@ -293,6 +293,52 @@ Or if Analyzer has not run in 120 seconds <code>{"data":{"timestamp":null},"stat
 		    </tbody>
 		  </table>
 
+		  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?authoritative_cluster_node</span></span></h4>
+		  <table class="table table-hover">
+			<thead>
+			  <tr>
+				<th>Name</th>
+				<th>Description</th>
+			  </tr>
+			</thead>
+			<tbody>
+			  <tr>
+				<td>Description:</td>
+				<td>Returns the authoritative node and FQDN for a metric</td>
+			  </tr>
+			  <tr>
+				<td>Endpoint:</td>
+				<td>/api?authoritative_cluster_node</td>
+			  </tr>
+			  <tr>
+				<td>Method:</td>
+				<td>GET</td>
+			  </tr>
+			  <tr>
+				<td>Request example:</td>
+				<td><code>/api?authoritative_cluster_node&metric=telegraf.26820.cpu-total.cpu.usage_idle</code><br>
+			</td>
+			  </tr>
+			  <tr>
+				<td>Responses:</td>
+				<td>200 - json response, example
+				<code>
+{
+  "data": {
+    "authoritative_fqdn": "https://skyline1.example.org",
+    "authoritative_node": "skyline1",
+	"metric": "telegraf.26820.cpu-total.cpu.usage_idle",
+  },
+  "status": {
+    "cluster_data": false,
+    "response": 200
+  }
+}</code><br>
+			</td>
+			  </tr>
+		  </tbody>
+		</table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?batch_processing_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -399,7 +445,10 @@ Or if no batch processing metrics are present <code>{"data":{"metrics":[]},"stat
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) have identified as derivative metrics as a json object.</td>
+  		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) have identified as derivative metrics as a json object.<br>
+				Or if a metric name is passed returns whether the metric is a derivative metric or not using the same format only
+				there is only one metric in the list if it is.<br>
+				If you want to include <strong>OR</strong> query for a labelled_metric you must pass the <code>include_labelled_metrics=true</code> parameter.</td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
@@ -410,9 +459,12 @@ Or if no batch processing metrics are present <code>{"data":{"metrics":[]},"stat
   		        <td>GET</td>
   		      </tr>
   		      <tr>
-  		        <td>Request example:</td>
+  		        <td>Request examples:</td>
 		          <td><code>/api?derivative_metrics</code><br>
-              <code>/api?derivative_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              <code>/api?derivative_metrics&cluster_data=true</code> [optional for clustered Skyline]<br>
+              <code>/api?derivative_metrics&cluster_data=true&metric=vista.nodes.skyline-1.cpu.user</code><br>
+              <code>/api?derivative_metrics&cluster_data=true&include_labelled_metrics=true</code><br>
+              <code>/api?derivative_metrics&cluster_data=true&include_labelled_metrics=true&metric=vm_http_requests_total{_tenant_id="1",_server_id="1",instance="victoriametrics.example.org:443",job="victoriametrics",path="/api/v1/alerts"}</code>
               </td>
   		      </tr>
   		      <tr>
@@ -426,9 +478,9 @@ Or if no batch processing metrics are present <code>{"data":{"metrics":[]},"stat
       "metrics.vista.nodes.skyline-1.cpu.user"
     ]
   },
-  "status": {}
+  "status": {"cluster_data": true}
 }</code><br>
-Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[]},"status":{}}</code><br>
+Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[]},"status":{"cluster_data": true}}</code><br>
               </td>
   		      </tr>
 		    </tbody>
@@ -656,7 +708,8 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		        <td>Parameters:</td>
   		        <td>from_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
                   until_timestamp=[unix timestamp | int | <font color=red>required</font>]<br>
-                  namespace=[parent_namespace | str | optional]<br>
+                  period=[period | str | optional]<br>
+                  namespace=[parent_namespace | str | optional]  You can pass period instead of from_timestamp and until_timestamp as a string 7d, 3,day, 7days, 7w, 4weeks, 2m, 2months, etc<br>
                   cluster_data=[true | bool | [optional for clustered Skyline]<br>
               </td>
   		      </tr>
@@ -664,6 +717,7 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		        <td>Request examples:</td>
 		          <td><code>/api?get_analysed_events=true&from_timestamp=1650462105&until_timestamp=1651671729</code><br>
 		          <code>/api?get_analysed_events=true&from_timestamp=1650462105&until_timestamp=1651671729&namespace=telegraf</code><br>
+		          <code>/api?get_analysed_events=true&period=3days&namespace=telegraf</code><br>
 		          <code>/api?get_analysed_events=true&from_timestamp=1650462105&until_timestamp=1651671729&cluster_data=true</code> [optional for clustered Skyline]<br>
               </td>
   		      </tr>
@@ -715,6 +769,187 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
 		    </tbody>
 		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_flux_test_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the test metrics that were submitted to flux.<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?get_flux_test_metrics</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>namespace=[the namespace | str | <font color=red>required</font>]<br>
+                  cluster_data=[true | bool | [optional for clustered Skyline]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?get_flux_test_metrics=true&namespace=telegraf</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "status": {
+    "cluster_data": false,
+    "request_time": 0.03296913206577301,
+    "response": 200
+  },
+  "data": {
+    "flux_test_metrics": {
+      "1677152100": {
+        "message": "metric ingestion test, no metrics were ingested only counts are reported",
+        "namespace": "test",
+        "ingest_count": 2,
+        "drop_count": 0,
+        "metrics": [
+          "flux_metric_data_post.test.2",
+          "flux_metric_data_post.test.1"
+        ],
+        "dropped": []
+      },
+      "ingest_count": 2,
+      "metrics": [
+        "flux_metric_data_post.test.2",
+        "flux_metric_data_post.test.1"
+      ],
+      "drop_count": 0,
+      "dropped": [],
+      "metric_details": {
+        "metrics": [
+          "flux_metric_data_post.test.2",
+          "flux_metric_data_post.test.1"
+        ],
+        "namespace_elements": [
+          "flux_metric_data_post",
+          "test",
+          "2",
+          "flux_metric_data_post",
+          "test",
+          "1"
+        ],
+        "namespaces": {},
+        "labels": {},
+        "values": {},
+        "metrics_and_labels": {},
+        "time_complexity": "high"
+      }
+    }
+  }
+}
+</code>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_fp_timeseries</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the timeseries for a fp_id.<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?get_fp_timeseries</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>fp_id=[fp id | int | <font color=red>required</font>]<br>
+                  metric=[the metric | str | optional]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?get_fp_timeseries=true&fp_id=5775&metric=telegraf.26820.cpu-total.cpu.usage_idle</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "data": {
+    "anomaly_timestamp": 1507756321,
+    "calc_time": 0.841909,
+    "checked_count": 802,
+    "created_timestamp": "Sat, 06 Apr 2019 11:37:49 GMT",
+    "deleted": null,
+    "echo_fp": 1,
+    "enabled": 1,
+    "features_count": 210,
+    "features_sum": "300552565.6880000234",
+    "fp_id": 5775,
+    "full_duration": 86400,
+    "generation": 1,
+    "id": 5775,
+    "label": null,
+    "last_checked": 1648557522,
+    "last_matched": 1613821398,
+    "layers_id": 0,
+    "matched_count": 61,
+    "metric": "telegraf.26820.cpu-total.cpu.usage_idle",
+    "metric_id": 61,
+    "motif_checked_count": 533,
+    "motif_last_checked": 1652743591,
+    "motif_last_matched": 1652742643,
+    "motif_matched_count": 5,
+    "parent_id": 3123,
+    "timeseries": [
+      [
+        1507669315,
+        503
+      ],
+      [
+        1507669375,
+        386
+      ], ...,
+      [
+        1507756321,
+        1229
+      ]
+    ],
+    "tsfresh_version": "0.4.0",
+    "user_id": 1,
+    "validated": 1
+  },
+  "status": {
+    "cluster_data": false,
+    "request_time": 1.0802947971969843,
+    "response": 200
+  }
+}</code>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_json</span></span></h4>
   		  <table class="table table-hover">
@@ -832,6 +1067,63 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   "status": {
     "cluster_data": false,
     "request_time": 0.8154124729335308,
+    "response": 200
+  }
+}</code>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_namespace_metric_count</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the metric count for a namespace.<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?get_namespace_metric_count</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>namespace=[the namespace | str | <font color=red>required</font>]<br>
+                  primary_namespace=[false | bool | [optional for internal Skyline function]<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?get_namespace_metric_count=true&namespace=telegraf</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "data": {
+    "active_metrics": 412,
+    "inactive_metrics": 1398,
+    "namespace": "telegraf",
+    "namespaces": [
+      "telegraf"
+    ],
+    "primary_namespace": false,
+    "total_metrics": 1810
+  },
+  "status": {
+    "cluster_data": false,
+    "request_time": 0.22551699727773666,
     "response": 200
   }
 }</code>
@@ -1521,13 +1813,33 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?redis_data&type=hash&key=metrics_manager.flux.aggregate_namespaces</code></td>
-		          <td><code>/api?redis_data&type=set&key=flux.quota.namespace_metrics.telegraf&cluster_data=true</code></td>
+		          <td><code>/api?redis_data&type=set&key=flux.quota.namespace_metrics.dc1&cluster_data=true</code></br>
+		          <code>/api?redis_data&type=hash&key=metrics_manager.flux.aggregate_namespaces</code></td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
-  		        <td>200 - with json response, example
-                  <code>{
+  		        <td>200 - with json response, for <code>key=flux.quota.namespace_metrics.dc1</code> example:<br>
+								<code>{
+"data": {
+	"flux.quota.namespace_metrics.dc1": [
+		"dc1.telegraf_test.nginx-2.system.n_cpus",
+		"dc1.telegraf_test.nginx-2.system.uptime",
+		"vm_tcplistener_written_bytes_total{_tenant_id=\"dc1\",_server_id=\"1\",addr=\"127.0.0.0.1:8401\",alias=\"VictoriaMetrics\",cluster=\"vm-cluster-1-dc1\",component=\"vmstorage\",instance=\"vm1.example.org:8482\",job=\"vm-cluster-1-dc1-vmstorage\",name=\"vmselect\"}",
+		"dc1.telegraf_test.nginx-2.enp3s0.net.err_in",
+		"dc1.telegraf_test.nginx-2.enp3s0.net.drop_in",
+		"dc1.telegraf_test.nginx-2.swap.total",
+		"vm_rows_inserted_total{_tenant_id=\"dc1\",_server_id=\"1\",alias=\"VictoriaMetrics\",cluster=\"vm-cluster-1-dc1\",component=\"vminsert\",instance=\"vm2.example.org:8480\",job=\"vm-cluster-1-dc1-vminsert\",type=\"opentsdbhttp\"}"]
+		]
+  },
+  "status": {
+    "cluster_data": true,
+    "request_time": 0.0010091625154018402,
+    "response": 200
+  }
+}</code><br>
+<br>
+200 - with json response, for <code>key=metrics_manager.flux.aggregate_namespaces</code> example:<br>
+		<code>{
   "data": {
     "metrics_manager.flux.aggregate_namespaces": {
       "skyline-test-external-settings.1": "{'interval': 60, 'last_known_value': False, 'method': ['avg'], 'method_suffix': False, 'zero_fill': False}",
@@ -1686,7 +1998,8 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Removes metrics defined in metrics or by patterns from the namespace flux quota AND removes the metrics from all Redis reources INCLUDING the metric timesereis data for the metrics and sets the metrics to inactive in the database.</td>
+  		        <td>Removes metrics defined in metrics or by patterns from the namespace flux quota AND removes the metrics
+								from all Redis resources INCLUDING the metric timeseries data for the metrics and sets the metrics to inactive in the database.</td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
@@ -1703,29 +2016,44 @@ Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswel
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>key=[FLUX_SELF_API_KEY | str | <font color=red>required</font>]<br>
+  		        <td>key=[FLUX_SELF_API_KEY | str | <font color=red>required</font>] NOTE that this is the admin FLUX API key not the namespace API key<br>
                   parent_namespace=[top_level_namespace | str | <font color=red>required</font>]<br>
                   metrics=[list_of_base_names | list | optional]<br>
                   patterns=[list_of_patterns_to_match | list | optional]<br>
-                  cluster_data=[true | boolean | optional]<br>
+                  remove_prefix=[the prefix to strip from the metric names in the response | str | optional]<br>
+									cluster_data=[true | boolean | optional]<br>
+									dry_run=[true | boolean | optional] Can be used for testing, will return a list of metrics that would be removed<br>
               </td>
   		      </tr>
   		      <tr>
   		        <td>Request example with POST data:</td>
               <td>
-              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "namespace": "telegraf", "metrics": ["telegraf.server-1.cpu-total.cpu.usage_steal", "telegraf.server-1.cpu-total.cpu.usage_guest"]}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code><br>
-              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "namespace": "telegraf", "metrics": ["telegraf.server-1.cpu-total.cpu.usage_steal"], "patterns": ["telegraf.redis.redis_cmdstat.usec_per_call", "mysql.performance_schema"]}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code><br>
-              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "namespace": "telegraf", "patterns": ["telegraf.redis.redis_cmdstat.usec_per_call", "mysql.performance_schema"], "cluster_data": true}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code> [optional for clustered Skyline]<br>
-              </td>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "parent_namespace": "telegraf", "metrics": ["telegraf.server-1.cpu-total.cpu.usage_steal", "telegraf.server-1.cpu-total.cpu.usage_guest"]}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code><br>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "parent_namespace": "telegraf", "metrics": ["telegraf.server-1.cpu-total.cpu.usage_steal"], "patterns": ["telegraf.redis.redis_cmdstat.usec_per_call", "mysql.performance_schema"]}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code><br>
+              <code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "parent_namespace": "telegraf", "patterns": ["telegraf.redis.redis_cmdstat.usec_per_call", "mysql.performance_schema"], "cluster_data": true}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code> [optional for clustered Skyline]<br>
+							<code>curl --user WEBAPP_AUTH_USER:WEBAPP_AUTH_USER_PASSWORD -d '{"data":{"key":"FLUX_SELF_API_KEY", "parent_namespace": "telegraf", "patterns": ["telegraf.mariadb-12.kernel", "telegraf.nginx-2.kernel"], "cluster_data": true, "dry_run": true}}' -H "Content-Type: application/json" -X POST <SKYLINE_URL>/remove_namespace_quota_metrics</code> [optional for TESTING]<br>
+							</td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
   		        <td>200 - json responses, examples:<br>
-Single response:<br>
-                  <code>
-</code><br>
-cluster_data response:<br>
 <code>
+	{'data': {'metrics': ['telegraf.mariadb-12.kernel.context_switches',
+	'telegraf.mariadb-12.kernel.entropy_avail',
+	'telegraf.mariadb-12.kernel.interrupts',
+	'telegraf.mariadb-12.kernel.processes_forked',
+	'telegraf.mariadb-12.kernel.boot_time',
+	'telegraf.nginx-2.kernel.context_switches',
+	'telegraf.nginx-2.kernel.entropy_avail',
+	'telegraf.nginx-2.kernel.interrupts',
+	'telegraf.nginx-2.kernel.processes_forked',
+	'telegraf.nginx-2.kernel.boot_time'],
+ 'removed_metrics_count': 10},
+'status': {'cluster_data': True,
+ 'dry_run': True,
+ 'remove_namespace_quota_metrics': 'success',
+ 'request_time': 1.002692811191082,
+ 'response': 200}}
 </code><br>
               </td>
   		      </tr>
@@ -1846,7 +2174,7 @@ cluster_data response:<br>
 		          <td><code>/api?training_data</code><br>
                   <code>/api?training_data&metric=[metric_name]</code><br>
                   <code>/api?training_data&timestamp=[timestamp]</code><br>
-                  <code>/api?training_data&metric=[metric_name]&amp;timestamp=[timestamp]</code><br>
+                  <code>/api?training_data&metric=[metric_name]&timestamp=[timestamp]</code><br>
                   <code>/api?training_data&cluster_data=true</code> [optional for clustered Skyline]
               </td>
   		      </tr>
@@ -1904,6 +2232,8 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
               <code>/api?unique_metrics&cluster_data=true</code> [optional for clustered Skyline]<br>
               <code>/api?unique_metrics&filter_namespace=[namespace elements]</code> [optional]<br>
               <code>/api?unique_metrics&remove_full_namespace_prefix=true</code> [optional]<br>
+              <code>/api?unique_metrics&details=true</code> [optional - returns namespaces, labels and values]<br>
+              <code>/api?unique_metrics&include_inactive_metrics=true</code> [optional - returns active and inactive metrics]<br>
               </td>
   		      </tr>
   		      <tr>

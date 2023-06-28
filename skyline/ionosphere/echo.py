@@ -20,6 +20,12 @@ from database import (
 # @added 2017014 - Feature #1854: Ionosphere learn
 from ionosphere_functions import create_features_profile
 
+# @added 20220729 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -36,7 +42,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: echo :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: echo :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings')
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
@@ -64,6 +70,31 @@ def echo_get_metric_from_metrics(base_name, engine):
     metrics_id = 0
     metric_db_object = None
 
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    labelled_metric_name = None
+    labelled_metric_base_name = None
+    use_base_name = str(base_name)
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if base_name.startswith('labelled_metrics.'):
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+            if metric_name:
+                labelled_metric_base_name = str(metric_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
+
     # Get the metrics_table metadata
     metrics_table = None
     try:
@@ -76,7 +107,12 @@ def echo_get_metric_from_metrics(base_name, engine):
 
     try:
         connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        stmt = select([metrics_table]).where(metrics_table.c.metric == use_base_name)
+        # @added 20220729 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metrics
+        if labelled_metric_base_name:
+            stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
         result = connection.execute(stmt)
         row = result.fetchone()
         metric_db_object = row
@@ -98,6 +134,32 @@ def ionosphere_echo(base_name, mirage_full_duration):
     context = 'ionosphere_echo'
     logger.info('ionosphere_echo :: started with child_process_pid - %s for %s' % (str(child_process_pid), base_name))
     full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
+
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    labelled_metric_name = None
+    labelled_metric_base_name = None
+    use_base_name = str(base_name)
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if base_name.startswith('labelled_metrics.'):
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+            if metric_name:
+                labelled_metric_base_name = str(metric_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
+    logger.info('ionosphere_echo :: use_base_name: %s' % use_base_name)
 
     try:
         # Allow for 3 seconds
@@ -141,7 +203,8 @@ def ionosphere_echo(base_name, mirage_full_duration):
     engine = None
 
     # Get the metric db object data to memcache it is exists
-    metric_db_object = get_memcache_metric_object(skyline_app, base_name)
+    metric_db_object = get_memcache_metric_object(skyline_app, use_base_name)
+
     if metric_db_object:
         metrics_id = metric_db_object['id']
         logger.info('ionosphere_echo :: determined metric id %s from memcache for %s' % (str(metrics_id), base_name))
@@ -162,7 +225,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
             return
 
         try:
-            metrics_id, metric_db_object = echo_get_metric_from_metrics(base_name, engine)
+            metrics_id, metric_db_object = echo_get_metric_from_metrics(use_base_name, engine)
             echo_engine_disposal(engine)
         except:
             logger.error(traceback.format_exc())
@@ -329,7 +392,8 @@ def ionosphere_echo(base_name, mirage_full_duration):
         fp_learn = False
 
         # What is the path of the features profile files
-        metric_timeseries_dir = base_name.replace('.', '/')
+        metric_timeseries_dir = use_base_name.replace('.', '/')
+
         metric_fp_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
             str(fp_timestamp))
@@ -382,10 +446,10 @@ def ionosphere_echo(base_name, mirage_full_duration):
             # Specifically include the required files
             if 'graphite_now' in i_file:
                 copy_files.append(i_file)
-            echo_metric_txt = '%s.txt' % base_name
+            echo_metric_txt = '%s.txt' % use_base_name
             if echo_metric_txt in i_file:
                 copy_files.append(i_file)
-            echo_metric_json = '%s.json' % base_name
+            echo_metric_json = '%s.json' % use_base_name
             if echo_metric_json in i_file:
                 copy_files.append(i_file)
             if 'mirage.graphite' in i_file:
@@ -413,7 +477,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
                     logger.error('error :: ionosphere_echo ::  OSError error - training data not copied to %s' % metric_training_data_dir)
                     logger.error('error :: %s' % (e))
 
-        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, base_name)
+        calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_training_data_dir, use_base_name)
         calculated_feature_file_found = False
         fp_csv = None
         if os.path.isfile(calculated_feature_file):
@@ -421,12 +485,12 @@ def ionosphere_echo(base_name, mirage_full_duration):
             fp_csv = calculated_feature_file
             logger.info('ionosphere_echo :: calculated features file is available - %s' % (calculated_feature_file))
 
-        echo_json_file = '%s.mirage.redis.%sh.json' % (base_name, str(full_duration_in_hours))
+        echo_json_file = '%s.mirage.redis.%sh.json' % (use_base_name, str(full_duration_in_hours))
         if not calculated_feature_file_found:
             logger.info('ionosphere_echo :: calculating features from mirage.redis data ts json - %s' % (echo_json_file))
             str_created_ts = str(created_ts)
             try:
-                fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, str_created_ts, base_name, context)
+                fp_csv, successful, fp_exists, fp_id, log_msg, traceback_format_exc, f_calc = calculate_features_profile(skyline_app, str_created_ts, use_base_name, context)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: ionosphere_echo :: failed to calculate features')
@@ -462,7 +526,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
             # Added missing label
             label = 'echo'
 
-            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
+            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, use_base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: ionosphere_echo :: failed to create a settings.FULL_DURATION features profile from fp_id %s for %s' % (str(mirage_fp_id), base_name))

@@ -10,6 +10,10 @@ from matched_or_regexed_in_list import matched_or_regexed_in_list
 from sqlalchemy.sql import select
 from database import get_engine, cloudburst_table_meta
 
+# @added 20221103 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
@@ -18,8 +22,8 @@ skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 try:
     ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
-except EnvironmentError as err:
-    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % err)
+except EnvironmentError as outer_err:
+    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % outer_err)
     ENABLE_WEBAPP_DEBUG = False
 
 this_host = str(os.uname()[1])
@@ -148,10 +152,32 @@ def get_cloudbursts(metric, namespaces, from_timestamp, until_timestamp):
             str(until_timestamp)))
 
     if metric != 'all':
-        filter_by_metrics = [metric]
-        use_filter_by_metrics = True
-        if not namespaces:
-            namespaces = [metric]
+
+        # @added 20221103 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        use_metric = str(metric)
+        if metric.startswith('labelled_metrics.'):
+            use_metric = str(metric)
+            try:
+                metric = get_base_name_from_labelled_metrics_name(skyline_app, use_metric)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed with %s - %s' % (
+                    function_str, metric, err))
+                raise
+            logger.info(
+                'get_cloudbursts - looked up %s to metric: %s' % (
+                    use_metric, str(metric)))
+            if not metric:
+                logger.error('error :: %s :: failed to look up metric' % function_str)
+                raise ValueError('failed to look up metric')
+
+            filter_by_metrics = [metric]
+            use_filter_by_metrics = True
+            if not namespaces:
+                namespaces = [metric]
+            if namespaces == ['all']:
+                namespaces = [metric]
 
     try:
         redis_conn_decoded = get_redis_conn_decoded(skyline_app)
@@ -229,10 +255,22 @@ def get_cloudbursts(metric, namespaces, from_timestamp, until_timestamp):
                     where(cloudburst_table.c.timestamp <= until_timestamp)
         results = connection.execute(stmt)
         for row in results:
-            cloudburst_id = row['id']
-            metric_id = row['metric_id']
-            cloudbursts_dict[cloudburst_id] = dict(row)
-            cloudbursts_dict[cloudburst_id]['metric'] = ids_with_metric_names[metric_id]
+            # @modified 20230126
+            # Wrapped in try except
+            try:
+                cloudburst_id = row['id']
+                metric_id = row['metric_id']
+                cloudbursts_dict[cloudburst_id] = dict(row)
+                try:
+                    cloudbursts_dict[cloudburst_id]['metric'] = ids_with_metric_names[metric_id]
+                except KeyError:
+                    use_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                    logger.warning('warning :: %s :: failed to find metric name for metric id in ids_with_metric_names, using %s' % (
+                        function_str, use_metric_name))
+                    cloudbursts_dict[cloudburst_id]['metric'] = use_metric_name
+            except Exception as err:
+                logger.error('error :: %s :: failed to iterate row from cloudburst_table - %s' % (
+                    function_str, err))
         connection.close()
     except Exception as err:
         logger.error(traceback.format_exc())

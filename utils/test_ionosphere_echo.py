@@ -33,7 +33,9 @@ from functions.numpy.percent_different import get_percent_different
 
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
-settings.LOG_PATH = '/tmp'
+# @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+# Added nosec B108 for bandit
+settings.LOG_PATH = '/tmp'  # nosec B108
 logging.basicConfig()
 
 parser = OptionParser()

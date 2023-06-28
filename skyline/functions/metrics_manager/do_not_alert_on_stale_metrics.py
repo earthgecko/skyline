@@ -43,11 +43,18 @@ def do_not_alert_on_stale_metrics(self, external_settings, unique_base_names):
         try:
             alert_on_stale_metrics = external_settings[config_id]['alert_on_stale_metrics']['enabled']
             if alert_on_stale_metrics:
-                external_settings_namespace = external_settings[config_id]['namespace']
+                exclude_metrics = []
+                try:
+                    exclude_metrics = external_settings[config_id]['alert_on_stale_metrics']['exclude']
+                except KeyError:
+                    continue
+                for i in exclude_metrics:
+                    do_not_alert_on_stale_metric_namespaces.append(i)
+                # external_settings_namespace = external_settings[config_id]['namespace']
         except KeyError:
             continue
-        if external_settings_namespace:
-            do_not_alert_on_stale_metric_namespaces.append(external_settings_namespace)
+        # if external_settings_namespace:
+        #     do_not_alert_on_stale_metric_namespaces.append(external_settings_namespace)
 
     do_not_alert_on_stale_metric_namespaces = list(set(do_not_alert_on_stale_metric_namespaces))
     for i_base_name in unique_base_names:

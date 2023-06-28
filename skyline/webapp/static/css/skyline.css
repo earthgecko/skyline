@@ -50,9 +50,11 @@ body {
     background: #67BED3;
 }
 
+/* disabled 20220729
 .container {
     width: 1400px;
 }
+*/
 
 a {
     color: gray;

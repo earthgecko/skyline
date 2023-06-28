@@ -1,5 +1,12 @@
 {% block training_data_block %}
 <!-- BEGIN /ionosphere train data block -->
+
+{% if labelled_metric_name %}
+  {% set use_for_metric = labelled_metric_name %}
+{% else %}
+  {% set use_for_metric = for_metric %}
+{% endif %}
+
 {% if list_by %}
   <div class="navbar-header" role="navigation">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -58,6 +65,7 @@
 {% endif %}
 
 {% if list_by %}
+<!--
 	<div class="row">
 		<div class="col-md-3 col-md-push-9">
 			<p>Number of training data sets in results: <strong>{{ td_files|length }}</strong></p>
@@ -71,10 +79,12 @@
 			<div><strike>If you think that you may be that person, please do get in touch.</strike><br></div>
 			<div>Change in strategy: rather fork it and try and when it works, get in touch.<br></div>
 		</div>
+-->
 {% endif %}
 
 {% if unique_metrics or metric_td_dirs %}
-		<div class="col-md-9 col-md-pull-3">
+<!--		<div class="col-md-9 col-md-pull-3"> -->
+		<div class="container-fluid">
 			<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
   {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
 			  <li><a href="/ionosphere">List by metrics</a></li>
@@ -108,17 +118,28 @@ Be aware that...<br>
 And...<br>
   	  <div class="tab-pane active" id="by_metric">
         <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">training data :: </span></span> {{ td_files|length }} data sets to review</h4>
-  			<table class="table table-hover">
+<!--  			<table class="table table-hover" style="width:100%"> -->
+  	   <div class="table-responsive">
+  			<table class="table">
   				<thead>
   					<tr>
-              <th>Metric</th>
-              <th>Link to training data sets</th>
+              <th style="width:50%">Metric</th>
+              <th style="width:50%">Link to training data sets</th>
   					</tr>
   				</thead>
   				<tbody>
     {% for metric in unique_metrics %}
             <tr>
-              <td><code>{{ metric }}</code></td>
+      {% if metric.startswith('labelled_metrics.') %}
+        {% set labelled_metric_base_name = labelled_metric_base_names[metric] %}
+        {% if labelled_metric_base_name|length > 100 %}
+              <td style="word-break:break-all;"><smallcode>{{ labelled_metric_base_name }}</smallcode></td>
+        {% else %}
+              <td style="word-break:break-all;"><code>{{ labelled_metric_base_name }}</code></td>
+        {% endif %}
+      {% else %}
+              <td style="word-break:break-all;"><code>{{ metric }}</code></td>
+      {% endif %}
               <td onclick="window.location='?metric_td={{ metric }}&requested_timestamp={{ requested_timestamp }}'">
                 <a href="?metric_td={{ metric }}&requested_timestamp={{ requested_timestamp }}">{{ metric }}</a>
               </td>
@@ -126,6 +147,7 @@ And...<br>
     {% endfor %}
 					</tbody>
 				</table>
+			 </div>
 			</div>
   {% endif %}
 
@@ -189,7 +211,23 @@ And...<br>
   <code> unique_ts</code>:: {{ unique_ts }}<br>
         {% endfor %}
       {% endif %}
+    {% if labelled_metric_name %}
+    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span></span>{{ use_for_metric }} :: {{ td_files|length }} data sets</h4>
+	  <table class="table table-hover">
+	    <thead>
+	      <tr>
+	        <th>Full metric name</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+          <td style="word-break:break-all;"><smallcode>{{ labelled_metric_base_name }}</smallcode></td>
+	      </tr>
+	    </tbody>
+    </table>
+    {% else %}
     <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
+    {% endif %}
 If you arrived here via an initial List by date route, your selected date is the <code>highlighted</code> entry
 below.<br>
 Please note: be advised that tracking the timestamp and metric through Flask
@@ -217,8 +255,8 @@ Also note:
           <td> {{ hdates }} </td>
         {% endif %}
           <td> {{ unique_ts }} </td>
-          <td onclick="window.location='?timestamp={{ unique_ts }}&metric={{ for_metric }}&requested_timestamp={{ unique_ts }}'">
-            <a href="?timestamp={{ unique_ts }}&metric={{ for_metric }}&requested_timestamp={{ unique_ts }}">{{ unique_ts }}</a>
+          <td onclick="window.location='?timestamp={{ unique_ts }}&metric={{ use_for_metric }}&requested_timestamp={{ unique_ts }}'">
+            <a href="?timestamp={{ unique_ts }}&metric={{ use_for_metric }}&requested_timestamp={{ unique_ts }}">{{ unique_ts }}</a>
           </td>
         </tr>
       {% endfor %}
@@ -244,47 +282,81 @@ Also note:
     {% endif %}
 <!-- # @added 20170617 - Feature #2054: ionosphere.save.training_data
 # Allow the operator to save a training_data set -->
+		<div class="container-fluid">
     {% if saved_metric_td == False %}
-    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
+    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span>{{ use_for_metric }} - {{ human_date }}</h4>
 <!-- # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR -->
       {% if historical_training_data == True %}
     <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is HISTORICAL training data</span></span></h4></center>
       {% endif %}
     {% else %}
-    <h4><span class="logo"><span class="re">SAVED - </span><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
+    <h4><span class="logo"><span class="re">SAVED - </span><span class="sky">Training ::</span> <span class="re">data :: </span>{{ use_for_metric }} - {{ human_date }}</h4>
     {% endif %}
+    {% if labelled_metric_base_name %}
+	  <table class="table table-hover">
+	    <thead>
+	      <tr>
+	        <th>Full metric name</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+          <td style="word-break:break-all;"><smallcode>{{ labelled_metric_base_name }}</smallcode></td>
+	      </tr>
+	    </tbody>
+    </table>
+    {% endif %}
+    </div>
 
-		<div class="col-md-10">
+<!--		<div class="col-md-10">  -->
+		<div class="container-fluid">
+
   {% if data_ok == True %}
-		<div class="container">
+<!--		<div class="container">  -->
+		<div class="container-fluid">
 <!-- # @modified 20170122 - Feature #1876: Ionosphere - training_data learn countdown -->
     {% if print_debug == True %}
 <code> DEBUG </code> :: countdown :: {{ countdown }}<br>
     {% endif %}
 
+    {% if vortex_metric_data %}
+      {% if vortex_metric_data['trigger_anomaly'] %}
+    <h4><center><span class="logo"><span class="sky">VORTEX ::</span> <span class="re">TEST ANOMALY</span></span></center></h4>
+      {% endif %}
+    {% endif %}
+
     {% if fp_id_created %}
       {% if fp_generation > 1 %}
-		    <h4><span class="logo"><span class="sky">LEARNT ::</span> <span class="re">not anomalous :: </span></span>this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+		    <h4><span class="logo"><span class="sky">LEARNT ::</span> <span class="re">not anomalous :: </span></span>this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ use_for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
     	  <div class="alert alert-success">
-    	    <strong>LEARNT</strong> this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b>
+    	    <strong>LEARNT</strong> this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ use_for_metric }}">fp_id {{ fp_id_created }}</a></b>
     	  </div>
       {% else %}
-		    <h4><span class="logo"><span class="sky">TRAINED ::</span> <span class="re">not anomalous :: </span></span>trained and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+        {% if labelled_metric_name %}
+		    <h4><span class="logo"><span class="sky">TRAINED ::</span> <span class="re">not anomalous :: </span></span>trained and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ labelled_metric_name }}">fp_id {{ fp_id_created }}</a></b></h4>
     	  <div class="alert alert-warning">
-    	    <strong>Trained</strong> this training data has already been used to create <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b>
+    	    <strong>Trained</strong> this training data has already been used to create <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ labelled_metric_name }}">fp_id {{ fp_id_created }}</a></b>
     	  </div>
+        {% else %}
+		    <h4><span class="logo"><span class="sky">TRAINED ::</span> <span class="re">not anomalous :: </span></span>trained and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ use_for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+    	  <div class="alert alert-warning">
+    	    <strong>Trained</strong> this training data has already been used to create <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ use_for_metric }}">fp_id {{ fp_id_created }}</a></b>
+    	  </div>
+        {% endif %}
       {% endif %}
     {% else %}
 		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span> (aka: "That's not what I call an anomaly")</h4>
     {% endif %}
 
-    {% if saved_metric_td == False %}
-      {% if countdown == False %}
-		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>True</h4>
-      {% else %}
-		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>False - Ionosphere will attempt
-      to learn if this is <code>not anomalous</code> from the {{ use_full_duration_days }} days features profiles that exist in:</h4>
-      <div class="countdown styled"></div>
+    {% if ionosphere_metric == True %}
+      {% if saved_metric_td == False %}
+        {% if countdown == False %}
+  		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>True</h4>
+        {% else %}
+  		  <h4><span class="logo"><span class="sky">Countdown ::</span> <span class="re">valid to learn :: </span></span>False - Ionosphere will attempt
+        to learn if this is <code>not anomalous</code> from the {{ use_full_duration_days }} days features profiles that exist in:</h4>
+        <div class="countdown styled"></div>
+        {% endif %}
       {% endif %}
     {% endif %}
 
@@ -296,7 +368,7 @@ Also note:
     {% if fp_id_matched == None %}
 		  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">NOT matched :: </span></span>no features profiles matched this training data</h4>
     {% else %}
-		  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">matched :: </span></span>True - <a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
+		  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">matched :: </span></span>True - <a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ use_for_metric }}">fp_id {{ fp_id_matched }}</a> has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
     {% endif %}
 
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
@@ -320,23 +392,23 @@ already matched a training data set -->
   	  <h4><span class="logo"><span class="sky">Motif match ::</span> <span class="re">not validated</span></span></h4>
 	   <div class="alert alert-warning">
       This match has not been validated, please review it and validate or invalidate it
-      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ use_for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
       <button type="button">Validate match</button></a>
-      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ use_for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
       <button type="button">Invalidate match</button></a>
 	   </div>
           {% elif match_validated_db_value == 1 %}
   	  <h4><span class="logo"><span class="sky">Motif match :: </span> <span class="re">validated ::</span></span> <code>True</code></h4>
 	   <div class="alert alert-warning">
       If this match was incorrectly validated, you can invalidate it
-      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ use_for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
       <button type="button">Invalidate match</button></a>
 	   </div>
           {% else %}
   	  <h4><span class="logo"><span class="sky">Motif match :: </span> <span class="re">INVALID ::</span></span> True</h4>
 	   <div class="alert alert-warning">
       If this match was incorrectly invalidated, you can validate it
-      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ use_for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
       <button type="button">Validate match</button></a>
 	   </div>
           {% endif %}
@@ -344,9 +416,9 @@ already matched a training data set -->
   	  <h4><span class="logo"><span class="sky">Motif match ::</span> <span class="re">not validated</span></span></h4>
 	   <div class="alert alert-warning">
       This match has not been validated, please review it and validate or invalidate it
-      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ use_for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
       <button type="button">Validate match</button></a>
-      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ use_for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
       <button type="button">Invalidate match</button></a>
 	   </div>
         {% endif %}
@@ -357,12 +429,18 @@ already matched a training data set -->
     {% if metric_training_data_saved %}
       {% if saved_metric_td == False %}
 	  <div class="alert alert-success">
+        {% if labelled_metric_name %}
+	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ labelled_metric_name }}">{{ use_for_metric }} saved training page link</a></b>
+        {% else %}
 	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ for_metric }}">{{ for_metric }} saved training page link</a></b>
+        {% endif %}
 	  </div>
       {% endif %}
     {% endif %}
 
-  		<div class="col-md-12">
+<!--  		<div class="col-md-12">  -->
+  		<div class="container-fluid">
+
   		  <h4><span class="logo"><span class="sky">Similarity ::</span> <span class="re">search</span></span></h4>
 You can run this training data through the similarilty search to determine if similar patterns/shapelets (motifs) have been trained on.<br>
 Due to how long this can take run through all the training data the results are only a <strong>sample</strong> of the possible similar and
@@ -374,7 +452,11 @@ The creation of not_similar_enough plots is limited to 10, to give you an idea o
         <div id="motif_analysis" class="collapse">
   {% endif %}
         <form action="ionosphere">
+  {% if labelled_metric_name %}
+        <input type="hidden" name="metric" value="{{ labelled_metric_name }}" />
+  {% else %}
         <input type="hidden" name="metric" value="{{ for_metric }}" />
+  {% endif %}
         <input type="hidden" name="timestamp" value="{{ timestamp }}" />
         <input type="hidden" name="requested_timestamp" value="{{ timestamp }}" />
   {% if saved_metric_td %}
@@ -453,26 +535,26 @@ The creation of not_similar_enough plots is limited to 10, to give you an idea o
       </div>
   {% endif %}
   {% if motif_analysis %}
-	  <h4><span class="logo"><span class="sky">Motif ::</span> <span class="re">analysis ::</span></span> motif sample count - {{ motif_analysis[for_metric]['motifs']|length }} </h4>
-    exact_motifs: {{ motif_analysis[for_metric]['exact_motifs'] }}<br>
-    similar_motifs: {{ motif_analysis[for_metric]['similar_motifs'] }}<br>
-    distance_motifs: {{ motif_analysis[for_metric]['distance_motifs'] }}<br>
-    not_similar_motifs: {{ motif_analysis[for_metric]['not_similar_motifs'] }}<br>
-    not_similar_enough_sample: {{ motif_analysis[for_metric]['not_similar_enough_sample'] }}<br>
-    fps_checked: {{ motif_analysis[for_metric]['fps_checked'] }}<br>
+	  <h4><span class="logo"><span class="sky">Motif ::</span> <span class="re">analysis ::</span></span> motif sample count - {{ motif_analysis[use_for_metric]['motifs']|length }} </h4>
+    exact_motifs: {{ motif_analysis[use_for_metric]['exact_motifs'] }}<br>
+    similar_motifs: {{ motif_analysis[use_for_metric]['similar_motifs'] }}<br>
+    distance_motifs: {{ motif_analysis[use_for_metric]['distance_motifs'] }}<br>
+    not_similar_motifs: {{ motif_analysis[use_for_metric]['not_similar_motifs'] }}<br>
+    not_similar_enough_sample: {{ motif_analysis[use_for_metric]['not_similar_enough_sample'] }}<br>
+    fps_checked: {{ motif_analysis[use_for_metric]['fps_checked'] }}<br>
   {% for motif_id in motif_analysis_motif_id_by_distance %}
-      <code>fp_id: {{ motif_analysis[for_metric]['motifs'][motif_id]['fp_id'] }} |
-      index: {{ motif_analysis[for_metric]['motifs'][motif_id]['index'] }} |
-      size: {{ motif_analysis[for_metric]['motifs'][motif_id]['size'] }} |
-      match_type: {{ motif_analysis[for_metric]['motifs'][motif_id]['type'] }} |
-      distance: {{ motif_analysis[for_metric]['motifs'][motif_id]['distance'] }} |
-      max_distance: {{ motif_analysis[for_metric]['motifs'][motif_id]['max_distance']|default('not known') }}</code><br>
-      <code>motif_area: {{ motif_analysis[for_metric]['motifs'][motif_id]['motif_area'] }} |
-      fp_motif_area: {{ motif_analysis[for_metric]['motifs'][motif_id]['fp_motif_area'] }} |
-      area_percent_diff: {{ motif_analysis[for_metric]['motifs'][motif_id]['area_percent_diff'] }} |
-      max_area_percent_diff: {{ motif_analysis[for_metric]['motifs'][motif_id]['max_area_percent_diff'] }}</code><br>
-      <img src="ionosphere_images?image={{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}" alt="{{ for_metric }} motif graph" class="img-responsive center-block" /><br>
-Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br>
+      <code>fp_id: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['fp_id'] }} |
+      index: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['index'] }} |
+      size: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['size'] }} |
+      match_type: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['type'] }} |
+      distance: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['distance'] }} |
+      max_distance: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['max_distance']|default('not known') }}</code><br>
+      <code>motif_area: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['motif_area'] }} |
+      fp_motif_area: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['fp_motif_area'] }} |
+      area_percent_diff: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['area_percent_diff'] }} |
+      max_area_percent_diff: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['max_area_percent_diff'] }}</code><br>
+      <img src="ionosphere_images?image={{ motif_analysis[use_for_metric]['motifs'][motif_id]['image'] }}" alt="{{ for_metric }} motif graph" class="img-responsive center-block" /><br>
+Image file: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['image'] }}<br><br>
   {% endfor %}
   {% endif %}
     </div>
@@ -490,15 +572,24 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 		      </tr>
 		    </thead>
 		    <tbody>
-		      <tr>
+		      <tr>        
 		        <td>Extract features</td>
 		        <td>First extract the features from this timeseries with tsfresh, saves and displays only</td>
   {% if extracted_features %}
 		        <td><b><span class="logo"><span class="sky">features ::</span> <span class="re">extracted</span></span></b>
 						</td>
 	{% else %}
-		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&calc_features=true&learn=true">
+    {% if valid_length_for_training %}
+      {% if labelled_metric_name %}
+		        <td><a href="?timestamp={{ timestamp }}&metric={{ labelled_metric_name }}&requested_timestamp={{ timestamp }}&calc_features=true&learn=true">
 						<button type="button">Extract features</button></a> - <code>if not anomalous:</code> press this button first</td>
+      {% else %}
+		        <td><a href="?timestamp={{ timestamp }}&metric={{ use_for_metric }}&requested_timestamp={{ timestamp }}&calc_features=true&learn=true">
+						<button type="button">Extract features</button></a> - <code>if not anomalous:</code> press this button first</td>
+	   {% endif %}
+    {% else %}
+		        <td><button type="button">Insufficient data for training</button> - this button does nothing</td>
+    {% endif %}
 		      </tr>
 	{% endif %}
 		      <tr>
@@ -517,7 +608,11 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 		        <td>
               <form action="ionosphere">
         			<input type="hidden" name="timestamp" value="{{ timestamp }}" />
+      {% if labelled_metric_name %}
+        			<input type="hidden" name="metric" value="{{ labelled_metric_name }}" />
+      {% else %}
         			<input type="hidden" name="metric" value="{{ for_metric }}" />
+      {% endif %}
         			<input type="hidden" name="requested_timestamp" value="{{ timestamp }}" />
         			<input type="hidden" name="add_fp" value="true" />
         			<input type="hidden" name="learn" value="false" />
@@ -530,7 +625,7 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
             </td>
     {% endif %}
   {% else %}
-            <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
+            <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ use_for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
             <button type="button" onclick="return confirm('Are you sure you want to try and click the Create features profile button before you have extracted the features? Especially after being advise to not do it?');">Create features profile and <b>DO NOT learn</b></button></a><br>
             You first have to extract features before this button will work properly.<br>
   {% endif %}
@@ -556,7 +651,11 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 		        <td>
               <form action="ionosphere">
         			<input type="hidden" name="timestamp" value="{{ timestamp }}" />
-        			<input type="hidden" name="metric" value="{{ for_metric }}" />
+      {% if labelled_metric_name %}
+        			<input type="hidden" name="metric" value="{{ labelled_metric_name }}" />
+      {% else %}
+        			<input type="hidden" name="metric" value="{{ use_for_metric }}" />
+      {% endif %}
         			<input type="hidden" name="requested_timestamp" value="{{ timestamp }}" />
         			<input type="hidden" name="add_fp" value="true" />
         			<input type="hidden" name="learn" value="true" />
@@ -565,7 +664,7 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
               </form>
             </td>
       {% else %}
-            <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
+            <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ use_for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
             <button type="button" onclick="return confirm('Are you sure you want to try and click the Create features profile button before you have extracted the features? Especially after being advise to not do it?');">Create features profile and <b>LEARN</b></button></a><br>
             You first have to extract features before this button will work properly.<br></td>
       {% endif %}
@@ -588,6 +687,13 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
       {% endif %}
     {% endif %}
 
+    {% if insufficient_data_for_training %}
+	  <div class="alert alert-warning">
+	    There is insufficient data for profile training on {{ use_for_metric }}
+	  </div>
+    {% endif %}
+
+
 <!-- # @added 20171106 - Feature #2210: existing features profiles link
 Add a link to features profiles for a metric so that the operator can open up
 the features profile search page with all the features profiles for the metric
@@ -596,9 +702,14 @@ Ionosphere is working on a metric.  This could be a table insert like Existing
 layers, but big tables may hinder easy navigation in the training page, so a
 link and new tab is ok.
 -->
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
+  {% if labelled_metric_name %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span> <a href="?fp_search=true&metric={{ labelled_metric_name }}&limit=0&order=DESC" target="_blank">existing features profile page for {{ use_for_metric }}</a></h4>
+	  <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ labelled_metric_name }}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ use_for_metric }}</a></h5>
+  {% else %}
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span> <a href="?fp_search=true&metric={{ use_for_metric }}&limit=0&order=DESC" target="_blank">existing features profile page for {{ use_for_metric }}</a></h4>
 <!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
-	  <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
+	  <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ use_for_metric }}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ use_for_metric }}</a></h5>
+  {% endif %}
 
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the existing layers and algorithms for the metric
@@ -609,7 +720,7 @@ link and new tab is ok.
   {% endif %}
 
   {% if extracted_features %}
-	  <h4><span class="logo"><span class="sky">Extracted ::</span> <span class="re">features ::</span></span></span> created OK</h4>
+	  <h4><span class="logo"><span class="sky">Extracted ::</span> <span class="re">features ::</span></span> created OK</h4>
 		<pre>{{ extracted_features }}</pre>
     {% if not features_profile_id %}
 	  <div class="alert alert-success">
@@ -618,7 +729,7 @@ link and new tab is ok.
 	  <div class="alert alert-warning">
 	    <strong>Warning!</strong> Features have only been calculated.<strong> A features
 profile has not been created yet</strong> to train Skyline with, use the <strong>Create features profile</strong>
-button above to train Skyline on this features profile for {{ for_metric }} <code>if not anomalous:</code>
+button above to train Skyline on this features profile for {{ use_for_metric }} <code>if not anomalous:</code>
 	  </div>
 	  <div class="alert alert-danger">
 	    <strong>Danger!</strong> If you leave this page before clicking the
@@ -638,19 +749,23 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
     {% if not features_profile_exists %}
 	  <div class="alert alert-success">
 	    <strong>Success!</strong> The features profile was created with id {{ features_profile_id }}
-      and can be viewed in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric}}">features profile page for fp_id {{ features_profile_id }}</a>
-      or view under the {{ for_metric }} and {{ timestamp }}  dir in ionosphere/features_profiles/.
+      and can be viewed in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ use_for_metric}}">features profile page for fp_id {{ features_profile_id }}</a>
+      or view under the {{ use_for_metric }} and {{ timestamp }}  dir in ionosphere/features_profiles/.
 	  </div>
     {% else %}
 	  <div class="alert alert-warning">
 	    <strong>A features profile has already been created or learnt</strong> from this training data set with fp_id {{ features_profile_id }}.
       This training data set will be removed by the normal Ionosphere training data roomba that removes old training data dirs and files.
       <strong>However it is good to know</strong> that you thought this was not anomalous <strong>as well or again :)</strong>.  This training data set is now a features_profiles
-      data set and can be viewed via this link in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ for_metric }}"><strong>features profile page for fp_id {{ features_profile_id }}</strong></a>
+      data set and can be viewed via this link in the Features Profiles <a href="?fp_view=true&timestamp={{ timestamp }}&metric={{ use_for_metric }}"><strong>features profile page for fp_id {{ features_profile_id }}</strong></a>
 	  </div>
     {% endif %}
 
-	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">profile :: </span></span>{{ for_metric }}</h3>
+    {% if labelled_metric_name %}
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">profile :: </span></span>{{ labelled_metric_name }}</h3>
+    {% else %}
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">profile :: </span></span>{{ use_for_metric }}</h3>
+    {% endif %}
 
   {% endif %}
 
@@ -658,7 +773,11 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
 <!-- @added 20170303 - Feature #1960: ionosphere_layers -->
   {% if features_profile_id %}
     {% if layer_id %}
-	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">layers :: </span></span>{{ for_metric }}</h3>
+      {% if labelled_metric_name %}
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">layers :: </span></span>{{ labelled_metric_name }}</h3>
+      {% else %}
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">layers :: </span></span>{{ use_for_metric }}</h3>
+      {% endif %}
       {% if layers_algorithms_ids %}
   	  <div class="alert alert-success">
   	    <strong>Success!</strong> The features profile layers were created with id {{ layer_id }}<br>
@@ -671,7 +790,7 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
   	  </div>
       {% endif %}
     {% else %}
-	  <h3><span class="logo"><span class="sky">Train ::</span> <span class="re">layers :: </span></span>[optional] - {{ for_metric }}</h3>
+	  <h3><span class="logo"><span class="sky">Train ::</span> <span class="re">layers :: </span></span>[optional] - {{ use_for_metric }}</h3>
 Optionally you now can create an Ionosphere layers profile which allows you to specify conditions that are <code>not anomalous</code> at <b>FULL_DURATION</b>.<br>
 This does not stop Skyline learning, it reduces Ionosphere alerts and enables the creation of custom Boundary type algorithms per metric and profile<br>
 For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b>every enabled</b> layer must be matched (or not matched in terms of layers D and D1).
@@ -689,7 +808,11 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 
       <form action="ionosphere">
 			<input type="hidden" name="timestamp" value="{{ timestamp }}" />
-			<input type="hidden" name="metric" value="{{ for_metric }}" />
+      {% if labelled_metric_name %}
+        			<input type="hidden" name="metric" value="{{ labelled_metric_name }}" />
+      {% else %}
+        			<input type="hidden" name="metric" value="{{ for_metric }}" />
+      {% endif %}
     {% if requested_timestamp %}
 			<input type="hidden" name="requested_timestamp" value="{{ requested_timestamp }}" />
     {% endif %}
@@ -819,7 +942,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
 # Moved the layer table block so that they are always displayed where relevant -->
       {% include "layers_table.html" %}
     {% if last_i_ts_json %}
-	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span></span> at FULL_DURATION of ({{ redis_full_duration }}) for evalution in layers creation</h4>
+	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span> at FULL_DURATION of ({{ redis_full_duration }}) for evalution in layers creation</h4>
     {{ last_i_ts_json }}
     {% endif %}
 
@@ -833,7 +956,7 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
   {% if layers_id_matched %}
       {% include "layers_table.html" %}
       {% if last_i_ts_json %}
-  	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span></span> at FULL_DURATION of ({{ redis_full_duration }}) for evalution of the training data timeseries that <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+  	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span> at FULL_DURATION of ({{ redis_full_duration }}) for evalution of the training data timeseries that <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
       {{ last_i_ts_json }}
       {% endif %}
   {% endif %}
@@ -841,10 +964,10 @@ For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b
   {% endif %}
 
   {% if data_ok == False %}
-  <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></span></h3>
-  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error</span></span></span></h4>
+  <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></h3>
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error</span></span></h4>
 
-  <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error message</span></span></span></b>
+  <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error message</span></span></b>
 The timeseries data for this anomaly was not loaded, either an error occurred or
 the data is gone or corrupt.  Please try reload the page <strong>quicker</strong>
 next time.<br>
@@ -865,7 +988,7 @@ next time.<br>
 <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologies ::</span></span></b> below in the Danger alert<br>
 	  <div class="alert alert-danger">
 <strong>Danger! Oh dear.</strong> <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">apologies ::</span></span></b>
- profusely it seems that the timeseries json data for {{ for_metric }} at {{ timestamp }} | {{ human_date }}
+ profusely it seems that the timeseries json data for {{ use_for_metric }} at {{ timestamp }} | {{ human_date }}
 has gone!!!  Perhaps it was removed before you could click the mouse. Maybe
 you need to try and be quicker next time.
 	  </div>
@@ -873,13 +996,24 @@ you need to try and be quicker next time.
   {% endif %}
 <!-- # @modified 20190510 - Feature #2990: Add metrics id to relevant Ionosphere pages
 # Added the metric id -->
-      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
+      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span> {{ use_for_metric }} with metrics id {{ metric_id }}</h4>
       {{ metric_vars }}<br>
+
+  {% if vortex_metric_data %}
+    {% if vortex_metric_data['trigger_anomaly'] %}
+      <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">metric_data ::</span></span> request and results (<strong>TESTING</strong> trigger_anomaly passed)</h4>
+    {% else %}
+      <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">metric_data ::</span></span> request and results</h4>
+    {% endif %}
+
+      {{ vortex_metric_data }}<br>
+  {% endif %}
+
   {% if panorama_anomaly_id != False %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% elif panorama_anomaly_id == 'None' %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
-{{ for_metric }} has no Panorama anomaly recorded at this timestamp
+{{ use_for_metric }} has no Panorama anomaly recorded at this timestamp
   {% else %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% endif %}
@@ -890,11 +1024,11 @@ you need to try and be quicker next time.
 	  </div>
     {% elif fp_id_matched %}
 	  <div class="alert alert-success">
-	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong> therefore there is no Panorama recorded anomaly as this is a training data set only and was <code>not anomalous</code>
+	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ use_for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong> therefore there is no Panorama recorded anomaly as this is a training data set only and was <code>not anomalous</code>
 	  </div>
     {% else %}
 	  <div class="alert alert-warning">
-<strong>Please note :: </strong> it seems that {{ for_metric }} has no Panorama anomaly recorded at
+<strong>Please note :: </strong> it seems that {{ use_for_metric }} has no Panorama anomaly recorded at
 this timestamp, this can happen when a Panorama expiry key has not yet expired
 and a metric is checking and found anomalous a number of times in a row.
 	  </div>
@@ -929,45 +1063,70 @@ and a metric is checking and found anomalous a number of times in a row.
 			</table>
     {% endif %}
 
+  {% if labelled_metric_name %}
+    {% set datastore = 'VictoriaMetrics' %}
+  {% else %}
+    {% set datastore = 'Graphite' %}
+  {% endif %}
+  {% if vortex_training %}
+    {% set datastore = 'Vortex' %}
+  {% endif %}
+
   {% for image in metric_images %}
 <!-- # @modified 20210323 - Feature #3642: Anomaly type classification -->
-    {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image) and ( not 'luminosity.classify_anomaly' in image )) %}
+    {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image) and ( not 'luminosity.classify_anomaly' in image ) and ( not 'vortex.' in image )) %}
       {% if metric_second_order_resolution_hours != False %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
+      <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
       {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
+      <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
+      {% endif %}
+      {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode><br>
       {% endif %}
       {% if graphite_url != False %}
 If you wish to see the <a target='_blank' href="{{ graphite_url }}">current
-Graphite graph</a> for {{ for_metric }} (opens in new tab)
+{{ datastore }} graph</a> for {{ use_for_metric }} (opens in new tab)
       {% endif %}
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
     {% endif %}
+    {% if 'vortex.undownsampled' in image %}
+      <h4><span class="logo"><span class="sky">Original ::</span> <span class="re">undownsampled ::</span></span> graph</h4>
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    {% endif %}
+    {% if 'vortex.analysed' in image %}
+      <h4><span class="logo"><span class="sky">Analysed ::</span> <span class="re">data ::</span></span> graph</h4>
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    {% endif %}
   {% endfor %}
 
   {% if fp_id_matched %}
-    <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> no graph as <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
+    <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">anomaly ::</span></span> no graph as <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ use_for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
 	  <div class="alert alert-success">
-	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a></strong> therefore no Graphite image was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ use_for_metric }}">fp_id {{ fp_id_matched }}</a></strong> therefore no {{ datastore }} image was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
 	  </div>
   {% endif %}
   {% if layers_id_matched %}
-    <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> no graph as <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+    <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">anomaly ::</span></span> no graph as <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
 	  <div class="alert alert-success">
-	    <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong> therefore no Graphite image was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	    <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong> therefore no {{ datastore }} image was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
 	  </div>
   {% endif %}
 
   {% if fp_id_matched %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
+      <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ use_for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
   {% elif layers_id_matched %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+      <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
   {% elif saved_metric_td_requested %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs when saved as {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">graphs when saved as {{ graphite_now_graphs_title }} ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+  {% elif vortex_training %}
+      <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">analysis ::</span></span> algortihm graphs</h4>
   {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
   {% endif %}
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode><br>
+    {% endif %}
 <!-- @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs -->
   {% for gimage in graphite_now_images %}
 <!--      <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" />
@@ -977,6 +1136,13 @@ Image file: {{ image }}<br><br>
 -->
         <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
   {% endfor %}
+  {% if vortex_training %}
+    {% for image in metric_images %}
+      {% if 'vortex.algorithm.' in image %}
+        <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+      {% endif %}
+    {% endfor %}
+  {% endif %}
         <p style="clear: both;">
 
 <!-- # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data -->
@@ -984,14 +1150,17 @@ Image file: {{ image }}<br><br>
 	  <div class="alert alert-danger">
     If the Graphite graphs are not displaying as derivatives you can reload them and set the metric
     as having strictly increasing monotonicity - see <a href="/static/docs/monotonic-metrics.html#">docs</a>
-      <a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&load_derivative_graphs=true">
+      <a href="?timestamp={{ timestamp }}&metric={{ use_for_metric }}&load_derivative_graphs=true">
       <button type="button" onclick="return confirm('Are you sure you want to set this metric to strictly increasing monotonicity?');"><b>Load derivative graphs</b></button></a>
 	  </div>
   {% endif %}
 
   {% for image in metric_images %}
     {% if '.redis.plot' in image %}
-      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode><br>
+    {% endif %}
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
 
@@ -1003,14 +1172,22 @@ Image file: {{ image }}<br><br>
     {% endif %}
   {% endfor %}
 
+  {% if vortex_results_dict %}
+  <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">results</span></span></h4>
+  <code>{{ vortex_results_dict }}</code>
+  {% endif %}
+
   {% if fp_id_matched %}
-    <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> no data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+    <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span> no data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode>
+    {% endif %}
 	  <div class="alert alert-success">
-	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong> therefore no Redis plot was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
+	    <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ use_for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong> therefore no Redis plot was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
 	  </div>
   {% endif %}
   {% if layers_id_matched %}
-    <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> no data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+    <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span> no data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
 	  <div class="alert alert-success">
 	    <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong> therefore no Redis plot was generated because no alert was sent as this is a training data set only and was <code>not anomalous</code>
 	  </div>
@@ -1043,6 +1220,9 @@ Image file: {{ image }}<br><br>
     {% else %}
   <h4><span class="logo"><span class="sky">Luminosity ::</span> <span class="re">classify_anomaly ::</span> graphs at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
     {% endif %}
+    {% if labelled_metric_name %}
+    <smallcode>{{ labelled_metric_base_name }}</smallcode>
+    {% endif %}
     {% for image in metric_images %}
       {% if 'luminosity.classify_anomaly' in image %}
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
@@ -1052,7 +1232,7 @@ Image file: {{ image }}<br><br>
   {% endif %}
 
 
-    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
+    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span> files</h4>
       <table>
         <tr>
           <th>[filename, path_and_filename]</th>
@@ -1073,7 +1253,7 @@ Image file: {{ image }}<br><br>
       {{ timeseries[-30:] }}-->
 <!-- # @modified 20200711 - Feature #3634: webapp - ionosphere - report number of data points
      # Added length -->
-    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points of {{ anomalous_timeseries_length }}</span></h4>
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points of {{ anomalous_timeseries_length }}</span></h4>
       {{ last_ts_json[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
@@ -1081,7 +1261,7 @@ based features profile -->
     {% if ionosphere_json %}
 <!-- # @modified 20200711 - Feature #3634: webapp - ionosphere - report number of data points
      # Added length -->
-    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points of {{ ts_json_length }}</span></h4>
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points of {{ ts_json_length }}</span></h4>
 <!--      {{ ionosphere_json[-30:] }} -->
       {{ last_i_ts_json[-30:] }}
     {% endif %}
@@ -1099,7 +1279,9 @@ based features profile -->
       <code>NOTE: - this should only be used for debugging, testing or sharing a training data set for demo or training.  It
       is not generally required.</code>
 
-  		<div class="col-md-12">
+<!--  		<div class="col-md-12"> -->
+  		<div class="container-fluid">
+
         <div id="save_training_data" class="collapse">
           <form action="ionosphere">
     		  <table class="table table-hover">
@@ -1117,18 +1299,26 @@ based features profile -->
                   </select>
     			        Label: <input type="text" name="saved_td_label" value="label" /> - optional label, e.g. iowait increase
     			        <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+      {% if labelled_metric_name %}
+    			        <input type="hidden" name="metric" value="{{ labelled_metric_name }}" />
+      {% else %}
     			        <input type="hidden" name="metric" value="{{ for_metric }}" />
+      {% endif %}
                   <input type="submit" value="Save training data">
-                  </form>
                 </td>
     		      </tr>
     		    </tbody>
     		  </table>
+        </form>
         </div>
       </div>
       {% if metric_training_data_saved %}
   	  <div class="alert alert-success">
-  	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ for_metric }}">saved for {{ for_metric }}</a></b>
+        {% if labelled_metric_name %}
+  	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ labelled_metric_name }}">saved for {{ use_for_metric }}</a></b>
+        {% else %}
+  	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ use_for_metric }}">saved for {{ for_metric }}</a></b>
+        {% endif %}
   	  </div>
       {% endif %}
     {% endif %}
