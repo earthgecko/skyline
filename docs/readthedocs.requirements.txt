@@ -14,9 +14,12 @@
 pip>=10.0.1
 
 # @added 20230628 - Task #4962: Build and test skyline v4.0.0
-Sphinx==5.3.0
-sphinx-rtd-theme==1.1.1
-recommonmark==0.7.1
+#Sphinx==5.3.0
+#sphinx-rtd-theme==1.1.1
+#recommonmark==0.7.1
+Sphinx==7.0.1
+sphinx-rtd-theme==1.2.2
+recommonmark
 
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
 setuptools
