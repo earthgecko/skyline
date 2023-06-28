@@ -10,6 +10,8 @@ from multiprocessing import Process
 from time import sleep, time
 from ast import literal_eval
 import random
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -25,9 +27,17 @@ if load_settings:
         get_redis_conn, get_redis_conn_decoded,
         # @added 20220210 - Feature #4284: flux - telegraf
         # Added flux.aggregator.queue metric
-        send_graphite_metric)
+        # @modified 20220726 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Moved send_graphite_metric
+        # send_graphite_metric)
+    )
     # @added 20210718 - skyline-syslog
     from matched_or_regexed_in_list import matched_or_regexed_in_list
+    # @added 20220726 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.graphite.send_graphite_metric import send_graphite_metric
+
     # @added 20220429 - Feature #4536: Handle Redis failure
     if settings.MEMCACHE_ENABLED:
         from functions.memcache.get_memcache_key import get_memcache_key
@@ -41,7 +51,6 @@ if load_settings:
         delete_memcache_key = None
         incr_memcache_key = None
         append_memcache_key = None
-
 
 logger = set_up_logging(None)
 
@@ -76,7 +85,10 @@ class Aggregator(Process):
     them to the httpMetricDataQueue queue for worker to submit to Graphite.
     """
     def __init__(self, parent_pid):
-        super(Aggregator, self).__init__()
+        # @modified 20230205 - Task #4778: v4.0.0 - update dependencies
+        # Changed to Python 3 style super () without arguments
+        # super(Aggregator, self).__init__()
+        super().__init__()
         self.redis_conn = get_redis_conn(skyline_app)
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -134,7 +146,7 @@ class Aggregator(Process):
 
         primary_aggregator_key = 'flux.primary_aggregator_pid.%s' % str(main_process_pid)
         logger.info('aggregator :: starting primary_aggregator election using primary_aggregator_key: %s' % primary_aggregator_key)
-        sleep_for = random.uniform(0.1, 1.5)
+        sleep_for = random.uniform(0.1, 1.5)  # nosec B311
         logger.info('aggregator :: starting primary_aggregator election - sleeping for %s' % str(sleep_for))
         sleep(sleep_for)
         primary_aggregator_pid = 0
@@ -387,7 +399,9 @@ class Aggregator(Process):
                             logger.error('error :: aggregator :: failed to evaluate item for %s from metrics_manager.flux.aggregate_namespaces Redis hash - %s' % (
                                 str(flux_aggregate_namespace), err))
                         if flux_aggregate_namespace_setting:
-                            metrics_manager_flux_aggregate_namespaces[flux_aggregate_namespace] = flux_aggregate_namespace_setting.copy()
+                            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                            # metrics_manager_flux_aggregate_namespaces[flux_aggregate_namespace] = flux_aggregate_namespace_setting.copy()
+                            metrics_manager_flux_aggregate_namespaces[flux_aggregate_namespace] = copy.deepcopy(flux_aggregate_namespace_setting)
 
                 # @added 20220429 - Feature #4536: Handle Redis failure
                 # If the aggregator has failed over to memcache get the memcache
@@ -679,7 +693,7 @@ class Aggregator(Process):
                     # Added flux.aggregator.queue metric
                     skyline_metric = '%s.queue.size' % skyline_app_graphite_namespace
                     try:
-                        send_graphite_metric(skyline_app, skyline_metric, flux_aggregator_queue_length)
+                        send_graphite_metric(self, skyline_app, skyline_metric, flux_aggregator_queue_length)
                         logger.info('aggregator :: %s - %s' % (skyline_metric, str(flux_aggregator_queue_length)))
                     except:
                         logger.error(traceback.format_exc())

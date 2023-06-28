@@ -16,8 +16,8 @@
     <span class="icon-bar"></span>
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
-		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -76,7 +76,7 @@
   		      </tr>
   		      <tr>
   		        <td>Metric like</td>
-  		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		        <td><input type="text" name="metric_like" value="all"> <br>(wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%<br>for labelled metrics you can only search by metric name or key or value)</td>
   		      </tr>
   		      <tr>
   		        <td>from_timestamp</td>
@@ -230,7 +230,7 @@ count
 -->
   {% if features_profiles_count %}
 	  <div class="tab-pane active" id="search">
-      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span>
           by count - limtied to {{ features_profiles_count|length }} features profiles ordered by {{ order }}</h4>
 			<table class="table table-hover">
 				<thead>
@@ -257,7 +257,7 @@ count
 
   {% if matched_count %}
 	  <div class="tab-pane active" id="search">
-      <h4><span class="logo"><span class="sky">Matched ::</span> <span class="re">features profiles :: </span></span></span>
+      <h4><span class="logo"><span class="sky">Matched ::</span> <span class="re">features profiles :: </span></span>
           by count - limtied to {{ matched_count|length }} features profiles ordered by {{ order }}</h4>
 			<table class="table table-hover">
 				<thead>
@@ -284,7 +284,7 @@ count
 
   {% if checked_count %}
 	  <div class="tab-pane active" id="search">
-      <h4><span class="logo"><span class="sky">Checked ::</span> <span class="re">features profiles :: </span></span></span>
+      <h4><span class="logo"><span class="sky">Checked ::</span> <span class="re">features profiles :: </span></span>
           by count - limtied to {{ checked_count|length }} features profiles ordered by {{ order }}</h4>
 			<table class="table table-hover">
 				<thead>
@@ -311,7 +311,7 @@ count
 
   {% if generation_count %}
 	  <div class="tab-pane active" id="search">
-      <h4><span class="logo"><span class="sky">Generations ::</span> <span class="re">count :: </span></span></span>
+      <h4><span class="logo"><span class="sky">Generations ::</span> <span class="re">count :: </span></span>
           ordered by {{ order }}</h4>
 			<table class="table table-hover">
 				<thead>
@@ -334,21 +334,40 @@ count
 
   {% if features_profiles %}
 	  <div class="tab-pane active" id="search">
+    {% if labelled_metric_name %}
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span>{{ labelled_metric_name }} - {{ labelled_metric_base_name }} -
+          limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
+    {% else %}
       <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span>{{ for_metric }} -
           limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
+    {% endif %}
 
 <!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
     {% if show_graphs == True %}
-	    <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link without graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h5>
+      {% if labelled_metric_name %}
+	    <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link without graphs ::</span></span> <a href="?fp_search=true&metric={{ labelled_metric_name }}&limit=0&order=DESC" target="_blank">existing features profile page for {{ labelled_metric_name }} - {{ labelled_metric_base_name }}</a></h5>
+      {% else %}
+	    <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link without graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric }}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h5>
+      {% endif %}
     {% else %}
       {% if for_metric != 'all' %}
-      <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
+        {% if labelled_metric_name %}
+      <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ labelled_metric_name }}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ labelled_metric_name }} - {{ labelled_metric_base_name }}</a></h5>
+        {% else %}
+      <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric }}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
+        {% endif %}
       {% endif %}
     {% endif %}
 
+    {% if labelled_metric_name %}
+      <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span>
+        <a href="?fp_validate=true&metric={{ labelled_metric_name }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ labelled_metric_name }} - {{ labelled_metric_base_name }}</a></h5>
+    {% else %}
       <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span>
         <a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ for_metric }}</a></h5>
+    {% endif %}
 
+    <div class="tableFixHead">
 			<table class="table table-hover">
 				<thead>
 					<tr>
@@ -411,8 +430,14 @@ count
   {#% for item in features_profiles %#} -->
   {% for item in features_profiles_with_images %}
           <tr>
+<!-- # @modified 20220728 - Task #2732: Prometheus to Skyline
+#                           Branch #4300: prometheus
             <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}'">
               <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ item[2] }}">{{ item[0] }}</a>
+            </td>
+-->
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric_id={{ item[1] }}">{{ item[0] }}</a>
             </td>
 <!-- # @added 20180917 - Feature #2602: Graphs in search_features_profiles -->
 <!-- # @modified 20180917 - Feature #2602: Graphs in search_features_profiles -->
@@ -440,7 +465,11 @@ count
         {% endif %}
       {% endif %}
     {% endif %}
-            <td><code>{{ item[2] }}</code></td>
+    {% if item[2]|length < 150 %}
+            <td><div style='width: 750px;'><code>{{ item[2] }}</code></div></td>
+    {% else %}
+            <td><div style='width: 750px;'><smallcode>{{ item[2] }}</smallcode></div></td>
+    {% endif %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}'">
               <a href="?fp_view=true&fp_id={{ item[15] }}&metric={{ item[2] }}">{{ item[15] }}</a>
             </td>
@@ -517,6 +546,8 @@ for any of the returned features profiles the layers column values will be blank
   {% endfor %}
 				</tbody>
 			</table>
+    </div>
+
 		</div>
   {% endif %}
 

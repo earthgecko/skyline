@@ -13,7 +13,7 @@ at some point, for a sacrifice in operability.
 
 # @modified 20170913 - Task #2160: Test skyline with bandit
 # Added nosec to exclude from bandit tests
-array = [[random.randint(1, 1000), random.randint(1, 1000)] for x in range(1, 8000)]  # nosec
+array = [[random.randint(1, 1000), random.randint(1, 1000)] for x in range(1, 8000)]  # nosec B311
 numpy_list = numpy.array(array).tostring()
 msg_list = msgpack.packb(array)
 

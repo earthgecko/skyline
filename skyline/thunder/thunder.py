@@ -11,7 +11,11 @@ from ast import literal_eval
 
 import settings
 from skyline_functions import (
-    mkdir_p, get_redis_conn, get_redis_conn_decoded, send_graphite_metric,
+    # @modified 20220726 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # mkdir_p, get_redis_conn, get_redis_conn_decoded, send_graphite_metric,
+    mkdir_p, get_redis_conn, get_redis_conn_decoded,
     write_data_to_file)
 from thunder_alerters import thunder_alert
 from functions.redis.update_set import update_redis_set
@@ -21,6 +25,10 @@ from functions.thunder.alert_on_stale_metrics import alert_on_stale_metrics
 from functions.thunder.alert_on_no_data import alert_on_no_data
 # @added 20220202 - Feature #4412: flux - quota - thunder alert
 from functions.thunder.alert_on_quota_exceeded import alert_on_quota_exceeded
+
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
 
 skyline_app = 'thunder'
 skyline_app_logger = '%sLog' % skyline_app
@@ -581,7 +589,8 @@ class Thunder(Thread):
                                         data_dict = literal_eval(data_dict_str)
                                         if data_dict:
                                             data_dict['event_file'] = event_file
-                                            thunder_events.add(str(data_dict))
+                                            # thunder_events.add(str(data_dict))
+                                            thunder_events.append(str(data_dict))
                                     except Exception as e:
                                         logger.error('error :: failed to literal_eval event_file: %s - %s' % (event_file, e))
                                 except Exception as e:
@@ -1022,7 +1031,7 @@ class Thunder(Thread):
 
                 logger.info('alerts.sent          :: %s' % str(thunder_alerts_sent))
                 send_metric_name = '%s.alerts.sent' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(thunder_alerts_sent))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(thunder_alerts_sent))
 
                 last_sent_to_graphite = int(time())
                 thunder_alerts_sent = 0
@@ -1064,7 +1073,7 @@ class Thunder(Thread):
                             thunder_event_timestamp = 0
                             if thunder_event:
                                 try:
-                                    thunder_event_timestamp = int(thunder_event['timestamp'])
+                                    thunder_event_timestamp = int(float(thunder_event['timestamp']))
                                 except KeyError:
                                     # No timestamp, remove event
                                     remove_item = thunder_event_str

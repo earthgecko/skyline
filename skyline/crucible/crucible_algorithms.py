@@ -188,9 +188,14 @@ def first_hour_average(timeseries, end_timestamp, full_duration):
         # ten_data_point_seconds = resolution * 10
         sixty_data_point_seconds = resolution * 60
         sixty_datapoints_ago = int_end_timestamp - sixty_data_point_seconds
-        last_hour_threshold = int_end_timestamp - (int_full_duration - sixty_datapoints_ago)
+        # @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution
+        # last_hour_threshold = int_end_timestamp - (int_full_duration - sixty_datapoints_ago)
+        last_hour_threshold = int_end_timestamp - int_full_duration
 
-        series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        # series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
+        last_hour_threshold_end = last_hour_threshold + 3600
+        series = pandas.Series([x[1] for x in timeseries if x[0] > last_hour_threshold and x[0] < last_hour_threshold_end])
+
         mean = (series).mean()
         stdDev = (series).std()
         t = tail_avg(timeseries, end_timestamp, full_duration)
@@ -374,7 +379,7 @@ def histogram_bins(timeseries, end_timestamp, full_duration):
                         return True
                 # Is it in the current bin?
                 elif t >= bins[index] and t < bins[index + 1]:
-                        return True
+                    return True
     except:
         return None
 
@@ -610,6 +615,18 @@ def run_algorithms(
                 break
         logger.info('padded_timeseries - default range set to %s to %s' % (str(default_range), str(timeseries_file)))
 
+    # @added 20220516 - Feature #4118: crucible - custom_algorithms
+    #                   Feature #3566: custom_algorithms
+    # Run certain algorithms on the entire timeseries rather than on
+    # slices
+    one_shot_algorithms = [
+        'adtk_level_shift', 'adtk_persist', 'adtk_seasonal',
+        'adtk_volatility_shift'
+    ]
+    timeseries_timestamp_index_dict = {}
+    for index, item in enumerate(timeseries):
+        timeseries_timestamp_index_dict[int(item[0])] = index
+
     for algorithm in check_algorithms:
 
         # @added 20220430 - Feature #4118: crucible - custom_algorithms
@@ -624,6 +641,34 @@ def run_algorithms(
             plt.figure(figsize=(5.86, 3.08), dpi=100)
             plt.plot(x_vals, y_vals)
 
+            slices = len(list(range(default_range, len(timeseries))))
+            algorithm_start = int(time.time())
+            last_log_time = int(algorithm_start)
+            logger.info('running %s on %s slices' % (
+                algorithm, str(slices)))
+
+            # @added 20220516 - Feature #4118: crucible - custom_algorithms
+            #                   Feature #3566: custom_algorithms
+            # Run certain algorithms on the entire timeseries rather than on
+            # slices
+            if algorithm in one_shot_algorithms:
+                result = None
+                anomalyScore = None
+                custom_anomalies = []
+                CUSTOM_ALGORITHMS[algorithm]['algorithm_parameters']['return_anomalies'] = True
+                CUSTOM_ALGORITHMS[algorithm]['algorithm_parameters']['realtime_analysis'] = False
+                try:
+                    result, anomalyScore, custom_anomalies = run_custom_algorithm_on_timeseries(skyline_app, os.getpid(), timeseries_name, timeseries, algorithm, CUSTOM_ALGORITHMS[algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                except Exception as err:
+                    custom_algorithm_errors.append(err)
+                # Point out the datapoints that are anomalous
+                if len(custom_anomalies) > 0:
+                    for item in custom_anomalies:
+                        item_index = timeseries_timestamp_index_dict[int(item[0])]
+                        plt.plot([item_index], [item[1]], 'ro')
+                        detected = "DETECTED"
+                        anomalies.append([int(item[0]), item[1], algorithm])
+
             # Start a couple datapoints in for the tail average
             # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
             #                      Feature #1448: Crucible web UI
@@ -631,6 +676,17 @@ def run_algorithms(
             # that the padded period data points are not analysed for anomalies
             # for index in range(10, len(timeseries)):
             for index in range(default_range, len(timeseries)):
+
+                if algorithm in one_shot_algorithms:
+                    break
+
+                log_time = int(time.time())
+                if ((log_time - start_analysis) % 30) == 0:
+                    if last_log_time != log_time:
+                        logger.info('stilling running %s on slice %s of %s slices' % (
+                            algorithm, str(index), str(slices)))
+                        last_log_time = int(log_time)
+
                 sliced = timeseries[:index]
                 # @modified 20220430 - Feature #4118: crucible - custom_algorithms
                 #                      Feature #3566: custom_algorithms
@@ -685,6 +741,10 @@ def run_algorithms(
                 logger.error('error :: %s custom algorithm errors encountered with %s, last error - %s' % (
                     str(len(custom_algorithm_errors)), str(algorithm),
                     str(custom_algorithm_errors[-1])))
+
+            algorithm_end = int(time.time())
+            logger.info('ran %s in %s seconds' % (
+                algorithm, str(algorithm_end - algorithm_start)))
 
         except:
             logger.error('error :: %s' % (traceback.format_exc()))
@@ -882,7 +942,7 @@ def run_algorithms(
         logger.info('info :: creating anomalies_csv - %s for %s' % (anomalies_csv, str(timeseries_file)))
         try:
             with open(anomalies_csv, 'w') as fh:
-                fh.write('timstamp,value,consensus_count,triggered_algorithms\n')
+                fh.write('timestamp,value,consensus_count,triggered_algorithms\n')
             for ts, value, consensus, algorithms_triggered in anomalies_score:
                 try:
                     algos_str = str(algorithms_triggered)
@@ -914,7 +974,7 @@ def run_algorithms(
                 str(timeseries_file)))
             try:
                 with open(alert_interval_discarded_anomalies_csv, 'w') as fh:
-                    fh.write('timstamp,value,consensus,triggered_algorithms\n')
+                    fh.write('timestamp,value,consensus,triggered_algorithms\n')
                 for ts, value, consensus, algorithms_triggered in alert_interval_discarded_anomalies:
                     try:
                         line = '%s,%s,%s,%s\n' % (str(ts), str(value), str(consensus), str(algorithms_triggered))

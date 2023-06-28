@@ -3,7 +3,7 @@ get_analysed_events.py
 """
 import logging
 import datetime
-from time import strftime, gmtime, mktime
+from time import time, strftime, gmtime, mktime
 from ast import literal_eval
 
 from skyline_functions import get_redis_conn_decoded
@@ -11,17 +11,20 @@ from skyline_functions import get_redis_conn_decoded
 
 # @added 202200504 - Feature #4530: namespace.analysed_events
 def get_analysed_events(
-        current_skyline_app, from_timestamp, until_timestamp, namespace=None):
+        current_skyline_app, period, from_timestamp, until_timestamp,
+        namespace=None):
     """
     Return a dict with the number of analysed events, estimate the first day
     count based on dividing the total of the first day by the elapsed number of
     minutes that have past in the until_timestamp day.
 
     :param current_skyline_app: the app calling the function
-    :param from_timestamp: get analsed events from
-    :param until_timestamp: get analsed events until
-    :param namespace: get analsed events for namespace
+    :param period: get analysed events for
+    :param from_timestamp: get analysed events from
+    :param until_timestamp: get analysed events until
+    :param namespace: get analysed events for namespace
     :type current_skyline_app: str
+    :type period: str
     :type from_timestamp: int
     :type until_timestamp: int
     :type namespace: str
@@ -34,6 +37,23 @@ def get_analysed_events(
 
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
+
+    period_int = 0
+    time_now = int(time())
+    if period:
+        if period.endswith(('d', 'day', 'days')):
+            period_int = 86400
+        if period.endswith(('w', 'week', 'weeks')):
+            period_int = (86400 * 7)
+        if period.endswith(('m', 'month', 'months')):
+            period_int = (86400 * 7) * 30
+        try:
+            period_multiplier = int(''.join(c for c in period if c.isdigit()))
+            from_timestamp = time_now - (period_int * period_multiplier)
+        except Exception as err:
+            current_logger.error('error :: %s :: invalid period passed - %s - %s' % (
+                function_str, period, err))
+            raise
 
     from_date_str = str(strftime('%Y-%m-%d', gmtime(from_timestamp)))
     until_date_str = str(strftime('%Y-%m-%d', gmtime(until_timestamp)))

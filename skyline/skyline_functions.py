@@ -10,12 +10,13 @@ import socket
 import datetime
 import errno
 import os
-
 import traceback
 import json
-import requests
-
 from ast import literal_eval
+# @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+import urllib.parse
+
+import requests
 
 # @modified 20191025 - Task #3290: Handle urllib2 in py3
 #                      Branch #3262: py3
@@ -31,10 +32,15 @@ from ast import literal_eval
 # charset='utf-8', decode_responses=True arguments required in py3
 from redis import StrictRedis
 
-# @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
-import urllib.parse
+# @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import select, Table, MetaData
 
 import settings
+
+# @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from database import get_engine, engine_disposal
 
 try:
     # @modified 20190518 - Branch #3002: docker
@@ -124,10 +130,20 @@ def get_redis_conn(current_skyline_app):
     # Fail gracefully if opentelemetry breaks it breaks
     # if current_skyline_app == 'webapp':
     if current_skyline_app == 'webapp' and OTEL_ENABLED:
+
+        # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+        instrumented = False
         try:
-            RedisInstrumentor().instrument()
-        except:
-            pass
+            instrumented = RedisInstrumentor().is_instrumented_by_opentelemetry
+        except Exception as err:
+            current_logger.error('error :: get_redis_conn - RedisInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+                err))
+        if not instrumented:
+            current_logger.info('get_redis_conn - starting RedisInstrumentor')
+            try:
+                RedisInstrumentor().instrument()
+            except:
+                pass
 
     REDIS_CONN = None
     try:
@@ -180,10 +196,19 @@ def get_redis_conn_decoded(current_skyline_app):
     # Fail gracefully if opentelemetry breaks it breaks
     # if current_skyline_app == 'webapp':
     if current_skyline_app == 'webapp' and OTEL_ENABLED:
+        # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+        instrumented = False
         try:
-            RedisInstrumentor().instrument()
-        except:
-            pass
+            instrumented = RedisInstrumentor().is_instrumented_by_opentelemetry
+        except Exception as err:
+            current_logger.error('error :: get_redis_conn_decoded - RedisInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+                err))
+        if not instrumented:
+            current_logger.info('get_redis_conn_decoded - starting RedisInstrumentor')
+            try:
+                RedisInstrumentor().instrument()
+            except:
+                pass
 
     REDIS_CONN_DECODED = None
     try:
@@ -1049,6 +1074,7 @@ def get_graphite_metric(
                     try_encoded_name = True
             if try_encoded_name:
                 new_url = url.replace('%', '%25')
+                new_url = new_url.replace('%2525', '%25')
                 current_logger.info('get_graphite_metric :: no data - trying %s' % new_url)
                 r = requests.get(new_url, timeout=use_timeout)
             graphite_json_fetched = True
@@ -1169,11 +1195,22 @@ def send_anomalous_metric_to(
     #     from sys import version_info
     #     python_version = int(version_info[0])
 
+    # @added 20221130 - Feature #4734: mirage_vortex
+    mirage_vortex = False
+    if current_skyline_app == 'mirage_vortex':
+        added_by_context = str(current_skyline_app)
+        current_skyline_app = 'mirage'
+        mirage_vortex = True
+
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     # @added 20170116 - Feature #1854: Ionosphere learn
     added_by_context = str(current_skyline_app)
+
+    # @added 20221130 - Feature #4734: mirage_vortex
+    if mirage_vortex:
+        added_by_context = 'mirage_vortex'
 
     # @added 20170117 - Feature #1854: Ionosphere learn
     # Added the ionosphere_learn_to_ionosphere to fix ionosphere_learn not being
@@ -1225,6 +1262,13 @@ def send_anomalous_metric_to(
     if not os.path.exists(anomaly_dir):
         os.makedirs(anomaly_dir, mode=0o755)
 
+    # @added 20220805 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    graphite_metric = True
+    if base_name.startswith('labelled_metrics.'):
+        graphite_metric = False
+
     # Note:
     # The values are enclosed is single quoted intentionally
     # as the imp.load_source used in crucible results in a
@@ -1234,6 +1278,11 @@ def send_anomalous_metric_to(
     # single quoting results in the desired,
     # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
     now_timestamp = int(time())
+
+    algorithms = settings.ALGORITHMS
+    if added_by_context == 'mirage_vortex':
+        algorithms = algorithms_run
+
     # @modified 20161228 Feature #1828: ionosphere - mirage Redis data features
     # Added full_duration
     # @modified 20170116 - Feature #1854: Ionosphere learn
@@ -1251,7 +1300,7 @@ def send_anomalous_metric_to(
                    'algorithms = %s\n' \
                    'triggered_algorithms = %s\n' \
                    'anomaly_dir = \'%s\'\n' \
-                   'graphite_metric = True\n' \
+                   'graphite_metric = %s\n' \
                    'run_crucible_tests = False\n' \
                    'added_by = \'%s\'\n' \
                    'added_at = \'%s\'\n' \
@@ -1259,8 +1308,13 @@ def send_anomalous_metric_to(
                    'ionosphere_parent_id = \'%s\'\n' \
                    'algorithms_run = %s\n' \
         % (str(base_name), str(datapoint), str(from_timestamp),
-            str(metric_timestamp), str(settings.ALGORITHMS),
-            str(triggered_algorithms), anomaly_dir, added_by_context,
+            str(metric_timestamp), str(algorithms),
+            str(triggered_algorithms), anomaly_dir,
+            # @added 20220805 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Handle labelled_metrics
+            str(graphite_metric),
+            added_by_context,
             str(now_timestamp), str(int(full_duration)), str(parent_id),
             # @added 20201001 - Task #3748: POC SNAB
             # Added algorithms_run required to determine the anomalyScore
@@ -1601,12 +1655,21 @@ def get_memcache_metric_object(current_skyline_app, base_name):
     # @added 20220405 - Task #4514: Integrate opentelemetry
     #                   Feature #4516: flux - opentelemetry traces
     if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
-        # @modified 20220505 - Task #4514: Integrate opentelemetry
-        # Fail gracefully if opentelemetry breaks it breaks
+
+        # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+        instrumented = False
         try:
-            PymemcacheInstrumentor().instrument()
-        except:
-            pass
+            instrumented = PymemcacheInstrumentor().is_instrumented_by_opentelemetry
+        except Exception as err:
+            current_logger.error('error :: get_memcache_metric_object - PymemcacheInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+                err))
+        if not instrumented:
+            # @modified 20220505 - Task #4514: Integrate opentelemetry
+            # Fail gracefully if opentelemetry breaks it breaks
+            try:
+                PymemcacheInstrumentor().instrument()
+            except:
+                pass
 
     if settings.MEMCACHE_ENABLED:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
@@ -1863,6 +1926,31 @@ def is_derivative_metric(current_skyline_app, base_name):
         REDIS_CONN_DECODED = get_redis_conn_decoded(current_skyline_app)
     except:
         current_logger.error('error :: known_derivative_metric - get_redis_conn failed')
+        return None
+
+    # @added 20220808 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if base_name.startswith('labelled_metrics.'):
+        metric_id = 0
+        metric_id_str = base_name.replace('labelled_metrics.', '', 1)
+        try:
+            metric_id = int(metric_id_str)
+        except:
+            metric_id = 0
+        if metric_id:
+            metric_type_id = None
+            try:
+                metric_type_id_str = REDIS_CONN_DECODED.hget('skyline.labelled_metrics.id.type', str(metric_id))
+                if metric_type_id_str:
+                    metric_type_id = int(float(metric_type_id_str))
+            except Exception as err:
+                current_logger.error('error :: known_derivative_metric - hget skyline.labelled_metrics.id.type failed for metric_id: %s - %s' % (
+                    str(metric_id), err))
+            if metric_type_id == 1:
+                return True
+            if metric_type_id == 0:
+                return False
+        return False
 
     try:
         # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
@@ -1893,11 +1981,11 @@ def is_derivative_metric(current_skyline_app, base_name):
             REDIS_CONN = None
             try:
                 REDIS_CONN = get_redis_conn(current_skyline_app)
-            except:
-                current_logger.error('error :: %s :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed')
+            except Exception as err:
+                current_logger.error('error :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed - %s' % err)
             last_derivative_metric_key = REDIS_CONN.get(derivative_metric_key)
-        except Exception as e:
-            current_logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+        except Exception as err:
+            current_logger.error('error :: is_derivative_metric :: could not query Redis for last_derivative_metric_key: %s' % err)
 
         if last_derivative_metric_key:
             # Until the z.derivative_metric key expires, it is classed
@@ -2074,31 +2162,71 @@ def get_user_details(current_skyline_app, desired_value, key, value):
         current_logger.error('%s' % fail_msg)
         if current_skyline_app == 'webapp':
             # Raise to webbapp
-            raise
-        else:
-            return False, None
+            raise ValueError(fail_msg)
+        return False, None
+
+    # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    try:
+        engine, fail_msg, trace = get_engine(current_skyline_app)
+    except Exception as err:
+        current_logger.error('error :: get_user_details :: could not get a MySQL engine - %s' % err)
+    try:
+        users_table_meta = MetaData()
+        users_table = Table('users', users_table_meta, autoload=True, autoload_with=engine)
+    except Exception as err:
+        current_logger.error('error :: get_user_details :: Table failed on user table - %s' % (
+            err))
 
     try:
-        query = 'select %s from users WHERE %s = \'%s\'' % (select_field, select_where, str(value))  # nosec
-        results = mysql_select(str(current_skyline_app), query)
-        result = results[0][0]
-    except:
+        # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # query = 'select %s from users WHERE %s = \'%s\'' % (select_field, select_where, str(value))  # nosec
+        # results = mysql_select(str(current_skyline_app), query)
+        # result = results[0][0]
+        if key == 'id':
+            stmt = select([users_table.c.user]).where(users_table.c.id == int(value))
+        if key == 'username':
+            stmt = select([users_table.c.id]).where(users_table.c.user == value)
+        connection = engine.connect()
+        for row in connection.execute(stmt):
+            result = row[0]
+        connection.close()
+
+    except Exception as err:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
-        fail_msg = 'error :: %s :: get_user_details :: could not get user %s from database for get_user_details(%s, %s %s)' % (
+        fail_msg = 'error :: %s :: get_user_details :: could not get user %s from database for get_user_details(%s, %s %s) - %s' % (
             str(current_skyline_app), select_field, str(desired_value),
-            str(key), str(value))
+            str(key), str(value), err)
         current_logger.error('%s' % fail_msg)
+        # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        try:
+            engine_disposal(current_skyline_app, engine)
+        except Exception as err:
+            current_logger.error('error :: get_user_details :: engine_disposal failed - %s' % (
+                str(err)))
         if current_skyline_app == 'webapp':
             # Raise to webbapp
             raise
-        else:
-            return False, None
-        fail_msg = 'error :: %s :: get_user_details :: could not get user %s from database for get_user_details(%s, %s %s)' % (
-            str(current_skyline_app), select_field, str(desired_value),
-            str(key), str(value))
-        current_logger.info('%s :: get_user_details :: determined %s of %s for users.%s = %s' % (
-            str(current_skyline_app), select_field, str(result), select_where, str(value)))
+        return False, None
+
+    current_logger.info('%s :: get_user_details :: determined %s of %s for users.%s = %s' % (
+        str(current_skyline_app), select_field, str(result), select_where, str(value)))
+
+    # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    try:
+        engine_disposal(current_skyline_app, engine)
+    except Exception as err:
+        current_logger.error('error :: get_user_details :: engine_disposal failed - %s' % (
+            str(err)))
+
     if select_field == 'id':
         return True, int(result)
     return True, str(result)
@@ -2622,86 +2750,10 @@ def encode_graphite_metric_name(current_skyline_app, metric):
 # def correlate_or_relate_with(current_skyline_app, metric, metric_to_correlate_or_relate):
 
 # @added 20210323 - Feature #3642: Anomaly type classification
-def get_anomaly_id(current_skyline_app, base_name, timestamp):
-    """
-    Given a base_name and timestamp, return the anomaly id
-
-    :param current_skyline_app: the Skyline app calling the function
-    :param base_name: the base_name of the metric in question
-    :param timestamp: the timestamp
-    :type current_skyline_app: str
-    :type base_name: str
-    :type timestamp: int
-    :return: id
-    :rtype: int
-
-    """
-
-    try:
-        current_skyline_app_logger = str(current_skyline_app) + 'Log'
-        current_logger = logging.getLogger(current_skyline_app_logger)
-    except:
-        pass
-
-    panorama_anomaly_id = 0
-    # Time shift the requested_timestamp by 120 seconds either way on the
-    # from_timestamp and until_timestamp parameter to account for any lag in the
-    # insertion of the anomaly by Panorama in terms Panorama only running every
-    # 60 second and Analyzer to Mirage to Ionosphere and back introduce
-    # additional lags.  Panorama will not add multiple anomalies from the same
-    # metric in the time window so there is no need to consider the possibility
-    # of there being multiple anomaly ids being returned.
-    grace_from_timestamp = int(timestamp) - 300
-    grace_until_timestamp = int(timestamp) + 120
-    url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (
-        settings.SKYLINE_URL, str(base_name), str(grace_from_timestamp),
-        str(grace_until_timestamp))
-    panorama_resp = None
-
-    # @added 20190519 - Branch #3002: docker
-    # Handle self signed certificate on Docker
-    verify_ssl = True
-    try:
-        running_on_docker = settings.DOCKER
-    except:
-        running_on_docker = False
-    if running_on_docker:
-        verify_ssl = False
-
-    # @added 20191029 - Branch #3262: py3
-    # Allow for the use of self signed SSL certificates even if not running on
-    # docker.
-    try:
-        overall_verify_ssl = settings.VERIFY_SSL
-    except:
-        overall_verify_ssl = True
-    if not overall_verify_ssl:
-        verify_ssl = False
-
-    if settings.WEBAPP_AUTH_ENABLED:
-        user = str(settings.WEBAPP_AUTH_USER)
-        password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
-    try:
-        if settings.WEBAPP_AUTH_ENABLED:
-            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password), verify=verify_ssl)
-        else:
-            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, verify=verify_ssl)
-        panorama_resp = True
-    except:
-        current_logger.error(traceback.format_exc())
-        current_logger.error('error :: get_anomaly_id :: failed to get anomaly id from panorama: %s' % str(url))
-    if panorama_resp:
-        try:
-            data = literal_eval(r.text)
-            if str(data) == '[]':
-                panorama_anomaly_id = 0
-            else:
-                panorama_anomaly_id = int(data[0][0])
-            current_logger.info('get_anomaly_id :: anomaly id: %s' % str(panorama_anomaly_id))
-        except:
-            current_logger.error(traceback.format_exc())
-            current_logger.error('error :: get_anomaly_id :: failed to get anomaly id from panorama response: %s' % str(r.text))
-    return panorama_anomaly_id
+# @modified 20220722 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# Moved to function.panorama.get_anomaly_id
+# def get_anomaly_id(current_skyline_app, base_name, timestamp):
 
 
 # @added 20210324 - Feature #3642: Anomaly type classification
@@ -2726,14 +2778,49 @@ def get_anomaly_type(current_skyline_app, anomaly_id):
         pass
 
     anomaly_type_ids = None
-    query = 'SELECT type from anomalies_type WHERE id=%s' % str(anomaly_id)  # nosec
+
+    # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
     try:
-        result = mysql_select(current_skyline_app, query)
-        if result:
-            anomaly_type_ids = str(result[0][0])
-    except Exception as e:
-        current_logger.error('error :: get_anomaly_type :: failed to get anomaly type for anomaly id %s from the db: %s' % (
-            str(anomaly_id), str(e)))
+        engine, fail_msg, trace = get_engine(current_skyline_app)
+    except Exception as err:
+        current_logger.error('error :: get_anomaly_type :: could not get a MySQL engine - %s' % err)
+    try:
+        anomalies_type_table_meta = MetaData()
+        anomalies_type_table = Table('anomalies_type', anomalies_type_table_meta, autoload=True, autoload_with=engine)
+    except Exception as err:
+        current_logger.error('error :: get_anomaly_type :: Table failed on anomalies_type table - %s' % (
+            err))
+
+    # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    # query = 'SELECT type from anomalies_type WHERE id=%s' % str(anomaly_id)  # nosec
+
+    try:
+        # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # result = mysql_select(current_skyline_app, query)
+        # if result:
+        #     anomaly_type_ids = str(result[0][0])
+        stmt = select([anomalies_type_table.c.type]).where(anomalies_type_table.c.id == int(anomaly_id))
+        connection = engine.connect()
+        for row in connection.execute(stmt):
+            anomaly_type_ids = row['type']
+        connection.close()
+
+    except Exception as err:
+        current_logger.error('error :: get_anomaly_type :: failed to get anomaly type for anomaly id %s from the db - %s' % (
+            str(anomaly_id), str(err)))
+
+    try:
+        engine_disposal(current_skyline_app, engine)
+    except Exception as err:
+        current_logger.error('error :: get_anomaly_type :: engine_disposal failed - %s' % (
+            str(err)))
+
     if anomaly_type_ids:
         anomaly_type_ids_str_list = anomaly_type_ids.split(',')
         for anomaly_type_id in anomaly_type_ids_str_list:

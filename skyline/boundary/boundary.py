@@ -35,7 +35,11 @@ import settings
 # @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
 # Added move_file
 from skyline_functions import (
-    send_graphite_metric, write_data_to_file, move_file,
+    # @added 20220726 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # send_graphite_metric, write_data_to_file, move_file,
+    write_data_to_file, move_file,
     # @added 20181126 - Task #2742: Update Boundary
     #                   Feature #2034: analyse_derivatives
     nonNegativeDerivative, in_list,
@@ -71,6 +75,17 @@ from functions.timeseries.full_duration_timeseries_fill import full_duration_tim
 
 # @added 20220504 - Feature #2580: illuminance
 from functions.illuminance.add_illuminance_entries import add_illuminance_entries
+
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
+# @added 20230220 - Feature #4854: boundary - labelled_metrics
+#                   Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
+from functions.prometheus.metric_name_labels_parser import metric_name_labels_parser
 
 skyline_app = 'boundary'
 skyline_app_logger = skyline_app + 'Log'
@@ -242,16 +257,36 @@ class Boundary(Thread):
             for unique_assigned_metric in unique_assigned_metrics:
                 logger.debug('debug :: unique_assigned_metric - %s' % str(unique_assigned_metric))
 
+        logger.info('assigned unique_assigned_metrics: %s' % str(len(unique_assigned_metrics)))
+
         # Check if this process is unnecessary
         if len(unique_assigned_metrics) == 0:
             return
 
+        # @added 20230222 - Feature #4854: boundary - labelled_metrics
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        unique_assigned_redis_metrics = []
+        unique_assigned_redistimeseries_metrics = []
+        for metric in unique_assigned_metrics:
+            if '_tenant_id="' in metric:
+                unique_assigned_redistimeseries_metrics.append(metric)
+            else:
+                unique_assigned_redis_metrics.append(metric)
+        unique_assigned_redis_metrics_indices = {}
+        for index, metric in enumerate(unique_assigned_redis_metrics):
+            unique_assigned_redis_metrics_indices[metric] = index
+
         # Multi get series
         try:
-            raw_assigned = self.redis_conn.mget(unique_assigned_metrics)
+            # @modified 20230222 - Feature #4854: boundary - labelled_metrics
+            # raw_assigned = self.redis_conn.mget(unique_assigned_metrics)
+            raw_assigned = self.redis_conn.mget(unique_assigned_redis_metrics)
         except:
             logger.error('error :: failed to mget assigned_metrics from redis')
             return
+
+        logger.info('got %s raw_assigned from Redis mget' % str(len(raw_assigned)))
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
@@ -290,10 +325,32 @@ class Boundary(Thread):
 
         discover_run_metrics = []
 
+        # @added 20230222 - Feature #4854: boundary - labelled_metrics
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        analysis_stats = {
+            'unique_metrics_with_timeseries': 0,
+            'unique_metrics_with_no_timeseries': 0,
+            'labelled_metrics_with_timeseries': 0,
+            'labelled_metrics_with_no_timeseries': 0,
+            'not_anomalous': 0,
+            'anomalous': 0,
+        }
+        boundary_errors = {}
+
         # Distill metrics into a run list
         for index, metric_name, in enumerate(unique_assigned_metrics):
 
-            base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+            # @modified 20230222 - Feature #4854: boundary - labelled_metrics
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Only replace if the metric starts with FULL_NAMESPACE because a
+            # labelled_metric could have the FULL_NAMESPACE string in it
+            # base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+            if metric_name.startswith(FULL_NAMESPACE):
+                base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+            else:
+                base_name = str(metric_name)
 
             # Determine the metrics BOUNDARY_METRICS metric tuple settings
             # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
@@ -405,6 +462,12 @@ class Boundary(Thread):
         for metric_and_algo in run_metrics:
             self.check_if_parent_is_alive()
 
+            # @added 20230220 - Feature #4854: boundary - labelled_metrics
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            labelled_metric = False
+            datapoint = None
+
             try:
                 raw_assigned_id = metric_and_algo[0]
                 metric_name = metric_and_algo[1]
@@ -420,10 +483,76 @@ class Boundary(Thread):
                 if ENABLE_BOUNDARY_DEBUG:
                     logger.debug('debug :: unpacking timeseries for %s - %s' % (metric_name, str(raw_assigned_id)))
 
-                raw_series = raw_assigned[metric_and_algo[0]]
-                unpacker = Unpacker(use_list=False)
-                unpacker.feed(raw_series)
-                timeseries = list(unpacker)
+                # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                #                   Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                use_base_name = base_name
+                if '_tenant_id="' in metric_name:
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                    except Exception as err:
+                        logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                            str(base_name), err))
+                        metric_id = 0
+                    redis_ts_key = 'labelled_metrics.%s' % str(metric_id)
+                    labelled_metric = str(redis_ts_key)
+                    use_base_name = str(metric_id)
+
+                # @modified 20230220 - Feature #4854: boundary - labelled_metrics
+                #                      Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # Change to trying to get data from RedisTimeseries if data is
+                # not present in the raw_assigned data
+                # if raw_assigned[raw_assigned_id]:
+                if not labelled_metric:
+
+                    raw_assigned_index = unique_assigned_redis_metrics_indices[metric_name]
+
+                    try:
+                        # raw_series = raw_assigned[metric_and_algo[0]]
+                        raw_series = raw_assigned[raw_assigned_index]
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(raw_series)
+                        timeseries = list(unpacker)
+                    except Exception as err:
+                        boundary_errors[metric_name] = {'err': str(str), 'traceback': str(traceback.format_exc())}
+                        timeseries = []
+
+                    # @added 20230222 - Feature #4854: boundary - labelled_metrics
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if timeseries:
+                        analysis_stats['unique_metrics_with_timeseries'] += 1
+                    else:
+                        analysis_stats['unique_metrics_with_no_timeseries'] += 1
+
+                else:
+                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    until_timestamp = int(time())
+                    from_timestamp = until_timestamp - settings.FULL_DURATION
+                    full_duration_timeseries = []
+                    try:
+                        full_duration_timeseries = self.redis_conn_decoded.ts().range(redis_ts_key, (from_timestamp * 1000), (until_timestamp * 1000))
+                    except Exception as err:
+                        if str(err) == 'TSDB: the key does not exist':
+                            full_duration_timeseries = []
+                        else:
+                            logger.error('error :: failed to get Redis timeseries for %s - %s' % (
+                                str(base_name), err))
+                            full_duration_timeseries = []
+                    if not full_duration_timeseries:
+                        timeseries = []
+                    else:
+                        timeseries = [[int(mts / 1000), value] for mts, value in full_duration_timeseries]
+                    # @added 20230222 - Feature #4854: boundary - labelled_metrics
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if timeseries:
+                        analysis_stats['labelled_metrics_with_timeseries'] += 1
+                    else:
+                        analysis_stats['labelled_metrics_with_no_timeseries'] += 1
 
                 # @added 20200507 - Feature #3532: Sort all time series
                 # To ensure that there are no unordered timestamps in the time
@@ -485,7 +614,10 @@ class Boundary(Thread):
                     # Dump the the timeseries data to a file
                     # @modified 20170913 - Task #2160: Test skyline with bandit
                     # Added nosec to exclude from bandit tests
-                    timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm  # nosec
+                    # @modified 20230109 - Task #4778: v4.0.0 - update dependencies
+                    # timeseries_dump_dir = "/tmp/skyline/boundary/" + algorithm  # nosec
+                    timeseries_dump_dir = '%s/boundary/%s' % (settings.SKYLINE_TMP_DIR, algorithm)
+
                     # self.mkdir_p(timeseries_dump_dir)
                     mkdir_p(timeseries_dump_dir)
                     timeseries_dump_file = timeseries_dump_dir + "/" + metric_name + ".json"
@@ -572,6 +704,30 @@ class Boundary(Thread):
                         skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
                         if skip_derivative:
                             known_derivative_metric = False
+
+                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    check_monotonicity = False
+                    if labelled_metric:
+                        try:
+                            counter_metric = self.redis_conn_decoded.hget('skyline.labelled_metrics.id.type', str(metric_id))
+                            if counter_metric:
+                                if int(counter_metric) == 1:
+                                    known_derivative_metric = True
+                            else:
+                                check_monotonicity = True
+                        except Exception as err:
+                            logger.error('error :: failed to determine metric type from skyline.labelled_metrics.id.type for metric_id: %s, %s' % (
+                                str(metric_id), err))
+                            check_monotonicity = True
+                    if check_monotonicity:
+                        try:
+                            known_derivative_metric = strictly_increasing_monotonicity(timeseries)
+                        except Exception as err:
+                            logger.error('error :: strictly_increasing_monotonicity failed on metric_id: %s, %s' % (
+                                str(metric_id), err))
+
                     if known_derivative_metric:
                         try:
                             derivative_timeseries = nonNegativeDerivative(timeseries)
@@ -609,38 +765,74 @@ class Boundary(Thread):
                     except:
                         metric_timestamp = None
 
-                    # Submit the timeseries and settings to run_selected_algorithm
-                    anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
-                        timeseries, metric_name,
-                        metric_expiration_time,
-                        metric_min_average,
-                        metric_min_average_seconds,
-                        metric_trigger,
-                        alert_threshold,
-                        metric_alerters,
-                        autoaggregate,
-                        autoaggregate_value,
-                        algorithm
-                    )
-                    if ENABLE_BOUNDARY_DEBUG:
-                        # @modified 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
-                        #                      Feature #3532: Sort all time series
-                        # logger.debug('debug :: analysed - %s' % (metric_name))
+                    # @modified 20230221 - Feature #4854: boundary - labelled_metrics
+                    #                      Task #2732: Prometheus to Skyline
+                    #                      Branch #4300: prometheus
+                    # Do not analyse if no timeseries and wrapped run_selected_algorithm
+                    # in try and except
+                    if not timeseries:
+                        anomalous = None
+                    else:
+                        # Submit the timeseries and settings to run_selected_algorithm
                         try:
-                            logger.debug('debug :: analysed - %s, with datapoint %s at timestamp %s' % (
-                                metric_name, str(datapoint),
-                                str(metric_timestamp)))
-                        except:
-                            logger.error('error :: debug :: analysed - %s, but unknown datapoint or timestamp' % (
-                                metric_name))
+                            anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
+                                timeseries, metric_name,
+                                metric_expiration_time,
+                                metric_min_average,
+                                metric_min_average_seconds,
+                                metric_trigger,
+                                alert_threshold,
+                                metric_alerters,
+                                autoaggregate,
+                                autoaggregate_value,
+                                algorithm
+                            )
+                        except TypeError:
+                            exceptions['DeletedByRoomba'] += 1
+                            anomalous = None
+                        except TooShort:
+                            exceptions['TooShort'] += 1
+                            logger.info('TooShort metric :: %s - %s' % (base_name, str(metric_timestamp)))
+                            anomalous = None
+                        except Stale:
+                            exceptions['Stale'] += 1
+                            logger.info('Stale metric :: %s - %s' % (base_name, str(metric_timestamp)))
+                            anomalous = None
+                        except Boring:
+                            exceptions['Boring'] += 1
+                            logger.info('Boring metric :: %s - %s' % (base_name, str(metric_timestamp)))
+                            anomalous = None
+                        except Exception as err:
+                            logger.warning('warning :: run_selected_algorithm failed on %s - %s' % (metric_name, err))
+                            boundary_errors[metric_name] = {'err': str(str), 'traceback': str(traceback.format_exc())}
+                            anomalous = None
 
-                    # @added 20220420 - Feature #4530: namespace.analysed_events
-                    analysed_metrics.append(base_name)
+                        if ENABLE_BOUNDARY_DEBUG:
+                            # @modified 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
+                            #                      Feature #3532: Sort all time series
+                            # logger.debug('debug :: analysed - %s' % (metric_name))
+                            try:
+                                logger.debug('debug :: analysed - %s, with datapoint %s at timestamp %s' % (
+                                    metric_name, str(datapoint),
+                                    str(metric_timestamp)))
+                            except:
+                                logger.error('error :: debug :: analysed - %s, but unknown datapoint or timestamp' % (
+                                    metric_name))
+
+                        # @added 20220420 - Feature #4530: namespace.analysed_events
+                        analysed_metrics.append(base_name)
 
                     # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
                     # If it's not anomalous, add it to list
                     if not anomalous:
                         not_anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
+
+                        # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                   Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        if labelled_metric:
+                            not_anomalous_metric = [datapoint, labelled_metric, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
+
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # self.not_anomalous_metrics.append(not_anomalous_metric)
                         try:
@@ -652,6 +844,11 @@ class Boundary(Thread):
                     anomalous = False
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.debug('debug :: more unique metric tuple not analysed - %s' % (metric_name))
+
+                if not anomalous:
+                    analysis_stats['not_anomalous'] += 1
+                else:
+                    analysis_stats['anomalous'] += 1
 
                 # If it's anomalous, add it to list
                 if anomalous:
@@ -680,13 +877,18 @@ class Boundary(Thread):
 
                     # @added 20220504 - Feature #2580: illuminance
                     try:
-                        illuminance_dict[base_name] = {
+
+                        # @modified 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                      Task #2732: Prometheus to Skyline
+                        #                      Branch #4300: prometheus
+                        # illuminance_dict[base_name] = {
+                        illuminance_dict[use_base_name] = {
                             'timestamp': int(metric_timestamp),
                             'value': float(datapoint),
                             'triggered_algorithms_count': len(triggered_algorithms)}
                     except Exception as err:
                         logger.error('error :: failed to add %s to illuminance_dict' % (
-                            str(base_name)))
+                            str(use_base_name)))
 
                     # If Crucible or Panorama are enabled determine details
                     determine_anomaly_details = False
@@ -716,7 +918,14 @@ class Boundary(Thread):
                         # added_at now passedas an argument to spin_process so that the panaroma_anomaly_file
                         # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
                         # added_at = str(int(time()))
-                        source = 'graphite'
+                        # @modified 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                      Task #2732: Prometheus to Skyline
+                        #                      Branch #4300: prometheus
+                        # source = 'graphite'
+                        source = 'redis'
+                        if labelled_metric:
+                            source = 'redistimeseries'
+
                         panaroma_anomaly_data = 'metric = \'%s\'\n' \
                                                 'value = \'%s\'\n' \
                                                 'from_timestamp = \'%s\'\n' \
@@ -745,6 +954,15 @@ class Boundary(Thread):
                         tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
                             settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
                             base_name)
+
+                        # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                   Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        if labelled_metric:
+                            tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
+                                labelled_metric)
+
                         try:
                             write_data_to_file(
                                 skyline_app, tmp_panaroma_anomaly_file, 'w',
@@ -848,15 +1066,34 @@ class Boundary(Thread):
             except Boring:
                 exceptions['Boring'] += 1
                 logger.info('Boring metric :: %s - %s' % (base_name, str(metric_timestamp)))
-            except:
-                logger.error(traceback.format_exc())
+            # except:
+            #     logger.error(traceback.format_exc())
+            #     exceptions['Other'] += 1
+            #     logger.error('error :: exceptions[\'Other\']')
+            except Exception as err:
+                logger.warning('warning :: analysis failed on %s - %s' % (base_name, err))
+                boundary_errors[base_name] = {'err': str(str), 'traceback': str(traceback.format_exc())}
                 exceptions['Other'] += 1
-                logger.error('error :: exceptions[\'Other\']')
 
         # @added 20220420 - Feature #4530: namespace.analysed_events
         namespace_analysed = defaultdict(int)
         for base_name in list(set(analysed_metrics)):
             parent_namespace = base_name.split('.')[0]
+
+            # @added 20230220 - Feature #4854: boundary - labelled_metrics
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if '_tenant_id="' in base_name:
+                try:
+                    metric_dict = metric_name_labels_parser(skyline_app, base_name)
+                except:
+                    pass
+                if metric_dict:
+                    try:
+                        parent_namespace = metric_dict['labels']['_tenant_id']
+                    except:
+                        pass
+
             namespace_analysed[parent_namespace] += 1
         date_string = str(strftime('%Y-%m-%d', gmtime()))
         namespace_analysed_events_hash = 'namespace.analysed_events.%s.%s' % (skyline_app, date_string)
@@ -897,6 +1134,27 @@ class Boundary(Thread):
             self.exceptions_q.put((key, value))
             if ENABLE_BOUNDARY_DEBUG:
                 logger.debug('debug :: exceptions.item - %s, %s' % (str(key), str(value)))
+
+        # @added 20230222 - Feature #4854: boundary - labelled_metrics
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        analysis_stats['assigned_metrics'] = len(unique_assigned_metrics)
+        analysis_stats['analysed_metrics'] = len(analysed_metrics)
+        logger.info('analysis_stats: %s' % str(analysis_stats))
+        if boundary_errors:
+            # Convert dicts to strings as Redis hash requires strings
+            for key, value in boundary_errors.items():
+                boundary_errors[key] = str(value)
+            hash_key = 'boundary.errors.%s' % str(time())
+            logger.warning('warning :: recording %s boundary_errors to Redis hash %s' % (
+                str(len(boundary_errors)), hash_key))
+            try:
+                self.redis_conn.hset(hash_key, mapping=boundary_errors)
+                self.redis_conn.expire(hash_key, 300)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to set %s Redis hash - %s' % (
+                    hash_key, err))
 
     def run(self):
         """
@@ -950,23 +1208,23 @@ class Boundary(Thread):
             logger.info('warning :: ENABLE_BOUNDARY_DEBUG is not declared in settings.py, defaults to False')
             ENABLE_BOUNDARY_DEBUG = False
         try:
-            BOUNDARY_METRICS = settings.BOUNDARY_METRICS
+            # BOUNDARY_METRICS = settings.BOUNDARY_METRICS
             boundary_metrics_count = len(BOUNDARY_METRICS)
-            logger.info('BOUNDARY_METRICS is set from settings.py with %s Boundry metrics' % str(boundary_metrics_count))
+            logger.info('BOUNDARY_METRICS is set from settings.py with %s Boundary metrics' % str(boundary_metrics_count))
             if ENABLE_BOUNDARY_DEBUG:
                 logger.debug('debug :: BOUNDARY_METRICS - %s' % str(BOUNDARY_METRICS))
         except:
-            BOUNDARY_METRICS = []
+            # BOUNDARY_METRICS = []
             logger.info('warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []')
         try:
-            BOUNDARY_AUTOAGGRERATION = settings.BOUNDARY_AUTOAGGRERATION
+            # BOUNDARY_AUTOAGGRERATION = settings.BOUNDARY_AUTOAGGRERATION
             logger.info('BOUNDARY_AUTOAGGRERATION is set from settings.py to %s' % str(BOUNDARY_AUTOAGGRERATION))
         except:
             BOUNDARY_AUTOAGGRERATION = False
             logger.info('warning :: BOUNDARY_AUTOAGGRERATION is not declared in settings.py, defaults to False')
         try:
-            BOUNDARY_AUTOAGGRERATION_METRICS = settings.BOUNDARY_AUTOAGGRERATION_METRICS
-            logger.info('BOUNDARY_AUTOAGGRERATION_METRICS is set from settings.py')
+            # BOUNDARY_AUTOAGGRERATION_METRICS = settings.BOUNDARY_AUTOAGGRERATION_METRICS
+            logger.info('BOUNDARY_AUTOAGGRERATION_METRICS is set from settings.py -  %s' % str(BOUNDARY_AUTOAGGRERATION_METRICS))
         except:
             BOUNDARY_AUTOAGGRERATION_METRICS = (
                 ('autoaggeration_metrics_not_declared', 60)
@@ -990,11 +1248,11 @@ class Boundary(Thread):
                 logger.error('error :: skyline cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-#                if settings.REDIS_PASSWORD:
-#                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-#                else:
-#                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                self.redis_conn = get_redis_conn(skyline_app)
+                # if settings.REDIS_PASSWORD:
+                #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # self.redis_conn = get_redis_conn(skyline_app)
                 continue
 
             # Report app up
@@ -1004,26 +1262,59 @@ class Boundary(Thread):
             # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
             # unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
-            redis_set = settings.FULL_NAMESPACE + 'unique_metrics'
-            try:
-                unique_metrics = list(self.redis_conn_decoded.smembers(redis_set))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to generate list from Redis set %s' % redis_set)
+            # @modified 20230217 - Feature #4854: boundary - labelled_metrics
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Change from using the unique_metrics to using metrics_manager.boundary_metrics
+            # which includes labelled_metrics too and computed and refreshed
+            # every 5 minutes in metrics_manager
+            # redis_set = settings.FULL_NAMESPACE + 'unique_metrics'
+            # try:
+            #     unique_metrics = list(self.redis_conn_decoded.smembers(redis_set))
+            # except:
+            #     logger.error(traceback.format_exc())
+            #     logger.error('error :: failed to generate list from Redis set %s' % redis_set)
 
-            if len(unique_metrics) == 0:
-                logger.info('no metrics in redis. try adding some - see README')
+            # @added 20230217 - Feature #4854: boundary - labelled_metrics
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Added the ability for boundary to handle labelled_metrics as well
+            # by changing to using metrics_manager.boundary_metrics
+            boundary_metrics_redis_dict = {}
+            try:
+                boundary_metrics_redis_dict = self.redis_conn_decoded.hgetall('metrics_manager.boundary_metrics')
+            except Exception as err:
+                logger.error('error :: failed to hgetall Redis hash key metrics_manager.boundary_metrics - %s' % (
+                    err))
+            boundary_metrics_list = list(boundary_metrics_redis_dict.keys())
+
+            # @modified 20230217 - Feature #4854: boundary - labelled_metrics
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Change from using the unique_metrics to using metrics_manager.boundary_metrics
+            # if len(unique_metrics) == 0:
+            if len(boundary_metrics_list) == 0:
+                logger.info('no identified BOUNDARY_METRICS from metrics_manager.boundary_metrics')
                 sleep(10)
                 continue
             if ENABLE_BOUNDARY_DEBUG:
-                logger.debug('debug :: %s metrics in Redis set %s' % (
-                    str(len(unique_metrics)), redis_set))
+                logger.debug('debug :: %s metrics in Redis hash metrics_manager.boundary_metrics' % (
+                    # str(len(unique_metrics)), redis_set))
+                    str(len(boundary_metrics_list))))
 
             # Reset boundary_metrics
             boundary_metrics = []
 
             # Build boundary metrics
-            for metric_name in unique_metrics:
+            # @modified 20230217 - Feature #4854: boundary - labelled_metrics
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Change from using the unique_metrics to using metrics_manager.boundary_metrics
+            # for metric_name in unique_metrics:
+            for metric_name in boundary_metrics_list:
+                if '_tenant_id="' not in metric_name:
+                    if settings.FULL_NAMESPACE:
+                        metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric_name)
                 for metric in BOUNDARY_METRICS:
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.debug('debug :: pattern matching %s against BOUNDARY_METRICS %s' % (
@@ -1280,12 +1571,33 @@ class Boundary(Thread):
                         if ENABLE_BOUNDARY_DEBUG:
                             logger.info("debug :: alert_threshold - " + str(alert_threshold))
 
+                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    labelled_metric = False
+                    use_base_name = str(metric_name)
+                    if '_tenant_id="' in metric_name:
+                        try:
+                            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                        except Exception as err:
+                            logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                                str(base_name), err))
+                            metric_id = 0
+                        labelled_metric = 'labelled_metrics.%s' % str(metric_id)
+                        use_base_name = str(labelled_metric)
+
                     if alert_threshold > 1:
                         if ENABLE_BOUNDARY_DEBUG:
                             logger.debug('debug :: alert_threshold - ' + str(alert_threshold))
                         anomaly_cache_key_count_set = False
                         anomaly_cache_key_expiration_time = (int(alert_threshold) + 1) * 60
-                        anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
+
+                        # @modified 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                      Task #2732: Prometheus to Skyline
+                        #                      Branch #4300: prometheus
+                        # anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
+                        anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, use_base_name)
+
                         try:
                             anomaly_cache_key_count = self.redis_conn.get(anomaly_cache_key)
                             if not anomaly_cache_key_count:
@@ -1333,11 +1645,28 @@ class Boundary(Thread):
                             # Added algorithm as it is required if the metric has
                             # multiple rules covering a number of algorithms
                             str(algorithm), base_name)
+
+                        # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                      Task #2732: Prometheus to Skyline
+                        #                      Branch #4300: prometheus
+                        if labelled_metric:
+                            tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                settings.SKYLINE_TMP_DIR, str(added_at),
+                                str(algorithm), labelled_metric)
+
                         if ENABLE_BOUNDARY_DEBUG:
                             logger.debug('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                         if os.path.isfile(tmp_panaroma_anomaly_file):
                             panaroma_anomaly_file = '%s/%s.%s.txt' % (
                                 settings.PANORAMA_CHECK_PATH, str(added_at), base_name)
+
+                            # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                            #                      Task #2732: Prometheus to Skyline
+                            #                      Branch #4300: prometheus
+                            if labelled_metric:
+                                panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                                    settings.PANORAMA_CHECK_PATH, str(added_at), labelled_metric)
+
                             logger.info('moving tmp_panaroma_anomaly_file - %s to panaroma_anomaly_file %s' % (str(tmp_panaroma_anomaly_file), str(panaroma_anomaly_file)))
                             # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
                             # Added skyline_app
@@ -1355,6 +1684,15 @@ class Boundary(Thread):
                                 tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
                                     settings.PANORAMA_CHECK_PATH, str(added_at),
                                     str(algorithm), base_name)
+
+                                # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                                #                      Task #2732: Prometheus to Skyline
+                                #                      Branch #4300: prometheus
+                                if labelled_metric:
+                                    tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                        settings.PANORAMA_CHECK_PATH, str(added_at),
+                                        str(algorithm), labelled_metric)
+
                                 os.rename(tmp_panaroma_anomaly_file_to_rename, panaroma_anomaly_file)
                             except:
                                 logger.info(traceback.format_exc())
@@ -1435,6 +1773,12 @@ class Boundary(Thread):
                             alert_paused = False
                             try:
                                 cache_key = 'alert.paused.%s.%s' % (alerter, base_name)
+                                # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                                #                   Task #2732: Prometheus to Skyline
+                                #                   Branch #4300: prometheus
+                                if labelled_metric:
+                                    cache_key = 'alert.paused.%s.%s' % (alerter, labelled_metric)
+
                                 alert_paused = self.redis_conn_decoded.get(cache_key)
                             except Exception as e:
                                 logger.error('error :: alert_paused check failed: %s' % str(e))
@@ -1447,6 +1791,12 @@ class Boundary(Thread):
                             alerter_alert_sent = False
                             if send_alert:
                                 cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, base_name, algorithm)
+                                # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                                #                   Task #2732: Prometheus to Skyline
+                                #                   Branch #4300: prometheus
+                                if labelled_metric:
+                                    cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, labelled_metric, algorithm)
+
                                 if ENABLE_BOUNDARY_DEBUG:
                                     logger.info("debug :: checking cache_key - %s" % cache_key)
                                 try:
@@ -1524,6 +1874,15 @@ class Boundary(Thread):
                         # Added algorithm
                         settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
                         base_name)
+
+                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if labelled_metric:
+                        tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                            settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
+                            labelled_metric)
+
                     if os.path.isfile(tmp_panaroma_anomaly_file):
                         try:
                             os.remove(str(tmp_panaroma_anomaly_file))
@@ -1550,7 +1909,11 @@ class Boundary(Thread):
             try:
                 redis_set = 'boundary.http_alerter.queue'
                 try:
-                    resend_queue = list(self.redis_conn_decoded.smembers(redis_set))
+                    # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                    #                      Feature #4652: http_alerter - dotted_representation
+                    # Change to a hash
+                    # resend_queue = list(self.redis_conn_decoded.smembers(redis_set))
+                    resend_queue = []
                     if resend_queue:
                         logger.info('%s items in the %s Redis set' % (str(len(resend_queue)), redis_set))
                     else:
@@ -1562,6 +1925,28 @@ class Boundary(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to get %s.http_alerter.queue from Redis' % skyline_app)
                 resend_queue = []
+
+            # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+            #                   Feature #4652: http_alerter - dotted_representation
+            # Change to a hash
+            resend_queue_dict = {}
+            try:
+                redis_alert_queue_hash = 'boundary.http_alerter.queue.hash'
+                try:
+                    resend_queue_dict = self.redis_conn_decoded.hgetall(redis_alert_queue_hash)
+                    if resend_queue_dict:
+                        logger.info('%s items in the %s Redis hash' % (str(len(resend_queue_dict)), redis_alert_queue_hash))
+                    else:
+                        logger.info('0 items in the %s Redis hash' % redis_alert_queue_hash)
+                except Exception as err:
+                    logger.error('error :: could not determine http_alerter item from Redis hash %s - %s' % (
+                        redis_alert_queue_hash, err))
+                    resend_queue_dict = {}
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get boundary.http_alerter.queue.hash from Redis- %s' % err)
+                resend_queue_dict = {}
+
             if resend_queue:
                 try:
                     http_alerters_down = []
@@ -1598,7 +1983,53 @@ class Boundary(Thread):
                             continue
                         logger.info('resend_queue item :: %s' % (str(resend_item_list)))
                         try:
-                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
+                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                            logger.info('trigger_alert :: %s resend %s' % (
+                                str(resend_item_list), str(metric_alert_dict)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to trigger_alert for resend queue item')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to parse resend_queue')
+
+            if resend_queue_dict:
+                try:
+                    http_alerters_down = []
+                    for resend_item_key in list(resend_queue_dict.keys()):
+                        resend_item_list = literal_eval(resend_queue_dict[resend_item_key])
+                        # data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, str(metric_alert_dict)]
+                        alerter = resend_item_list[0]
+                        datapoint = resend_item_list[1]
+                        metric_name = resend_item_list[2]
+                        expiration_time = resend_item_list[3]
+                        metric_trigger = resend_item_list[4]
+                        algorithm = resend_item_list[5]
+                        metric_timestamp = resend_item_list[6]
+                        metric_alert_dict = resend_item_list[7]
+
+                        # To ensure that Boundary does not loop through every alert in the queue
+                        # for an alerter_endpoint, if the alerter_endpoint is down and wait for
+                        # the connect timeout on each one, if an alerter_endpoint fails a Redis
+                        # key is created to check against to see if the alerter_endpoint is down
+                        alerter_name = alerter
+                        alerter_endpoint_cache_key = 'http_alerter.down.%s' % str(alerter_name)
+                        if alerter_endpoint_cache_key in http_alerters_down:
+                            continue
+                        alerter_endpoint_failed = False
+                        try:
+                            alerter_endpoint_failed = self.redis_conn.get(alerter_endpoint_cache_key)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: alert_http could not query Redis for cache_key %s: %s' % (str(alerter_endpoint_cache_key), e))
+                        if alerter_endpoint_failed:
+                            if alerter_endpoint_cache_key not in http_alerters_down:
+                                http_alerters_down.append(alerter_endpoint_cache_key)
+                                logger.info('%s Redis exists not alerting for any alerts for this endpoint' % str(alerter_endpoint_cache_key))
+                            continue
+                        logger.info('resend_queue item :: %s' % (str(resend_item_list)))
+                        try:
+                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
                             logger.info('trigger_alert :: %s resend %s' % (
                                 str(resend_item_list), str(metric_alert_dict)))
                         except:
@@ -1626,22 +2057,26 @@ class Boundary(Thread):
             # Log to Graphite
             graphite_run_time = '%.2f' % run_time
             send_metric_name = skyline_app_graphite_namespace + '.run_time'
-            send_graphite_metric(skyline_app, send_metric_name, graphite_run_time)
+            try:
+                send_graphite_metric(self, skyline_app, send_metric_name, graphite_run_time)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: send_graphite_metric failed - %s' % err)
 
             send_metric_name = skyline_app_graphite_namespace + '.total_analyzed'
-            send_graphite_metric(skyline_app, send_metric_name, total_analyzed)
+            send_graphite_metric(self, skyline_app, send_metric_name, total_analyzed)
 
             send_metric_name = skyline_app_graphite_namespace + '.total_anomalies'
-            send_graphite_metric(skyline_app, send_metric_name, total_anomalies)
+            send_graphite_metric(self, skyline_app, send_metric_name, total_anomalies)
 
             send_metric_name = skyline_app_graphite_namespace + '.total_metrics'
-            send_graphite_metric(skyline_app, send_metric_name, total_metrics)
+            send_graphite_metric(self, skyline_app, send_metric_name, total_metrics)
             for key, value in exceptions.items():
                 send_metric_name = '%s.exceptions.%s' % (skyline_app_graphite_namespace, key)
-                send_graphite_metric(skyline_app, send_metric_name, str(value))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(value))
             for key, value in anomaly_breakdown.items():
                 send_metric_name = '%s.anomaly_breakdown.%s' % (skyline_app_graphite_namespace, key)
-                send_graphite_metric(skyline_app, send_metric_name, str(value))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(value))
 
             # Check canary metric
             raw_series = self.redis_conn.get(settings.FULL_NAMESPACE + settings.CANARY_METRIC)
@@ -1664,10 +2099,10 @@ class Boundary(Thread):
 
                 logger.info('canary duration   :: %.2f' % time_human)
                 send_metric_name = skyline_app_graphite_namespace + '.duration'
-                send_graphite_metric(skyline_app, send_metric_name, str(time_human))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(time_human))
 
                 send_metric_name = skyline_app_graphite_namespace + '.projected'
-                send_graphite_metric(skyline_app, send_metric_name, str(projected))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(projected))
 
             # Reset counters
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage

@@ -19,13 +19,25 @@ wheel
 #redis==4.0.2
 # @modified 20220422 - Task #4452: Update dependencies
 #redis==4.1.0
-redis==4.2.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#redis==4.2.2
+# @modified 20230331 - Support #4884: Update dependencies - redis-py - CVE-2023-28858
+#redis==4.4.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#redis==4.4.4
+redis==4.6.0
 
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #hiredis==1.0.1
 # @modified 20211220 - Task #4344: Update dependencies
 #hiredis==1.1.0
-hiredis==2.0.0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#hiredis==2.0.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#hiredis==2.1.0
+hiredis==2.2.3
 
 ## python-daemon and deps
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
@@ -38,7 +50,12 @@ hiredis==2.0.0
 #docutils==0.15.2
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #docutils==0.16
-docutils==0.18.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#docutils==0.18.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#docutils==0.19
+docutils==0.20.1
 
 lockfile==0.12.2
 # @modified 20161119 - Branch #922: ionosphere
@@ -80,7 +97,9 @@ itsdangerous==2.1.2
 #Jinja2==2.11.3
 # @modified 20220422 - Task #4452: Update dependencies
 #Jinja2==3.0.3
-Jinja2==3.1.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#Jinja2==3.1.1
+Jinja2==3.1.2
 
 # @modified 20190412 - Task #2926: Update dependencies
 #MarkupSafe==1.0
@@ -88,7 +107,10 @@ Jinja2==3.1.1
 #MarkupSafe==1.1.1
 # @modified 20220422 - Task #4452: Update dependencies
 #MarkupSafe==2.0.1
-MarkupSafe==2.1.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#MarkupSafe==2.1.1
+MarkupSafe==2.1.3
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -109,7 +131,14 @@ MarkupSafe==2.1.1
 #Werkzeug==1.0.1
 # @modified 20220422 - Task #4452: Update dependencies
 #Werkzeug==2.0.2
-Werkzeug==2.1.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#Werkzeug==2.1.1
+# @modified 20230331 - Support #4884: Update dependencies - redis-py - CVE-2023-28858
+#Werkzeug==2.2.2
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Werkzeug==2.2.3
+Werkzeug==2.3.6
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #click==6.6
@@ -121,7 +150,9 @@ Werkzeug==2.1.1
 #click==7.1.2
 # @modified 20220422 - Task #4452: Update dependencies
 #click==8.0.3
-click==8.1.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#click==8.1.2
+click==8.1.3
 
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
 #Flask==0.11.1
@@ -139,7 +170,12 @@ click==8.1.2
 #Flask==1.1.2
 # @modified 20220422 - Task #4452: Update dependencies
 #Flask==2.0.2
-Flask==2.1.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#Flask==2.1.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Flask==2.2.2
+Flask==2.3.2
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -156,7 +192,12 @@ Flask==2.1.1
 #simplejson==3.17.0
 # @modified 20211220 - Task #4344: Update dependencies
 #simplejson==3.17.2
-simplejson==3.17.6
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#simplejson==3.17.6
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#simplejson==3.18.0
+simplejson==3.19.1
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #six==1.10.0
@@ -169,10 +210,16 @@ simplejson==3.17.6
 six==1.16.0
 
 ## unittest2 and deps
+# @modified 20230110 - Task #4800: Deprecate unittest2
+#                      Task #4778: v4.0.0 - update dependencies
+# Use built in unittest, deprecated linecache2, traceback2, argparse and unittest2
+# @modified 20230119 - Task #4800: Deprecate unittest2
+#                      Task #4778: v4.0.0 - update dependencies
+# argparse is left as it is required for pipdeptree
 argparse==1.4.0
-linecache2==1.0.0
-traceback2==1.4.0
-unittest2==1.1.0
+#linecache2==1.0.0
+#traceback2==1.4.0
+#unittest2==1.1.0
 
 ## mock and deps
 funcsigs==1.0.2
@@ -196,7 +243,12 @@ funcsigs==1.0.2
 #pbr==5.5.1
 # @modified 20220422 - Task #4452: Update dependencies
 #pbr==5.8.0
-pbr==5.8.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pbr==5.8.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pbr==5.11.0
+pbr==5.11.1
 
 # @modified 20190529 - Task #3060: Update dependencies
 #mock==2.0.0
@@ -204,7 +256,12 @@ pbr==5.8.1
 #mock==3.0.5
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #mock==4.0.2
-mock==4.0.3
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#mock==4.0.3
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#mock==5.0.0
+mock==5.0.2
 
 # If python-2.6 is being used, distribute is probably still required
 #distribute
@@ -246,7 +303,17 @@ mock==4.0.3
 #numpy==1.22.0
 # @modified 20220422 - Task #4452: Update dependencies
 #numpy==1.22.0
-numpy==1.22.3
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+# Cannot move to 1.24.1 because numba 0.56.4 depends on numpy<1.24 and >=1.18
+# so fix to 1.23.5, but cannot use 1.23.5 because there is a statsmodels dep on
+# scipy to 1.7.3 due to Bug #4346: statsmodel 0.13.1 error
+#numpy==1.22.3
+#numpy==1.23.5
+# @modified 20230120 - Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1 (earthgecko-tsfresh)
+# Updating statsmodels, scipy and numpy now tsfresh is updating to v0.19.1
+#numpy==1.22.4
+numpy==1.23.5
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -272,7 +339,19 @@ numpy==1.22.3
 #scipy==1.5.0
 # @modified 20211220 - Task #4344: Update dependencies
 #scipy==1.5.4
-scipy==1.7.3
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+# Cannot update to 1.9.3 due to statsmodels dep on scipy to 1.7.3 because of
+# Bug #4346: statsmodel 0.13.1 error
+#scipy==1.7.3
+#scipy==1.9.3
+# @modified 20230120 - Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1 (earthgecko-tsfresh)
+# Updating statsmodels, scipy and numpy now tsfresh is updating to v0.19.1
+# scipy==1.7.3
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#scipy==1.10.0
+scipy==1.10.1
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -319,7 +398,12 @@ python-dateutil==2.8.2
 #pytz==2020.5
 # @modified 20220422 - Task #4452: Update dependencies
 #pytz==2021.3
-pytz==2022.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pytz==2022.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pytz==2022.7
+pytz==2023.3
 
 # @modified 20211220 - Task #4344: Update dependencies
 #cycler==0.10.0
@@ -342,7 +426,12 @@ cycler==0.11.0
 #pyparsing==2.4.7
 # @modified 20220422 - Task #4452: Update dependencies
 #pyparsing==3.0.6
-pyparsing==3.0.8
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pyparsing==3.0.8
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pyparsing==3.0.9
+pyparsing==3.1.0
 
 # @added 20210115 - Bug #3940: SNYK-PYTHON-PILLOW-1055461 and SNYK-PYTHON-PILLOW-1055462
 # Added as matplotlib@3.3.3 introduced pillow@8.0.1 and Pillow is now fixed at
@@ -369,7 +458,12 @@ pyparsing==3.0.8
 #Pillow==8.4.0
 # @modified 20220422 - Task #4452: Update dependencies
 #Pillow==9.0.0
-Pillow==9.3.0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#Pillow==9.1.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#Pillow==9.4.0
+Pillow==9.5.0
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -398,7 +492,12 @@ Pillow==9.3.0
 #matplotlib==3.5.1
 # @modified 20220217 - Task #4452: Update dependencies
 #matplotlib==3.3.3
-matplotlib==3.5.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#matplotlib==3.5.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#matplotlib==3.6.2
+matplotlib==3.7.1
 
 ## pandas and deps
 # @modified 20161119 - Branch #922: ionosphere
@@ -424,7 +523,9 @@ matplotlib==3.5.1
 #pandas==1.2.0
 # @modified 20220422 - Task #4452: Update dependencies
 #pandas==1.3.5
-pandas==1.4.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pandas==1.4.2
+pandas==1.5.2
 
 # @modified 20180416 - Task #2272: update deps for luminosity branch
 #patsy==0.4.1
@@ -432,7 +533,9 @@ pandas==1.4.2
 #patsy==0.5.0
 # @modified 20211220 - Task #4344: Update dependencies
 #patsy==0.5.1
-patsy==0.5.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#patsy==0.5.2
+patsy==0.5.3
 
 # @modified 20170809 - Task #2138: Update deps
 #statsmodels==0.6.1
@@ -465,7 +568,11 @@ patsy==0.5.2
 #                      Task #4344: Update dependencies
 # NotImplementedError: AR has been removed from statsmodels and replaced with statsmodels.tsa.ar_model.AutoReg.
 #statsmodels==0.13.1
-statsmodels==0.12.1
+# @modified 20230120 - Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1 (earthgecko-tsfresh)
+# Updating statsmodels, scipy and numpy now tsfresh is updating to v0.19.1
+# statsmodels==0.12.1
+statsmodels==0.13.5
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #msgpack-python==0.4.7
@@ -501,7 +608,12 @@ msgpack-python==0.5.6
 #requests==2.25.1
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #requests==2.26.0
-requests==2.27.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#requests==2.27.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#requests==2.28.1
+requests==2.31.0
 
 # ALERTERS - uncomment any alerters you want to enable
 # @modified 20211220 - Task #4344: Update dependencies
@@ -559,7 +671,12 @@ pygerduty==0.38.3
 #mysql-connector-python==8.0.22
 # @modified 20220422 - Task #4452: Update dependencies
 #mysql-connector-python==8.0.27
-mysql-connector-python==8.0.28
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#mysql-connector-python==8.0.28
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#mysql-connector-python==8.0.31
+mysql-connector-python==8.0.33
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
@@ -592,7 +709,12 @@ gunicorn==20.1.0
 #pipdeptree==2.0.0
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #pipdeptree==2.2.0
-pipdeptree==2.2.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pipdeptree==2.2.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pipdeptree==2.3.3
+pipdeptree==2.9.3
 
 # @added 20210614 - Task #4140: deps updates
 #                   Branch #1444: thunder
@@ -623,13 +745,21 @@ pipdeptree==2.2.1
 #scikit-learn==0.24.2
 # @modified 20220110 - Task #4362: snyk - numpy and pillow updates
 #scikit-learn==1.0.1
-scikit-learn==1.0.2
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+# A bit of a jump but tsfresh tests OK, awaiting adtk testing
+#scikit-learn==1.0.2
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#scikit-learn==1.2.0
+scikit-learn==1.2.2
 
 # @modified 20190412 - Task #2926: Update dependencies
 #future==0.16.0
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #future==0.17.1
-future==0.18.2
+# @modified 20230331 - Support #4884: Update dependencies - redis-py - CVE-2023-28858
+#future==0.18.2
+future==0.18.3
 
 # @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
 #tsfresh==0.1.2
@@ -648,9 +778,17 @@ future==0.18.2
 #tsfresh==0.4.0
 # @modified 20220111 - Task #4368: Switch git clone to https
 #git+git://github.com/earthgecko/tsfresh@05ee36c#egg=tsfresh
-git+https://github.com/earthgecko/tsfresh@05ee36c#egg=tsfresh
+# @modified 20230123 - Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456 v0.19.1 (earthgecko/tsfresh)
+#git+https://github.com/earthgecko/tsfresh@05ee36c#egg=tsfresh
+git+https://github.com/earthgecko/tsfresh@3d5a320#egg=tsfresh
 
-termcolor==1.1.0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#termcolor==1.1.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#termcolor==2.1.1
+termcolor==2.3.0
 
 # @added 20161127 - Branch #922: ionosphere
 ## pytest and deps
@@ -696,7 +834,12 @@ py==1.11.0
 #pytest==6.2.1
 # @modified 20220422 - Task #4452: Update dependencies
 #pytest==6.2.5
-pytest==7.1.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pytest==7.1.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#pytest==7.2.0
+pytest==7.4.0
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -728,7 +871,12 @@ pytest==7.1.1
 #SQLAlchemy==1.4.28
 # @modified 20220422 - Task #4452: Update dependencies
 #SQLAlchemy==1.4.29
-SQLAlchemy==1.4.35
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#SQLAlchemy==1.4.35
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#SQLAlchemy==1.4.45
+SQLAlchemy==1.4.48
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 # @modified 20180416 - Task #2272: update deps for luminosity branch
@@ -745,6 +893,12 @@ SQLAlchemy==1.4.35
 #pymemcache==3.4.0
 # @modified 20220422 - Task #4452: Update dependencies
 #pymemcache==3.5.0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#pymemcache==3.5.2
+# @modified 20230119 - Task #4778: v4.0.0 - update dependencies
+# Downgraded to 3.5.2 because opentelemetry-instrumentation-pymemcache==0.36b0
+# requires pymemcache >= 1.3.5, < 4
+#pymemcache==4.0.0
 pymemcache==3.5.2
 
 # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
@@ -757,7 +911,12 @@ pymemcache==3.5.2
 #PyJWT==1.6.4
 # @modified 20211220 - Task #4344: Update dependencies
 #PyJWT==1.7.1
-PyJWT==2.3.0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#PyJWT==2.3.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#PyJWT==2.6.0
+PyJWT==2.7.0
 
 # @added 20180105 - Branch #2270: luminosity
 # @added 20180105 - Branch #2270: luminosity
@@ -771,7 +930,11 @@ PyJWT==2.3.0
 #git+git://github.com/earthgecko/luminol@d429044#egg=luminol
 # @modified 20220111 - Task #4368: Switch git clone to https
 #git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
-git+https://github.com/earthgecko/luminol@2de3fb2#egg=luminol
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#                      Task #4820: Deprecation of numpy asscalar function in luminol
+# Use earthgecko/luminol 0.4.4
+# git+https://github.com/earthgecko/luminol@2de3fb2#egg=luminol
+git+https://github.com/earthgecko/luminol@40791e2#egg=luminol
 
 # @added 20181006 - Feature #2618: alert_slack
 # @modified 20190412 - Task #2926: Update dependencies
@@ -783,7 +946,9 @@ git+https://github.com/earthgecko/luminol@2de3fb2#egg=luminol
 #slackclient==1.3.2
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #slackclient==2.7.2
-slackclient==2.9.3
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#slackclient==2.9.3
+slackclient==2.9.4
 
 # @added 20210305 - Support #3974: SNYK-PYTHON-AIOHTTP-1079232
 # Open Redirect in aiohttp@3.7.3 introduced by slackclient@2.9.3 > aiohttp@3.7.3
@@ -793,7 +958,12 @@ slackclient==2.9.3
 #aiohttp==3.7.4
 # @modified 20220422 - Task #4452: Update dependencies
 #aiohttp==3.8.0
-aiohttp==3.8.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#aiohttp==3.8.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#aiohttp==3.8.3
+aiohttp==3.8.4
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
@@ -821,18 +991,33 @@ aiohttp==3.8.1
 #urllib3==1.26.7
 # @modified 20220422 - Task #4452: Update dependencies
 #urllib3==1.26.8
-urllib3==1.26.9
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#urllib3==1.26.9
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#urllib3==1.26.13
+urllib3==1.26.16
 
 # @added 201906025 - Branch #956: flux
 # @modified 20211220 - Task #4344: Update dependencies
 #graphyte==1.6.0
-graphyte==1.7.0
-statsd==3.3.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#graphyte==1.7.0
+graphyte==1.7.1
+
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#statsd==3.3.0
+statsd==4.0.1
+
 # @modified 20211220 - Task #4344: Update dependencies
 #falcon==2.0.0
 # @modified 20220422 - Task #4452: Update dependencies
 #falcon==3.0.1
-falcon==3.1.0
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#falcon==3.1.0
+falcon==3.1.1
 
 # @added 20200517 - Feature #3550: flux.uploaded_data_worker
 #                   Feature #3538: webapp - upload_data endpoint
@@ -857,7 +1042,10 @@ timeout-decorator==0.5.0
 # @added 20200908 - Task #3744: POC matrixprofile
 # @modified 20211220 - Task #4344: Update dependencies
 #matrixprofile==1.1.4
-matrixprofile==1.1.10
+# @modified 20230104 - Task #4786: Switch from matrixprofile to stumpy
+# Thematrix-profile-foundation/matrixprofile library is no longer maintained and
+# this has been replaced with the stumpy matrixprofile implementation
+#matrixprofile==1.1.10
 
 # @added 20210316 - Feature #3970: custom_algorithm - adtk_level_shift
 #                   Feature #3978: luminosity - classify_metrics
@@ -875,7 +1063,12 @@ mass-ts==0.1.4
 #boto3==1.20.6
 # @modified 20220422 - Task #4452: Update dependencies
 #boto3==1.20.24
-boto3==1.21.44
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#boto3==1.21.44
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#boto3==1.26.41
+boto3==1.26.160
 
 # @added 20220110 - Feature #4180: custom_algorithm - m66
 #                   Feature #4164: luminosity - cloudbursts
@@ -885,39 +1078,122 @@ bottleneck==1.3.2
 #                   Feature #3538: webapp - upload_data endpoint
 #                   Task #4362: snyk - numpy and pillow updates
 # New dependency for pandas reading xls
-openpyxl==3.0.9
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#openpyxl==3.0.9
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#openpyxl==3.0.10
+openpyxl==3.1.2
 
 # @added 20220409 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
 # @modified 20220422 - Task #4452: Update dependencies
 #                      Bug #4532: opentelemetry - rename InstrumentationLibrary to InstrumentationScope
 #opentelemetry-api==1.10.0
-opentelemetry-api==1.11.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#opentelemetry-api==1.11.1
+opentelemetry-api==1.15.0
 
-opentelemetry-distro==0.29b0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#opentelemetry-distro==0.29b0
+opentelemetry-distro==0.36b0
 
 # @modified 20220422 - Task #4452: Update dependencies
 #                      Bug #4532: opentelemetry - rename InstrumentationLibrary to InstrumentationScope
 #opentelemetry-exporter-jaeger==1.10.0
 #opentelemetry-exporter-jaeger-proto-grpc==1.10.0
 #opentelemetry-exporter-jaeger-thrift==1.10.0
-opentelemetry-exporter-jaeger==1.11.1
-opentelemetry-exporter-jaeger-proto-grpc==1.11.1
-opentelemetry-exporter-jaeger-thrift==1.11.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#opentelemetry-exporter-jaeger==1.11.1
+#opentelemetry-exporter-jaeger-proto-grpc==1.11.1
+#opentelemetry-exporter-jaeger-thrift==1.11.1
+opentelemetry-exporter-jaeger==1.15.0
+opentelemetry-exporter-jaeger-proto-grpc==1.15.0
+opentelemetry-exporter-jaeger-thrift==1.15.0
 
-opentelemetry-instrumentation==0.29b0
-opentelemetry-instrumentation-flask==0.29b1
-opentelemetry-instrumentation-pymemcache==0.29b0
-opentelemetry-instrumentation-redis==0.29b0
-opentelemetry-instrumentation-sqlalchemy==0.29b0
-opentelemetry-instrumentation-wsgi==0.29b0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#opentelemetry-instrumentation==0.29b0
+#opentelemetry-instrumentation-flask==0.29b1
+#opentelemetry-instrumentation-pymemcache==0.29b0
+#opentelemetry-instrumentation-redis==0.29b0
+#opentelemetry-instrumentation-sqlalchemy==0.29b0
+#opentelemetry-instrumentation-wsgi==0.29b0
+opentelemetry-instrumentation==0.36b0
+opentelemetry-instrumentation-flask==0.36b0
+opentelemetry-instrumentation-pymemcache==0.36b0
+opentelemetry-instrumentation-redis==0.36b0
+opentelemetry-instrumentation-sqlalchemy==0.36b0
+opentelemetry-instrumentation-wsgi==0.36b0
 
 # @modified 20220422 - Task #4452: Update dependencies
 #                      Bug #4532: opentelemetry - rename InstrumentationLibrary to InstrumentationScope
 #opentelemetry-proto==1.10.0
 #opentelemetry-sdk==1.10.0
-opentelemetry-proto==1.11.1
-opentelemetry-sdk==1.11.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#opentelemetry-proto==1.11.1
+#opentelemetry-sdk==1.11.1
+opentelemetry-proto==1.15.0
+opentelemetry-sdk==1.15.0
 
-opentelemetry-semantic-conventions==0.29b0
-opentelemetry-util-http==0.29b0
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#opentelemetry-semantic-conventions==0.29b0
+#opentelemetry-util-http==0.29b0
+opentelemetry-semantic-conventions==0.36b0
+opentelemetry-util-http==0.36b0
+
+# @added 20220528 - Feature #4584: custom_algorithm - skyline_ARTime
+# @modified 20230119 - Task #4778: v4.0.0 - update dependencies
+# Remove WIP required library
+#juliacall==0.4.3
+
+# @added 20220611 - Branch #4300: prometheus
+python-snappy==0.6.1
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#prometheus-client==0.14.1
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#prometheus-client==0.15.0
+prometheus-client==0.17.0
+
+# @added 20220708 - Info #4620: memray
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#memray==1.4.0
+memray==1.8.0
+
+# @added 20221020 - Feature #4702: numba optimisations
+# @modified 20230102 - Task #4778: v4.0.0 - update dependencies
+#numba==0.56.3
+numba==0.56.4
+
+# @added 20221111 - Feature #4746: custom_algorithm - dbscan
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#kneed==0.8.1
+kneed==0.8.3
+
+# @added 20221118 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+gevent==22.10.2
+
+# @added 20221128 - Feature #4742: custom_algorithms - skyline_prophet
+# @modified 20230625 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#prophet==1.1.1
+prophet==1.1.4
+
+# @added 20220104 - Task #4786: Switch from matrixprofile to stumpy
+# For now pin to a protobuf that supports matrixprofile==1.1.10, although all
+# the other libraries have increased the protobuf version matrixprofile has not
+# and is now not maintained.  The uses in the other libraries seem to work OK
+# still with the older version for now.
+# However mysql-connector-python==8.0.31 [requires: protobuf>=3.11.0,<=3.20.1]
+# still requires 3.20.1 even though protobuf is now at 4.21.12
+protobuf==3.20.1
+
+# @added 20230104 - Task #4786: Switch from matrixprofile to stumpy
+stumpy==1.11.1
+
+# @added 20230427 - Feature #4896: custom_algorithms - mstl
+#                   Feature #4898: custom_algorithms - autoarima
+statsforecast==1.5.0

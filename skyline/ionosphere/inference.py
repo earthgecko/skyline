@@ -1,3 +1,6 @@
+"""
+inference.py
+"""
 from __future__ import division
 import logging
 import os
@@ -6,6 +9,8 @@ from ast import literal_eval
 from timeit import default_timer as timer
 import traceback
 import operator
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import numpy as np
 import mass_ts as mts
@@ -30,6 +35,10 @@ if True:
     from functions.database.queries.fp_timeseries import get_db_fp_timeseries
     from functions.numpy.percent_different import get_percent_different
     from functions.database.queries.get_ionosphere_fp_ids_for_full_duration import get_ionosphere_fp_ids_for_full_duration
+
+    # @added 20220731 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 
     import warnings
     warnings.filterwarnings('ignore')
@@ -71,7 +80,9 @@ except Exception as outer_err:
     logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
 try:
-    IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
+    IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = copy.deepcopy(settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS)
 except Exception as outer_err:
     logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
@@ -148,13 +159,40 @@ def ionosphere_motif_inference(metric, timestamp):
     if not IONOSPHERE_INFERENCE_MOTIFS_SETTINGS:
         return matched_motifs, fps_checked_for_motifs
 
+    # @added 20220731 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name
+    labelled_metric_name = None
+    if metric.startswith('labelled_metrics.'):
+        labelled_metric_name = str(metric)
+        logger.info('inference :: labelled_metric_name: %s' % labelled_metric_name)
+        try:
+            base_name = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+            if base_name:
+                labelled_metric_base_name = str(base_name)
+                metric = str(labelled_metric_base_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                metric, err))
+
     metric_dir = metric.replace('.', '/')
+
+    if labelled_metric_name:
+        metric_dir = labelled_metric_name.replace('.', '/')
+
     metric_timeseries_dir = '%s/%s/%s' % (
         settings.IONOSPHERE_DATA_FOLDER, str(timestamp), metric_dir)
+
     metric_vars_file = '%s/%s.txt' % (metric_timeseries_dir, metric)
     timeseries_json = '%s/%s.json' % (metric_timeseries_dir, metric)
     full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
         metric_timeseries_dir, metric, str(full_duration_in_hours))
+
+    if labelled_metric_name:
+        metric_vars_file = '%s/%s.txt' % (metric_timeseries_dir, labelled_metric_name)
+        timeseries_json = '%s/%s.json' % (metric_timeseries_dir, labelled_metric_name)
+        full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
+            metric_timeseries_dir, labelled_metric_name, str(full_duration_in_hours))
 
     try:
         metric_vars_dict = mirage_load_metric_vars(skyline_app, metric_vars_file, True)
@@ -174,7 +212,10 @@ def ionosphere_motif_inference(metric, timestamp):
     metric_db_object = {}
     start_get_metrics_db_object = timer()
     try:
-        metric_db_object = get_metrics_db_object(metric)
+        if not labelled_metric_name:
+            metric_db_object = get_metrics_db_object(metric)
+        else:
+            metric_db_object = get_metrics_db_object(labelled_metric_name)
     except Exception as e:
         logger.error('error :: inference :: failed to get_metrics_db_object - %s' % (e))
     end_get_metrics_db_object = timer()
@@ -231,9 +272,15 @@ def ionosphere_motif_inference(metric, timestamp):
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: inference :: failed to iterate results from get_ionosphere_fp_ids_for_full_duration for %s - %s' % (metric, e))
-        except Exception as e:
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: inference :: failed to get fp ids via mysql_select from %s - %s' % (metric, e))
+            # @modified 20230106 - Task #4778: v4.0.0 - update dependencies
+            # bandit incorrectly flagging up B608:hardcoded_sql_expressions and
+            # the log should have change when the above switch was made to use
+            # get_ionosphere_fp_ids_for_full_duration
+            # logger.error('error :: inference :: failed to get fp ids via mysql_select from %s - %s' % (metric, err))
+            logger.error('error :: inference :: failed to get fp ids via get_ionosphere_fp_ids_for_full_duration for %s - %s' % (
+                metric, err))
 
         logger.info('inference :: metric_id: %s, full_duration: %s, full_duration_fp_ids: %s' % (
             str(metric_id), str(full_duration), str(full_duration_fp_ids)))
@@ -342,7 +389,7 @@ def ionosphere_motif_inference(metric, timestamp):
                 (end_determine_data_frequency - start_determine_data_frequency)))
 
             # Add the timeseries to the fps_timeseries dict for later use in
-            # the all_in_range and areas under a cirve evaluation
+            # the all_in_range and areas under a curve evaluation
             fps_timeseries[fp_id] = fp_timeseries
 
             relate_dataset = [float(item[1]) for item in fp_timeseries]
@@ -832,8 +879,16 @@ def ionosphere_motif_inference(metric, timestamp):
                     logger.debug('debug :: inference :: exact match: %s' % (str(motif)))
 
             full_relate_timeseries = fps_timeseries[current_fp_id]
+            # @modified 20220526 - Bug #4588: Ionosphere - inference - further validate all_in_range
+            # The change to a simplified chained comparison between the operands
+            # did not have the desired result.  The index to end of timeseries
+            # was being selected rather than index to index+size.  This resulted
+            # in the fp_motifs being incorrect and having incorrect areas, etc.
+            # Reverted back to the original method, occassionally pylint is not
+            # useful.
             # relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
-            relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index < (best_index + motif_size)]
+            # relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index < (best_index + motif_size)]
+            relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index >= best_index and index < (best_index + motif_size)]
             relate_dataset = [item[1] for item in relate_timeseries]
             # relate_dataset_timestamps = [int(item[0]) for item in relate_timeseries]
 
@@ -867,6 +922,7 @@ def ionosphere_motif_inference(metric, timestamp):
                             logger.debug('debug :: inference :: all_in_range: related_min_y: %s greater than (min_y + range_padding): (%s + %s) = %s' % (
                                 str(min_relate_dataset), str(min_y), str(range_padding),
                                 str((min_y + range_padding))))
+
                 if all_in_range:
                     # logger.info('inference :: ALL IN RANGE - all_in_range: %s, distance: %s' % (str(all_in_range), str(best_dist)))
                     add_match = True
@@ -1038,8 +1094,13 @@ def ionosphere_motif_inference(metric, timestamp):
         if sorted_ordered_matched_motifs_list:
             # inference_debug_file = '%s/%s.%s.fp_id.%s.inference.sorted_ordered_matched_motifs.list' % (
             #     metric_timeseries_dir, str(timestamp), metric, str(fp_id))
-            inference_debug_file = '%s/%s.%s.inference.sorted_ordered_matched_motifs.list' % (
-                metric_timeseries_dir, str(timestamp), metric)
+            if not labelled_metric_name:
+                inference_debug_file = '%s/%s.%s.inference.sorted_ordered_matched_motifs.list' % (
+                    metric_timeseries_dir, str(timestamp), metric)
+            else:
+                inference_debug_file = '%s/%s.%s.inference.sorted_ordered_matched_motifs.list' % (
+                    metric_timeseries_dir, str(timestamp), labelled_metric_name)
+
             if not os.path.isfile(inference_debug_file):
                 try:
                     write_data_to_file(skyline_app, inference_debug_file, 'w', str(sorted_ordered_matched_motifs_list))
@@ -1054,11 +1115,18 @@ def ionosphere_motif_inference(metric, timestamp):
             sorted_matched_motifs[motif_id] = matched_motifs[motif_id]
             if SINGLE_MATCH:
                 break
-        matched_motifs = sorted_matched_motifs.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # matched_motifs = sorted_matched_motifs.copy()
+        matched_motifs = copy.deepcopy(sorted_matched_motifs)
 
     if matched_motifs:
-        inference_file = '%s/%s.%s.inference.matched_motifs.dict' % (
-            metric_timeseries_dir, str(timestamp), metric)
+        if not labelled_metric_name:
+            inference_file = '%s/%s.%s.inference.matched_motifs.dict' % (
+                metric_timeseries_dir, str(timestamp), metric)
+        else:
+            inference_file = '%s/%s.%s.inference.matched_motifs.dict' % (
+                metric_timeseries_dir, str(timestamp), labelled_metric_name)
+
         if not os.path.isfile(inference_file):
             try:
                 write_data_to_file(skyline_app, inference_file, 'w', str(matched_motifs))

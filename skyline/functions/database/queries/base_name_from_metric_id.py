@@ -55,7 +55,7 @@ def base_name_from_metric_id(current_skyline_app, metric_id, log=False):
 
     try:
         connection = engine.connect()
-        stmt = select([metrics_table.c.metric]).where(metrics_table.c.id == metric_id)
+        stmt = select([metrics_table.c.metric]).where(metrics_table.c.id == int(metric_id))
         result = connection.execute(stmt)
         for row in result:
             base_name = row['metric']

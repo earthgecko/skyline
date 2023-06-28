@@ -89,7 +89,7 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
         try:
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            image_data = urllib2.urlopen(link).read()  # nosec
+            image_data = urllib2.urlopen(link).read()  # nosec B310
         except urllib2.URLError:
             image_data = None
 
@@ -106,7 +106,7 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
         try:
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            analyzer_image_data = urllib2.urlopen(analyzer_link).read()  # nosec
+            analyzer_image_data = urllib2.urlopen(analyzer_link).read()  # nosec B310
         except urllib2.URLError:
             analyzer_image_data = None
 
