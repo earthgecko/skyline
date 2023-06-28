@@ -21,7 +21,6 @@ Contents:
   upgrading/index.rst
   getting-data-into-skyline
   alert-testing
-  skyline_metrics
   alerts
   slack
   monotonic-metrics
@@ -55,6 +54,7 @@ Contents:
   logging
   tuning-tips
   monitoring-skyline
+  skyline_metrics
   opentelemetry
   troubleshooting
   deprecated-docs/index.rst

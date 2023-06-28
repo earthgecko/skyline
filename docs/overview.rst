@@ -38,7 +38,7 @@ few use cases:
   performance related impacts any new feature may introduce.  For example a
   developer may create a new feature that periodically runs analysis on some
   data from a MySQL database.  The developer builds the feature, tests it to
-  ensure that it provides the required functionality and releases the feature.
+  ensures that it provides the required functionality and releases the feature.
   The feature works but it introduces an additional 225K of
   `mysql.handler_read_next` operations on every run, which were not there before
   the feature was released.  The developer method works, but it could work much
@@ -62,7 +62,7 @@ If the 3 pillars of observability are:
 
 What do pillars hold up?
 
-Data analysis is the next generation of the observability stack, observabilty 1.0
+Data analysis is the next generation of the observability stack, o11y 1.0
 was about collection, storage, retrieval and presentation.  Anomaly detection is
 is a part of the next generation of observability, putting all that data to use
 in real time - analysis.
@@ -109,7 +109,11 @@ algorithms in the real time pipeline, without having them influence the outcome
 of any existing analysis.  This allows for benchmarking the actual performance of
 algorithms on your own real data.
 
-And it is cluster ready for production.
+And it is cluster ready for production.  However be warned, it is a complex stack
+to set up and implement, once running it is fine, it bit like my Mercedes MB120
+van which has 662000 km on the clock.  However, like my van, it runs perfectly
+fine but when it comes to upgrading all the components and the app itself is a
+fairly large slice of orchestrated work, not for the faint hearted.
 
 **human-in-the-loop**
 
@@ -188,9 +192,9 @@ Skyline runs on Linux on commodity hardware or a cloud instance.
 
 At its core Skyline can currently makes use of the uses the following algorithms
 (or modifications thereof):
+
 - 9 three-sigma based algorithms, derived from Shewhart's statistical process
-- SITTSSCA - Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison
-  Algorithm
+- SITTSSCA - Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm
 - `MASS`_ - Mueen's Algorithm for Similarity Search (`mass-ts`_)
 - matrixprofile
 - various `adtk`_ algorithms - level shift, volatility shift and persist
@@ -236,3 +240,4 @@ The main objectives are:
 .. _MASS: https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html
 .. _mass-ts: https://github.com/matrix-profile-foundation/mass-ts
 .. _adtk: https://github.com/arundo/adtk
+.. _anomify: https://anomify.ai

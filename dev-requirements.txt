@@ -1189,7 +1189,12 @@ prophet==1.1.4
 # still with the older version for now.
 # However mysql-connector-python==8.0.31 [requires: protobuf>=3.11.0,<=3.20.1]
 # still requires 3.20.1 even though protobuf is now at 4.21.12
-protobuf==3.20.1
+# @modified 20230628 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#                      https://github.com/earthgecko/skyline/pull/624
+# Now mysql-connector-python==8.0.33 [requires: protobuf>=3.11.0,<=3.20.3]
+#protobuf==3.20.1
+protobuf==3.20.3
 
 # @added 20230104 - Task #4786: Switch from matrixprofile to stumpy
 stumpy==1.11.1

@@ -30,6 +30,13 @@ recommendations in terms of configurations of the various components and how and
 where they should be run in relation to Skyline.  There are no cfengine, puppet,
 chef or ansible patterns here, nor helm charts, yaml or dockerfiles.
 
+Because of the nature of the underlying Python libraries and specifically the
+data science libraries and large dependencies and versions tree, Skyline pins
+to absolute versions of packages and without isolation, stability and
+repeatability would be impossible.  It is for this reason that Skyline is very
+complicated and complex to build and upgrade.  Upgrading is generally doing
+a full new Python and virtualenv install and swapping the directories out.
+
 There are two methods of installation described here:
 
 - The quickstart standalone build script
@@ -37,8 +44,8 @@ There are two methods of installation described here:
 
 The documentation is aimed at installing Skyline securely by default.  It is
 possible to run Skyline very insecurely, however this documentation does not
-specify how to do that.  Both the set up and documentation are verbose.  Setting
-up Skyline takes a while.
+specify how to do that.  Both the set up and documentation are verbose (but
+do not cover everything).  Setting up Skyline takes a while.
 
 The quickstart installation script takes about 30 minutes to run.  It downloads
 and builds Python, creates a skyline system user, provisions a virtualenv,
@@ -295,7 +302,7 @@ Skyline and dependencies install
 
     PYTHON_MAJOR_VERSION="3"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3813"
+    PROJECT="skyline-py3817"
 
     # Ensure a symlink exists to the virtualenv
     ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" "${PYTHON_VIRTUALENV_DIR}/projects/skyline"

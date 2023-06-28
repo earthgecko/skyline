@@ -478,6 +478,11 @@ numba==0.56.4
 kneed==0.8.3
 gevent==22.10.2
 prophet==1.1.4
-protobuf==3.20.1
+# @modified 20230628 - Task #4962: Build and test skyline v4.0.0
+#                      Task #4778: v4.0.0 - update dependencies
+#                      https://github.com/earthgecko/skyline/pull/624
+# Now mysql-connector-python==8.0.33 [requires: protobuf>=3.11.0,<=3.20.3]
+#protobuf==3.20.1
+protobuf==3.20.3
 stumpy==1.11.1
 statsforecast==1.5.0

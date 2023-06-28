@@ -50,7 +50,7 @@ requires the following system dependencies:
     apt-get -y install libffi-dev
     apt-get -y install python3-dev python3-pip build-essential nginx apache2-utils \
       lzma lzma-dev liblzma-dev
-    apt-get -y install libsnappy-dev snappy
+    apt-get -y install libsnappy-dev
 
 virtualenv
 ~~~~~~~~~~
@@ -90,7 +90,7 @@ Python:
 
     ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
 
-    make
+    make -j4
 
     # Optionally here if you have the time or interest you can run
     # make test
