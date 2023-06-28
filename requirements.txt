@@ -77,6 +77,6 @@ numba==0.56.4
 kneed==0.8.3
 gevent==22.10.2
 prophet==1.1.4
-protobuf==3.20.1
+protobuf==3.20.2
 stumpy==1.11.1
 statsforecast==1.5.0

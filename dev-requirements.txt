@@ -1189,7 +1189,7 @@ prophet==1.1.4
 # still with the older version for now.
 # However mysql-connector-python==8.0.31 [requires: protobuf>=3.11.0,<=3.20.1]
 # still requires 3.20.1 even though protobuf is now at 4.21.12
-protobuf==3.20.1
+protobuf==3.20.2
 
 # @added 20230104 - Task #4786: Switch from matrixprofile to stumpy
 stumpy==1.11.1
