@@ -37,8 +37,9 @@ requires the following system dependencies:
       gcc gcc-c++ readline-devel ncurses-devel gdbm-devel freetype-devel \
       libpng-devel python38 wget tar git xz-devel
     yum -y install libffi-devel
+    yum -y install --enablerepo=powertools snappy-devel snappy
 
-- Debian family - only tested on Ubuntu 18.04 and 20.04
+- Debian family - only tested on Ubuntu 18.04, 20.04 and 22.04
 
 .. code-block:: bash
 
@@ -49,6 +50,7 @@ requires the following system dependencies:
     apt-get -y install libffi-dev
     apt-get -y install python3-dev python3-pip build-essential nginx apache2-utils \
       lzma lzma-dev liblzma-dev
+    apt-get -y install libsnappy-dev snappy
 
 virtualenv
 ~~~~~~~~~~
@@ -67,13 +69,13 @@ Python version
 ~~~~~~~~~~~~~~
 
 Below we use the path ``/opt/python_virtualenv``, which you can substitute
-with any path you choose.  We are going to use the Python-3.8.13 source and
-build and install an isolated Python-3.8.13, this has no effect on your system
+with any path you choose.  We are going to use the Python-3.8.17 source and
+build and install an isolated Python-3.8.17, this has no effect on your system
 Python:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.13"
+    PYTHON_VERSION="3.8.17"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 
@@ -96,20 +98,20 @@ Python:
     make altinstall
 
 
-You will now have a Python-3.8.13 environment with the Python
-executable: ``/opt/python_virtualenv/versions/3.8.13/bin/python3.8``
+You will now have a Python-3.8.17 environment with the Python
+executable: ``/opt/python_virtualenv/versions/3.8.17/bin/python3.8``
 
 Create a Skyline Python virtualenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once again using Python-3.8.13:
+Once again using Python-3.8.17:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.13"
+    PYTHON_VERSION="3.8.17"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3813"
+    PROJECT="skyline-py3817"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
     virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
