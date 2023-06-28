@@ -86,7 +86,12 @@ MarkupSafe==2.1.3
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #Werkzeug==2.1.1
-Werkzeug==2.3.6
+# readthedocs build error
+#ERROR: pip's legacy dependency resolver does not consider dependency conflicts when selecting packages. This behaviour is the source of the following dependency conflicts.
+#dash 2.11.0 requires Flask<2.3.0,>=1.0.4, but you'll have flask 2.3.2 which is incompatible.
+#dash 2.11.0 requires Werkzeug<2.3.0, but you'll have werkzeug 2.3.6 which is incompatible.
+#Werkzeug==2.3.6
+Werkzeug==2.2.3
 
 # @modified 20211220 - Task #4344: Update dependencies
 #click==7.1.2
@@ -105,7 +110,12 @@ click==8.1.3
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #Flask==2.0.2
-Flask==2.3.2
+# readthedocs build error
+#ERROR: pip's legacy dependency resolver does not consider dependency conflicts when selecting packages. This behaviour is the source of the following dependency conflicts.
+#dash 2.11.0 requires Flask<2.3.0,>=1.0.4, but you'll have flask 2.3.2 which is incompatible.
+#dash 2.11.0 requires Werkzeug<2.3.0, but you'll have werkzeug 2.3.6 which is incompatible.
+#Flask==2.3.2
+Flask==2.2.2
 
 # @modified 20211220 - Task #4344: Update dependencies
 #simplejson==3.17.2
