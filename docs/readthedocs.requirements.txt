@@ -50,7 +50,11 @@ hiredis==2.0.0
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #docutils==0.18.1
-docutils==0.20.1
+# readthedocs error 
+# The user requested docutils==0.20.1
+# sphinx 6.2.1 depends on docutils<0.20 and >=0.18.1
+#docutils==0.20.1
+docutils==0.19
 
 lockfile==0.12.2
 # @modified 20211220 - Task #4344: Update dependencies
