@@ -7,10 +7,13 @@ from os import getpid
 from os.path import isdir
 
 from multiprocessing import Queue
+import os.path
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
 from daemon import runner
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
-import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -40,13 +43,22 @@ logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 # @added 20201122 - Feature #3820: HORIZON_SHARDS
 # Add an additional listen process on a different port for the shard
 try:
-    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
 except:
     HORIZON_SHARDS = {}
 try:
     HORIZON_SHARD_PICKLE_PORT = settings.HORIZON_SHARD_PICKLE_PORT
 except:
     HORIZON_SHARD_PICKLE_PORT = None
+
+# @added 20220622 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+try:
+    PROMETHEUS_INGESTION = settings.PROMETHEUS_INGESTION
+except:
+    PROMETHEUS_INGESTION = False
 
 
 class Horizon():
@@ -98,9 +110,9 @@ class Horizon():
 
         # Start the listeners
         logger.info('%s :: starting Listen - pickle' % skyline_app)
-        Listen(settings.PICKLE_PORT, listen_queue, pid, type="pickle").start()
+        Listen(settings.PICKLE_PORT, listen_queue, pid, d_type="pickle").start()
         logger.info('%s :: starting Listen - udp' % skyline_app)
-        Listen(settings.UDP_PORT, listen_queue, pid, type="udp").start()
+        Listen(settings.UDP_PORT, listen_queue, pid, d_type="udp").start()
 
         # @added 20211026 - Branch #4300: prometheus
         prometheus_settings = {}
@@ -110,9 +122,13 @@ class Horizon():
             prometheus_settings = {}
         except:
             prometheus_settings = {}
-        if prometheus_settings:
+
+        # @modified 20220622 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # if prometheus_settings:
+        if prometheus_settings or PROMETHEUS_INGESTION:
             logger.info('%s :: starting PrometheusMetrics' % skyline_app)
-            PrometheusMetrics(listen_queue, pid).start()
+            PrometheusMetrics(pid).start()
 
         # @added 20201122 - Feature #3820: HORIZON_SHARDS
         # Add an additional listen process on a different port for the shard
@@ -121,9 +137,9 @@ class Horizon():
                 logger.info('%s :: starting Listen - pickle for horizon shard on port %s' % (
                     skyline_app, str(settings.HORIZON_SHARD_PICKLE_PORT)))
                 try:
-                    Listen(settings.HORIZON_SHARD_PICKLE_PORT, listen_queue, pid, type="pickle").start()
+                    Listen(settings.HORIZON_SHARD_PICKLE_PORT, listen_queue, pid, d_type="pickle").start()
                 except Exception as e:
-                    logger.error('error :: agent.py falied to start Listen for horizon shard - %s' % str(e))
+                    logger.error('error :: agent.py failed to start Listen for horizon shard - %s' % str(e))
             else:
                 logger.error('error :: agent.py could not start the horizon shard Listen process as no port')
 
@@ -155,10 +171,11 @@ def run():
         sys.exit(1)
 
     # @added 20201103 - Feature #3820: HORIZON_SHARDS
-    try:
-        HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
-    except:
-        HORIZON_SHARDS = {}
+    # use outer scope variable
+    # try:
+    #     HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    # except:
+    #     HORIZON_SHARDS = {}
     horizon_shards_validated = True
     if HORIZON_SHARDS:
         for shard_host in HORIZON_SHARDS:

@@ -19,7 +19,7 @@
 		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
 		  <li class="active"><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li ><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
-		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></a></li>
+		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -35,7 +35,7 @@
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
-  		  <h4><span class="logo"><span class="sky">Label ::</span> <span class="re">anomalies</span></span></span></h4>
+  		  <h4><span class="logo"><span class="sky">Label ::</span> <span class="re">anomalies</span></span></h4>
 
   {% if anomalies_labelled %}
 	  <div class="alert alert-success">
@@ -72,7 +72,10 @@
   		      </tr>
   		      <tr>
   		        <td>namespaces</td>
-  		        <td><input type="text" name="namespaces" value="" /> a list of comma separated metric namespaces with MySQL like wildcards e.g server1.cpu%,server2.cpu.%</td>
+  		        <td><input type="text" name="namespaces" value="" /> a list of comma separated metric namespaces with MySQL like wildcards e.g server1.cpu%,server2.cpu.%
+                <br>If you are ingesting <code>labelled_metrics</code> you cannot use <code>labelled_metrics.%</code> as the namespace, you must use labels.
+                This is because in the database no metrics are named <code>labelled_metrics.%</code>, just use label patterns, e.g. <code>%_tenant_id="123"%</code>
+              </td>
   		      </tr>
   		      <tr>
                 <td>start_timestamp</td>
@@ -80,7 +83,7 @@
   		      </tr>
   		      <tr>
                 <td>end_timestamp</td>
-                <td><input type="number" name="end_timestamp" value="" /> unix timestamp</td>
+                <td><input type="number" name="end_timestamp" value="" /> unix timestamp (defaults to current timestamp)</td>
   		      </tr>
   		      <tr>
   		        <td>label</td>

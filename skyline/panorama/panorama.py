@@ -19,11 +19,18 @@ from ast import literal_eval
 from msgpack import Unpacker, packb
 import traceback
 from sys import version_info
+from sys import exit as sys_exit
 import mysql.connector
 from mysql.connector import errorcode
 
 # @added 20190502 - Branch #2646: slack
 from sqlalchemy.sql import select
+
+# @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                      Task #4778: v4.0.0 - update dependencies
+# Use sqlalchemy rather than string-based query construction
+# Added Table and MetaData
+from sqlalchemy import select, Table, MetaData
 
 import settings
 
@@ -51,11 +58,21 @@ from database import (
     get_engine, metrics_table_meta, anomalies_table_meta,
     # @added 20200928 - Task #3748: POC SNAB
     #                   Branch #3068: SNAB
-    snab_table_meta)
+    snab_table_meta,
+)
 
 # @added 20211001 - Feature #4268: Redis hash key - panorama.metrics.latest_anomaly
 #                   Feature #4264: luminosity - cross_correlation_relationships
 from functions.panorama.update_metric_latest_anomaly import update_metric_latest_anomaly
+
+# @added 20220722 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+
+# @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+# Replace mysql_select for all metrics
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -116,9 +133,23 @@ except:
 
 # @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately
 try:
-    PANORAMA_INSERT_METRICS_IMMEDIATELY = settings.PANORAMA_INSERT_METRICS_IMMEDIATELY
+    # @modified 20230204 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    #                      Feature #3442: Panorama - add metric to metrics table immediately
+    # With the addition of analyzer/labelled_metrics, mirage/mirage_labelled_metrics,
+    # and the plethora of changes that supporting the ingestion, storage and
+    # analysis of labelled_metrics, Panorama now needs to insert the metrics as soon
+    # as possible as they are not accepted by flux/prometheus/write until the new,
+    # incoming metric/s have an id assigned to them.  Therefore as of v4.0.0 this
+    # was set to True so that Panorama checks and inserts new metrics every 60
+    # seconds.
+    # PANORAMA_INSERT_METRICS_IMMEDIATELY = settings.PANORAMA_INSERT_METRICS_IMMEDIATELY
+    PANORAMA_INSERT_METRICS_IMMEDIATELY = True
 except:
-    PANORAMA_INSERT_METRICS_IMMEDIATELY = False
+    # PANORAMA_INSERT_METRICS_IMMEDIATELY = False
+    PANORAMA_INSERT_METRICS_IMMEDIATELY = True
+
+
 
 # @added 20200413 - Feature #3486: analyzer_batch
 #                   Feature #3480: batch_processing
@@ -164,7 +195,10 @@ class Panorama(Thread):
         Create the :obj:`mysql_conn`
 
         """
-        super(Panorama, self).__init__()
+        # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+        # Changed to Python 3 style super without arguments
+        # super(Panorama, self).__init__()
+        super().__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         # @modified 20191031 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
@@ -207,12 +241,10 @@ class Panorama(Thread):
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
             logger.warning('warning :: parent or current process dead')
-            exit(0)
+            sys_exit(0)
 
-    """
-    These are the panorama mysql functions used to surface and input panorama data
-    for timeseries.
-    """
+    # These are the panorama mysql functions used to surface and input panorama data
+    # for timeseries.
 
     def mysql_select(self, select_stmt):
         """
@@ -361,27 +393,93 @@ class Panorama(Thread):
         logger.info('valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
         logger.info('max_generations              :: %s' % (str(max_generations)))
         logger.info('max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
-        insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
-            'metrics', 'metric', metric_name, str(learn_full_duration_days),
-            str(valid_learning_duration), str(max_generations),
-            str(max_percent_diff_from_origin))
-        insert_query = 'insert into %s' % insert_query_string  # nosec
-        logger.info('inserting %s into %s table' % (metric_name, 'metrics'))
+
+        # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        determined_id = None
         try:
-            results = self.mysql_insert(insert_query)
-        except:
+            engine, log_msg, trace = get_engine(skyline_app)
+            # @modified 20230116 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # DO NOT return the engine you muppet
+            # return engine, log_msg, trace
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: failed to determine the id of %s from the insert' % (metric_name))
-            raise
-        determined_id = 0
-        if results:
-            determined_id = int(results)
-            return determined_id
-        else:
-            logger.error('error :: results not set')
-            raise
-        logger.error('error :: failed to determine the inserted id for %s' % metric_name)
-        return False
+            log_msg = 'error :: insert_new_metric :: failed to get MySQL engine - %s' % err
+            logger.error(log_msg)
+            return None
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            log_msg = 'error :: insert_new_metric :: failed to get metrics_table meta - %s' % err
+            logger.error(log_msg)
+            try:
+                engine.dispose()
+            except Exception as err:
+                logger.error('error :: insert_new_metric :: engine.dispose() failed - %s' % (
+                    err))
+            return None
+
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+        #     'metrics', 'metric', metric_name, str(learn_full_duration_days),
+        #     str(valid_learning_duration), str(max_generations),
+        #     str(max_percent_diff_from_origin))
+        # insert_query = 'insert into %s' % insert_query_string  # nosec
+
+        # @modified 20230116 - Bug #4816: Handle error in sqlalchemy change
+        #                      Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Simplify log arguments
+        # logger.info('inserting %s into %s table' % (metric_name, 'metrics'))
+        logger.info('inserting %s into metrics table' % metric_name)
+
+        try:
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # results = self.mysql_insert(insert_query)
+            insert_stmt = metrics_table.insert().values(
+                metric=metric_name,
+                learn_full_duration_days=int(learn_full_duration_days),
+                learn_valid_ts_older_than=int(valid_learning_duration),
+                max_generations=int(max_generations),
+                max_percent_diff_from_origin=int(max_percent_diff_from_origin))
+            connection = engine.connect()
+            result = connection.execute(insert_stmt)
+            connection.close()
+            determined_id = result.inserted_primary_key[0]
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: insert_new_metric :: failed to insert metric %s - %s' % (metric_name, err))
+
+        # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        try:
+            engine.dispose()
+        except Exception as err:
+            logger.error('error :: insert_new_metric :: engine.dispose() failed - %s' % (
+                err))
+
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # determined_id = 0
+        # if results:
+        #     determined_id = int(results)
+        #     return determined_id
+        # else:
+        #    logger.error('error :: results not set')
+        #    raise ValueError('error :: results not set')
+        if not determined_id:
+            logger.error('error :: insert_new_metric :: failed to determine the inserted id for %s' % metric_name)
+            return None
+        return determined_id
 
     # @added 20170101 - Feature #1830: Ionosphere alerts
     #                   Bug #1460: panorama check file fails
@@ -567,49 +665,67 @@ class Panorama(Thread):
                 logger.error('error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in snab for %s' % str(snab_id))
             return False
 
+        metric_id = None
+        use_base_name = str(base_name)
+        # @modified 20230418 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        #                      Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Handle snab using None as base_name (not a str)
+        # if base_name.startswith('labelled_metrics.'):
+        if use_base_name.startswith('labelled_metrics.'):
+            metric_id_str = base_name.replace('labelled_metrics.', '', 1)
+            if metric_id_str:
+                metric_id = int(float(metric_id_str))
+            try:
+                use_base_name = get_base_name_from_labelled_metrics_name('panorama', base_name)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in anomalies for %s - %s' % (
+                    base_name, err))
+        anomaly_record_updated = False
         if base_name:
-            try:
-                metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-                logger.info(log_msg)
-                logger.info('update_slack_thread_ts :: metrics_table OK')
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: update_slack_thread_ts :: failed to get metrics_table meta for %s' % base_name)
-            metric_id = None
-            try:
-                connection = engine.connect()
-                stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-                result = connection.execute(stmt)
-                for row in result:
-                    metric_id = int(row['id'])
-                connection.close()
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: update_slack_thread_ts :: could not determine metric id from metrics table')
-            logger.info('update_slack_thread_ts :: metric id determined as %s' % str(metric_id))
-            if metric_id:
+            if not metric_id:
                 try:
-                    anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                    metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
                     logger.info(log_msg)
-                    logger.info('update_slack_thread_ts :: anomalies_table OK')
+                    logger.info('update_slack_thread_ts :: metrics_table OK')
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: update_slack_thread_ts :: failed to get anomalies_table meta for %s' % base_name)
-            anomaly_id = None
+                    logger.error('error :: update_slack_thread_ts :: failed to get metrics_table meta for %s' % base_name)
+                try:
+                    connection = engine.connect()
+                    # stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                    stmt = select([metrics_table]).where(metrics_table.c.metric == use_base_name)
+                    result = connection.execute(stmt)
+                    for row in result:
+                        metric_id = int(row['id'])
+                    connection.close()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_slack_thread_ts :: could not determine metric id from metrics table')
+            logger.info('update_slack_thread_ts :: metric id determined as %s' % str(metric_id))
             try:
-                connection = engine.connect()
-                stmt = select([anomalies_table]).\
-                    where(anomalies_table.c.metric_id == metric_id).\
-                    where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
-                result = connection.execute(stmt)
-                for row in result:
-                    anomaly_id = int(row['id'])
-                connection.close()
+                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('update_slack_thread_ts :: anomalies_table OK')
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table')
-            logger.info('update_slack_thread_ts :: anomaly id determined as %s' % str(anomaly_id))
-            anomaly_record_updated = False
+                logger.error('error :: update_slack_thread_ts :: failed to get anomalies_table meta for %s' % base_name)
+            anomaly_id = None
+            if metric_id:
+                try:
+                    connection = engine.connect()
+                    stmt = select([anomalies_table]).\
+                        where(anomalies_table.c.metric_id == metric_id).\
+                        where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
+                    result = connection.execute(stmt)
+                    for row in result:
+                        anomaly_id = int(row['id'])
+                    connection.close()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table')
+                logger.info('update_slack_thread_ts :: anomaly id determined as %s' % str(anomaly_id))
             if anomaly_id:
                 try:
                     connection = engine.connect()
@@ -671,6 +787,7 @@ class Panorama(Thread):
 
         if base_name:
             cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+            # cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), use_base_name)
         if snab_id:
             cache_key = 'panorama.snab.slack_thread_ts.%s.%s' % (str(metric_timestamp), str(snab_id))
 
@@ -818,33 +935,47 @@ class Panorama(Thread):
         if not engine:
             logger.error('error :: update_alert_ts :: engine not obtained to update slack_thread_ts in anomalies for %s' % (base_name))
             return False
-        try:
-            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-            logger.info(log_msg)
-            logger.info('update_alert_ts :: metrics_table OK')
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: update_alert_ts :: failed to get metrics_table meta for %s' % base_name)
-        metric_id = None
-        try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-            result = connection.execute(stmt)
-            for row in result:
-                metric_id = int(row['id'])
-            connection.close()
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: update_alert_ts :: could not determine metric id from metrics table')
-        logger.info('update_alert_ts :: metric id determined as %s' % str(metric_id))
-        if metric_id:
+
+        metric_id = 0
+
+        # @added 20220810 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        if base_name.startswith('labelled_metrics.'):
             try:
-                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                metric_id_str = base_name.replace('labelled_metrics.', '', 1)
+                metric_id = int(float(metric_id_str))
+            except Exception as err:
+                logger.error('error :: update_alert_ts :: failed to determine metric id for %s - %s' % (
+                    base_name, err))
+
+        if not metric_id:
+            try:
+                metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
                 logger.info(log_msg)
-                logger.info('update_alert_ts :: anomalies_table OK')
+                logger.info('update_alert_ts :: metrics_table OK')
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: update_alert_ts :: failed to get anomalies_table meta for %s' % base_name)
+                logger.error('error :: update_alert_ts :: failed to get metrics_table meta for %s' % base_name)
+            try:
+                connection = engine.connect()
+                stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                result = connection.execute(stmt)
+                for row in result:
+                    metric_id = int(row['id'])
+                connection.close()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_alert_ts :: could not determine metric id from metrics table')
+        logger.info('update_alert_ts :: metric id determined as %s' % str(metric_id))
+
+        try:
+            anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_alert_ts :: anomalies_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_alert_ts :: failed to get anomalies_table meta for %s' % base_name)
+
         anomaly_id = None
         try:
             connection = engine.connect()
@@ -918,23 +1049,67 @@ class Panorama(Thread):
         """
 
         determined_id = None
-        query = 'select id FROM %s WHERE %s=\'%s\'' % (table, key, value)  # nosec
-        results = None
+
+        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
         try:
-            results = self.mysql_select(query)
-        except:
-            logger.error('error :: failed to determine results from - %s' % (query))
+            engine, fail_msg, trace = get_engine(skyline_app)
+        except Exception as err:
+            logger.error('error :: determine_db_id :: could not get a MySQL engine - %s' % err)
+            return determined_id
+        # Use the MetaData autoload rather than string-based query construction
+        try:
+            use_table_meta = MetaData()
+            use_table = Table(table, use_table_meta, autoload=True, autoload_with=engine)
+        except Exception as err:
+            logger.error('error :: determine_db_id :: use_table Table failed on %s table - %s' % (
+                table, err))
+
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # query = 'select id FROM %s WHERE %s=\'%s\'' % (table, key, value)  # nosec
 
         determined_id = 0
-        if results:
-            try:
-                determined_id = int(results[0][0])
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: determined_id is not an int')
-                determined_id = 0
+        # results = None
+        try:
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # results = self.mysql_select(query)
+            stmt = select([use_table.c.id]).where(use_table.c[key] == value)
+            connection = engine.connect()
+            for row in engine.execute(stmt):
+                determined_id = row['id']
+                break
+            connection.close()
+        except Exception as err:
+            logger.error('error :: determine_db_id :: failed to determine results from - %s - %s' % (
+                str(stmt), err))
+
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # determined_id = 0
+        # if results:
+        #     try:
+        #         determined_id = int(results[0][0])
+        #     except:
+        #         logger.error(traceback.format_exc())
+        #         logger.error('error :: determined_id is not an int')
+        #         determined_id = 0
 
         if determined_id > 0:
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                engine.dispose()
+            except Exception as err:
+                logger.error('error :: determine_db_id :: engine.dispose() failed - %s' % (
+                    err))
+
             return int(determined_id)
 
         # @added 20170115 - Feature #1854: Ionosphere learn - generations
@@ -963,33 +1138,119 @@ class Panorama(Thread):
 
         # INSERT because no known id
         if table == 'metrics' and key == 'metric':
-            insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
-                table, key, value, str(learn_full_duration_days),
-                str(valid_learning_duration), str(max_generations),
-                str(max_percent_diff_from_origin))
-            insert_query = 'insert into %s' % insert_query_string  # nosec
+
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Comment out insert_query
+            # insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+            #     table, key, value, str(learn_full_duration_days),
+            #     str(valid_learning_duration), str(max_generations),
+            #     str(max_percent_diff_from_origin))
+            # insert_query = 'insert into %s' % insert_query_string  # nosec
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            insert_stmt = use_table.insert().values(**{
+                key: value,
+                'learn_full_duration_days': int(learn_full_duration_days),
+                'learn_valid_ts_older_than': int(valid_learning_duration),
+                'max_generations': int(max_generations),
+                'max_percent_diff_from_origin': int(max_percent_diff_from_origin)})
+
         else:
-            insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)  # nosec
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Comment out insert_query
+            # insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)  # nosec
+
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            insert_stmt = use_table.insert().values(**{key: value})
 
         logger.info('inserting %s into %s table' % (value, table))
         try:
-            results = self.mysql_insert(insert_query)
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # results = self.mysql_insert(insert_query)
+            connection = engine.connect()
+            result = connection.execute(insert_stmt)
+            connection.close()
+            determined_id = result.inserted_primary_key[0]
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to determine the id of %s from the insert' % (value))
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                engine.dispose()
+            except Exception as err:
+                logger.error('error :: determine_db_id :: engine.dispose() failed - %s' % (
+                    err))
+
             raise
 
-        determined_id = 0
-        if results:
-            determined_id = int(results)
-        else:
-            logger.error('error :: results not set')
-            raise
+        # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # determined_id = 0
+        # if results:
+        #    determined_id = int(results)
+        # else:
+        if not determined_id:
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                engine.dispose()
+            except Exception as err:
+                logger.error('error :: determine_db_id :: engine.dispose() failed - %s' % (
+                    err))
+
+            logger.error('error :: no determined_id')
+            raise ValueError('error :: no determined_id')
+
+        # @added 20220822 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Training data should only be returned for fp creation if there is
+        # sufficient data for a metric.  By adding to the Redis set
+        # ionosphere.untrainable_metrics, training data items are removed
+        # from the api training_data response, defaulting and hardcoding 7
+        # days because the metric may not fall into an alert tuple
+        if determined_id > 0:
+            if table == 'metrics' and key == 'metric':
+                redis_set = 'ionosphere.untrainable_metrics'
+                use_base_name = str(value)
+                if '_tenant_id' in value:
+                    use_base_name = 'labelled_metrics.%s' % str(determined_id)
+                try:
+                    now_ts = int(time())
+                    remove_after_timestamp = now_ts + (86400 * 7)
+                    data = str([use_base_name, now_ts, None, now_ts, None, (86400 * 7), remove_after_timestamp])
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
+
+        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        try:
+            engine.dispose()
+        except Exception as err:
+            logger.error('error :: determine_db_id :: engine.dispose() failed - %s' % (
+                err))
 
         if determined_id > 0:
             return determined_id
 
-        logger.error('error :: failed to determine the inserted id for %s' % value)
+        logger.error('error :: determine_db_id :: failed to determine the inserted id for %s' % value)
         return False
 
     # @added 20200928 - Task #3748: POC SNAB
@@ -1180,6 +1441,13 @@ class Panorama(Thread):
                             str(base_name), str(metric_timestamp)))
                 if new_snab_id:
                     snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (algorithm_group, str(metric_timestamp), base_name, str(added_at))
+                    # @added 20230419 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                    #                   Task #2732: Prometheus to Skyline
+                    #                   Branch #4300: prometheus
+                    if '_tenant_id="' in base_name:
+                        labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                        snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (algorithm_group, str(metric_timestamp), labelled_metric_name, str(added_at))
+
                     try:
                         self.redis_conn.setex(snab_id_redis_key, 3600, int(new_snab_id))
                         logger.info('update_snab :: created Redis key %s for snab id %s' % (
@@ -1523,7 +1791,7 @@ class Panorama(Thread):
         #                      Feature #1448: Crucible web UI
         #                      Branch #868: crucible
         # Added label to string_keys and user_id to int_keys
-        if app == 'webapp' or app == 'crucible':
+        if app in ['webapp', 'crucible']:
             logger.info('anomaly added by %s recording anomaly unsetting last_check' % (
                 app))
             last_check = None
@@ -1608,7 +1876,7 @@ class Panorama(Thread):
         check_max_age = True
         set_anomaly_key = True
         add_to_current_anomalies = True
-        if app == 'webapp' or app == 'crucible':
+        if app in ['webapp', 'crucible']:
             check_max_age = False
             set_anomaly_key = False
             add_to_current_anomalies = False
@@ -1646,7 +1914,12 @@ class Panorama(Thread):
             return
 
         # Determine id of something thing
-        def determine_id(table, key, value):
+        # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                     Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # Use self.determine_db_id instead, declare the function once
+        # def determine_id(table, key, value):
+        def old_determine_id(table, key, value):
             """
             Get the id of something from Redis or the database and create a new
             Redis key with the value if one does not exist.
@@ -1684,28 +1957,63 @@ class Panorama(Thread):
                 if determined_id > 0:
                     return determined_id
 
+            # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                engine, fail_msg, trace = get_engine(skyline_app)
+            except Exception as err:
+                logger.error('error :: determine_db_id :: could not get a MySQL engine - %s' % err)
+                return determined_id
+            # Use the MetaData autoload rather than string-based query construction
+            try:
+                use_table_meta = MetaData()
+                use_table = Table(table, use_table_meta, autoload=True, autoload_with=engine)
+            except Exception as err:
+                logger.error('error :: determine_id :: use_table Table failed on %s table - %s' % (
+                    table, err))
+
             # Query MySQL
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            query = 'select id FROM %s WHERE %s=\'%s\'' % (table, key, value)  # nosec
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # query = 'select id FROM %s WHERE %s=\'%s\'' % (table, key, value)  # nosec
+            determined_id = 0
 
             # @modified 20170916 - Bug #2166: panorama incorrect mysql_id cache keys
             # Wrap in except
             # results = self.mysql_select(query)
-            results = None
-            try:
-                results = self.mysql_select(query)
-            except:
-                logger.error('error :: failed to determine results from - %s' % (query))
 
-            determined_id = 0
-            if results:
-                try:
-                    determined_id = int(results[0][0])
-                except Exception as e:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: determined_id is not an int - %s' % e)
-                    determined_id = 0
+            # results = None
+            try:
+                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # results = self.mysql_select(query)
+                stmt = select([use_table.c.id]).where(use_table.c[key] == value)
+                connection = engine.connect()
+                for row in connection.execute(stmt):
+                    determined_id = row['id']
+                    break
+                connection.close()
+            except Exception as err:
+                # logger.error('error :: failed to determine results from - %s' % (query))
+                logger.error('error :: determine_id :: failed to determine results from - %s - %s' % (
+                    str(stmt), err))
+
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # determined_id = 0
+            # if results:
+            #     try:
+            #         determined_id = int(results[0][0])
+            #     except Exception as e:
+            #         logger.error(traceback.format_exc())
+            #         logger.error('error :: determined_id is not an int - %s' % e)
+            #         determined_id = 0
 
             if determined_id > 0:
                 # Set the key for a week
@@ -1753,28 +2061,78 @@ class Panorama(Thread):
             if table == 'metrics' and key == 'metric':
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
-                    table, key, value, str(learn_full_duration_days),
-                    str(valid_learning_duration), str(max_generations),
-                    str(max_percent_diff_from_origin))
-                insert_query = 'insert into %s' % insert_query_string  # nosec
+                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+                #     table, key, value, str(learn_full_duration_days),
+                #     str(valid_learning_duration), str(max_generations),
+                #     str(max_percent_diff_from_origin))
+                # insert_query = 'insert into %s' % insert_query_string  # nosec
+
+                # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                insert_stmt = use_table.insert().values(**{
+                    key: value,
+                    'learn_full_duration_days': int(learn_full_duration_days),
+                    'learn_valid_ts_older_than': int(valid_learning_duration),
+                    'max_generations': int(max_generations),
+                    'max_percent_diff_from_origin': int(max_percent_diff_from_origin)})
+
             else:
-                insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)  # nosec
+                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)  # nosec
+
+                # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                insert_stmt = use_table.insert().values(**{key: value})
 
             logger.info('inserting %s into %s table' % (value, table))
             try:
-                results = self.mysql_insert(insert_query)
-            except:
+                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # results = self.mysql_insert(insert_query)
+                connection = engine.connect()
+                result = connection.execute(insert_stmt)
+                connection.close()
+                determined_id = result.inserted_primary_key[0]
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to determine the id of %s from the insert' % (value))
+                logger.error('error :: failed to determine the id of %s from the insert - %s' % (value, err))
+                # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                try:
+                    engine.dispose()
+                except Exception as err:
+                    logger.error('error :: determine_id :: engine.dispose() failed - %s' % (
+                        err))
+
                 raise
 
-            determined_id = 0
-            if results:
-                determined_id = int(results)
-            else:
-                logger.error('error :: results not set')
-                raise
+            # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                engine.dispose()
+            except Exception as err:
+                logger.error('error :: determine_id :: engine.dispose() failed - %s' % (
+                    err))
+
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # determined_id = 0
+            # if results:
+            #     determined_id = int(results)
+            # else:
+            #     logger.error('error :: results not set')
+            #     raise ValueError('error :: results not set')
 
             if determined_id > 0:
                 # Set the key for a week
@@ -1794,39 +2152,92 @@ class Panorama(Thread):
             return False
 
         try:
-            added_by_host_id = determine_id('hosts', 'host', added_by)
-        except:
-            logger.error('error :: failed to determine id of %s' % (added_by))
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                     Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Use self.determine_db_id instead, declare the function once
+            # added_by_host_id = determine_id('hosts', 'host', added_by)
+            added_by_host_id = self.determine_db_id('hosts', 'host', added_by)
+        except Exception as err:
+            # logger.error('error :: failed to determine id of %s' % (added_by))
+            logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (added_by, err))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
 
         try:
-            app_id = determine_id('apps', 'app', app)
-        except:
-            logger.error('error :: failed to determine id of %s' % (app))
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                     Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Use self.determine_db_id instead, declare the function once
+            # app_id = determine_id('apps', 'app', app)
+            app_id = self.determine_db_id('apps', 'app', app)
+        except Exception as err:
+            # logger.error('error :: failed to determine id of %s' % (app))
+            logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (app, err))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
 
         try:
-            source_id = determine_id('sources', 'source', source)
-        except:
-            logger.error('error :: failed to determine id of %s' % (source))
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                     Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Use self.determine_db_id instead, declare the function once
+            # source_id = determine_id('sources', 'source', source)
+            source_id = self.determine_db_id('sources', 'source', source)
+        except Exception as err:
+            # logger.error('error :: failed to determine id of %s' % (source))
+            logger.error('error :: self.determine_db_id failed to determine id of %s- %s' % (source, err))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
 
+        # @added 20220722 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        labelled_metrics_name = None
+        if metric.startswith('labelled_metrics.'):
+            labelled_metrics_name = str(metric)
+            logger.info('looking up metric for %s' % metric)
+            try:
+                metric = get_base_name_from_labelled_metrics_name('panorama', metric)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (metric, err))
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                return
+
         try:
-            metric_id = determine_id('metrics', 'metric', metric)
-        except:
-            logger.error('error :: failed to determine id of %s' % (metric))
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                     Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Use self.determine_db_id instead, declare the function once
+            # metric_id = determine_id('metrics', 'metric', metric)
+            metric_id = self.determine_db_id('metrics', 'metric', metric)
+        except Exception as err:
+            # logger.error('error :: failed to determine id of %s' % (metric))
+            logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (metric, err))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
+
+        # @added 20221103 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        if '_tenant_id="' in metric:
+            labelled_metrics_name = 'labelled_metrics.%s' % str(metric_id)
 
         algorithms_ids_csv = ''
         for algorithm in algorithms:
+            # @added 20220822 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Strip override string
+            if ' (override - ' in algorithm:
+                algorithm = algorithm.split(' ', 1)[0]
             try:
-                algorithm_id = determine_id('algorithms', 'algorithm', algorithm)
-            except:
-                logger.error('error :: failed to determine id of %s' % (algorithm))
+                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                     Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Use self.determine_db_id instead, declare the function once
+                # algorithm_id = determine_id('algorithms', 'algorithm', algorithm)
+                algorithm_id = self.determine_db_id('algorithms', 'algorithm', algorithm)
+            except Exception as err:
+                # logger.error('error :: failed to determine id of %s' % (algorithm))
+                logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (algorithm, err))
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 return False
             if algorithms_ids_csv == '':
@@ -1837,10 +2248,21 @@ class Panorama(Thread):
 
         triggered_algorithms_ids_csv = ''
         for triggered_algorithm in triggered_algorithms:
+            # @added 20220822 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Strip override string
+            if ' (override - ' in triggered_algorithm:
+                triggered_algorithm = triggered_algorithm.split(' ', 1)[0]
             try:
-                triggered_algorithm_id = determine_id('algorithms', 'algorithm', triggered_algorithm)
-            except:
-                logger.error('error :: failed to determine id of %s' % (triggered_algorithm))
+                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                     Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Use self.determine_db_id instead, declare the function once
+                # triggered_algorithm_id = determine_id('algorithms', 'algorithm', triggered_algorithm)
+                triggered_algorithm_id = self.determine_db_id('algorithms', 'algorithm', triggered_algorithm)
+            except Exception as err:
+                # logger.error('error :: failed to determine id of %s' % (triggered_algorithm))
+                logger.error('error :: self.determine_db_id failed to determine id of %s - %s' % (triggered_algorithm, err))
                 fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 return False
             if triggered_algorithms_ids_csv == '':
@@ -1886,6 +2308,19 @@ class Panorama(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
 
+        # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        try:
+            engine, fail_msg, trace = get_engine(skyline_app)
+        except Exception as err:
+            logger.error('error :: could not get a MySQL engine for anomalies_table - %s' % err)
+        try:
+            anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: spin_process :: failed to get anomalies_table meta - %s' % err)
+
         try:
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
@@ -1913,14 +2348,50 @@ class Panorama(Thread):
 
         anomaly_id = None
         try:
-            anomaly_id = self.mysql_insert(query)
+            # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # anomaly_id = self.mysql_insert(query)
+            insert_stmt = anomalies_table.insert().values(
+                metric_id=int(metric_id),
+                host_id=int(added_by_host_id),
+                app_id=int(app_id),
+                source_id=int(source_id),
+                anomaly_timestamp=int(metric_timestamp),
+                anomalous_datapoint=float(anomalous_datapoint),
+                full_duration=int(full_duration),
+                algorithms_run=str(algorithms_ids_csv),
+                triggered_algorithms=str(triggered_algorithms_ids_csv),
+                label=str(label),
+                user_id=int(user_id))
+            connection = engine.connect()
+            result = connection.execute(insert_stmt)
+            connection.close()
+            anomaly_id = result.inserted_primary_key[0]
             logger.info('anomaly id - %d - created for %s at %s' % (
-                anomaly_id, metric, metric_timestamp))
-        except:
-            logger.error('error :: failed to insert anomaly %s at %s' % (
-                metric, metric_timestamp))
+                anomaly_id, metric, str(metric_timestamp)))
+
+        except Exception as err:
+            logger.error('error :: failed to insert anomaly for %s at %s - %s' % (
+                metric, str(metric_timestamp), err))
+            # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                engine.dispose()
+            except Exception as err:
+                logger.error('error :: engine.dispose() failed - %s' % err)
+
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
+
+        # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        try:
+            engine.dispose()
+        except Exception as err:
+            logger.error('error :: engine.dispose() failed - %s' % err)
 
         # @added 20211001 - Feature #4268: Redis hash key - panorama.metrics.latest_anomaly
         #                   Feature #4264: luminosity - cross_correlation_relationships
@@ -1937,6 +2408,10 @@ class Panorama(Thread):
         # If snab is enabled add a Redis key with the anomaly_id
         if anomaly_id:
             anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (str(int(metric_timestamp)), metric)
+            # @added 20220915 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if labelled_metrics_name:
+                anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (str(int(metric_timestamp)), labelled_metrics_name)
             try:
                 self.redis_conn.setex(anomaly_id_redis_key, 86400, int(anomaly_id))
                 logger.info('set Redis anomaly_key - %s' % (anomaly_id_redis_key))
@@ -2021,7 +2496,6 @@ class Panorama(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -2040,7 +2514,6 @@ class Panorama(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error :: failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -2082,59 +2555,72 @@ class Panorama(Thread):
             except:
                 logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
-            if ENABLE_PANORAMA_DEBUG:
-                # Make sure mysql is available
-                mysql_down = True
-                while mysql_down:
-
-                    query = 'SHOW TABLES'
-                    results = self.mysql_select(query)
-
-                    if results:
-                        mysql_down = False
-                        logger.info('debug :: tested database query - OK')
-                    else:
-                        logger.error('error :: failed to query database')
-                        sleep(30)
-
-            if ENABLE_PANORAMA_DEBUG:
-                try:
-                    query = 'SELECT id, test FROM test'
-                    result = self.mysql_select(query)
-                    logger.info('debug :: tested mysql SELECT query - OK')
-                    logger.info('debug :: result: %s' % str(result))
-                    logger.info('debug :: result[0]: %s' % str(result[0]))
-                    logger.info('debug :: result[1]: %s' % str(result[1]))
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Disabled all ENABLE_PANORAMA_DEBUG mysql tests
+            # if ENABLE_PANORAMA_DEBUG:
+            #     # Make sure mysql is available
+            #     mysql_down = True
+            #     while mysql_down:
+            #         query = 'SHOW TABLES'
+            #         results = self.mysql_select(query)
+            #         if results:
+            #             mysql_down = False
+            #             logger.info('debug :: tested database query - OK')
+            #         else:
+            #             logger.error('error :: failed to query database')
+            #             sleep(30)
+            #     try:
+            #         query = 'SELECT id, test FROM test'
+            #         result = self.mysql_select(query)
+            #         logger.info('debug :: tested mysql SELECT query - OK')
+            #         logger.info('debug :: result: %s' % str(result))
+            #         logger.info('debug :: result[0]: %s' % str(result[0]))
+            #         logger.info('debug :: result[1]: %s' % str(result[1]))
 # Works
 # 2016-06-10 19:07:23 :: 4707 :: result: [(1, u'test1')]
-                except:
-                    logger.error(
-                        'error :: mysql error - %s' %
-                        traceback.print_exc())
-                    logger.error('error :: failed to SELECT')
+            #     except:
+            #         logger.error(
+            #             'error :: mysql error - %s' %
+            #             traceback.print_exc())
+            #         logger.error('error :: failed to SELECT')
 
             # self.populate the database metatdata tables
             # What is my host id in the Skyline panorama DB?
             host_id = False
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            query = 'select id FROM hosts WHERE host=\'%s\'' % this_host  # nosec
-            results = self.mysql_select(query)
-            if results:
-                host_id = results[0][0]
-                logger.info('host_id: %s' % str(host_id))
-            else:
-                logger.info('failed to determine host id of %s' % this_host)
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # If this case use the determine_db_id function which now uses
+            # sqlalchemy
+            # query = 'select id FROM hosts WHERE host=\'%s\'' % this_host  # nosec
+            # results = self.mysql_select(query)
+            # if results:
+            #     host_id = results[0][0]
+            #     logger.info('host_id: %s' % str(host_id))
+            # else:
+            #     logger.info('failed to determine host id of %s' % this_host)
+            # #   - if not known - INSERT hostname INTO host
+            # if not host_id:
+            #     logger.info('inserting %s into hosts table' % this_host)
+            #     # @modified 20170913 - Task #2160: Test skyline with bandit
+            #     # Added nosec to exclude from bandit tests
+            #     query = 'insert into hosts (host) VALUES (\'%s\')' % this_host  # nosec
+            #     host_id = self.mysql_insert(query)
+            #     if host_id:
+            #         logger.info('new host_id: %s' % str(host_id))
 
-            #   - if not known - INSERT hostname INTO host
-            if not host_id:
-                logger.info('inserting %s into hosts table' % this_host)
-                # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
-                query = 'insert into hosts (host) VALUES (\'%s\')' % this_host  # nosec
-                host_id = self.mysql_insert(query)
-                if host_id:
-                    logger.info('new host_id: %s' % str(host_id))
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            try:
+                host_id = self.determine_db_id('hosts', 'host', this_host)
+                logger.info('host_id: %s' % str(host_id))
+            except Exception as err:
+                logger.error('error :: determine_db_id failed - %s' % err)
 
             if not host_id:
                 logger.error(
@@ -2158,9 +2644,7 @@ class Panorama(Thread):
                 os.path.exists(settings.PANORAMA_CHECK_PATH)
                 # continue
 
-            """
-            Determine if any metric has been added to add
-            """
+            # Determine if any metric has been added to add
             while True:
                 metric_var_files = False
                 try:
@@ -2185,6 +2669,7 @@ class Panorama(Thread):
                             check_metrics_to_insert = True
                             logger.info('checking for new metrics to insert into the metrics table')
                         if check_metrics_to_insert:
+                            logger.info('checking for new unique_metrics to insert into the metrics table')
                             redis_set = '%sunique_metrics' % settings.FULL_NAMESPACE
                             try:
                                 unique_metrics = list(self.redis_conn_decoded.smembers(redis_set))
@@ -2194,13 +2679,42 @@ class Panorama(Thread):
                                 unique_metrics = []
                             db_fullnamespace_unique_metrics = []
                             results = False
+
+                            # @added 20220630 - Task #2732: Prometheus to Skyline
+                            #                   Branch #4300: prometheus
+                            db_metric_names = []
+
                             if unique_metrics:
-                                query = 'SELECT metric FROM metrics'
-                                results = self.mysql_select(query)
+
+                                # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                                #                      Task #4778: v4.0.0 - update dependencies
+                                # Use sqlalchemy rather than string-based query construction
+                                # But in this case use the get_all_db_metric_names
+                                # function
+                                # query = 'SELECT metric FROM metrics'
+                                # results = self.mysql_select(query)
+                                try:
+                                    with_ids = False
+                                    results = get_all_db_metric_names(skyline_app, with_ids)
+                                except Exception as err:
+                                    logger.error('error :: get_all_db_metric_names failed - %s' % err)
+
                                 if results:
                                     for result in results:
-                                        db_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(result[0]))
+                                        # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                                        #                      Task #4778: v4.0.0 - update dependencies
+                                        # Use sqlalchemy rather than string-based query construction
+                                        # db_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(result[0]))
+                                        db_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(result))
                                         db_fullnamespace_unique_metrics.append(db_metric_name)
+                                        # @added 20220630 - Task #2732: Prometheus to Skyline
+                                        #                   Branch #4300: prometheus
+                                        # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+                                        #                      Task #4778: v4.0.0 - update dependencies
+                                        # Use sqlalchemy rather than string-based query construction
+                                        # db_metric_names.append(str(result[0]))
+                                        db_metric_names.append(str(result))
+
                             if unique_metrics and db_fullnamespace_unique_metrics:
                                 for unique_metric in unique_metrics:
                                     if unique_metric not in db_fullnamespace_unique_metrics:
@@ -2213,10 +2727,120 @@ class Panorama(Thread):
                                                 base_name = unique_metric
 
                                             metric_id = self.insert_new_metric(base_name)
-                                            logger.info('inserted %s into metrics table, assigned id %s' % (base_name, str(metric_id)))
+                                            logger.info('inserted %s into metrics table from db_fullnamespace_unique_metrics, assigned id %s' % (base_name, str(metric_id)))
                                         except:
                                             logger.error(traceback.format_exc())
                                             logger.error('error :: failed to insert %s into metrics table' % unique_metric)
+
+                            # @added 20220630 - Task #2732: Prometheus to Skyline
+                            #                   Branch #4300: prometheus
+                            logger.info('checking for new labelled_metrics to insert into the metrics table against %s known metrics' % str(len(db_metric_names)))
+                            unique_labelled_metrics = []
+                            unique_labelled_metric_ids = []
+                            try:
+                                unique_labelled_metric_ids = list(self.redis_conn_decoded.smembers('labelled_metrics.unique_labelled_metrics'))
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to get data from labelled_metrics.unique_labelled_metrics Redis set - %s' % err)
+                                unique_labelled_metric_ids = []
+                            if unique_labelled_metric_ids:
+                                ids_with_base_names = {}
+                                try:
+                                    ids_with_base_names = self.redis_conn_decoded.hgetall('aet.metrics_manager.ids_with_metric_names')
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: get_all_db_metric_names failed - %s' % err)
+                                for unique_labelled_metric_id in unique_labelled_metric_ids:
+                                    try:
+                                        metric_id_str = unique_labelled_metric_id.replace('labelled_metrics.', '', 1)
+                                    except:
+                                        continue
+                                    try:
+                                        base_name = ids_with_base_names[metric_id_str]
+                                    except:
+                                        continue
+                                    unique_labelled_metrics.append(base_name)
+                            del unique_labelled_metric_ids
+                            horizon_metrics_without_ids = []
+                            try:
+                                horizon_metrics_without_ids = list(self.redis_conn_decoded.smembers('panorama.horizon.metrics_with_no_id'))
+                                if horizon_metrics_without_ids:
+                                    logger.info('got %s metrics without ids from panorama.horizon.metrics_with_no_id' % str(len(horizon_metrics_without_ids)))
+                            except Exception as err:
+                                logger.error('error :: smembers failed on Redis set panorama.horizon.metrics_with_no_id - %s' % (
+                                    str(err)))
+                            if horizon_metrics_without_ids:
+                                unique_labelled_metrics = unique_labelled_metrics + horizon_metrics_without_ids
+                                try:
+                                    # self.redis_conn_decoded.delete('panorama.horizon.metrics_with_no_id')
+                                    new_key_name = 'panorama.horizon.metrics_with_no_id.%s' % str(int(time()))
+                                    self.redis_conn_decoded.rename('panorama.horizon.metrics_with_no_id', new_key_name)
+                                    self.redis_conn_decoded.expire(new_key_name, 600)
+                                except Exception as err:
+                                    logger.error('error :: failed to delete Redis set panorama.horizon.metrics_with_no_id - %s' % (
+                                        str(err)))
+                            del horizon_metrics_without_ids
+
+                            # @added 20220819 -
+                            # Added inserted metrics to the relevant Redis resources
+                            # so that metrics are processed
+                            inserted_metric_ids = []
+
+                            if unique_labelled_metrics and db_metric_names:
+                                # Using a sets comparison rather than a for loop
+                                # takes 0 seconds rather than 5 seconds for a
+                                # loop over 42955 metrics
+                                labelled_metrics = [unique_labelled_metric.replace('labelled_metrics.', '') for unique_labelled_metric in unique_labelled_metrics]
+                                db_metric_names_set = set(db_metric_names)
+                                labelled_metrics_set = set(labelled_metrics)
+                                unknown_metrics = list(labelled_metrics_set.difference(db_metric_names_set))
+                                for labelled_basename in unknown_metrics:
+                                    try:
+                                        metric_id = self.insert_new_metric(labelled_basename)
+                                        logger.info('inserted %s into metrics table from unique_labelled_metrics and db_metric_names, assigned id %s' % (labelled_basename, str(metric_id)))
+                                        # @added 20220819
+                                        inserted_metric_ids.append(metric_id)
+                                    except Exception as err:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to insert %s into metrics table - %s' % (labelled_basename, err))
+
+                            # @added 20220819
+                            # Added inserted metrics to the relevant Redis resources
+                            # so that metrics are processed
+                            if inserted_metric_ids:
+                                now_ts = int(time())
+                                data_dict = {}
+                                inserted_labelled_metrics = []
+                                for metric_id in inserted_metric_ids:
+                                    data_dict[str(metric_id)] = now_ts
+                                    labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                                    inserted_labelled_metrics.append(labelled_metric_name)
+                                logger.info('inserting %s entries into analyzer_labelled_metrics.last_timeseries_timestamp Redis hash' % str(len(data_dict)))
+                                try:
+                                    self.redis_conn_decoded.hset('analyzer_labelled_metrics.last_timeseries_timestamp', mapping=data_dict)
+                                except Exception as err:
+                                    logger.error('error :: failed to update analyzer_labelled_metrics.last_timeseries_timestamp Redis hash - %s' % (
+                                        str(err)))
+                                logger.info('inserting %s metrics into labelled_metrics.unique_labelled_metrics Redis set' % str(len(inserted_labelled_metrics)))
+                                try:
+                                    self.redis_conn_decoded.sadd('labelled_metrics.unique_labelled_metrics', *inserted_labelled_metrics)
+                                except Exception as err:
+                                    logger.error('error :: failed to sadd to labelled_metrics.unique_labelled_metrics Redis set - %s' % (
+                                        str(err)))
+
+                            try:
+                                del unknown_metrics
+                            except:
+                                pass
+                            try:
+                                del unique_labelled_metrics
+                            except:
+                                pass
+                            try:
+                                del db_metric_names
+                            except:
+                                pass
+
                             try:
                                 del unique_metrics
                             except:

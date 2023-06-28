@@ -5,6 +5,10 @@ import logging
 import traceback
 from os import path
 from ast import literal_eval
+from decimal import Decimal
+import datetime
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import numpy as np
 
@@ -16,7 +20,11 @@ from functions.ionosphere.get_fp_motif import get_fp_motif
 from functions.metrics.get_base_name_from_metric_id import get_base_name_from_metric_id
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.pandas.timeseries_to_datetime_indexed_df import timeseries_to_datetime_indexed_df
-from skyline_functions import get_graphite_metric
+from skyline_functions import get_graphite_metric, get_redis_conn_decoded
+# @added 20220801 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Handle labelled_metric name added metric id
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
 
 
 # @added 20220317 - Feature #4540: Plot matched timeseries
@@ -82,13 +90,20 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
             raise
         return matched_timeseries
 
-    matched_timeseries = matched.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # matched_timeseries = matched.copy()
+    matched_timeseries = copy.deepcopy(matched)
 
     # Get the fp timeseries
     fp_timeseries = []
     try:
         fp_timeseries = get_db_fp_timeseries(current_skyline_app, metric_id, fp_id)
         matched['fp']['timeseries'] = fp_timeseries
+        # @added 20221025 - Task #4624: Change all dict copy to deepcopy
+        # This was changed from matched to matched_timeseries but the fp_timeseries
+        # was not added to the matched_timestamp dict which caused match
+        # comparison segment graphs to fail
+        matched_timeseries['fp']['timeseries'] = fp_timeseries
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: get_db_fp_timeseries failed for fp id %s - %s' % (
@@ -137,6 +152,18 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
         current_logger.error('error :: %s :: get_base_name_from_metric_id failed for metric id %s - %s' % (
             function_str, str(metric_id), err))
 
+    # @added 20220801 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name
+    use_base_name = str(metric)
+    base_name = str(metric)
+    labelled_metric_name = None
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
+
     matched_timeseries['metric'] = metric
 
     # Create the matched timeseries
@@ -147,12 +174,22 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
     # Check if training data exists to get the match timeseries from
     try:
         metric_dir = metric.replace('.', '/')
+        if labelled_metric_name:
+            metric_dir = use_base_name.replace('.', '/')
+
         metric_training_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp), metric_dir)
         timeseries_json = '%s/%s.json' % (metric_training_dir, metric)
+        if labelled_metric_name:
+            timeseries_json = '%s/%s.json' % (metric_training_dir, use_base_name)
+
         full_duration_in_hours_int = int(settings.FULL_DURATION / 60 / 60)
         full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
             metric_training_dir, metric, str(full_duration_in_hours_int))
+        if labelled_metric_name:
+            full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
+                metric_training_dir, use_base_name, str(full_duration_in_hours_int))
+
         if fp_full_duration == settings.FULL_DURATION:
             timeseries_json_file = full_duration_timeseries_json
         else:
@@ -177,17 +214,30 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
 
     # Get it from Graphite
     if not match_timeseries:
-        try:
-            current_logger.info('%s :: getting data from graphite for %s from: %s, until: %s' % (
-                function_str, metric, str((metric_timestamp - fp_full_duration)),
-                str(metric_timestamp)))
-            match_timeseries = get_graphite_metric(
-                current_skyline_app, metric, (metric_timestamp - fp_full_duration),
-                metric_timestamp, 'list', 'object')
-        except Exception as err:
-            current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s :: get_graphite_metric failed for %s - %s' % (
-                function_str, str(metric), err))
+        if not labelled_metric_name:
+            try:
+                current_logger.info('%s :: getting data from graphite for %s from: %s, until: %s' % (
+                    function_str, metric, str((metric_timestamp - fp_full_duration)),
+                    str(metric_timestamp)))
+                match_timeseries = get_graphite_metric(
+                    current_skyline_app, metric, (metric_timestamp - fp_full_duration),
+                    metric_timestamp, 'list', 'object')
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: get_graphite_metric failed for %s - %s' % (
+                    function_str, str(metric), err))
+        else:
+            try:
+                # get_victoriametrics_metric automatically applies the rate and
+                # step required no downsampling or nonNegativeDerivative is
+                # required.
+                match_timeseries = get_victoriametrics_metric(
+                    current_skyline_app, metric,
+                    (metric_timestamp - fp_full_duration), metric_timestamp,
+                    'list', 'object')
+            except Exception as err:
+                current_logger.error('error :: %s :: get_victoriametrics_metric failed for %s - %s' % (
+                    function_str, metric, err))
 
     fp_resolution = 0
     try:
@@ -253,5 +303,61 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
 
     # matched_timeseries['matched_fp_timeseries'] = fp_timeseries[-(len(match_timeseries)):]
     # matched_timeseries['timeseries'] = match_timeseries
+
+    # @added 20220713 - Feature #4540: Plot matched timeseries
+    #                   Feature #4014: Ionosphere - inference
+    # Only for details_only parameter to be passed to strip out the time
+    # series data
+    if matched_timeseries:
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # cache_matched_timeseries_details = matched_timeseries.copy()
+        cache_matched_timeseries_details = copy.deepcopy(matched_timeseries)
+        try:
+            del cache_matched_timeseries_details['matched_fp_timeseries']
+        except:
+            pass
+        try:
+            del cache_matched_timeseries_details['timeseries']
+        except:
+            pass
+        try:
+            del cache_matched_timeseries_details['fp_timeseries']
+        except:
+            pass
+        try:
+            del cache_matched_timeseries_details['fp']['timeseries']
+        except:
+            pass
+        try:
+            del cache_matched_timeseries_details['fp_motif']['fp_motif_timeseries']
+        except:
+            pass
+        for key in list(cache_matched_timeseries_details.keys()):
+            if isinstance(cache_matched_timeseries_details[key], Decimal):
+                float_value = float(cache_matched_timeseries_details[key])
+                cache_matched_timeseries_details[key] = float_value
+            if isinstance(cache_matched_timeseries_details[key], datetime.datetime):
+                str_datetime = cache_matched_timeseries_details[key]
+                date_str = str_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                cache_matched_timeseries_details[key] = date_str
+            if isinstance(cache_matched_timeseries_details[key], dict):
+                for d_key in list(cache_matched_timeseries_details[key].keys()):
+                    if isinstance(cache_matched_timeseries_details[key][d_key], Decimal):
+                        float_value = float(cache_matched_timeseries_details[key][d_key])
+                        cache_matched_timeseries_details[key][d_key] = float_value
+                    if isinstance(cache_matched_timeseries_details[key][d_key], datetime.datetime):
+                        str_datetime = cache_matched_timeseries_details[key][d_key]
+                        date_str = str_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                        cache_matched_timeseries_details[key][d_key] = date_str
+
+        redis_key = 'webapp.match_details.id.%s' % str(match_id)
+        try:
+            redis_conn_decoded = get_redis_conn_decoded('webapp')
+            redis_conn_decoded.setex(redis_key, 7776000, str(cache_matched_timeseries_details))
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: failed to set Redis key %s - %s' % (
+                function_str, redis_key, err))
+        del cache_matched_timeseries_details
 
     return matched_timeseries

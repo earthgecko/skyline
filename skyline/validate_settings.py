@@ -1,6 +1,9 @@
-import pytz
 import sys
 import os
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
+import pytz
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -136,6 +139,7 @@ def validate_settings_variables(current_skyline_app):
         'FLUX_VERBOSE_LOGGING': bool,
         'FLUX_WORKERS': int,
         'FLUX_ZERO_FILL_NAMESPACES': list,
+        'FLUX_DROP_BUCKET_METRICS': bool,
         'FULLY_POPULATED_PERCENTAGE': float,
         'FULL_DURATION': int,
         'FULL_NAMESPACE': str,
@@ -198,6 +202,12 @@ def validate_settings_variables(current_skyline_app):
         'IONOSPHERE_PROFILES_FOLDER': str,
         'IONOSPHERE_UNTRAINABLES': list,
         'IONOSPHERE_VERBOSE_LOGGING': bool,
+        'IONOSPHERE_LEARN_REPETITIVE_PATTERNS': bool,
+        'IONOSPHERE_FIND_REPETITIVE_PATTERNS': bool,
+        'IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE': float,
+        'IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE': dict,
+        'IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE': dict,
+        'IONOSPHERE_ENFORCE_DOWNSAMPLING': dict,
         'LOCAL_EXTERNAL_SETTINGS': dict,
         'LOG_PATH': str,
         'LUMINOL_CROSS_CORRELATION_THRESHOLD': float,
@@ -208,6 +218,7 @@ def validate_settings_variables(current_skyline_app):
         'LUMINOSITY_CLOUDBURST_ENABLED': bool,
         'LUMINOSITY_CLOUDBURST_PROCESSES': int,
         'LUMINOSITY_CLOUDBURST_RUN_EVERY': int,
+        'LUMINOSITY_CLOUDBURST_SKIP_METRICS': list,
         'LUMINOSITY_CORRELATE_ALL': bool,
         'LUMINOSITY_CORRELATE_NAMESPACES_ONLY': list,
         'LUMINOSITY_CORRELATION_MAPS': dict,
@@ -235,6 +246,8 @@ def validate_settings_variables(current_skyline_app):
         'MIRAGE_ALWAYS_METRICS': list,
         'MIRAGE_AUTOFILL_TOOSHORT': bool,
         'MIRAGE_CHECK_PATH': str,
+        'MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS': int,
+        # 'MIRAGE_SKIP_IRREGULAR_UNSTABLE': list,
         'MIRAGE_CONSENSUS': int,
         'MIRAGE_CRUCIBLE_ENABLED': bool,
         'MIRAGE_DATA_FOLDER': str,
@@ -349,6 +362,14 @@ def validate_settings_variables(current_skyline_app):
         'LAST_KNOWN_VALUE_NAMESPACES': list,
         'MONOTONIC_METRIC_NAMESPACES': list,
         'ZERO_FILL_NAMESPACES': list,
+        'PROMETHEUS_INGESTION': bool,
+        'VICTORIAMETRICS_ENABLED': bool,
+        'VICTORIAMETRICS_OPTS': dict,
+        'MEMRAY_ENABLED': bool,
+        'VORTEX_ENABLED': bool,
+        'VORTEX_TIMESERIES_JSON_TO_DISK': bool,
+        'VORTEX_FULL_DURATION_RESOLUTIONS': dict,
+        'VORTEX_ALGORITHMS': dict,
     }
     settings_tested = []
 
@@ -1861,7 +1882,9 @@ def validate_settings_variables(current_skyline_app):
             print('error :: THUNDER_OPTS in settings.py is not a dict')
             invalid_variables = True
         else:
-            THUNDER_OPTS = settings.THUNDER_OPTS.copy()
+            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+            # THUNDER_OPTS = settings.THUNDER_OPTS.copy()
+            THUNDER_OPTS = copy.deepcopy(settings.THUNDER_OPTS)
     except AttributeError:
         print('error :: the THUNDER_OPTS dict is not defined in settings.py')
         invalid_variables = True

@@ -1,5 +1,7 @@
 import logging
 import traceback
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 
 # @added 20220128 - Feature #4404: flux - external_settings - aggregation
@@ -38,7 +40,9 @@ def external_settings_aggregation(
             if not aggregate:
                 continue
             for namespace_key in list(external_settings[config_id]['aggregate'].keys()):
-                external_settings_aggregations[namespace_key] = external_settings[config_id]['aggregate'][namespace_key].copy()
+                # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+                # external_settings_aggregations[namespace_key] = external_settings[config_id]['aggregate'][namespace_key].copy()
+                external_settings_aggregations[namespace_key] = copy.deepcopy(external_settings[config_id]['aggregate'][namespace_key])
         except Exception as e:
             if not log:
                 current_skyline_app_logger = current_skyline_app + 'Log'

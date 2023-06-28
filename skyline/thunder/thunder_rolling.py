@@ -10,12 +10,23 @@ import traceback
 
 import settings
 from skyline_functions import (
-    get_redis_conn, get_redis_conn_decoded, send_graphite_metric)
+    # @modified 20220726 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # get_redis_conn, get_redis_conn_decoded, send_graphite_metric)
+    get_redis_conn, get_redis_conn_decoded)
 from functions.thunder.checks.app.up import thunder_check_app
 from functions.thunder.checks.analyzer.run_time import thunder_check_analyzer_run_time
 from functions.thunder.checks.horizon.metrics_received import thunder_check_horizon_metrics_received
 
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
 # from functions.thunder.stale_metrics import thunder_stale_metrics
+
+# @added 20230622 - Feature #4958: webapp_features_profile - status
+from functions.thunder.checks.webapp.webapp_features_profile import thunder_check_webapp_features_profile
 
 skyline_app = 'thunder'
 skyline_app_logger = '%sLog' % skyline_app
@@ -184,6 +195,29 @@ class RollingThunder(Thread):
             for check_app in check_apps:
                 check_apps_up.append(check_app)
 
+        # @added 20230622 - Feature #4958: webapp_features_profile - status
+        # Check that webapp_features_profile gunicorn workers are responsive
+        # if not the main webapp_features_profile gunicorn process is issued
+        # -HUP to reload the workers
+        if 'webapp' in thunder_apps:
+            webapp_features_profile_check = False
+            try:
+                webapp_features_profile_check = settings.THUNDER_CHECKS['webapp']['webapp_features_profile']['run']
+            except Exception as err:
+                logger.error('error :: thunder/rolling :: failed to determine if horizon metrics_received check should be run - %s' % (
+                    err))
+            if webapp_features_profile_check:
+                try:
+                    success = thunder_check_webapp_features_profile(self)
+                    if success:
+                        logger.info('thunder/rolling :: webapp_features_profile OK')
+                    else:
+                        logger.warning('warning :: thunder/rolling :: webapp_features_profile unknown')
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - %s' % (
+                        err))
+
         # @added 20220328 - Feature #4018: thunder - skyline.errors
         # Consume the app RedisErrorLogHandler Redis key which is a count for
         # every error logged and create the
@@ -222,7 +256,12 @@ class RollingThunder(Thread):
             check_log_errors_file = False
             try:
                 error_count_str = None
-                error_count_str = self.redis_conn_decoded.getset(error_count_key, 0)
+                # @modified 20230205 - Task #4844: Replace Redis getset with set with get
+                # As of Redis version 6.2.0, this command is regarded as deprecated.
+                # It can be replaced by SET with the GET argument when migrating or writing new code.
+                # error_count_str = self.redis_conn_decoded.getset(error_count_key, 0)
+                error_count_str = self.redis_conn_decoded.set(error_count_key, 0, get=True)
+
                 if error_count_str:
                     error_count = int(error_count_str)
             except Exception as err:
@@ -257,7 +296,7 @@ class RollingThunder(Thread):
             check_app_graphite_namespace = 'skyline.%s%s' % (check_app, SERVER_METRIC_PATH)
             send_metric_name = '%s.logged_errors' % check_app_graphite_namespace
             logger.info('thunder/rolling :: %s :: %s' % (send_metric_name, str(error_count)))
-            send_graphite_metric(skyline_app, send_metric_name, error_count)
+            send_graphite_metric(self, skyline_app, send_metric_name, error_count)
 
         spin_end = time() - spin_start
         logger.info('thunder/rolling :: checks took %.2f seconds' % spin_end)

@@ -5,6 +5,10 @@ from sqlalchemy.sql import select
 
 from database import get_engine, engine_disposal, metrics_table_meta
 
+# @added 20220727 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+
 
 # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
 # Add a global method to query the DB for a metric id from a base_name
@@ -43,6 +47,17 @@ def metric_id_from_base_name(current_skyline_app, base_name):
             raise
         return False, fail_msg, trace
 
+    # @added 20220727 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if base_name.startswith('labelled_metrics.'):
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(current_skyline_app, base_name)
+            if metric_name:
+                base_name = str(metric_name)
+        except Exception as err:
+            current_logger.error('error :: %s :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                function_str, base_name, err))
+
     try:
         connection = engine.connect()
         stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
@@ -56,7 +71,7 @@ def metric_id_from_base_name(current_skyline_app, base_name):
     except Exception as e:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        fail_msg = 'error :: %s :: could not determine id of metric from DB for  %s - %s' % (
+        fail_msg = 'error :: %s :: could not determine id of metric from DB for %s - %s' % (
             function_str, base_name, e)
         current_logger.error('%s' % fail_msg)
         if engine:
@@ -69,6 +84,6 @@ def metric_id_from_base_name(current_skyline_app, base_name):
         engine_disposal(current_skyline_app, engine)
 
     if not metric_id:
-        current_logger.error('error :: %s :: no id for metric in the DB - %s' % (
-            function_str, base_name))
+        current_logger.info('%s :: %s :: no id for metric in the DB - %s' % (
+            current_skyline_app, function_str, base_name))
     return metric_id

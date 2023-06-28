@@ -147,7 +147,7 @@ class Roomba(Thread):
                 # UnboundLocalError: local variable 'full_namespace_batch_metrics' referenced before assignment
                 # del full_namespace_batch_metrics
                 if non_batch_unique_metrics:
-                    logger.info('roomba :: batch_processing :: removing %s batch metrics from unique_metrics' % str(len(full_namespace_batch_metrics)))
+                    logger.info('horizon.roomba :: batch_processing :: removing %s batch metrics from unique_metrics' % str(len(full_namespace_batch_metrics)))
                     unique_metrics = non_batch_unique_metrics
                 del non_batch_unique_metrics
                 # @added 20200815 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS

@@ -3,11 +3,18 @@ import traceback
 from os import walk
 import time
 from ast import literal_eval
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import settings
 from backend import get_cluster_data
 from skyline_functions import get_redis_conn_decoded
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+
+# @added 20220801 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
 
 # @added 20210727 - Feature #4206: webapp - saved_training_data page
@@ -54,6 +61,21 @@ def get_saved_training_data(
                 metric = '.'.join(file_name_elements[1:-2])
 
                 saved_training_data_dict[metric] = {}
+
+                # @added 20220801 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Handle labelled_metrics
+                use_base_name = str(metric)
+                labelled_metric_base_name = None
+                if metric.startswith('labelled_metrics.'):
+                    try:
+                        labelled_metric_base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, metric)
+                    except Exception as err:
+                        current_logger.error('%s :: error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                            function_str, metric, err))
+                if labelled_metric_base_name:
+                    use_base_name = str(labelled_metric_base_name)
+
                 saved_training_data_dict[metric][timestamp] = {}
                 saved_training_data_dict[metric][timestamp]['label'] = None
                 saved_hdate = time.strftime('%Y-%m-%d %H:%M:%S %Z (%A)', time.localtime(int(timestamp)))
@@ -61,6 +83,16 @@ def get_saved_training_data(
                 url = '%s/ionosphere?saved_training_data=true&metric=%s&timestamp=%s' % (
                     settings.SKYLINE_URL, metric, str(timestamp))
                 saved_training_data_dict[metric][timestamp]['url'] = url
+
+                saved_training_data_dict[metric][timestamp]['labelled_metric_base_name'] = labelled_metric_base_name
+                metric_id = 0
+                try:
+                    metric_id = get_metric_id_from_base_name(current_skyline_app, use_base_name)
+                except Exception as err:
+                    current_logger.error('%s :: error :: get_metric_id_from_base_name failed for %s - %s' % (
+                        function_str, use_base_name, err))
+                    metric_id = 0
+                saved_training_data_dict[metric][timestamp]['metric_id'] = metric_id
 
                 details_file = '%s/%s' % (root, file)
                 saved_training_data_details = []
@@ -167,7 +199,9 @@ def get_saved_training_data(
             if metric_training_data_dict:
                 filtered_saved_training_data_dict[base_name] = metric_training_data_dict
         if filtered_saved_training_data_dict:
-            saved_training_data_dict = filtered_saved_training_data_dict.copy()
+            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+            # saved_training_data_dict = filtered_saved_training_data_dict.copy()
+            saved_training_data_dict = copy.deepcopy(filtered_saved_training_data_dict)
             current_logger.info('%s :: %s :: filtered %s saved training data' % (
                 current_skyline_app, function_str,
                 str(len(saved_training_data_dict))))
@@ -189,7 +223,9 @@ def get_saved_training_data(
                         filtered_saved_training_data_dict[metric] = {}
                     filtered_saved_training_data_dict[metric][timestamp] = saved_training_data_dict[metric][timestamp]
         if filtered_saved_training_data_dict:
-            saved_training_data_dict = filtered_saved_training_data_dict.copy()
+            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+            # saved_training_data_dict = filtered_saved_training_data_dict.copy()
+            saved_training_data_dict = copy.deepcopy(filtered_saved_training_data_dict)
             current_logger.info('%s :: %s :: filtered %s saved training data on label_includes' % (
                 current_skyline_app, function_str,
                 str(len(saved_training_data_dict))))

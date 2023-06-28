@@ -3,14 +3,20 @@
 
 <!-- BEGIN /ionosphere block -->
 
+{% if labelled_metric_name %}
+  {% set use_for_metric = labelled_metric_name %}
+{% else %}
+  {% set use_for_metric = for_metric %}
+{% endif %}
+
 <ol class="breadcrumb">
 	<div class="breadcrumb">
 		<li><a href="/">Home</a></li>
 		<li><a href="/ionosphere">Ionosphere</a></li>
 {% if fp_view %}
   {% if metric_files %}
-		<li><a href="/ionosphere?fp_view=true&metric_td={{ for_metric }}">Features profiles</a></li>
-		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ for_metric }}</span></span></li>
+		<li><a href="/ionosphere?fp_view=true&metric_td={{ use_for_metric }}">Features profiles</a></li>
+		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ use_for_metric }}</span></span></li>
   {% else %}
 		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></li>
   {% endif %}
@@ -31,8 +37,8 @@
 		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
 {% else %}
   {% if metric_files %}
-		<li><a href="/ionosphere?metric_td={{ for_metric }}">training data</a></li>
-		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ for_metric }}</span></span></li>
+		<li><a href="/ionosphere?metric_td={{ use_for_metric }}">training data</a></li>
+		<li class="active"><span class="logo"><span class="sky">metric ::</span> <span class="re">{{ use_for_metric }}</span></span></li>
 <!-- # @added 20210727 - Feature #4206: webapp - saved_training_data page -->
 {% elif saved_training_data_page %}
 		<li class="active"><span class="logo"><span class="sky">Saved</span> <span class="re">training_data</span></span></li>
@@ -63,6 +69,9 @@
 <!-- # @added 20210727 - Feature #4206: webapp - saved_training_data page -->
 {% elif saved_training_data_page %}
     {% include "saved_training_data.html" %}
+<!-- # @added 20221018 - Feature #4650: ionosphere.bulk.training -->
+{% elif bulk_training %}
+    {% include "bulk_training.html" %}
 {% else %}
     {% include "training_data.html" %}
 {% endif %}

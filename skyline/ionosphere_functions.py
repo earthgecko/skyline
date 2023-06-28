@@ -31,7 +31,12 @@ from tsfresh import __version__ as tsfresh_version
 import settings
 import skyline_version
 
-from skyline_functions import RepresentsInt, mkdir_p, write_data_to_file
+from skyline_functions import (
+    RepresentsInt, mkdir_p, write_data_to_file,
+    # @added 20220630 - Feature #4000: EXTERNAL_SETTINGS
+    #                    Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    get_redis_conn_decoded)
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
 from skyline_functions import historical_data_dir_exists
 
@@ -50,6 +55,11 @@ from slack_functions import slack_post_message, slack_post_reaction
 # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
 #                   Feature #2404: Ionosphere - fluid approximation
 from create_matplotlib_graph import create_matplotlib_graph
+
+# @added 20220728 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
 LOCAL_DEBUG = False
 skyline_version = skyline_version.__absolute_version__
@@ -145,6 +155,57 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20220630 - Feature #4000: EXTERNAL_SETTINGS
+    #                    Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Added the external settings namespaces and their learn_full_duration_seconds
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: get_ionosphere_learn_details :: failed to check namespace config settings matches - %s' % err)
+
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    labelled_metrics_name = None
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metrics_name = str(base_name)
+        current_logger.info('get_ionosphere_learn_details:: looking up base_name for %s' % (labelled_metrics_name))
+        try:
+            base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, labelled_metrics_name)
+        except Exception as err:
+            current_logger.error('error :: get_ionosphere_learn_details :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+        current_logger.info('get_ionosphere_learn_details :: looked up base_name as %s' % (str(base_name)))
+
+    IONOSPHERE_LEARN_NAMESPACE_CONFIG = list(settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG)
+    external_settings = {}
+    try:
+        external_settings_str = redis_conn_decoded.get('skyline.external_settings')
+        if external_settings_str:
+            external_settings = literal_eval(external_settings_str)
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: get_ionosphere_learn_details :: failed to get skyline.external_settings - %s' % err)
+    max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
+    max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
+    if external_settings:
+        for config_id in list(external_settings.keys()):
+            try:
+                use_full_duration = int(external_settings[config_id]['full_duration'] * 86400)
+                use_full_duration_days = int(external_settings[config_id]['learn_full_duration_seconds'] / 86400)
+                namespace = external_settings[config_id]['namespace']
+                namespace_normal = '%s.' % namespace
+                external_settings_data_normal = (namespace_normal, use_full_duration_days, 3661, max_generations, max_percent_diff_from_origin)
+                IONOSPHERE_LEARN_NAMESPACE_CONFIG.append(external_settings_data_normal)
+                namespace_labelled = '_tenant_id="%s"' % namespace
+                external_settings_data_labelled = (namespace_labelled, use_full_duration_days, 3661, max_generations, max_percent_diff_from_origin)
+                IONOSPHERE_LEARN_NAMESPACE_CONFIG.append(external_settings_data_labelled)
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_ionosphere_learn_details :: failed to add %s settings from skyline.external_settings to IONOSPHERE_LEARN_NAMESPACE_CONFIG - %s' % (
+                    config_id, str(err)))
+
     use_full_duration = None
     valid_learning_duration = None
     use_full_duration_days = None
@@ -156,7 +217,12 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
         use_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
         max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
         max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
-        for namespace_config in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG:
+        # @modified 20220630 - Feature #4000: EXTERNAL_SETTINGS
+        #                      Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Added the external settings namespaces and their learn_full_duration_seconds
+        # for namespace_config in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG:
+        for namespace_config in IONOSPHERE_LEARN_NAMESPACE_CONFIG:
             NAMESPACE_MATCH_PATTERN = str(namespace_config[0])
             pattern_match = False
             try:
@@ -287,9 +353,38 @@ def create_fp_ts_graph(
                 fp_create_engine_disposal(current_skyline_app, engine)
             return False
 
+        # @added 20220729 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        labelled_metrics_name = None
+        if base_name.startswith('labelled_metrics.'):
+            labelled_metrics_name = str(base_name)
+            current_logger.info('get_ionosphere_learn_details:: looking up base_name for %s' % (labelled_metrics_name))
+            try:
+                base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, labelled_metrics_name)
+            except Exception as err:
+                current_logger.error('error :: get_ionosphere_learn_details :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    base_name, err))
+            current_logger.info('get_ionosphere_learn_details :: looked up base_name as %s' % (str(base_name)))
+
         metric_fp_ts_table = 'z_ts_%s' % str(metric_id)
+
+        # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use the MetaData autoload rather than string-based query construction
         try:
-            stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))  # nosec
+            use_table_meta = MetaData()
+            use_table = Table(metric_fp_ts_table, use_table_meta, autoload=True, autoload_with=engine)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_ionosphere_learn_details :: use_table Table failed on %s table - %s' % (
+                metric_fp_ts_table, err))
+
+        try:
+            # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))
+            stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+
             connection = engine.connect()
             for row in engine.execute(stmt):
                 fp_id_ts_timestamp = int(row['timestamp'])
@@ -340,7 +435,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :param context: The context of the caller
     :param ionosphere_job: The ionosphere_job name related to creation request
         valid jobs are ``learn_fp_human``, ``learn_fp_generation``,
-        ``learn_fp_learnt`` and ``learn_fp_automatic``.
+        ``learn_fp_learnt``, ``learn_fp_automatic`` and
+        ``learn_repetitive_patterns``.
     :param fp_parent_id: The id of the parent features profile that this was
         learnt from, 0 being an original human generated features profile
     :param fp_generation: The number of generations away for the original
@@ -381,6 +477,33 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     else:
         base_name = data_for_metric
 
+    # @added 20220728 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    labelled_metric_name = None
+    labelled_metric_base_name = None
+    slack_base_name = str(base_name)
+    use_base_name = str(base_name)
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
+        except Exception as err:
+            current_logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if base_name.startswith('labelled_metrics.'):
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(current_skyline_app, base_name)
+            if metric_name:
+                labelled_metric_base_name = str(metric_name)
+                labelled_metric_name = str(base_name)
+                slack_base_name = str(labelled_metric_base_name)
+        except Exception as err:
+            current_logger.error('error :: create_features_profile :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+    if labelled_metric_name:
+        use_base_name = str(labelled_metric_name)
+
     # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
     # Ensure that one features profile can only be created if
     # multiple requests are received to create a features profile
@@ -398,11 +521,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error(trace)
         fail_msg = 'error :: create_features_profile :: failed to establish redis_conn to determine if a features profile is pending - %s %s' % (str(requested_timestamp), base_name)
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            return False, False, False, fail_msg, trace
+        return False, False, False, fail_msg, trace
     try:
         fp_pending = redis_conn.get(fp_pending_cache_key)
     except:
@@ -410,46 +533,55 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error(trace)
         fail_msg = 'error :: create_features_profile :: failed to determine if a features profile is pending - %s %s' % (str(requested_timestamp), base_name)
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            return False, False, False, fail_msg, trace
+        return False, False, False, fail_msg, trace
     if fp_pending:
         trace = 'None'
         fail_msg = 'create_features_profile :: a features profile is pending - %s %s' % (str(requested_timestamp), base_name)
         current_logger.info('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
+            # Raise to webbapp I believe to provide traceback to user in UI
+            # raise
+            raise ValueError(fail_msg)
+        return False, False, False, fail_msg, trace
+    try:
+        redis_conn.setex(fp_pending_cache_key, 60, str(current_skyline_app))
+        current_logger.info('create_features_profile :: created %s Redis key with expiry of 60 seconds' % (
+            fp_pending_cache_key))
+    except:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: create_features_profile :: failed to determine create %s Redis key' % fp_pending_cache_key
+        current_logger.error('%s' % fail_msg)
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            return False, False, False, fail_msg, trace
-    else:
-        try:
-            redis_conn.setex(fp_pending_cache_key, 60, str(current_skyline_app))
-            current_logger.info('create_features_profile :: created %s Redis key with expiry of 60 seconds' % (
-                fp_pending_cache_key))
-        except:
-            trace = traceback.format_exc()
-            current_logger.error(trace)
-            fail_msg = 'error :: create_features_profile :: failed to determine create %s Redis key' % fp_pending_cache_key
-            current_logger.error('%s' % fail_msg)
-            if context == 'training' or context == 'features_profile':
-                # Raise to webbapp I believe to provide traceback to user in UI
-                raise
-            else:
-                return False, False, False, fail_msg, trace
+        return False, False, False, fail_msg, trace
+
+    # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+    learn_repetitive_patterns = False
+    if ionosphere_job == 'learn_repetitive_patterns':
+        learn_repetitive_patterns = True
 
     if context == 'training_data':
         ionosphere_job = 'learn_fp_human'
+        # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+        if learn_repetitive_patterns:
+            ionosphere_job = 'learn_repetitive_patterns'
 
     current_logger.info('create_features_profile :: %s :: requested for %s at %s by user id %s' % (
         context, str(base_name), str(requested_timestamp), str(user_id)))
 
-    metric_timeseries_dir = base_name.replace('.', '/')
+    metric_timeseries_dir = use_base_name.replace('.', '/')
     # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
     # Added context ionosphere_echo
-    if context == 'training_data' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    # if context == 'training_data' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    if context in ['training_data', 'ionosphere_echo', 'ionosphere_echo_check']:
         metric_training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
             metric_timeseries_dir)
@@ -468,8 +600,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 if context == 'training_data':
                     # Raise to webbapp I believe to provide traceback to user in UI
                     raise
-                else:
-                    return False, False, False, fail_msg, trace
+                return False, False, False, fail_msg, trace
 
     if context == 'features_profiles':
         metric_training_data_dir = '%s/%s/%s' % (
@@ -491,7 +622,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 metric_timeseries_dir)
 
     features_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (
-        metric_training_data_dir, base_name)
+        metric_training_data_dir, use_base_name)
 
     features_profile_dir = '%s/%s' % (
         settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir)
@@ -500,12 +631,12 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         features_profile_dir, str(requested_timestamp))
 
     features_profile_created_file = '%s/%s.%s.fp.created.txt' % (
-        metric_training_data_dir, str(requested_timestamp), base_name)
+        metric_training_data_dir, str(requested_timestamp), use_base_name)
 
     features_profile_details_file = '%s/%s.%s.fp.details.txt' % (
-        metric_training_data_dir, str(requested_timestamp), base_name)
+        metric_training_data_dir, str(requested_timestamp), use_base_name)
 
-    anomaly_check_file = '%s/%s.txt' % (metric_training_data_dir, base_name)
+    anomaly_check_file = '%s/%s.txt' % (metric_training_data_dir, use_base_name)
 
     trace = 'none'
     fail_msg = 'none'
@@ -565,15 +696,15 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if path.isfile(features_file):
         current_logger.info('create_features_profile :: features_file exists: %s' % features_file)
     else:
-        trace = traceback.format_exc()
-        current_logger.error(trace)
+        trace = 'none'
+        # current_logger.error(trace)
         fail_msg = 'error :: create_features_profile :: features_file does not exist: %s' % features_file
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp I believe to provide traceback to user in UI
-            raise
-        else:
-            return False, False, False, fail_msg, trace
+            raise ValueError(fail_msg)
+        return False, False, False, fail_msg, trace
 
     # @added 20191029 - Task #3302: Handle csv.reader in py3
     #                      Branch #3262: py3
@@ -644,11 +775,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error(trace)
         fail_msg = 'error :: %s :: failed iterate csv data from %s' % (current_skyline_app, str(features_file))
         current_logger.error(fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp to provide traceback to user in UI
             raise
-        else:
-            return False, False, False, fail_msg, trace
+        return False, False, False, fail_msg, trace
 
     # @added 20170113 - Feature #1854: Ionosphere learn - generations
     # Set the learn generations variables with the IONOSPHERE_LEARN_DEFAULT_ and any
@@ -661,7 +792,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
     max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
     try:
-        use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(current_skyline_app, base_name)
+        if not labelled_metric_base_name:
+            use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(current_skyline_app, base_name)
+        else:
+            use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(current_skyline_app, labelled_metric_base_name)
         learn_full_duration_days = use_full_duration_days
     except:
         current_logger.error(traceback.format_exc())
@@ -681,21 +815,21 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error(trace)
         fail_msg = 'error :: create_features_profile :: could not get a MySQL engine'
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            return False, False, False, fail_msg, trace
+        return False, False, False, fail_msg, trace
 
     if not engine:
         trace = 'none'
         fail_msg = 'error :: create_features_profile :: engine not obtained'
         current_logger.error(fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # Raise to webbapp I believe to provide traceback to user in UI
-            raise
-        else:
-            return False, False, False, fail_msg, trace
+            raise ValueError(fail_msg)
+        return False, False, False, fail_msg, trace
 
     # Get metric details from the database
     metrics_id = False
@@ -715,17 +849,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to get metrics_table meta for %s' % base_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
-            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
-            # Added missing disposal
-            if engine:
-                fp_create_engine_disposal(current_skyline_app, engine)
-            # Raise to webbapp I believe to provide traceback to user in UI
-            raise
-        else:
+        if engine:
             current_logger.info('create_features_profile :: disposing of any engine')
             fp_create_engine_disposal(current_skyline_app, engine)
-            return False, False, False, fail_msg, trace
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise
+        return False, False, False, fail_msg, trace
 
     current_logger.info('create_features_profile :: metrics_table OK')
 
@@ -737,7 +868,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 #        for row in result:
 #            while not metrics_id:
 #                metrics_id = row['id']
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+
+        # @modified 20220728 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        if not labelled_metric_base_name:
+            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        else:
+            stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+
         result = connection.execute(stmt)
         for row in result:
             metrics_id = row['id']
@@ -783,7 +921,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     use_anomaly_timestamp = int(requested_timestamp)
     # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
     # Added ionosphere_echo
-    if context == 'ionosphere_learn' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    # if context == 'ionosphere_learn' or context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    if context in ['ionosphere_learn', 'ionosphere_echo', 'ionosphere_echo_check']:
         if path.isfile(anomaly_check_file):
             current_logger.info('create_features_profile :: determining the metric_timestamp from anomaly_check_file - %s' % anomaly_check_file)
             # Read the details file
@@ -805,17 +944,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to get ionosphere_table meta for %s' % base_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
-            # Raise to webbapp I believe to provide traceback to user in UI
-            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
-            # Added missing disposal
-            if engine:
-                fp_create_engine_disposal(current_skyline_app, engine)
-            raise
-        else:
+        if engine:
             current_logger.info('create_features_profile :: disposing of any engine')
             fp_create_engine_disposal(current_skyline_app, engine)
-            return False, False, False, fail_msg, trace
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise
+        return False, False, False, fail_msg, trace
 
     current_logger.info('create_features_profile :: ionosphere_table OK')
 
@@ -830,9 +966,16 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if int(fp_generation) <= 1:
         fp_validated = 1
 
+    # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+    if learn_repetitive_patterns:
+        fp_validated = 0
+        if fp_generation < 2:
+            fp_generation = 2
+
     # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
     # Added ionosphere_echo
-    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    # if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    if context in ['ionosphere_echo', 'ionosphere_echo_check']:
         echo_fp_value = 1
     else:
         echo_fp_value = 0
@@ -855,7 +998,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         #                      Ideas #2476: Label and relate anomalies
         #                      Feature #2516: Add label to features profile
         # Added user_id and label
-        if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+        # if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+        if context in ['ionosphere_echo', 'ionosphere_echo_check']:
             ts_for_db = int(requested_timestamp)
             db_created_timestamp = datetime.utcfromtimestamp(ts_for_db).strftime('%Y-%m-%d %H:%M:%S')
             ins = ionosphere_table.insert().values(
@@ -885,34 +1029,27 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to insert a new record into the ionosphere table for %s' % base_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
-            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
-            # Added missing disposal
-            if engine:
-                fp_create_engine_disposal(current_skyline_app, engine)
-            # Raise to webbapp I believe to provide traceback to user in UI
-            raise
-        else:
+        if engine:
             current_logger.info('create_features_profile :: disposing of any engine')
             fp_create_engine_disposal(current_skyline_app, engine)
-            return False, False, False, fail_msg, trace
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise
+        return False, False, False, fail_msg, trace
 
     if not RepresentsInt(new_fp_id):
-        trace = traceback.format_exc()
-        current_logger.error('%s' % trace)
+        trace = 'none'
         fail_msg = 'error :: create_features_profile :: unknown new ionosphere new_fp_id for %s' % base_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
-            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
-            # Added missing disposal
-            if engine:
-                fp_create_engine_disposal(current_skyline_app, engine)
-            # Raise to webbapp I believe to provide traceback to user in UI
-            raise
-        else:
+        if engine:
             current_logger.info('create_features_profile :: disposing of any engine')
             fp_create_engine_disposal(current_skyline_app, engine)
-            return False, False, False, fail_msg, trace
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise ValueError(fail_msg)
+        return False, False, False, fail_msg, trace
 
     # Create z_fp_<metric_id> table
     fp_table_created = False
@@ -943,36 +1080,36 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to create table - %s' % fp_table_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
             if engine:
                 fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
+        current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
 
     if not fp_table_created:
-        trace = traceback.format_exc()
-        current_logger.error('%s' % trace)
+        trace = 'none'
         fail_msg = 'error :: create_features_profile :: failed to determine True for create table - %s' % fp_table_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
             if engine:
                 fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
-            raise
-        else:
-            current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
+            raise ValueError(fail_msg)
+        current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
 
     # Insert features and values
     insert_statement = []
     for fname_id, f_value in features_data:
         insert_statement.append({'fp_id': new_fp_id, 'feature_id': fname_id, 'value': f_value},)
-    if insert_statement == []:
+    # if insert_statement == []:
+    if not insert_statement:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: empty insert_statement for %s inserts' % fp_table_name
@@ -998,15 +1135,15 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to insert a feature values into %s' % fp_table_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
             if engine:
                 fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
+        current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
 
     # Create metric ts table if not exists ts_<metric_id>
     # Create z_ts_<metric_id> table
@@ -1041,24 +1178,25 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to create table - %s' % ts_table_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
             if engine:
                 fp_create_engine_disposal(current_skyline_app, engine)
             # Raise to webbapp I believe to provide traceback to user in UI
             raise
-        else:
-            current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
+        current_logger.info('create_features_profile :: %s - automated so the table should exists continuing' % context)
 
     # Insert timeseries that the features profile was created from
     raw_timeseries = []
-    anomaly_json = '%s/%s.json' % (metric_training_data_dir, base_name)
+    anomaly_json = '%s/%s.json' % (metric_training_data_dir, use_base_name)
 
     # @added 20190327 - Feature #2484: FULL_DURATION feature profiles
-    if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
-        full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
-        anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, base_name, str(full_duration_in_hours))
+    # if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
+    if context in ['ionosphere_echo', 'ionosphere_echo_check']:
+        i_full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
+        anomaly_json = '%s/%s.mirage.redis.%sh.json' % (metric_training_data_dir, use_base_name, str(i_full_duration_in_hours))
 
     if path.isfile(anomaly_json):
         current_logger.info('create_features_profile :: metric anomaly json found OK - %s' % (anomaly_json))
@@ -1073,7 +1211,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             current_logger.error('%s' % (fail_msg))
             fail_msg = 'error: failed to read timeseries data from %s' % anomaly_json
             # end = timer()
-            if context == 'training' or context == 'features_profile':
+            # if context == 'training' or context == 'features_profile':
+            if context in ['training', 'features_profile']:
                 # @added 20170806 - Bug #2130: MySQL - Aborted_clients
                 # Added missing disposal
                 if engine:
@@ -1119,14 +1258,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         current_logger.error('%s' % trace)
         fail_msg = 'error :: create_features_profile :: failed to insert the timeseries into %s' % ts_table_name
         current_logger.error('%s' % fail_msg)
-        if context == 'training' or context == 'features_profile':
+        # if context == 'training' or context == 'features_profile':
+        if context in ['training', 'features_profile']:
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
             if engine:
                 fp_create_engine_disposal(current_skyline_app, engine)
             raise
-        else:
-            current_logger.info('create_features_profile :: %s - automated so the table should exist continuing' % context)
+        current_logger.info('create_features_profile :: %s - automated so the table should exist continuing' % context)
 
     # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
     #                   Feature #2404: Ionosphere - fluid approximation
@@ -1134,10 +1273,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # to their size, create a matplotlib graph for the DB fp time
     # series data for more accurate validation
     fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
-        metric_training_data_dir, base_name, str(new_fp_id))
+        metric_training_data_dir, use_base_name, str(new_fp_id))
     if not path.isfile(fp_ts_graph_file):
         try:
-            created_fp_ts_graph, fp_ts_graph_file = create_fp_ts_graph(current_skyline_app, metric_training_data_dir, base_name, int(new_fp_id), int(use_anomaly_timestamp), validated_timeseries)
+            created_fp_ts_graph, fp_ts_graph_file = create_fp_ts_graph(current_skyline_app, metric_training_data_dir, use_base_name, int(new_fp_id), int(use_anomaly_timestamp), validated_timeseries)
         except:
             trace = traceback.format_exc()
             current_logger.error(traceback.format_exc())
@@ -1178,7 +1317,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     except:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        fail_msg = 'error :: create_features_profile :: could not update metrics table and set ionosphere_enabled on id %s' % str(metrics_id)
+        fail_msg = 'error :: create_features_profile :: could not modify metrics table and set ionosphere_enabled on id %s' % str(metrics_id)
         current_logger.error('%s' % fail_msg)
         # raise
 
@@ -1291,7 +1430,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
         try:
             ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
-                settings.SKYLINE_URL, str(new_fp_id), base_name)
+                settings.SKYLINE_URL, str(new_fp_id), use_base_name)
         except:
             trace = traceback.format_exc()
             current_logger.error(traceback.format_exc())
@@ -1300,21 +1439,26 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
         if not fp_learn:
             message = '*TRAINED - not anomalous* - features profile id %s was created for %s via %s - %s' % (
-                str(new_fp_id), base_name, current_skyline_app, ionosphere_link)
+                str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
         else:
             message = '*TRAINED - not anomalous* - features profile id %s was created for %s via %s - %s AND set to *LEARN* at %s days' % (
-                str(new_fp_id), base_name, current_skyline_app, ionosphere_link,
+                str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link,
                 str(learn_full_duration_days))
 
         if context == 'ionosphere_learn':
             if slack_ionosphere_job != 'learn_fp_human':
                 message = '*LEARNT - not anomalous* - features profile id %s was created for %s via %s - %s' % (
-                    str(new_fp_id), base_name, current_skyline_app, ionosphere_link)
+                    str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
             else:
                 message = '*LEARNING - not anomalous at %s days* - features profile id %s was created using %s days data for %s via %s - %s' % (
                     str(learn_full_duration_days), str(new_fp_id),
-                    str(learn_full_duration_days), base_name,
+                    str(learn_full_duration_days), slack_base_name,
                     current_skyline_app, ionosphere_link)
+
+        # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+        if learn_repetitive_patterns:
+            message = '*LEARNT - not anomalous repetitive pattern* - features profile id %s was created for %s via %s - %s' % (
+                str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
 
         channel = None
         try:
@@ -1486,17 +1630,24 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                             current_logger.error('%s' % fail_msg)
                             current_logger.error('%s' % str(slack_response))
 
-            if context == 'ionosphere_learn':
+            # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+            # if context == 'ionosphere_learn':
+            if context == 'ionosphere_learn' or learn_repetitive_patterns:
                 try:
                     validate_link = '%s/ionosphere?fp_validate=true&metric=%s&validated_equals=false&limit=0&order=DESC' % (
-                        settings.SKYLINE_URL, base_name)
+                        settings.SKYLINE_URL, use_base_name)
                 except:
                     trace = traceback.format_exc()
                     current_logger.error(traceback.format_exc())
                     current_logger.error('failed to interpolated the validate_link')
                     validate_link = 'validate URL link failed to build'
                 message = '*Skyline Ionosphere LEARNT* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
-                    str(new_fp_id), base_name, current_skyline_app, ionosphere_link, validate_link)
+                    str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
+                # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+                if learn_repetitive_patterns:
+                    message = '*Skyline Ionosphere LEARNT - repetitive pattern * - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
+                        str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
+
                 if slack_ionosphere_job != 'learn_fp_human':
                     slack_response = {'ok': False}
                     try:
@@ -1557,11 +1708,15 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 current_logger.info('the origin parent was not allowed to learn not adding to Redis ionosphere.learn.work set')
                 create_redis_work_item = False
 
+        # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+        if learn_repetitive_patterns:
+            create_redis_work_item = False
+
         if create_redis_work_item:
             try:
                 current_logger.info(
                     'adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
-                        str(ionosphere_job), str(requested_timestamp), base_name,
+                        str(ionosphere_job), str(requested_timestamp), use_base_name,
                         str(new_fp_id), str(fp_generation)))
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
                 # @modified 20200216 - Feature #3450: Handle multiple requests to create a features profile
@@ -1573,12 +1728,12 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 # @modified 20190414 - Task #2824: Test redis-py upgrade
                 #                      Task #2926: Update dependencies
                 # redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])
-                redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)]))
+                redis_conn.sadd('ionosphere.learn.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), use_base_name, int(new_fp_id), int(fp_generation)]))
             except:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(
                     'error :: failed adding work to Redis ionosphere.learn.work set - [\'Soft\', \'%s\', %s, \'%s\', %s, %s] to make a learn features profile later' % (
-                        str(ionosphere_job), str(requested_timestamp), base_name,
+                        str(ionosphere_job), str(requested_timestamp), use_base_name,
                         str(new_fp_id), str(fp_generation)))
 
         # @added 20170806 - Bug #2130: MySQL - Aborted_clients
@@ -1599,7 +1754,16 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             # else:
             #     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
             ionosphere_job = 'echo_fp_human'
-            redis_conn.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
+            redis_conn.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), use_base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
+
+    # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
+    # Having reviewed the process echo fps will be created for learn_repetitive_patterns
+    # once they have been human validated, so not adding here.
+    if settings.IONOSPHERE_ECHO_ENABLED and new_fp_id and learn_repetitive_patterns:
+        if int(ts_full_duration) > int(settings.FULL_DURATION):
+            current_logger.info(
+                'an echo fp will be automatically added for this learn_repetitive_patterns fp %s will it is human validated' % (
+                    str(new_fp_id)))
 
     # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
     # Ensure that one features profile can only be created if
@@ -1818,7 +1982,10 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
 
     try:
         connection = engine.connect()
-        stmt = select([anomalies_table]).where(anomalies_table.c.anomaly_timestamp > minus_two_minutes).where(anomalies_table.c.anomaly_timestamp <= plus_two_minutes).where(anomalies_table.c.id != anomaly_id)
+        stmt = select([anomalies_table]).\
+            where(anomalies_table.c.anomaly_timestamp > minus_two_minutes).\
+            where(anomalies_table.c.anomaly_timestamp <= plus_two_minutes).\
+            where(anomalies_table.c.id != anomaly_id)
         results = connection.execute(stmt)
         for row in results:
             related_anomaly_id = row['id']
@@ -1869,16 +2036,16 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             connection = engine.connect()
             stmt = select([anomalies_table]).where(anomalies_table.c.metric_id == int(metric_id)).\
                 where(anomalies_table.c.anomaly_timestamp >= from_timestamp).\
-                where(anomalies_table.c.anomaly_timestamp < until_timestamp).\
+                where(anomalies_table.c.anomaly_timestamp <= until_timestamp).\
                 where(anomalies_table.c.label.isnot(None)).\
                 where(anomalies_table.c.label != 'None')
             results = connection.execute(stmt)
             for row in results:
                 labelled_anomaly_id = row['id']
-                labelled_anomaly_creeated_timestamp = row['created_timestamp']
+                labelled_anomaly_created_timestamp = row['created_timestamp']
                 labelled_anomaly_timestamp = row['anomaly_timestamp']
                 labelled_anomaly_label = row['label']
-                labelled_anomalies.append([int(labelled_anomaly_id), labelled_anomaly_creeated_timestamp, int(labelled_anomaly_timestamp), labelled_anomaly_label])
+                labelled_anomalies.append([int(labelled_anomaly_id), labelled_anomaly_created_timestamp, int(labelled_anomaly_timestamp), labelled_anomaly_label])
             connection.close()
         except:
             current_logger.error(traceback.format_exc())
@@ -1896,4 +2063,5 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
     # return related, fail_msg, trace
     if len(labelled_anomalies) == 0:
         labelled_anomalies = None
+
     return related, labelled_anomalies, fail_msg, trace

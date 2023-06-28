@@ -90,6 +90,7 @@
 				<thead>
 					<tr>
             <th>date</th>
+            <th>metric_id</th>
             <th>metric</th>
             <th>label</th>
 					</tr>
@@ -98,8 +99,13 @@
     {% for item in saved_training_data_metrics %}
           <tr>
             <td>{{ saved_training_data_dict[item[0]][item[1]]['saved_date'] }}</td>
+            <td>{{ saved_training_data_dict[item[0]][item[1]]['metric_id'] }}</td>
             <td>
+      {% if saved_training_data_dict[item[0]][item[1]]['labelled_metric_base_name'] == 'None' %}
               <a href="{{ saved_training_data_dict[item[0]][item[1]]['url'] }}">{{ item[0] }}</a>
+      {% else %}
+              <a href="{{ saved_training_data_dict[item[0]][item[1]]['url'] }}">{{ saved_training_data_dict[item[0]][item[1]]['labelled_metric_base_name'] }}</a>
+      {% endif %}
             </td>
             <td>{{ saved_training_data_dict[item[0]][item[1]]['label'] }}</td>
           </tr>

@@ -1,3 +1,6 @@
+"""
+agent.py
+"""
 import logging
 import sys
 import traceback
@@ -5,17 +8,17 @@ from os import getpid
 # @modified 20191115 - Branch #3262: py3
 # from os.path import dirname, abspath, isdir
 from os.path import isdir
-from daemon import runner
 from time import sleep, time
 from sys import version_info
 import os
+from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
+from daemon import runner
 import mysql.connector
 from mysql.connector import errorcode
 
-from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
-import os.path
+# import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -49,6 +52,9 @@ except:
 
 
 class IonosphereAgent():
+    """
+    The IonosphereAgent
+    """
     def __init__(self):
         self.stdin_path = '/dev/null'
         self.stdout_path = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
@@ -88,9 +94,7 @@ class IonosphereAgent():
 
 
 if __name__ == "__main__":
-    """
-    Start the Ionosphere agent.
-    """
+    # Start the Ionosphere agent.
     if not isdir(settings.PID_PATH):
         print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
@@ -173,7 +177,7 @@ if __name__ == "__main__":
         #                      Branch 3262: py3
         # sys.exit(1)
         if start_if_no_db:
-            logger.warn('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+            logger.warning('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
                 str(mysql_up), str(start_if_no_db)))
             mysql_up = True
         else:
@@ -183,7 +187,7 @@ if __name__ == "__main__":
     #                   Branch 3262: py3
     if start_if_no_db:
         if not mysql_up:
-            logger.warn('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+            logger.warning('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
                 str(mysql_up), str(start_if_no_db)))
             mysql_up = True
 

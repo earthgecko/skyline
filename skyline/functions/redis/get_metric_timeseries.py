@@ -5,11 +5,16 @@ from settings import FULL_NAMESPACE
 from skyline_functions import (
     get_redis_conn, get_redis_conn_decoded, nonNegativeDerivative)
 
+# @added 20220808 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Handle labelled_metrics.
+from functions.redis.get_metric_redistimeseries import get_metric_redistimeseries
+
 
 # @added 20210525 - Branch #1444: thunder
 #                   Task #4030: refactoring
 # Add a global method to get a metric timeseries from Redis
-def get_metric_timeseries(current_skyline_app, metric_name, log=True):
+def get_metric_timeseries(current_skyline_app, metric_name, from_timestamp=None, until_timestamp=None, log=True):
     """
     Return a metric time series as a list e.g.
     [[ts, value], [ts, value], ..., [ts, value]]
@@ -33,6 +38,27 @@ def get_metric_timeseries(current_skyline_app, metric_name, log=True):
         current_logger = None
 
     timeseries = []
+
+    # @added 20220808 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics.
+    redistimeseries_data = False
+    if metric_name.startswith('labelled_metrics.'):
+        redistimeseries_data = True
+    if '_tenant_id="' in metric_name:
+        redistimeseries_data = True
+    if redistimeseries_data:
+        try:
+            timeseries = get_metric_redistimeseries(current_skyline_app, metric_name, from_timestamp, until_timestamp, log)
+        except Exception as err:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error('error :: %s :: get_metric_redistimeseries failed for %s - %s' % (
+                function_str, metric_name, err))
+            return timeseries
+        return timeseries
+
     try:
         redis_conn = get_redis_conn(current_skyline_app)
     except Exception as e:

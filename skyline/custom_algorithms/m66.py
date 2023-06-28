@@ -79,7 +79,8 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             'nth_median': 6, 'sigma': 6, 'window': 5, 'resolution': 60,
             'minimum_sparsity': 0, 'determine_duration': False,
             'return_anomalies': True, 'save_plots_to': False,
-            'save_plots_to_absolute_dir': False, 'filename_prefix': False
+            'save_plots_to_absolute_dir': False, 'filename_prefix': False,
+            'return_results': False, 'anomaly_window': 1,
         },
         'max_execution_time': 1.0
         'consensus': 1,
@@ -91,6 +92,13 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         'debug_logging': False,
     },
 
+    The context that you wish to use the algorithm in determines whether
+    you should set return_anomalies to True or return_results to True or
+    and anomalies_dict is returned.
+    The original implementation of this algorithm returned a list of
+    anomalies if the return_anomalies was set to True, however for the
+    inclusion as an algorithm that can be used in Vortex, it needed to
+    be extended to be able to return a results dict.
     """
 
     # You MUST define the algorithm_name
@@ -107,6 +115,19 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     anomalies = []
     anomalies_dict = {}
     anomalies_dict['algorithm'] = algorithm_name
+
+    # @added 20230612 - Feature #4946: vortex - m66
+    # Changed the m66 algorithm to return a results dict
+    # like other custom algorithms that vortex can run
+    anomalyScore_list = []
+    m66_scores = []
+    results_anomalies = {}
+    results = {
+        'anomalous': anomalous,
+        'anomalies': results_anomalies,
+        'anomalyScore_list': anomalyScore_list,
+        'scores': m66_scores,
+    }
 
     realtime_analysis = False
 
@@ -288,6 +309,23 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         dev_null = e
 
+    # @added 20230612 - Feature #4946: vortex - m66
+    # Changed the m66 algorithm to return a results dict
+    # like other custom algorithms that vortex can run
+    return_results = False
+    try:
+        return_results = algorithm_parameters['return_results']
+    except KeyError:
+        return_results = False
+    except Exception as e:
+        record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
+        dev_null = e
+    anomaly_window = 1
+    try:
+        anomaly_window = int(algorithm_parameters['anomaly_window'])
+    except:
+        anomaly_window = 1
+
     try:
         base_name = algorithm_parameters['base_name']
     except Exception as e:
@@ -302,6 +340,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         # Return None and None as the algorithm could not determine True or False
         dev_null = e
         del dev_null
+        # @added 20230612 - Feature #4946: vortex - m66
+        # Changed the m66 algorithm to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
         if current_skyline_app == 'webapp':
             return (anomalous, anomalyScore, anomalies, anomalies_dict)
         if return_anomalies:
@@ -359,6 +402,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 if debug_logging:
                     current_logger.debug('debug_logging :: %s :: SystemExit called, exiting - %s' % (
                         algorithm_name, e))
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
                 if current_skyline_app == 'webapp':
                     return (anomalous, anomalyScore, anomalies, anomalies_dict)
                 if return_anomalies:
@@ -373,6 +421,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                         algorithm_name))
                 timeseries = []
             if not timeseries:
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
                 if current_skyline_app == 'webapp':
                     return (anomalous, anomalyScore, anomalies, anomalies_dict)
                 if return_anomalies:
@@ -400,6 +453,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     if debug_logging:
                         current_logger.debug('debug :: %s :: time series does not have sufficient data' % (
                             algorithm_name))
+                    # @added 20230612 - Feature #4946: vortex - m66
+                    # Changed the m66 algorithm to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
                     if current_skyline_app == 'webapp':
                         return (anomalous, anomalyScore, anomalies, anomalies_dict)
                     if return_anomalies:
@@ -409,6 +467,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 if debug_logging:
                     current_logger.debug('debug_logging :: %s :: SystemExit called, exiting - %s' % (
                         algorithm_name, e))
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
                 if current_skyline_app == 'webapp':
                     return (anomalous, anomalyScore, anomalies, anomalies_dict)
                 if return_anomalies:
@@ -421,6 +484,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     current_logger.error(traceback_msg)
                     current_logger.error('error :: debug_logging :: %s :: falied to determine if time series has sufficient data' % (
                         algorithm_name))
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
                 if current_skyline_app == 'webapp':
                     return (anomalous, anomalyScore, anomalies, anomalies_dict)
                 if return_anomalies:
@@ -461,6 +529,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                         if debug_logging:
                             current_logger.debug('debug_logging :: %s :: SystemExit called, exiting - %s' % (
                                 algorithm_name, e))
+                        # @added 20230612 - Feature #4946: vortex - m66
+                        # Changed the m66 algorithm to return a results dict
+                        # like other custom algorithms that vortex can run
+                        if return_results:
+                            return (anomalous, anomalyScore, results)
                         if current_skyline_app == 'webapp':
                             return (anomalous, anomalyScore, anomalies, anomalies_dict)
                         if return_anomalies:
@@ -489,6 +562,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                         current_logger.debug('debug :: %s :: time series does not have sufficient data, minimum_datapoints required is %s and time series has %s' % (
                             algorithm_name, str(minimum_datapoints),
                             str(total_datapoints)))
+                    # @added 20230612 - Feature #4946: vortex - m66
+                    # Changed the m66 algorithm to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
                     if current_skyline_app == 'webapp':
                         return (anomalous, anomalyScore, anomalies, anomalies_dict)
                     if return_anomalies:
@@ -506,6 +584,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     current_logger.debug('debug :: %s :: time series does not have sufficient data, minimum_percentage_sparsity required is %s and time series has %s' % (
                         algorithm_name, str(minimum_percentage_sparsity),
                         str(sparsity)))
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
                 if current_skyline_app == 'webapp':
                     return (anomalous, anomalyScore, anomalies, anomalies_dict)
                 if return_anomalies:
@@ -516,6 +599,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     current_logger.debug('debug :: %s :: time series does not have sufficient variability, all the values are the same' % algorithm_name)
                 anomalous = False
                 anomalyScore = 0.0
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    return (anomalous, anomalyScore, results)
                 if current_skyline_app == 'webapp':
                     return (anomalous, anomalyScore, anomalies, anomalies_dict)
                 if return_anomalies:
@@ -533,6 +621,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 current_logger.debug('debug :: %s :: m66 not run as no data' % (
                     algorithm_name))
             anomalies = []
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
             if current_skyline_app == 'webapp':
                 return (anomalous, anomalyScore, anomalies, anomalies_dict)
             if return_anomalies:
@@ -571,6 +664,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
             if use_bottleneck:
                 if len(timeseries) < 10:
+                    # @added 20230612 - Feature #4946: vortex - m66
+                    # Changed the m66 algorithm to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
                     if current_skyline_app == 'webapp':
                         return (anomalous, anomalyScore, anomalies, anomalies_dict)
                     if return_anomalies:
@@ -612,6 +710,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 data = df['value'].tolist()
 
                 if len(data) < 10:
+                    # @added 20230612 - Feature #4946: vortex - m66
+                    # Changed the m66 algorithm to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
                     if current_skyline_app == 'webapp':
                         return (anomalous, anomalyScore, anomalies, anomalies_dict)
                     if return_anomalies:
@@ -683,6 +786,7 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                             anomalies.append(timeseries[(trigger_index - (window * int((nth_median / 2))))])
                         else:
                             anomalies.append(timeseries[trigger_index])
+
             if not anomalies:
                 anomalous = False
 
@@ -690,11 +794,22 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 anomalous = True
                 anomalies_data = []
                 anomaly_timestamps = [int(item[0]) for item in anomalies]
-                for item in timeseries:
+                for index, item in enumerate(timeseries):
+                    score = 0
                     if int(item[0]) in anomaly_timestamps:
                         anomalies_data.append(1)
+                        # @added 20230612 - Feature #4946: vortex - m66
+                        # Changed the m66 algorithm to return a results dict
+                        # like other custom algorithms that vortex can run
+                        results_anomalies[int(item[0])] = {'value': item[1], 'index': index, 'score': 1}
                     else:
                         anomalies_data.append(0)
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                anomalyScore_list = list(anomalies_data)
+                m66_scores = list(anomalies_data)
+
                 if not use_bottleneck:
                     df['anomalies'] = anomalies_data
                 anomalies_list = []
@@ -702,6 +817,22 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     if int(ts) in anomaly_timestamps:
                         anomalies_list.append([int(ts), value])
                         anomalies_dict['anomalies'][int(ts)] = value
+
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run
+                if return_results:
+                    anomaly_sum = sum(anomalyScore_list[-anomaly_window:])
+                    if anomaly_sum > 0:
+                        anomalous = True
+                    else:
+                        anomalous = False
+                    results = {
+                        'anomalous': anomalous,
+                        'anomalies': results_anomalies,
+                        'anomalyScore_list': anomalyScore_list,
+                        'scores': m66_scores,
+                    }
 
             if anomalies and save_plots_to:
                 try:
@@ -752,6 +883,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     if debug_logging:
                         current_logger.debug('debug_logging :: %s :: SystemExit called during save plot, exiting - %s' % (
                             algorithm_name, e))
+                    # @added 20230612 - Feature #4946: vortex - m66
+                    # Changed the m66 algorithm to return a results dict
+                    # like other custom algorithms that vortex can run
+                    if return_results:
+                        return (anomalous, anomalyScore, results)
                     if current_skyline_app == 'webapp':
                         return (anomalous, anomalyScore, anomalies, anomalies_dict)
                     if return_anomalies:
@@ -773,6 +909,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             if debug_logging:
                 current_logger.debug('debug_logging :: %s :: SystemExit called, during analysis, exiting - %s' % (
                     algorithm_name, e))
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
             if current_skyline_app == 'webapp':
                 return (anomalous, anomalyScore, anomalies, anomalies_dict)
             if return_anomalies:
@@ -785,6 +926,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 current_logger.error(traceback_msg)
                 current_logger.error('error :: debug_logging :: %s :: failed to run on ts' % (
                     algorithm_name))
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                return (anomalous, anomalyScore, results)
             if current_skyline_app == 'webapp':
                 return (anomalous, anomalyScore, anomalies, anomalies_dict)
             if return_anomalies:
@@ -816,6 +962,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             del timeseries
         except:
             pass
+        # @added 20230612 - Feature #4946: vortex - m66
+        # Changed the m66 algorithm to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
         if current_skyline_app == 'webapp':
             return (anomalous, anomalyScore, anomalies, anomalies_dict)
         if return_anomalies:
@@ -825,6 +976,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         if debug_logging:
             current_logger.debug('debug_logging :: %s :: SystemExit called (before StopIteration), exiting - %s' % (
                 algorithm_name, e))
+        # @added 20230612 - Feature #4946: vortex - m66
+        # Changed the m66 algorithm to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
         if current_skyline_app == 'webapp':
             return (anomalous, anomalyScore, anomalies, anomalies_dict)
         if return_anomalies:
@@ -838,6 +994,11 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         # anything to the log, so the pythonic except is used to "sample" any
         # algorithm errors to a tmp file and report once per run rather than
         # spewing tons of errors into the log e.g. analyzer.log
+        # @added 20230612 - Feature #4946: vortex - m66
+        # Changed the m66 algorithm to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
         if current_skyline_app == 'webapp':
             return (anomalous, anomalyScore, anomalies, anomalies_dict)
         if return_anomalies:
@@ -846,11 +1007,22 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     except:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         # Return None and None as the algorithm could not determine True or False
+        # @added 20230612 - Feature #4946: vortex - m66
+        # Changed the m66 algorithm to return a results dict
+        # like other custom algorithms that vortex can run
+        if return_results:
+            return (anomalous, anomalyScore, results)
         if current_skyline_app == 'webapp':
             return (anomalous, anomalyScore, anomalies, anomalies_dict)
         if return_anomalies:
             return (False, None, anomalies)
         return (False, None)
+
+    # @added 20230612 - Feature #4946: vortex - m66
+    # Changed the m66 algorithm to return a results dict
+    # like other custom algorithms that vortex can run
+    if return_results:
+        return (anomalous, anomalyScore, results)
 
     if current_skyline_app == 'webapp':
         return (anomalous, anomalyScore, anomalies, anomalies_dict)

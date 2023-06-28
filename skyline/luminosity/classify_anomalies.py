@@ -1,3 +1,6 @@
+"""
+classify_anomalies.py
+"""
 import os
 from os import getpid
 import logging
@@ -6,11 +9,31 @@ from timeit import default_timer as timer
 from time import time
 from ast import literal_eval
 
-import mysql.connector
+# @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                      Task #4778: v4.0.0 - update dependencies
+# Use sqlalchemy and deprecate mysql_insert and direct use of mysql
+# import mysql.connector
+
+# @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import select, Table, MetaData
 
 import settings
 from skyline_functions import (
-    get_redis_conn, get_redis_conn_decoded, get_anomaly_id, mysql_select)
+    # @modified 20220722 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved to function.panorama.get_anomaly_id
+    # get_redis_conn, get_redis_conn_decoded, get_anomaly_id, mysql_select)
+    get_redis_conn, get_redis_conn_decoded, mysql_select)
+
+# @added 20220722 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Moved from skyline_functions
+from functions.panorama.get_anomaly_id import get_anomaly_id
+
+# @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from database import get_engine, engine_disposal
 
 try:
     from custom_algorithms import run_custom_algorithm_on_timeseries
@@ -45,58 +68,15 @@ redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
 def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for):
 
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     debug_algorithms = False
     logger.info('classify_anomalies :: with start_timestamp - %s' % str(start_timestamp))
     start_classify_anomalies = timer()
 
-    def mysql_insert(insert):
-        """
-        Insert data into mysql table
-
-        :param insert: the insert string
-        :type insert: str
-        :return: int
-        :rtype: int or boolean
-
-        - **Example usage**::
-
-            query = 'insert into host (host) VALUES (\'this_host\')'
-            result = self.mysql_insert(query)
-
-        .. note::
-            - If the MySQL query fails a boolean will be returned not a tuple
-                * ``False``
-                * ``None``
-
-        """
-
-        try:
-            cnx = mysql.connector.connect(**config)
-        except mysql.connector.Error as err:
-            logger.error('error :: classify_anomalies :: mysql error - %s' % str(err))
-            logger.error('error :: classify_anomalies :: failed to connect to mysql')
-            raise
-
-        if cnx:
-            try:
-                cursor = cnx.cursor()
-                cursor.execute(insert)
-                inserted_id = cursor.rowcount
-                # Make sure data is committed to the database
-                cnx.commit()
-                cursor.close()
-                cnx.close()
-                return inserted_id
-            except mysql.connector.Error as err:
-                logger.error('error :: classify_anomalies :: failed to insert record - mysql error - %s' % str(err))
-                cnx.close()
-                raise
-        else:
-            cnx.close()
-            return False
-
-        return False
+    # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Deprecated mysql_insert
+    # def mysql_insert(insert):
 
     # Handle luminosity running with multiple processes
     def manage_processing_key(current_pid, base_name, timestamp, classify_for, action):
@@ -141,6 +121,19 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
         classify_anomalies_list = sorted(classify_anomalies_list, key=lambda x: x[2], reverse=False)
 
     current_pid = getpid()
+
+    # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    engine = None
+    try:
+        engine, fail_msg, trace = get_engine(skyline_app)
+        if fail_msg != 'got MySQL engine':
+            logger.error('error :: classify_anomalies :: could not get a MySQL engine fail_msg - %s' % str(fail_msg))
+        if trace != 'none':
+            logger.error('error :: classify_anomalies :: could not get a MySQL engine trace - %s' % str(trace))
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: classify_anomalies :: could not get a MySQL engine - %s' % str(err))
 
     anomalies_proceessed = 0
     for classify_anomaly in classify_anomalies_list:
@@ -294,17 +287,21 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 logger.error('error :: classify_anomalies :: failed to run custom_algorithm %s on %s' % (
                     custom_algorithm, base_name))
             triggered = False
+            triggered_ts = None
+
             if anomalies:
                 anomalies.reverse()
                 for ts, value in anomalies:
                     if ts in window_timestamps:
                         triggered = True
+                        triggered_ts = ts
                         break
                     if ts < window_timestamps[0]:
                         break
+                    del value
                 if triggered:
                     logger.info('classify_anomalies :: %s triggered on %s within the window at %s' % (
-                        custom_algorithm, base_name, str(ts)))
+                        custom_algorithm, base_name, str(triggered_ts)))
                 else:
                     logger.info('classify_anomalies :: %s did not trigger on %s within the window' % (
                         custom_algorithm, base_name))
@@ -350,6 +347,7 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 anomaly_id = 0
         logger.info('classify_anomalies :: anomaly_id: %s' % (
             str(anomaly_id)))
+
         type_data = []
         if anomaly_id:
             query = 'SELECT id,algorithm,type FROM anomaly_types'
@@ -364,32 +362,83 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 db_anomaly_types[associated_algorithm]['id'] = id
                 db_anomaly_types[associated_algorithm]['type'] = anomaly_type
             metric_id = 0
-            query = 'SELECT id FROM metrics WHERE metric=\'%s\'' % base_name
+
+            # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload rather than string-based query construction
             try:
-                results = mysql_select(skyline_app, query)
+                use_table_meta = MetaData()
+                use_table = Table('metrics', use_table_meta, autoload=True, autoload_with=engine)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: classify_anomalies :: use_table Table failed on metrics table - %s' % (
+                    err))
+
+            # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # query = 'SELECT id FROM metrics WHERE metric=\'%s\'' % base_name
+
+            try:
+                # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # results = mysql_select(skyline_app, query)
+                stmt = select(use_table.c.id).where(use_table.c.metric == base_name)
+                connection = engine.connect()
+                results = connection.execute(stmt)
+
                 for item in results:
                     metric_id = item[0]
                     break
+                connection.close()
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: classify_anomalies :: querying MySQL - SELECT id FROM metrics WHERE metric=\'%s\'' % base_name)
+                logger.error('error :: classify_anomalies :: querying metrics table for id for %s' % base_name)
             type_data = []
             for anomaly_type in anomaly_types:
                 type_data.append(int(db_anomaly_types[anomaly_type]['id']))
         logger.info('classify_anomalies :: type_data: %s' % (
             str(type_data)))
 
+        # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Only load the table once
+        anomalies_type_meta_loaded = False
+
         classification_exists = None
         if type_data and anomaly_id:
-            query = 'SELECT metric_id FROM anomalies_type WHERE id=%s' % anomaly_id
+
+            # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload rather than string-based query construction
             try:
-                results = mysql_select(skyline_app, query)
+                use_table_meta = MetaData()
+                use_table = Table('anomalies_type', use_table_meta, autoload=True, autoload_with=engine)
+                anomalies_type_meta_loaded = True
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: classify_anomalies :: use_table Table on anomalies_type failed - %s' % (
+                    err))
+
+            # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # query = 'SELECT metric_id FROM anomalies_type WHERE id=%s' % anomaly_id
+
+            try:
+
+                # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # results = mysql_select(skyline_app, query)
+                stmt = select(use_table.c.metric_id).where(use_table.c.id == anomaly_id)
+                connection = engine.connect()
+                results = connection.execute(stmt)
+
                 for item in results:
                     classification_exists = item[0]
                     break
+                connection.close()
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: classify_anomalies :: querying MySQL - SELECT metric_id FROM anomalies_type WHERE id=%s' % anomaly_id)
+                logger.error('error :: classify_anomalies :: querying anomalies_type table for metric_id for id %s' % str(anomaly_id))
         if classification_exists:
             try:
                 redis_conn.srem('luminosity.classify_anomalies', str(classify_anomaly))
@@ -409,23 +458,55 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                     type_data_str = '%s' % str(id)
                 else:
                     type_data_str = '%s,%s' % (type_data_str, str(id))
-            ins_values = '(%s,%s,\'%s\')' % (str(anomaly_id), str(metric_id), type_data_str)
-            values_string = 'INSERT INTO anomalies_type (id, metric_id, type) VALUES %s' % ins_values
+
+            # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload rather than string-based query construction
+            if not anomalies_type_meta_loaded:
+                try:
+                    use_table_meta = MetaData()
+                    use_table = Table('anomalies_type', use_table_meta, autoload=True, autoload_with=engine)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: classify_anomalies :: use_table Table on anomalies_type failed - %s' % (
+                        err))
+
+            # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload rather than string-based query construction
+            # ins_values = '(%s,%s,\'%s\')' % (str(anomaly_id), str(metric_id), type_data_str)
+            # values_string = 'INSERT INTO anomalies_type (id, metric_id, type) VALUES %s' % ins_values
+
             try:
-                results_recorded = mysql_insert(values_string)
-                logger.debug('debug :: classify_anomalies :: INSERT: %s' % (
-                    str(values_string)))
-                logger.debug('debug :: classify_anomalies :: results_recorded: %s' % (
-                    str(results_recorded)))
-            except Exception as e:
+                # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # results_recorded = mysql_insert(values_string)
+                connection = engine.connect()
+                ins = use_table.insert().values(
+                    id=int(anomaly_id),
+                    metric_id=int(metric_id),
+                    type=type_data_str)
+                result = connection.execute(ins)
+                connection.close()
+                # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # logger.debug('debug :: classify_anomalies :: INSERT: %s' % (
+                #     str(values_string)))
+                # results_recorded = result.inserted_primary_key[0]
+                logger.debug('debug :: classify_anomalies :: results recorded')
+            except Exception as err:
                 # Handle a process updating on SystemExit
-                if 'Duplicate entry' in str(e):
+                if 'Duplicate entry' in str(err):
                     results_recorded = True
                     logger.info('classify_anomalies :: a entry already exists in anomalies_type for anomaly id %s on %s, OK' % (
                         str(anomaly_id), str(base_name)))
                 else:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: MySQL insert - %s' % str(values_string))
+                    # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # logger.error('error :: MySQL insert - %s' % str(values_string))
+                    logger.error('error :: failed to add new record for anomaly_id: %s, metric_id: %s, type: %s - %s' % (
+                        str(anomaly_id), str(metric_id), type_data_str, err))
                     results_recorded = 0
             if results_recorded:
                 logger.info('classify_anomalies :: added %s row to anomalies_type for anomaly id %s on %s - %s' % (
@@ -446,6 +527,11 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: classify_anomalies :: failed to run manage_processing_key - %s' % base_name)
+
+    # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    if engine:
+        engine_disposal(skyline_app, engine)
 
     end_classify_anomalies = timer()
     logger.info('classify_anomalies :: %s anomalies were processed, took %.6f seconds' % (

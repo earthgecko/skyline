@@ -45,7 +45,8 @@ def thunder_check_app(self, check_app):
     # to exist for an app and do not expire.
     do_not_check = False
     if check_app == 'analyzer_batch':
-        if not settings.BATCH_PROCESSING and not settings.BATCH_PROCESSING_NAMESPACES:
+        # if not settings.BATCH_PROCESSING and not settings.BATCH_PROCESSING_NAMESPACES:
+        if not settings.BATCH_PROCESSING:
             do_not_check = True
     if check_app.startswith('vista'):
         if not settings.VISTA_ENABLED:

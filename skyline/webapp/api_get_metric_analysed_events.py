@@ -8,6 +8,9 @@ from settings import FULL_NAMESPACE, REMOTE_SKYLINE_INSTANCES
 from skyline_functions import get_redis_conn_decoded
 from backend import get_cluster_data
 from functions.metrics.get_metric_analysed_events import get_metric_analysed_events
+# @added 20220915 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
 
 # @added 202200504 - Feature #4530: namespace.analysed_events
@@ -71,6 +74,21 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
         raise
 
     redis_metric_name = '%s%s' % (FULL_NAMESPACE, base_name)
+
+    # @added 20220915 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if base_name.startswith('labelled_metrics.'):
+        redis_metric_name = str(base_name)
+    if 'tenant_id="' in base_name:
+        current_logger.info('%s :: looking up metric_id for %s' % (function_str, base_name))
+        try:
+            metric_id = get_metric_id_from_base_name(current_skyline_app, base_name)
+        except Exception as err:
+            current_logger.error('error :: %s :: get_metric_id_from_base_name failed for %s - %s' % (
+                function_str, base_name, err))
+        current_logger.info('%s :: looked up metric id as %s' % (function_str, str(metric_id)))
+        if metric_id:
+            redis_metric_name = 'labelled_metrics.%s' % str(metric_id)
 
     local_metric = False
     try:
