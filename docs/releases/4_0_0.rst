@@ -58,6 +58,10 @@ Learning repetitive patterns has been added.
 
 An adhoc analysis service has been added called Vortex.
 
+There is a new internal monitoring service named Thunder that handles and routes
+internal alerts relating to metric namespaces and monitors the internal
+availability and functioning of the Skyline apps.
+
 There has been a lot of computationally performance improvements by refactoring
 all/most viable methods in algorithms and data processing into numba functions
 where appropriate.
@@ -126,63 +130,13 @@ stumpy version if available.  matrixprofile has been removed as a dependency.
 Prometheus/VictoriaMetrics metrics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+- Accept labelled metrics data from Prometheus, InfluxDB (telegraf) and VictoriaMetrics.
+- Use VictoriaMetrics as Skyline's longer term TSDB for labelled metrics.
 
 Changes
 ~~~~~~~
 
 The changes list is LONG, so listed at the end of this page.
-
-- Handle multiple metrics in victoriametrics response (4776)
-- webapp - link to current VictoriaMetrics graph (4772)
-- analyzer_labelled_metrics - monotonicity checked incorrect classification (4766)
-- custom_algorithms - normal_peaks (4764)
-- Group metrics based on names and labels (4762)
-- Use gevent gunicorn worker_class (4756)
-- csv_to_timeseries (4754)
-- custom_algorithm - pca (4750)
-- custom_algorithm - isolation_forest (4748)
-- custom_algorithm - dbscan (4746)
-- custom_algorithms - spectral_residual (4744)
-- custom_algorithms - skyline_prophet (4742)
-- custom_algorithms - lof (4740)
-- Allow first_hour_average to handle different resolution (4738)
-- custom_algorithms - sigma (4736)
-- mirage_vortex (4734)
-- flux vortex (4732)
-- vortex (4728)
-- custom_algorithms - anomalous_daily_peak (4724)
-- Handle alert and waterfall alert overlap (4722)
-- dotted_representation breaking alert resend_queue (4720)
-- ionosphere.learn_repetitive_patterns - learning repetitively from recent patterns (4718)
-- opentelemetry check is_instrumented_by_opentelemetry (4714)
-- Reset mirage trigger_history on Ionosphere match (4712)
-- ionosphere - store and cache fp minmax data (4708)
-- Add request id and timing to ionosphere requests (4706)
-- get_ionosphere_performance - allow multiple metric_like string (4704)
-- numba optimisations (4702)
-- algorithms - single series (4700)
-- Optimise Ionosphere Redis sets refresh when busy (4698)
-- analyzer - anomalous metrics sets not flushing (4696)
-- analyzer - illuminance.all key (4676)
-- cloudburst active events only (4674)
-- ionosphere_downsampled (4672)
-- settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS (4662)
-- ionosphere.learn_repetitive_patterns (4658)
-- http_alerter - dotted_representation (4652)
-- luminosity.aligned.metrics (4648)
-- functions.metrics.labelled_metrics_remove_labels (4632)
-- Change all dict copy to deepcopy (4624)
-- Support labelled metrics (4614)
-- POC - prometheus, redistimeseries, victoriametrics (4610)
-- functions.settings.manage_external_settings - use cache data on bad response (4608)
-- Ionosphere - inference - further validate all_in_range (4588)
-- custom_algorithm - skyline_ARTime (4584)
-- POC ARTime (4582)
-- webapp - api_get_fp_timeseries (4578)
-- mirage - process multiple metrics (4576)
-- Reduce cluster logging (4568)
-- http_alerter - discard after x resend attempts (4566)
-- authoritative_node (4564)
 
 Upgrade notes
 ~~~~~~~~~~~~~
@@ -223,7 +177,6 @@ Here are the steps....
     # Get the new version
     NEW_SKYLINE_VERSION="v4.0.0"    # Your new Skyline version
     OLD_SKYLINE_VERSION="v3.0.4"    # Your old Skyline version
-    # OLD_SKYLINE_VERSION="v3.0.0"    # Your old Skyline version
 
     CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
     NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
