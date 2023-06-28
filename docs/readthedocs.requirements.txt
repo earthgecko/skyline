@@ -298,7 +298,7 @@ future==0.18.3
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #tsfresh==0.17.0
-tsfresh==0.19.0
+git+https://github.com/earthgecko/tsfresh@3d5a320#egg=tsfresh
 
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
