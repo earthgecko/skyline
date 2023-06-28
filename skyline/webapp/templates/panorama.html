@@ -71,6 +71,7 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
     </div>
 	</ol>
 
+<div class="container-fluid">
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -81,7 +82,7 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
 		  <li class="active"><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
-		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></a></li>
+		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -94,6 +95,10 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
       <span class="icon-bar"></span>
     </button>
   </div>
+  </div>
+  </div>
+  </div>
+  </div>
 
 
 <!-- @modified 20161125 - Branch #922: ionosphere
@@ -102,9 +107,16 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
           <div class="container search_container"></p>
             <h4>Anomaly Search</h4>
 -->
+<!--
         <div class="container main_container">
           <div class="container search_container">
-            <h4><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></span></h4>
+  <div class="col-md-12">
+  <div class="col-md-12 main_container">
+-->
+
+  <div class="container-fluid">
+  <div class="container-fluid search_container">
+            <h4><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></h4>
             <form action="panorama">
               <label>metric:</label><input type="text" name="metric" value="all" /><br>
               <label>Anomaly count by metric:</label>
@@ -112,7 +124,7 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
                 <option value="false">false</option>
                 <option value="true">true</option>
               </select> (NOTE: this overrides the above metric value if one is specified)<br><br>
-              <label>metric_like:</label><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)<br>
+              <label>metric_like:</label><input type="text" name="metric_like" value="all"> <br>(wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%<br>for labelled metrics you can only search by metric name or key or value)<br>
               <label>from_timestamp:</label><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)<br>
               <label>until_timestamp:</label><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)<br>
 {% if app_list %}
@@ -168,13 +180,18 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
           </div>
           <p>
 {% if anomalies %}
+<!--
           <div class="container search_results_container">
+-->
+          <div class="container-fluid search_results_container">
+
 <!-- @modified 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
             <h4>Anomaly Search</h4>
 -->
             <h4><span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></h4>
-            <h6>{{ results }} :: {{ anomalies|length }} anomalies</h6>
+<!--            <h6>{{ results }} :: {{ anomalies|length }} anomalies</h6> -->
+            <h6>Results :: {{ anomalies|length }} anomalies</h6>
             <table>
 <!-- @modified 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
@@ -203,7 +220,11 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
                       <a href="?metric={{ item[1] }}&limit={{ item[2] }}&order=DESC">{{ item[1] }}</a>
                     </td>
   {% else %}
-                    <td> {{ item[1] }} </td>
+    {% if item[1]|length < 150 %}
+                    <td style="word-break:break-all;"><code>{{ item[1] }}</code></td>
+    {% else %}
+                    <td style="word-break:break-all;"><smallcode>{{ item[1] }}</smallcode></td>
+    {% endif %}
                     <td> {{ item[2] }} </td>
                     <td> {{ item[3] }} </td>
     {% if item[6] == 'None' %}
@@ -222,12 +243,19 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
         </div>
           <p>
   {% if count_request != 'true' %}
+<!--
           <div class="container panorama_graph_container">
+-->
 <!-- @added 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
 -->
+<!--
             <div id="graph_title_container">
-                <h5><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly</span></span></span></h5>
+-->
+          <div class="container-fluid panorama_graph_container">
+            <div class="container-fluid graph_title_container">
+
+                <h5><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly</span></span></h5>
                 <span id="graph_title">anomaly id: </span>
             </div>
             <div id="graph_subtitle_container">
@@ -243,24 +271,30 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
             <div id="graph_subtitle_created_date_container">
                 <br><span id="graph_subtitle_created_date">created date: </span>
             </div>
+          </div>
+        </div>
 
 <!--            <div id="graph_container">-->
+        <div class="container-fluid">
             <br>
-            <h5><span class="logo"><span class="sky">Plot ::</span> <span class="re">anomaly</span></span></span></h5>
+            <h5><span class="logo"><span class="sky">Plot ::</span> <span class="re">anomaly</span></span></h5>
             <div id="p_graph_container">
                 <div id="big_label"></div>
                 <div id="graph"></div>
                 <div id="time_shift">
                     <span id="time_shift">time shifted (hours): </span>
                 </div>
-                <div class="duration">Timeseries at full duration (time shifted) for the anomalous datapoint</div>
+<!--                <div class="duration">Timeseries at full duration (time shifted) for the anomalous datapoint</div>  -->
+                <div class="container-fluid duration">Timeseries at full duration (time shifted) for the anomalous datapoint</div>
             </div>
+        </div>
             <br>
 <!-- @modified 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
             <span class="logo"><span class="sky">Found</span> <span class="re">anomalies</span></span></span>
 -->
-            <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalies ::</span></span></span> {{ anomalies|length }} x Graphite timeseries data sets</h4>
+        <div class="container-fluid">
+            <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalies ::</span></span> {{ anomalies|length }} x Graphite timeseries data sets</h4>
             <div id="metrics_main">
 <!--
                 <div id="legend">
@@ -273,15 +307,25 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
                 <div class="col-xs-6 col-md-4" align="right">Original, unaggregated anomalous datapoint</div>
                 <div id="metrics_listings"></div>
             </div>
+        </div>
+
 <!-- @added 20160801 - Webapp js - first element in the list does not load timeseries data -->
             <div class="known_bugs">
               <table>
-                  <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
+                <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
+        				<thead>
+        					<tr>
+                    <th>Github Issue</th>
+                    <th>Description</th>
+        					</tr>
+        				</thead>
                   <tr>
                       <td>
                         <a target='_blank' href="https://github.com/earthgecko/skyline/issues/17">#17</a>
                       </td>
                       <td> The first element in initial list does not fetch timeseries data, mouseover any other and then the first will be available</td>
+                  </tr>
+                  <tr>
 <!-- @added 20180601 - Panorama graph does not display if no FULL_DURATION data #51 -->
                       <td>
                         <a target='_blank' href="https://github.com/earthgecko/skyline/issues/51">#51</a>
@@ -294,8 +338,10 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
   {% endif %}
 {% endif %}
           <br>
+<!--
       </div>
       </div>
+-->
 
 {% endif %}
 

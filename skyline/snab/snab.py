@@ -13,15 +13,29 @@ from os import kill, getpid
 import traceback
 import re
 from sys import version_info
+from sys import exit as sys_exit
 import os.path
 from ast import literal_eval
 import datetime as dt
 from time import gmtime, strftime
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import settings
 from skyline_functions import (
-    mkdir_p, get_redis_conn, get_redis_conn_decoded, send_graphite_metric)
+    # @modified 20220726 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # mkdir_p, get_redis_conn, get_redis_conn_decoded, send_graphite_metric)
+    mkdir_p, get_redis_conn, get_redis_conn_decoded)
 from slack_functions import slack_post_message
+
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
+from custom_algorithms.irregular_unstable import irregular_unstable
+
 try:
     from custom_algorithms import run_custom_algorithm_on_timeseries
 except:
@@ -113,8 +127,8 @@ class SNAB(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
-            exit(0)
+            logger.warning('warning :: parent or current process dead')
+            sys_exit(0)
 
     def spin_snab_process(self, i, check_details):
         """
@@ -141,6 +155,7 @@ class SNAB(Thread):
         check_details is a dict with the following structure:
         check_details = {
             'metric': '<base_name>'|str,
+            'labelled_metric_name': '<labelled_metric_name>'|str,
             'timestamp': anomaly_timestamp|int,
             'value': datapoint|float,
             'full_duration': full_duration|int,
@@ -222,7 +237,9 @@ class SNAB(Thread):
             source = str(check_details['source'])
             algorithm = str(check_details['algorithm'])
             algorithm_source = str(check_details['algorithm_source'])
-            algorithm_parameters = check_details['algorithm_parameters'].copy()
+            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+            # algorithm_parameters = check_details['algorithm_parameters'].copy()
+            algorithm_parameters = copy.deepcopy(check_details['algorithm_parameters'])
             max_execution_time = float(check_details['max_execution_time'])
             algorithm_debug_logging = check_details['debug_logging']
             # @added 20200916 - Branch #3068: SNAB
@@ -234,11 +251,27 @@ class SNAB(Thread):
                 str(spin_snab_process_pid)))
             return anomalous
 
-        original_check_details = check_details.copy()
-        updated_check_details = check_details.copy()
+        # @added 20230419 - Feature #4892: SNAB - labelled_metrics
+        #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        labelled_metric_name = None
+        try:
+            labelled_metric_name = check_details['labelled_metric_name']
+        except:
+            labelled_metric_name = None
+
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # original_check_details = check_details.copy()
+        # updated_check_details = check_details.copy()
+        original_check_details = copy.deepcopy(check_details)
+        updated_check_details = copy.deepcopy(check_details)
+
         updated_check_details['processed'] = int(time())
         update_check_details(original_check_details, updated_check_details)
-        original_updated_check_details = updated_check_details.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # original_updated_check_details = updated_check_details.copy()
+        original_updated_check_details = copy.deepcopy(updated_check_details)
 
         if algorithm != 'testing':
             if not os.path.isfile(anomaly_data):
@@ -248,6 +281,11 @@ class SNAB(Thread):
                 return anomalous
 
         snab_do_not_recheck_key = 'snab.do.not.recheck.%s' % metric_name
+
+        # @added 20230419 - Feature #4892: SNAB - labelled_metrics
+        if labelled_metric_name:
+            snab_do_not_recheck_key = 'snab.do.not.recheck.%s' % labelled_metric_name
+
         snab_do_not_recheck = False
         try:
             snab_do_not_recheck = int(self.redis_conn_decoded.get(snab_do_not_recheck_key))
@@ -270,13 +308,19 @@ class SNAB(Thread):
         else:
             base_name = metric_name
 
+        # @added 20230429 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+        # Use downsampled_timeseries data
+        downsampled = False
+        if anomaly_data.endswith('.downsampled.json'):
+            downsampled = True
+
         if anomaly_data.endswith('.json'):
             with open((anomaly_data), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
             timeseries = literal_eval(timeseries_array_str)
         if anomaly_data.endswith('.csv'):
-            logger.warn('warning :: spin_snab_process - anomaly_data file is csv format which is not currently handled, skipping %s' % (
+            logger.warning('warning :: spin_snab_process - anomaly_data file is csv format which is not currently handled, skipping %s' % (
                 str(anomaly_data)))
             update_check_details(original_updated_check_details, 'remove')
             return anomalous
@@ -296,9 +340,16 @@ class SNAB(Thread):
 
         if timeseries:
             try:
+                algorithm_parameters['metric'] = metric_name
+                # @added 20230419 - Feature #4892: SNAB - labelled_metrics
+                algorithm_parameters['labelled_metric_name'] = labelled_metric_name
                 if check_details:
                     algorithm_parameters['check_details'] = check_details
                     algorithm_parameters['debug_logging'] = algorithm_debug_logging
+                # @added 20230429 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                # Use downsampled_timeseries data
+                algorithm_parameters['downsample_data'] = downsampled
+
                 custom_algorithm_dict = {
                     'namespaces': [metric_name],
                     'algorithm_source': algorithm_source,
@@ -384,8 +435,12 @@ class SNAB(Thread):
                     if algorithm == 'skyline_matrixprofile':
                         algorithm_group = 'matrixprofile'
 
+                    # @added 20230417 - Feature #4848mirage - analyse.irregular.unstable.timeseries.at.30days
+                    if not algorithm_group:
+                        algorithm_group = str(algorithm)
+
                     # @added 20201001 - Branch #3068: SNAB
-                    #                      Task #3748: POC SNAB
+                    #                   Task #3748: POC SNAB
                     # Added analysis_run_time
                     analysis_run_time = 0
                     redis_key = 'snab.analysis_run_time.%s.%s.%s' % (algorithm, base_name, str(metric_timestamp))
@@ -423,6 +478,12 @@ class SNAB(Thread):
                     anomaly_id = None
                     anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
                         str(original_anomaly_timestamp), metric_name)
+                    # @added 20230420 - Feature #4892: SNAB - labelled_metrics
+                    #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                    if labelled_metric_name:
+                        anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                            str(original_anomaly_timestamp), labelled_metric_name)
+
                     try_get_anomaly_id_redis_key_count = 0
                     while try_get_anomaly_id_redis_key_count < 30:
                         try_get_anomaly_id_redis_key_count += 1
@@ -436,7 +497,12 @@ class SNAB(Thread):
                         snab_slack_comment = '\nThe anomaly id was not determined to generate snab results links'
                     snab_id = None
                     if anomaly_id:
-                        snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (algorithm_group, str(use_timestamp), base_name, panorama_added_at)
+                        snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (str(algorithm_group), str(use_timestamp), base_name, panorama_added_at)
+                        # @added 20230420 - Feature #4892: SNAB - labelled_metrics
+                        #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                        if labelled_metric_name:
+                            snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (str(algorithm_group), str(use_timestamp), labelled_metric_name, panorama_added_at)
+
                         try_get_snab_id_redis_key_count = 0
                         while try_get_snab_id_redis_key_count < 30:
                             try_get_snab_id_redis_key_count += 1
@@ -512,7 +578,8 @@ class SNAB(Thread):
                     # can be applied to the slack message.
                     if snab_slack_comment:
                         slack_message = slack_message + snab_slack_comment
-                    slack_post = slack_post_message(skyline_app, original_check_details['alert_slack_channel'], None, slack_message)
+                    alert_slack_channel = str(original_check_details['alert_slack_channel'])
+                    slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
                     logger.info('posted results to slack - %s' % slack_message)
                     if slack_post:
                         try:
@@ -634,7 +701,9 @@ class SNAB(Thread):
             source = str(check_details['source'])
             algorithm = str(check_details['algorithm'])
             algorithm_source = str(check_details['algorithm_source'])
-            algorithm_parameters = check_details['algorithm_parameters'].copy()
+            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+            # algorithm_parameters = check_details['algorithm_parameters'].copy()
+            algorithm_parameters = copy.deepcopy(check_details['algorithm_parameters'])
             max_execution_time = float(check_details['max_execution_time'])
             algorithm_debug_logging = check_details['debug_logging']
             # @added 20200916 - Branch #3068: SNAB
@@ -666,7 +735,6 @@ class SNAB(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -685,7 +753,6 @@ class SNAB(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -748,9 +815,7 @@ class SNAB(Thread):
                     logger.error('error :: cannot connect to get_redis_conn_decoded')
                 continue
 
-            """
-            Determine if any metric has been added to process
-            """
+            # Determine if any metric has been added to process
             while True:
 
                 # Report app up
@@ -1150,7 +1215,7 @@ class SNAB(Thread):
             if int(time()) >= (last_sent_to_graphite + 60):
                 logger.info('checks.processed          :: %s' % str(snab_checks_done))
                 send_metric_name = '%s.checks.processed' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(snab_checks_done))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(snab_checks_done))
                 algorithms_run = []
                 for algorithm, run_time in algorithm_run_times:
                     algorithms_run.append(algorithm)
@@ -1168,32 +1233,32 @@ class SNAB(Thread):
                     if avg_time or avg_time == 0:
                         logger.info('checks.analyzer.anomalies   :: %s' % str(analyzer_anomalies))
                         send_metric_name = '%s.checks.analyzer.anomalies' % skyline_app_graphite_namespace
-                        send_graphite_metric(skyline_app, send_metric_name, str(analyzer_anomalies))
+                        send_graphite_metric(self, skyline_app, send_metric_name, str(analyzer_anomalies))
 
                 logger.info('checks.analyzer.anomalies :: %s' % str(analyzer_anomalies))
                 send_metric_name = '%s.checks.analyzer.anomalies' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(analyzer_anomalies))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(analyzer_anomalies))
                 logger.info('checks.analyzer.realtime  :: %s' % str(analyzer_realtime_checks))
                 send_metric_name = '%s.checks.analyzer.realtime' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(analyzer_realtime_checks))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(analyzer_realtime_checks))
                 logger.info('checks.analyzer.testing   :: %s' % str(analyzer_testing_checks))
                 send_metric_name = '%s.checks.analyzer.testing' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(analyzer_testing_checks))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(analyzer_testing_checks))
                 logger.info('checks.analyzer.falied    :: %s' % str(analyzer_falied_checks))
                 send_metric_name = '%s.checks.analyzer.falied' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(analyzer_falied_checks))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(analyzer_falied_checks))
                 logger.info('checks.mirage.anomalies   :: %s' % str(mirage_anomalies))
                 send_metric_name = '%s.checks.mirage.anomalies' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(mirage_anomalies))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(mirage_anomalies))
                 logger.info('checks.mirage.realtime    :: %s' % str(mirage_realtime_checks))
                 send_metric_name = '%s.checks.mirage.realtime' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(mirage_realtime_checks))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(mirage_realtime_checks))
                 logger.info('checks.mirage.testing     :: %s' % str(mirage_testing_checks))
                 send_metric_name = '%s.checks.mirage.testing' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(mirage_testing_checks))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(mirage_testing_checks))
                 logger.info('checks.mirage.falied      :: %s' % str(mirage_falied_checks))
                 send_metric_name = '%s.checks.mirage.falied' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, str(mirage_falied_checks))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(mirage_falied_checks))
 
                 last_sent_to_graphite = int(time())
                 snab_checks_done = 0

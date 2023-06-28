@@ -1,5 +1,6 @@
 import logging
 import traceback
+from ast import literal_eval
 
 from skyline_functions import get_redis_conn_decoded
 from matched_or_regexed_in_list import matched_or_regexed_in_list
@@ -57,13 +58,29 @@ def remove_namespace_quota_metrics(
     if not quota_metrics:
         return removed_metrics
 
+    # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+    # Handle labelled_metrics
+    tenant_id_namespace = '_tenant_id="%s"' % str(namespace)
+    full_namespace = '%s.' % str(namespace)
+
     metrics_to_remove = []
     for base_name in metrics:
-        if not base_name.startswith(namespace):
+        # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+        # Handle labelled_metrics
+        if tenant_id_namespace in base_name:
+            if base_name in quota_metrics:
+                metrics_to_remove.append(base_name)
+                continue
+        if base_name in quota_metrics:
+            metrics_to_remove.append(base_name)
+            continue
+
+        # if not base_name.startswith(namespace):
+        if not base_name.startswith(full_namespace):
             base_name = '%s.%s' % (str(namespace), base_name)
         if base_name in quota_metrics:
             metrics_to_remove.append(base_name)
-
+        
     pattern_errors = []
     traceback_sample = None
     if patterns:
@@ -84,6 +101,20 @@ def remove_namespace_quota_metrics(
         current_logger.error(traceback_sample)
         current_logger.error('error :: %s :: some matched_or_regexed_in_list errors were reported on pattern - %s, traceback sample above and errors follow' % (
             function_str, str(patterns)))
+
+    # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+    #                   Feature #4464: flux - quota - cluster_sync
+    # Handle labelled_metrics, do not sync the flux.quota.namespace_metrics
+    # keys with analyzer/metrics_manager.py if there have been removals
+    # recently
+    namespaces_quota_removed_key = 'flux.removed.quota.namespace_metrics.%s' % str(namespace)
+    try:
+        redis_conn_decoded.setex(namespaces_quota_removed_key, 300, 1)
+        current_logger.info('%s :: setex %s Redis key to a TTL of 300' % (
+            function_str, namespaces_quota_removed_key))
+    except Exception as err:
+        current_logger.error('error :: %s :: failed to setex %s Redis key - %s' % (
+            function_str, namespaces_quota_removed_key, err))
 
     if metrics_to_remove:
         metrics_to_remove = list(set(metrics_to_remove))
@@ -106,6 +137,41 @@ def remove_namespace_quota_metrics(
             current_logger.error('error :: %s :: failed to srem %s metrics from Redis set %s - %s' % (
                 function_str, str(len(list(set(metrics_to_remove)))),
                 namespace_metrics_quota_key, err))
+
+        # @added 20230322 - Feature #4468: flux - remove_namespace_quota_metrics
+        #                   Feature #4464: flux - quota - cluster_sync
+        # Handle the single hash that contains all the flux.quota.namespace_metrics
+        # namespaces to allow for the cluster sync to make a single call rather
+        # than a call per namespace
+        metrics_manager_flux_quota_namespace_metrics = []
+        metrics_to_keep = []
+        try:
+            metrics_manager_flux_quota_namespace_metrics_str = redis_conn_decoded.hget('metrics_manager.flux.quota.namespace_metrics', namespace)
+            if metrics_manager_flux_quota_namespace_metrics_str:
+                metrics_manager_flux_quota_namespace_metrics = literal_eval(metrics_manager_flux_quota_namespace_metrics_str)
+            current_logger.info('%s :: got %s metrics for %s namespace from metrics_manager.flux.quota.namespace_metrics' % (
+                function_str, str(len(metrics_manager_flux_quota_namespace_metrics)),
+                namespace))
+        except Exception as err:
+            current_logger.error('error :: %s :: failed to setex %s Redis key - %s' % (
+                function_str, namespaces_quota_removed_key, err))
+        if metrics_manager_flux_quota_namespace_metrics:
+            metrics_to_keep = [metric for metric in metrics_manager_flux_quota_namespace_metrics if metric not in removed_metrics]
+            if metrics_to_keep and len(metrics_to_keep) != len(metrics_manager_flux_quota_namespace_metrics):
+                if not dry_run:
+                    try:
+                        redis_conn_decoded.hset('metrics_manager.flux.quota.namespace_metrics', namespace, str(metrics_to_keep))
+                        current_logger.info('%s :: updated %s namespace in metrics_manager.flux.quota.namespace_metrics with %s metrics_to_keep' % (
+                            function_str, namespace, str(len(metrics_to_keep))))
+                    except Exception as err:
+                        current_logger.error('error :: %s :: failed to hset metrics_manager.flux.quota.namespace_metrics Redis hash for namespace %s - %s' % (
+                            function_str, namespace, err))
+                else:
+                    current_logger.info('%s :: DRY RUN :: would update %s namespace in metrics_manager.flux.quota.namespace_metrics with %s metrics_to_keep' % (
+                        function_str, namespace, str(len(metrics_to_keep))))
+        else:
+            current_logger.warning('warning :: %s :: nothing to update for %s namespace in metrics_manager.flux.quota.namespace_metrics' % (
+                function_str, namespace))
 
         # Set to inactive in the database before removing from the Redis keys
         # because if not when the set_metrics_as_inactive tries to determine

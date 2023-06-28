@@ -1,3 +1,6 @@
+"""
+learn.py
+"""
 from __future__ import division
 import logging
 import os
@@ -9,7 +12,12 @@ import glob
 from sys import version_info
 import traceback
 
-from redis import StrictRedis
+# @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+# Use sqlalchemy rather than string-based query construction
+from datetime import datetime, timedelta
+
+# from redis import StrictRedis
 import requests
 
 # @modified 20191115 - Branch #3262: py3
@@ -27,7 +35,9 @@ import settings
 from skyline_functions import (
     mkdir_p, get_graphite_metric, send_anomalous_metric_to,
     # @added 20170603 - Feature #2034: analyse_derivatives
-    nonNegativeDerivative, in_list,
+    # @modified 20230109 - Task #4778: v4.0.0 - update dependencies
+    # Commented out unused nonNegativeDerivative and in_list
+    # nonNegativeDerivative, in_list,
     # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
     get_memcache_metric_object,
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
@@ -47,6 +57,12 @@ from ionosphere_functions import create_features_profile
 # @added 20210425 - Task #4030: refactoring
 #                   Feature #4014: Ionosphere - inference
 from functions.numpy.percent_different import get_percent_different
+
+# @added 20220729 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -233,9 +249,28 @@ def get_metric_from_metrics(base_name, engine):
         logger.error('error :: learn :: failed to get metrics_table meta for %s' % base_name)
         return False
 
+    # @added 20220729 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metrics
+    labelled_metric_base_name = None
+    if base_name.startswith('labelled_metrics.'):
+        try:
+            metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+            if metric_name:
+                labelled_metric_base_name = str(metric_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+
     try:
         connection = engine.connect()
         stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        # @added 20220729 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metrics
+        if labelled_metric_base_name:
+            stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+
         result = connection.execute(stmt)
         row = result.fetchone()
         metric_db_object = row
@@ -310,6 +345,10 @@ def get_ionosphere_record(fp_id, engine):
         stmt = select([ionosphere_table]).where(ionosphere_table.c.id == fp_id)
         result = connection.execute(stmt)
         row = result.fetchone()
+        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Added missing close
+        connection.close()
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: could not get the fp_ids_db_object_count from the DB for %s' % str(fp_id))
@@ -495,7 +534,7 @@ def ionosphere_learn(timestamp):
         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
         # learn_work = redis_conn.smembers(work_set)
-        learn_work = redis_conn_decoded.smembers(work_set)
+        learn_work = list(redis_conn_decoded.smembers(work_set))
         logger.info('learn :: got Redis %s set' % work_set)
     except Exception as e:
         logger.error('error :: learn :: could not query Redis for ionosphere.learn.work - %s' % (e))
@@ -512,6 +551,26 @@ def ionosphere_learn(timestamp):
     # else:
     #     logger.info('learn :: work items in queue - %s' % str(work_items_todo))
     logger.info('learn :: work items in queue - %s' % str(work_items_todo))
+
+    # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                   Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    # Get engine and ionosphere_table once
+    engine = None
+    # Get a MySQL engine
+    try:
+        engine, log_msg, trace = learn_get_an_engine()
+        logger.info('learn :: %s' % log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: learn :: could not get a MySQL engine to determine last features profiles details for work check')
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: learn :: failed to get ionosphere_table meta - %s' % (
+            err))
 
     for index, ionosphere_learn_work in enumerate(learn_work):
 
@@ -541,6 +600,33 @@ def ionosphere_learn(timestamp):
 
         logger.info('learn :: checking work item - %s' % (str(learn_metric_list)))
 
+        # @added 20220731 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metric name
+        use_base_name = str(learn_base_name)
+        labelled_metric_name = None
+        if '{' in learn_base_name and '}' in learn_base_name and '_tenant_id="' in learn_base_name:
+            metric_id = 0
+            try:
+                metric_id = get_metric_id_from_base_name(skyline_app, learn_base_name)
+            except Exception as err:
+                logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(learn_base_name), err))
+            if metric_id:
+                labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+        if learn_base_name.startswith('labelled_metrics.'):
+            labelled_metric_name = str(learn_base_name)
+            try:
+                metric = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+                if metric:
+                    labelled_metric_base_name = str(metric)
+                    base_name = str(labelled_metric_base_name)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    learn_base_name, err))
+        if labelled_metric_name:
+            use_base_name = str(labelled_metric_name)
+            logger.info('learn :: use_base_name: %s' % use_base_name)
+
         # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
         # If the work is older than 7200 seconds
 
@@ -548,23 +634,33 @@ def ionosphere_learn(timestamp):
         # Determine the metric details from the database
         metrics_id = None
         metric_db_object = None
-        engine = None
+
+        # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use sqlalchemy rather than string-based query construction
+        # Get engine once
+        # engine = None
 
         # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
         # Get the metric db object data to memcache it is exists
-        metric_db_object = get_memcache_metric_object(skyline_app, learn_base_name)
+        metric_db_object = get_memcache_metric_object(skyline_app, use_base_name)
         if metric_db_object:
             metrics_id = metric_db_object['id']
         else:
             # @modified 20170825 - Task #2132: Optimise Ionosphere DB usage
             # Only if no memcache data
             # Get a MySQL engine
-            try:
-                engine, log_msg, trace = learn_get_an_engine()
-                logger.info('learn :: %s' % log_msg)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: learn :: could not get a MySQL engine to get metric_db_object')
+            # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Get engine once
+            if not engine:
+                try:
+                    engine, log_msg, trace = learn_get_an_engine()
+                    logger.info('learn :: %s' % log_msg)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: could not get a MySQL engine to get metric_db_object')
 
             if not engine:
                 logger.error('error :: learn :: engine not obtained to get metric_db_object')
@@ -572,8 +668,12 @@ def ionosphere_learn(timestamp):
                 continue
 
             try:
-                metrics_id, metric_db_object = get_metric_from_metrics(learn_base_name, engine)
-                learn_engine_disposal(engine)
+                metrics_id, metric_db_object = get_metric_from_metrics(use_base_name, engine)
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once
+                # learn_engine_disposal(engine)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed get the metric details from the database')
@@ -596,13 +696,21 @@ def ionosphere_learn(timestamp):
                         logger.error('error :: learn :: failed remove %s from Redis set %s' % (str(learn_metric_list), work_set))
                 else:
                     logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-                learn_engine_disposal(engine)
+                # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                   Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once
+                # learn_engine_disposal(engine)
                 continue
 
             if not metric_db_object:
                 logger.error('error :: learn :: failed get the metric_db_object from the database')
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
                 continue
 
         learn_valid_ts_older_than = None
@@ -615,8 +723,12 @@ def ionosphere_learn(timestamp):
             use_full_duration = None
         if not learn_valid_ts_older_than:
             logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-            if engine:
-                learn_engine_disposal(engine)
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Get engine once, so do not dispose
+            # if engine:
+            #     learn_engine_disposal(engine)
             continue
 
         time_check = int(time())
@@ -663,8 +775,12 @@ def ionosphere_learn(timestamp):
 
             if not learn_full_duration_days:
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-                if engine:
-                    learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # if engine:
+                #     learn_engine_disposal(engine)
                 continue
             if not engine:
                 engine = None
@@ -679,14 +795,26 @@ def ionosphere_learn(timestamp):
                 logger.error('error :: learn :: engine not obtained to determine last features profiles details for work check')
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires to determine last features profiles details')
                 continue
+
         if learn_parent_id and learn_full_duration_seconds:
             logger.info('info :: learn :: checking if any fps have been recently created from parent fp id %s' % (
                 str(learn_parent_id)))
             exisitng_recent_fps = []
             try:
                 connection = engine.connect()
-                result = connection.execute(
-                    'SELECT * FROM ionosphere WHERE metric_id=%s AND parent_id=%s AND full_duration=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 2 HOUR) <= created_timestamp' % (str(metrics_id), str(learn_parent_id), str(learn_full_duration_seconds)))  # nosec
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # result = connection.execute(
+                #     'SELECT * FROM ionosphere WHERE metric_id=%s AND parent_id=%s AND full_duration=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 2 HOUR) <= created_timestamp' % (str(metrics_id), str(learn_parent_id), str(learn_full_duration_seconds)))  # nosec
+                two_hours_ago = datetime.now() - timedelta(hours=2)
+                stmt = select([ionosphere_table]).\
+                    where(ionosphere_table.c.metric_id == int(metrics_id)).\
+                    where(ionosphere_table.c.parent_id == int(learn_parent_id)).\
+                    where(ionosphere_table.c.full_duration == int(learn_full_duration_seconds)).\
+                    where(ionosphere_table.c.created_timestamp >= two_hours_ago)
+                result = connection.execute(stmt)
+
                 for row in result:
                     try:
                         recent_fp_id = int(row['id'])
@@ -700,6 +828,7 @@ def ionosphere_learn(timestamp):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: learn :: failed to determine exisitng_recent_fps from DB response for work check')
+                connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed to determine exisitng_recent_fps for work check')
@@ -709,7 +838,11 @@ def ionosphere_learn(timestamp):
                 logger.info('info :: learn :: features profiles exists %s' % (str(exisitng_recent_fps)))
                 logger.warning('warning :: learn :: the required features profile has already created, removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
                 remove_work_list_from_redis_set(learn_metric_list)
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
                 continue
             logger.info('info :: learn :: completed work check - no features profile at learn_full_duration_days of %s has already been created for fp id %s, OK' % (
                 str(learn_full_duration_days), str(learn_parent_id)))
@@ -718,10 +851,21 @@ def ionosphere_learn(timestamp):
         # Do not learn from any recent feature profiles
         if learn_parent_id:
             exisitng_recent_fps = []
+
             try:
                 connection = engine.connect()
-                result = connection.execute(
-                    'SELECT * FROM ionosphere WHERE metric_id=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 1 HOUR) <= created_timestamp' % (str(metrics_id)))  # nosec
+
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # result = connection.execute(
+                #     'SELECT * FROM ionosphere WHERE metric_id=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 1 HOUR) <= created_timestamp' % (str(metrics_id)))  # nosec
+                hour_ago = datetime.now() - timedelta(hours=1)
+                stmt = select([ionosphere_table]).\
+                    where(ionosphere_table.c.metric_id == int(metrics_id)).\
+                    where(ionosphere_table.c.created_timestamp >= hour_ago)
+                result = connection.execute(stmt)
+
                 for row in result:
                     try:
                         recent_fp_id = int(row['id'])
@@ -732,6 +876,7 @@ def ionosphere_learn(timestamp):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: learn :: failed to determine exisitng_recent_fps from DB response for work check')
+                connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed to determine exisitng_recent_fps for work check')
@@ -741,7 +886,11 @@ def ionosphere_learn(timestamp):
                         str(learn_parent_id)))
                     logger.info('info :: learn :: removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
                     remove_work_list_from_redis_set(learn_metric_list)
-                    learn_engine_disposal(engine)
+                    # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # Use sqlalchemy rather than string-based query construction
+                    # Get engine once, so do not dispose
+                    # learn_engine_disposal(engine)
                     continue
                 logger.info('info :: learn :: completed work check - the learn_parent_id fp %s is not in exisitng_recent_fps continuing' % (
                     str(learn_parent_id)))
@@ -751,7 +900,7 @@ def ionosphere_learn(timestamp):
 
         # First learn checks if the metric_training_data_dir exists, if it does not
         # there is nothing to learn with.
-        metric_timeseries_dir = learn_base_name.replace('.', '/')
+        metric_timeseries_dir = use_base_name.replace('.', '/')
         metric_training_data_dir = '%s/%s/%s' % (
             str(settings.IONOSPHERE_DATA_FOLDER), str(learn_metric_timestamp),
             metric_timeseries_dir)
@@ -776,8 +925,8 @@ def ionosphere_learn(timestamp):
                 str(settings.IONOSPHERE_DATA_FOLDER), str(learn_metric_timestamp),
                 metric_timeseries_dir)
 
-        original_metric_check_file = '%s/%s.txt' % (metric_training_data_dir, learn_base_name)
-        metric_check_file = '%s/%s.txt' % (metric_learn_data_dir, learn_base_name)
+        original_metric_check_file = '%s/%s.txt' % (metric_training_data_dir, use_base_name)
+        metric_check_file = '%s/%s.txt' % (metric_learn_data_dir, use_base_name)
 
         if not os.path.exists(metric_learn_data_dir):
             try:
@@ -1082,6 +1231,21 @@ def ionosphere_learn(timestamp):
             remove_work_list_from_redis_set(learn_metric_list)
             continue
 
+        # @added 20220729 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metrics
+        data_source = 'graphite'
+        labelled_metric_base_name = None
+        if base_name.startswith('labelled_metrics.'):
+            try:
+                metric_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+                if metric_name:
+                    labelled_metric_base_name = str(metric_name)
+                    data_source = 'victoriametrics'
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    base_name, err))
+
         # @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
         # With the introduction of calculating the nonNegativeDerivative in both
         # Analyzer and Mirage before the initial analysis, both apps are now
@@ -1104,20 +1268,45 @@ def ionosphere_learn(timestamp):
             # @added 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
             preprocessed_learn_json_data_exists = True
         else:
-            try:
+            # @modified 20220729 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            if data_source == 'graphite':
+                try:
+                    logger.info(
+                        'learn :: need learning data ts json from Graphite at %s days - %s' % (
+                            str(learn_full_duration_days), learn_json_file))
+                    got_learn_json = get_learn_json(
+                        learn_json_file, base_name, use_full_duration, metric_timestamp,
+                        learn_full_duration_days)
+                    # @added 20220406 - Feature #4520: settings - ZERO_FILL_NAMESPACES
+                    # get_graphite_metric is applying nonNegativeDerivative
+                    preprocessed_learn_json_data_exists = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: learn_json call failed')
+                    got_learn_json = False
+
+            # @added 20220729 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Get data from victoriametrics
+            if data_source == 'victoriametrics':
                 logger.info(
-                    'learn :: need learning data ts json from Graphite at %s days - %s' % (
+                    'learn :: need learning data ts json from victoriametrics at %s days - %s' % (
                         str(learn_full_duration_days), learn_json_file))
-                got_learn_json = get_learn_json(
-                    learn_json_file, base_name, use_full_duration, metric_timestamp,
-                    learn_full_duration_days)
-                # @added 20220406 - Feature #4520: settings - ZERO_FILL_NAMESPACES
-                # get_graphite_metric is applying nonNegativeDerivative
-                preprocessed_learn_json_data_exists = True
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: learn :: learn_json call failed')
-                got_learn_json = False
+                try:
+                    metric_data = {}
+                    second_resolution_timestamp = int(float(metric_timestamp)) - (int(float(learn_full_duration_days)) * 86400)
+                    # get_victoriametrics_metric automatically applies the rate and
+                    # step required no downsampling or nonNegativeDerivative is
+                    # required.
+                    got_learn_json = get_victoriametrics_metric(
+                        skyline_app, base_name, second_resolution_timestamp,
+                        metric_timestamp, 'json', learn_json_file, metric_data)
+                    if got_learn_json:
+                        logger.info('learn :: %s time series data saved to %s' % (base_name, got_learn_json))
+                except Exception as err:
+                    logger.error('error :: learn :: get_victoriametrics_metric failed for %s - %s' % (
+                        str(got_learn_json), err))
 
         if not got_learn_json:
             logger.error(
@@ -1187,6 +1376,19 @@ def ionosphere_learn(timestamp):
         # TODO still calculate age and discard if no data from the first day of
         # use_full_duration_days
 
+        # @added 20220729 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        check_first_timestamp = False
+        if check_first_timestamp:
+            first_day_first_timestamp = (metric_timestamp - (learn_full_duration_days * 86400))
+            first_day_last_timestamp = first_day_first_timestamp + 86399
+            if first_timestamp not in list(range(first_day_first_timestamp, first_day_last_timestamp)):
+                logger.error('error :: learn :: first timestamp from learning data ts json, %s, does not fall between %s and %s' % (
+                    str(first_timestamp), str(first_day_first_timestamp),
+                    str(first_day_last_timestamp)))
+                remove_work_list_from_redis_set(learn_metric_list)
+                continue
+
         # Calculate the features and a features profile for the learn_json_file
         calculated_feature_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (metric_learn_data_dir, base_name)
         calculated_feature_file_found = False
@@ -1204,6 +1406,13 @@ def ionosphere_learn(timestamp):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: learn :: failed to calculate features')
+                    remove_work_list_from_redis_set(learn_metric_list)
+                    continue
+                # @added 20220805 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                #                   Feature #4658: ionosphere.learn_repetitive_patterns
+                if not successful and 'insufficient data to create profile' in log_msg:
+                    logger.info('learn :: removing work item as insufficient data to create profile')
                     remove_work_list_from_redis_set(learn_metric_list)
                     continue
             else:
@@ -1228,7 +1437,11 @@ def ionosphere_learn(timestamp):
             use_full_duration = None
         if not max_generations:
             logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-            learn_engine_disposal(engine)
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Get engine once, so do not dispose
+            # learn_engine_disposal(engine)
             continue
         if str(work) == 'learn_fp_learnt' and calculated_feature_file_found:
             if int(learn_generation) >= max_generations:
@@ -1249,7 +1462,11 @@ def ionosphere_learn(timestamp):
                 max_percent_diff_from_origin = None
             if not max_percent_diff_from_origin:
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
                 continue
 
             # The metric learn work variables now known so we can process the metric
@@ -1283,14 +1500,23 @@ def ionosphere_learn(timestamp):
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed get the fp_ids from the database')
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
+                # learn_engine_disposal(engine)
                 continue
 
             # if not fp_ids:
             if fp_ids == []:
                 logger.error('error :: learn :: failed get the fp_ids from the database')
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
                 continue
 
             # Determine the sum of the origin features profile which means
@@ -1306,7 +1532,11 @@ def ionosphere_learn(timestamp):
                 logger.error('error :: learn :: ionosphere_learn does not handle generation %s profiles' % str(current_generation))
                 logger.info('learn :: exiting this work and removing work item')
                 remove_work_list_from_redis_set(learn_metric_list)
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
                 continue
 
             logger.info('learn :: determining the id and features sum value for the origin features profile from the fp_ids for fp id %s' % str(learn_parent_id))
@@ -1352,11 +1582,24 @@ def ionosphere_learn(timestamp):
                 connection = engine.connect()
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                result = connection.execute(
-                    'SELECT COUNT(id) FROM ionosphere WHERE parent_id=%s AND full_duration=%s' % (str(origin_fp_id), str(use_full_duration)))  # nosec
-                for row in result:
-                    child_fp_count = row['COUNT(id)']
+
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # result = connection.execute(
+                #     'SELECT COUNT(id) FROM ionosphere WHERE parent_id=%s AND full_duration=%s' % (str(origin_fp_id), str(use_full_duration)))  # nosec
+                # for row in result:
+                #     child_fp_count = row['COUNT(id)']
+                child_fp_count = 0
+                stmt = select([ionosphere_table.c.id]).\
+                    where(ionosphere_table.c.parent_id == int(origin_fp_id)).\
+                    where(ionosphere_table.c.full_duration == int(use_full_duration))
+                results = connection.execute(stmt)
+                for row in results:
+                    child_fp_count += 1
+
                 child_use_full_duration_count_of_origin_fp_id = int(child_fp_count)
+                connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: determining parent id of the 0 generation origin')
@@ -1366,13 +1609,21 @@ def ionosphere_learn(timestamp):
             else:
                 logger.info('learn :: the origin_fp_id %s was not allowed to learn, not allowing learning' % str(origin_fp_id))
 
-            learn_engine_disposal(engine)
+            # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # Get engine once, so do not dispose
+            # learn_engine_disposal(engine)
 
             if not origin_features_profile_sum:
                 logger.info('learn :: exiting this work and removing as the origin fp features sum could not be determined')
                 # TODO: remove this just testing
                 # remove_work_list_from_redis_set(learn_metric_list)
-                learn_engine_disposal(engine)
+                # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # Use sqlalchemy rather than string-based query construction
+                # Get engine once, so do not dispose
+                # learn_engine_disposal(engine)
                 continue
             logger.info(
                 'learn :: the origin zero generation features profile %s - features_sum - %s' % (

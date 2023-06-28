@@ -40,8 +40,10 @@ Although Skyline webapp can send traces directly to Jaeger, the experimental
 set up is using the opentelemetry collector as a router to send trace data to
 both Jaeger and Flux.
 
-webapp -> opentelemetry JaegerExporter -> otelcol |-> Jaeger
-                                                  |-> Flux
+.. code-block::
+
+  webapp -> opentelemetry JaegerExporter -> otelcol |-> Jaeger
+                                                    |-> Flux
 
 On receiving trace data Flux will automatically aggregate traces and send the
 trace timings and trace counts per method as metrics to Graphite.  In terms of
@@ -88,7 +90,25 @@ opentelemetry settings section:
   otelcol and convert them into metrics which will be namespaced as
   ``otel.traces.skyline.webapp.*``
 - :mod:`settings.LAST_KNOWN_VALUE_NAMESPACES` if you wish to monitor otel trace
-  ensure that the ``otel.traces namespace`` is declared in this setting.
+  ensure that the ``otel.traces`` namespace is declared in this setting.
+
+Further to this the ``OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES`` ENV
+variable must be set to prevent the opentelemetry.exporter.jaeger.thrift
+JaegerExporter from warning that Data exceeds the max UDP packet size and losing
+data on large traces.
+
+Therefore ensure that your systemd service file has the following declared:
+
+.. code-block:: bash
+
+  Environment=OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES=True
+
+If you start the web service differently ensure that the ENV variable is set:
+
+.. code-block:: bash
+
+    export OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES="True"
+
 
 The general installation of otelcol and Jaeger is not covered here see the
 respective documentation for each:
@@ -112,7 +132,7 @@ instance with memory-mode:
 
 .. code-block:: bash
 
-  /opt/jaeger/jaeger-1.32.0-linux-amd64/jaeger-all-in-one  --memory.max-traces 10000 --query.base-path=/jaeger >> /var/log/jaeger.log 2>&1 &
+  /opt/jaeger/jaeger-1.32.0-linux-amd64/jaeger-all-in-one --memory.max-traces 10000 --query.base-path=/jaeger >> /var/log/jaeger.log 2>&1 &
 
 
 

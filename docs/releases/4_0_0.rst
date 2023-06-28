@@ -1,0 +1,460 @@
+=====
+4.0.0
+=====
+
+v4.0.0 - xxx xx, 2023
+
+This is a **MAJOR** release with changes and enhancements across the board,
+including changes and additions to backend components.
+
+Notable new features and functionality
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are a plethera of changes and additions in v4.0.0
+
+Added support for Prometheus/VictoriaMetrics - ingesting, storing and analysing
+labelled metrics or tagged metrics from Prometheus, VictoriaMetrics and via
+plain HTTP JSON.
+
+This version also starts making use of the very, very long awaited
+RedisTimeseries for storing labelled metric timeseries data.
+
+Mirage has been significantly improved in its processing methodology to process
+many metrics per run rather than a single metric per run.  This reduces the
+occurrences of WATERFALL ALERTS to practically zero.  Mirage has also been
+enhanced with additional algorithms to identify normal daily peaks and to
+identify irregular, unstable timeseries and run an additional analysis on
+these types of metrics at a much longer time period due to the sparsity of
+normal events in a weekly period.  These two additional analysis methodologies
+vastly decrease false positives on metrics which display these behaviours. 
+
+There is a plethera of additions to custom algorithms and the addition of a new
+adhoc analysis service called Skyline/Vortex which does adhoc analysis on any
+24hr or 7day (overrrideable) uploaded timeseries or timeseries in the system
+and uses any combination/s of custom algorithms that the user chooses to analyse
+the timeseries and return results.  Vortex can be used directly via a HTTP API
+and there is also a webapp UI for it as well.
+
+There is also the addition of numerous mainstream custom algorithms to choose
+from that can now also be used in any part of the analysis pipeline or at least
+be used with Mirage and Vortex (for which these are intended to be used with,
+they are not intended to be used as custom_algorithms in Analyzer):
+
+- sigma
+- matrixprofile
+- spectral_residual
+- lof
+- isolation_forest
+- dbscan
+- pca
+- prophet
+- one_class_svm
+- anomalous_daily_peak
+- irregular_unstable
+- mstl
+- autoarima
+
+Learning repetitive patterns has been added.
+
+An adhoc analysis service has been added called Vortex.
+
+There has been a lot of computationally performance improvements by refactoring
+all/most viable methods in algorithms and data processing into numba functions
+where appropriate.
+
+The webapp has a number of new pages and features.
+
+There are significant changes to how both webapp and flux are run by gunicorn,
+both apps have changed to using gevent for the unicorn ``worker_class``.
+
+There are also a number of new dependencies and dependency updates as well.
+
+Noteable Backend changes
+========================
+
+Flux and Webapp changed to gevent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are significant changes to how both webapp and flux are run by gunicorn,
+both apps have changed to using gevent for the unicorn ``worker_class``.  This
+is a significant operational change.  Further there is also **one** remaining
+webapp process that needs to be started as the default sync ``worker_class`` due
+to not being able to get flask, gunicorn, gevent and the use of multiprocessing
+in tsfresh webapp functions to work as desired.  Although there are ways to run
+gevent and multiprocessing together, none of the recommended methods or other
+attempted methods worked with flask, gunicorn, gevent and tsfresh.  The simplest
+solution therefore is to just have an additional gunicorn process start using
+sync to serve the few tsfresh related webapp requests, which have always worked
+and with this method still do.  It is a tradeoff incurring a new process as
+opposed to determining a convoluted method for flask, gunicorn, gevent and
+tsfresh to work together and maintaining that.
+
+numba optimisations
+~~~~~~~~~~~~~~~~~~~
+
+The starting of apps is a little slower in some cases and the first analysis run
+on some apps can take longer than normal.  This is because gaining performance
+on every analysis thereafter has the tradeoff in that all the numba algorithms
+and numba data processing functions must be compiled on their initialisation.
+Thereafter the performance improvements are gained on every function call.
+
+RedisTimeseries
+~~~~~~~~~~~~~~~
+
+There are 2 available of methods to deploy and use RedisTimeseries, one being use
+the normal OSS Redis and compile RedisTimeseries and load the module via the include
+or use redis-stack-server.  Upgrading Redis or changing to redis-stack-server is
+beyond the scope of this document as it will be vary OS/version (and there are lots
+of options).  There is a guide at https://earthgecko-skyline.readthedocs.io/en/latest/upgrading/redis-to-redis-stack-server.html
+that explains the upgrade process, but if you run your own Redis build/config/pattern
+then you may have your own update/upgrade strategy.
+
+That said, if your want to run Skyline with labelled metrics you will need a version
+of Redis that has the RedisTimeseries module.  Consider not just using the redis.io
+packages repos for yum/apt as they provide redis-stack-server RC (release candidate)
+packages at times and in terms of Skyline Redis needs to be stable, using the
+download binaries for your OS is a more stable method.
+
+matrixprofile replaced by stumpy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The matrix-profile-foundation/matrixprofile library is no longer maintained and
+this has been replaced with the stumpy matrixprofile implementation.  This
+affects the matrixprofile custom_algorithm which will automatically use the
+stumpy version if available.  matrixprofile has been removed as a dependency.
+
+Prometheus/VictoriaMetrics metrics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changes
+~~~~~~~
+
+- Handle multiple metrics in victoriametrics response (4776)
+- webapp - link to current VictoriaMetrics graph (4772)
+- analyzer_labelled_metrics - monotonicity checked incorrect classification (4766)
+- custom_algorithms - normal_peaks (4764)
+- Group metrics based on names and labels (4762)
+- Use gevent gunicorn worker_class (4756)
+- csv_to_timeseries (4754)
+- custom_algorithm - pca (4750)
+- custom_algorithm - isolation_forest (4748)
+- custom_algorithm - dbscan (4746)
+- custom_algorithms - spectral_residual (4744)
+- custom_algorithms - skyline_prophet (4742)
+- custom_algorithms - lof (4740)
+- Allow first_hour_average to handle different resolution (4738)
+- custom_algorithms - sigma (4736)
+- mirage_vortex (4734)
+- flux vortex (4732)
+- vortex (4728)
+- custom_algorithms - anomalous_daily_peak (4724)
+- Handle alert and waterfall alert overlap (4722)
+- dotted_representation breaking alert resend_queue (4720)
+- ionosphere.learn_repetitive_patterns - learning repetitively from recent patterns (4718)
+- opentelemetry check is_instrumented_by_opentelemetry (4714)
+- Reset mirage trigger_history on Ionosphere match (4712)
+- ionosphere - store and cache fp minmax data (4708)
+- Add request id and timing to ionosphere requests (4706)
+- get_ionosphere_performance - allow multiple metric_like string (4704)
+- numba optimisations (4702)
+- algorithms - single series (4700)
+- Optimise Ionosphere Redis sets refresh when busy (4698)
+- analyzer - anomalous metrics sets not flushing (4696)
+- analyzer - illuminance.all key (4676)
+- cloudburst active events only (4674)
+- ionosphere_downsampled (4672)
+- settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS (4662)
+- ionosphere.learn_repetitive_patterns (4658)
+- http_alerter - dotted_representation (4652)
+- luminosity.aligned.metrics (4648)
+- functions.metrics.labelled_metrics_remove_labels (4632)
+- Change all dict copy to deepcopy (4624)
+- Support labelled metrics (4614)
+- POC - prometheus, redistimeseries, victoriametrics (4610)
+- functions.settings.manage_external_settings - use cache data on bad response (4608)
+- Ionosphere - inference - further validate all_in_range (4588)
+- custom_algorithm - skyline_ARTime (4584)
+- POC ARTime (4582)
+- webapp - api_get_fp_timeseries (4578)
+- mirage - process multiple metrics (4576)
+- Reduce cluster logging (4568)
+- http_alerter - discard after x resend attempts (4566)
+- authoritative_node (4564)
+
+Upgrade notes
+~~~~~~~~~~~~~
+
+- These update instructions apply to upgrading from v3.0.4
+- There are are changes to the DB in v4.0.0
+- There are changes to settings.py in v4.0.0
+- There are changes to dependencies in v4.0.0
+- There is a new service called thunder in v4.0.0
+
+How to update from v3.0.4
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Build a new Python version and virtualenv, due to this being a major version
+  release we use a new virtualenv which all the required libraries and do not
+  affect your running install so you can rollback if necessarily.
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Copy your settings.py from v3.0.4 and update/replace the v3.0.4 settings.py
+  with your new v4.0.0 settings.py file
+- Stop the Skyline apps
+- Backup the database and Redis
+- OPTIONALLY upgrade MariaDB and/or Redis (redis-stack-server)
+- Update the Python dependencies (requirements.txt)
+- Move to the new version,
+- Start the Skyline apps.
+
+Ensure you read through all the steps below first and assess the steps you wish
+to do and if any paths, etc need to be changed for your set up.  Also you need
+to make a decision and assess whether you want to upgrade to use redis-stack-server.
+
+Here are the steps....
+
+- Get the new version.
+
+.. code-block:: bash
+
+    # Get the new version
+    NEW_SKYLINE_VERSION="v4.0.0"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v3.0.4"    # Your old Skyline version
+    # OLD_SKYLINE_VERSION="v3.0.0"    # Your old Skyline version
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # settings.py
+    cp "$NEW_SKYLINE_PATH/skyline/settings.py" "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak"
+
+    # Create a new settings.py file in the new version based on your existing
+    # settings.py file
+    cat "${CURRENT_SKYLINE_PATH}/skyline/settings.py" > "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # You can diff the new settings with your settings that you just copied
+    diff "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak" "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+- You are probably going to want to diff those settings in a visual diff like Meld.
+- Deploy the new Python version and a new virtualenv and install the dependencies.
+
+.. code-block:: bash
+
+  # DEPLOY A NEW Python 3.8.17 virtualenv
+  PYTHON_VERSION="3.8.17"
+  PYTHON_MAJOR_VERSION="3.8"
+  PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+  mkdir -p "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
+  mkdir -p "${PYTHON_VIRTUALENV_DIR}/projects"
+  cd "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
+  wget -q "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
+  tar -zxvf "Python-${PYTHON_VERSION}.tgz"
+  cd ${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}
+  ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
+  make -j4
+  make altinstall
+
+  # Create a new skyline-py3817 virtualenv
+  PROJECT="skyline-py3817"
+  cd "${PYTHON_VIRTUALENV_DIR}/projects"
+  virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
+  ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/skyline" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+
+  # Ensure the requirements are installed in your new Python 3.8.17 virtualenv
+  cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+  source bin/activate
+
+  # Deploy the new requirements
+  "bin/pip${PYTHON_MAJOR_VERSION}" install -r "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt
+
+  deactivate
+  cd
+
+  # Fix python-daemon
+  cp "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py" "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak"
+  cat "$NEW_SKYLINE_PATH/utils/python-daemon/runner.2.3.0.py" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+  # minor change related to unbuffered bytes I/O
+  diff "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak" "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+
+- Ensure you have added all the new (and changed) settings to `$NEW_SKYLINE_PATH/skyline/settings.py` and test them
+
+.. code-block:: bash
+
+  # Get the new version
+  NEW_SKYLINE_VERSION="v4.0.0"    # Your new Skyline version
+  CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+  NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+  # You can diff the new settings with your settings that you just copied
+  diff "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak" "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+  # UPDATE YOUR $NEW_SKYLINE_PATH/skyline/settings.py as appropriate
+
+  # **TEST**
+  # Test your new settings.py BEFORE continuing with the upgrade,
+  # test_settings.sh runs the validate_settings.py that the Skyline apps run
+  # when they start
+  $NEW_SKYLINE_PATH/bin/test_settings.sh
+
+- At this point we are going to stop Skyline services, update the DB and you
+  can also upgrade MariaDB and/or Redis at this point if you choose to.
+
+- Stop/disable any/all service controls like monit, etc that are controlling
+  Skyline services.
+
+.. code-block:: bash
+
+  # Stop/disable any/all service controls like monit, etc that are controlling
+  # Skyline services.
+
+  # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+  # or do not wish to run.
+  SKYLINE_SERVICES="analyzer
+  analyzer_batch
+  mirage
+  crucible
+  boundary
+  ionosphere
+  luminosity
+  panorama
+  webapp
+  vista
+  snab
+  flux
+  horizon"
+  for i in $SKYLINE_SERVICES
+  do
+    systemctl stop "$i"
+  done
+
+- Remove the numba cache directory.  This needs to be done to ensure that new
+  jit cache files are compiled for numba jit functions with the updated Python
+  version and required dependencies like numpy (even though they do not exist
+  yet, this is for next time so it does not get forgetten).
+
+.. code-block:: bash
+
+  rm -rf /opt/skyline/.cache/numba/
+
+- Backup the DB and apply the update
+
+.. code-block:: bash
+
+    # BACKUP THE DB AND APPLY THE NEW SQL
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="skyline"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
+
+    # Check you dump exists and has data
+    ls -al $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/v4.0.0.sql"
+    echo $?
+
+- If you are wanting to upgrade MariaDB now is the time to do that.
+- If you want to upgrade Redis or deploy redis-stack-server, now is the time to that.
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v4.0.0 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+  mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
+  mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+  # Set permission on the dump dir
+  chown skyline:skyline "$CURRENT_SKYLINE_PATH"/skyline/webapp/static/dump
+
+- Replace your /etc/skyline/skyline.conf to reflect the new Python version and
+  PYTHON_VIRTUALENV_DIR
+
+.. code-block:: bash
+
+  mv /etc/skyline/skyline.conf /etc/skyline/skyline.conf.pre.v4.0.0.bak
+  cp "$CURRENT_SKYLINE_PATH"/etc/skyline.conf /etc/skyline/
+  diff /etc/skyline/skyline.conf.pre.v4.0.0.bak /etc/skyline/skyline.conf
+
+- Backup and replace your systemd unit files to to reflect the new Python
+  version and PYTHON_VIRTUALENV_DIR, **unless you control systemd units via
+  configuration management or other**, then assess how to update your systemd
+  unit files.  Note there is a new thunder service.
+
+.. code-block:: bash
+
+  mkdir /opt/skyline/github/skyline/etc/systemd/system.pre.v4.0.0.bak
+  for i in $(find /opt/skyline/github/skyline/etc/systemd/system -type f)
+  do
+    unitfile=$(basename "$i")
+    cp "/etc/systemd/system/${unitfile}" /opt/skyline/github/skyline/etc/systemd/system.pre.v4.0.0.bak/
+    /bin/cp -f $i /etc/systemd/system/
+  done
+  systemctl daemon-reload
+
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+    # apart from the new thunder Skyline app
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="horizon
+    flux
+    panorama
+    webapp
+    vista
+    analyzer
+    analyzer_batch
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    snab
+    thunder"
+    for i in $SKYLINE_SERVICES
+    do
+      systemctl start "$i"
+      if [ $? -ne 0 ]; then
+        echo "failed to start $i"
+      else
+        echo "started $i"
+      fi
+      systemctl enable "$i"
+    done
+    # Restart any/all service controls like monit, etc that are controlling
+    # Skyline services.
+
+- Check the logs.  You may see a few errors related to some missing Redis keys/hashes
+  this is expected as they do not exist on starting the new version.
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
+
+Congratulations, you are now running the best OSS anomaly detection stack in the
+world (probably).

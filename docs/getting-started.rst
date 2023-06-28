@@ -26,6 +26,8 @@ introduced here.
 
 - Graphite - although Graphite is not part of Skyline it is Skyline's long term
   time series database.
+- VictoriaMetrics - not part of Skyline but can be used as Skyline's long term
+  time series database for label based metrics.
 - Redis - transient database for real time data and sharing data between Skyline
   applications.
 - Horizon - receives metrics from Graphite and feeds them into Redis.  And also
@@ -40,7 +42,8 @@ introduced here.
   it to Ionosphere (if the metric has been trained on) or alerts on the metric.
 - Ionosphere extracts features and potentially anomalous shapelets from the
   data and runs similarity searches across all trained data, if still anomalous,
-  it sends an alert.
+  it sends an event to Panorama and back to the originating app, e.g. Mirage to
+  route the event as appropriate.
 - Panorama receives detected anomalies from Analyzer, Mirage, Boundary and
   Ionosphere and records the details in the database.
 - Boundary analyses defined metrics against specified thresholds and configured

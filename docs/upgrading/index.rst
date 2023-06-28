@@ -8,6 +8,7 @@ Upgrading
   crucible-to-ionosphere.rst
   etsy-to-ionosphere.rst
   etsy-to-crucible.rst
+  redis-to-redis-stack-server.conf
 
 Backup your Redis!
 ##################

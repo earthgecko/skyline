@@ -13,7 +13,10 @@ if True:
     import matplotlib.pyplot as plt
     from matplotlib.pylab import rcParams
     from matplotlib.dates import DateFormatter
-
+    # @added 20230626 - Task #4962: Build and test skyline v4.0.0
+    #                   Task #4778: v4.0.0 - update dependencies
+    # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+    from matplotlib import __version__ as matplotlib_version
 
 # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
 #                   Feature #2404: Ionosphere - fluid approximation
@@ -22,7 +25,7 @@ if True:
 # Added anomalies
 def create_matplotlib_graph(
         current_skyline_app, output_file, graph_title, timeseries,
-        anomalies=[]):
+        anomalies=[], monotonic_timeseries=[]):
     """
     Creates a png graph image using the features profile time series data
     provided or from the features profile time seires data in the DB if an empty
@@ -53,6 +56,7 @@ def create_matplotlib_graph(
 
     try:
         current_logger.info('create_matplotlib_graph - creating graph image - %s' % output_file)
+        current_logger.info('create_matplotlib_graph - with monotonic timeseries of length %s' % str(len(monotonic_timeseries)))
 
         # @added 20211103 - Branch #3068: SNAB
         #                      Bug #4308: matrixprofile - fN on big drops
@@ -77,9 +81,13 @@ def create_matplotlib_graph(
                     anomalies_indices.append(index)
                 last_timestamp = int(item[0])
 
-
         timeseries_x = [float(item[0]) for item in timeseries]
         timeseries_y = [item[1] for item in timeseries]
+
+        if monotonic_timeseries:
+            current_logger.info('create_matplotlib_graph - adding monotonic timeseries')
+            timeseries_z = [item[1] for item in monotonic_timeseries]
+
         values = pd.Series([x[1] for x in timeseries])
         array_amax = np.amax(values)
         array_amin = np.amin(values)
@@ -106,7 +114,13 @@ def create_matplotlib_graph(
             ax.set_axis_bgcolor('black')
         datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
         plt.xticks(rotation=0, horizontalalignment='center')
-        xfmt = DateFormatter('%m/%d')
+
+        timeseries_duration = timeseries_x[-1] - timeseries_x[0]
+        if timeseries_duration > 87000:
+            xfmt = DateFormatter('%m/%d')
+        else:
+            xfmt = DateFormatter('%H:%M')
+
         plt.gca().xaxis.set_major_formatter(xfmt)
         ax.xaxis.set_major_formatter(xfmt)
         ax.plot(datetimes, timeseries_y, color='orange', lw=0.6, zorder=3)
@@ -124,6 +138,11 @@ def create_matplotlib_graph(
             sigma3_lower_label = '%s lower - %s' % (str(sigma3_text), str(sigma3_lower_bound))
             ax.plot(datetimes, sigma3_lower_series, lw=1, label=sigma3_lower_label, color='r', ls='solid', zorder=4)
 
+        if monotonic_timeseries:
+            ax2 = ax.twinx()
+            ax2.plot(datetimes, timeseries_z, lw=1, label='COUNTER', color='grey', ls='--', zorder=4)
+            # ax2.set_ylabel('Y2 data', color='b')
+
         # @added 20211103 - Branch #3068: SNAB
         #                   Bug #4308: matrixprofile - fN on big drops
         # Added anomalies
@@ -139,8 +158,16 @@ def create_matplotlib_graph(
                   fancybox=True, shadow=True, ncol=4, fontsize='x-small')
         plt.rc('lines', lw=2, color='w')
         plt.grid(True)
-        ax.grid(b=True, which='both', axis='both', color='lightgray',
-                linestyle='solid', alpha=0.5, linewidth=0.6)
+        # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
+        #                      Task #4778: v4.0.0 - update dependencies
+        # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+        if matplotlib_version < '3.7.0':
+            ax.grid(b=True, which='both', axis='both', color='lightgray',
+                    linestyle='solid', alpha=0.5, linewidth=0.6)
+        else:
+            ax.grid(visible==True, which='both', axis='both', color='lightgray',
+                    linestyle='solid', alpha=0.5, linewidth=0.6)
+
         if hasattr(ax, 'set_facecolor'):
             ax.set_facecolor('black')
         else:

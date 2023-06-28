@@ -6,6 +6,8 @@ from timeit import default_timer as timer
 import traceback
 import operator
 import warnings
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import numpy as np
 import mass_ts as mts
@@ -36,7 +38,9 @@ except Exception as e:
     SINGLE_MATCH = True
 
 try:
-    IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
+    IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = copy.deepcopy(settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS)
 except Exception as e:
     logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % e)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
@@ -567,7 +571,9 @@ def find_cloudburst_motifs(metric, snippet, timeseries, print_output=False):
             sorted_matched_motifs[motif_id] = matched_motifs[motif_id]
             # if SINGLE_MATCH:
             #     break
-        matched_motifs = sorted_matched_motifs.copy()
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # matched_motifs = sorted_matched_motifs.copy()
+        matched_motifs = copy.deepcopy(sorted_matched_motifs)
 
     end = timer()
     if dev_null:

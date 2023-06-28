@@ -12,6 +12,8 @@ from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_b
 from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
 from functions.database.queries.get_metric_group import get_metric_group
 # from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+# @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+from functions.metrics.get_labelled_metric_dict import get_labelled_metric_dict
 
 LOCAL_DEBUG = False
 
@@ -232,6 +234,20 @@ def get_related_metrics(current_skyline_app, cluster_data, full_details, base_na
         tertiary_base_namespace = '.'.join(base_namespace_elements[0:3])
         first_degree_base_namespace = '.'.join(base_namespace_elements[0:-1])
 
+        # @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+        base_name_metric_dict = {}
+        if '_tenant_id="' in base_name:
+            try:
+                base_name_metric_dict = get_labelled_metric_dict(current_skyline_app, base_name)
+                base_namespace_elements = list(base_name_metric_dict['labels'].values())[0:2]
+                base_namespace_elements.append(base_name_metric_dict['metric'])
+                base_namespace_elements.append(list(base_name_metric_dict['labels'].values())[2:])
+            except:
+                base_namespace_elements = base_name.split(',')
+            secondary_base_namespace = '.'.join(base_namespace_elements[0:2])
+            tertiary_base_namespace = '.'.join(base_namespace_elements[0:3])
+            first_degree_base_namespace = '.'.join(base_namespace_elements[0:-1])
+
         for related_metric in list(related_metrics['related_metrics'].keys()):
             # Calculate a confidence score based on the number of times cross
             # correlations have been found.  This results in a low confidence
@@ -253,6 +269,20 @@ def get_related_metrics(current_skyline_app, cluster_data, full_details, base_na
             secondary_related_namespace = '.'.join(related_namespace_elements[0:2])
             tertiary_related_namespace = '.'.join(related_namespace_elements[0:3])
             first_degree_related_namespace = '.'.join(related_namespace_elements[0:-1])
+
+            # @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+            related_metric_metric_dict = {}
+            if '_tenant_id="' in related_metric:
+                try:
+                    related_metric_metric_dict = get_labelled_metric_dict(current_skyline_app, related_metric)
+                    related_namespace_elements = list(related_metric_metric_dict['labels'].values())[0:2]
+                    related_namespace_elements.append(related_metric_metric_dict['metric'])
+                    related_namespace_elements.append(list(related_metric_metric_dict['labels'].values())[2:])
+                except:
+                    related_namespace_elements = related_metric.split(',')
+                secondary_related_namespace = '.'.join(related_namespace_elements[0:2])
+                tertiary_related_namespace = '.'.join(related_namespace_elements[0:3])
+                first_degree_related_namespace = '.'.join(related_namespace_elements[0:-1])
 
             in_namespace = False
             in_tertiary_namespace = False
@@ -318,6 +348,20 @@ def get_related_metrics(current_skyline_app, cluster_data, full_details, base_na
                 # number of correlations
                 if correlations_count < 8 and not in_namespace:
                     new_confidence = new_confidence * 0.5
+
+                # @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics
+                # This works to down confidence anything not on the same instance
+                if related_metric_metric_dict and base_name_metric_dict:
+                    instance_present = True
+                    base_name_instance = None
+                    related_metric_instance = None
+                    if 'instance' in base_name_metric_dict['labels']:
+                        base_name_instance = base_name_metric_dict['labels']['instance']
+                    if 'instance' in related_metric_metric_dict['labels']:
+                        related_metric_instance = related_metric_metric_dict['labels']['instance']
+                    if base_name_instance:
+                        if base_name_instance != related_metric_instance:
+                            new_confidence = new_confidence * 0.5
 
                 confidence = round(new_confidence, 5)
                 if LOCAL_DEBUG:

@@ -24,13 +24,26 @@ from os import remove as os_remove
 from sys import version_info
 from sys import exit as sys_exit
 
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
 from msgpack import packb
 from redis import StrictRedis, WatchError
 
 import settings
 # @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list
 # Added get_redis_conn_decoded
-from skyline_functions import send_graphite_metric, get_redis_conn_decoded
+# @modified 20220726 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# Moved send_graphite_metric
+# from skyline_functions import send_graphite_metric, get_redis_conn_decoded
+from skyline_functions import get_redis_conn_decoded
+# @added 20220726 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
+# @added 20230512 - Feature #4904: Handle send_graphite_metric failure
+from functions.horizon.process_graphite_fail_queue import process_graphite_fail_queue
 
 parent_skyline_app = 'horizon'
 child_skyline_app = 'worker'
@@ -62,7 +75,9 @@ except:
 
 # @added 20201103 - Feature #3820: HORIZON_SHARDS
 try:
-    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
 except:
     HORIZON_SHARDS = {}
 try:
@@ -472,7 +487,7 @@ class Worker(Process):
                     # self.send_graphite_metric('skyline.horizon.' + SERVER_METRIC_PATH + 'queue_size', self.q.qsize())
                     # self.send_graphite_metric('queue_size', average_queue_size)
                     send_metric_name = '%s.queue_size' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, average_queue_size)
+                    send_graphite_metric(self, skyline_app, send_metric_name, average_queue_size)
                     # @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric
                     for size_value in queue_sizes:
                         queue_sizes_60_seconds.append(size_value)
@@ -496,7 +511,7 @@ class Worker(Process):
                         logger.info('%s :: total queue values known for the last 60 seconds - %s' % (skyline_app, str(number_queue_sizes)))
                         logger.info('%s :: average queue size for the last 60 seconds - %s' % (skyline_app, str(average_queue_size)))
                         send_metric_name = '%s.queue_size_60s_avg' % skyline_app_graphite_namespace
-                        send_graphite_metric(skyline_app, send_metric_name, average_queue_size)
+                        send_graphite_metric(self, skyline_app, send_metric_name, average_queue_size)
                         # reset queue_sizes_60_seconds and last_sent_graphite
                         queue_sizes_60_seconds = []
                         last_send_to_graphite = time()
@@ -519,6 +534,20 @@ class Worker(Process):
                         logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
                             cache_key, e))
 
+                    # @added 20230512 - Feature #4904: Handle send_graphite_metric failure
+                    # Process any metrics to be submitted in the fail queue
+                    graphite_fail_queue_exists = 0
+                    try:
+                        graphite_fail_queue_exists = self.redis_conn_decoded.exists('skyline.graphite_fail_queue')
+                    except Exception as err:
+                        logger.error('%s :: error: exists failed on Redis set skyline.graphite_fail_queue - %s' % (skyline_app, err))
+                    if graphite_fail_queue_exists:
+                        try:
+                            sent_count = process_graphite_fail_queue(self)
+                        except Exception as err:
+                            logger.error('error :: horizon :: worker :: process_graphite_fail_queue failed - %s' % (
+                                err))
+
             # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
             # @modified 20201017 - Feature #3788: snab_flux_load_test
             #                      Feature #3680: horizon.worker.datapoints_sent_to_redis
@@ -532,7 +561,7 @@ class Worker(Process):
                 else:
                     send_metric_name = '%s.datapoints_sent_to_redis_%s' % (
                         skyline_app_graphite_namespace, str(self.worker_number))
-                send_graphite_metric(skyline_app, send_metric_name, datapoints_sent_to_redis)
+                send_graphite_metric(self, skyline_app, send_metric_name, datapoints_sent_to_redis)
                 datapoints_sent_to_redis = 0
                 last_datapoints_to_redis = int(time())
 
@@ -597,7 +626,7 @@ class Worker(Process):
                                 cache_key, e))
                         send_metric_name = '%s.metrics_received' % (
                             skyline_app_graphite_namespace)
-                        send_graphite_metric(skyline_app, send_metric_name, metrics_received_count)
+                        send_graphite_metric(self, skyline_app, send_metric_name, metrics_received_count)
 
                     # @added 20210520 - Branch #1444: thunder
                     # Added Redis hash keys for thunder to monitor the horizon

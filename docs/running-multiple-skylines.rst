@@ -60,17 +60,17 @@ username, password and hostname for the other instances in the Skyline cluster
 so that if a request is made to the Skyline webapp for a resource it does not
 have, it can return the other URLs to the client.  This is also used in
 :mod:`settings.SYNC_CLUSTER_FILES` so that each instance in the cluster can
-sync relevant Ionosphere training data andd features profiles data to itself.
+sync relevant Ionosphere training data and features profiles data to itself.
 
 It is used by Skyline internally to request resources from other Skyline
 instances to:
 
-# Retrieve time series data and general data for metrics served by the other
+- Retrieve time series data and general data for metrics served by the other
   Skyline instance/s.
-# To retrieve resources for certain client and API requests to respond with
-  all the data for the cluster, in terms of unique_metrics, alerting_metrics,
-  etc.
-# To sync Ionosphere data between the cluster instances.
+- To retrieve resources for certain client and API requests to respond with
+  all the data for the cluster, in terms of unique_metrics, alerting_metrics, etc.
+- To sync Ionosphere data between the cluster instances.
+
 
 Read about :mod:`settings.HORIZON_SHARDS` see
 `HORIZON_SHARDS <horizon.html#HORIZON_SHARDS>`__ section on the Horizon page.
@@ -139,9 +139,22 @@ partitioning, etc, are updated.  flock rsyncing all the whisper files daily
 mostly handles this and ensures that you have no gaps in the whisper data on
 your backup Graphite instance.
 
+With the addition of labelled_metrics, one can use a VictoriaMetrics cluster
+to achieve HA of the TSDB data for labelled_metrics.
+
 Webapp UI
 ---------
 
 In terms of the functionality in webapp, the webapp is multiple instance aware.
 Where any "not in Redis" UI errors are found, webapp responds to the request
 with a 302 redirect to the remote Skyline instance that is assigned the metric.
+
+Cluster sync
+------------
+
+Cluster nodes will sync training data and features profiles data between themselves,
+however currently saved training is not synced between cluster nodes any **user**
+saved training data will only be available on the cluster node on which it was saved.
+Therefore each cluster node has its own saved training data pages.  This only
+relates to training data that is specifically saved by the user and not normal
+operational training data that is generated for Ionosphere.

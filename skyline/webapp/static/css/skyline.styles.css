@@ -11,9 +11,14 @@
   src: local('Montserrat-Bold'), url(/static/fonts/montserrat-bold.woff) format('woff');
 }
 
+
 html {
   position: relative;
   min-height: 100%;
+/* @added 20220729 */
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
 }
 body {
   margin-top: 70px;
@@ -21,6 +26,10 @@ body {
   background: #f5f5f1;
 /* @added 20160704 */
   height: 100%;
+/* @added 20220729 */
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
 }
 
 .navbar-brand {
@@ -300,9 +309,11 @@ th,td {
     word-wrap: break-word;
 }
 
+/* disabled 20220729
 table {
   border-collapse: collapse;
 }
+*/
 
 .link-wrap {
   height: 100%;
@@ -872,3 +883,27 @@ ionosphere echo matched red border
  left: 50%;
  transform: translate(-50%, -50%);
 }
+
+td.metriccell {
+  width: 400px;
+}
+
+.tableFixHead          { overflow: auto; height: 600px; width: 1600px;}
+.tableFixHead thead th { position: sticky; top: 0; z-index: 1; }
+.tableFixHead tbody th { position: sticky; left: 0; }
+
+/* Just common table stuff. Really.
+table  { border-collapse: collapse; width: 100%; }
+th, td { padding: 8px 16px; } */
+th     { background:#eee; }
+
+/* Borders (if you need them) */
+/*
+.tableFixHead,
+.tableFixHead td {
+  box-shadow: inset 1px -1px #000;
+}
+.tableFixHead th {
+  box-shadow: inset 1px 1px #000, 0 1px #000;
+}
+*/

@@ -9,6 +9,17 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if labelled_metric_name %}
+  {% set use_metric = labelled_metric_name %}
+{% else %}
+  {% set use_metric = metric %}
+{% endif %}
+{% if labelled_metric_base_name %}
+  {% set use_base_name = labelled_metric_base_name %}
+{% else %}
+  {% set use_base_name = metric %}
+{% endif %}
+
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -19,7 +30,7 @@
 		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
-		  <li class="active"><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></a></li>
+		  <li class="active"><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -35,26 +46,85 @@
 
   <div class="container main_container">
     <div class="container search_container">
-      <h4><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></h4>
+      <h4><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></h4>
       <form action="panorama">
         <input type="hidden" name="plot_metric_anomalies" value="true" />
         <label>metric:</label><input type="text" name="metric" value="" /><br>
         <label>from_timestamp:</label><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y-%m-%d %H:%M)<br>
         <label>until_timestamp:</label><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y-%m-%d %H:%M)<br>
+        <label>plot matches:</label>
+        <select name="plot_matches">
+            <option value="false">false</option>
+            <option value="true">true</option>
+        </select> whether to also plot matches<br>
+        <label>plot all events:</label>
+        <select name="plot_all_events">
+            <option value="false">false</option>
+            <option value="true">true</option>
+        </select> whether to also plot all activity, including all 1st stage analysis (analyzer) all 2nd stage analysis (mirage), matches and anomalies.  Everything.<br>
         <br>
         <input type="submit" value="Submit">
       </form>
     </div>
     <p>
+
+{% if plot_file or plot_matches %}
+  {% if labelled_metric_name %}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>{{ use_metric }} - Full metric name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="word-break:break-all;"><smallcode>{{ use_base_name }}</smallcode></td>
+      </tr>
+    </tbody>
+  </table>
+  {% endif %}
+{% endif %}
+
 {% if plot_file %}
-    <h4><span class="logo"><span class="sky">Anomalies</span> <span class="re">{{ metric }}</span></span></h4>
+    <h4><span class="logo"><span class="sky">Anomalies</span> <span class="re">{{ use_metric }}</span></span></h4>
     <img src="panorama_images?image={{ plot_file }}" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ plot_file }}<br><br>
 {% else %}
   {% if metric %}
-    <h4><span class="logo"><span class="sky">Anomalies</span> <span class="re">{{ metric }}</span></span> No anomalies found</h4>
+    <h4><span class="logo"><span class="sky">Anomalies</span> <span class="re">{{ use_metric }}</span></span> No anomalies found</h4>
   {% endif %}
 {% endif %}
+
+{% if plot_matches %}
+  {% if matches_plot_file %}
+      <h4><span class="logo"><span class="sky">Matches</span> <span class="re">{{ use_metric }}</span></span></h4>
+      <img src="panorama_images?image={{ matches_plot_file }}" alt="{{ metric }} - matches timeseries graph" class="img-responsive center-block" /><br>
+  Image file: {{ matches_plot_file }}<br><br>
+  {% else %}
+    {% if metric %}
+      <h4><span class="logo"><span class="sky">Matches</span> <span class="re">{{ use_metric }}</span></span> No matches found</h4>
+    {% endif %}
+  {% endif %}
+{% endif %}
+
+{% if plot_all_events %}
+  {% if events_plot_file %}
+      <h4><span class="logo"><span class="sky">All events</span> <span class="re">{{ use_metric }}</span></span></h4>
+      <img src="panorama_images?image={{ events_plot_file }}" alt="{{ metric }} - all events timeseries graph" class="img-responsive center-block" /><br>
+  Image file: {{ events_plot_file }}<br><br>
+  {% endif %}
+{% endif %}
+
+{% if timeseries_dict %}
+      <h4><span class="logo"><span class="sky">Timeseries data</span> <span class="re">{{ use_metric }}</span></span></h4>
+      {{ timeseries_dict }}
+{% endif %}
+
+{% if all_events_dict %}
+      <h4><span class="logo"><span class="sky">All events data</span> <span class="re">{{ use_metric }}</span></span></h4>
+      {{ all_events_dict }}
+{% endif %}
+
     </div>
   </div>
   </div>

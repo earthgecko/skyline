@@ -4,6 +4,10 @@ Get algorithms
 import logging
 import traceback
 
+# @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import select, Table, MetaData
+
 from database import get_engine, engine_disposal
 
 
@@ -33,6 +37,11 @@ def get_algorithms(current_skyline_app):
             stmt = 'SELECT DISTINCT(algorithm) FROM algorithms'
             result = connection.execute(stmt)
             for row in result:
+                # @added 20220920 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Strip override string
+                if ' (override - ' in row['algorithm']:
+                    continue
                 algorithms_list.append(row['algorithm'])
             connection.close()
         except Exception as err:
@@ -40,9 +49,26 @@ def get_algorithms(current_skyline_app):
             current_logger.error('error :: get_algorithms :: failed to build algorithms_list - %s' % str(err))
     if algorithms_list:
         try:
+
+            # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                   Task #4778: v4.0.0 - update dependencies
+            # Use the MetaData autoload rather than string-based query construction
+            try:
+                use_table_meta = MetaData()
+                use_table = Table('algorithms', use_table_meta, autoload=True, autoload_with=engine)
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_algorithms :: use_table Table failed algorithms table - %s' % (
+                    err))
+
             connection = engine.connect()
             for algorithm in algorithms_list:
-                stmt = 'SELECT id FROM algorithms WHERE algorithm=\'%s\'' % algorithm
+
+                # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                #                      Task #4778: v4.0.0 - update dependencies
+                # stmt = 'SELECT id FROM algorithms WHERE algorithm=\'%s\'' % algorithm
+                stmt = select(use_table.c.id).where(use_table.c.algorithm == algorithm)
+
                 result = connection.execute(stmt)
                 for row in result:
                     algorithms[algorithm] = row['id']

@@ -8,6 +8,12 @@ from timeit import default_timer as timer
 import traceback
 
 from flask import request
+import numpy as np
+import mass_ts as mts
+
+# @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import select
 
 import settings
 import skyline_version
@@ -16,15 +22,21 @@ from skyline_functions import (
     mysql_select,
     mirage_load_metric_vars,
 )
+
+# @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                      Task #4778: v4.0.0 - update dependencies
+# Use sqlalchemy rather than string-based query construction
+from database import get_engine, ionosphere_table_meta
+
 # @added 20210414 - Feature #4014: Ionosphere - inference
 #                   Branch #3590: inference
 from motif_plots import plot_motif_match
 from motif_match_types import motif_match_types_dict
 
 from functions.memcache.get_fp_timeseries import get_fp_timeseries
-from ionosphere.common_functions import get_metrics_db_object
 from functions.database.queries.get_ionosphere_fp_row import get_ionosphere_fp_db_row
 from functions.numpy.percent_different import get_percent_different
+from ionosphere.common_functions import get_metrics_db_object
 
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
@@ -45,10 +57,7 @@ def on_demand_motif_analysis(
     """
     Process a motif similarity search on demand
     """
-    import numpy as np
-    import mass_ts as mts
-
-    logger = logging.getLogger(skyline_app_logger)
+    # logger = logging.getLogger(skyline_app_logger)
     dev_null = None
     function_str = 'on_demand_motif_analysis'
     logger.info('%s :: with parameters :: metric: %s, timestamp: %s, similarity: %s, batch_size:%s, top_matches: %s, max_distance: %s, range_padding: %s, max_area_percent_diff: %s' % (
@@ -161,18 +170,62 @@ def on_demand_motif_analysis(
         full_durations = [full_duration, settings.FULL_DURATION]
     logger.info('%s :: full_durations - %s' % (function_str, str(full_durations)))
 
+    # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+    #                      Task #4778: v4.0.0 - update dependencies
+    # Use sqlalchemy rather than string-based query construction
+    try:
+        engine, fail_msg, trace = get_engine(skyline_app)
+    except Exception as err:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: %s :: failed to get MySQL engine - %s' % (function_str, err)
+        logger.error(fail_msg)
+        motif_analysis[metric]['status'] = 'error'
+        motif_analysis[metric]['reason'] = fail_msg
+        return motif_analysis, fail_msg, trace
+
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+    except:
+        logger.error(traceback.format_exc())
+        fail_msg = 'error :: %s :: failed to get ionosphere_table meta - %s' % (function_str, err)
+        logger.error(fail_msg)
+        try:
+            engine.dispose()
+        except Exception as err:
+            logger.error('error :: %s :: engine.dispose() failed - %s' % (
+                function_str, err))
+        motif_analysis[metric]['status'] = 'error'
+        motif_analysis[metric]['reason'] = fail_msg
+        return motif_analysis, fail_msg, trace
+
     # Loop through analysis per full_duration
     for full_duration in full_durations:
         start_full_duration = timer()
         fp_ids = []
         try:
-            query = 'SELECT id,last_matched from ionosphere WHERE metric_id=%s AND full_duration=%s AND enabled=1 ORDER BY last_matched DESC' % (
-                str(metric_id), str(full_duration))
-            results = mysql_select(skyline_app, query)
-            for row in results:
-                fp_ids.append(int(row[0]))
-        except Exception as e:
-            logger.error('error :: %s :: failed to get fp ids via mysql_select from %s - %s' % (function_str, metric, e))
+            # @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
+            #                      Task #4778: v4.0.0 - update dependencies
+            # Use sqlalchemy rather than string-based query construction
+            # query = 'SELECT id,last_matched from ionosphere WHERE metric_id=%s AND full_duration=%s AND enabled=1 ORDER BY last_matched DESC' % (
+            #     str(metric_id), str(full_duration))
+            # results = mysql_select(skyline_app, query)
+            # for row in results:
+            #     fp_ids.append(int(row[0]))
+            stmt = select([ionosphere_table]).\
+                where(ionosphere_table.c.metric_id == int(metric_id)).\
+                where(ionosphere_table.c.full_duration == int(full_duration)).\
+                where(ionosphere_table.c.enabled == 1).\
+                order_by(ionosphere_table.c.last_matched.desc())
+            connection = engine.connect()
+            result = connection.execute(stmt)
+            for row in result:
+                fp_ids.append(row['id'])
+            connection.close()
+
+        except Exception as err:
+            logger.error('error :: %s :: failed to get fp ids for %s - %s' % (
+                function_str, metric, err))
 
         logger.info('%s :: metric_id: %s, full_duration: %s, fp_ids: %s' % (
             function_str, (metric_id), str(full_duration), str(fp_ids)))
@@ -272,8 +325,8 @@ def on_demand_motif_analysis(
             best_dists = None
 
             try:
-                logger.info('%s :: running mts.mass2_batch fp_id: %s, full_duration: %s, batch_size: %s, top_matches: %s, max_distance: %s, motif_size: %s' % (
-                    function_str, str(fp_id), str(full_duration),
+                logger.info('%s :: running mts.mass2_batch fp_id: %s, length: %s, full_duration: %s, batch_size: %s, top_matches: %s, max_distance: %s, motif_size: %s' % (
+                    function_str, str(fp_id), str(len(fp_timeseries)), str(full_duration),
                     str(batch_size), str(top_matches), str(max_distance),
                     str(len(anomalous_ts))))
 
@@ -282,7 +335,12 @@ def on_demand_motif_analysis(
                 # mts.mass2_batch error: kth(=50) out of bounds (16)
                 use_top_matches = int(top_matches)
                 if (len(fp_timeseries) / int(batch_size)) <= int(top_matches):
-                    use_top_matches = round(len(fp_timeseries) / int(batch_size)) - 1
+                    # @modified 20230110 - Feature #4014: Ionosphere - inference
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # use_top_matches = round(len(fp_timeseries) / int(batch_size)) - 1
+                    # floor could be used instead of round here but - 2 is what
+                    # is used in the other contexts so using - 2
+                    use_top_matches = round(len(fp_timeseries) / int(batch_size)) - 2
                     if use_top_matches == 2:
                         use_top_matches = 1
                     logger.info('%s :: adjusting top_matches to %s (the maximum possible top - 1) as kth(=%s) will be out of bounds mts.mass2_batch' % (
@@ -327,11 +385,9 @@ def on_demand_motif_analysis(
             for index, best_dist in enumerate(current_best_dists):
                 try:
                     motif_added = False
-                    """
-                    Note: mass_ts finds similar motifs NOT the same motif, the same motif
-                    will result in the best_dists being a nan+nanj
-                    So it is DIYed
-                    """
+                    # Note: mass_ts finds similar motifs NOT the same motif, the same motif
+                    # will result in the best_dists being a nan+nanj
+                    # So it is DIYed
                     try:
                         # @modified 20210414 - Feature #4014: Ionosphere - inference
                         #                      Branch #3590: inference
@@ -627,10 +683,10 @@ def on_demand_motif_analysis(
                     else:
                         logger.error('failed to plot motif match plot')
                         graph_image_file = None
-            except Exception as e:
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: inference :: with fp id %s proceesing motif at index: %s - %s' % (
-                    str(fp_id), str(motif[0]), str(e)))
+                logger.error('error :: inference :: proceesing motif at index: %s - %s' % (
+                    str(motif[0]), str(err)))
                 continue
     end_timer = timer()
     motif_analysis[metric]['fps_checked'] = fps_checked_for_motifs

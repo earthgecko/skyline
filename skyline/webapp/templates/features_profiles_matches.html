@@ -48,7 +48,7 @@
 		<div class="tab-content">
 
   		<div class="col-md-12">
-  		  <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles</span></span></span></h4>
+  		  <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles</span></span></h4>
   {% if fp_matches_results %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#match_options">Show match options</button>
         <div id="match_options" class="collapse">
@@ -74,7 +74,7 @@
   		      </tr>
   		      <tr>
   		        <td>Metric like</td>
-  		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
+  		        <td><input type="text" name="metric_like" value="all"> <br>(wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%<br>for labelled metrics you can only search by metric name or key or value)</td>
   		      </tr>
   		      <tr>
   		        <td>features profile id:</td>
@@ -134,13 +134,19 @@ count
 
   {% if fp_matches_results %}
 	  <div class="tab-pane active" id="matches">
-      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles and layers :: </span></span></span>{{ for_metric }} -
+    {% if fp_matches_results[0] %}
+      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles and layers :: </span></span>{{ for_metric }} -
           limited by {{ fp_matches_results|length }} features profile and layers matches ordered by {{ order }}</h4>
+    {% else %}
+      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">features profiles and layers :: </span></span>{{ for_metric }} -
+          has no features profiles</h4>
+    {% endif %}
 			<table class="table table-hover">
 				<thead>
 					<tr>
-<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, motif_matched_id] -->
+<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, motif_matched_id, metric_id] -->
             <th>date</th>
+            <th>metric_id</th>
             <th>metric</th>
             <th>match id</th>
             <th>matched by</th>
@@ -158,23 +164,28 @@ count
     {% for item in fp_matches_results %}
           <tr>
             <td>{{ item[0] }}</td>
-            <td>{{ item[5] }}</td>
+            <td>{{ item[10] }}</td>
+      {% if item[5]|length < 150 %}
+            <td><div style='width: 750px;'><code>{{ item[5] }}</code></div></td>
+      {% else %}
+            <td ><div style='width: 750px;'><smallcode>{{ item[5] }}</smallcode></div></td>
+      {% endif %}
       {% if 'features profile' in item[2]  %}
 <!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
             </td>  -->
         {% if item[7] == 2 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_fp_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
             </td>
         {% elif item[7] == 1 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_fp_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
             </td>
         {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_fp_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% endif %}
 
@@ -192,16 +203,16 @@ count
 <!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
       {% elif 'motif' in item[2] %}
         {% if item[7] == 2 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2&ionosphere_matched_id={{ item[1] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=2&ionosphere_matched_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=2&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% elif item[7] == 1 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1&ionosphere_matched_id={{ item[1] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=1&ionosphere_matched_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&match_validation=1&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&ionosphere_matched_id={{ item[1] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&ionosphere_matched_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% endif %}
             <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
@@ -212,36 +223,36 @@ count
             </td>
 -->
         {% if item[7] == 2 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_layer_id={{ item[1] }}&match_validation=2">{{ item[1] }}</a>
             </td>
         {% elif item[7] == 1 %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_layer_id={{ item[1] }}&match_validation=1">{{ item[1] }}</a>
             </td>
         {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_layer_id={{ item[1] }}">{{ item[1] }}</a>
             </td>
         {% endif %}
             <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
       {% endif %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[3] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}">{{ item[3] }}</a>
             </td>
       {% if item[4] == 'None' %}
             <td>{{ item[4] }}</td>
       {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[4] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}">{{ item[4] }}</a>
             </td>
       {% endif %}
 <!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
       {% if item[9] == 0 %}
             <td>None</td>
       {% else %}
-            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}'">
-              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}">{{ item[9] }}</a>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric_id={{ item[10] }}&matched_motif_id={{ item[9] }}">{{ item[9] }}</a>
             </td>
       {% endif %}
 <!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches

@@ -3,8 +3,12 @@ import logging
 from os import path
 import time
 from ast import literal_eval
-
 import traceback
+# @added 20221021 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Handle labelled_metrics
+import re
+
 from flask import request
 from sqlalchemy.sql import select
 from sqlalchemy.sql import text
@@ -43,7 +47,10 @@ def get_ionosphere_performance(
         # Improve performance and pass arguments to get_ionosphere_performance
         # for cache key
         anomalies, new_fps, fps_matched_count, layers_matched_count,
-        sum_matches, title, period, height, width, fp_type, timezone_str):
+        sum_matches, title, period, height, width, fp_type, timezone_str,
+        # @added 20230418 - Feature #3934: ionosphere_performance
+        # Allow to exclude apps
+        min_full_duration):
     """
     Analyse the performance of Ionosphere on a metric or metric namespace and
     create the graph resources or json data as required.
@@ -208,13 +215,14 @@ def get_ionosphere_performance(
             else:
                 remove_prefix = '%s.' % remove_prefix_str
             use_metric_name = metric.replace(remove_prefix, '')
-        except Exception as e:
-            logger.error('error :: failed to remove prefix %s from %s - %s' % (str(remove_prefix_str), metric, e))
+        except Exception as err:
+            logger.error('error :: failed to remove prefix %s from %s - %s' % (str(remove_prefix_str), metric, err))
 
     # @added 20210129 - Feature #3934: ionosphere_performance
     # Improve performance and pass arguments to get_ionosphere_performance
     # for cache key
     yesterday_timestamp = end_timestamp - 86400
+
     yesterday_end_date = datetime.datetime.utcfromtimestamp(yesterday_timestamp).strftime('%Y-%m-%d')
     metric_like_str = str(metric_like)
     metric_like_wildcard = metric_like_str.replace('.%', '')
@@ -228,32 +236,34 @@ def get_ionosphere_performance(
 
     try:
         redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-    except Exception as e:
+    except Exception as err:
         logger.error(traceback.format_exc())
-        logger.error('error :: get_ionosphere_performance :: get_redis_conn_decoded failed')
-        dev_null = e
+        logger.error('error :: get_ionosphere_performance :: get_redis_conn_decoded failed - %s' % err)
+        # dev_null = err
     yesterday_data_raw = None
     try:
         yesterday_data_raw = redis_conn_decoded.get(yesterday_data_cache_key)
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
         fail_msg = 'error :: get_ionosphere_performance - could not get Redis data for - %s' % yesterday_data_cache_key
         logger.error(trace)
         logger.error(fail_msg)
-        dev_null = e
+        dev_null = err
     yesterday_data = None
     if yesterday_data_raw:
         try:
             yesterday_data = literal_eval(yesterday_data_raw)
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
             fail_msg = 'error :: get_ionosphere_performance - could not get literal_eval Redis data from key - %s' % yesterday_data_cache_key
             logger.error(trace)
             logger.error(fail_msg)
-            dev_null = e
+            dev_null = err
+
     if yesterday_data:
         logger.info('get_ionosphere_performance - using cache data from yesterday with %s items' % str(len(yesterday_data)))
         new_from = '%s 23:59:59' % yesterday_end_date
+
         # @modified 20210202 - Feature #3934: ionosphere_performance
         # Handle user timezone
         if timezone_str == 'UTC':
@@ -302,27 +312,63 @@ def get_ionosphere_performance(
     metric_id = None
     metric_ids = []
     if metric_like != 'all':
-        metric_like_str = str(metric_like)
-        logger.info('get_ionosphere_performance - metric_like - %s' % metric_like_str)
-        metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
-        metric_like_wildcard = metric_like_str.replace('.%', '')
+        # @modified 20221020 - Feature #4704: get_ionosphere_performance - allow multiple metric_like string
+        #                      Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Handle labelled_metrics and multiple metric_like strings
+        # metric_like_str = str(metric_like)
+        metric_like_wildcard = metric_like.replace('.%', '')
         request_key = '%s.%s.%s.%s' % (metric_like_wildcard, begin_date, end_date, frequency)
         plot_title = '%s - %s' % (metric_like_wildcard, period)
         logger.info('get_ionosphere_performance - metric like query, cache key being generated from request key - %s' % request_key)
-        try:
-            connection = engine.connect()
-            result = connection.execute(metrics_like_query, like_string=metric_like_str)
-            connection.close()
-            for row in result:
-                m_id = row['id']
-                metric_ids.append(int(m_id))
-        except Exception as e:
-            trace = traceback.format_exc()
-            logger.error(trace)
-            logger.error('error :: get_ionosphere_performance - could not determine ids from metrics table LIKE query - %s' % e)
-            if engine:
-                engine_disposal(skyline_app, engine)
-            return {}
+        metric_likes = metric_like.split(',')
+        for i_metric_like in metric_likes:
+            metric_like_str = str(i_metric_like)
+            logger.info('get_ionosphere_performance - metric_like - %s' % metric_like_str)
+            metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            metric_like_wildcard = metric_like_str.replace('.%', '')
+            # request_key = '%s.%s.%s.%s' % (metric_like_wildcard, begin_date, end_date, frequency)
+            # plot_title = '%s - %s' % (metric_like_wildcard, period)
+            # logger.info('get_ionosphere_performance - metric like query, cache key being generated from request key - %s' % request_key)
+            try:
+                connection = engine.connect()
+                result = connection.execute(metrics_like_query, like_string=metric_like_str)
+                connection.close()
+                for row in result:
+                    m_id = row['id']
+                    metric_ids.append(int(m_id))
+            except Exception as e:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: get_ionosphere_performance - could not determine ids from metrics table LIKE query - %s' % e)
+                if engine:
+                    engine_disposal(skyline_app, engine)
+                return {}
+
+        # @added 20221021 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle labelled_metrics
+        if len(metric_likes) == 1:
+            pattern = '(org_[0-9]+\\.%)'
+            if re.search(pattern, metric_likes[0]):
+                metric_label_like_str = '%%_tenant_id="%s",%%' % metric_like_wildcard
+                logger.info('get_ionosphere_performance - getting labelled metrics metric_label_like_str - %s' % metric_label_like_str)
+                metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+                try:
+                    connection = engine.connect()
+                    result = connection.execute(metrics_like_query, like_string=metric_label_like_str)
+                    connection.close()
+                    for row in result:
+                        m_id = row['id']
+                        metric_ids.append(int(m_id))
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    logger.error(trace)
+                    logger.error('error :: get_ionosphere_performance - could not determine ids from metrics table LIKE query with %s - %s' % (
+                        metric_label_like_str, err))
+                    if engine:
+                        engine_disposal(skyline_app, engine)
+                    return {}
 
         start_timestamp_date = None
         # If the from_timestamp is 0 or all
@@ -372,10 +418,10 @@ def get_ionosphere_performance(
 
                 determine_start_timestamp = False
                 request_key = '%s.%s.%s.%s' % (metric_like_wildcard, begin_date, end_date, frequency)
-            except Exception as e:
+            except Exception as err:
                 trace = traceback.format_exc()
                 logger.error(trace)
-                logger.error('error :: get_ionosphere_performance - could not determine ids from metrics table LIKE query - %s' % e)
+                logger.error('error :: get_ionosphere_performance - could not determine ids from metrics table LIKE query - %s' % err)
                 if engine:
                     engine_disposal(skyline_app, engine)
                 return {}
@@ -467,6 +513,14 @@ def get_ionosphere_performance(
                 if engine:
                     engine_disposal(skyline_app, engine)
                 raise
+
+            # @added 20221018 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Handle labelled_metrics
+            if '_tenant_id="' in metric:
+                use_metric = 'labelled_metrics.%s' % str(metric_id)
+                request_key = '%s.%s.%s.%s' % (use_metric, begin_date, end_date, frequency)
+
             if determine_start_timestamp and metric_id:
                 try:
                     connection = engine.connect()
@@ -542,22 +596,28 @@ def get_ionosphere_performance(
             raise  # to webapp to return in the UI
         try:
             connection = engine.connect()
+            # @modified 20230418 - Feature #3934: ionosphere_performance
+            # Allow for a minimum full_duration to differential between analyzer and
+            # mirage anomalies. Added min_full_duration
             if metric_ids:
                 # stmt = select([anomalies_table.c.id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
                 stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
-                    where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+                    where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
+                    where(anomalies_table.c.full_duration >= min_full_duration)
                 result = connection.execute(stmt)
             elif metric_id:
                 stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
                     where(anomalies_table.c.metric_id == int(metric_id)).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
-                    where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+                    where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
+                    where(anomalies_table.c.full_duration >= min_full_duration)
                 result = connection.execute(stmt)
             else:
                 stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
-                    where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+                    where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
+                    where(anomalies_table.c.full_duration >= min_full_duration)
                 result = connection.execute(stmt)
             for row in result:
                 r_metric_id = row['metric_id']
@@ -574,10 +634,9 @@ def get_ionosphere_performance(
                     # anomalies_ts.append([datetime.datetime.fromtimestamp(int(anomaly_timestamp)), int(anomaly_id)])
                     anomalies_ts.append([int(anomaly_timestamp), int(anomaly_id)])
             connection.close()
-        except Exception as e:
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not determine anomaly ids')
-            dev_null = e
+            logger.error('error :: could not determine anomaly ids - %s' % err)
             if engine:
                 engine_disposal(skyline_app, engine)
             raise
@@ -597,47 +656,42 @@ def get_ionosphere_performance(
     if not redis_conn_decoded:
         try:
             redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-        except Exception as e:
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: get_ionosphere_performance :: get_redis_conn_decoded failed')
-            dev_null = e
+            logger.error('error :: get_ionosphere_performance :: get_redis_conn_decoded failed - %s' % err)
     try:
         fp_ids_raw = redis_conn_decoded.get(fp_ids_cache_key)
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
-        fail_msg = 'error :: get_ionosphere_performance - could not get Redis data for - %s' % fp_ids_cache_key
+        fail_msg = 'error :: get_ionosphere_performance - could not get Redis data for - %s - %s' % (fp_ids_cache_key, err)
         logger.error(trace)
         logger.error(fail_msg)
-        dev_null = e
     if fp_ids_raw:
         try:
             fp_ids = literal_eval(fp_ids_raw)
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
-            fail_msg = 'error :: get_ionosphere_performance - could not get literal_eval Redis data from key - %s' % fp_ids_cache_key
+            fail_msg = 'error :: get_ionosphere_performance - could not get literal_eval Redis data from key - %s- %s' % (fp_ids_cache_key, err)
             logger.error(trace)
             logger.error(fail_msg)
-            dev_null = e
     if fp_ids:
         logger.info('get_ionosphere_performance - using fp_ids from cache')
 
     try:
         fp_ids_ts_raw = redis_conn_decoded.get(fp_ids_ts_cache_key)
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
-        fail_msg = 'error :: get_ionosphere_performance - could not get Redis data for - %s' % fp_ids_ts_cache_key
+        fail_msg = 'error :: get_ionosphere_performance - could not get Redis data for - %s- %s' % (fp_ids_ts_cache_key, err)
         logger.error(trace)
         logger.error(fail_msg)
-        dev_null = e
     if fp_ids_ts_raw:
         try:
             fp_ids_ts = literal_eval(fp_ids_ts_raw)
-        except Exception as e:
+        except Exception as err:
             trace = traceback.format_exc()
-            fail_msg = 'error :: get_ionosphere_performance - could not get literal_eval Redis data from key - %s' % fp_ids_ts_cache_key
+            fail_msg = 'error :: get_ionosphere_performance - could not get literal_eval Redis data from key - %s - %s' % (fp_ids_ts_cache_key, err)
             logger.error(trace)
             logger.error(fail_msg)
-            dev_null = e
     if fp_ids_ts:
         logger.info('get_ionosphere_performance - using fp_ids_ts from cache')
 
@@ -645,10 +699,9 @@ def get_ionosphere_performance(
         try:
             ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
             logger.info(log_msg)
-        except Exception as e:
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: get_ionosphere_performance - failed to get ionosphere_table meta')
-            dev_null = e
+            logger.error('error :: get_ionosphere_performance - failed to get ionosphere_table meta - %s' % err)
             if engine:
                 engine_disposal(skyline_app, engine)
             raise  # to webapp to return in the UI
@@ -725,10 +778,9 @@ def get_ionosphere_performance(
                     fp_ids.append(int(fp_id))
                     fp_ids_ts.append([int(anomaly_timestamp), int(fp_id)])
             connection.close()
-        except Exception as e:
+        except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: get_ionosphere_performance - could not determine fp_ids')
-            dev_null = e
+            logger.error('error :: get_ionosphere_performance - could not determine fp_ids - %s' % err)
             if engine:
                 engine_disposal(skyline_app, engine)
             raise
@@ -893,6 +945,7 @@ def get_ionosphere_performance(
             fps_total_df = fp_ids_df.cumsum()
             fp_ids_df.rename(columns={'id': 'new_fps_count'}, inplace=True)
             fps_total_df.rename(columns={'id': 'fps_total_count'}, inplace=True)
+
             if ionosphere_performance_debug:
                 fname_out = '%s/%s.fp_ids_df.csv' % (settings.SKYLINE_TMP_DIR, request_key)
                 fp_ids_df.to_csv(fname_out)
@@ -1007,6 +1060,15 @@ def get_ionosphere_performance(
     # else:
     #    performance_df['new_fps_count'] = 0
 
+    # @added 20230408 - Feature #3934: ionosphere_performance
+    # There will be no performance_df['new_fps_count'] if there are no fp_ids_df
+    # so add them
+    if 'new_fps_count' not in performance_df.columns and report_new_fps:
+        new_fps_list = []
+        for i in range(len(performance_df)):
+            new_fps_list.append(0)
+        performance_df['new_fps_count'] = new_fps_list
+        
     # Report running total fp count per day
     report_total_fps = False
     if 'total_fps' in request.args:
@@ -1131,6 +1193,14 @@ def get_ionosphere_performance(
         # Do not drop rows with nans, convert them to 0
         # performance_df = performance_df.dropna(how='any')
         performance_df = performance_df.fillna(0)
+
+        # @added 20230125 - Feature #3934: ionosphere_performance
+        # Deal with edge cases where cache data is available and the query
+        # returns 0 new_fps_count resulting in the fps_total_count values for
+        # the last x days of the period being 0 because the cumsum of new_fps_count
+        # is 0.  Recalculate the fps_total_count on the cumsum of new_fps_count
+        # of the merged df
+        performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
 
     plot_png = None
     if output_format != 'json':

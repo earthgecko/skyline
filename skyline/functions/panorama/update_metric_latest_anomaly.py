@@ -1,5 +1,7 @@
 import logging
 import traceback
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 from skyline_functions import get_redis_conn_decoded
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
@@ -87,7 +89,10 @@ def update_metric_latest_anomaly(current_skyline_app, base_name, metric_id=0):
             current_skyline_app, function_str, base_name, str(metric_id)))
         return {}
 
-    latest_anomaly = anomaly_data_dict.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # latest_anomaly = anomaly_data_dict.copy()
+    latest_anomaly = copy.deepcopy(anomaly_data_dict)
+
     latest_anomaly['metric'] = base_name
 
     try:

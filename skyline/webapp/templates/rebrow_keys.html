@@ -88,6 +88,7 @@
 
 	</nav>
 
+  <div class="tableFixHead">
 	<table class="table table-hover">
 		<thead>
 			<tr>
@@ -95,6 +96,7 @@
 				<th>Type</th>
 				<th>Key</th>
 				<th>Size</th>
+				<th><code>Delete</code></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -113,6 +115,7 @@
 			{% endfor %}
 		</tbody>
 	</table>
+  </div>
 
 	{% if num_keys > perpage %}
 	<ul class="pagination">

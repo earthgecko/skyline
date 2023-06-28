@@ -10,6 +10,9 @@ from sys import version_info
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
+# @added 20221019 - Feature #4700: algorithms - single series
+import pandas as pd
+
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -101,22 +104,32 @@ def run():
     try:
         import algorithms
         logger.info('Testing algorithms')
-        timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+        # @modified 20200723 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # Use a shorter timeseries for quicker start up
+        # timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+        timeseries = map(list, zip(map(float, range(int(time()) - 1440, int(time()) + 1)), [1] * 1440))
 
         # Convert map to list
         if python_version == 3:
             if isinstance(timeseries, map):
                 timeseries = list(timeseries)
 
-        ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
+        # @added 20221019 - Feature #4700: algorithms - single series
+        series = pd.Series(x[1] for x in timeseries)
+
+        # ensemble = [globals()[algorithm](timeseries) for algorithm in settings.ALGORITHMS]
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
+        ensemble = [getattr(algorithms, algorithm)(timeseries, series) for algorithm in settings.ALGORITHMS]
     except KeyError as e:
-        print('Algorithm %s deprecated or not defined; check settings.ALGORITHMS' % e)
+        print('Algorithm deprecated or not defined; check settings.ALGORITHMS - %s' % e)
         sys.exit(1)
     except Exception as e:
         print('Algorithm test run failed - %s' % e)
         traceback.print_exc()
         sys.exit(1)
 
+    logger.info('Tested algorithms')
     del timeseries
     del ensemble
 
