@@ -1,0 +1,10 @@
+.. role:: skyblue
+.. role:: red
+
+m66
+===
+
+THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT
+
+See the custom_algorithm source - https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/m66.py
+

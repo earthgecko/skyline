@@ -197,7 +197,7 @@ Skyline uses the
 .. code-block:: yaml
 
   remote_write:
-    - url: "https://skyline-test-1-fra1.of-networks.co.uk/flux/prometheus/write"
+    - url: "https://skyline.example.org/flux/prometheus/write"
       queue_config:
         max_samples_per_send: 1000
       headers:

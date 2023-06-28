@@ -28,10 +28,12 @@ introduced here.
   time series database.
 - VictoriaMetrics - not part of Skyline but can be used as Skyline's long term
   time series database for label based metrics.
-- Redis - transient database for real time data and sharing data between Skyline
+- Redis - database for transient real time data and sharing data between Skyline
   applications.
-- Horizon - receives metrics from Graphite and feeds them into Redis.  And also
-  prunes old time series data from Redis.
+- Horizon - receives metrics from Graphite (and labelled metrics from Flux) and
+  feeds them into Redis.  And also prunes old time series data from Redis.
+- Flux ingests metrics via HTTP in various formats, including JSON and Prometheus
+  protocol buffer format.
 - Analyzer - every minute, gets 24 hours of metric data from Redis and analyses
   them all with 9 three-sigma based algorithms and pushes potential anomalies to
   Mirage or Ionosphere.
@@ -50,6 +52,7 @@ introduced here.
   dynamic thresholds and alerts if breached.
 - Luminosity cross correlates anomalies with the entire or defined metric
   population and can classify anomaly types.
+- Panorama records and tracks anomalies in the DB
 
 Realistic expectations
 ----------------------
@@ -88,9 +91,10 @@ metrics, it can but...
 Skyline should have been pitched to monitor your KEY metrics.
 
 To begin with decide what your 100 most important metrics are and **only**
-configure :mod:`settings.ALERTS` and :mod:`settings.SMTP_OPTS` and slack on
-those to begin with and get to know what Skyline does with those.  Add more key
-metric groups as you get the hang of it.
+configure :mod:`settings.ALERTS` and :mod:`settings.SMTP_OPTS` (you can use
+``no_email`` to not recieve alerts).  If you have Slack, set up a channel and
+send these to begin with and get to know what Skyline does with those.  Add
+more key metric groups as you get the hang of it.
 
 You cannot rush time series.
 
@@ -134,7 +138,8 @@ Add Mirage parameters to :mod:`settings.ALERTS`
 
 Once you have an overview of metrics that have seasonality that are greater
 than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to
-the :mod:`settings.ALERTS` tuples to be analysed by Mirage.
+the :mod:`settings.ALERTS` tuples to be analysed by Mirage.  And set
+:mod:`ENABLE_MIRAGE` to ``True``.
 
 Add Boundary settings
 ---------------------
