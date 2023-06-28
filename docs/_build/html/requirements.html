@@ -1,104 +1,57 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Requirements &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Requirements &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Getting started" href="getting-started.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="prev" title="Anomify - cutting edge Skyline" href="anomify-cutting-edge-skyline.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#requirements-txt"><code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#recent-changes-in-the-pip-environment">Recent changes in the pip environment</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pandas">pandas</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#python-2-6-may-work-but-not-supported">Python-2.6 - may work, but not supported</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#redhat-family-6-x">RedHat family 6.x</a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements-txt"><code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
@@ -121,11 +74,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -133,6 +93,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -141,261 +104,93 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Requirements</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Requirements</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/requirements.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="requirements">
-<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h1>
 <p>The requirements are:</p>
 <ul class="simple">
-<li><p>First you need an instance of Graphite running</p></li>
-<li><p>Then you need some things feeding Graphite metrics (see statsd, sensu, riemann
-buckyserver, nc)</p></li>
-<li><p>Linux (and probably any environment that supports Python virtualenv
-and bash)</p></li>
+<li><p>The recommended minimum spec for the Skyline server is a 4 CPU / 8GB RAM
+instance. For a small metric population a single CPU would suffice.</p></li>
+<li><p>A server running CentOS Stream 8, Ubuntu 20.04 or Ubuntu 22.04.  Although
+CentOS Stream 8 is recommended because Skyline is developed, tested and run
+in production on CentOS Stream 8, only building is tested on Ubuntu.</p></li>
 <li><p>virtualenv</p></li>
-<li><p>Python-2.7.14 or Python-2.7.16 (running in an isolated vitualenv)</p></li>
-<li><p>Redis</p></li>
-<li><p>MySQL/mariadb</p></li>
+<li><p>Python 3.8.17 (running in an isolated virtualenv)</p></li>
+<li><p>Redis (or redis-stack-server)</p></li>
+<li><p>MariaDB</p></li>
+<li><p>memcached (optional)</p></li>
+<li><p>Additionally, a Graphite, Prometheus or VictoriaMetrics instance is required
+that is being populated with metric data from telegraf, sensu, prometheus
+remote_storage_adapter, et al or whatever your preferred metric collector is.
+Skyline use Graphite and/or VictoriaMetrics for long term time series
+database.  Graphite and/or VictoriaMetrics can run on the Skyline instance.</p></li>
+<li><p>A slack account, although optional, almost <strong>all</strong> of Skyline’s messaging is
+done via slack, along with all the links and functionality to train metrics.
+A channel and bot in a free-tier slack account is sufficient.</p></li>
 </ul>
-<div class="section" id="requirements-txt">
-<h2><code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code><a class="headerlink" href="#requirements-txt" title="Permalink to this headline">¶</a></h2>
+<p>If you using the quickstart install script, then Graphite will be deployed on
+the server as well (if you do not disable the Graphite install) and you can opt
+to install Prometheus (to send data to Flux) and/or VictoriaMetrics (to store
+longer term data).</p>
+<section id="requirements-txt">
+<h2><code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code><a class="headerlink" href="#requirements-txt" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file lists the required packages and the last
-verified as working version with Python-2.7 within a virtaulenv.</p>
-<div class="section" id="recent-changes-in-the-pip-environment">
-<h3>Recent changes in the pip environment<a class="headerlink" href="#recent-changes-in-the-pip-environment" title="Permalink to this headline">¶</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If you use pip or virtualenv in any other context, please note the
-following and assess if and/or how it pertains to you environment</p>
-</div>
-<p>The new pip, setuptools, distribute and virtualenv methodology that the
-pypa community has adopted is in a bit of a state of flux in terms of
-the setuptools version and virtualenv implementation of making the
-<code class="docutils literal notranslate"><span class="pre">--distribute</span></code> and <code class="docutils literal notranslate"><span class="pre">--setuptools</span></code> legacy parameters has caused pip
-8.1.1 and setuptools 20.9.0 and virtualenv 15.0.1 to complain if
-distribute is one of the requirements on packages that pip tries to
-install. However, it is needed for Mirage if you are trying to
-run/upgrade on Python-2.6</p>
-<p>virtualenv 15.2.0 is the last version of virtualenv that supports Python 2.6,
-virtualenv 16.0.0 requires Python 2.7</p>
-<div class="section" id="pandas">
-<h4>pandas<a class="headerlink" href="#pandas" title="Permalink to this headline">¶</a></h4>
-<p>Updated: 20161120 - can no longer be supported as of Ionosphere (probably)</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">PANDAS_VERSION</span></code> variable was added to settings.py to handle
-backwards compatability with any instances of Skyline that are run older
-versions that perhaps cannot upgrade to a later version due to any
-mainstream packaging restrictions. This <code class="docutils literal notranslate"><span class="pre">PANDAS_VERSION</span></code> is required
-to run the applicable panda functions dependent on the version that is
-use.</p>
-<ul class="simple">
-<li><p>pandas 0.17.0 deprecated the pandas.Series.iget in favour of
-<code class="docutils literal notranslate"><span class="pre">.iloc[i]</span></code> or <code class="docutils literal notranslate"><span class="pre">.iat[i]</span></code></p></li>
-<li><p>pandas 0.18.0 introduced a change in the Exponentially-weighted
-moving average function used in a number of algorithms</p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.18.0&#39;</span><span class="p">:</span>
-    <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">moments</span><span class="o">.</span><span class="n">ewma</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">expAverage</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">ewm</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ignore_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">com</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-
-<span class="k">if</span> <span class="n">PANDAS_VERSION</span> <span class="o">&lt;</span> <span class="s1">&#39;0.17.0&#39;</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iget</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span>
-</pre></div>
-</div>
-<p>Skyline should be able to run on pandas versions 0.12.0 - 0.18.0 (or
-later)</p>
-</div>
-<div class="section" id="python-2-6-may-work-but-not-supported">
-<h4>Python-2.6 - may work, but not supported<a class="headerlink" href="#python-2-6-may-work-but-not-supported" title="Permalink to this headline">¶</a></h4>
-<p>Skyline can still run on Python-2.6. However deploying Skyline on
-Python-2.6 requires jumping through some hoops. This is because of the
-dependencies and pip packages moving a lot. At some point some older pip
-package is not going to be available any longer and it will no longer be
-possible, unless you are packaging the pip packages into your own packages, e.g.
-with fpm or such.</p>
-<p>Updated: 20161120 - can no longer be supported as of Ionosphere (probably)</p>
-</div>
-<div class="section" id="redhat-family-6-x">
-<h4>RedHat family 6.x<a class="headerlink" href="#redhat-family-6-x" title="Permalink to this headline">¶</a></h4>
-<p>If you are locked into mainstream versions of things and cannot run
-Skyline in an isolated virtualenv, but have to use the system Python and
-pip. The following pip installs and versions are known to working, with
-a caveat on the scipy needs to be installed via yum NOT pip and you need
-to do the following:</p>
-<p>Updated: 20161120 - this information is now too old to be applicable really.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="nv">numpy</span><span class="o">==</span><span class="m">1</span>.8.0
-yum install scipy
-pip install --force-reinstall --ignore-installed <span class="nv">numpy</span><span class="o">==</span><span class="m">1</span>.8.0
-</pre></div>
-</div>
-<p>Known working scipy rpm - scipy-0.7.2-8.el6.x86_64</p>
-<p>pip packages (these are the requirements and their dependencies), it is
-possible that some of these pip packages will no longer exist or may not
-exist in the future, this is documented here for info ONLY.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">argparse</span> <span class="p">(</span><span class="mf">1.2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">backports</span><span class="o">.</span><span class="n">ssl</span><span class="o">-</span><span class="n">match</span><span class="o">-</span><span class="n">hostname</span> <span class="p">(</span><span class="mf">3.4</span><span class="o">.</span><span class="mf">0.2</span><span class="p">)</span>
-<span class="n">cycler</span> <span class="p">(</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">distribute</span> <span class="p">(</span><span class="mf">0.7</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">Flask</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
-<span class="n">hiredis</span> <span class="p">(</span><span class="mf">0.1</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">iniparse</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">iotop</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">Jinja2</span> <span class="p">(</span><span class="mf">2.7</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">lockfile</span> <span class="p">(</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">MarkupSafe</span> <span class="p">(</span><span class="mf">0.23</span><span class="p">)</span>
-<span class="n">matplotlib</span> <span class="p">(</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">mock</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">msgpack</span><span class="o">-</span><span class="n">python</span> <span class="p">(</span><span class="mf">0.4</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">nose</span> <span class="p">(</span><span class="mf">0.10</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">numpy</span> <span class="p">(</span><span class="mf">1.7</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">ordereddict</span> <span class="p">(</span><span class="mf">1.2</span><span class="p">)</span>
-<span class="n">pandas</span> <span class="p">(</span><span class="mf">0.12</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">patsy</span> <span class="p">(</span><span class="mf">0.2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">pip</span> <span class="p">(</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">pycurl</span> <span class="p">(</span><span class="mf">7.19</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">pygerduty</span> <span class="p">(</span><span class="mf">0.29</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">pygpgme</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-<span class="n">pyparsing</span> <span class="p">(</span><span class="mf">1.5</span><span class="o">.</span><span class="mi">6</span><span class="p">)</span>
-<span class="n">python</span><span class="o">-</span><span class="n">daemon</span> <span class="p">(</span><span class="mf">1.6</span><span class="p">)</span>
-<span class="n">python</span><span class="o">-</span><span class="n">dateutil</span> <span class="p">(</span><span class="mf">2.3</span><span class="p">)</span>
-<span class="n">python</span><span class="o">-</span><span class="n">simple</span><span class="o">-</span><span class="n">hipchat</span> <span class="p">(</span><span class="mf">0.3</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">pytz</span> <span class="p">(</span><span class="mf">2014.4</span><span class="p">)</span>
-<span class="n">redis</span> <span class="p">(</span><span class="mf">2.7</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">requests</span> <span class="p">(</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">scipy</span> <span class="p">(</span><span class="mf">0.7</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-<span class="n">setuptools</span> <span class="p">(</span><span class="mf">11.3</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">simplejson</span> <span class="p">(</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">9</span><span class="p">)</span>
-<span class="n">six</span> <span class="p">(</span><span class="mf">1.6</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">statsmodels</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">tornado</span> <span class="p">(</span><span class="mf">2.2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">unittest2</span> <span class="p">(</span><span class="mf">0.5</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">urlgrabber</span> <span class="p">(</span><span class="mf">3.9</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">Werkzeug</span> <span class="p">(</span><span class="mf">0.9</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">yum</span><span class="o">-</span><span class="n">metadata</span><span class="o">-</span><span class="n">parser</span> <span class="p">(</span><span class="mf">1.1</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
+verified as working version with Python-3.8 within a virtualenv.</p>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="anomify-cutting-edge-skyline.html" class="btn btn-neutral float-left" title="Anomify - cutting edge Skyline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

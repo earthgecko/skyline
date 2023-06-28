@@ -1,0 +1,531 @@
+=====
+3.0.0
+=====
+
+v3.0.0 - May 1, 2022
+
+This is a major release with additional apps, features and functionality.
+
+IMPORTANT NOTICE FOR CURRENT USERS
+----------------------------------
+
+- Skyline requires a modification to the runner.py of the python-daemon 2.3.0
+  package to allow it to run on Python 3 properly in the manner in which
+  Skyline runs it.
+- settings.py is now validated when the Skyline apps are started.  If a variable
+  is not defined in your settings.py Skyline apps **will fail to start**.
+  Ensure that your settings are up to date and have all the latest variables defined
+  properly.
+
+Summary of some key changes in v3.0.0
+-------------------------------------
+
+Lots of changes and new functionality have been introduced in v3.0.0 the key
+new features are listed below.  This is a **major** update to all Skyline apps
+with the addition of some new apps too.
+
+- The ability to use your own or any custom algorithms in analysis.
+- The ability to use the matrixprofile algorithm as a custom algorithm with
+  Mirage to greatly reduce three-sigma false positives.
+- The ability to use MASS (Mueen's Algorithm for Similarity Search) to
+  discover, compare and match short period shapelets against trained data.  This
+  maximises the use of any existing trained features profiles greatly.  The
+  features profiles trained data is used to turn a single trained resource into
+  10s of 1000s of trained resources by dividing it up into shapelets.
+- The ability to classify anomalies by types.
+- Various adtk based custom algorithms have been added.
+- The addition of the Skyline Thunder app which monitors all the Skyline apps.
+- Support for running on **docker** has been **discontinued**.
+- The addition of monitoring on the data of metric population as a whole in
+  terms of increasing and decreasing sparsity.
+- Miscellaneous clustering improvements.
+- The addition of the Skyline SNAB app which allows for the testing of the
+  performance and correctness of algorithms in a real time ongoing manner.
+- The automatic learning of related metrics if enabled.
+- Flux can ingest metrics from telegraf.
+- The addition of waterfall alerting, so no alerts are missed if Skyline is
+  super busy.
+- The ability to send SMS alerts via AWS.
+- The ability to use an external SMTP server/service.
+- The use of downsampled FULL_DURATION data in Mirage where appropriate to
+  replace the partially filled bucket in the last Graphite aggregated data to
+  reduce these types of false positives.
+- The creation of match comparison graphs in the UI.
+- systemd units have been added see /opt/skyline/github/skyline/etc/systemd/system
+  after cloning the new version or in github directly.
+- There are many ADVANCED FEATURE additions as well.  These are described by new
+  settings in settings.py, their docstrings and related documentation pages for
+  those interested.
+
+Breaking changes
+----------------
+
+- Skyline is no longer supported on docker.
+- Skyline is now only supported on CentOS Stream 8, Ubuntu 18.04 and 20.04.
+- settings.py is now validated when the Skyline apps are started.  If a variable
+  is not defined in your settings.py Skyline apps **will fail to start**.  Ensure
+  your settings are up to date and have all the latest variables defined
+  properly.
+- Skyline has now moved to supporting nginx only and support for Apache has been
+  discontinued.  Although you can still use Apache there is no support (examples)
+  of Apache configurations for new features.
+
+Notable changes for users that were moving with master
+------------------------------------------------------
+
+- Only for users that have been running versions of master > v2.0.0. The
+  :mod:`SKYLINE_FEEDBACK_NAMESPACES` was introduced and it defaulted to the
+  Skyline node hostname and the GRAPHITE_HOST.  As of version v3.0.0
+  :mod:`DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES` has been introduced to allow
+  you to declare metrics that are not feedback metrics in the
+  :mod:`SKYLINE_FEEDBACK_NAMESPACES` so these will always be analysed even if
+  Skyline is very busy.
+
+Update notes
+------------
+
+- These update instruction apply to upgrading from v2.0.0 to v3.0.0 (through
+  to v3.0.4) only. However as with all Skyline updates it is possible to go
+  through the update notes for each version and make your own update notes/process
+  to take you from version x to version y.
+- If you have been running on the rolling master and unreleased rolling v2.1.0
+  version, please determine what SQL updates you have applied and apply only
+  further v2.1.0 SQL updates as appropriate.
+- There are changes to the DB in v3.0.0
+- There are changes to settings.py in v3.0.0, please ensure you diff your
+  current and the new settings.py as there are appended additions but there are
+  also additional settings that have been added to existing settings blocks.
+  The additions and changes described below.
+- Ensure you **TEST** your new settings.py before continuing with the upgrade.
+
+settings.py Changes
+~~~~~~~~~~~~~~~~~~~
+
+**IMPORTANT** in the new version of Skyline **ALL** settings must be defined in
+your settings.py because they are now tested when the services start.  If any
+settings are missing or ill-defined in your settings.py the Skyline services
+will **fail** to start.
+
+Modified settings:
+
+A number of docstrings have been corrected, changed or have been updated for
+various settings, these are not listed here.  This list only details where the
+setting itself has changed not the docstring.
+
+- :mod:`settings.BATCH_PROCESSING` default changed from ``None`` to ``False``
+- :mod:`settings.BATCH_PROCESSING_DEBUG` default changed from ``None`` to ``False``
+- :mod:`settings.CANARY_METRIC` changed from ``statsd.numStats``
+- :mod:`settings.ALERTS` the default has changed.
+- :mod:`settings.SMTP_OPTS` the default has changed to declare the ``smtp_server``
+- :mod:`settings.MAX_QUEUE_SIZE` changed from 500 to 50000
+- :mod:`settings.DO_NOT_SKIP_LIST` has **new** Skyline metrics added to it,
+  ensure these are added to yours.
+- :mod:`settings.FLUX_SEND_TO_CARBON` default has changed from ``False`` to ``True``
+- :mod:`settings.FLUX_STATSD_HOST` default changed from ``None`` to ``''``
+
+New settings:
+
+Most of these are set to reasonable defaults and those you need to consider are
+flagged with ``[USER DEFINED]``.  All new settings and their function are
+described in their docstrings in settings.py
+
+- :mod:`settings.SKYLINE_DIR`
+- :mod:`settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES`
+- :mod:`settings.ANALYZER_VERBOSE_LOGGING`
+- :mod:`settings.CUSTOM_STALE_PERIOD`
+- :mod:`settings.CHECK_DATA_SPARSITY`
+- :mod:`settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES`
+- :mod:`settings.FULLY_POPULATED_PERCENTAGE`
+- :mod:`settings.SPARSELY_POPULATED_PERCENTAGE`
+- :mod:`settings.ANALYZER_CHECK_LAST_TIMESTAMP`
+- :mod:`settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS`
+- :mod:`settings.ANALYZER_SKIP`
+- :mod:`settings.MONOTONIC_METRIC_NAMESPACES`
+- :mod:`settings.ZERO_FILL_NAMESPACES`
+- :mod:`settings.LAST_KNOWN_VALUE_NAMESPACES`
+- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED`
+- :mod:`settings.SMS_ALERT_OPTS`
+- :mod:`settings.ROOMBA_OPTIMUM_RUN_DURATION`
+- :mod:`settings.ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS`
+- :mod:`settings.BATCH_METRICS_CUSTOM_FULL_DURATIONS`
+- :mod:`settings.HORIZON_SHARDS`
+- :mod:`settings.HORIZON_SHARD_PICKLE_PORT`
+- :mod:`settings.HORIZON_SHARD_DEBUG`
+- :mod:`settings.SYNC_CLUSTER_FILES`
+- :mod:`settings.THUNDER_ENABLED`
+- :mod:`settings.THUNDER_CHECKS`
+- :mod:`settings.THUNDER_OPTS`
+- :mod:`settings.MIRAGE_PROCESSES`
+- :mod:`settings.WEBAPP_GUNICORN_WORKERS`
+- :mod:`settings.WEBAPP_GUNICORN_BACKLOG`
+- :mod:`settings.IONOSPHERE_VERBOSE_LOGGING`
+- :mod:`settings.IONOSPHERE_HISTORICAL_DATA_FOLDER`
+- :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR`
+- :mod:`settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE`
+- :mod:`settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH`
+- :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_ENABLED`
+- :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS`
+- :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES`
+- :mod:`settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE`
+- :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING`
+- :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH`
+- :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY`
+- :mod:`settings.LUMINOSITY_DATA_FOLDER`
+- :mod:`settings.LUMINOSITY_CORRELATE_ALL`
+- :mod:`settings.LUMINOSITY_CORRELATION_MAPS`
+- :mod:`settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT`
+- :mod:`settings.LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES`
+- :mod:`settings.LUMINOSITY_CLASSIFY_ANOMALIES`
+- :mod:`settings.LUMINOSITY_CLASSIFY_ANOMALY_ALGORITHMS`
+- :mod:`settings.LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS`
+- :mod:`settings.LUMINOSITY_CLOUDBURST_ENABLED`
+- :mod:`settings.LUMINOSITY_CLOUDBURST_PROCESSES`
+- :mod:`settings.LUMINOSITY_CLOUDBURST_RUN_EVERY`
+- :mod:`settings.LUMINOSITY_RELATED_METRICS`
+- :mod:`settings.LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG`
+- :mod:`settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE`
+- :mod:`settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT`
+- :mod:`settings.FLUX_VERBOSE_LOGGING`
+- :mod:`settings.FLUX_API_KEYS`
+- :mod:`settings.FLUX_PERSIST_QUEUE`
+- :mod:`settings.FLUX_CHECK_LAST_TIMESTAMP`
+- :mod:`settings.FLUX_GRAPHITE_WHISPER_PATH`
+- :mod:`settings.FLUX_ZERO_FILL_NAMESPACES`
+- :mod:`settings.FLUX_LAST_KNOWN_VALUE_NAMESPACES`
+- :mod:`settings.FLUX_AGGREGATE_NAMESPACES`
+- :mod:`settings.FLUX_EXTERNAL_AGGREGATE_NAMESPACES`
+- :mod:`settings.FLUX_NAMESPACE_QUOTAS`
+- :mod:`settings.FLUX_OTEL_ENABLED`
+- :mod:`settings.VISTA_VERBOSE_LOGGING`
+- :mod:`settings.SNAB_ENABLED`
+- :mod:`settings.SNAB_DATA_DIR`
+- :mod:`settings.SNAB_anomalyScore`
+- :mod:`settings.SNAB_CHECKS`
+- :mod:`settings.SNAB_LOAD_TEST_ANALYZER`
+- :mod:`settings.SNAB_FLUX_LOAD_TEST_ENABLED`
+- :mod:`settings.SNAB_FLUX_LOAD_TEST_METRICS`
+- :mod:`settings.SNAB_FLUX_LOAD_TEST_METRICS_PER_POST`
+- :mod:`settings.SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX`
+- :mod:`settings.EXTERNAL_SETTINGS`
+- :mod:`settings.LOCAL_EXTERNAL_SETTINGS`
+- :mod:`settings.PROMETHEUS_SETTINGS` - experimental and not functional
+- :mod:`settings.OTEL_ENABLED` - experimental
+- :mod:`settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME` - experimental
+- :mod:`settings.OTEL_JAEGEREXPORTER_AGENT_PORT` - experimental
+- :mod:`settings.WEBAPP_SERVE_JAEGER` - experimental
+
+How to update from v2.0.0
+-------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+- Get your new settings.py ready
+- **NOTE** you must currently set :mod:`settings.OTEL_ENABLED` to `True`, even if
+  you are not using it.  This is to simply prevent an unhandled error in v3.0.0
+  relating to opentelemetry, resulting traces will be sent to 127.0.0.1:26831
+  via UDP so will fail silently with no ill effects.
+- Deploy a new Python-3.8.13 virtualenv
+- Ensure all the dependencies are at the correct versions in the new
+  Python-3.8.13 virtualenv
+- Stop the Skyline apps, backup the database and Redis, move to the new version,
+  start the Skyline apps.
+
+
+.. code-block:: bash
+
+    # Get the new version
+    # NEW_SKYLINE_VERSION="v3.0.0"    # Your new Skyline version
+    # Updated to v3.0.4
+    NEW_SKYLINE_VERSION="v3.0.4"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v2.0.0"    # Your old Skyline version
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+    # DEPLOY A NEW Python 3.8.13 virtualenv
+    PYTHON_VERSION="3.8.13"
+    PYTHON_MAJOR_VERSION="3.8"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    mkdir -p "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
+    mkdir -p "${PYTHON_VIRTUALENV_DIR}/projects"
+    cd "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}"
+    wget -q "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz"
+    tar -zxvf "Python-${PYTHON_VERSION}.tgz"
+    cd ${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}
+    ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
+    make -j4
+    make altinstall
+
+    # Create a new skyline-py3813 virtualenv
+    PROJECT="skyline-py3813"
+    cd "${PYTHON_VIRTUALENV_DIR}/projects"
+    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"
+    ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/skyline" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+
+    # Ensure the requirements are installed in your new Python 3.8.13 virtualenv
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+
+    # Deploy the new requirements.  Unfortunately this must be done in 5 stages
+    # due to some version conflict on some packages that are lagging in their
+    # own dependencies.  This staged install has the desired effect and the
+    # lagging packages still work as desired even with the new later dependencies.
+    # Note that there will be read pip warnings for matrixprofile, protobuf and
+    # opentelemetry related contrib packages, this is expected.
+
+    # As of statsmodels 0.9.0 numpy, et al need to be installed before
+    # statsmodels in requirements
+    # https://github.com/statsmodels/statsmodels/issues/4654
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.1.txt
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt | grep "^pandas==" > /tmp/requirements.2.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.2.txt
+
+    # Currently matrixprofile protobuf version conflicts with the opentelemetry
+    # required version
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt | grep -v "^opentelemetry" > /tmp/requirements.3.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.3.txt
+
+    # Handle conflict between opentelemetry contrib packages and opentelemetry
+    # main because opentelemetry contibs are behind main
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt | grep "^opentelemetry" | grep -v "1.11.1" > /tmp/requirements.4.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.4.txt
+
+    # opentelemetry main
+    cat "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"/requirements.txt | grep "^opentelemetry" | grep "1.11.1" > /tmp/requirements.5.txt
+    "bin/pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.5.txt
+    # The pip error is expected
+    # ERROR: pip's dependency resolver does not currently take into account all the packages that are installed ....
+
+    deactivate
+    cd
+
+    # Fix python-daemon - which fails to run on Python 3 (numerous PRs are waiting
+    # to fix it https://pagure.io/python-daemon/pull-requests)
+    cp "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py" "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak"
+    cat "$NEW_SKYLINE_PATH/utils/python-daemon/runner.2.3.0.py" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+    # minor change related to unbuffered bytes I/O
+    diff "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak" "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+
+    # settings.py
+    cp "$NEW_SKYLINE_PATH/skyline/settings.py" "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak"
+    # You can diff your settings.py with the new settings.py if you wish but there
+    # will be lots on changes
+    #diff "${CURRENT_SKYLINE_PATH}/skyline/settings.py" "$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak"
+
+    # You can create a new settings.py file in the new version based on your existing
+    # settings.py file but it is probably better to do locally on your desktop/laptop
+    # using a GUI diff editor and create your new settings.py based on your current
+    # cat "${CURRENT_SKYLINE_PATH}/skyline/settings.py" > "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # ADD the appropriate new settings to your settings file and modify any
+    # changed settings as appropriate for your set up.
+    vi "$NEW_SKYLINE_PATH/skyline/settings.py"
+
+    # There will be lots of changes, consider using a GUI diff editor and create your
+    # new settings.py
+
+    # NOTE you must currently set OTEL_ENABLED to True in settings.py, even if
+    # you are not using it.  This is to simply prevent an unhandled error in
+    # v3.0.0 relating to opentelemetry.
+
+    # **TEST**
+    # **TEST**
+    # **TEST**
+    # Test your new settings.py BEFORE continuing with the upgrade,
+    # test_settings.sh runs the validate_settings.py that the Skyline apps run
+    # when they start
+    $NEW_SKYLINE_PATH/bin/test_settings.sh
+
+    # Stop/disable any/all service controls like monit, etc that are controlling
+    # Skyline services.
+
+    # Stop Skyline services that use the DB
+    SKYLINE_SERVICES="webapp
+    analyzer
+    ionosphere
+    luminosity
+    panorama"
+    for i in $SKYLINE_SERVICES
+    do
+      # /etc/init.d/$i stop
+      # or
+      systemctl stop $i
+    done
+
+    # BACKUP THE DB AND APPLY THE NEW SQL
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="skyline"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+
+    ####    IMPORTANT NOTICE    ####
+    # If you have been running on the rolling master and unreleased rolling v2.1.0
+    # version, please determine what SQL updates you have applied and apply only
+    # further v2.1.0 SQL updates as appropriate.  Compare your
+    # "${CURRENT_SKYLINE_PATH}/updates/sql" to
+    # "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/updates/sql" and your
+    # .bash_history, .sql_history or notes to determine the last SQL patch you
+    # applied from the v2.1.0 patches.
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
+
+    # Check you dump exists and has data
+    ls -al $BACKUP_DIR/pre.$NEW_SKYLINE_VERSION.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < "${NEW_SKYLINE_PATH}/updates/sql/v3.0.0.sql"
+
+    # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+    # or do not wish to run.
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer_batch
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp
+    vista
+    flux"
+    for i in $SKYLINE_SERVICES
+    do
+      systemctl stop "$i"
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v3.0.0 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "${CURRENT_SKYLINE_PATH}.${OLD_SKYLINE_VERSION}"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+    # Set permission on the dump dir
+    chown skyline:skyline "$CURRENT_SKYLINE_PATH"/skyline/webapp/static/dump
+
+    # Update to the new skyline.conf
+    cp /etc/skyline/skyline.conf "/etc/skyline/skyline.conf.${OLD_SKYLINE_VERSION}"
+    cat "$CURRENT_SKYLINE_PATH"/etc/skyline.conf > /etc/skyline/skyline.conf
+
+- If you wish to deploy the new systemd unit files then do the following, but
+  **do note they use the skyline user and group**
+
+.. code-block:: bash
+
+    for i in $(find /opt/skyline/github/skyline/etc/systemd/system -type f)
+    do
+      /bin/cp -f $i /etc/systemd/system/
+    done
+    systemctl daemon-reload
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN
+    # apart from the new thunder Skyline app
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="horizon
+    flux
+    panorama
+    webapp
+    vista
+    analyzer
+    analyzer_batch
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    snab
+    thunder"
+    for i in $SKYLINE_SERVICES
+    do
+      systemctl start "$i"
+      if [ $? -ne 0 ]; then
+        echo "failed to start $i"
+      else
+        echo "started $i"
+      fi
+    done
+    # Restart any/all service controls like monit, etc that are controlling
+    # Skyline services.
+
+- Check the logs
+
+.. code-block:: bash
+
+    # How are they running
+    tail -n 20 /var/log/skyline/*.log
+
+    # Any errors - each app
+    find /var/log/skyline -type f -name "*.log" | while read skyline_logfile
+    do
+      echo "#####
+    # Checking for errors in $skyline_logfile"
+      cat "$skyline_logfile" | grep -B2 -A10 -i "error ::\|traceback" | tail -n 60
+      echo ""
+      echo ""
+    done
+
+Congratulations, you are now running the best open source anomaly detection
+stack in the world (probably).  Have a look at the new functionality in the UI
+and enjoy.
+
+Considerations
+~~~~~~~~~~~~~~
+
+By default in v3.0.0 matrixprofile is not enabled as an additional algorithm to
+run.  This is because it is a user decision as to whether they wish to implement
+matrixprofile as an algorithm to be added to the analysis pipeline.  The
+addition of matrixprofile has a significant impact on the amount of events that
+are recorded and alerted on.  This is due to matrixprofile significantly
+decreasing the number of false positive alerts that are sent.  **HOWEVER** due
+to this being a fundamental change to Skyline, the user must be aware of what
+this means in practice.
+
+1. matrixprofile will result in a small number of false negatives (~2.48%)
+2. matrixprofile will filter out a very large number of false positives (~88.4%)
+
+These two points must be stressed because for any users that are accustomed to
+using Skyline as an information stream of changes in your environments, if you
+turn on matrixprofile, you may question if Skyline is running properly with
+matrixprofile probably result in filtering out ~88.4% of your events.
+
+Although the paneacea of anomaly detection **alerting** is 0 false positives and
+0 false negatives, anomaly detection is about the bad, the good and the unknown.
+This drastic decrease in events also results in a reduction of correlation data,
+training data opportunities and an overall reduced picture events in your
+timeline.
+
+If you implement matrixprofile be prepared to most of the events you are
+accustomed too, when you or developers deploy something, those subtle changes
+that used to trigger and send an event into slack, probably will not happen
+any more.  Most if not all of the events triggered when changes are made to
+things will stop.  This results in those feedback reinforcements events that
+used to trigger in slack vanishing.  You will be accustomed to making changes
+and often seeing events being triggered in slack, that reinforcement feedback
+mostly gets lost with addition of maxtrixprofile as an algorithm.
+
+This can be somewhat mitigated by setting the ``'trigger_history_override': 5,``
+in ``skyline_matrixprofile`` :mod:`settings.CUSTOM_ALGORITHMS`.  This means that
+if three-sigma has triggered 5 runs in a row the matrixprofile result will be
+overridden and an anomaly will be triggered.
+
+Consider adding some namespaces to be analysed by matrixprofile and assess the
+results before jumping in with both feet, it really depends if you are wanting
+to use Skyline as an alerter only or as an informational stream of the bad, the
+good and the unknown.

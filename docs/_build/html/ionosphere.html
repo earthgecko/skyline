@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Ionosphere &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ionosphere &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Ionosphere echo" href="ionosphere_echo.html" />
     <link rel="prev" title="Webapp" href="webapp.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -158,15 +119,23 @@
 <li class="toctree-l3"><a class="reference internal" href="#mysql-configuration">MySQL configuration</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#ionosphere-custom-keep-training-timeseries-for">IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ionosphere-autobuild-features-profiles-dir">Ionosphere - autobuild features_profiles dir</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -174,6 +143,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -182,82 +154,43 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Ionosphere</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Ionosphere</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/ionosphere.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="ionosphere">
-<h1>Ionosphere<a class="headerlink" href="#ionosphere" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="ionosphere">
+<h1>Ionosphere<a class="headerlink" href="#ionosphere" title="Permalink to this heading"></a></h1>
 <p>Ionosphere is a story about time series.</p>
 <p>Dedicated to my father, Derek, a man of numbers if there ever was one.</p>
-<div class="section" id="what-ionosphere-is-for-humble-beginnings">
-<h2>What Ionosphere is for - humble beginnings<a class="headerlink" href="#what-ionosphere-is-for-humble-beginnings" title="Permalink to this headline">¶</a></h2>
+<section id="what-ionosphere-is-for-humble-beginnings">
+<h2>What Ionosphere is for - humble beginnings<a class="headerlink" href="#what-ionosphere-is-for-humble-beginnings" title="Permalink to this heading"></a></h2>
 <p><strong>YOU</strong> can teach a system.</p>
 <p><strong>YOU</strong> can help a system to LEARN.</p>
 <p>You want to monitor metrics on small VPSs that do not do a great deal, meaning
 there is no high, rate constant work or 3sigma consistency in the metrics.
 There are 0 to 7 apache.sending a day, not 7000 a minute. Or there are some
 peaks on the metric stats_counts.statsd.bad_lines_seen</p>
-<img alt="_images/21060819.stats_counts.statsd.bad_lines_seen1.png" src="_images/21060819.stats_counts.statsd.bad_lines_seen1.png" />
+<img alt="_images/21060819.stats_counts.statsd.bad_lines_seen.png" src="_images/21060819.stats_counts.statsd.bad_lines_seen.png" />
 <p>This is <span class="red">NOT ANOMALOUS</span></p>
 <p>Even in massive, workload intensive, dynamic systems there are always some
 metrics that are low rate and relatively low range.  And at 3sigma… that means
@@ -274,9 +207,9 @@ Skyline Ionosphere actually does somewhat of the opposite.</p>
 <p>With Ionosphere we are training Skyline on what is NOT ANOMALOUS, rather than
 focusing on what is anomalous.  Ionosphere allows us to train Skyline as to what
 is normal, even if normal includes spikes and dips and seasonality.</p>
-</div>
-<div class="section" id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Ionosphere gives the operator an input into Skyline to allow them to train it
 and compliment the existing statistical 3sigma anomaly detection methods.</p></li>
@@ -292,13 +225,17 @@ different time series for a metric.</p></li>
 time series using <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> to “fingerprint” the data set.</p></li>
 <li><p>This allows the operator to fingerprint and profile what is not anomalous, but
 normal and to be expected, even if 3sigma will always detect it as anomalous.</p></li>
+<li><p>Further to this, Ionosphere uses the trained data to create 1000s of motifs
+(small patterns) of what normal is and supplements the feature profile
+comparisons by evaluating the current potentially anomaly against the 1000s of
+trained normal motifs from the features profiles.</p></li>
 <li><p>Ionosphere also allows for the creation of layers rules which allow the
 operator to define ad hoc boundaries and conditions that can be considered as
 not anomalous for each features profile that is created.</p></li>
 </ul>
-</div>
-<div class="section" id="how-well-does-it-work">
-<h2>How well does it work?<a class="headerlink" href="#how-well-does-it-work" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="how-well-does-it-work">
+<h2>How well does it work?<a class="headerlink" href="#how-well-does-it-work" title="Permalink to this heading"></a></h2>
 <p>This is a graph of the impact that Ionosphere has had on the anomaly count of
 <cite>ionosphere_enabled</cite> metrics before and after the deployment of Ionosphere.</p>
 <img alt="_images/ionosphere_impact_on_anomaly_count.png" src="_images/ionosphere_impact_on_anomaly_count.png" />
@@ -315,9 +252,9 @@ metrics any easier, in fact it can make it harder.</p>
 yesterday while OVH had 2 x 20 Kv lines down and generator problems in France,
 is normal?  Maybe I should wait a week before training Skyline on any metrics
 that have been OVH’d…”</p>
-</div>
-<div class="section" id="deploying-and-setting-ionosphere-up">
-<h2>Deploying and setting Ionosphere up<a class="headerlink" href="#deploying-and-setting-ionosphere-up" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="deploying-and-setting-ionosphere-up">
+<h2>Deploying and setting Ionosphere up<a class="headerlink" href="#deploying-and-setting-ionosphere-up" title="Permalink to this heading"></a></h2>
 <p>Requires - Panorama to be enabled and running.</p>
 <p>Ionosphere has a specific section of variables in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> that are
 documented in the settings specific documentation see all the settings below:</p>
@@ -332,15 +269,15 @@ should all be fairly intuitive.</p>
 set up and running you should have a more intuitive feel for these to after
 having spent some time looking over your running Skyline.  You cannot rush
 time series :)</p>
-</div>
-<div class="section" id="ionosphere-static-demo-pages">
-<h2>Ionosphere static demo pages<a class="headerlink" href="#ionosphere-static-demo-pages" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="ionosphere-static-demo-pages">
+<h2>Ionosphere static demo pages<a class="headerlink" href="#ionosphere-static-demo-pages" title="Permalink to this heading"></a></h2>
 <p>The demo pages show examples of how Ionosphere presents the operator with the
 metric’s details for the specific point anomaly and the all the Graphite
 metric graphs at multiple resolutions so that the operator can evaluation the
 anomaly in the full context of the metric’s history.</p>
-<div class="section" id="graphs-demo-page-multiple-resolution-graphite-graphs-for-context">
-<h3>Graphs demo page - multiple resolution Graphite graphs for context<a class="headerlink" href="#graphs-demo-page-multiple-resolution-graphite-graphs-for-context" title="Permalink to this headline">¶</a></h3>
+<section id="graphs-demo-page-multiple-resolution-graphite-graphs-for-context">
+<h3>Graphs demo page - multiple resolution Graphite graphs for context<a class="headerlink" href="#graphs-demo-page-multiple-resolution-graphite-graphs-for-context" title="Permalink to this heading"></a></h3>
 <p>The demo page uses an edge case anomaly one which is not easy to decide whether
 it is or is not an anomaly.</p>
 <p>Would <strong>YOU</strong> consider it anomalous or not?  Would you want an alert?</p>
@@ -356,9 +293,9 @@ the buttons, look at the graphs, see the <span class="skyblue">Graphite ::</span
 section on the below demo page.</p>
 <p>See <a href="_static/ionosphere_demo/training-data-stats.gauges.statsd.timestamp_lag-20170110161506UTC/Skyline.Ionosphere.training-data-stats.gauges.statsd.timestamp_lag-20170110161506UTC.html" target="_blank">Ionosphere static multiple resolution graphs demo page</a> for a clearer picture (opens in a new browser tab).  Is
 it anomalous or not anomalous?</p>
-</div>
-<div class="section" id="features-profile-demo-page-with-matched-graphs">
-<h3>Features profile demo page with matched graphs<a class="headerlink" href="#features-profile-demo-page-with-matched-graphs" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="features-profile-demo-page-with-matched-graphs">
+<h3>Features profile demo page with matched graphs<a class="headerlink" href="#features-profile-demo-page-with-matched-graphs" title="Permalink to this heading"></a></h3>
 <p>This demo page shows an existing features profile with all the graph resources
 that the profile was created, see the <span class="skyblue">Graphite ::</span> <span class="red">graphs WHEN created ::</span> <strong>at 7h, 24h, 7d and 30d</strong>
 section in the below demo page.</p>
@@ -370,22 +307,22 @@ that was calculated for features profile 989 see
 <span class="skyblue">Graphite ::</span> <span class="red">graphs MATCHED</span> section in the below demo page.</p>
 <p>See <a href="_static/ionosphere_demo/fp_matched_demo/Skyline.fp.matched.demo.html" target="_blank">Ionosphere static features profile demo page with matched graphs</a> for a clearer picture.</p>
 <p>The <a href="_static/ionosphere_demo/features-profile.stats.statsd.graphiteStats.calculationtime/Skyline.Ionosphere.features-profile.stats.statsd.graphiteStats.calculationtime.html" target="_blank">old demo page with matched graphs</a>.</p>
-</div>
-<div class="section" id="features-profile-search-demo-page-with-generational-information">
-<h3>Features profile search demo page with generational information<a class="headerlink" href="#features-profile-search-demo-page-with-generational-information" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="features-profile-search-demo-page-with-generational-information">
+<h3>Features profile search demo page with generational information<a class="headerlink" href="#features-profile-search-demo-page-with-generational-information" title="Permalink to this heading"></a></h3>
 <p>See <a href="_static/ionosphere_demo/features-profile-search.stats.statsd.graphiteStats.calculationtime/Skyline.Ionosphere.features-profile-search.stats.statsd.graphiteStats.calculationtime.html" target="_blank">Ionosphere static search features profiles demo page with generation info</a> for a clearer picture with generational, parent_id,
 number of times checked, number of times matched information.</p>
-</div>
-</div>
-<div class="section" id="still-interested">
-<h2>Still interested?<a class="headerlink" href="#still-interested" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="still-interested">
+<h2>Still interested?<a class="headerlink" href="#still-interested" title="Permalink to this heading"></a></h2>
 <img alt="_images/what_if_i_told_you_train.jpeg" src="_images/what_if_i_told_you_train.jpeg" />
 <img alt="_images/what_if_i_told_you_learn.jpeg" src="_images/what_if_i_told_you_learn.jpeg" />
-</div>
-<div class="section" id="things-to-consider">
-<h2>Things to consider<a class="headerlink" href="#things-to-consider" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="contextual-anomalies-earthquakes-and-earth-tremors">
-<h3>Contextual anomalies - Earthquakes and Earth tremors<a class="headerlink" href="#contextual-anomalies-earthquakes-and-earth-tremors" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="things-to-consider">
+<h2>Things to consider<a class="headerlink" href="#things-to-consider" title="Permalink to this heading"></a></h2>
+<section id="contextual-anomalies-earthquakes-and-earth-tremors">
+<h3>Contextual anomalies - Earthquakes and Earth tremors<a class="headerlink" href="#contextual-anomalies-earthquakes-and-earth-tremors" title="Permalink to this heading"></a></h3>
 <p>A point anomaly is only as contextually as the time frame in which it is
 considered to be anomalous in.</p>
 <p>The following metaphor can be used to describe this concept.  As this concept is
@@ -420,30 +357,34 @@ failure.</p>
 <p>Skyline does not know all the contexts to the data, you do.  Ionosphere lets
 us teach Bob <strong>that is not an earthquake!!!</strong> and enables Bob to look and ask,
 “Did Alice say this was not an earthquake, let me look”.</p>
-</div>
-<div class="section" id="negative-values">
-<h3>Negative values<a class="headerlink" href="#negative-values" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="negative-values">
+<h3>Negative values<a class="headerlink" href="#negative-values" title="Permalink to this heading"></a></h3>
 <p>It needs to be noted that the current implementation of the algorithm is only
 valid for positive time series.  Any anomaly in time series that is identified
 as having a negative value in that specific time series period will not be
 trainable.</p>
-</div>
-<div class="section" id="create-or-create-and-learn">
-<h3>“Create” or “Create and LEARN”<a class="headerlink" href="#create-or-create-and-learn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="create-or-create-and-learn">
+<h3>“Create” or “Create and LEARN”<a class="headerlink" href="#create-or-create-and-learn" title="Permalink to this heading"></a></h3>
 <p>With Ionosphere, you have the option to allow it to learn these things for
 itself, as long as you tell it what it is ALLOWED to learn at the fuller
 duration.</p>
 <p>So Ionosphere gives you 2 options:</p>
-<div class="figure align-default" id="id1">
+<figure class="align-default" id="id1">
 <img alt="_images/create.and.do.not.learn.png" src="_images/create.and.do.not.learn.png" />
-<p class="caption"><span class="caption-text">Only make a features profile based on the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data or the Mirage <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_SECONDS</span></code></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id2">
+<figcaption>
+<p><span class="caption-text">Only make a features profile based on the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data or the Mirage <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_SECONDS</span></code></span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id2">
 <img alt="_images/create.and.learn.png" src="_images/create.and.learn.png" />
-<p class="caption"><span class="caption-text">This is not an anomaly now or then or in the forseeable future if it
+<figcaption>
+<p><span class="caption-text">This is not an anomaly now or then or in the forseeable future if it
 looks anything like the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> or any of the multiple
-resolution Graphite graphs, LEARN it at the <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
-</div>
+resolution Graphite graphs, LEARN it at the <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image"></a></p>
+</figcaption>
+</figure>
 <p>This means you do not have to ship that earthquake that happened 17 days ago into
 Ionosphere’s features profiles and teach it BAD, badly.  You can just tell it
 to see the relevant Analyzer <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> or Mirage the
@@ -478,9 +419,9 @@ review matches.  Having a few learn features profiles as well, will also give
 you a good idea of what is being done when Skyline is learning, when you look
 at the Ionosphere features profiles page and reviewing the <span class="red">learnt</span>
 features profiles on the <span class="skyblue">Search ::</span> <span class="red">features profiles</span> page.</p>
-</div>
-<div class="section" id="bad-learnt-features-profiles">
-<h3>Bad LEARNT features profiles<a class="headerlink" href="#bad-learnt-features-profiles" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="bad-learnt-features-profiles">
+<h3>Bad LEARNT features profiles<a class="headerlink" href="#bad-learnt-features-profiles" title="Permalink to this heading"></a></h3>
 <p>Due to Ionosphere using a <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a>
 percentage difference to learn with, it is going to get some learning wrong as
 far as we humans are concerned.  Due to the algorithm using a percentage
@@ -494,7 +435,7 @@ that incorrect LEARNT features profiles are disabled as soon as possible.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>A <strong>important</strong> note on learning.  When you let Ionosphere learn
-you create a lot of work for yourself in terms of validating every learnt
+you create work for yourself in terms of validating every learnt
 profile that Ionosphere learns.  If Ionosphere learns badly and you do not
 keep up to date with validating learnt features profiles, Ionosphere could end
 up silencing genuine anomalies which you would <strong>want</strong> to be alerted on.
@@ -503,17 +444,17 @@ possible to set the <a class="reference internal" href="skyline.html#settings.IO
 variable to 2 instead of the current default of 16 (as of v1.2.5), but as a
 general rule of thumb, using learning sparingly and validate often.</p>
 </div>
-</div>
-</div>
-<div class="section" id="how-ionosphere-works-a-simple-overview">
-<h2>How Ionosphere works - a simple overview<a class="headerlink" href="#how-ionosphere-works-a-simple-overview" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="how-ionosphere-works-a-simple-overview">
+<h2>How Ionosphere works - a simple overview<a class="headerlink" href="#how-ionosphere-works-a-simple-overview" title="Permalink to this heading"></a></h2>
 <p>Firstly one needs to understand there is a chicken and egg aspect to Ionosphere.
 Which if you have read up to this point, hopefully you have already got that
 point.</p>
 <p>Ionosphere has a number of roles that are centered on feature extractions,
 feature calculations and comparisons and a role centered on learning.</p>
-<div class="section" id="the-features-role">
-<h3>The features role<a class="headerlink" href="#the-features-role" title="Permalink to this headline">¶</a></h3>
+<section id="the-features-role">
+<h3>The features role<a class="headerlink" href="#the-features-role" title="Permalink to this heading"></a></h3>
 <p>The features role is based on the sum of the calculated features of a time series.
 What are calculated features?  Between 150 and 210 features are calculated, here
 are a few examples:</p>
@@ -585,9 +526,9 @@ in the database.</p></li>
 (Analyzer or Mirage) to send out the anomaly alert with a
 <code class="docutils literal notranslate"><span class="pre">[Skyline</span> <span class="pre">alert]</span> <span class="pre">-</span> <span class="pre">Ionosphere</span> <span class="pre">ALERT</span></code> subject field.</p></li>
 </ul>
-</div>
-<div class="section" id="the-learning-role">
-<h3>The learning role<a class="headerlink" href="#the-learning-role" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="the-learning-role">
+<h3>The learning role<a class="headerlink" href="#the-learning-role" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Once a features profile has been made for a metric with the LEARN option, for
 every unmatched anomaly that training_data is created for, after the
@@ -612,19 +553,19 @@ metric specific <code class="docutils literal notranslate"><span class="pre">max
 the learnt features profiles are only created with the time series at the
 original scale.</p>
 </div>
-</div>
-</div>
-<div class="section" id="input">
-<h2>Input<a class="headerlink" href="#input" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="input">
+<h2>Input<a class="headerlink" href="#input" title="Permalink to this heading"></a></h2>
 <p>When an anomaly alert is sent out via email, a link to the Ionosphere training
 data is included in the alert.  This link opens the Ionosphere UI with the all
 training data for the specific anomaly where the user can submit the metric
 time series as not anomalous and have Skyline generate a features profile with
 <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> (and optionally some additional layers, which are covered further down
 on this page).</p>
-</div>
-<div class="section" id="features-profiles">
-<h2>features profiles<a class="headerlink" href="#features-profiles" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="features-profiles">
+<h2>features profiles<a class="headerlink" href="#features-profiles" title="Permalink to this heading"></a></h2>
 <p>When a training data set is submitted as not anomalous for a metric a features
 profile is extracted from the time series using <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a>.  This features profile
 contains the values of 210 features (currently as of tsfresh-0.4.0), such
@@ -659,9 +600,9 @@ extracted when the user requests them.  This is for the sake of efficiency,
 there is no need to add computational overhead to extract features on every
 anomaly.</p>
 </div>
-</div>
-<div class="section" id="how-ionosphere-is-learning">
-<h2>How Ionosphere is “learning”?<a class="headerlink" href="#how-ionosphere-is-learning" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="how-ionosphere-is-learning">
+<h2>How Ionosphere is “learning”?<a class="headerlink" href="#how-ionosphere-is-learning" title="Permalink to this heading"></a></h2>
 <p>Ionosphere may have had humble beginnings, but adding this seemingly trivial
 function was anything but humble, simple or easy.  So to solve the seemingly
 simple problem, something completely new had to be pieced together.</p>
@@ -703,8 +644,8 @@ or negative of a features sum and a mirror image time series can have very
 similar calculated feature sums.</p>
 <p>Anyway, it is not perfect, by design.  Evolution tends to not achieve perfection,
 attaining a working, functional state is usually the norm in evolution it seems.</p>
-<div class="section" id="evolutionary-learning-generations">
-<h3>Evolutionary learning - generations<a class="headerlink" href="#evolutionary-learning-generations" title="Permalink to this headline">¶</a></h3>
+<section id="evolutionary-learning-generations">
+<h3>Evolutionary learning - generations<a class="headerlink" href="#evolutionary-learning-generations" title="Permalink to this heading"></a></h3>
 <p>Ionosphere uses an evolutionary learning model that records (and limits) the
 generations of trained and learnt features profiles per metric.  Limits can be
 set in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> and played around with.  For veterans of Skyline, these
@@ -727,9 +668,9 @@ similarities, it gets quite complicated.</p>
 work helps or hinders depending on your outlook…
 “Shit lots of stuff is anomalous” can often lead to lots of work, debugging,
 fine tuning and making better or polishing a turd or diamante.</p>
-</div>
-<div class="section" id="disabled-features-profiles">
-<h3>DISABLED features profiles<a class="headerlink" href="#disabled-features-profiles" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="disabled-features-profiles">
+<h3>DISABLED features profiles<a class="headerlink" href="#disabled-features-profiles" title="Permalink to this heading"></a></h3>
 <p>Ionosphere learning is not perfect, sometimes it will get it wrong as far as a
 human is concerned.  Luckily that does not happen often, but it will happen.</p>
 <p>Ionosphere lets the operator disable any features profile that they deem as
@@ -743,10 +684,10 @@ that spike from 2 weeks ago”.</p>
 disabled as well.  This ensures that every features profile was LEARNT from the
 profile and any that were LEARNT from any of them are disabled too so that the
 pattern is removed from evaluation during analysis of the metric in the future.</p>
-</div>
-</div>
-<div class="section" id="layers">
-<h2>Layers<a class="headerlink" href="#layers" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="layers">
+<h2>Layers<a class="headerlink" href="#layers" title="Permalink to this heading"></a></h2>
 <p>Ionosphere allows the operator to train Skyline a not anomalous time series
 in terms of generating a features profile to be compared to anomalies in the
 future, however Ionosphere also allows the operator to define “layers” rules at
@@ -790,8 +731,8 @@ them when they are matched, just to ensure they are behaving as you desire.
 Once you have validated that the layer is behaving as you wish, you should
 never have to worry about an invalid layer match thereafter.  However, do ensure
 that you just try to validate a few layers every now and then.</p>
-<div class="section" id="matching-approximately-close">
-<h3>Matching approximately close<a class="headerlink" href="#matching-approximately-close" title="Permalink to this headline">¶</a></h3>
+<section id="matching-approximately-close">
+<h3>Matching approximately close<a class="headerlink" href="#matching-approximately-close" title="Permalink to this heading"></a></h3>
 <p>The <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE" title="settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE</span></code></a> variable
 enables a margin of tolerance to be applied to layers D and E.  This is enabled
 by default and D and E boundary limits are matched if the value is approximately
@@ -804,9 +745,9 @@ limit on a layer is set to 52 and the data point is 53, the layer will match
 and you probably want it to as well.  If approximately_close is not used you
 will find it frustrating the number of times an anomaly is triggered where it
 did not match a layer by small margin.</p>
-</div>
-<div class="section" id="how-layers-are-defined">
-<h3>How layers are defined<a class="headerlink" href="#how-layers-are-defined" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="how-layers-are-defined">
+<h3>How layers are defined<a class="headerlink" href="#how-layers-are-defined" title="Permalink to this heading"></a></h3>
 <p>The layers are defined as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">last_datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span>
 <span class="n">DISCARD</span> <span class="o">-</span> <span class="n">not_anomalous</span> <span class="kc">False</span>
@@ -882,17 +823,19 @@ not want any layers silencing a drop to 0, please try and use layer D1 wisely
 where required.</p>
 <p>However, in this example,  if you want to ensure that your 200 status code count
 does not hit 0 or drop off a cliff, you would configure Boundary to watch it.</p>
-</div>
-</div>
-<div class="section" id="no-machine-learning">
-<h2>No machine learning<a class="headerlink" href="#no-machine-learning" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="no-machine-learning">
+<h2>No machine learning<a class="headerlink" href="#no-machine-learning" title="Permalink to this heading"></a></h2>
 <p>Ionosphere brings <strong>no</strong> machine learning to Skyline per se.  It is merely making
 programmatic decisions based on the data it is provided with, things a human
 operator tells it are not anomalous.  Ionosphere is an attempt to give Skyline
 an Apollo Program refit.  Enabling the pilots to take control, have inputs.</p>
-</div>
-<div class="section" id="for-humans">
-<h2>For Humans<a class="headerlink" href="#for-humans" title="Permalink to this headline">¶</a></h2>
+<p>A benefit here is that the method does not suffer from underspecification that
+is prevalent in machine learning models.</p>
+</section>
+<section id="for-humans">
+<h2>For Humans<a class="headerlink" href="#for-humans" title="Permalink to this heading"></a></h2>
 <p>If Ionosphere achieves the sentiments expressed in Brian L. Troutwine &#64;bltroutwine
 seminal Belgium 2014 devopsdays presentation, then it has achieved a goal.</p>
 <ul class="simple">
@@ -912,9 +855,9 @@ cost and here the cost is the operator needs to
 what is not anomalous.  Some brain CPU cycles, opening emails and clicks,
 assess 1 or 2 more clicks.  It is not easy, however that said it is effective at
 what it set out to achieve.</p>
-</div>
-<div class="section" id="current-state">
-<h2>Current state<a class="headerlink" href="#current-state" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="current-state">
+<h2>Current state<a class="headerlink" href="#current-state" title="Permalink to this heading"></a></h2>
 <p>It appears that Ionosphere is better at doing what it was intended for than
 doing what it was not intended for.  All time series not being created equal.</p>
 <p>Ionosphere does low range, low rate metrics very well.</p>
@@ -929,9 +872,9 @@ and high variability metrics, time will tell.</p>
 available via the database data for analysis.</p>
 <p><strong>UPDATE</strong> - using Min-Max scaling Ionosphere now handles high range, highly
 variable metrics much better.</p>
-</div>
-<div class="section" id="tsfresh">
-<h2>tsfresh<a class="headerlink" href="#tsfresh" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="tsfresh">
+<h2>tsfresh<a class="headerlink" href="#tsfresh" title="Permalink to this heading"></a></h2>
 <p>The <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> package and features extraction functions, enabled this ability of
 features calculation on a wholesale scale, without having to design lots of
 algorithms to calculate the time series features for.  The <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> package
@@ -947,9 +890,9 @@ development of Ionosphere took so long, but you cannot rush time series.</p>
 the <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> people &#64;MaxBenChrist, &#64;nils-braun and &#64;jneuff who are some of nicest
 people in open source, on par with &#64;astanway :)</p>
 <p>Thanks to <a href="https://www.blue-yonder.com" target="_blank">blue-yonder</a> for supporting the open sourcing of <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a>.</p>
-</div>
-<div class="section" id="memcached">
-<h2>memcached<a class="headerlink" href="#memcached" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="memcached">
+<h2>memcached<a class="headerlink" href="#memcached" title="Permalink to this heading"></a></h2>
 <p>Ionosphere uses memcached and pymemcache (see <a class="reference external" href="https://github.com/pinterest/pymemcache">https://github.com/pinterest/pymemcache</a>)
 to cache some DB data.  This optimises DB usage and ensures that any large
 anomalous event does not result in Ionosphere making all the DB metrics become
@@ -959,8 +902,8 @@ available, was done to ensure that Redis is for time series data (and alert keys
 and memcached isolates DB data caching.  The memcache data is truly transient,
 where as the Redis data is more persistent data and memcached is a mature, easy
 to use and well documented.</p>
-<div class="section" id="cached-data">
-<h3>Cached data<a class="headerlink" href="#cached-data" title="Permalink to this headline">¶</a></h3>
+<section id="cached-data">
+<h3>Cached data<a class="headerlink" href="#cached-data" title="Permalink to this heading"></a></h3>
 <p>Ionosphere caches the following data:</p>
 <ul class="simple">
 <li><p>features profile features values from the <cite>z_fp_&lt;metric_id&gt;</cite> table - no expiry</p></li>
@@ -974,35 +917,47 @@ expiry</p></li>
 <p>due to caching a metric and a features profile can take up to 1 hour
 to become live.</p>
 </div>
-</div>
-</div>
-<div class="section" id="operational-considerations">
-<h2>Operational considerations<a class="headerlink" href="#operational-considerations" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="no-ui-data-update-method">
-<h3>No UI data update method<a class="headerlink" href="#no-ui-data-update-method" title="Permalink to this headline">¶</a></h3>
+</section>
+</section>
+<section id="operational-considerations">
+<h2>Operational considerations<a class="headerlink" href="#operational-considerations" title="Permalink to this heading"></a></h2>
+<section id="no-ui-data-update-method">
+<h3>No UI data update method<a class="headerlink" href="#no-ui-data-update-method" title="Permalink to this heading"></a></h3>
 <p>There is no method to modify the DB data via the UI.  If you want to make any
 changes, they must be made directly against the DB.  Deleting features profiles,
 changing any of the metrics values once set for metrics e.g.
 <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">learn_valid_ts_older_than</span></code>, <code class="docutils literal notranslate"><span class="pre">max_generations</span></code> or
 <code class="docutils literal notranslate"><span class="pre">max_percent_diff_from_origin</span></code></p>
-</div>
-<div class="section" id="backup">
-<h3>Backup<a class="headerlink" href="#backup" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="backup">
+<h3>Backup<a class="headerlink" href="#backup" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Backup the MySQL DB to another machine or better slave it and backup the slave.</p></li>
 <li><p>rsync backup /opt/skyline/ionosphere/features_profiles to another machine,
 frequently (for the time being, until autobuild is available, however
 autobuild will not a able to recreate all the resources, but most).</p></li>
 </ul>
-</div>
-<div class="section" id="mysql-configuration">
-<h3>MySQL configuration<a class="headerlink" href="#mysql-configuration" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="mysql-configuration">
+<h3>MySQL configuration<a class="headerlink" href="#mysql-configuration" title="Permalink to this heading"></a></h3>
 <p>There could be a lot of tables. <strong>DEFINITELY</strong> implement <code class="docutils literal notranslate"><span class="pre">innodb_file_per_table</span></code>
 in MySQL.</p>
-</div>
-</div>
-<div class="section" id="ionosphere-autobuild-features-profiles-dir">
-<h2>Ionosphere - autobuild features_profiles dir<a class="headerlink" href="#ionosphere-autobuild-features-profiles-dir" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="ionosphere-custom-keep-training-timeseries-for">
+<h2>IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR<a class="headerlink" href="#ionosphere-custom-keep-training-timeseries-for" title="Permalink to this heading"></a></h2>
+<p>Enabling <a class="reference internal" href="skyline.html#settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR</span></code></a> allows
+you to not remove training data when it is <a class="reference internal" href="skyline.html#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span></code></a>
+seconds old.  Instead for any training data for metrics that match a namespace
+substring declared in the <a class="reference internal" href="skyline.html#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span></code></a>
+list will be moved to <a class="reference internal" href="skyline.html#settings.IONOSPHERE_HISTORICAL_DATA_FOLDER" title="settings.IONOSPHERE_HISTORICAL_DATA_FOLDER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_HISTORICAL_DATA_FOLDER</span></code></a>
+This is an advance feature and not for general purpose, please read the
+documentation in the docstrings for more info, see:
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_HISTORICAL_DATA_FOLDER" title="settings.IONOSPHERE_HISTORICAL_DATA_FOLDER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_HISTORICAL_DATA_FOLDER</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR</span></code></a></p>
+</section>
+<section id="ionosphere-autobuild-features-profiles-dir">
+<h2>Ionosphere - autobuild features_profiles dir<a class="headerlink" href="#ionosphere-autobuild-features-profiles-dir" title="Permalink to this heading"></a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>autobuild - TBD at some point in the future, for now see the Backup
@@ -1027,63 +982,38 @@ profile page data on-demand.</p>
 <p>expire features profiles older than?  Ionosphere forget.</p>
 </div>
 <p>See <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="ionosphere_echo.html" class="btn btn-neutral float-right" title="Ionosphere echo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="webapp.html" class="btn btn-neutral float-left" title="Webapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="webapp.html" class="btn btn-neutral float-left" title="Webapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ionosphere_echo.html" class="btn btn-neutral float-right" title="Ionosphere echo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>custom_algorithms.abs_stddev_from_median &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_algorithms.html">custom_algorithms</a></li>
+      <li class="breadcrumb-item active">custom_algorithms.abs_stddev_from_median</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for custom_algorithms.abs_stddev_from_median</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">THIS IS A SAMPLE CUSTOM ALGORITHM to provide a skeleton to develop your own</span>
+<span class="sd">custom algorithms.  The algorithm itself, although viable, is not recommended for</span>
+<span class="sd">production or general use, it is simply a toy algorithm here to demonstrate the</span>
+<span class="sd">structure of a simple custom algorithm that has ``algorithm_parameters`` passed</span>
+<span class="sd">as an empty dict {}.</span>
+<span class="sd">It is documented via comments #</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># REQUIRED Skyline imports.  All custom algorithms MUST have the following two</span>
+<span class="c1"># imports.  These are required for exception handling and to record algorithm</span>
+<span class="c1"># errors regardless of debug_logging setting for the custom_algorithm</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">record_algorithm_error</span>
+
+<span class="c1"># Import ALL modules that the custom algorithm requires.  Remember that if a</span>
+<span class="c1"># requirement is not one that is provided by the Skyline requirements.txt you</span>
+<span class="c1"># must ensure it is installed in the Skyline virtualenv</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+
+<span class="c1"># To test max_execution_time import sleep</span>
+<span class="c1"># from time import sleep</span>
+
+
+<span class="c1"># Define your simple algorithm.</span>
+<span class="c1"># The name of the function MUST be the same as the name declared in</span>
+<span class="c1"># settings.CUSTOM_ALGORITHMS.</span>
+<span class="c1"># It MUST have 3 parameters:</span>
+<span class="c1"># current_skyline_app, timeseries, algorithm_parameters</span>
+<span class="c1"># See https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</span>
+<span class="c1"># for a full explanation about each.</span>
+<span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and except</span>
+<div class="viewcode-block" id="abs_stddev_from_median"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.abs_stddev_from_median.abs_stddev_from_median">[docs]</a><span class="k">def</span> <span class="nf">abs_stddev_from_median</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A data point is anomalous if its absolute value is greater than three</span>
+<span class="sd">    standard deviations of the median.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app executing the algorithm.  This</span>
+<span class="sd">        will be passed to the algorithm by Skyline.  This is **required** for</span>
+<span class="sd">        error handling and logging.  You do not have to worry about handling the</span>
+<span class="sd">        argument in the scope of the custom algorithm itself,  but the algorithm</span>
+<span class="sd">        must accept it as the first agrument.</span>
+<span class="sd">    :param parent_pid: the parent pid which is executing the algorithm, this is</span>
+<span class="sd">        **required** for error handling and logging.  You do not have to worry</span>
+<span class="sd">        about handling this argument in the scope of algorithm, but the</span>
+<span class="sd">        algorithm must accept it as the second argument.</span>
+<span class="sd">    :param timeseries: the time series as a list e.g. ``[[1578916800.0, 29.0],</span>
+<span class="sd">        [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``</span>
+<span class="sd">    :param algorithm_parameters: a dictionary of any parameters and their</span>
+<span class="sd">        arguments you wish to pass to the algorithm.</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type parent_pid: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :type algorithm_parameters: dict</span>
+<span class="sd">    :return: True, False or Non</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># You MUST define the algorithm_name</span>
+    <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s1">&#39;abs_stddev_from_median&#39;</span>
+
+    <span class="c1"># Define the default state of None and None, anomalous does not default to</span>
+    <span class="c1"># False as that is not correct, False is only correct if the algorithm</span>
+    <span class="c1"># determines the data point is not anomalous.  The same is true for the</span>
+    <span class="c1"># anomalyScore.</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># To test max_execution_time enable a sleep</span>
+    <span class="c1"># sleep(1)</span>
+
+    <span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and the BELOW except</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">median</span> <span class="o">+</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span><span class="p">)</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="n">median</span> <span class="o">-</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span><span class="p">)</span>
+        <span class="c1"># make_error = median * UNDEFINED_VARIABLE</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">upper</span><span class="p">:</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">lower</span><span class="p">:</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

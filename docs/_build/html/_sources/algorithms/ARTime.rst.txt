@@ -1,0 +1,156 @@
+.. role:: skyblue
+.. role:: red
+
+`ARTime`_
+=========
+
+Skyline can use a port of the `ARTimeNAB`_ algorithm in the analysis pipeline.
+
+The algorithm based on adaptive resonance theory (`ART`_) which was developed by
+Stephen Grossberg and Gail Carpenter.  The `ARTimeNAB`_ algorithm itself was
+developed and published by Mark Hampton.
+
+
+The use of ARTime can be used to supplement three-sigma based algorithms and
+is better in the detection realm than matrixprofile.  ARTime has been proven
+to be a very useful and accurate algorithm in anomaly detection in time series,
+having achieved the highest score on the NAB scoreboard, usurping Numenta HTM's
+8 year place at the top.  No small feat.  However as the saying goes, all magic
+comes with a price.
+
+Implementing ARTime in Skyline incurs a number of additional overheads which
+are non-trivial.
+
+- It requires the installation and maintenance of Julia julialang
+- It requires significant number of Julia dependencies packages
+- It requires running a new Skyline app - skyline/flock
+
+The installation process for Julia is fairly straightforward, however the
+the installation of the dependencies packages less so.  This has to be done as a
+manually process.
+
+The requirement to run ARTime in the new process manager skyline/flock is
+based on the fact, that although ARTime could be run as normal custom
+algorithm, the initialisation time of the Julia process is limiting and not
+suited to running in real time on an adhoc basis.  The new skyline/flock process
+manager initialises a process/es with all the Julia dependencies and packages
+loaded and then handles job submitted to a Redis queue.
+
+ARTime is fast, but it is not fast enough to run in the 1st stage Analyzer
+analysis stage, so it is limited to running in the Mirage 2nd stage analysis,
+much like matrixprofile.  That said, even then ARTime cannot be considered as
+fast.  The algorithm time and memory is linear based on the number of data
+points being analysed (see considerations).  Although ARTime is an online
+streaming algorithm, it is used in Skyline in a batch method.  It would be
+possible to have an ARTime model for every metric and have it continuously
+learning, however that is unrealistic in terms of memory and overhead in the
+context of Skyline and 1000s upon 1000s of metrics.
+
+Therefore implementation methodology in Skyline is the same as always, ARTime
+is fed SECOND_ORDER_RESOLUTION_HOURS data points and returns anomalies.
+Therefore Skyline is using ARTime in a oneshot, streaming fashion. A new
+model is initialised, each data point fed to the model and the model returns an
+anomaly score for each data point.  Once the data has been analysed, a decision
+is made based on whether or not the data point/s in the last window are anomalous
+or not.
+
+Considerations
+~~~~~~~~~~~~~~
+
+As always analysis run time is paramount in Skyline, therefore due to the
+analysis run time for ARTime increasing with the number of data
+points analysed, the following must be noted.
+
+- The skyline_ARTime algorithm is not suited to high frequency time series,
+  meaning if your SECOND_ORDER_RESOLUTION_HOURS data is 7 days longer and has
+  a data point every 60 seconds, having 10080 data points, it is too big.
+- The skyline_ARTime algorithm will downsample any time series > 1440 data
+  points to as close to 1000 data points as possible.
+- skyline_ARTime can take approximately between 1.5 and 2 seconds to analyse a
+  time series with a length of 1008 data points (e.g. 7 days at 600 seconds
+  resolution).  However depending on CPU utilisation this can head up to the
+  5 to 10 seconds range when the server is under heavy load.
+
+
+Setting up the Julia environment, dependencies and ARTime
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Firstly you need to install Julia on the server and all the dependencies.  The
+steps highlighted here are based on having a standard Skyline installarion
+deployed as per the Installation page or dawn quick start methods.
+
+.. code-block:: bash
+
+    # NOTE: make sure the correct versions are stated below just in case this
+    #       documentation is not updated when versions update.
+    PYTHON_VERSION="3.8.13"
+    PYTHON_MAJOR_VERSION="3.8"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py3813"
+
+    PYTHON_MAJOR_VERSION="3"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py3813"
+
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+
+    # Use jill to install the latest Julia - https://github.com/johnnychen94/jill.py
+    bin/pip3.8 install jill
+    jill install
+
+    # Install the julia requirements
+    bin/pip3.8 install -r /opt/skyline/github/skyline/julia-requirements.txt
+
+    # Start a julia REPL
+    julia
+
+
+    # As of statsmodels 0.9.0 numpy, et al need to be installed before
+    # statsmodels in requirements
+    # https://github.com/statsmodels/statsmodels/issues/4654
+    cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" > /tmp/requirements.1.txt
+
+    cd "${PYTHON_VIRTUALENV_DIR}/projects"
+
+
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385
+source bin/activate
+bin/pip3.8 install tad
+git clone https://github.com/JoungheeKim/fuseAD
+bin/pip3.8 install jill
+cd
+jill install
+history | tail -n 30
+bin/pip3.8 install juliacall==0.4.3
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385
+bin/pip3.8 install juliacall==0.4.3
+mkdir /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed
+git clone https://github.com/markNZed/ARTimeNAB.jl
+mkdir /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed/NAB/ARTimeNAB
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed/NAB/ARTimeNAB
+git clone https://github.com/markNZed/NAB
+cd NAB
+git checkout ARTimeNAB
+pwd
+ls -al
+ls -al data/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv
+
+
+
+Enabling ARTime to run in Mirage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See the current ``'skyline_matrixprofile'`` example in
+:mod:`settings.CUSTOM_ALGORITHMS` and change the ``'namespaces':`` parameter as
+appropriate.
+
+Important points to note.
+
+- The window and and probationary_period must be an even number
+- probationary_period must => window otherwise anomaly scores are nans
+
+
+.. _ARTimeNAB: https://github.com/markNZed/ARTimeNAB.jl
+.. _ART: https://en.wikipedia.org/wiki/Adaptive_resonance_theory

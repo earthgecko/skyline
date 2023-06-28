@@ -1,23 +1,67 @@
 Getting started
 ===============
 
-At some point hopefully it will be `pip install skyline` but for now see the
-`Installation`_ page **after** reviewing the below
-
 .. _Installation: ../html/installation.html
+
+See the `Installation`_ page **after** reviewing the below.
+
+Managed Service
+---------------
+
+You can sign up to Anomify, a cutting edge Skyline service, built and managed by
+the team behind Skyline.  Anomify is offering a free
+`service for beta users <https://anomify.ai/skyline>`_.  Or you can elect to
+clone the Skyline repository from Github and run Skyline on premise or in your
+own cloud infrastructure and follow the steps below.
+
+A collection of applications
+----------------------------
+
+Skyline is made up of a collection of applications that interact with each other
+but all run independently, each fulfilling a specific role in the analysis pipeline.
+Lets go through them briefly.  Horizon, Analyzer, Mirage, Panorama, Boundary,
+Crucible, Ionosphere, Luminosity, Vista, Flux and the webapp (and snab).  That
+is a lot... full featured.  Only the core real times applications will be
+introduced here.
+
+- Graphite - although Graphite is not part of Skyline it is Skyline's long term
+  time series database.
+- VictoriaMetrics - not part of Skyline but can be used as Skyline's long term
+  time series database for label based metrics.
+- Redis - database for transient real time data and sharing data between Skyline
+  applications.
+- Horizon - receives metrics from Graphite (and labelled metrics from Flux) and
+  feeds them into Redis.  And also prunes old time series data from Redis.
+- Flux ingests metrics via HTTP in various formats, including JSON and Prometheus
+  protocol buffer format.
+- Analyzer - every minute, gets 24 hours of metric data from Redis and analyses
+  them all with 9 three-sigma based algorithms and pushes potential anomalies to
+  Mirage or Ionosphere.
+- Mirage analyses potential anomalies with the same 9 three-sigma based
+  algorithms but against a longer period of data than 24 hours, normally 7 days.
+  It also analyses the metric with any defined custom algorithms such as
+  matrixprofile. If the instance is still considered anomalous, Mirage forwards
+  it to Ionosphere (if the metric has been trained on) or alerts on the metric.
+- Ionosphere extracts features and potentially anomalous shapelets from the
+  data and runs similarity searches across all trained data, if still anomalous,
+  it sends an event to Panorama and back to the originating app, e.g. Mirage to
+  route the event as appropriate.
+- Panorama receives detected anomalies from Analyzer, Mirage, Boundary and
+  Ionosphere and records the details in the database.
+- Boundary analyses defined metrics against specified thresholds and configured
+  dynamic thresholds and alerts if breached.
+- Luminosity cross correlates anomalies with the entire or defined metric
+  population and can classify anomaly types.
+- Panorama records and tracks anomalies in the DB
 
 Realistic expectations
 ----------------------
 
 Anomaly detection is not easy.  Skyline is not easy to set up, it has a number
 of moving parts that need to be orchestrated.  Further to this, for Skyline to
-be configured, trained and start learning takes a lot of time.
-
-Take time to read through the documentation and review ``settings.py`` at the
-same time.  There are lots of settings in ``settings.py`` do not feel
-intimidated by this. The default settings should be adequate and reasonable for
-starting out with.  The settings that you must change and take note of are all
-documented on the `Installation`_ page
+be configured, trained and start learning takes time.  But rest assured once set
+up, it just runs and runs and runs, requiring minimal maintenance, if any (apart
+from when things need to be upgraded).
 
 Anomaly detection is a journey not an app
 -----------------------------------------
@@ -47,10 +91,11 @@ metrics, it can but...
 
 Skyline should have been pitched to monitor your KEY metrics.
 
-To begin with decide what your 10 most important Graphite metrics are and
-**only** configure :mod:`settings.ALERTS` and :mod:`settings.SMTP_OPTS` on those
-to begin with and get to know what Skyline does with those.  Add more key metric
-groups as you get the hang of it.
+To begin with decide what your 100 most important metrics are and **only**
+configure :mod:`settings.ALERTS` and :mod:`settings.SMTP_OPTS` (you can use
+``no_email`` to not recieve alerts).  If you have Slack, set up a channel and
+send these to begin with and get to know what Skyline does with those.  Add
+more key metric groups as you get the hang of it.
 
 You cannot rush time series.
 
@@ -67,13 +112,13 @@ starting out.  Bringing Skyline modules online incrementally over time, helps
 you to understand the processes and their different configuration settings
 easier.  Easier than trying to get the whole stack up and running straight off.
 
-Start with Horizon, Analyzer, Webapp, Luminosity and Panorama
--------------------------------------------------------------
+Start with Horizon, Analyzer, Mirage, Ionosphere and Webapp, Luminosity and Panorama
+------------------------------------------------------------------------------------
 
-It is advisable to only start the Horizon, Analyzer, Luminosity, Webapp and
-Panorama daemons initially and take time to understand what Skyline is doing.
-Take some time to tune Analyzer's :mod:`settings.ALERTS` and learn the patterns
-in your IMPORTANT metrics:
+It is advisable to only start the Horizon, Analyzer, Mirage, Ionosphere, Webapp,
+Luminosity and Panorama daemons initially and take time to understand what
+Skyline is doing.  Take some time to tune Analyzer's :mod:`settings.ALERTS` and
+learn the patterns in your IMPORTANT metrics:
 
 - which metrics trigger anomalies?
 - when the metrics trigger anomalies?
@@ -94,7 +139,8 @@ Add Mirage parameters to :mod:`settings.ALERTS`
 
 Once you have an overview of metrics that have seasonality that are greater
 than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to
-the :mod:`settings.ALERTS` tuples and start the Mirage daemon.
+the :mod:`settings.ALERTS` tuples to be analysed by Mirage.  And set
+:mod:`ENABLE_MIRAGE` to ``True``.
 
 Add Boundary settings
 ---------------------
@@ -109,10 +155,19 @@ Train Ionosphere
 Via the alert emails or in the Skyline Ionosphere UI, train Ionosphere on what
 is NOT anomalous.
 
+Play with Vortex
+~~~~~~~~~~~~~~~~
+
+After you have over 7 days of data in the system, you can run whatever metrics
+you want through all the different algorithms and see their results, just for
+fun.
+
 Ignore Crucible
 ---------------
 
 Still EXPERIMENTAL - for the time being.
+
+You will probably like Vortex more.
 
 By default Crucible is enabled in the ``settings.py`` however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate
@@ -126,6 +181,5 @@ Crucible has 2 roles:
    run algorithms.
 
 It is not advisable to enable Crucible on any of the other modules unless you
-really want to "see" anomalies in great depth.  Crucible is enabled as there is
-a Crucible frontend view on the roadmap that will allow the user to test any
-time series of any metric directly through the UI.
+really want to "see" anomalies in great depth.  Crucible allows the user to test
+any time series of any metric directly through the webapp UI.

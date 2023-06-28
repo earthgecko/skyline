@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vortex &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Thunder" href="thunder/index.html" />
+    <link rel="prev" title="Prometheus" href="prometheus.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vortex</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#preprocessing">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coercing">Coercing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-periods">Analysis periods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#downsampling">Downsampling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strictly-increasing-monotonic-data-transformation">Strictly increasing monotonic data transformation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#http-303-and-302s-responses">HTTP 303 and 302s responses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vortex-post-data">Vortex POST data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#algorithms"><code class="docutils literal notranslate"><span class="pre">algorithms</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#anomaly-window"><code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#available-algorithms">Available algorithms</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Vortex</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/vortex.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="vortex">
+<h1>Vortex<a class="headerlink" href="#vortex" title="Permalink to this heading"></a></h1>
+<p>Skyline Vortex is a service responsible for adhoc analysis of timeseries data
+submitted via HTTP POSTs.  This allows for adhoc analysis of any timeseries
+data, these metrics can be stored anywhere, Skyline does not require access to
+them, but metrics already in Skyline can be run through Vortex as well.  The
+timeseries data is posted to Flux with json data that provides details about the
+metric, the timeseries data itself and what algorithms to analyse the data with.</p>
+<p>Although Vortex is accessible via API, there is a webapp UI page to submit local
+metric timeseries and csv data as well.</p>
+<p>Vortex is handled by two services, Flux and Mirage.  Requests are submitted to
+Flux, which are added to a queue for mirage_vortex to process.  mirage_vortex
+processes the items in the queue and adds the results to a queue for Flux to
+return the results in the request response.</p>
+<p>A few things to be aware of are:</p>
+<ul class="simple">
+<li><p>Timestamps must be unix timestamps and will be coerced into ints.</p></li>
+<li><p>Values must be ints, floats or nans and will be coerced into floats.</p></li>
+<li><p>Timestamps and values that cannot be coerced will be removed.</p></li>
+<li><p>The requesting client should use a timeout of 60 seconds.</p></li>
+<li><p>The requesting client must follow HTTP status 303 and 302 redirects.</p></li>
+<li><p>Only one timeseries can be submitted per request.  This is for the sake of
+simplicity, if multiple metrics/timeseries were accepted the client would
+possibly have to parse and process HTTP 207 responses <strong>and</strong> follow any 303
+or 302 items returned in the 207 response, which could hold a number of 200,
+303 and 302 items.  This would make it impossible to use simple HTTP methods
+such as cURL or python requests, without having to wrap their usage in
+complicated conditions. Therefore to keep it simple - one timeseries per
+request.</p></li>
+</ul>
+<section id="preprocessing">
+<h2>Preprocessing<a class="headerlink" href="#preprocessing" title="Permalink to this heading"></a></h2>
+<p>All data submitted to Vortex is preprocessed.  Preprocessing is required to
+ensure that the data is suitable for algorithmic analysis, clean and consistent.
+Certain algorithms require that there are no gaps or nans in the data to
+generate reliable results, others are more tolerant.  Best efforts are made to
+assess the data appropriately per algorithm.  Preprocessing also ensures that
+the shape of the data conforms to additional analysis in the pipeline such as
+training and matching features profiles, etc.</p>
+<p>The each preprocessing step that is applied to every data set is described
+below.  There may be additional preprocessing required specific to each
+algorithm and those preprocessing steps are described in the documentation
+specific to the algorithm and are not covered here.</p>
+<section id="coercing">
+<h3>Coercing<a class="headerlink" href="#coercing" title="Permalink to this heading"></a></h3>
+<p>Timestamps and values will be coerced into ints and floats respectively.  Any
+data that cannot be coerced into the said types will be discarded from the
+dataset.</p>
+</section>
+<section id="analysis-periods">
+<h3>Analysis periods<a class="headerlink" href="#analysis-periods" title="Permalink to this heading"></a></h3>
+<p>To allow Vortex analysis and results to be trained on, by default Vortex
+can handle two periods, 86400 seconds (24 hours) and 604800 seconds (7 days).
+Data submitted must be either 24 hours worth of data or 7 days worth of data,
+if you wish to be able to train on it.</p>
+<p>Any data that is submitted that is greater than 7 days in length will be
+shortened to start at <code class="docutils literal notranslate"><span class="pre">last_timestamp</span> <span class="pre">-</span> <span class="pre">604800</span></code>.</p>
+<p>Any data that is submitted that is greater in length than 1 day but less than 7
+will <strong>only have the last 24 hour period analysed</strong> and the preceding data will
+be discarded.</p>
+<p>Unless, you pass the <code class="docutils literal notranslate"><span class="pre">override_7_day_limit</span></code> parameter, then the data can be
+any length, but it will not be trainable.</p>
+</section>
+<section id="downsampling">
+<h3>Downsampling<a class="headerlink" href="#downsampling" title="Permalink to this heading"></a></h3>
+<p>During preprocessing Vortex will downsample 7 day data to a resolution of 600
+seconds and 24 hour data to 60 seconds (if the resolution is &lt; 60).</p>
+<p>Data is downsampled on the mean and aligned to the end of the dataset, rather
+than the start of the dataset, which results in the final period have a full
+sample rather than a partial sample.</p>
+<p>If your data is high resolution, e.g. a scrape_interval of 10 seconds, try and
+ensure that you use an appropriate rate/step values when surfacing the data to
+send. This will result in less bandwidth and time to process than sending your
+raw high resolution data.  Although you can send high resolution data, the
+downsampling will result in different <strong>exact</strong> values to what your original
+data may return when a rate/step is applied, which can lead to small
+inconsistencies/discrepancies which may raise needless questions at some point.</p>
+<p><strong>Always try to send 7 days worth of data at a resolution of 600 seconds or 24
+hours of data at a resolution of 60 seconds.</strong></p>
+<p>Unless you pass the <code class="docutils literal notranslate"><span class="pre">no_downsample</span></code> parameter and in this case the data will
+not be trainable.</p>
+</section>
+<section id="strictly-increasing-monotonic-data-transformation">
+<h3>Strictly increasing monotonic data transformation<a class="headerlink" href="#strictly-increasing-monotonic-data-transformation" title="Permalink to this heading"></a></h3>
+<p>Any data submitted that is strictly increasing monotonic data (counters, counts)
+will be transformed to a non-negative derivative timeseries (resets discarded).</p>
+<p>Similar to downsampling, <strong>always try to apply an appropriate rate</strong> to any
+count based metrics before sending the data rather than sending the raw
+monotonic data.</p>
+</section>
+</section>
+<section id="http-303-and-302s-responses">
+<h2>HTTP 303 and 302s responses<a class="headerlink" href="#http-303-and-302s-responses" title="Permalink to this heading"></a></h2>
+<p>Due to the fact that 100s or 1000s of requests could be made to Vortex at the
+same time, the expected response times can vary.  Under general load (and
+depending on the algortihms requests) Vortex should return responses within a
+few seconds, however if the workload is high that time can be much longer.
+This is why the client needs to use a 60 second timeout on requests.  Further
+to that if Vortex has not processed the request in the defined timeout period,
+it will issue a HTTP 303 (See other) response with a GET URL location for the
+client to request to get the result from, the original timeout is automatically
+added as a URL parameter.  The client should follow the 303 and will once again
+wait for the timeout period for the results response.  If the results are not
+ready after this timeout period, then a HTTP 302 response is issues with the
+same URL and the retry parameter incurred by 1.  This process is repeated 3
+times after which if no results are available, a HTTP 200 response will be
+issued with json response of:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;REQUEST_ID&gt;&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;reason&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;No results were returned . The request can be retried later, results will be available for 1 hour.&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;retry_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;SCHEME&gt;://&lt;HOST&gt;/flux/vortex_results?request_id=&lt;REQUEST_ID&gt;&amp;timeout=&lt;TIMEOUT&gt;&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">retry_url</span></code> will only be present on the final request.</p>
+</section>
+<section id="vortex-post-data">
+<h2>Vortex POST data<a class="headerlink" href="#vortex-post-data" title="Permalink to this heading"></a></h2>
+<p>Due to the number of options available the POST data object can be quite complex.
+Each algorithm has it’s own parameters, which if not passed will be set to a
+sensible default.  Sometimes these sensible defaults are calculated from the
+timeseries data itself.</p>
+<p>The basic json POST data has the following structure, the keys in the below
+example are required.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span>{
+    &quot;key&quot;: &quot;apikey|str|required&quot;,
+    &quot;metric&quot;: &quot;metric|str|required&quot;,
+    &quot;timeout&quot;: seconds|int|required,
+    &quot;timeseries&quot;: timeseries|[list,dict]|required,
+    &quot;algorithms&quot;: {
+        &quot;sigma&quot;: {&quot;consensus&quot;: 6},
+        &quot;spectral_residual&quot;: {},
+    },
+    &quot;consensus&quot;: [[&quot;sigma&quot;, &quot;spectral_residual&quot;]],
+    &quot;reference&quot;: &quot;a reference id for you|str|optional&quot;
+}
+</pre></div>
+</div>
+<p>Required key value pairs that must be sent in the POST json data are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span></code>: The flux API token for the namespace.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metric</span></code>: The metric name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">timeout</span></code>: The timeout to use in seconds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">timeseries</span></code>: A list or dict (k/v pairs) of unix timestamps and values.</p></li>
+</ul>
+<p>Optional key value pairs are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithms</span></code>: A dict of the algorithms to run, their parameters and a
+consensus patterns.  <code class="docutils literal notranslate"><span class="pre">algorithms</span></code> is covered in detail below.  There is a
+maximum of 3 algorithms that can be passed (unless the
+mod:<cite>settings.FLUX_SELF_API_KEY</cite> key is used, see below).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reference</span></code>: This can be a string of a reference you wish to assign to the
+analysis task.  This could be a trace id, a metric name or a timeseries, it
+can be anything, but it <strong>must</strong> be cast as a string.  Therefore if it is an
+int or float it must be passed as <code class="docutils literal notranslate"><span class="pre">&quot;1987&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;1669399450.337939&quot;</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">no_downsample</span></code>: Allows analysis to be run without downsampling the data,
+<strong>be advised no training_data is saved for these requests</strong>, only results are
+returned.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">override_7_day_limit</span></code>:  Allows to override the requirement for 24h or 7d
+data, <strong>be advised training_data is not suitable for training with on these
+requests</strong></p></li>
+</ul>
+<p>Using the mod:<cite>settings.FLUX_SELF_API_KEY</cite> key allows for additional parameters
+to be passed and can be used to remove the maximum algorithm limit of 3.
+Additional keys that can be passed with this key are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">save_training_data_on_false</span></code>: A boolean that enables the saving of
+training data even if the instance is not found to be anomalous.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">metric_namespace_prefix</span></code>: A string of the namespace prefix to use or a
+<code class="docutils literal notranslate"><span class="pre">None</span></code> boolean value.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shard_test</span></code>: A boolean that allows for run a shard test while Skyline is
+running in a clustered mode.  No analysis is done, the requests is just
+distributed to correct cluster node which returns a response indicating that
+it received and would process the request.</p></li>
+</ul>
+<section id="algorithms">
+<h3><code class="docutils literal notranslate"><span class="pre">algorithms</span></code><a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h3>
+<p>DOCUMENTATION STILL UNDER DEVELOPMENT</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">algorithms</span></code> object is the most complicated so it is covered in detail
+here.  It consists keys for each algorithm to be run with any algorithm
+parameters defined for each algorithm.  If no algorithm parameters are passed
+e.g. <code class="docutils literal notranslate"><span class="pre">{}</span></code> then the default parameters for the algorithm will be used.</p>
+<p>Along with these algorithm definitions there is a <code class="docutils literal notranslate"><span class="pre">consensus</span></code> key with can
+hold a list of lists to define what combinations of triggered algorithms will be
+classed as an anomaly.  For example below we define that both the <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and
+<code class="docutils literal notranslate"><span class="pre">spectral_residual</span></code> algorithms must be triggered to be classed as an anomaly.</p>
+<div class="highlight-json-object notranslate"><div class="highlight"><pre><span></span>{
+    &quot;key&quot;: &quot;0123456789abcdefghijlmnopqrstu&quot;,
+    &quot;metric&quot;: &quot;prometheus_http_requests_total{alias=\\&quot;Prometheus\\&quot;, code=\\&quot;200\\&quot;, handler=\\&quot;/api/v1/query_range\\&quot;, instance=\\&quot;localhost:9090\\&quot;, job=\\&quot;prometheus\\&quot;}&quot;,
+    &quot;timeout&quot;: 60,
+    &quot;timeseries&quot;: [[1668689060, 23.3], ..., [1668689120, 162.9]],
+    &quot;algorithms&quot;: {
+        &quot;sigma&quot;: {&quot;sigma_value&quot;: 3, &quot;consensus&quot;: 6},
+        &quot;spectral_residual&quot;: {},
+    },
+    &quot;consensus&quot;: [[&quot;sigma&quot;, &quot;spectral_residual&quot;]],
+    &quot;reference&quot;: &quot;128186f730da2d9e&quot;
+}
+</pre></div>
+</div>
+<p>Above we define that the <code class="docutils literal notranslate"><span class="pre">sigma</span></code> algorithms must achieve a consensus of 6
+e.g. 6 of the 9 sigma algorithms must trigger for <code class="docutils literal notranslate"><span class="pre">sigma</span></code> to be classed as
+anomalous.  We also define that <code class="docutils literal notranslate"><span class="pre">spectral_residual</span></code> should be run with it’s
+default settings <code class="docutils literal notranslate"><span class="pre">{}</span></code>.  In the overall <code class="docutils literal notranslate"><span class="pre">consensus</span></code> key we define that
+<strong>both</strong> <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and <code class="docutils literal notranslate"><span class="pre">spectral_residual</span></code> <strong>must</strong> trigger to class the
+analysis as anomalous.</p>
+<p>Should you wish to have an anomalous classification based on any of the
+algorithms triggering, you can specify the overall <code class="docutils literal notranslate"><span class="pre">consensus</span></code> as:</p>
+<div class="highlight-json-object notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;algorithms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;sigma&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;sigma_value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;consensus&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;spectral_residual&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="p">},</span>
+<span class="nt">&quot;consensus&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[[</span><span class="s2">&quot;sigma&quot;</span><span class="p">],</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;spectral_residual&quot;</span><span class="p">]],</span>
+</pre></div>
+</div>
+<p>This would mean that if either one of the algorithms triggered, the instance
+would be classed as anomalous.</p>
+<p>It is possible to not specify the <code class="docutils literal notranslate"><span class="pre">algorithms</span></code> key and defaults will be used.
+Currently the defaults are <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and <code class="docutils literal notranslate"><span class="pre">spectral_residual</span></code>, however if a
+better combination of algorithms is discovered this can change in future
+versions.</p>
+<section id="anomaly-window">
+<h4><code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code><a class="headerlink" href="#anomaly-window" title="Permalink to this heading"></a></h4>
+<p>A number of the algorithms have a special algorithm parameter of
+<code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code>.  This parameter allows one to specify a window size in which
+to classify an instance as anomalous.</p>
+<p>Basically this allows you to configure the algorithm to check if any value in
+the last x values are anomalous, rather than just checking the last value.</p>
+<p>If present in an algorithm, by default the <code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code> is 1.  Skyline
+generally only determines if the final value in a timeseries is anomalous
+related to the rest of the timeseries, however, due to the nature of Vortex, it
+may help the set the <code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code> to a number of data points.</p>
+<p>Because Vortex is adhoc analysis, the methods you use to decide whether to
+analyse a timeseries may be lagged, meaning by the time your analysis/alerter
+has decided something should be further assessed and surfaces the data, the
+timeseries may already have changed.  Perhaps you see a value of 800 and your
+normal values are between 10 and 30, by the time you surface the data to send
+to Vortex the last value may have updated to say 22, using the default
+<code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code> the timeseries may be classified as not anomalous, because
+the value of 22 is being used as the decider.  Having an <code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code> of
+say 5 and say the following values would be evaluated <code class="docutils literal notranslate"><span class="pre">17,</span> <span class="pre">14,</span> <span class="pre">24,</span> <span class="pre">800,</span> <span class="pre">22</span></code>
+and the timeseries would be classified as anomalous.</p>
+<p><strong>It is important to consider this window in the context of any downsampling
+that may be applied to the data.</strong></p>
+<p>For example if you are sending 7 days of data at a resolution of 5 seconds
+(because you have decided to not following the advice on downsampling above) and
+you wanted to check for anomalies in the last 10 minutes, the <code class="docutils literal notranslate"><span class="pre">anomaly_window</span></code>
+will be 1 not 40 when downsampling is applied.</p>
+</section>
+<section id="available-algorithms">
+<h4>Available algorithms<a class="headerlink" href="#available-algorithms" title="Permalink to this heading"></a></h4>
+<p>The currently the following algorithms are available to use with Vortex, each
+listed here will be handled in detail regarding their individual
+<code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> which are available.  These may be subject to or
+removal at some point in the future:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">default</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sigma</span></code> - Collection of the original Skyline 3sigma algorithms</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dbscan</span></code> - Density-based spatial clustering of applications with noise</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lof</span></code> - Local Outlier Factor</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">one_class_svm</span></code> - One Class SVM</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pca</span></code> - Principal Component Analysis</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">prophet</span></code> - the fbprophet algorithm (long running and not suited to realtime</dt><dd><p>analysis)</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spectral_residual</span></code> - Spectral Residual</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isolation_forest</span></code> - Isolation Forest</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">m66</span></code> - A skyline changepoint detection algorithm, similar to</dt><dd><p>PELT, ruptures and Bayesian Online Changepoint Detection, however it is
+more robust to instaneous outliers and more conditionally selective of
+changepoints.</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adtk_level_shift</span></code> - ADTK LevelShiftAD algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adtk_persist</span></code> - ADTK PersistAD algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adtk_seasonal</span></code> - ADTK SeasonalAD algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">adtk_volatility_shift</span></code> - ADTK VolatilityShiftAD algorithm</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">macd</span></code> - Moving Average Convergence/Divergence</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spectral_entropy</span></code> - Spectral Entropy</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">mstl</span></code> - statsforecast MSTL algorithm (the mstl algorithm is very long running</dt><dd><p>and not suited for realtime analysis)</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The algorithms are run in the order in which they are declared and the analysis
+will stop before running all algorithms, if a consensus is reached before all
+the algorithms are run or if consensus cannot be reached.</p>
+<p>To determine the various parameters that can be passed for each algorithm and
+understand what those parameters do, please refer to the algorithm source code
+in skyline/skyline/custom_algorithms/ algorithm py file.</p>
+<p>DOCUMENTATION STILL UNDER DEVELOPMENT</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="prometheus.html" class="btn btn-neutral float-left" title="Prometheus" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="thunder/index.html" class="btn btn-neutral float-right" title="Thunder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

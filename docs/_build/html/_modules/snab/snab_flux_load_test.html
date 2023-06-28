@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snab.snab_flux_load_test &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snab.snab_flux_load_test</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snab.snab_flux_load_test</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">exit</span> <span class="k">as</span> <span class="n">sys_exit</span>
+<span class="c1"># import os.path</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.packages.urllib3.exceptions</span> <span class="kn">import</span> <span class="n">InsecureRequestWarning</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span>
+<span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+<span class="kn">from</span> <span class="nn">functions.flux.get_last_metric_data</span> <span class="kn">import</span> <span class="n">get_last_metric_data</span>
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">functions.memcache.get_memcache_key</span> <span class="kn">import</span> <span class="n">get_memcache_key</span>
+    <span class="kn">from</span> <span class="nn">functions.memcache.set_memcache_key</span> <span class="kn">import</span> <span class="n">set_memcache_key</span>
+    <span class="kn">from</span> <span class="nn">functions.memcache.delete_memcache_key</span> <span class="kn">import</span> <span class="n">delete_memcache_key</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">get_memcache_key</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">set_memcache_key</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">delete_memcache_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;snab_flux_load_test&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;snab_flux_load_testLog&#39;</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SNAB_FLUX_LOAD_TEST_ENABLED</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span> <span class="o">=</span> <span class="s1">&#39;skyline.snab.</span><span class="si">%s</span><span class="s1">.flux_load_test&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
+
+<span class="n">FLUX_POST_URL</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/flux/metric_data_post&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">snab_flux_load_test_metrics_set</span> <span class="o">=</span> <span class="s1">&#39;snab.flux_load_test.metrics&#39;</span>
+<span class="n">snab_flux_load_test_metrics_all_set</span> <span class="o">=</span> <span class="s1">&#39;snab.flux_load_test.metrics.all&#39;</span>
+
+<span class="n">requests</span><span class="o">.</span><span class="n">packages</span><span class="o">.</span><span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">(</span><span class="n">InsecureRequestWarning</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SNAB_flux_load_test"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab_flux_load_test.SNAB_flux_load_test">[docs]</a><span class="k">class</span> <span class="nc">SNAB_flux_load_test</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The SNAB class which controls the snab thread and spawned</span>
+<span class="sd">    processes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the SNAB_flux_load_test</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SNAB_flux_load_test</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SNAB_flux_load_test.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab_flux_load_test.SNAB_flux_load_test.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics</span>
+            <span class="c1"># Log warning</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent or current process dead&#39;</span><span class="p">)</span>
+            <span class="n">sys_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SNAB_flux_load_test.spin_snab_flux_load_test_process"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab_flux_load_test.SNAB_flux_load_test.spin_snab_flux_load_test_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_snab_flux_load_test_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_timestamp</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Push metrics to flux.</span>
+
+<span class="sd">        :param i: python process id</span>
+
+<span class="sd">        :return: True</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="c1"># snab_flux_load_test_metrics_set = &#39;snab.flux_load_test.metrics&#39;</span>
+        <span class="c1"># snab_flux_load_test_metrics_all_set = &#39;snab.flux_load_test.metrics.all&#39;</span>
+
+        <span class="n">spin_snab_flux_load_test_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_snab_flux_load_test_process - pid </span><span class="si">%s</span><span class="s1">, sending </span><span class="si">%s</span><span class="s1"> metrics to flux at </span><span class="si">%s</span><span class="s1"> metrics per POST&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">spin_snab_flux_load_test_process_pid</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;nothing to do&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_set</span><span class="p">)))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="n">get_memcache_key</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test&#39;</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">:</span>
+                        <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed over to memcache - got data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_memcache_key </span><span class="si">%s</span><span class="s1"> failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test_metrics determined </span><span class="si">%s</span><span class="s1"> test metrics from Redis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">))))</span>
+
+        <span class="k">if</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add multiple members to the </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">)</span>
+            <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="n">set_memcache_key</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test&#39;</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> metrics to memcache </span><span class="si">%s</span><span class="s1"> key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)),</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> metrics to memcache </span><span class="si">%s</span><span class="s1"> key&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)),</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">))</span>
+
+        <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">)))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="n">get_memcache_key</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test&#39;</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">snab_flux_load_test_metrics_all</span><span class="p">:</span>
+                        <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed over to memcache - got data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_memcache_key </span><span class="si">%s</span><span class="s1"> failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test_metrics_all determined </span><span class="si">%s</span><span class="s1"> known test metrics from Redis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all</span><span class="p">))))</span>
+
+        <span class="n">check_for_removals</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all</span><span class="p">):</span>
+            <span class="n">check_for_removals</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+            <span class="n">check_for_removals</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">check_for_removals</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking what snab test metrics need to be removed&#39;</span><span class="p">)</span>
+            <span class="n">remove_from_snab_set</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+                <span class="n">remove_from_snab_set</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">metrics_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">remove_from_snab_set</span><span class="p">:</span>
+                <span class="n">metrics_to_remove</span> <span class="o">=</span> <span class="n">snab_flux_load_test_metrics_all</span><span class="p">[</span><span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:]</span>
+                <span class="n">snab_flux_load_test_metrics</span> <span class="o">=</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">remove_from_snab_set</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">metrics_to_remove</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removing </span><span class="si">%s</span><span class="s1"> metrics from </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_remove</span><span class="p">)),</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">metrics_to_remove</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove multiple members from </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting list of metrics.unique_metrics from Redis set&#39;</span><span class="p">)</span>
+            <span class="n">full_uniques</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">full_uniques</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="n">full_uniques</span><span class="p">)</span>
+                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking if any snab test metrics need to be removed from metrics.unique_metrics&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span>
+                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">full_uniques</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+            <span class="k">del</span> <span class="n">unique_metrics</span>
+            <span class="k">del</span> <span class="n">metrics_to_remove</span>
+
+            <span class="n">flux_last_key_prefix</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">.*&#39;</span> <span class="o">%</span> <span class="n">SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;generating list of all possible </span><span class="si">%s</span><span class="s1"> Redis keys&#39;</span> <span class="o">%</span> <span class="n">flux_last_key_prefix</span><span class="p">)</span>
+            <span class="n">snab_remove_flux_last_keys</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">snab_flux_load_test_metrics_all</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">flux_last_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                        <span class="n">snab_remove_flux_last_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flux_last_key</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+            <span class="k">del</span> <span class="n">snab_flux_load_test_metrics_all</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting list of flux.last Redis keys&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">flux_last_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="n">flux_last_key_prefix</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: scan_iter failed on flux.last Redis keys - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                <span class="n">flux_last_keys</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are potentially </span><span class="si">%s</span><span class="s1"> flux.last keys that need to be removed from Redis for not in use snab test metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_remove_flux_last_keys</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking if any of the </span><span class="si">%s</span><span class="s1"> flux.last keys need to be removed from Redis&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flux_last_keys</span><span class="p">)))</span>
+            <span class="n">snab_flux_last_keys_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">flux_last_key</span> <span class="ow">in</span> <span class="n">snab_remove_flux_last_keys</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">flux_last_key</span> <span class="ow">in</span> <span class="n">flux_last_keys</span><span class="p">:</span>
+                    <span class="n">snab_flux_last_keys_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flux_last_key</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">flux_last_keys</span>
+            <span class="k">del</span> <span class="n">snab_remove_flux_last_keys</span>
+            <span class="k">if</span> <span class="n">snab_flux_last_keys_to_remove</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">flux_last_key</span> <span class="ow">in</span> <span class="n">snab_flux_last_keys_to_remove</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">flux_last_key</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted </span><span class="si">%s</span><span class="s1"> flux.last keys for not in use snab test metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_last_keys_to_remove</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are no flux.last keys for not in use snab test metrics to delete&#39;</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">snab_flux_last_keys_to_remove</span>
+
+        <span class="n">adding_metrics</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+            <span class="n">adding_metrics</span> <span class="o">=</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;adding </span><span class="si">%s</span><span class="s1"> metrics to snab_flux_load_test_metrics and </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">adding_metrics</span><span class="p">),</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+            <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">known_snab_metrics_to_added</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="n">get_memcache_key</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test&#39;</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">snab_flux_load_test_metrics_all</span><span class="p">:</span>
+                            <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed over to memcache - got data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_memcache_key </span><span class="si">%s</span><span class="s1"> failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">snab_flux_load_test_metrics_all_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                        <span class="n">snab_flux_load_test_metrics_all</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test_metrics_all determined </span><span class="si">%s</span><span class="s1"> test metrics from Redis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all</span><span class="p">))))</span>
+            <span class="k">if</span> <span class="n">snab_flux_load_test_metrics_all</span><span class="p">:</span>
+                <span class="n">unique_snab_flux_load_test_metrics_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span>
+                <span class="n">unique_snab_flux_load_test_metrics_all_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_all</span><span class="p">)</span>
+                <span class="n">known_snab_metrics_to_add</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">set_difference</span> <span class="o">=</span> <span class="n">unique_snab_flux_load_test_metrics_all_set</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">unique_snab_flux_load_test_metrics_set</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">set_difference</span><span class="p">:</span>
+                    <span class="n">known_snab_metrics_to_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">known_snab_metrics_to_add</span><span class="p">:</span>
+                    <span class="n">known_snab_metrics_to_add</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">known_snab_metrics_to_add</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">known_snab_metrics_to_add</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+                        <span class="n">snab_flux_load_test_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                        <span class="n">known_snab_metrics_to_added</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> known_snab_metrics added snab_flux_load_test_metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">known_snab_metrics_to_added</span><span class="p">)))</span>
+            <span class="k">del</span> <span class="n">snab_flux_load_test_metrics_all</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span><span class="p">:</span>
+            <span class="n">new_uuid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+            <span class="n">new_metric_uuid</span> <span class="o">=</span> <span class="n">new_uuid</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="n">slot</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># nosec B311</span>
+            <span class="n">new_metric</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span><span class="p">,</span> <span class="n">slot</span><span class="p">,</span> <span class="n">new_metric_uuid</span><span class="p">)</span>
+            <span class="n">snab_flux_load_test_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_metric</span><span class="p">)</span>
+            <span class="c1"># Add to the snab_flux_load_test_metrics_set Redis set</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="n">new_metric</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add item to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">snab_flux_load_test_metrics_set</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">adding_metrics</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test_metrics now has </span><span class="si">%s</span><span class="s1"> metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">))))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test_metrics has </span><span class="si">%s</span><span class="s1"> metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">))))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test_metrics has </span><span class="si">%s</span><span class="s1"> unique metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)))))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add multiple members to the </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">)</span>
+            <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="n">set_memcache_key</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test&#39;</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> metrics to memcache </span><span class="si">%s</span><span class="s1"> key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)),</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> metrics to memcache </span><span class="si">%s</span><span class="s1"> key&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">snab_flux_load_test_metrics</span><span class="p">)),</span> <span class="n">snab_flux_load_test_metrics_set</span><span class="p">))</span>
+
+        <span class="n">epoch_Y</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">year</span>
+        <span class="n">epoch_m</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">month</span>
+        <span class="n">epoch_d</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">day</span>
+        <span class="n">epoch_H</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">hour</span>
+        <span class="n">epoch_M</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">minute</span>
+        <span class="n">epoch_S</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">initial_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="n">epoch_Y</span><span class="p">,</span> <span class="n">epoch_m</span><span class="p">,</span> <span class="n">epoch_d</span><span class="p">,</span> <span class="n">epoch_H</span><span class="p">,</span> <span class="n">epoch_M</span><span class="p">,</span> <span class="n">epoch_S</span><span class="p">)</span>
+        <span class="n">one_minute</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">epoch_datetime</span> <span class="o">=</span> <span class="n">initial_datetime</span> <span class="o">-</span> <span class="n">one_minute</span>
+        <span class="c1"># epoch_timestamp = int(epoch_datetime.strftime(&#39;%s&#39;))</span>
+        <span class="n">now_epoch_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">initial_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="n">epoch_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now_epoch_timestamp</span> <span class="o">//</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+
+        <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
+
+        <span class="n">post_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">posted_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">snab_flux_load_test_metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">post_count</span><span class="p">:</span>
+                <span class="n">post_data_dict</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_SELF_API_KEY</span><span class="p">,</span>
+                    <span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="p">[]</span>
+                <span class="p">}</span>
+            <span class="k">if</span> <span class="n">post_count</span> <span class="o">&lt;</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span><span class="p">:</span>
+                <span class="n">post_data_dict</span><span class="p">[</span><span class="s1">&#39;metrics&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">epoch_timestamp</span><span class="p">),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))})</span>  <span class="c1"># nosec B311</span>
+                <span class="n">post_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">post_count</span> <span class="o">==</span> <span class="n">SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">FLUX_POST_URL</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">json</span><span class="o">=</span><span class="n">post_data_dict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to post </span><span class="si">%s</span><span class="s1"> metrics, sleeping for 1 second&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">post_count</span><span class="p">)))</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;posted </span><span class="si">%s</span><span class="s1"> metrics to flux with status code </span><span class="si">%s</span><span class="s1"> returned&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">post_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+                    <span class="n">posted_count</span> <span class="o">+=</span> <span class="n">post_count</span>
+                    <span class="n">post_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">running_for</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">current_timestamp</span>
+            <span class="k">if</span> <span class="n">running_for</span> <span class="o">&gt;</span> <span class="mi">55</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;load test has run for longer than 55 seconds, stopping&#39;</span><span class="p">)</span>
+                <span class="n">post_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">post_count</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">FLUX_POST_URL</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">json</span><span class="o">=</span><span class="n">post_data_dict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to post </span><span class="si">%s</span><span class="s1"> metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">post_count</span><span class="p">)))</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                <span class="n">posted_count</span> <span class="o">+=</span> <span class="n">post_count</span>
+
+        <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_snab_flux_load_test_process posted </span><span class="si">%s</span><span class="s1"> metrics to flux in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">posted_count</span><span class="p">),</span> <span class="n">spin_end</span><span class="p">))</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="SNAB_flux_load_test.run"><a class="viewcode-back" href="../../skyline.snab.html#snab.snab_flux_load_test.SNAB_flux_load_test.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+
+<span class="sd">        - Determine if Redis is up and discover checks to run.</span>
+
+<span class="sd">        - Divide and assign each process a metric check to analyse and add</span>
+<span class="sd">          results to source Redis set.</span>
+
+<span class="sd">        - Wait for the processes to finish.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting SNAB_flux_load_test&#39;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;pinged Redis via get_redis_conn&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connected via get_redis_conn&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: not connected via get_redis_conn&#39;</span><span class="p">)</span>
+                <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;pinged Redis via get_redis_conn_decoded&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: not connected via get_redis_conn_decoded&#39;</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connected via get_redis_conn_decoded&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot connect to get_redis_conn_decoded&#39;</span><span class="p">)</span>
+                <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># Run load test</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+
+                <span class="n">current_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_flux_load_test - running load test&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Spawn processes</span>
+                <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_snab_flux_load_test_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">current_timestamp</span><span class="p">,))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting 1 of </span><span class="si">%s</span><span class="s1"> spin_snab_process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">)))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+                <span class="c1"># Send wait signal to zombie processes</span>
+                <span class="c1"># for p in pids:</span>
+                <span class="c1">#     p.join()</span>
+                <span class="c1"># Self monitor processes and terminate if any spin_snab_process</span>
+                <span class="c1"># that has run for longer than 58 seconds</span>
+                <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">58</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                        <span class="c1"># Just to avoid hogging the CPU</span>
+                        <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># All the processes are done, break now.</span>
+                        <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;1 spin_snab_flux_load_test_process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time_to_run</span><span class="p">))</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timed out, killing spin_snab_flux_load_test_process process&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="c1"># p.join()</span>
+
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping spin_snab_flux_load_test_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+                <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">current_timestamp</span>
+                <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+                    <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="mi">60</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping for </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">sleep_for</span><span class="p">)</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">sleep_for</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

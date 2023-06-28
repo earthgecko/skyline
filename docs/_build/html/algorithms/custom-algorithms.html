@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Custom algorithms &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom algorithms &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Mirage" href="../mirage.html" />
+    <link rel="next" title="matrixprofile" href="matrixprofile.html" />
     <link rel="prev" title="Algorithms" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -104,18 +65,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Algorithms</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Custom algorithms</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#settings-custom-algorithms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#the-custom-algorithm-file">The custom algorithm file</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#anomalyscore"><code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#custom-algorithm-requirements">Custom algorithm requirements</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#error-handling">Error handling</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#example-custom-algorithms">Example custom algorithms</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time">Running a Mirage only custom algorithm on a metric all the time</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#some-things-to-consider">Some things to consider</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#available-custom-algorithms">Available custom algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementing-a-custom-algorithm">Implementing a custom algorithm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-use-of-numba-optimisations">The use of numba optimisations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-custom-algorithms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-custom-algorithm-file">The custom algorithm file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#int-and-floats-only-and-no-nans">int and floats <strong>ONLY</strong> and no nans</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#anomalyscore"><code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-algorithm-requirements">Custom algorithm requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-custom-algorithms">Example custom algorithms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time">Running a Mirage only custom algorithm on a metric all the time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#some-things-to-consider">Some things to consider</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="matrixprofile.html">matrixprofile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectral_residual.html">spectral_residual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dbscan.html">DBSCAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pca.html">PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="isolation_forest.html">isolation_forest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prophet.html">prophet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="one_class_svm.html">one_class_svm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
@@ -125,11 +102,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -137,6 +121,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
@@ -145,83 +132,54 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="index.html">Algorithms</a> &raquo;</li>
-        
-      <li>Custom algorithms</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Algorithms</a></li>
+      <li class="breadcrumb-item active">Custom algorithms</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="../_sources/algorithms/custom-algorithms.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="custom-algorithms">
-<h1>Custom algorithms<a class="headerlink" href="#custom-algorithms" title="Permalink to this headline">¶</a></h1>
-<p><strong>EXPERIMENTAL - py3 only</strong></p>
+             
+  <section id="custom-algorithms">
+<h1>Custom algorithms<a class="headerlink" href="#custom-algorithms" title="Permalink to this heading"></a></h1>
+<p><strong>py3 only</strong></p>
 <p>This section describes the process, steps and resources required to run custom
 algorithms in Skyline. Adding a custom algorithm or algorithms is easier and
 better than modifying the core Skyline algorithm files yourself.</p>
 <p>If you are wanting to implement a custom algorithm, ensure you read this
 documentation <strong>thoroughly</strong> and <strong>understand the layout</strong> in the example
 algorithms.  This will save you time if you do it properly from the beginning.</p>
-<p>Custom algorithms are currently implemented in anlayzer, analyzer_batch, mirage
-and soon crucible, they are not yet consumed in boundary and probably will not
-unless there is a good use case for them to be added.</p>
+<p>Custom algorithms are currently only implemented in analyzer (also covers
+analyzer_batch), crucible and mirage.</p>
+<section id="available-custom-algorithms">
+<h2>Available custom algorithms<a class="headerlink" href="#available-custom-algorithms" title="Permalink to this heading"></a></h2>
+<p>There is a collection of custom algorithms already available in Skyline and each
+has a page here.  However currently most are only documented in the code and their
+pages refer to the source code.</p>
+<p>The performance and accuracy of the available algorithms vary, their inclusion is
+not a validation of the method, simply that they can function as outlier detectors.
+Each generates different results and few seldom agree.  The Vortex webapp UI can be
+used to run them adhoc on any time series should you wish to assess there performance.</p>
+</section>
+<section id="implementing-a-custom-algorithm">
+<h2>Implementing a custom algorithm<a class="headerlink" href="#implementing-a-custom-algorithm" title="Permalink to this heading"></a></h2>
 <p>To implement a custom algorithm, you need to define it in
 <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> and add the Python source custom algorithm
 file.</p>
@@ -230,17 +188,96 @@ file.</p>
 <p><strong>A note on speed</strong>, bear in mind that any custom algorithms added
 have to run <strong>FAST</strong>, otherwise analysis stops being real time and the
 Skyline apps will terminate their own spawned processes if they run too long.
-Consider that Skyline’s 3 sigma algorithms take on average 0.0023 seconds to
-run and all 9 are run on a metric in about 0.0207 seconds.  Adding any
-algorithms that run substantially slower is <strong>not</strong> recommended, even if it is
-on a small set of metrics.  If you break Skyline with your own custom
-algorithms, be that on your head.</p>
+Consider that Skyline’s three-sigma triggered algorithms take on average
+0.0023 seconds to run and all 9 are run on a metric in about 0.0207 seconds.
+Adding any algorithms that run substantially slower is <strong>not</strong> recommended,
+even if it is on a small set of metrics.  Any algorithms added to should be as
+computationally efficient as possible and suitable for processing real time
+streaming data, e.g. O(n).  This is especially true for any custom algorithms
+added to Analyzer.  This is not a hard requirement, just a recommendation.
+It is possible to add non O(n) algorithms to Mirage, but they should be
+designed and implemented to be as computationally efficient as possible.
+If you break Skyline with your own custom algorithms, be that on your head.</p>
 </div>
-<p>Custom algorithms are run <strong>before</strong> the core 3 sigma algorithms, which allows
-the user to disable the running of 3 sigma algorithms on namespaces if they so
-desire, more on this below.</p>
-<div class="section" id="settings-custom-algorithms">
-<h2><a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a><a class="headerlink" href="#settings-custom-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>Custom algorithms can be run <strong>before</strong> or <strong>after</strong> the core three-sigma
+algorithms. The custom algorithm can be configured to run before the three-sigma
+algorithms which allows the user to disable the running of three-sigma
+algorithms on namespaces if they so desire, more on this below.  By default
+custom algorithms are run <strong>before</strong> three-sigma algorithms.
+Running the custom algorithm <strong>after</strong> three-sigma allows the user to only run
+a custom algorithm if three-sigma achieves <a class="reference internal" href="../skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> or run the
+custom algorithm regardless of the CONSENSUS that was achieved.</p>
+<p>The custom algorithms settings are therefore highly configurable, specifically
+take note of the consensus, run_3sigma_algorithms, run_before_3sigma and
+run_only_if_consensus parameters, especially if you are attempting to run
+multiple custom algorithms at different stages, before or after three-sigma and
+what consensus should be applied.  It is probably possible to configure poorly
+given the methods and modes that can be configured.</p>
+<section id="the-use-of-numba-optimisations">
+<h3>The use of numba optimisations<a class="headerlink" href="#the-use-of-numba-optimisations" title="Permalink to this heading"></a></h3>
+<p>Any performance optimisations that can be achieve in custom algortihm with numba
+jit functions is encouraged, with the following caveats.</p>
+<p>If the algorithm or any part thereof uses numba optimisations in anyway ensure
+that the <code class="docutils literal notranslate"><span class="pre">jit</span></code> or <code class="docutils literal notranslate"><span class="pre">njit</span></code> decorator has <code class="docutils literal notranslate"><span class="pre">cache=True</span></code> applied to ensure that
+the jit compilation overhead is only incurred once and is not incurred on every
+execution.  In terms of multiprocessing and threading if there is no jit cache
+file of a function the jit compilation happens every execution which is slow.</p>
+<p>Also note that in the normal Skyline build on CentOS 8 the default
+<code class="docutils literal notranslate"><span class="pre">NUMBA_CACHE_DIR</span></code> is <code class="docutils literal notranslate"><span class="pre">/opt/skyline/.cache/numba</span></code> this is not specifically
+defined, it is what gets defaulted to by numba.  <strong>IMPORTANT</strong> as per relevant
+upgrade instructions in release notes, this directory needs to be flushed
+whenever an upgrade is made to Python and/or any dependencies, so that the numba
+jit cache files can be recompiled with the new versions.</p>
+<p>In terms of making changes to any existing numba optimised custom algorithms
+that are loaded by Skyline, numba will <strong>automatically</strong> replace it jit cache
+files when a change is made to the algorithm source file in Skyline when the
+relevant Skyline service is restarted and the custom algorithm function is
+called for the first time.</p>
+<p>That said this has a direct impact on the custom algorithm <code class="docutils literal notranslate"><span class="pre">max_execution_time</span></code>
+parameter.  This is because the first execution of the jit function when the
+cache files are not present could take say 40 seconds to compile the function.
+Now if you can expect the algorithm to run in say less than 1 second WHEN the
+jit cache file is present, you may want to set the <code class="docutils literal notranslate"><span class="pre">max_execution_time:</span> <span class="pre">1.2,</span></code>
+however the custom algorithm will be terminated by the timeout decorator on
+<strong>every</strong> run and it will never compile and therefore never save the jit cache
+files.</p>
+<p>Therefore an additional key value pair can be passed in the
+<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> definition for any custom algorithm that uses
+numba jit functions, e.g. <code class="docutils literal notranslate"><span class="pre">'numba_cache_dirs':</span> <span class="pre">['stumpy_'],</span></code>.  This is a list
+of cache dirs that are expected to exist and if do not exist then increase the
+<code class="docutils literal notranslate"><span class="pre">max_execution_time</span></code> to 180 seconds to allow for first time numba jit
+compilations to occur so that the timeout decorator does not terminate the
+algorithm due to a low max_execution_time.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">numba_cache_dirs</span></code> is a list of substrings of the directories created in
+the default <code class="docutils literal notranslate"><span class="pre">/opt/skyline/.cache/numba</span></code> which are expected.</p>
+<p>For example the stumpy stump algorithm with njit caching enabled saves
+<code class="docutils literal notranslate"><span class="pre">/opt/skyline/.cache/numba/stumpy_7b65d2f0242c0368bd086e515d849481810e817d</span></code> with nbc and nbi files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">skyline</span><span class="o">-</span><span class="n">py3816</span><span class="p">)</span> <span class="p">[</span><span class="n">root</span><span class="nd">@skyline</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">1</span> <span class="n">skyline</span><span class="o">-</span><span class="n">py3816</span><span class="p">]</span> <span class="n">ls</span> <span class="o">-</span><span class="n">al</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">skyline</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">numba</span><span class="o">/</span> <span class="o">|</span> <span class="n">grep</span> <span class="n">stump</span>
+<span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span>  <span class="mi">2</span> <span class="n">skyline</span> <span class="n">skyline</span> <span class="mi">4096</span> <span class="n">Jan</span> <span class="mi">12</span> <span class="mi">16</span><span class="p">:</span><span class="mi">37</span> <span class="n">stumpy_7b65d2f0242c0368bd086e515d849481810e817d</span>
+<span class="p">(</span><span class="n">skyline</span><span class="o">-</span><span class="n">py3816</span><span class="p">)</span> <span class="p">[</span><span class="n">root</span><span class="nd">@skyline</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">1</span> <span class="n">skyline</span><span class="o">-</span><span class="n">py3816</span><span class="p">]</span> <span class="n">ls</span> <span class="o">-</span><span class="n">al</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">skyline</span><span class="o">/.</span><span class="n">cache</span><span class="o">/</span><span class="n">numba</span><span class="o">/</span><span class="n">stump</span><span class="o">*</span>
+<span class="n">total</span> <span class="mi">460</span>
+<span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">2</span> <span class="n">skyline</span> <span class="n">skyline</span>   <span class="mi">4096</span> <span class="n">Jan</span> <span class="mi">12</span> <span class="mi">16</span><span class="p">:</span><span class="mi">37</span> <span class="o">.</span>
+<span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="mi">8</span> <span class="n">skyline</span> <span class="n">skyline</span>   <span class="mi">4096</span> <span class="n">Jan</span> <span class="mi">12</span> <span class="mi">16</span><span class="p">:</span><span class="mi">09</span> <span class="o">..</span>
+<span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">rw</span><span class="o">-</span> <span class="mi">1</span> <span class="n">skyline</span> <span class="n">skyline</span> <span class="mi">455583</span> <span class="n">Jan</span> <span class="mi">12</span> <span class="mi">16</span><span class="p">:</span><span class="mi">37</span> <span class="n">stump</span><span class="o">.</span><span class="n">_stump</span><span class="o">-</span><span class="mf">216.</span><span class="n">py38</span><span class="mf">.1</span><span class="o">.</span><span class="n">nbc</span>
+<span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">rw</span><span class="o">-</span> <span class="mi">1</span> <span class="n">skyline</span> <span class="n">skyline</span>   <span class="mi">1487</span> <span class="n">Jan</span> <span class="mi">12</span> <span class="mi">16</span><span class="p">:</span><span class="mi">37</span> <span class="n">stump</span><span class="o">.</span><span class="n">_stump</span><span class="o">-</span><span class="mf">216.</span><span class="n">py38</span><span class="o">.</span><span class="n">nbi</span>
+<span class="p">(</span><span class="n">skyline</span><span class="o">-</span><span class="n">py3816</span><span class="p">)</span> <span class="p">[</span><span class="n">root</span><span class="nd">@skyline</span><span class="o">-</span><span class="n">test</span><span class="o">-</span><span class="mi">1</span> <span class="n">skyline</span><span class="o">-</span><span class="n">py3816</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This would be declared as <code class="docutils literal notranslate"><span class="pre">'numba_cache_dirs':</span> <span class="pre">['stumpy_']</span></code>, and the
+<code class="docutils literal notranslate"><span class="pre">custom_algorithms.run_custom_algorithm_on_timeseries</span></code> checks for the
+existence of a dir matching these substrings/patterns in
+<code class="docutils literal notranslate"><span class="pre">/opt/skyline/.cache/numba</span></code>, if not found sets the <code class="docutils literal notranslate"><span class="pre">max_execution_time</span></code> to
+180 seconds for that run to allow for the jit compile and save overhead without
+terminating the run before it has time to compile and save.</p>
+<p>You therefore need to be fully aware of what jit cache files your algorithm will
+create and declare them appropriately.</p>
+</section>
+<section id="settings-custom-algorithms">
+<h3><a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a><a class="headerlink" href="#settings-custom-algorithms" title="Permalink to this heading"></a></h3>
+<p>Custom algorithms are only available in analyzer, crucible and mirage, any
+declared for use with analyzer will automatically also be applied for
+analyzer_batch.  For a custom_algorithm to be available for use in crucible
+it must be declared in CUSTOM_ALGORITHMS.</p>
 <p>Custom algorithms are defined in the <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>
 dictionary.  The format and key values of the dictionary are shown in the
 following <strong>example</strong>:</p>
@@ -253,7 +290,10 @@ following <strong>example</strong>:</p>
         <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
         <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;analyzer_batch&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;run_before_3sigma&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_only_if_consensus&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;trigger_history_override&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;analyzer_batch&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage&#39;</span><span class="p">],</span>
         <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="s1">&#39;last_same_hours&#39;</span><span class="p">:</span> <span class="p">{</span>
@@ -269,6 +309,9 @@ following <strong>example</strong>:</p>
         <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
         <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[],</span>
         <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_before_3sigma&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_only_if_consensus&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;trigger_history_override&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
         <span class="c1"># This does not run on analyzer as it is weekly data</span>
         <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
         <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
@@ -282,8 +325,27 @@ following <strong>example</strong>:</p>
         <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;detect_significant_change&#39;</span><span class="p">],</span>
         <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;run_before_3sigma&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_only_if_consensus&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;trigger_history_override&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mirage&#39;</span><span class="p">],</span>
         <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;numba_cache_dirs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;stumpy_&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span>  <span class="p">{</span><span class="s1">&#39;windows&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;k_discords&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span>
+        <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+        <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_before_3sigma&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;run_only_if_consensus&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;trigger_history_override&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mirage&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;numba_cache_dirs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;stumpy_&#39;</span><span class="p">,]</span>
     <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
@@ -304,35 +366,54 @@ file can be deployed to any directory it does not need to be in the same path
 as the Skyline code, just ensure the user running the Skyline process has read
 permissions on the path and file itself.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> - this is a dictionary of any parameters/arguments
-that you want to pass to your algorithm.  In your custom algorithm you will
-need to interpolate your parameters/arguments (key/value) from this
-dictionary. If none are required simply use an empty dict <cite>{}</cite>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_execution_time</span></code> - a float and read the warning about speed above.</p></li>
+that you want to pass to your algorithm.  Your custom algorithm will need to
+interpolate your parameters/arguments (key/value) from this dictionary. If
+none are required simply use an empty dict <cite>{}</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_execution_time</span></code> - a float (and read the warning about speed above).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">consensus</span></code> - this allows you to add your algorithm to the <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> or
 override <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> by setting this to 1.  If you are running
 <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span> <span class="pre">=</span> <span class="pre">6</span></code> and wanted to just add your custom algorithm as an addition
-to the normal 3 sigma algorithms, you would just pass <code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">6</span></code> or
+to the normal three-sigma algorithms, you would just pass <code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">6</span></code> or
 <code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">7</span></code> depending on what you want.  The only other option currently
 is to <strong>override</strong> the <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code>, if you want an anomaly triggered every
-time your custom algorithm triggers, regardless of 3 sigma <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> then
+time your custom algorithm triggers, regardless of three-sigma <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> then
 set <code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">1</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">algorithms_allowed_in_consensus</span></code>: must be passed but is not implemented yet
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithms_allowed_in_consensus</span></code>: must be passed but is <strong>not implemented yet</strong>
 but this is a list of algorithms that must have triggered for consensus to be
 achieved. If an empty list is passed <cite>[]</cite> this will be ignored and normal
 <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> will be used.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">run_3sigma_algorithms</span></code>: a boolean stating whether to run the normal 3 sigma
+<li><p><code class="docutils literal notranslate"><span class="pre">run_3sigma_algorithms</span></code>: a boolean stating whether to run the normal three-sigma
 algorithms, this is optional and defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code> if it is not passed
-in the dictionary.  If any custom algorithm is run that has this set to
-<code class="docutils literal notranslate"><span class="pre">False</span></code> no 3 sigma algorithms will be run regardless of what any other
-custom algorithms are set to.</p></li>
+in the dictionary.  <strong>NOTE</strong> - If any custom algorithm is run that has this
+set to <code class="docutils literal notranslate"><span class="pre">False</span></code> no three-sigma algorithms will be run regardless of what any
+other custom algorithms are set to.  If multiple custom algorithms are being
+run and only 1 has this set to <code class="docutils literal notranslate"><span class="pre">False</span></code> it will be applied to all.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_before_3sigma</span></code>: a boolean stating whether to run the custom algorithm
+before the normal three-sigma algorithms, this defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.  If you
+want your custom algorithm to run after the three-sigma algorithms set this to
+<code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_only_if_consensus</span></code>: a boolean stating whether to run the custom
+algorithm only if CONSENSUS or MIRAGE_CONSENSUS is achieved, it defaults to
+<code class="docutils literal notranslate"><span class="pre">False</span></code>.  This only applies to custom algorithms that are run after
+three-sigma algorithms, e.g. with the parameter <code class="docutils literal notranslate"><span class="pre">run_before_3sigma:</span> <span class="pre">False</span></code>
+Currently this parameter only uses the CONSENSUS or MIRAGE_CONSENSUS setting
+and does not apply the consensus parameter above.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">trigger_history_override</span></code>: an int defining whether override the outcome of
+the custom algorithm if the three-sigma algorithms have triggered this many
+times in a row.  Setting this to 0 disables the override and the number of
+times the three-sigma algorithms have triggered is not checked.  If this value
+is set to 4 then even if the custom algorithm evaluates the metric as not
+anomalous, if the metric has been determined to be anomalous by the three-sigma
+analysis 4 times in a row, the custom algorithm result will be overridden and
+the metric will be classified as anomalous.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">use_with</span></code> - a list of the Skyline apps that should apply the custom
 algorithm.  All the apps can be declared but they will only apply the custom
 algorithm <strong>if</strong> they actually handle the metric.  Simply declaring them in
 the list does not mean that the app will just automatically run them all the
 time.  If the app does not handle the metric, it being declared makes no
 difference, therefore if you are unsure, it is safe to list them all.
-Altough do <strong>note</strong> that if your custom algorithm needs more data than
-<a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> then do not specify <code class="docutils literal notranslate"><span class="pre">'analyzer',</span> <span class="pre">'analyzer_batch'</span></code>
+Although do <strong>note</strong> that if your custom algorithm needs more data than
+<a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> then do not specify <code class="docutils literal notranslate"><span class="pre">'analyzer'</span></code>
 as apps to run the custom algorithm with.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">debug_logging</span></code>: a boolean to enable debug_logging, which wraps the custom
 algorithm run in a bit of additional logging, regarding timings, etc this is
@@ -345,9 +426,9 @@ their <code class="docutils literal notranslate"><span class="pre">debug_logging
 logging can still be implemented on each custom_algorithm individually using
 <code class="docutils literal notranslate"><span class="pre">'debug_logging':</span> <span class="pre">True,</span></code> in the algorithm item in
 <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>.</p>
-</div>
-<div class="section" id="the-custom-algorithm-file">
-<h2>The custom algorithm file<a class="headerlink" href="#the-custom-algorithm-file" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="the-custom-algorithm-file">
+<h3>The custom algorithm file<a class="headerlink" href="#the-custom-algorithm-file" title="Permalink to this heading"></a></h3>
 <p>Although any Python code can be added to a custom algorithm file, the algorithm
 file must meet some basic requirements that are required to properly integrate
 and be run by Skyline.</p>
@@ -360,19 +441,32 @@ directory of the repo.  <a class="reference external" href="https://github.com/e
 in Skyline’s requirements.txt file, ensure that you install the algorithm’s
 requirements in the Skyline virtualenv.</p>
 </div>
-<div class="section" id="anomalyscore">
-<h3><code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code><a class="headerlink" href="#anomalyscore" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="int-and-floats-only-and-no-nans">
+<h3>int and floats <strong>ONLY</strong> and no nans<a class="headerlink" href="#int-and-floats-only-and-no-nans" title="Permalink to this heading"></a></h3>
+<p>If your custom algorithm has the ability to also <code class="docutils literal notranslate"><span class="pre">return_results</span></code> or
+<code class="docutils literal notranslate"><span class="pre">return_anomalies</span></code> be advised that you need to ensure that the results are
+coerced to int and float types only.  This is due to the fact the results can be
+moved through the pipeline and saved as json.  Therefore results from any numpy
+arrays could have type <code class="docutils literal notranslate"><span class="pre">int64</span></code> or other which are not JSON serializable.</p>
+<p>The same is true for <code class="docutils literal notranslate"><span class="pre">nan</span></code> values, although floats in Python they are not
+valid in JSON, ensure <code class="docutils literal notranslate"><span class="pre">nan</span></code> values are coerced to <code class="docutils literal notranslate"><span class="pre">None</span></code> which json will
+dump to <code class="docutils literal notranslate"><span class="pre">null</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code> which json will dump to <code class="docutils literal notranslate"><span class="pre">false</span></code>.</p>
+</section>
+</section>
+<section id="anomalyscore">
+<h2><code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code><a class="headerlink" href="#anomalyscore" title="Permalink to this heading"></a></h2>
 <p>Unlike the core Skyline algorithms, custom algorithms introduces the requirement
 for the algorithm to also return a <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code>.  The concept of the
 <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> is used in many anomaly detection algorithms and methods and it
 is useful in many cases for algorithm testing.</p>
-</div>
-<div class="section" id="custom-algorithm-requirements">
-<h3>Custom algorithm requirements<a class="headerlink" href="#custom-algorithm-requirements" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="custom-algorithm-requirements">
+<h2>Custom algorithm requirements<a class="headerlink" href="#custom-algorithm-requirements" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Must be written in Python</p></li>
 <li><p>Must import all modules and classes it requires.</p></li>
-<li><p>The algorithm must have four parameters, e.g.</p></li>
+<li><p>The algorithm must have the following four parameters, e.g.</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">last_same_hours_weekly</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
 </pre></div>
@@ -421,16 +515,16 @@ anomalous <strong>and</strong> a <code class="docutils literal notranslate"><spa
 being not anomalous and 1.0 being a certain anomaly.  You can pass
 <cite>(False, 0.7)</cite>,  you just have to normalise your <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> between 0.0
 and 1.0.  The <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> is currently only for testing it is not used in
-any way but it  <strong>must</strong> be returned.  The anomalous classification is
+any way but it <strong>must</strong> be returned.  The anomalous classification is
 currently <strong>only</strong> determined from the boolean and the <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> is
 currently not used in any way other than for testing.  If your algorithm does
 not calculate an anomaly score, when your algorithm returns <code class="docutils literal notranslate"><span class="pre">False</span></code> just
 return it with a 0.0 and when your algorithm returns <code class="docutils literal notranslate"><span class="pre">True</span></code> just return it
 with 1.0</p></li>
 </ul>
-</div>
-<div class="section" id="error-handling">
-<h3>Error handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="error-handling">
+<h2>Error handling<a class="headerlink" href="#error-handling" title="Permalink to this heading"></a></h2>
 <p>In the example algorithms there are examples of how to wrap your algorithm in
 normal Skyline algorithm exception handling method.  Although you can implement
 your own logging in a custom algorithm, before you do, consider using the method
@@ -453,27 +547,21 @@ NameError: name &#39;UNDEFINED_VARIABLE&#39; is not defined
 </div>
 <p>This allows for errors to be encountered while not spewing 1000s and 1000s of
 lines of errors to disk based the application logs and incurring masses of I/O.</p>
-</div>
-<div class="section" id="example-custom-algorithms">
-<h3>Example custom algorithms<a class="headerlink" href="#example-custom-algorithms" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="example-custom-algorithms">
+<h2>Example custom algorithms<a class="headerlink" href="#example-custom-algorithms" title="Permalink to this heading"></a></h2>
 <p>There are two example custom algorithms in the repo for you to model the
 structure of your custom algorithm on.</p>
-<div class="section" id="abs-stddev-from-median">
-<h4>abs_stddev_from_median<a class="headerlink" href="#abs-stddev-from-median" title="Permalink to this headline">¶</a></h4>
 <p>This is the simplest custom algorithm structure, it does not have any
 <code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> and has no debug logging.</p>
 <p><a class="reference external" href="https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/abs_stddev_from_median.py">https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/abs_stddev_from_median.py</a></p>
-</div>
-<div class="section" id="last-same-hours">
-<h4>last_same_hours<a class="headerlink" href="#last-same-hours" title="Permalink to this headline">¶</a></h4>
 <p>This is an example of a more complex custom algorithm structure, that uses
 <code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> and can even debug log to the Skyline app log if
 <code class="docutils literal notranslate"><span class="pre">debug_logging</span></code> is passed and enabled via the <code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code>.</p>
 <p><a class="reference external" href="https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/last_same_hours.py">https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/last_same_hours.py</a></p>
-</div>
-</div>
-<div class="section" id="running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time">
-<h3>Running a Mirage only custom algorithm on a metric all the time<a class="headerlink" href="#running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time">
+<h2>Running a Mirage only custom algorithm on a metric all the time<a class="headerlink" href="#running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time" title="Permalink to this heading"></a></h2>
 <p>Normally for Analyzer to push a metric to Mirage, Analyzer would have to trigger
 on it as anomalous.  However if you wish to run a custom algorithm on a metric
 that requires <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> of data to run against as the
@@ -484,9 +572,9 @@ metric to Mirage on every run.  Note that the metric needs to be defined as a
 mirage enabled metric in the normal way, ensuring it matches a smtp alert
 defined in <a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> with a <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>
 declared.</p>
-</div>
-<div class="section" id="some-things-to-consider">
-<h3>Some things to consider<a class="headerlink" href="#some-things-to-consider" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="some-things-to-consider">
+<h2>Some things to consider<a class="headerlink" href="#some-things-to-consider" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Think about what Skyline apps you want your algorithm to run in.  If you are
 wanting to use data &gt; <a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> then ensure you only
@@ -498,64 +586,38 @@ handling is working.</p></li>
 that are only applied to mirage and analyzer_batch can take a bit longer to
 run, but they will delay analysis the longer their execution time.</p></li>
 </ul>
-</div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../mirage.html" class="btn btn-neutral float-right" title="Mirage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="Algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="matrixprofile.html" class="btn btn-neutral float-right" title="matrixprofile" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

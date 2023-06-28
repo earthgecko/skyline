@@ -52,14 +52,6 @@ skyline.analyzer.analyzer module
    :undoc-members:
    :show-inheritance:
 
-skyline.analyzer.analyzer module
---------------------------------
-
-.. automodule:: analyzer.analyzer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 skyline.analyzer.analyzer\_batch module
 ---------------------------------------
 
@@ -68,18 +60,10 @@ skyline.analyzer.analyzer\_batch module
    :undoc-members:
    :show-inheritance:
 
-skyline.analyzer.analyzer\_batch module
----------------------------------------
+skyline.analyzer.analyzer\_labelled\_metrics module
+---------------------------------------------------
 
-.. automodule:: analyzer.analyzer_batch
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.analyzer.analyzer\_batch module
----------------------------------------
-
-.. automodule:: analyzer.analyzer_batch
+.. automodule:: analyzer.analyzer_labelled_metrics
    :members:
    :undoc-members:
    :show-inheritance:

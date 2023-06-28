@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>thunder.thunder_rolling &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">thunder.thunder_rolling</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for thunder.thunder_rolling</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">exit</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="c1"># @modified 20220726 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                      Branch #4300: prometheus</span>
+    <span class="c1"># Moved send_graphite_metric</span>
+    <span class="c1"># get_redis_conn, get_redis_conn_decoded, send_graphite_metric)</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">functions.thunder.checks.app.up</span> <span class="kn">import</span> <span class="n">thunder_check_app</span>
+<span class="kn">from</span> <span class="nn">functions.thunder.checks.analyzer.run_time</span> <span class="kn">import</span> <span class="n">thunder_check_analyzer_run_time</span>
+<span class="kn">from</span> <span class="nn">functions.thunder.checks.horizon.metrics_received</span> <span class="kn">import</span> <span class="n">thunder_check_horizon_metrics_received</span>
+
+<span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
+<span class="c1">#                   Branch #4300: prometheus</span>
+<span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+
+<span class="c1"># from functions.thunder.stale_metrics import thunder_stale_metrics</span>
+
+<span class="c1"># @added 20230622 - Feature #4958: webapp_features_profile - status</span>
+<span class="kn">from</span> <span class="nn">functions.thunder.checks.webapp.webapp_features_profile</span> <span class="kn">import</span> <span class="n">thunder_check_webapp_features_profile</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;thunder&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+<span class="n">full_uniques</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="RollingThunder"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder_rolling.RollingThunder">[docs]</a><span class="k">class</span> <span class="nc">RollingThunder</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The RollingThunder class which controls the thunder/rolling thread and</span>
+<span class="sd">    spawned processes. thunder/rolling carries out internal and external checks</span>
+<span class="sd">    and sends any events to thunder for various Skyline app operations and</span>
+<span class="sd">    dependencies, such as Redis, mariadb, memcache and Graphite.</span>
+<span class="sd">    In a distributed Skyline set up, thunder/rolling can alert on other Skyline</span>
+<span class="sd">    apps in the cluster (TBD)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize Rolling</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RollingThunder</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RollingThunder.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder_rolling.RollingThunder.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RollingThunder.rolling_process"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder_rolling.RollingThunder.rolling_process">[docs]</a>    <span class="k">def</span> <span class="nf">rolling_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and manage the required lists and Redis sets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: rolling_process started&#39;</span><span class="p">)</span>
+
+        <span class="n">redis_available</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">last_run_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">thunder_rolling_last_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;thunder.rolling.last_run_timestamp&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">last_run_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">thunder_rolling_last_timestamp_key</span><span class="p">)</span>
+            <span class="n">redis_available</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to timestamp from </span><span class="si">%s</span><span class="s1"> Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">thunder_rolling_last_timestamp_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">last_run_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">last_run_timestamp</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: </span><span class="si">%s</span><span class="s1"> Redis key has not expired, not running&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">thunder_rolling_last_timestamp_key</span><span class="p">))</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Check apps</span>
+        <span class="n">thunder_apps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">THUNDER_CHECKS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">check_apps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">thunder_app</span> <span class="ow">in</span> <span class="n">thunder_apps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">THUNDER_CHECKS</span><span class="p">[</span><span class="n">thunder_app</span><span class="p">][</span><span class="s1">&#39;up&#39;</span><span class="p">][</span><span class="s1">&#39;run&#39;</span><span class="p">]:</span>
+                <span class="n">check_apps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">thunder_app</span><span class="p">)</span>
+        <span class="n">apps_up</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">check_apps_up</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">check_app</span> <span class="ow">in</span> <span class="n">check_apps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_available</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: redis not available not check </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">check_app</span><span class="p">))</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="n">thunder_check_app</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_app</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="n">apps_up</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: </span><span class="si">%s</span><span class="s1"> is reporting UP&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">check_app</span><span class="p">))</span>
+                    <span class="n">check_apps_up</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">check_app</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: </span><span class="si">%s</span><span class="s1"> is NOT reporting UP&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">check_app</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: thunder_check_app errored for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">check_app</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">check_apps</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: </span><span class="si">%s</span><span class="s1"> Skyline apps checked and </span><span class="si">%s</span><span class="s1"> apps reporting UP&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">check_apps</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">apps_up</span><span class="p">)))</span>
+
+        <span class="c1"># Analyzer checks</span>
+        <span class="k">if</span> <span class="s1">&#39;analyzer&#39;</span> <span class="ow">in</span> <span class="n">thunder_apps</span><span class="p">:</span>
+            <span class="c1"># run_time check</span>
+            <span class="n">run_time_check</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">run_time_check</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">THUNDER_CHECKS</span><span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">][</span><span class="s1">&#39;run_time&#39;</span><span class="p">][</span><span class="s1">&#39;run&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to determine if analyzer run_time check should be run - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">e</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_available</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: redis not available not checking analyzer run_time&#39;</span><span class="p">)</span>
+                <span class="n">run_time_check</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">run_time_check</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="n">thunder_check_analyzer_run_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: analyzer run_time OK&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: analyzer run_time overruning&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: thunder_check_analyzer_run_time errored - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">err</span><span class="p">))</span>
+
+        <span class="c1"># Horizon checks</span>
+        <span class="k">if</span> <span class="s1">&#39;horizon&#39;</span> <span class="ow">in</span> <span class="n">thunder_apps</span><span class="p">:</span>
+            <span class="c1"># metrics_received check</span>
+            <span class="n">metrics_received_check</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metrics_received_check</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">THUNDER_CHECKS</span><span class="p">[</span><span class="s1">&#39;horizon&#39;</span><span class="p">][</span><span class="s1">&#39;worker.metrics_received&#39;</span><span class="p">][</span><span class="s1">&#39;run&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to determine if horizon metrics_received check should be run - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">e</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_available</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: redis not available not checking horizon metrics_received&#39;</span><span class="p">)</span>
+                <span class="n">metrics_received_check</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">metrics_received_check</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="n">thunder_check_horizon_metrics_received</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: horizon metrics_received OK&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: horizon metrics_received has significantly changed&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: did not check horizon metrics_recieved as thunder_check_horizon_metrics_received failed to import&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_available</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">check_app</span> <span class="ow">in</span> <span class="n">check_apps</span><span class="p">:</span>
+                <span class="n">check_apps_up</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">check_app</span><span class="p">)</span>
+
+        <span class="c1"># @added 20230622 - Feature #4958: webapp_features_profile - status</span>
+        <span class="c1"># Check that webapp_features_profile gunicorn workers are responsive</span>
+        <span class="c1"># if not the main webapp_features_profile gunicorn process is issued</span>
+        <span class="c1"># -HUP to reload the workers</span>
+        <span class="k">if</span> <span class="s1">&#39;webapp&#39;</span> <span class="ow">in</span> <span class="n">thunder_apps</span><span class="p">:</span>
+            <span class="n">webapp_features_profile_check</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">webapp_features_profile_check</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">THUNDER_CHECKS</span><span class="p">[</span><span class="s1">&#39;webapp&#39;</span><span class="p">][</span><span class="s1">&#39;webapp_features_profile&#39;</span><span class="p">][</span><span class="s1">&#39;run&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to determine if horizon metrics_received check should be run - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">webapp_features_profile_check</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="n">thunder_check_webapp_features_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: webapp_features_profile OK&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: thunder/rolling :: webapp_features_profile unknown&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">err</span><span class="p">))</span>
+
+        <span class="c1"># @added 20220328 - Feature #4018: thunder - skyline.errors</span>
+        <span class="c1"># Consume the app RedisErrorLogHandler Redis key which is a count for</span>
+        <span class="c1"># every error logged and create the</span>
+        <span class="c1"># skyline.&lt;hostname&gt;.&lt;skyline_app&gt;.logged_errors metrics</span>
+        <span class="k">if</span> <span class="s1">&#39;thunder&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">check_apps_up</span><span class="p">:</span>
+            <span class="n">check_apps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;thunder&#39;</span><span class="p">)</span>
+        <span class="n">flux_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">vista_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">check_app</span> <span class="ow">in</span> <span class="n">check_apps_up</span><span class="p">:</span>
+            <span class="c1"># Do not check Redis</span>
+            <span class="k">if</span> <span class="n">check_app</span> <span class="o">==</span> <span class="s1">&#39;redis&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">check_app_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_app</span><span class="p">)</span>
+            <span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">error_count_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.log.errors.per_minute&#39;</span> <span class="o">%</span> <span class="n">check_app</span>
+            <span class="c1"># Only check flux once, although there are flux.listen and</span>
+            <span class="c1"># flux.worker check app Redis keys, both submit errors to the same</span>
+            <span class="c1"># Redis error key</span>
+            <span class="k">if</span> <span class="n">check_app</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;flux&#39;</span><span class="p">):</span>
+                <span class="n">check_app_name</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+                <span class="n">error_count_key</span> <span class="o">=</span> <span class="s1">&#39;flux.log.errors.per_minute&#39;</span>
+                <span class="k">if</span> <span class="n">flux_done</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">flux_done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">check_app</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+            <span class="c1"># Only check vista once, although there are vista and vista.worker</span>
+            <span class="c1"># check app Redis keys, both submit errors to the same Redis error</span>
+            <span class="c1"># key</span>
+            <span class="k">if</span> <span class="n">check_app</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;vista&#39;</span><span class="p">):</span>
+                <span class="n">check_app_name</span> <span class="o">=</span> <span class="s1">&#39;vista&#39;</span>
+                <span class="n">error_count_key</span> <span class="o">=</span> <span class="s1">&#39;vista.log.errors.per_minute&#39;</span>
+                <span class="k">if</span> <span class="n">vista_done</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">vista_done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">check_app</span> <span class="o">=</span> <span class="s1">&#39;vista&#39;</span>
+            <span class="n">check_log_errors_file</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">error_count_str</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># @modified 20230205 - Task #4844: Replace Redis getset with set with get</span>
+                <span class="c1"># As of Redis version 6.2.0, this command is regarded as deprecated.</span>
+                <span class="c1"># It can be replaced by SET with the GET argument when migrating or writing new code.</span>
+                <span class="c1"># error_count_str = self.redis_conn_decoded.getset(error_count_key, 0)</span>
+                <span class="n">error_count_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">error_count_key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">get</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">error_count_str</span><span class="p">:</span>
+                    <span class="n">error_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">error_count_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to getset Redis key </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">error_count_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">check_log_errors_file</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">check_log_errors_file</span><span class="p">:</span>
+                <span class="n">error_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">log_errors_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log_errors.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">check_app_name</span><span class="p">)</span>
+                <span class="n">error_count_array</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">log_errors_file</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: using </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">log_errors_file</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">log_errors_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                                <span class="n">value_string</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                <span class="n">unquoted_value_string</span> <span class="o">=</span> <span class="n">value_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">unquoted_value_string</span><span class="p">)</span>
+                                <span class="n">error_count_array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">float_value</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">error_count_array</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">log_errors_file</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">if</span> <span class="n">error_count_array</span><span class="p">:</span>
+                    <span class="n">error_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">error_count_array</span><span class="p">)</span>
+
+            <span class="n">check_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">check_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.logged_errors&#39;</span> <span class="o">%</span> <span class="n">check_app_graphite_namespace</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: </span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_count</span><span class="p">)))</span>
+            <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">error_count</span><span class="p">)</span>
+
+        <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: checks took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">spin_end</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="RollingThunder.run"><a class="viewcode-back" href="../../skyline.thunder.html#thunder.thunder_rolling.RollingThunder.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+
+<span class="sd">        - Determine if Redis is up</span>
+
+<span class="sd">        - Spawn a rolling process to do checks</span>
+
+<span class="sd">        - Wait for the process to finish.</span>
+
+<span class="sd">        - run_every 60 seconds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: starting </span><span class="si">%s</span><span class="s1">/rolling&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">run_every</span> <span class="o">=</span> <span class="mi">60</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling cannot connect to get_redis_conn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="c1"># continue</span>
+
+            <span class="c1"># Report app up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;thunder.rolling&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: could not update the Redis analyzer.thunder/rolling key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Spawn processes</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rolling_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: starting rolling_process&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to spawn process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Self monitor processes and terminate if any rolling_process that</span>
+            <span class="c1"># has run for longer than 180 seconds</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">run_every</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: rolling_process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: timed out, killing rolling_process process&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: killing rolling_process process&#39;</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: killed rolling_process process&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: stopping rolling_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to stop rolling_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="n">run_every</span><span class="p">:</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_every</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+
+                <span class="n">process_runtime_now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_every</span> <span class="o">-</span> <span class="n">process_runtime_now</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;thunder/rolling :: sleeping for </span><span class="si">%.2f</span><span class="s1"> seconds due to low run time...&#39;</span> <span class="o">%</span> <span class="n">sleep_for</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">sleep_for</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to del sleep_for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">process_runtime</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: thunder/rolling :: failed to del process_runtime - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

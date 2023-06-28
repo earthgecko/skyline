@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARTime &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ARTime</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/algorithms/ARTime.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="artime">
+<h1><a class="reference internal" href="#artime">ARTime</a><a class="headerlink" href="#artime" title="Permalink to this heading"></a></h1>
+<p>Skyline can use a port of the <a class="reference external" href="https://github.com/markNZed/ARTimeNAB.jl">ARTimeNAB</a> algorithm in the analysis pipeline.</p>
+<p>The algorithm based on adaptive resonance theory (<a class="reference external" href="https://en.wikipedia.org/wiki/Adaptive_resonance_theory">ART</a>) which was developed by
+Stephen Grossberg and Gail Carpenter.  The <a class="reference external" href="https://github.com/markNZed/ARTimeNAB.jl">ARTimeNAB</a> algorithm itself was
+developed and published by Mark Hampton.</p>
+<p>The use of ARTime can be used to supplement three-sigma based algorithms and
+is better in the detection realm than matrixprofile.  ARTime has been proven
+to be a very useful and accurate algorithm in anomaly detection in time series,
+having achieved the highest score on the NAB scoreboard, usurping Numenta HTM’s
+8 year place at the top.  No small feat.  However as the saying goes, all magic
+comes with a price.</p>
+<p>Implementing ARTime in Skyline incurs a number of additional overheads which
+are non-trivial.</p>
+<ul class="simple">
+<li><p>It requires the installation and maintenance of Julia julialang</p></li>
+<li><p>It requires significant number of Julia dependencies packages</p></li>
+<li><p>It requires running a new Skyline app - skyline/flock</p></li>
+</ul>
+<p>The installation process for Julia is fairly straightforward, however the
+the installation of the dependencies packages less so.  This has to be done as a
+manually process.</p>
+<p>The requirement to run ARTime in the new process manager skyline/flock is
+based on the fact, that although ARTime could be run as normal custom
+algorithm, the initialisation time of the Julia process is limiting and not
+suited to running in real time on an adhoc basis.  The new skyline/flock process
+manager initialises a process/es with all the Julia dependencies and packages
+loaded and then handles job submitted to a Redis queue.</p>
+<p>ARTime is fast, but it is not fast enough to run in the 1st stage Analyzer
+analysis stage, so it is limited to running in the Mirage 2nd stage analysis,
+much like matrixprofile.  That said, even then ARTime cannot be considered as
+fast.  The algorithm time and memory is linear based on the number of data
+points being analysed (see considerations).  Although ARTime is an online
+streaming algorithm, it is used in Skyline in a batch method.  It would be
+possible to have an ARTime model for every metric and have it continuously
+learning, however that is unrealistic in terms of memory and overhead in the
+context of Skyline and 1000s upon 1000s of metrics.</p>
+<p>Therefore implementation methodology in Skyline is the same as always, ARTime
+is fed SECOND_ORDER_RESOLUTION_HOURS data points and returns anomalies.
+Therefore Skyline is using ARTime in a oneshot, streaming fashion. A new
+model is initialised, each data point fed to the model and the model returns an
+anomaly score for each data point.  Once the data has been analysed, a decision
+is made based on whether or not the data point/s in the last window are anomalous
+or not.</p>
+<section id="considerations">
+<h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this heading"></a></h2>
+<p>As always analysis run time is paramount in Skyline, therefore due to the
+analysis run time for ARTime increasing with the number of data
+points analysed, the following must be noted.</p>
+<ul class="simple">
+<li><p>The skyline_ARTime algorithm is not suited to high frequency time series,
+meaning if your SECOND_ORDER_RESOLUTION_HOURS data is 7 days longer and has
+a data point every 60 seconds, having 10080 data points, it is too big.</p></li>
+<li><p>The skyline_ARTime algorithm will downsample any time series &gt; 1440 data
+points to as close to 1000 data points as possible.</p></li>
+<li><p>skyline_ARTime can take approximately between 1.5 and 2 seconds to analyse a
+time series with a length of 1008 data points (e.g. 7 days at 600 seconds
+resolution).  However depending on CPU utilisation this can head up to the
+5 to 10 seconds range when the server is under heavy load.</p></li>
+</ul>
+</section>
+<section id="setting-up-the-julia-environment-dependencies-and-artime">
+<h2>Setting up the Julia environment, dependencies and ARTime<a class="headerlink" href="#setting-up-the-julia-environment-dependencies-and-artime" title="Permalink to this heading"></a></h2>
+<p>Firstly you need to install Julia on the server and all the dependencies.  The
+steps highlighted here are based on having a standard Skyline installarion
+deployed as per the Installation page or dawn quick start methods.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE: make sure the correct versions are stated below just in case this</span>
+<span class="c1">#       documentation is not updated when versions update.</span>
+<span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.13&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py3813&quot;</span>
+
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py3813&quot;</span>
+
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+
+<span class="c1"># Use jill to install the latest Julia - https://github.com/johnnychen94/jill.py</span>
+bin/pip3.8<span class="w"> </span>install<span class="w"> </span>jill
+jill<span class="w"> </span>install
+
+<span class="c1"># Install the julia requirements</span>
+bin/pip3.8<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/opt/skyline/github/skyline/julia-requirements.txt
+
+<span class="c1"># Start a julia REPL</span>
+julia
+
+
+<span class="c1"># As of statsmodels 0.9.0 numpy, et al need to be installed before</span>
+<span class="c1"># statsmodels in requirements</span>
+<span class="c1"># https://github.com/statsmodels/statsmodels/issues/4654</span>
+cat<span class="w"> </span>/opt/skyline/github/skyline/requirements.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^numpy\|^scipy\|^patsy&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/requirements.1.txt
+
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+</pre></div>
+</div>
+<p>cd /opt/python_virtualenv/projects/skyline-SNAB-py385
+source bin/activate
+bin/pip3.8 install tad
+git clone <a class="reference external" href="https://github.com/JoungheeKim/fuseAD">https://github.com/JoungheeKim/fuseAD</a>
+bin/pip3.8 install jill
+cd
+jill install
+history | tail -n 30
+bin/pip3.8 install juliacall==0.4.3
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385
+bin/pip3.8 install juliacall==0.4.3
+mkdir /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed
+git clone <a class="reference external" href="https://github.com/markNZed/ARTimeNAB.jl">https://github.com/markNZed/ARTimeNAB.jl</a>
+mkdir /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed/NAB/ARTimeNAB
+cd /opt/python_virtualenv/projects/skyline-SNAB-py385/markNZed/NAB/ARTimeNAB
+git clone <a class="reference external" href="https://github.com/markNZed/NAB">https://github.com/markNZed/NAB</a>
+cd NAB
+git checkout ARTimeNAB
+pwd
+ls -al
+ls -al data/realAWSCloudwatch/ec2_cpu_utilization_24ae8d.csv</p>
+</section>
+<section id="enabling-artime-to-run-in-mirage">
+<h2>Enabling ARTime to run in Mirage<a class="headerlink" href="#enabling-artime-to-run-in-mirage" title="Permalink to this heading"></a></h2>
+<p>See the current <code class="docutils literal notranslate"><span class="pre">'skyline_matrixprofile'</span></code> example in
+<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> and change the <code class="docutils literal notranslate"><span class="pre">'namespaces':</span></code> parameter as
+appropriate.</p>
+<p>Important points to note.</p>
+<ul class="simple">
+<li><p>The window and and probationary_period must be an even number</p></li>
+<li><p>probationary_period must =&gt; window otherwise anomaly scores are nans</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

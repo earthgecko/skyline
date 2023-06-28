@@ -72,14 +72,16 @@ keeps the 5 last logs:
             interval=1,
             backupCount=5)
 
-The Skyline app logs and the rotation is relatively cheap on disk space.
+The Skyline app logs and the rotation is relatively cheap on disk space,
+an example of the disk space usage on four different Skyline servers.
 
-```
-141M    /var/log/skyline
-248M    /var/log/skyline
-139M    /var/log/skyline
-330M    /var/log/skyline
-```
+.. code-block:: bash
+
+    141M    /var/log/skyline
+    248M    /var/log/skyline
+    139M    /var/log/skyline
+    330M    /var/log/skyline
+
 
 Skyline app log preservation
 ----------------------------
@@ -106,7 +108,7 @@ logging implementation was made from and it is possible that all this is due to
 a method change from the source, it tested OK, but has not been implemented as
 logging is working and needs to work.  So it is horribly fixed, but works and
 testing something else new under all possible conditions is difficult.  So it
-reamins this way for the forseeable future.
+remains this way for the forseeable future.
 
 syslog
 ------
@@ -118,7 +120,9 @@ namespace metrics.
 
 A special mention of the settings.py variable
 
-```SYSLOG_ENABLED = True```
+.. code-block:: python
+
+  SYSLOG_ENABLED = True
 
 This essentially now a hard requirement for Panorama and Luminosity now.
 If this special alerter is disabled a large chunk of Skyline's new functionality

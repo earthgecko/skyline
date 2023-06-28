@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ionosphere inference &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ionosphere learning from repetitive patterns" href="ionosphere_learn_repetitive_patterns.html" />
+    <link rel="prev" title="Ionosphere echo" href="ionosphere_echo.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ionosphere inference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mass-similar-motifs">MASS - Similar motifs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Ionosphere inference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ionosphere_inference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ionosphere-inference">
+<h1>Ionosphere inference<a class="headerlink" href="#ionosphere-inference" title="Permalink to this heading"></a></h1>
+<section id="mass-similar-motifs">
+<h2>MASS - Similar motifs<a class="headerlink" href="#mass-similar-motifs" title="Permalink to this heading"></a></h2>
+<p>Ionosphere inference is a extension of Ionosphere specifically for the purpose
+of making use of <a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> (Mueen’s Algorithm for Similarity Search) for searching
+time series sub-sequences under z-normalized Euclidean distance for similarity.
+In simple terms it finds similar patterns.</p>
+<p>Note that the terms motif, shape, shapelet and subsuqeunces are somewhat
+synonymous in this regard.  HOWEVER their use in relation to
+<span class="skyblue">Sky</span><span class="red">line</span> has distinctions made:</p>
+<ul class="simple">
+<li><p>shapelet, <code class="docutils literal notranslate"><span class="pre">subsequence</span></code> or shape: is a snippet of a timeseries</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">motif</span></code>: is shapelet that has be discovered based on distance.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">matched_motif</span></code>: is a motif identified as matching some additional criteria
+(other than distance).  A matched_motif can represent a <code class="docutils literal notranslate"><span class="pre">similar</span></code>,
+<code class="docutils literal notranslate"><span class="pre">exact</span></code> or <code class="docutils literal notranslate"><span class="pre">not_similar</span></code> motif.</p></li>
+</ul>
+<p>The initially Ionosphere implemented similarity search solely with the use of
+feature profiles created with tsfresh, which works very well, however
+introducing the use of <a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> makes Ionosphere work even better.
+<a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> compliments the original SITTCA algorithm, in terms of <a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> is very
+good at shorter pattern similarity search and SITTCA is very good at long
+pattern similarity search.</p>
+<p>It is important to know that MASS only finds similar shapes (values are not
+taken into account). So a metric that was running steadily at 10 and then jumps
+to 100 and runs steadily at 100, will have the same shape as a metric that was
+running at 10000 and then jumps to 100000.
+However MASS makes it possible to discover similar motifs very efficiently,
+these discovered motifs can then be validated based not only on their
+distances but also on their similar range and similarity in their areas under
+the curve as well.  These multiple conditional verifications ensure that the
+method being used attempts to achieve 0 false negatives.</p>
+<p>It is important to state that <a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> is being used with very strict default
+allowed maximum distances and areas so that the outcomes are correct for purpose.
+The purpose being to find <strong>very similar</strong> motifs in <strong>trained</strong> data.</p>
+<p>A note on batch_size vs. time series length, even if a batch_size is less than
+the length of the time series <span class="skyblue">Sky</span><span class="red">line</span> only runs a batch_size
+if the time series at least 10% larger than the batch_size.  Although it is
+generally possible to run a batch_size of very similar size on a time series,
+errors occur when a time series that has some missing data points is used.
+In testing a match was never found on data with a batch_size of 1440 and
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> time series.</p>
+<p>Consider the system flags a potentially anomaly and using the subsequence of
+the last 180 data points of the potentially anomalous time series to create a
+shapelet.</p>
+<img alt="_images/looking.for.motif.png" src="_images/looking.for.motif.png" />
+<p>Using <a class="reference external" href="https://github.com/matrix-profile-foundation/mass-ts">mass-ts</a> the system then searches all the available trained data for the
+metric to find similar motifs within the trained data.  It then filters out
+similar motifs that are not similar enough based on:</p>
+<ul class="simple">
+<li><p>their distance scores</p></li>
+<li><p>the similar motif not being within the same values range as potentially
+anomalous motif.</p></li>
+<li><p>the areas under the curve not being similar enough</p></li>
+</ul>
+<p>If there are similar motifs remaining after the filtering, this is deemed as a
+match and the instance is considered normal and not anomalous.  These examples
+just show the last 10 data points, in practice the minimum batch size should not
+be less than 180 data points so as to represent a large enough sample of the data
+to exclude repetitive volatility shifts.</p>
+<p>2 matches are visualised below:</p>
+<img alt="_images/found.similar.motif.png" src="_images/found.similar.motif.png" />
+<img alt="_images/found.similar.motif.2.png" src="_images/found.similar.motif.2.png" />
+<p>To demonstrate what inference is filtering <strong>out</strong>, the following are similar
+motifs that are filtered out as they are a similar shape, but they are not
+similar enough in terms of the values range (based on a
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING" title="settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span></code></a> of 10)</p>
+<img alt="_images/filtered.out.similar.motif.png" src="_images/filtered.out.similar.motif.png" />
+<img alt="_images/filtered.out.similar.motif.2.png" src="_images/filtered.out.similar.motif.2.png" />
+<p>The method is based on the best match found wins, not the first match found wins.
+The first matched found wins method is more efficient in terms of potential
+compute time, but more importantly the method wants to ensure 0 false negatives.</p>
+<p>With Ionosphere inference enabled the analysis pipeline is as follows, best
+match found wins:</p>
+<ul class="simple">
+<li><p>Ionosphere finding similar matching motifs for existing
+<code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_SECONDS</span></code> features profiles time series and
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> features profiles</p></li>
+<li><p>Ionosphere comparison to Mirage <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_SECONDS</span></code> features
+profiles and minmax scaled features profiles</p></li>
+<li><p>Ionosphere echo comparison to Mirage <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> features
+profiles</p></li>
+<li><p>Ionosphere comparison to Mirage <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> minmax scaled
+features profiles</p></li>
+<li><p>Ionosphere layers comparisons</p></li>
+</ul>
+</section>
+<section id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this heading"></a></h2>
+<p>It is possible to run inference in a testing mode, where all analysis is done
+and results recorded, but the results do not have any bearing on the normal
+anomaly detection and alerting, meaning that if inference finds a similar
+motif that matches, it does not feedback as not anomalous, it just records the
+results for evaluation and validation, but do note that results will be stored
+in the database as if it were live.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ionosphere_echo.html" class="btn btn-neutral float-left" title="Ionosphere echo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ionosphere_learn_repetitive_patterns.html" class="btn btn-neutral float-right" title="Ionosphere learning from repetitive patterns" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

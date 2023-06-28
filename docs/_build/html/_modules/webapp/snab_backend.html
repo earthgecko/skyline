@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.snab_backend &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.snab_backend</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.snab_backend</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
+
+<span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_engine</span><span class="p">,</span> <span class="n">snab_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span> <span class="n">anomalies_table_meta</span><span class="p">)</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
+<span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_WEBAPP_DEBUG from settings&#39;</span><span class="p">)</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="get_snab_engine"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.get_snab_engine">[docs]</a><span class="k">def</span> <span class="nf">get_snab_engine</span><span class="p">():</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_snab_result :: failed to get MySQL engine for snab table&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return None, fail_msg, trace</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span></div>
+
+
+<div class="viewcode-block" id="snab_engine_disposal"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.snab_engine_disposal">[docs]</a><span class="k">def</span> <span class="nf">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: calling engine.dispose()&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="update_snab_result"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.snab_backend.update_snab_result">[docs]</a><span class="k">def</span> <span class="nf">update_snab_result</span><span class="p">(</span><span class="n">snab_id</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">snab_result</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the relevant field in the snab table.</span>
+
+<span class="sd">    :param snab_id: the snab table id</span>
+<span class="sd">    :param anomaly_id: the anomaly id</span>
+<span class="sd">    :param snab_result: a selected result</span>
+<span class="sd">    :type snab_id: int</span>
+<span class="sd">    :type anomaly_id: int</span>
+<span class="sd">    :type result: str</span>
+<span class="sd">    :return: snab_result_updated, base_name, anomaly_timestamp</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">snab_result_updated</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;update_snab_result :: for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">)))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_snab_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: could not get a MySQL engine to get update snab table&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_snab_result :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">snab_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">snab_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;snab_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: failed to get snab_table meta&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="c1"># @modified 20201004 - Task #3748: POC SNAB</span>
+    <span class="c1">#                   Branch #3068: SNAB</span>
+    <span class="c1"># Allow results to be changed</span>
+    <span class="n">determined_result</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">existing_result</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">snab_table</span><span class="p">])</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">snab_id</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">tP_set</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tP&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">tP_set</span><span class="p">:</span>
+                <span class="n">existing_result</span> <span class="o">=</span> <span class="s1">&#39;tP&#39;</span>
+            <span class="n">fP_set</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fP&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fP_set</span><span class="p">:</span>
+                <span class="n">existing_result</span> <span class="o">=</span> <span class="s1">&#39;fP&#39;</span>
+            <span class="n">tN_set</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;tN&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">tN_set</span><span class="p">:</span>
+                <span class="n">existing_result</span> <span class="o">=</span> <span class="s1">&#39;tN&#39;</span>
+            <span class="n">fN_set</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;fN&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fN_set</span><span class="p">:</span>
+                <span class="n">existing_result</span> <span class="o">=</span> <span class="s1">&#39;fN&#39;</span>
+            <span class="n">unsure_set</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;unsure&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">unsure_set</span><span class="p">:</span>
+                <span class="n">existing_result</span> <span class="o">=</span> <span class="s1">&#39;unsure&#39;</span>
+            <span class="n">determined_result</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: current result values to snab id </span><span class="si">%s</span><span class="s1"> - tP: </span><span class="si">%s</span><span class="s1">, fP: </span><span class="si">%s</span><span class="s1">, tN: </span><span class="si">%s</span><span class="s1">, fN: </span><span class="si">%s</span><span class="s1">, unsure: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tP_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fP_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tN_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fN_set</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">unsure_set</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: could not determine current result values for snab id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">)))</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_snab_result :: could not determine current result values for snab id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">determined_result</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: did not determine current result values for snab id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: current existing result for snab id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">existing_result</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">snab_result</span> <span class="o">==</span> <span class="s1">&#39;tP&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">snab_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">tP</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unsure</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">snab_result</span> <span class="o">==</span> <span class="s1">&#39;fP&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">snab_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">tP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fP</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">tN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unsure</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">snab_result</span> <span class="o">==</span> <span class="s1">&#39;tN&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">snab_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">tP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tN</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unsure</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">snab_result</span> <span class="o">==</span> <span class="s1">&#39;fN&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">snab_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">tP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fN</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">unsure</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">snab_result</span> <span class="o">==</span> <span class="s1">&#39;unsure&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">snab_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">tP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unsure</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">snab_result</span> <span class="o">==</span> <span class="s1">&#39;NULL&#39;</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">snab_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">tP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fP</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fN</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unsure</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">snab_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">snab_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="n">snab_result_updated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">snab_result</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: could not update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)))</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_snab_result :: could not update result for snab id </span><span class="si">%s</span><span class="s1"> with anomaly id </span><span class="si">%s</span><span class="s1"> and result </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">snab_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: metrics_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: anomalies_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_snab_result :: failed to get anomalies_table meta&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">anomaly_id</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+            <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]</span>
+            <span class="k">break</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_snab_result :: determined anomaly_timestamp </span><span class="si">%s</span><span class="s1"> for metric id </span><span class="si">%s</span><span class="s1"> for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_snab_result :: could not determine anomaly timestamp or metric id from DB for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">connection</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not determine metric id from metrics table&#39;</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="n">connection</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">snab_engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">snab_result_updated</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">existing_result</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

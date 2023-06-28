@@ -8,31 +8,30 @@ skyline.crucible.agent module
 -----------------------------
 
 .. automodule:: crucible.agent
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 skyline.crucible.crucible module
 --------------------------------
 
 .. automodule:: crucible.crucible
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
-skyline.crucible.crucible_algorithms module
--------------------------------------------
+skyline.crucible.crucible\_algorithms module
+--------------------------------------------
 
 .. automodule:: crucible.crucible_algorithms
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: crucible
-    :members:
-    :undoc-members:
-    :show-inheritance:
+   :members:
+   :undoc-members:
+   :show-inheritance:

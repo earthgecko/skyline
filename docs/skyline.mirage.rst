@@ -36,6 +36,30 @@ skyline.mirage.mirage\_algorithms module
    :undoc-members:
    :show-inheritance:
 
+skyline.mirage.mirage\_labelled\_metrics module
+-----------------------------------------------
+
+.. automodule:: mirage.mirage_labelled_metrics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.mirage.mirage\_vortex module
+------------------------------------
+
+.. automodule:: mirage.mirage_vortex
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.mirage.mirage\_vortex\_algorithms module
+------------------------------------------------
+
+.. automodule:: mirage.mirage_vortex_algorithms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.mirage.negaters module
 ------------------------------
 

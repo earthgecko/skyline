@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Analyzer Optimizations &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyzer Optimizations &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Algorithms" href="algorithms/index.html" />
     <link rel="prev" title="Analyzer" href="analyzer.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -126,11 +87,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -138,6 +106,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -146,71 +117,32 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Analyzer Optimizations</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Analyzer Optimizations</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/analyzer-optimizations.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="analyzer-optimizations">
-<h1>Analyzer Optimizations<a class="headerlink" href="#analyzer-optimizations" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="analyzer-optimizations">
+<h1>Analyzer Optimizations<a class="headerlink" href="#analyzer-optimizations" title="Permalink to this heading"></a></h1>
 <p>The original implementation of Skyline has worked for years, almost
 flawlessly it must be said. However the original implementation of
 Skyline was patterned and somewhat even hard coded to run in a very
@@ -233,8 +165,8 @@ spawning again and again, etc.</p>
     <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="section" id="number-of-analyzer-processors">
-<h2>Number of Analyzer processors<a class="headerlink" href="#number-of-analyzer-processors" title="Permalink to this headline">¶</a></h2>
+<section id="number-of-analyzer-processors">
+<h2>Number of Analyzer processors<a class="headerlink" href="#number-of-analyzer-processors" title="Permalink to this heading"></a></h2>
 <p>A number of optimizations have changed the required number of processors
 to assign to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>, quite dramatically in some
 cases.  Specifically in cases where the number of metrics being analyzed is not
@@ -283,23 +215,23 @@ will find that:</p>
 </li>
 </ul>
 <p>See <a class="reference internal" href="#optimizations-results">Optimizations results</a> at the end of this page.</p>
-</div>
-<div class="section" id="analyzer-work-rate">
-<h2>Analyzer work rate<a class="headerlink" href="#analyzer-work-rate" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="analyzer-work-rate">
+<h2>Analyzer work rate<a class="headerlink" href="#analyzer-work-rate" title="Permalink to this heading"></a></h2>
 <p>The original Analyzer analyzed all timeseries against all algorithms
 which is the maximum possible work. In terms of the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>
 based model, this is not the most efficient work rate.</p>
-</div>
-<div class="section" id="performance-tuning">
-<h2>Performance tuning<a class="headerlink" href="#performance-tuning" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="performance-tuning">
+<h2>Performance tuning<a class="headerlink" href="#performance-tuning" title="Permalink to this heading"></a></h2>
 <p>A special thanks to <a class="reference external" href="https://jiffyclub.github.io/snakeviz/">Snakeviz</a>
 for a very useful Python profiling tool which enabled some minimal
 changes in the code and substantial improvements in the performance,
 along with <a class="reference external" href="https://github.com/ymichael/cprofilev">cprofilev</a> and
 <a class="reference external" href="https://github.com/vmprof/vmprof-python">vmprof</a>.</p>
-</div>
-<div class="section" id="using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow">
-<h2>Using anomaly_breakdown metrics graphs to tune the Analyzer workflow<a class="headerlink" href="#using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow">
+<h2>Using anomaly_breakdown metrics graphs to tune the Analyzer workflow<a class="headerlink" href="#using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow" title="Permalink to this heading"></a></h2>
 <p>anomaly_breakdown metrics were added to Skyline on 10 Jun 2014, yet
 never merged into the main Etsy fork. However, in terms of performance
 tuning and profiling Skyline they are quite useful. They provide us with
@@ -349,18 +281,18 @@ have been implemented with backwards compatibility and for the purpose
 of running Analyzer without optimization of the algorithms to ensure
 that they can be benchmarked again should any further algorithms ever be
 added to Analyzer or any existing algorithms modified in any way.</p>
-</div>
-<div class="section" id="algorithm-benchmarks">
-<h2>algorithm benchmarks<a class="headerlink" href="#algorithm-benchmarks" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="algorithm-benchmarks">
+<h2>algorithm benchmarks<a class="headerlink" href="#algorithm-benchmarks" title="Permalink to this heading"></a></h2>
 <p>analyzer_dev can be/was used as a benchmarking module to determine the
 execution times of algorithms.</p>
-<div class="section" id="considerations-approximation-of-timings">
-<h3>Considerations - approximation of timings<a class="headerlink" href="#considerations-approximation-of-timings" title="Permalink to this headline">¶</a></h3>
+<section id="considerations-approximation-of-timings">
+<h3>Considerations - approximation of timings<a class="headerlink" href="#considerations-approximation-of-timings" title="Permalink to this heading"></a></h3>
 <p>The algorithm benchmark timings are simply approximations of the real
 times that the algorithm execution is undertaken in (float).</p>
-</div>
-<div class="section" id="tmpfs-vs-multiprocessing-value">
-<h3>tmpfs vs multiprocessing Value<a class="headerlink" href="#tmpfs-vs-multiprocessing-value" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="tmpfs-vs-multiprocessing-value">
+<h3>tmpfs vs multiprocessing Value<a class="headerlink" href="#tmpfs-vs-multiprocessing-value" title="Permalink to this heading"></a></h3>
 <p>Recording the algorithm counts and timings without using multiprocessing Value
 and associated overhead of locks, etc, etc. /tmp was opted for instead and the
 variable <a class="reference internal" href="skyline.html#settings.SKYLINE_TMP_DIR" title="settings.SKYLINE_TMP_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_TMP_DIR</span></code></a> was added. In most cases /tmp is tmpfs
@@ -368,9 +300,9 @@ which is memory anyway so all the heavy lifting in terms of locking etc is
 offloaded to the OS and modules do not have to incur the additional complexity
 in Python. A simple yet effective win. Same same but different. There may be
 some valid reasons for the use multiprocessing Value or Manager().list()</p>
-</div>
-<div class="section" id="algorithms-ranked-by-triggered-count">
-<h3>Algorithms ranked by triggered count<a class="headerlink" href="#algorithms-ranked-by-triggered-count" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="algorithms-ranked-by-triggered-count">
+<h3>Algorithms ranked by triggered count<a class="headerlink" href="#algorithms-ranked-by-triggered-count" title="Permalink to this heading"></a></h3>
 <p>Using the <code class="docutils literal notranslate"><span class="pre">anomaly_breakdown</span></code> metrics data it shows that on a plethora of
 machine and application related metrics, we can determine the most
 triggered algorithms by rank:</p>
@@ -385,9 +317,9 @@ triggered algorithms by rank:</p>
 <li><p>median_absolute_deviation</p></li>
 <li><p>ks_test</p></li>
 </ol>
-</div>
-<div class="section" id="algorithms-ranked-by-execution-time">
-<h3>Algorithms ranked by execution time<a class="headerlink" href="#algorithms-ranked-by-execution-time" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="algorithms-ranked-by-execution-time">
+<h3>Algorithms ranked by execution time<a class="headerlink" href="#algorithms-ranked-by-execution-time" title="Permalink to this heading"></a></h3>
 <p>Using the <code class="docutils literal notranslate"><span class="pre">algorithm_breakdown</span></code> metrics data we can determine the most
 “expensive” algorithms by total time to run:</p>
 <ol class="arabic simple">
@@ -401,9 +333,9 @@ triggered algorithms by rank:</p>
 <li><p>histogram_bins (avg: 0.101075738333)</p></li>
 <li><p>ks_test (avg: 0.0979568116667)</p></li>
 </ol>
-</div>
-<div class="section" id="performance-weighting">
-<h3>Performance weighting<a class="headerlink" href="#performance-weighting" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="performance-weighting">
+<h3>Performance weighting<a class="headerlink" href="#performance-weighting" title="Permalink to this heading"></a></h3>
 <p>If we change the order in which the timeseries are run through the
 algorithms in Analyzer, we can improve the overall performance by
 running the most expensive computational algorithms later in the
@@ -431,10 +363,10 @@ analysis.</p>
 <span class="o">+-----------------------------+----------------+---------------------+</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="settings-run-optimized-workflow">
-<h2><a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a><a class="headerlink" href="#settings-run-optimized-workflow" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="settings-run-optimized-workflow">
+<h2><a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a><a class="headerlink" href="#settings-run-optimized-workflow" title="Permalink to this heading"></a></h2>
 <p>The original version of Analyzer ran all timeseries through all
 <code class="docutils literal notranslate"><span class="pre">ALGORITHMS</span></code> like so:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">]</span>
@@ -489,9 +421,9 @@ performance weighing matrix is:</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="optimizations-results">
-<h2>Optimizations results<a class="headerlink" href="#optimizations-results" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="optimizations-results">
+<h2>Optimizations results<a class="headerlink" href="#optimizations-results" title="Permalink to this heading"></a></h2>
 <p>These server graphs show the pre and post crucible update metrics related to CPU
 and loadavg for a dedicated Skyline server running on a 4 vCPU, 4GB RAM, SSD
 cloud server.  The server is handling ~3000 metrics and is solely dedicated to
@@ -504,81 +436,56 @@ Panorama daemon in addition to what it was running before.</p>
 only a few steps away from Etsy master and those steps were related to Analyzer
 sending a few more Skyline metric namespaces to Graphite, in terms of Analyzer
 and the algorithms logic pre update were identical to Etsy master.</p>
-<div class="figure align-default">
+<figure class="align-default">
 <img alt="_images/analyzer.skyline1.runtime.png" src="_images/analyzer.skyline1.runtime.png" />
-</div>
-<div class="figure align-default">
+</figure>
+<figure class="align-default">
 <img alt="_images/analyzer.optimizations.cpu0.png" src="_images/analyzer.optimizations.cpu0.png" />
-</div>
-<div class="figure align-default">
+</figure>
+<figure class="align-default">
 <img alt="_images/analyzer.optimizations.cpu1.png" src="_images/analyzer.optimizations.cpu1.png" />
-</div>
-<div class="figure align-default">
+</figure>
+<figure class="align-default">
 <img alt="_images/analyzer.optimizations.cpu2.png" src="_images/analyzer.optimizations.cpu2.png" />
-</div>
-<div class="figure align-default">
+</figure>
+<figure class="align-default">
 <img alt="_images/analyzer.optimizations.cpu3.png" src="_images/analyzer.optimizations.cpu3.png" />
-</div>
-<div class="figure align-default">
+</figure>
+<figure class="align-default">
 <img alt="_images/analyzer.optimizations.loadavg.png" src="_images/analyzer.optimizations.loadavg.png" />
-</div>
-</div>
-</div>
+</figure>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="algorithms/index.html" class="btn btn-neutral float-right" title="Algorithms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="analyzer.html" class="btn btn-neutral float-left" title="Analyzer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="analyzer.html" class="btn btn-neutral float-left" title="Analyzer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="algorithms/index.html" class="btn btn-neutral float-right" title="Algorithms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

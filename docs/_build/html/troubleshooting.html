@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trouble shooting &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Deprecated docs" href="deprecated-docs/index.html" />
+    <link rel="prev" title="opentelemetry" href="opentelemetry.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Trouble shooting</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/troubleshooting.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trouble-shooting">
+<h1>Trouble shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this heading"></a></h1>
+<p><span class="skyblue">Sky</span><span class="red">line</span> does a lot of work and because of this you can
+experience issues.</p>
+<p>Generally the key indicators with <span class="skyblue">Sky</span><span class="red">line</span> are CPU usage,
+CPU iowait, CPU steal, disk I/O (specifically <code class="docutils literal notranslate"><span class="pre">write_time</span></code>),
+<code class="docutils literal notranslate"><span class="pre">skyline.&lt;host&gt;.analyzer.runtime</span></code> and some key Redis metrics.</p>
+<p>Redis performance is one of the best indicators as it is the cornerstone of
+speed in the <span class="skyblue">Sky</span><span class="red">line</span> pipeline.
+Redis <strong>cannot</strong> be slow.  If Redis is running slow there is a problem.</p>
+<p>If you are running a moderately loaded <span class="skyblue">Sky</span><span class="red">line</span> instance/s in a
+cloud environment over time you <strong>probably will</strong> experience some performance
+degradation.  These incidents are generally (and in almost all cases related) to:</p>
+<ul class="simple">
+<li><p>A noisy neighbour on the host machine on which the <span class="skyblue">Sky</span><span class="red">line</span>
+VM instances runs, which introduces iowait and resource limiting on
+host/resources which is divided and distributed between all the users of those
+resources.</p></li>
+<li><p>An actual issue on the host, disk I/O, memory allocation failure, swap, etc, etc</p></li>
+<li><p>Or you are just trying to do too much on the host on which you are running
+<span class="skyblue">Sky</span><span class="red">line</span> on.</p></li>
+</ul>
+<p>Hopefully you are monitoring the machine/VM on which you run
+<span class="skyblue">Sky</span><span class="red">line</span> with <span class="skyblue">Sky</span><span class="red">line</span>, if not install
+telegraf and start monitoring it!</p>
+<p>Key <span class="skyblue">Sky</span><span class="red">line</span> performance metrics and things to check if you are
+experiencing issues are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">skyline.&lt;host&gt;.analyzer.runtime</span></code></p></li>
+<li><p>CPU user, CPU iowait, CPU steal</p></li>
+<li><p>disk io <code class="docutils literal notranslate"><span class="pre">write_time</span></code></p></li>
+<li><p>Using swap (although you swap should always be disabled)</p></li>
+<li><p>The roomba runtime in <code class="docutils literal notranslate"><span class="pre">/var/log/skyline/horizon.log</span></code></p></li>
+<li><p>Check that Transparent huge pages is disabled and has not been accidentally
+re-enabled on you kernel.  Check with
+<code class="docutils literal notranslate"><span class="pre">cat</span> <span class="pre">/sys/kernel/mm/transparent_hugepage/enabled</span></code> and it should be set to
+<code class="docutils literal notranslate"><span class="pre">always</span> <span class="pre">madvise</span> <span class="pre">[never]</span></code>.  If it is not, use
+<code class="docutils literal notranslate"><span class="pre">echo</span> <span class="pre">never</span> <span class="pre">&gt;</span> <span class="pre">/sys/kernel/mm/transparent_hugepage/enabled</span></code> to disable and
+restart Redis.</p></li>
+<li><p>redis <code class="docutils literal notranslate"><span class="pre">INFO</span></code> specifically <code class="docutils literal notranslate"><span class="pre">rdb_last_bgsave_time_sec</span></code></p></li>
+<li><p>redis <code class="docutils literal notranslate"><span class="pre">INFO</span> <span class="pre">commandstats</span></code> specifically <code class="docutils literal notranslate"><span class="pre">usec_per_call</span></code> stats in the case
+of <span class="skyblue">Sky</span><span class="red">line</span> the following samples are normal times for an
+instances handling between 1500 to 3000 metrics (with everything running on
+the <span class="skyblue">Sky</span><span class="red">line</span> VM, Redis, MariaDB, Graphite, etc)</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Commandstats</span>
+<span class="n">cmdstat_mget</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">3879</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">66793268</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">17219.20</span>
+<span class="n">cmdstat_smembers</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">747026</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">175273317</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">234.63</span>
+<span class="n">cmdstat_sunionstore</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">687</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">855735</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">1245.61</span>
+<span class="n">cmdstat_hgetall</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">9518</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">5108903</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">536.76</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Commandstats</span>
+<span class="n">cmdstat_mget</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">238831</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">16884528653</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">70696.55</span>
+<span class="n">cmdstat_smembers</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">75653989</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">24095897878</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">318.50</span>
+<span class="n">cmdstat_sunionstore</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">118861</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">242901100</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">2043.57</span>
+<span class="n">cmdstat_hgetall</span><span class="p">:</span><span class="n">calls</span><span class="o">=</span><span class="mi">1324879</span><span class="p">,</span><span class="n">usec</span><span class="o">=</span><span class="mi">2020767640</span><span class="p">,</span><span class="n">usec_per_call</span><span class="o">=</span><span class="mf">1525.25</span>
+</pre></div>
+</div>
+<p>If you are experiencing very high <code class="docutils literal notranslate"><span class="pre">usec_per_call</span></code> times on the above metrics
+(much higher than the examples above) you probably have an IO problem</p>
+<p>The good news is that <span class="skyblue">Sky</span><span class="red">line</span> is <strong>very robust</strong> and runs in a
+degraded state OK, analyzer may take 3 minutes to get through a single analysis
+run, but it <strong>still works fine</strong>, it may failover into waterfall alerting and
+albeit it will probably be much more chatty about its own metrics, but it will
+carry on running.  Don’t panic and just methodically try and determine where and
+what the bad actor is.</p>
+<p>Often just opening an issue with your service provider will get your issue
+resolved, unless your are just doing too much on the machine in which case
+just scale <span class="skyblue">Sky</span><span class="red">line</span>.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="opentelemetry.html" class="btn btn-neutral float-left" title="opentelemetry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deprecated-docs/index.html" class="btn btn-neutral float-right" title="Deprecated docs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

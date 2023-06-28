@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4.0.0 &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.0.4" href="3_0_4.html" />
+    <link rel="prev" title="Release Notes" href="../releases.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">4.0.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#notable-new-features-and-functionality">Notable new features and functionality</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#noteable-backend-changes">Noteable Backend changes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#flux-and-webapp-changed-to-gevent">Flux and Webapp changed to gevent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numba-optimisations">numba optimisations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#redistimeseries">RedisTimeseries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#matrixprofile-replaced-by-stumpy">matrixprofile replaced by stumpy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prometheus-victoriametrics-metrics">Prometheus/VictoriaMetrics metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changes">Changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#upgrade-notes">Upgrade notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v3-0-4">How to update from v3.0.4</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_4.html">3.0.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_3.html">3.0.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_2.html">3.0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_0.html">3.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_0_0.html">2.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_3_1.html">1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_3_0.html">1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_17.html">1.2.17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_16.html">1.2.16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_15.html">1.2.15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_14.html">1.2.14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_13.html">1.2.13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_12.html">1.2.12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_11.html">1.2.11 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_10.html">1.2.10 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_8.html">1.2.8 - the luminosity and dawn branches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_7.html">1.2.7 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_6.html">1.2.6 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_5.html">1.2.5 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_4.html">1.2.4 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_3.html">1.2.3 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_2.html">1.2.2 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_1.html">1.2.1 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_0.html">1.2.0 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_11.html">1.1.11 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_10.html">1.1.10 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_9.html">1.1.9 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_8.html">1.1.8 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_7.html">1.1.7 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_6.html">1.1.6 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_5.html">1.1.5 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_4.html">1.1.4 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_3.html">1.1.3 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_2.html">1.1.2 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_1.html">1.1.1 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_0.html">1.1.0 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_8.html">1.0.8 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_7.html">1.0.7 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_6.html">1.0.6 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../releases.html">Release Notes</a></li>
+      <li class="breadcrumb-item active">4.0.0</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/releases/4_0_0.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>4.0.0<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<p>v4.0.0 - xxx xx, 2023</p>
+<p>This is a <strong>MAJOR</strong> release with changes and enhancements across the board,
+including changes and additions to backend components.</p>
+<section id="notable-new-features-and-functionality">
+<h2>Notable new features and functionality<a class="headerlink" href="#notable-new-features-and-functionality" title="Permalink to this heading"></a></h2>
+<p>There are a plethera of changes and additions in v4.0.0</p>
+<p>Added support for Prometheus/VictoriaMetrics - ingesting, storing and analysing
+labelled metrics or tagged metrics from Prometheus, VictoriaMetrics and via
+plain HTTP JSON.</p>
+<p>This version also starts making use of the very, very long awaited
+RedisTimeseries for storing labelled metric timeseries data.</p>
+<p>Mirage has been significantly improved in its processing methodology to process
+many metrics per run rather than a single metric per run.  This reduces the
+occurrences of WATERFALL ALERTS to practically zero.  Mirage has also been
+enhanced with additional algorithms to identify normal daily peaks and to
+identify irregular, unstable timeseries and run an additional analysis on
+these types of metrics at a much longer time period due to the sparsity of
+normal events in a weekly period.  These two additional analysis methodologies
+vastly decrease false positives on metrics which display these behaviours.</p>
+<p>There is a plethera of additions to custom algorithms and the addition of a new
+adhoc analysis service called Skyline/Vortex which does adhoc analysis on any
+24hr or 7day (overrrideable) uploaded timeseries or timeseries in the system
+and uses any combination/s of custom algorithms that the user chooses to analyse
+the timeseries and return results.  Vortex can be used directly via a HTTP API
+and there is also a webapp UI for it as well.</p>
+<p>There is also the addition of numerous mainstream custom algorithms to choose
+from that can now also be used in any part of the analysis pipeline or at least
+be used with Mirage and Vortex (for which these are intended to be used with,
+they are not intended to be used as custom_algorithms in Analyzer):</p>
+<ul class="simple">
+<li><p>sigma</p></li>
+<li><p>matrixprofile</p></li>
+<li><p>spectral_residual</p></li>
+<li><p>lof</p></li>
+<li><p>isolation_forest</p></li>
+<li><p>dbscan</p></li>
+<li><p>pca</p></li>
+<li><p>prophet</p></li>
+<li><p>one_class_svm</p></li>
+<li><p>anomalous_daily_peak</p></li>
+<li><p>irregular_unstable</p></li>
+<li><p>mstl</p></li>
+<li><p>autoarima</p></li>
+</ul>
+<p>Learning repetitive patterns has been added.</p>
+<p>An adhoc analysis service has been added called Vortex.</p>
+<p>There has been a lot of computationally performance improvements by refactoring
+all/most viable methods in algorithms and data processing into numba functions
+where appropriate.</p>
+<p>The webapp has a number of new pages and features.</p>
+<p>There are significant changes to how both webapp and flux are run by gunicorn,
+both apps have changed to using gevent for the unicorn <code class="docutils literal notranslate"><span class="pre">worker_class</span></code>.</p>
+<p>There are also a number of new dependencies and dependency updates as well.</p>
+<section id="noteable-backend-changes">
+<h3>Noteable Backend changes<a class="headerlink" href="#noteable-backend-changes" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="flux-and-webapp-changed-to-gevent">
+<h2>Flux and Webapp changed to gevent<a class="headerlink" href="#flux-and-webapp-changed-to-gevent" title="Permalink to this heading"></a></h2>
+<p>There are significant changes to how both webapp and flux are run by gunicorn,
+both apps have changed to using gevent for the unicorn <code class="docutils literal notranslate"><span class="pre">worker_class</span></code>.  This
+is a significant operational change.  Further there is also <strong>one</strong> remaining
+webapp process that needs to be started as the default sync <code class="docutils literal notranslate"><span class="pre">worker_class</span></code> due
+to not being able to get flask, gunicorn, gevent and the use of multiprocessing
+in tsfresh webapp functions to work as desired.  Although there are ways to run
+gevent and multiprocessing together, none of the recommended methods or other
+attempted methods worked with flask, gunicorn, gevent and tsfresh.  The simplest
+solution therefore is to just have an additional gunicorn process start using
+sync to serve the few tsfresh related webapp requests, which have always worked
+and with this method still do.  It is a tradeoff incurring a new process as
+opposed to determining a convoluted method for flask, gunicorn, gevent and
+tsfresh to work together and maintaining that.</p>
+</section>
+<section id="numba-optimisations">
+<h2>numba optimisations<a class="headerlink" href="#numba-optimisations" title="Permalink to this heading"></a></h2>
+<p>The starting of apps is a little slower in some cases and the first analysis run
+on some apps can take longer than normal.  This is because gaining performance
+on every analysis thereafter has the tradeoff in that all the numba algorithms
+and numba data processing functions must be compiled on their initialisation.
+Thereafter the performance improvements are gained on every function call.</p>
+</section>
+<section id="redistimeseries">
+<h2>RedisTimeseries<a class="headerlink" href="#redistimeseries" title="Permalink to this heading"></a></h2>
+<p>There are 2 available of methods to deploy and use RedisTimeseries, one being use
+the normal OSS Redis and compile RedisTimeseries and load the module via the include
+or use redis-stack-server.  Upgrading Redis or changing to redis-stack-server is
+beyond the scope of this document as it will be vary OS/version (and there are lots
+of options).  There is a guide at <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/upgrading/redis-to-redis-stack-server.html">https://earthgecko-skyline.readthedocs.io/en/latest/upgrading/redis-to-redis-stack-server.html</a>
+that explains the upgrade process, but if you run your own Redis build/config/pattern
+then you may have your own update/upgrade strategy.</p>
+<p>That said, if your want to run Skyline with labelled metrics you will need a version
+of Redis that has the RedisTimeseries module.  Consider not just using the redis.io
+packages repos for yum/apt as they provide redis-stack-server RC (release candidate)
+packages at times and in terms of Skyline Redis needs to be stable, using the
+download binaries for your OS is a more stable method.</p>
+</section>
+<section id="matrixprofile-replaced-by-stumpy">
+<h2>matrixprofile replaced by stumpy<a class="headerlink" href="#matrixprofile-replaced-by-stumpy" title="Permalink to this heading"></a></h2>
+<p>The matrix-profile-foundation/matrixprofile library is no longer maintained and
+this has been replaced with the stumpy matrixprofile implementation.  This
+affects the matrixprofile custom_algorithm which will automatically use the
+stumpy version if available.  matrixprofile has been removed as a dependency.</p>
+</section>
+<section id="prometheus-victoriametrics-metrics">
+<h2>Prometheus/VictoriaMetrics metrics<a class="headerlink" href="#prometheus-victoriametrics-metrics" title="Permalink to this heading"></a></h2>
+</section>
+<section id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this heading"></a></h2>
+<p>The changes list is LONG, so listed at the end of this page.</p>
+<ul class="simple">
+<li><p>Handle multiple metrics in victoriametrics response (4776)</p></li>
+<li><p>webapp - link to current VictoriaMetrics graph (4772)</p></li>
+<li><p>analyzer_labelled_metrics - monotonicity checked incorrect classification (4766)</p></li>
+<li><p>custom_algorithms - normal_peaks (4764)</p></li>
+<li><p>Group metrics based on names and labels (4762)</p></li>
+<li><p>Use gevent gunicorn worker_class (4756)</p></li>
+<li><p>csv_to_timeseries (4754)</p></li>
+<li><p>custom_algorithm - pca (4750)</p></li>
+<li><p>custom_algorithm - isolation_forest (4748)</p></li>
+<li><p>custom_algorithm - dbscan (4746)</p></li>
+<li><p>custom_algorithms - spectral_residual (4744)</p></li>
+<li><p>custom_algorithms - skyline_prophet (4742)</p></li>
+<li><p>custom_algorithms - lof (4740)</p></li>
+<li><p>Allow first_hour_average to handle different resolution (4738)</p></li>
+<li><p>custom_algorithms - sigma (4736)</p></li>
+<li><p>mirage_vortex (4734)</p></li>
+<li><p>flux vortex (4732)</p></li>
+<li><p>vortex (4728)</p></li>
+<li><p>custom_algorithms - anomalous_daily_peak (4724)</p></li>
+<li><p>Handle alert and waterfall alert overlap (4722)</p></li>
+<li><p>dotted_representation breaking alert resend_queue (4720)</p></li>
+<li><p>ionosphere.learn_repetitive_patterns - learning repetitively from recent patterns (4718)</p></li>
+<li><p>opentelemetry check is_instrumented_by_opentelemetry (4714)</p></li>
+<li><p>Reset mirage trigger_history on Ionosphere match (4712)</p></li>
+<li><p>ionosphere - store and cache fp minmax data (4708)</p></li>
+<li><p>Add request id and timing to ionosphere requests (4706)</p></li>
+<li><p>get_ionosphere_performance - allow multiple metric_like string (4704)</p></li>
+<li><p>numba optimisations (4702)</p></li>
+<li><p>algorithms - single series (4700)</p></li>
+<li><p>Optimise Ionosphere Redis sets refresh when busy (4698)</p></li>
+<li><p>analyzer - anomalous metrics sets not flushing (4696)</p></li>
+<li><p>analyzer - illuminance.all key (4676)</p></li>
+<li><p>cloudburst active events only (4674)</p></li>
+<li><p>ionosphere_downsampled (4672)</p></li>
+<li><p>settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS (4662)</p></li>
+<li><p>ionosphere.learn_repetitive_patterns (4658)</p></li>
+<li><p>http_alerter - dotted_representation (4652)</p></li>
+<li><p>luminosity.aligned.metrics (4648)</p></li>
+<li><p>functions.metrics.labelled_metrics_remove_labels (4632)</p></li>
+<li><p>Change all dict copy to deepcopy (4624)</p></li>
+<li><p>Support labelled metrics (4614)</p></li>
+<li><p>POC - prometheus, redistimeseries, victoriametrics (4610)</p></li>
+<li><p>functions.settings.manage_external_settings - use cache data on bad response (4608)</p></li>
+<li><p>Ionosphere - inference - further validate all_in_range (4588)</p></li>
+<li><p>custom_algorithm - skyline_ARTime (4584)</p></li>
+<li><p>POC ARTime (4582)</p></li>
+<li><p>webapp - api_get_fp_timeseries (4578)</p></li>
+<li><p>mirage - process multiple metrics (4576)</p></li>
+<li><p>Reduce cluster logging (4568)</p></li>
+<li><p>http_alerter - discard after x resend attempts (4566)</p></li>
+<li><p>authoritative_node (4564)</p></li>
+</ul>
+</section>
+<section id="upgrade-notes">
+<h2>Upgrade notes<a class="headerlink" href="#upgrade-notes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>These update instructions apply to upgrading from v3.0.4</p></li>
+<li><p>There are are changes to the DB in v4.0.0</p></li>
+<li><p>There are changes to settings.py in v4.0.0</p></li>
+<li><p>There are changes to dependencies in v4.0.0</p></li>
+<li><p>There is a new service called thunder in v4.0.0</p></li>
+</ul>
+</section>
+<section id="how-to-update-from-v3-0-4">
+<h2>How to update from v3.0.4<a class="headerlink" href="#how-to-update-from-v3-0-4" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Build a new Python version and virtualenv, due to this being a major version
+release we use a new virtualenv which all the required libraries and do not
+affect your running install so you can rollback if necessarily.</p></li>
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</p></li>
+<li><p>Copy your settings.py from v3.0.4 and update/replace the v3.0.4 settings.py
+with your new v4.0.0 settings.py file</p></li>
+<li><p>Stop the Skyline apps</p></li>
+<li><p>Backup the database and Redis</p></li>
+<li><p>OPTIONALLY upgrade MariaDB and/or Redis (redis-stack-server)</p></li>
+<li><p>Update the Python dependencies (requirements.txt)</p></li>
+<li><p>Move to the new version,</p></li>
+<li><p>Start the Skyline apps.</p></li>
+</ul>
+<p>Ensure you read through all the steps below first and assess the steps you wish
+to do and if any paths, etc need to be changed for your set up.  Also you need
+to make a decision and assess whether you want to upgrade to use redis-stack-server.</p>
+<p>Here are the steps….</p>
+<ul class="simple">
+<li><p>Get the new version.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the new version</span>
+<span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v4.0.0&quot;</span><span class="w">    </span><span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v3.0.4&quot;</span><span class="w">    </span><span class="c1"># Your old Skyline version</span>
+<span class="c1"># OLD_SKYLINE_VERSION=&quot;v3.0.0&quot;    # Your old Skyline version</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span><span class="w">                 </span><span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">  </span><span class="c1"># Your new Skyline path</span>
+
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/earthgecko/skyline<span class="w"> </span>.
+git<span class="w"> </span>checkout<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+<span class="c1"># settings.py</span>
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span>
+
+<span class="c1"># Create a new settings.py file in the new version based on your existing</span>
+<span class="c1"># settings.py file</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># You can diff the new settings with your settings that you just copied</span>
+diff<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>You are probably going to want to diff those settings in a visual diff like Meld.</p></li>
+<li><p>Deploy the new Python version and a new virtualenv and install the dependencies.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># DEPLOY A NEW Python 3.8.17 virtualenv</span>
+<span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.17&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+wget<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;https://www.python.org/ftp/python/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
+tar<span class="w"> </span>-zxvf<span class="w"> </span><span class="s2">&quot;Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/Python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+./configure<span class="w"> </span>--prefix<span class="o">=</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+make<span class="w"> </span>-j4
+make<span class="w"> </span>altinstall
+
+<span class="c1"># Create a new skyline-py3817 virtualenv</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py3817&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+virtualenv<span class="w"> </span>--python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
+ln<span class="w"> </span>-sf<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/skyline&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="c1"># Ensure the requirements are installed in your new Python 3.8.17 virtualenv</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+
+<span class="c1"># Deploy the new requirements</span>
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt
+
+deactivate
+<span class="nb">cd</span>
+
+<span class="c1"># Fix python-daemon</span>
+cp<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py.original.bak&quot;</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/utils/python-daemon/runner.2.3.0.py&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span>
+<span class="c1"># minor change related to unbuffered bytes I/O</span>
+diff<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py.original.bak&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Ensure you have added all the new (and changed) settings to <cite>$NEW_SKYLINE_PATH/skyline/settings.py</cite> and test them</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the new version</span>
+<span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v4.0.0&quot;</span><span class="w">    </span><span class="c1"># Your new Skyline version</span>
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span><span class="w">                 </span><span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">  </span><span class="c1"># Your new Skyline path</span>
+
+<span class="c1"># You can diff the new settings with your settings that you just copied</span>
+diff<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># UPDATE YOUR $NEW_SKYLINE_PATH/skyline/settings.py as appropriate</span>
+
+<span class="c1"># **TEST**</span>
+<span class="c1"># Test your new settings.py BEFORE continuing with the upgrade,</span>
+<span class="c1"># test_settings.sh runs the validate_settings.py that the Skyline apps run</span>
+<span class="c1"># when they start</span>
+<span class="nv">$NEW_SKYLINE_PATH</span>/bin/test_settings.sh
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>At this point we are going to stop Skyline services, update the DB and you
+can also upgrade MariaDB and/or Redis at this point if you choose to.</p></li>
+<li><p>Stop/disable any/all service controls like monit, etc that are controlling
+Skyline services.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop/disable any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+
+<span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># or do not wish to run.</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">snab</span>
+<span class="s2">flux</span>
+<span class="s2">horizon&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Remove the numba cache directory.  This needs to be done to ensure that new
+jit cache files are compiled for numba jit functions with the updated Python
+version and required dependencies like numpy (even though they do not exist
+yet, this is for next time so it does not get forgetten).</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rm<span class="w"> </span>-rf<span class="w"> </span>/opt/skyline/.cache/numba/
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Backup the DB and apply the update</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># BACKUP THE DB AND APPLY THE NEW SQL</span>
+<span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span><span class="w">  </span><span class="c1"># Where you want to backup the DB to</span>
+<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>
+<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="w">  </span><span class="c1"># Your MySQL IP</span>
+<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span><span class="w">  </span><span class="c1"># Your MySQL Skyline DB name</span>
+
+<span class="c1"># Backup DB</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$BACKUP_DIR</span>
+mysqldump<span class="w"> </span>-u<span class="nv">$MYSQL_USER</span><span class="w"> </span>-p<span class="w"> </span><span class="nv">$MYSQL_DB</span><span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$BACKUP_DIR</span>/pre.<span class="nv">$NEW_SKYLINE_VERSION</span>.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Check you dump exists and has data</span>
+ls<span class="w"> </span>-al<span class="w"> </span><span class="nv">$BACKUP_DIR</span>/pre.<span class="nv">$NEW_SKYLINE_VERSION</span>.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Update DB</span>
+mysql<span class="w"> </span>-u<span class="nv">$MYSQL_USER</span><span class="w"> </span>-p<span class="w"> </span><span class="nv">$MYSQL_DB</span><span class="w"> </span>&lt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/v4.0.0.sql&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>If you are wanting to upgrade MariaDB now is the time to do that.</p></li>
+<li><p>If you want to upgrade Redis or deploy redis-stack-server, now is the time to that.</p></li>
+<li><p>Move your current Skyline directory to a backup directory and move the new
+Skyline v4.0.0 with your new settings.py from the temp location to your
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
+
+<span class="c1"># Set permission on the dump dir</span>
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>/skyline/webapp/static/dump
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Replace your /etc/skyline/skyline.conf to reflect the new Python version and
+PYTHON_VIRTUALENV_DIR</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv<span class="w"> </span>/etc/skyline/skyline.conf<span class="w"> </span>/etc/skyline/skyline.conf.pre.v4.0.0.bak
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>/etc/skyline.conf<span class="w"> </span>/etc/skyline/
+diff<span class="w"> </span>/etc/skyline/skyline.conf.pre.v4.0.0.bak<span class="w"> </span>/etc/skyline/skyline.conf
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Backup and replace your systemd unit files to to reflect the new Python
+version and PYTHON_VIRTUALENV_DIR, <strong>unless you control systemd units via
+configuration management or other</strong>, then assess how to update your systemd
+unit files.  Note there is a new thunder service.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system.pre.v4.0.0.bak
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>find<span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system<span class="w"> </span>-type<span class="w"> </span>f<span class="k">)</span>
+<span class="k">do</span>
+<span class="w">  </span><span class="nv">unitfile</span><span class="o">=</span><span class="k">$(</span>basename<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span><span class="k">)</span>
+<span class="w">  </span>cp<span class="w"> </span><span class="s2">&quot;/etc/systemd/system/</span><span class="si">${</span><span class="nv">unitfile</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system.pre.v4.0.0.bak/
+<span class="w">  </span>/bin/cp<span class="w"> </span>-f<span class="w"> </span><span class="nv">$i</span><span class="w"> </span>/etc/systemd/system/
+<span class="k">done</span>
+systemctl<span class="w"> </span>daemon-reload
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># apart from the new thunder Skyline app</span>
+
+<span class="c1"># Start all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">flux</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">snab</span>
+<span class="s2">thunder&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>start<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;failed to start </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;started </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="w">  </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+<span class="c1"># Restart any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Check the logs.  You may see a few errors related to some missing Redis keys/hashes
+this is expected as they do not exist on starting the new version.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>/var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>skyline_logfile
+<span class="k">do</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+<span class="w">  </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-B2<span class="w"> </span>-A10<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;error ::\|traceback&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<p>Congratulations, you are now running the best OSS anomaly detection stack in the
+world (probably).</p>
+<p>New slack messaging does not handle public channel (111)
+thunder (1444)
+panorama check file fails (1460)
+Memory leak in Analyzer (1558)
+Patterning Skyline Ionosphere - updated to tsfresh-0.3.0 (1658)
+Update deps in Ionosphere (1758)
+Update to tsfresh-0.3.0 (1778)
+Shapelet extraction (1792)
+tsfresh extract_features process stalling (1822)
+ionosphere - mirage Redis data features (1828)
+Ionosphere alerts (1830)
+Ionosphere - Graphite now graphs (1842)
+Ionosphere - features_profile matched graphite graphs (1852)
+Ionosphere learn (1886)
+Ionosphere learn - child like parent with evolutionary maturity (1886)
+Handle non filesystem friendly metric names in check files (1904)
+ionosphere_layers (1960)
+Ionosphere - matches page (1996)
+analyse_derivatives (2034)
+analyse_derivatives - change in monotonicity (2050)
+MySQL - Aborted_clients (2130)
+Optimise Ionosphere DB usage (2132)
+Update deps (2138)
+Test skyline with bandit (2160)
+luminosity (2270)
+update deps for luminosity branch (2272)
+pandas-0.22.0 and numpy (2274)
+CORRELATE_ALERTS_ONLY (2360)
+Add redis auth to Skyline and rebrow (2378)
+Ionosphere validate learnt features profiles page (2430)
+Ionosphere validate learnt features profiles page –&gt; (2430)
+luminosity_remote_data (2464)
+FULL_DURATION feature profiles (2484)
+illuminance (2580)
+Update dependencies (2588)
+mysql-connector-python - use_pure (2590)
+Build Skyline on nodes at v1.2.8 (2596)
+statsmodels-0.9.0 - cannot import name _representation (2600)
+alert_slack (2618)
+slack (2646)
+CVE-2018-18074 - Skyline requests (2652)
+Reduce mirage ionosphere alert loop (2682)
+python-daemon does not support Python 3 buffer method (2692)
+Failing to load metric vars (2708)
+Prometheus to Skyline (2732)
+Mutliple SQL Injection Security Vulnerabilities (2818)
+Test redis-py upgrade (2824)
+Skyline - Python 3.7.2 (2828)
+Mirage - periodic_check (2882)
+Initial Ionosphere echo load and Ionosphere feedback (2904)
+ANALYZER_ENABLED setting (2916)
+Update dependencies (2926)
+Update dependencies (2964)
+New slack messaging does not handle public channel (2986)
+docker (3002)
+Reduce multiprocessing Manager list usage (3034)
+Reduce multiprocessing Manager list usage, this was (3034)
+Update dependencies (3060)
+SNAB (3068)
+Add CUSTOM_ALERT_OPTS to settings (3194)
+Allow Skyline to send metrics to another Carbon host (3250)
+webapp api - unique_metrics (3252)
+Review and test PR 124 (3256)
+py3 (3262)
+py3 (3263)
+py3 Redis binary objects not strings (3266)
+Deprecate string.replace for py3 (3270)
+Always send anomaly_breakdown and exception metrics (3288)
+Handle urllib2 in py3 (3290)
+Record anomaly_end_timestamp (3306)
+webapp api - derivative_metrics (3336)
+http_alerter (3396)
+Panorama - add metric to metrics table immediately (3442)
+Allow flux to backfill (3444)
+Add IONOSPHERE_MANAGE_PURGE (3462)
+ionosphere.training_data Redis set (3472)
+webapp api - training_data (3474)
+batch_processing (3480)
+analyzer_batch (3486)
+webapp - crucible_process_metrics (3500)
+ionosphere.untrainable_metrics (3508)
+matched_or_regexed_in_list function (3512)
+Sort all time series (3532)
+webapp - upload_data endpoint (3538)
+flux.uploaded_data_worker (3550)
+Update deps (3556)
+External alert config (3560)
+custom_algorithms (3566)
+Apply list to settings import (3572)
+inference (3590)
+Add timestamp to ENABLE_BOUNDARY_DEBUG output (3594)
+Update Skyline to Python 3.8.3 and deps (3608)
+Upgrade to slack v2 (3612)
+Anomaly type classification (3642)
+ROOMBA_DO_NOT_PROCESS_BATCH_METRICS (3650)
+Handle multiple metrics in base_name conversion (3652)
+IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE (3654)
+Change mirage.last_check keys to timestamp value (3662)
+flux - POST multiple metrics (3694)
+FLUX_ZERO_FILL_NAMESPACES (3708)
+Update sqlalchemy - SNYK-PYTHON-SQLALCHEMY-590109 (3720)
+Validate Mirage running multiple processes (3730)
+waterfall alerts (3734)
+POC matrixprofile (3744)
+POC SNAB (3748)
+Add the anomaly_id to the http_alerter json (3772)
+waterfall_alert - no analyzer triggered_algorithms in waterfall_panorama_data on MIRAGE_ALWAYS_METRICS (3776)
+Handle single encoded forward slash requests to Graphite (3778)
+skyline_functions - sanitise_graphite_url (3780)
+snab_flux_load_test (3788)
+flux - pickle to Graphite (3790)
+Handle feedback metrics in Mirage and waterfall alerts (3800)
+ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS (3808)
+HORIZON_SHARDS (3820)
+get_cluster_data (3824)
+Add inactive columns to the metrics DB table (3828)
+metrics_manager (3830)
+custom_algorithms - run_before_3sigma parameter (3848)
+webapp - yhat_values API endoint (3850)
+Handle boring sparsely populated metrics in derivative_metrics (3856)
+flux - try except everything (3864)
+MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS (3866)
+POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS (3868)
+metrics_manager - check_data_sparsity (3870)
+SNYK-PYTHON-PY-1049546 (3874)
+ANALYZER_CHECK_LAST_TIMESTAMP (3884)
+Test Python 3.8.6 and deps (3898)
+Test Skyline with dependencies updates - tsfresh v0.17.9 (3926)
+Update Skyline to use new tsfresh feature extraction method (3928)
+ionosphere_performance (3934)
+SNYK-PYTHON-PILLOW-1055461 and SNYK-PYTHON-PILLOW-1055462 (3940)
+xlrd-2.0.1 removed support for xlsx format (3944)
+luminosity - motifs (3956)
+Handle secondary algorithms in yhat_values (3958)
+SNYK-PYTHON-JINJA2-1012994 (3960)
+custom_algorithm - adtk_level_shift (3970)
+SNYK-PYTHON-PILLOW-1080635 (3972)
+SNYK-PYTHON-AIOHTTP-1079232 (3974)
+luminosity - classify_metrics (3978)
+SNYK-PYTHON-URLLIB3-1085966 (3988)
+Panorama - mirage not anomalous (3994)
+EXTERNAL_SETTINGS (4000)
+flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES (4004)
+SNYK-PYTHON-PILLOW-1090584 (4008)
+Ionosphere - inference (4014)
+Move mysql_select calls to SQLAlchemy (4022)
+Change from scipy array to numpy array (4026)
+refactoring (4030)
+Mirage - removing feedback metrics to be processed (4048)
+skyline.flux.worker.discarded metrics (4060)
+ANALYZER_SKIP (4068)
+CUSTOM_STALE_PERIOD (4076)
+crucible - custom_algorithms (4118)
+deps updates (4140)
+webapp - stale_metrics API endpoint (4144)
+check_data_sparsity - incorrect on low fidelity and inconsistent metrics (4146)
+analyzer.metrics_manager.resolutions (4148)
+metrics_manager - roomba batch processing metrics (4150)
+DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES (4152)
+luminosity - cloudbursts (4164)
+custom_algorithm - m66 (4180)
+metrics_manager.boundary_metrics (4188)
+functions.aws.send_sms (4196)
+luminosity - cross_correlation_relationships (4264)
+luminosity - related_namespaces (4278)
+aet.metrics_manager.derivative_metrics Redis hash (4280)
+Update dependencies (4282)
+flux - telegraf (4284)
+prometheus (4300)
+matrixprofile - fN on big drops (4308)
+flux - reload external_settings (4324)
+webapp - panorama_plot_anomalies (4326)
+BATCH_METRICS_CUSTOM_FULL_DURATIONS (4328)
+SNYK-PYTHON-AIOHTTP-1584144 (4340)
+Update dependencies (4344)
+statsmodel 0.13.1 error (4346)
+matplotlib 3.5.1 error (4348)
+snyk - numpy and pillow updates (4362)
+Prune old thunder.events (4364)
+Switch git clone to https (4368)
+webapp - handle url encoded chars (4374)
+webapp - update_external_settings (4376)
+flux - return reason with 400 (4380)
+flux - quota (4400)
+flux - external_settings - aggregation (4404)
+settings - LOCAL_EXTERNAL_SETTINGS (4442)
+webapp - inactive_metrics (4444)
+Optimise horizon worker in_skip_list (4446)
+Update dependencies (4452)
+v0.19.1 (4456)
+v0.19.1 (earthgecko-tsfresh) (4456)
+flux - quota - cluster_sync (4464)
+flux - remove_namespace_quota_metrics (4468)
+Stationarity (4480)
+Test alerts (4482)
+settings - MONOTONIC_METRIC_NAMESPACES (4502)
+Integrate opentelemetry (4514)
+flux - opentelemetry traces (4516)
+settings - LAST_KNOWN_VALUE_NAMESPACES (4518)
+settings - ZERO_FILL_NAMESPACES (4520)
+metrics_manager - derivative_metric_check (4528)
+namespace.analysed_events (4530)
+opentelemetry - rename InstrumentationLibrary to InstrumentationScope (4532)
+Handle Redis failure (4536)
+Plot matched timeseries (4540)
+authoritative_node (4564)
+mirage - process multiple metrics (4576)
+webapp - api_get_fp_timeseries (4578)
+custom_algorithm - skyline_ARTime (4584)
+Ionosphere - inference - further validate all_in_range (4588)
+flux - prometheus_alerts (4596)
+functions.settings.manage_external_settings - use cache data on bad response (4608)
+Support labelled metrics (4614)
+memray (4620)
+Change all dict copy to deepcopy (4624)
+ionosphere.bulk.training (4650)
+http_alerter - dotted_representation (4652)
+ionosphere.learn_repetitive_patterns (4658)
+settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS (4662)
+cloudburst active events only (4674)
+analyzer - illuminance.all key (4676)
+analyzer - anomalous metrics sets not flushing (4696)
+Optimise Ionosphere Redis sets refresh when busy (4698)
+algorithms - single series (4700)
+numba optimisations (4702)
+get_ionosphere_performance - allow multiple metric_like string (4704)
+Add request_id and timing to ionosphere requests (4706)
+ionosphere - store and cache fp minmax data (4708)
+Reset mirage trigger_history on Ionosphere match (4712)
+opentelemetry check is_instrumented_by_opentelemetry (4714)
+dotted_representation breaking alert resend_queue (4720)
+Handle alert and waterfall alert overlap (4722)
+custom_algorithms - anomalous_daily_peak (4724)
+vortex (4728)
+flux vortex (4732)
+mirage_vortex (4734)
+custom_algorithms - sigma (4736)
+Allow first_hour_average to handle different resolution (4738)
+custom_algorithms - lof (4740)
+custom_algorithms - skyline_prophet (4742)
+custom_algorithms - spectral_residual (4744)
+custom_algorithm - dbscan (4746)
+custom_algorithm - isolation_forest (4748)
+custom_algorithm - one_class_svm (4750)
+custom_algorithm - pca (4750)
+csv_to_timeseries (4754)
+Use gevent gunicorn worker_class (4756)
+Group metrics based on names and labels (4762)
+analyzer_labelled_metrics - monotonicity checked incorrect classification (4766)
+webapp - link to current VictoriaMetrics graph (4772)
+Handle multiple metrics in victoriametrics response (4776)
+v4.0.0 - update dependencies (4778)
+Switch from matrixprofile to stumpy (4786)
+functions.metrics_manager.manage_inactive_metrics (4792)
+Deprecate run_script from crucible (4798)
+Deprecate unittest2 (4800)
+Manage NUMBA_CACHE_DIR (4806)
+custom_algorithms - numba_cache_dirs (4808)
+Handle error in sqlalchemy change (4816)
+Deprecation of numpy asscalar function in luminol (4820)
+vista - warn on remote_error (4824)
+EXTERNAL_SETTINGS - handle key value in external_settings (4828)
+webapp - panorama_plot_anomalies - all_events (4830)
+webapp - api - get_all_activity (4834)
+functions.metrics.get_namespace_metric.count (4838)
+flux - prometheus - drop bucket metrics (4840)
+flux - prometheus - x-test-only header (4840)
+webapp - api - get_flux_test_metrics (4842)
+Replace Redis getset with set with get (4844)
+mirage - analyse.irregular.unstable.timeseries.at.30days (4848)
+Allow for level to be passed in SYSLOG_OPTS (4852)
+boundary - labelled_metrics (4854)
+flux - prometheus - no 0s (4856)
+analyzer_labelled_metrics - exceptions metrics set (4864)
+Optimise luminosity for labelled_metrics (4872)
+luminosity - related_metrics - labelled_metrics (4874)
+labelled_metrics - resolution and data sparsity (4882)
+Update dependencies - redis-py - CVE-2023-28858 (4884)
+analyzer - operation_timings (4886)
+analyzer - load_shedding (4888)
+analyzer_labelled_metrics - use mrange (4890)
+SNAB - labelled_metrics (4892)
+labelled_metrics - SKYLINE_FEEDBACK_NAMESPACES (4894)
+custom_algorithms - mstl (4896)
+custom_algorithms - autoarima (4898)
+Prevent training on metrics newer than 7 days (4902)
+Handle send_graphite_metric failure (4904)
+mute_alerts_on (4932)
+Inefficient full_duration_timeseries_fill - last_known_value (4940)
+vortex - m66 (4946)
+vortex - adtk algorithms (4948)
+custom_algorithm - spectral_entropy (4950)
+vortex - consensus_count (4952)
+webapp_features_profile - status (4958)
+custom_algorithms - macd (4960)
+Build and test skyline v4.0.0 (4962)
+dawn - redis-stack-server (4964)
+horizon.prometheus - handle TSDB not being able to parse LABELS (4968)
+Ionosphere (922)
+flux (956)</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../releases.html" class="btn btn-neutral float-left" title="Release Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="3_0_4.html" class="btn btn-neutral float-right" title="3.0.4" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

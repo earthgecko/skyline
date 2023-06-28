@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>tsfresh &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tsfresh &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Luminosity" href="luminosity.html" />
-    <link rel="prev" title="Ionosphere echo" href="ionosphere_echo.html" /> 
+    <link rel="prev" title="Ionosphere learning from repetitive patterns" href="ionosphere_learn_repetitive_patterns.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,7 +71,10 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">tsfresh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-tsfresh-fork">Skyline tsfresh fork</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#tsfresh-and-graphite-integration">tsfresh and Graphite integration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py">skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py</a></li>
 </ul>
@@ -120,7 +84,12 @@
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -128,6 +97,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -136,79 +108,69 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>tsfresh</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">tsfresh</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/tsfresh.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="tsfresh">
-<h1>tsfresh<a class="headerlink" href="#tsfresh" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="tsfresh">
+<h1>tsfresh<a class="headerlink" href="#tsfresh" title="Permalink to this heading"></a></h1>
 <p>The Ionosphere branch introduced tsfresh to the Skyline stack to enable the
 creation of feature profiles for time series that the user deems to be not
-anomalous.</p>
-<p><a class="reference external" href="https://github.com/blue-yonder/tsfresh/">https://github.com/blue-yonder/tsfresh/</a></p>
+anomalous. <a class="reference external" href="https://github.com/blue-yonder/tsfresh/">https://github.com/blue-yonder/tsfresh/</a></p>
 <p>See <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a> for the long
 trail that lead to tsfresh.</p>
-<div class="section" id="tsfresh-and-graphite-integration">
-<h2>tsfresh and Graphite integration<a class="headerlink" href="#tsfresh-and-graphite-integration" title="Permalink to this headline">¶</a></h2>
+<section id="skyline-tsfresh-fork">
+<h2>Skyline tsfresh fork<a class="headerlink" href="#skyline-tsfresh-fork" title="Permalink to this heading"></a></h2>
+<p>Due to the addition of new algorithms/features and modifications to tsfresh, the
+original blue-yonder/tsfresh package can no longer be run on any of the tsfresh
+releases since v0.5.0 with Skyline to achieve consistent results on features
+extraction.  Therefore Skyline runs a modified fork of the tsfresh.  This
+modified fork maintains the features extracted at v0.4.0 but moves this tsfresh
+forked version forward in line with blue-yonder/tsfresh in terms of tsfresh
+internals and dependencies, etc.</p>
+<p><a class="reference external" href="https://github.com/earthgecko/tsfresh">https://github.com/earthgecko/tsfresh</a></p>
+<p>In this fork:</p>
+<ul class="simple">
+<li><p>New features added to blue-yonder/tsfresh are disabled</p></li>
+<li><p>Original methods for features are maintained even if they are changed in
+blue-yonder/tsfresh</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>these branches/versions are tested against the
+tests/baseline/tsfresh_features_test.py, which was removed from
+blue-yonder/tsfresh in v0.7.0 but has been readded to this fork. These
+branches/versions are only tested via the Skyline build tests, they are not
+tested against the tsfresh tests. Seeing as this fork follows the
+blue-yonder/tsfresh versions and retrospectively makes backwards compatible
+changes to the settings and feature_calculators.py which work with the Skyline
+tests. Therefore these changes are not currently backported to the tsfresh
+tests themselves and the tsfresh tests will fail if run against any of theses
+branches.</p>
+</div>
+</section>
+<section id="tsfresh-and-graphite-integration">
+<h2>tsfresh and Graphite integration<a class="headerlink" href="#tsfresh-and-graphite-integration" title="Permalink to this heading"></a></h2>
 <p>Skyline needs to tie Graphite, Redis and tsfresh together.  However these is
 fairly straight forward really, but to save any others having to reverse
 engineer the process the skyline/tsfresh_features/scripts are written is a
@@ -220,33 +182,33 @@ tsfresh feature extraction capabilities.</p>
 <li><p>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py</p></li>
 <li><p>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.requirements.txt</p></li>
 </ul>
-<div class="section" id="skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py">
-<h3>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py<a class="headerlink" href="#skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py" title="Permalink to this headline">¶</a></h3>
+<section id="skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py">
+<h3>skyline/tsfresh_features/scripts/tsfresh_graphite_csv.py<a class="headerlink" href="#skyline-tsfresh-features-scripts-tsfresh-graphite-csv-py" title="Permalink to this heading"></a></h3>
 <p>Assign a Graphite single tiemseries metric csv file to tsfresh to process and
 calculate the features for.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param path_to_your_graphite_csv</dt>
+<dt class="field-odd">param path_to_your_graphite_csv<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the full path and filename to your Graphite
 single metric time series file saved from a Graphite request with &amp;format=csv</p>
 </dd>
-<dt class="field-even">type path_to_your_graphite_csv</dt>
+<dt class="field-even">type path_to_your_graphite_csv<span class="colon">:</span></dt>
 <dd class="field-even"><p>str</p>
 </dd>
-<dt class="field-odd">param pytz_tz</dt>
+<dt class="field-odd">param pytz_tz<span class="colon">:</span></dt>
 <dd class="field-odd"><p>[OPTIONAL] defaults to UTC or pass as your pytz timezone string.
 For a list of all pytz timezone strings see
 <a class="reference external" href="https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst">https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst</a>
 and find yours.</p>
 </dd>
-<dt class="field-even">type string</dt>
+<dt class="field-even">type string<span class="colon">:</span></dt>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
 <p>Run the script with, a virtualenv example is shown but you can run just with
-Python-2.7 from wherever you save the script:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nb">source</span> bin/activate
-bin/python2.7 tsfresh_features/scripts/tsfresh_graphite_csv path_to_your_graphite_csv <span class="o">[</span>pytz_timezone<span class="o">]</span>
+Python-3.8 from wherever you save the script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+bin/python3.8<span class="w"> </span>tsfresh_features/scripts/tsfresh_graphite_csv<span class="w"> </span>path_to_your_graphite_csv<span class="w"> </span><span class="o">[</span>pytz_timezone<span class="o">]</span>
 deactivate
 </pre></div>
 </div>
@@ -269,64 +231,39 @@ format) you look at this csv :)</p></li>
 <p>Please note that if your time series are recorded in a daylight
 savings time zone, this has not been tested with DST changes.</p>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="luminosity.html" class="btn btn-neutral float-right" title="Luminosity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="ionosphere_echo.html" class="btn btn-neutral float-left" title="Ionosphere echo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ionosphere_learn_repetitive_patterns.html" class="btn btn-neutral float-left" title="Ionosphere learning from repetitive patterns" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="luminosity.html" class="btn btn-neutral float-right" title="Luminosity" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

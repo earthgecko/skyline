@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>vista.worker &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>vista.worker &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,67 +98,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>vista.worker</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">vista.worker</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for vista.worker</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -216,10 +149,19 @@
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">send_graphite_metric</span><span class="p">,</span>
+    <span class="c1"># @modified 20220726 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                      Branch #4300: prometheus</span>
+    <span class="c1"># Moved send_graphite_metric</span>
+    <span class="c1"># send_graphite_metric,</span>
     <span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
     <span class="c1">#                   Branch #3262: py3</span>
     <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+<span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+<span class="kn">from</span> <span class="nn">functions.flux.get_last_metric_data</span> <span class="kn">import</span> <span class="n">get_last_metric_data</span>
+
+<span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
+<span class="c1">#                   Branch #4300: prometheus</span>
+<span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
 
 <span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;vista&#39;</span>
 <span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;worker&#39;</span>
@@ -237,6 +179,18 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
+<span class="c1"># @added 20201020 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">FLUX_CHECK_LAST_TIMESTAMP</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_CHECK_LAST_TIMESTAMP</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">FLUX_CHECK_LAST_TIMESTAMP</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># @added 20210512 - Feature #4064: VERBOSE_LOGGING</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">VERBOSE_LOGGING</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VISTA_VERBOSE_LOGGING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">VERBOSE_LOGGING</span> <span class="o">=</span> <span class="kc">False</span>
+
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">.worker&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -247,7 +201,7 @@
 
 
 <div class="viewcode-block" id="Worker"><a class="viewcode-back" href="../../skyline.vista.html#vista.worker.Worker">[docs]</a><span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The worker process retrieves time series published to the Vista Fetcher</span>
 <span class="sd">    Redis set, vista.fetcher.metrics.json (and in future the</span>
 <span class="sd">    vista.fetcher.metrics.csv Redis set) and validates the latest data points</span>
@@ -271,16 +225,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Worker.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.vista.html#vista.worker.Worker.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics</span>
+            <span class="c1"># Log warning</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Worker.run"><a class="viewcode-back" href="../../skyline.vista.html#vista.worker.Worker.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Log management to prevent overwriting</span>
@@ -291,7 +248,7 @@
         <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
         <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
@@ -367,6 +324,12 @@
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">str_metric_data</span> <span class="ow">in</span> <span class="n">metrics_data</span><span class="p">:</span>
+
+                <span class="c1"># @added 20200903 - Feature #3728: metric - vista.fetcher.metrics.json set count</span>
+                <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">time_now</span> <span class="o">-</span> <span class="n">last_sent_to_graphite</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">:</span>
+                    <span class="k">break</span>
+
                 <span class="n">delete_set_record</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">remote_host_type</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -422,31 +385,56 @@
                 <span class="n">have_data</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">delete_set_record</span><span class="p">:</span>
                     <span class="n">last_flux_metric_data</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">)</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                            <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
-                        <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="n">redis_last_flux_metric_data</span>
-                        <span class="n">last_flux_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_flux_metric_data</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: got last_flux_metric_data from Redis&#39;</span><span class="p">)</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: retrieving Redis key </span><span class="si">%s</span><span class="s1"> data&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
-                        <span class="n">last_flux_metric_data</span> <span class="o">=</span> <span class="kc">False</span>
 
+                    <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                    <span class="c1"># Swap to using a Redis hash instead of the</span>
+                    <span class="c1"># flux.last.&lt;metric&gt; keys</span>
                     <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">if</span> <span class="n">last_flux_metric_data</span><span class="p">:</span>
+                    <span class="n">use_old_timestamp_keys</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">redis_last_metric_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">redis_last_metric_data_dict</span> <span class="o">=</span> <span class="n">get_last_metric_data</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: get_last_metric_data failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">err</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">redis_last_metric_data_dict</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_flux_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="n">redis_last_metric_data_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+                            <span class="n">use_old_timestamp_keys</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to get timestamp from - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">redis_last_metric_data_dict</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="c1"># @modified 20220429 - Feature #4536: Handle Redis failure</span>
+                    <span class="k">if</span> <span class="n">use_old_timestamp_keys</span><span class="p">:</span>
+                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                                <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="n">redis_last_flux_metric_data_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_last_flux_metric_data</span><span class="p">)</span>
+                            <span class="n">last_flux_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_flux_metric_data_str</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: got last_flux_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: got last_flux_metric_data from Redis&#39;</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed determining last_flux_timestamp&#39;</span><span class="p">)</span>
-                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: retrieving Redis key </span><span class="si">%s</span><span class="s1"> data&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
+                            <span class="n">last_flux_metric_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+                        <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">last_flux_metric_data</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_flux_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: got last_flux_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed determining last_flux_timestamp&#39;</span><span class="p">)</span>
+                                <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
 
                     <span class="c1"># Determine the timestamp of the current minute to apply</span>
                     <span class="c1"># VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</span>
@@ -570,8 +558,9 @@
                             <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
                         <span class="n">delete_set_record</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: after processing, there were no valid data points in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">VERBOSE_LOGGING</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: after processing, there were no valid data points in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
                     <span class="n">delete_set_record</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">have_data</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to determine last_timestamp_with_data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -583,7 +572,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">str_metric_data</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to delete data from Redis set </span><span class="si">%s</span><span class="s1">, data - &#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to delete data from Redis set </span><span class="si">%s</span><span class="s1">, data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">str_metric_data</span><span class="p">)))</span>
                     <span class="k">continue</span>
 
@@ -656,13 +645,11 @@
                                 <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
                             <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
                                 <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">except</span><span class="p">:</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to request </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">flux_url</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to request </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">flux_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: http status code - </span><span class="si">%s</span><span class="s1">, reason - </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">flux_url</span><span class="p">)))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: worker :: failed to submit data to flux&#39;</span><span class="p">)</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: timeseries - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>
 
                     <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
@@ -675,8 +662,9 @@
                         <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
                         <span class="c1"># logger.info(&#39;worker :: data submitted to flux OK, removing data from Redis set %s&#39; % (</span>
                         <span class="c1">#     redis_set))</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: </span><span class="si">%s</span><span class="s1"> data points submitted to flux OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">VERBOSE_LOGGING</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: </span><span class="si">%s</span><span class="s1"> data points submitted to flux OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">str_metric_data</span><span class="p">)</span>
                         <span class="k">except</span><span class="p">:</span>
@@ -691,65 +679,92 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">remote_target</span><span class="p">,</span> <span class="n">redis_set</span><span class="p">))</span>
+                        <span class="c1"># @added 20201020 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP</span>
+                        <span class="c1"># Add internal transformed metric name to a Redis for</span>
+                        <span class="c1"># flux to consume and determine if the flux.last Redis</span>
+                        <span class="c1"># keys are to be set for a vista metrics even if flux</span>
+                        <span class="c1"># FLUX_CHECK_LAST_TIMESTAMP is False, flux still uses</span>
+                        <span class="c1"># flux.last Redis keys for vista.metrics</span>
+                        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.metrics&#39;</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">metric</span><span class="p">,</span> <span class="n">redis_set</span><span class="p">))</span>
 
             <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">time_now</span> <span class="o">-</span> <span class="n">last_sent_to_graphite</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: metrics sent_to_flux in last 60 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_flux</span><span class="p">))</span>
                 <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.metrics_sent_to_flux&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_flux</span><span class="p">))</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_flux</span><span class="p">))</span>
                     <span class="n">last_sent_to_graphite</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                     <span class="n">metrics_sent_to_flux</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to send_graphite_metric </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_flux</span><span class="p">)))</span></div></div>
+                        <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_flux</span><span class="p">)))</span>
+
+                <span class="c1"># @added 20200903 - Feature #3728: metric - vista.fetcher.metrics.json set count</span>
+                <span class="c1"># This metric should mostly always be 0, if it starts to</span>
+                <span class="c1"># increment, vista needs to be stopped, the Redis set deleted</span>
+                <span class="c1"># and vista needs to be restarted.  Unfortunately this edge case</span>
+                <span class="c1"># cannot be automatically fixed as when it present the</span>
+                <span class="c1"># delete_set_record was already implemented and logging but the</span>
+                <span class="c1"># records were not deleted.  This edge case has only been seen</span>
+                <span class="c1"># once on one instance.</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.metrics.json&#39;</span>
+                <span class="n">metrics_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metrics_data_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: retrieving Redis set </span><span class="si">%s</span><span class="s1"> data&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: vista.fetcher.metrics.json Redis set count - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_data_list</span><span class="p">)))</span>
+                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.vista.fetcher.metrics.json&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_data_list</span><span class="p">)))</span>
+                    <span class="n">last_sent_to_graphite</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to send_graphite_metric </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_flux</span><span class="p">)))</span>
+
+                <span class="c1"># @added 20220329 - Feature #4018: thunder - skyline.errors</span>
+                <span class="c1"># Report app up</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;vista.worker&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">time_now</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: could not update the Redis vista.worker key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

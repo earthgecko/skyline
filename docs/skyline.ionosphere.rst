@@ -28,42 +28,10 @@ skyline.ionosphere.echo module
    :undoc-members:
    :show-inheritance:
 
-skyline.ionosphere.inference module
------------------------------------
+skyline.ionosphere.find\_repetitive\_patterns module
+----------------------------------------------------
 
-.. automodule:: ionosphere.inference
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.ionosphere.inference module
------------------------------------
-
-.. automodule:: ionosphere.inference
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.ionosphere.inference module
------------------------------------
-
-.. automodule:: ionosphere.inference
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.ionosphere.inference module
------------------------------------
-
-.. automodule:: ionosphere.inference
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.ionosphere.inference module
------------------------------------
-
-.. automodule:: ionosphere.inference
+.. automodule:: ionosphere.find_repetitive_patterns
    :members:
    :undoc-members:
    :show-inheritance:
@@ -96,6 +64,14 @@ skyline.ionosphere.learn module
 -------------------------------
 
 .. automodule:: ionosphere.learn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.ionosphere.learn\_repetitive\_patterns module
+-----------------------------------------------------
+
+.. automodule:: ionosphere.learn_repetitive_patterns
    :members:
    :undoc-members:
    :show-inheritance:

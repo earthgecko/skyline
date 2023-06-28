@@ -2,7 +2,7 @@
 Custom algorithms
 =================
 
-**EXPERIMENTAL - py3 only**
+**py3 only**
 
 This section describes the process, steps and resources required to run custom
 algorithms in Skyline. Adding a custom algorithm or algorithms is easier and
@@ -12,9 +12,23 @@ If you are wanting to implement a custom algorithm, ensure you read this
 documentation **thoroughly** and **understand the layout** in the example
 algorithms.  This will save you time if you do it properly from the beginning.
 
-Custom algorithms are currently implemented in anlayzer, analyzer_batch, mirage
-and soon crucible, they are not yet consumed in boundary and probably will not
-unless there is a good use case for them to be added.
+Custom algorithms are currently only implemented in analyzer (also covers
+analyzer_batch), crucible and mirage.
+
+Available custom algorithms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is a collection of custom algorithms already available in Skyline and each
+has a page here.  However currently most are only documented in the code and their
+pages refer to the source code.
+
+The performance and accuracy of the available algorithms vary, their inclusion is
+not a validation of the method, simply that they can function as outlier detectors.
+Each generates different results and few seldom agree.  The Vortex webapp UI can be
+used to run them adhoc on any time series should you wish to assess there performance.
+
+Implementing a custom algorithm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To implement a custom algorithm, you need to define it in
 :mod:`settings.CUSTOM_ALGORITHMS` and add the Python source custom algorithm
@@ -23,18 +37,112 @@ file.
 .. warning:: **A note on speed**, bear in mind that any custom algorithms added
   have to run **FAST**, otherwise analysis stops being real time and the
   Skyline apps will terminate their own spawned processes if they run too long.
-  Consider that Skyline's 3 sigma algorithms take on average 0.0023 seconds to
-  run and all 9 are run on a metric in about 0.0207 seconds.  Adding any
-  algorithms that run substantially slower is **not** recommended, even if it is
-  on a small set of metrics.  If you break Skyline with your own custom
-  algorithms, be that on your head.
+  Consider that Skyline's three-sigma triggered algorithms take on average
+  0.0023 seconds to run and all 9 are run on a metric in about 0.0207 seconds.
+  Adding any algorithms that run substantially slower is **not** recommended,
+  even if it is on a small set of metrics.  Any algorithms added to should be as
+  computationally efficient as possible and suitable for processing real time
+  streaming data, e.g. O(n).  This is especially true for any custom algorithms
+  added to Analyzer.  This is not a hard requirement, just a recommendation.
+  It is possible to add non O(n) algorithms to Mirage, but they should be
+  designed and implemented to be as computationally efficient as possible.
+  If you break Skyline with your own custom algorithms, be that on your head.
 
-Custom algorithms are run **before** the core 3 sigma algorithms, which allows
-the user to disable the running of 3 sigma algorithms on namespaces if they so
-desire, more on this below.
+Custom algorithms can be run **before** or **after** the core three-sigma
+algorithms. The custom algorithm can be configured to run before the three-sigma
+algorithms which allows the user to disable the running of three-sigma
+algorithms on namespaces if they so desire, more on this below.  By default
+custom algorithms are run **before** three-sigma algorithms.
+Running the custom algorithm **after** three-sigma allows the user to only run
+a custom algorithm if three-sigma achieves :mod:`settings.CONSENSUS` or run the
+custom algorithm regardless of the CONSENSUS that was achieved.
+
+The custom algorithms settings are therefore highly configurable, specifically
+take note of the consensus, run_3sigma_algorithms, run_before_3sigma and
+run_only_if_consensus parameters, especially if you are attempting to run
+multiple custom algorithms at different stages, before or after three-sigma and
+what consensus should be applied.  It is probably possible to configure poorly
+given the methods and modes that can be configured.
+
+The use of numba optimisations
+------------------------------
+
+Any performance optimisations that can be achieve in custom algortihm with numba
+jit functions is encouraged, with the following caveats.
+
+If the algorithm or any part thereof uses numba optimisations in anyway ensure
+that the ``jit`` or ``njit`` decorator has ``cache=True`` applied to ensure that
+the jit compilation overhead is only incurred once and is not incurred on every
+execution.  In terms of multiprocessing and threading if there is no jit cache
+file of a function the jit compilation happens every execution which is slow.
+
+Also note that in the normal Skyline build on CentOS 8 the default
+``NUMBA_CACHE_DIR`` is ``/opt/skyline/.cache/numba`` this is not specifically
+defined, it is what gets defaulted to by numba.  **IMPORTANT** as per relevant
+upgrade instructions in release notes, this directory needs to be flushed
+whenever an upgrade is made to Python and/or any dependencies, so that the numba
+jit cache files can be recompiled with the new versions.
+
+In terms of making changes to any existing numba optimised custom algorithms
+that are loaded by Skyline, numba will **automatically** replace it jit cache
+files when a change is made to the algorithm source file in Skyline when the
+relevant Skyline service is restarted and the custom algorithm function is
+called for the first time.
+
+That said this has a direct impact on the custom algorithm ``max_execution_time``
+parameter.  This is because the first execution of the jit function when the
+cache files are not present could take say 40 seconds to compile the function.
+Now if you can expect the algorithm to run in say less than 1 second WHEN the
+jit cache file is present, you may want to set the ``max_execution_time: 1.2,``
+however the custom algorithm will be terminated by the timeout decorator on
+**every** run and it will never compile and therefore never save the jit cache
+files.
+
+Therefore an additional key value pair can be passed in the
+:mod:`settings.CUSTOM_ALGORITHMS` definition for any custom algorithm that uses
+numba jit functions, e.g. ``'numba_cache_dirs': ['stumpy_'],``.  This is a list
+of cache dirs that are expected to exist and if do not exist then increase the
+``max_execution_time`` to 180 seconds to allow for first time numba jit
+compilations to occur so that the timeout decorator does not terminate the
+algorithm due to a low max_execution_time.
+
+The ``numba_cache_dirs`` is a list of substrings of the directories created in
+the default ``/opt/skyline/.cache/numba`` which are expected.
+
+For example the stumpy stump algorithm with njit caching enabled saves
+``/opt/skyline/.cache/numba/stumpy_7b65d2f0242c0368bd086e515d849481810e817d`` with nbc and nbi files:
+
+.. code-block::
+
+  (skyline-py3816) [root@skyline-test-1 skyline-py3816] ls -al /opt/skyline/.cache/numba/ | grep stump
+  drwxr-xr-x  2 skyline skyline 4096 Jan 12 16:37 stumpy_7b65d2f0242c0368bd086e515d849481810e817d
+  (skyline-py3816) [root@skyline-test-1 skyline-py3816] ls -al /opt/skyline/.cache/numba/stump*
+  total 460
+  drwxr-xr-x 2 skyline skyline   4096 Jan 12 16:37 .
+  drwxr-xr-x 8 skyline skyline   4096 Jan 12 16:09 ..
+  -rw-rw-rw- 1 skyline skyline 455583 Jan 12 16:37 stump._stump-216.py38.1.nbc
+  -rw-rw-rw- 1 skyline skyline   1487 Jan 12 16:37 stump._stump-216.py38.nbi
+  (skyline-py3816) [root@skyline-test-1 skyline-py3816]
+
+
+This would be declared as ``'numba_cache_dirs': ['stumpy_']``, and the
+``custom_algorithms.run_custom_algorithm_on_timeseries`` checks for the
+existence of a dir matching these substrings/patterns in
+``/opt/skyline/.cache/numba``, if not found sets the ``max_execution_time`` to
+180 seconds for that run to allow for the jit compile and save overhead without
+terminating the run before it has time to compile and save.
+
+You therefore need to be fully aware of what jit cache files your algorithm will
+create and declare them appropriately.
 
 :mod:`settings.CUSTOM_ALGORITHMS`
 ---------------------------------
+
+Custom algorithms are only available in analyzer, crucible and mirage, any
+declared for use with analyzer will automatically also be applied for
+analyzer_batch.  For a custom_algorithm to be available for use in crucible
+it must be declared in CUSTOM_ALGORITHMS.
+
 
 Custom algorithms are defined in the :mod:`settings.CUSTOM_ALGORITHMS`
 dictionary.  The format and key values of the dictionary are shown in the
@@ -51,7 +159,10 @@ following **example**:
             'consensus': 6,
             'algorithms_allowed_in_consensus': [],
             'run_3sigma_algorithms': True,
-            'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
+            'trigger_history_override': 0,
+            'use_with': ['analyzer', 'analyzer_batch', 'mirage'],
             'debug_logging': False,
         },
         'last_same_hours': {
@@ -67,6 +178,9 @@ following **example**:
             'consensus': 6,
             'algorithms_allowed_in_consensus': [],
             'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             # This does not run on analyzer as it is weekly data
             'use_with': ['mirage', 'crucible'],
             'debug_logging': False,
@@ -80,8 +194,27 @@ following **example**:
             'consensus': 1,
             'algorithms_allowed_in_consensus': ['detect_significant_change'],
             'run_3sigma_algorithms': False,
-            'use_with': ['analyzer', 'crucible'],
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
+            'trigger_history_override': 0,
+            'use_with': ['mirage'],
             'debug_logging': True,
+        },
+        'skyline_matrixprofile': {
+            'namespaces': ['*'],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
+            'numba_cache_dirs': ['stumpy_'],
+            'algorithm_parameters':  {'windows': 5, 'k_discords': 20},
+            'max_execution_time': 5.0,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['skyline_matrixprofile'],
+            'run_3sigma_algorithms': True,
+            'run_before_3sigma': False,
+            'run_only_if_consensus': True,
+            'trigger_history_override': 4,
+            'use_with': ['mirage'],
+            'debug_logging': False,
+            'numba_cache_dirs': ['stumpy_',]
         },
     }
 
@@ -101,35 +234,54 @@ requirements.
   as the Skyline code, just ensure the user running the Skyline process has read
   permissions on the path and file itself.
 - ``algorithm_parameters`` - this is a dictionary of any parameters/arguments
-  that you want to pass to your algorithm.  In your custom algorithm you will
-  need to interpolate your parameters/arguments (key/value) from this
-  dictionary. If none are required simply use an empty dict `{}`.
-- ``max_execution_time`` - a float and read the warning about speed above.
+  that you want to pass to your algorithm.  Your custom algorithm will need to
+  interpolate your parameters/arguments (key/value) from this dictionary. If
+  none are required simply use an empty dict `{}`.
+- ``max_execution_time`` - a float (and read the warning about speed above).
 - ``consensus`` - this allows you to add your algorithm to the ``CONSENSUS`` or
   override ``CONSENSUS`` by setting this to 1.  If you are running
   ``CONSENSUS = 6`` and wanted to just add your custom algorithm as an addition
-  to the normal 3 sigma algorithms, you would just pass ``'consensus': 6`` or
+  to the normal three-sigma algorithms, you would just pass ``'consensus': 6`` or
   ``'consensus': 7`` depending on what you want.  The only other option currently
   is to **override** the ``CONSENSUS``, if you want an anomaly triggered every
-  time your custom algorithm triggers, regardless of 3 sigma ``CONSENSUS`` then
+  time your custom algorithm triggers, regardless of three-sigma ``CONSENSUS`` then
   set ``'consensus': 1``
-- ``algorithms_allowed_in_consensus``: must be passed but is not implemented yet
+- ``algorithms_allowed_in_consensus``: must be passed but is **not implemented yet**
   but this is a list of algorithms that must have triggered for consensus to be
   achieved. If an empty list is passed `[]` this will be ignored and normal
   ``CONSENSUS`` will be used.
-- ``run_3sigma_algorithms``: a boolean stating whether to run the normal 3 sigma
+- ``run_3sigma_algorithms``: a boolean stating whether to run the normal three-sigma
   algorithms, this is optional and defaults to ``True`` if it is not passed
-  in the dictionary.  If any custom algorithm is run that has this set to
-  ``False`` no 3 sigma algorithms will be run regardless of what any other
-  custom algorithms are set to.
+  in the dictionary.  **NOTE** - If any custom algorithm is run that has this
+  set to ``False`` no three-sigma algorithms will be run regardless of what any
+  other custom algorithms are set to.  If multiple custom algorithms are being
+  run and only 1 has this set to ``False`` it will be applied to all.
+- ``run_before_3sigma``: a boolean stating whether to run the custom algorithm
+  before the normal three-sigma algorithms, this defaults to ``True``.  If you
+  want your custom algorithm to run after the three-sigma algorithms set this to
+  ``False``.
+- ``run_only_if_consensus``: a boolean stating whether to run the custom
+  algorithm only if CONSENSUS or MIRAGE_CONSENSUS is achieved, it defaults to
+  ``False``.  This only applies to custom algorithms that are run after
+  three-sigma algorithms, e.g. with the parameter ``run_before_3sigma: False``
+  Currently this parameter only uses the CONSENSUS or MIRAGE_CONSENSUS setting
+  and does not apply the consensus parameter above.
+- ``trigger_history_override``: an int defining whether override the outcome of
+  the custom algorithm if the three-sigma algorithms have triggered this many
+  times in a row.  Setting this to 0 disables the override and the number of
+  times the three-sigma algorithms have triggered is not checked.  If this value
+  is set to 4 then even if the custom algorithm evaluates the metric as not
+  anomalous, if the metric has been determined to be anomalous by the three-sigma
+  analysis 4 times in a row, the custom algorithm result will be overridden and
+  the metric will be classified as anomalous.
 - ``use_with`` - a list of the Skyline apps that should apply the custom
   algorithm.  All the apps can be declared but they will only apply the custom
   algorithm **if** they actually handle the metric.  Simply declaring them in
   the list does not mean that the app will just automatically run them all the
   time.  If the app does not handle the metric, it being declared makes no
   difference, therefore if you are unsure, it is safe to list them all.
-  Altough do **note** that if your custom algorithm needs more data than
-  :mod:`settings.FULL_DURATION` then do not specify ``'analyzer', 'analyzer_batch'``
+  Although do **note** that if your custom algorithm needs more data than
+  :mod:`settings.FULL_DURATION` then do not specify ``'analyzer'``
   as apps to run the custom algorithm with.
 - ``debug_logging``: a boolean to enable debug_logging, which wraps the custom
   algorithm run in a bit of additional logging, regarding timings, etc this is
@@ -158,6 +310,19 @@ directory of the repo.  https://github.com/earthgecko/skyline/tree/master/skylin
   in Skyline's requirements.txt file, ensure that you install the algorithm's
   requirements in the Skyline virtualenv.
 
+int and floats **ONLY** and no nans
+-----------------------------------
+
+If your custom algorithm has the ability to also ``return_results`` or
+``return_anomalies`` be advised that you need to ensure that the results are
+coerced to int and float types only.  This is due to the fact the results can be
+moved through the pipeline and saved as json.  Therefore results from any numpy
+arrays could have type ``int64`` or other which are not JSON serializable.
+
+The same is true for ``nan`` values, although floats in Python they are not
+valid in JSON, ensure ``nan`` values are coerced to ``None`` which json will
+dump to ``null`` or ``False`` which json will dump to ``false``.
+
 ``anomalyScore``
 ~~~~~~~~~~~~~~~~
 
@@ -171,7 +336,7 @@ Custom algorithm requirements
 
 - Must be written in Python
 - Must import all modules and classes it requires.
-- The algorithm must have four parameters, e.g.
+- The algorithm must have the following four parameters, e.g.
 
 .. code-block:: python
 
@@ -218,7 +383,7 @@ Custom algorithm requirements
   being not anomalous and 1.0 being a certain anomaly.  You can pass
   `(False, 0.7)`,  you just have to normalise your ``anomalyScore`` between 0.0
   and 1.0.  The ``anomalyScore`` is currently only for testing it is not used in
-  any way but it  **must** be returned.  The anomalous classification is
+  any way but it **must** be returned.  The anomalous classification is
   currently **only** determined from the boolean and the ``anomalyScore`` is
   currently not used in any way other than for testing.  If your algorithm does
   not calculate an anomaly score, when your algorithm returns ``False`` just
@@ -252,6 +417,7 @@ once.  As shown in the example below.
 
 This allows for errors to be encountered while not spewing 1000s and 1000s of
 lines of errors to disk based the application logs and incurring masses of I/O.
+
 
 Example custom algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~~~

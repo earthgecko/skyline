@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3.0.3 &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.0.2" href="3_0_2.html" />
+    <link rel="prev" title="3.0.4" href="3_0_4.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="4_0_0.html">4.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_4.html">3.0.4</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.0.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#changes">Changes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#upgrade-notes">Upgrade notes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-to-update-from-v3-0-0-v3-0-2">How to update from v3.0.0/v3.0.2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_2.html">3.0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_0.html">3.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2_0_0.html">2.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_3_1.html">1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_3_0.html">1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_17.html">1.2.17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_16.html">1.2.16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_15.html">1.2.15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_14.html">1.2.14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_13.html">1.2.13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_12.html">1.2.12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_11.html">1.2.11 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_10.html">1.2.10 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_8.html">1.2.8 - the luminosity and dawn branches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_7.html">1.2.7 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_6.html">1.2.6 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_5.html">1.2.5 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_4.html">1.2.4 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_3.html">1.2.3 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_2.html">1.2.2 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_1.html">1.2.1 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_0.html">1.2.0 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_11.html">1.1.11 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_10.html">1.1.10 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_9.html">1.1.9 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_8.html">1.1.8 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_7.html">1.1.7 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_6.html">1.1.6 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_5.html">1.1.5 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_4.html">1.1.4 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_3.html">1.1.3 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_2.html">1.1.2 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_1.html">1.1.1 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_0.html">1.1.0 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_8.html">1.0.8 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_7.html">1.0.7 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_6.html">1.0.6 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../releases.html">Release Notes</a></li>
+      <li class="breadcrumb-item active">3.0.3</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/releases/3_0_3.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>3.0.3<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<p>v3.0.3 - May 9, 2022</p>
+<p>This is a minor release with minor bug fixes for v3.0.2</p>
+<section id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Change error to warning for Graphite timeseries is unavailable (4164: luminosity - cloudbursts)</p></li>
+<li><p>Added missing log str (#4536: Handle Redis failure)</p></li>
+</ul>
+<section id="upgrade-notes">
+<h3>Upgrade notes<a class="headerlink" href="#upgrade-notes" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>These update instructions apply to upgrading from v3.0.0 or v3.0.2</p></li>
+<li><p>There are no changes to the DB in v3.0.3</p></li>
+<li><p>There are no changes to settings.py in v3.0.3</p></li>
+</ul>
+</section>
+<section id="how-to-update-from-v3-0-0-v3-0-2">
+<h3>How to update from v3.0.0/v3.0.2<a class="headerlink" href="#how-to-update-from-v3-0-0-v3-0-2" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</p></li>
+<li><p>Copy your settings.py from v3.0.0/v3.0.2 and replace the v3.0.2 settings.py</p></li>
+<li><p>Stop the Skyline apps, backup the database and Redis, move to the new version,
+start the Skyline apps.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the new version</span>
+<span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v3.0.3&quot;</span><span class="w">    </span><span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v3.0.2&quot;</span><span class="w">    </span><span class="c1"># Your old Skyline version</span>
+<span class="c1"># OLD_SKYLINE_VERSION=&quot;v3.0.0&quot;    # Your old Skyline version</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span><span class="w">                 </span><span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">  </span><span class="c1"># Your new Skyline path</span>
+
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/earthgecko/skyline<span class="w"> </span>.
+git<span class="w"> </span>checkout<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+<span class="c1"># settings.py</span>
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span>
+
+<span class="c1"># Create a new settings.py file in the new version based on your existing</span>
+<span class="c1"># settings.py file</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># **TEST**</span>
+<span class="c1"># Test your new settings.py BEFORE continuing with the upgrade,</span>
+<span class="c1"># test_settings.sh runs the validate_settings.py that the Skyline apps run</span>
+<span class="c1"># when they start</span>
+<span class="nv">$NEW_SKYLINE_PATH</span>/bin/test_settings.sh
+
+<span class="c1"># Stop/disable any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+
+<span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># or do not wish to run.</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">snab</span>
+<span class="s2">flux</span>
+<span class="s2">horizon&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Move your current Skyline directory to a backup directory and move the new
+Skyline v3.0.3 with your new settings.py from the temp location to your
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
+
+<span class="c1"># Set permission on the dump dir</span>
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>/skyline/webapp/static/dump
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># apart from the new thunder Skyline app</span>
+
+<span class="c1"># Start all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">flux</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">snab</span>
+<span class="s2">thunder&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>start<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;failed to start </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;started </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="k">done</span>
+<span class="c1"># Restart any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Check the logs</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>/var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>skyline_logfile
+<span class="k">do</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+<span class="w">  </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-B2<span class="w"> </span>-A10<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;error ::\|traceback&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<p>Congratulations, you are now running the best open source anomaly detection
+stack in the world (probably).</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="3_0_4.html" class="btn btn-neutral float-left" title="3.0.4" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="3_0_2.html" class="btn btn-neutral float-right" title="3.0.2" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

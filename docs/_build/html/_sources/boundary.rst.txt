@@ -31,11 +31,11 @@ Boundary currently has 3 defined algorithms:
 
 Boundary is run as a separate process just like Analyzer, horizon and
 mirage. It was not envisaged to analyze all your metrics, but rather
-your key metrics in additional dimension/s. If it was run across all of your
+your key metrics with additional analysis. If it was run across all of your
 metrics it would probably be:
 
 - VERY noisy
-- CPU intensive
+- VERY CPU intensive
 
 If deployed only key metrics it has a very low footprint (9 seconds on
 150 metrics with 2 processes assigned) and a high return. If deployed as
@@ -54,8 +54,9 @@ Configuration and running Boundary
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``settings.py`` has an independent setting blocks and has detailed information
-on each setting in its docstring, the main difference from Analyzer being in
-terms of number of variables that have to be declared in the alert tuples, e.g:
+on each setting and the parameter in its docstring, the main difference from
+Analyzer being in terms of number of variables that have to be declared in the
+alert tuples, e.g:
 
 .. code-block:: python
 
@@ -75,6 +76,36 @@ Boundary:
 
     /opt/skyline/github/skyline/bin/boundary.d start
 
+
+An example
+~~~~~~~~~~
+
+Here is an example of what you can use Boundary for.  If you look at the graph
+below, you can see that the minimum value is around 1000.  Let us say that this
+metric is a fairly reliable and important global metric, like the number of page
+impression per minute in your shop.
+
+.. image:: images/boundary/boundary_example.png
+
+We can configure Boundary to monitor this metric.  Although you can use Boundary
+to monitor any metric, it works best if only monitoring your important and
+reliable global metrics with Boundary.
+
+:: .. code-block:: python
+
+  ('example_org.shop.total.page_impressions', 'detect_drop_off_cliff', 1800, 800, 300, 0, 1, 'smtp|slack|pagerduty'),
+  ('example_org.shop.total.page_impressions', 'less_than', 1800, 0, 0, 1000, 7, 'smtp|slack|pagerduty'),
+
+
+The above :mod:`settings.BOUNDARY_METRICS` enables 2 algorithms to check this
+metric against every minute, :func:`.boundary_algorithms.detect_drop_off_cliff`
+and :func:`.boundary_algorithms.less_than`.  Although the ``less_than`` check
+should normally be sufficient on it's own, the ``detect_drop_off_cliff`` check
+will ensure that nothing is missed.  For instance that metric could drop to
+between 2 and 15 for 6 minutes and then go back up to 1600 and then drop again
+for 5 minutes and go back up again and enter a "flapping" state.  There are
+instances where ``less_than`` may not fire, but ``detect_drop_off_cliff``
+would.
 
 detect\_drop\_off\_cliff algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

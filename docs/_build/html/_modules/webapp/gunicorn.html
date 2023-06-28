@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.gunicorn &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.gunicorn</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.gunicorn</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">gunicorn.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># @added 20221206 - Feature #4756: Use gevent gunicorn worker_class</span>
+<span class="c1">#                   Feature #4732: flux vortex</span>
+<span class="kn">from</span> <span class="nn">gevent</span> <span class="kn">import</span> <span class="n">monkey</span>
+<span class="n">monkey</span><span class="o">.</span><span class="n">patch_all</span><span class="p">()</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="c1"># import multiprocessing</span>
+<span class="c1"># import traceback</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">settings</span>
+    <span class="c1"># @added 20220328 - Feature #4018: thunder - skyline.errors</span>
+    <span class="kn">from</span> <span class="nn">functions.redis.RedisErrorLogHandler</span> <span class="kn">import</span> <span class="n">RedisErrorLogHandler</span>
+
+    <span class="c1"># @added 20220405 - Task #4514: Integrate opentelemetry</span>
+    <span class="c1">#                   Feature #4516: flux - opentelemetry traces</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span>
+    <span class="n">OTEL_JAEGEREXPORTER_AGENT_PORT</span> <span class="o">=</span> <span class="mi">26831</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTEL_ENABLED</span>
+        <span class="n">OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span>
+        <span class="n">OTEL_JAEGEREXPORTER_AGENT_PORT</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTEL_JAEGEREXPORTER_AGENT_PORT</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">OTEL_ENABLED</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">opentelemetry</span> <span class="kn">import</span> <span class="n">trace</span>
+        <span class="c1"># from opentelemetry.exporter import jaeger</span>
+        <span class="kn">from</span> <span class="nn">opentelemetry.exporter.jaeger.thrift</span> <span class="kn">import</span> <span class="n">JaegerExporter</span>
+        <span class="kn">from</span> <span class="nn">opentelemetry.sdk.resources</span> <span class="kn">import</span> <span class="n">SERVICE_NAME</span><span class="p">,</span> <span class="n">Resource</span>
+        <span class="kn">from</span> <span class="nn">opentelemetry.sdk.trace</span> <span class="kn">import</span> <span class="n">TracerProvider</span>
+        <span class="c1"># from opentelemetry.sdk.trace.export import BatchExportSpanProcessor</span>
+        <span class="kn">from</span> <span class="nn">opentelemetry.sdk.trace.export</span> <span class="kn">import</span> <span class="n">BatchSpanProcessor</span>
+    <span class="c1">#    from typing import Iterable</span>
+    <span class="c1">#    from opentelemetry.exporter.otlp.metrics_exporter import OTLPMetricsExporter</span>
+    <span class="c1">#    from opentelemetry.sdk.metrics import MeterProvider</span>
+    <span class="c1">#    from opentelemetry.sdk.metrics.export.controller import PushController</span>
+    <span class="c1"># @added 20220405</span>
+    <span class="c1"># Not stable or ready for prime time and only ConsoleMetricExporter is available</span>
+        <span class="c1"># from opentelemetry._metrics import get_meter_provider, set_meter_provider</span>
+        <span class="c1"># from opentelemetry.exporter.otlp.metrics_exporter import OTLPMetricsExporter</span>
+        <span class="c1"># from opentelemetry._metrics.measurement import Measurement</span>
+        <span class="c1"># from opentelemetry.sdk._metrics import MeterProvider</span>
+        <span class="c1"># from opentelemetry.sdk._metrics.export import (</span>
+        <span class="c1">#     ConsoleMetricExporter,</span>
+        <span class="c1">#     PeriodicExportingMetricReader,</span>
+        <span class="c1"># )</span>
+
+<span class="c1"># @added 20221206 - Feature #4756: Use gevent gunicorn worker_class</span>
+<span class="c1">#                   Feature #4732: flux vortex</span>
+<span class="c1"># Switch to using gevent instead of default sync worker type to allow for slow</span>
+<span class="c1"># requests and fast requests to be handled.  This results in an immediate</span>
+<span class="c1"># improvement in page load times specifically noticable on Ionosphere features</span>
+<span class="c1"># profile pages.</span>
+<span class="n">worker_class</span> <span class="o">=</span> <span class="s1">&#39;gevent&#39;</span>
+
+<span class="n">bind</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_IP</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_PORT</span><span class="p">))</span>
+<span class="c1"># @modified 20201011 - Reduce the number of workers on machine with lots of</span>
+<span class="c1">#                      CPUs</span>
+<span class="c1"># workers = multiprocessing.cpu_count() * 2 + 1</span>
+<span class="c1"># workers = 2</span>
+<span class="c1"># backlog = 10</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">workers</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_GUNICORN_WORKERS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">workers</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1"># @added 20221209 - Feature #4756: Use gevent gunicorn worker_class</span>
+<span class="c1">#                   Feature #4732: flux vortex</span>
+<span class="c1"># Since switching to using gevent instead of default sync worker type there is</span>
+<span class="c1"># no need for more than 2 workers with the default worker_connections of 1000</span>
+<span class="c1"># 2 workers will allow for 2000 concurrent connections to be served at once.</span>
+<span class="k">if</span> <span class="n">workers</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;settings.WEBAPP_GUNICORN_WORKERS is set to </span><span class="si">%s</span><span class="s1">, decreased to 2 as more than 2 are not required with the gevent worker_class&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_GUNICORN_WORKERS</span><span class="p">)))</span>
+    <span class="n">workers</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">backlog</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_GUNICORN_BACKLOG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">backlog</span> <span class="o">=</span> <span class="mi">2048</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+
+<span class="n">pidfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.pid&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PID_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+<span class="n">accesslog</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/webapp.access.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
+<span class="n">access_log_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(h)s</span><span class="s1"> </span><span class="si">%(l)s</span><span class="s1"> </span><span class="si">%(u)s</span><span class="s1"> </span><span class="si">%(t)s</span><span class="s1"> &quot;</span><span class="si">%(r)s</span><span class="s1">&quot; </span><span class="si">%(s)s</span><span class="s1"> </span><span class="si">%(b)s</span><span class="s1"> &quot;</span><span class="si">%(f)s</span><span class="s1">&quot; &quot;</span><span class="si">%(a)s</span><span class="s1">&quot;&#39;</span>
+
+<span class="n">errorlog</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/webapp.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">)</span>
+
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> :: </span><span class="si">%(process)s</span><span class="s2"> :: </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">datefmt</span><span class="o">=</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">)</span>
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">TimedRotatingFileHandler</span><span class="p">(</span>
+    <span class="n">logfile</span><span class="p">,</span>
+    <span class="n">when</span><span class="o">=</span><span class="s2">&quot;midnight&quot;</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">backupCount</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="n">memory_handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span>
+                                                <span class="n">flushLevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+                                                <span class="n">target</span><span class="o">=</span><span class="n">handler</span><span class="p">)</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">memory_handler</span><span class="p">)</span>
+
+<span class="c1"># @added 20220328 - Feature #4018: thunder - skyline.errors</span>
+<span class="c1"># For every error logged set a count in the app Redis key which is consumed</span>
+<span class="c1"># by thunder and creates the sskyline.&lt;hostname&gt;.&lt;skyline_app&gt;.logged_errors</span>
+<span class="c1"># metric</span>
+<span class="n">redis_error_log_handler</span> <span class="o">=</span> <span class="n">RedisErrorLogHandler</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">redis_error_log_handler</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="n">redis_error_log_handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">redis_error_log_handler</span><span class="p">)</span>
+
+<span class="c1"># @added 20220405 - Task #4514: Integrate opentelemetry</span>
+<span class="c1">#                   Feature #4516: flux - opentelemetry traces</span>
+<span class="c1"># As per https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html#gunicorn-post-fork-hook</span>
+<span class="c1"># required for opentelemetry to work with gunicorn</span>
+<div class="viewcode-block" id="post_fork"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.gunicorn.post_fork">[docs]</a><span class="k">def</span> <span class="nf">post_fork</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="n">worker</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">OTEL_ENABLED</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">service_name</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s</span><span class="s1">.webapp&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+        <span class="n">trace</span><span class="o">.</span><span class="n">set_tracer_provider</span><span class="p">(</span>
+            <span class="n">TracerProvider</span><span class="p">(</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">Resource</span><span class="o">.</span><span class="n">create</span><span class="p">({</span><span class="n">SERVICE_NAME</span><span class="p">:</span> <span class="n">service_name</span><span class="p">})</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># SpanExporter receives the spans and send them to the target location.</span>
+        <span class="c1"># exporter = jaeger.JaegerSpanExporter(</span>
+        <span class="n">jaeger_exporter</span> <span class="o">=</span> <span class="n">JaegerExporter</span><span class="p">(</span>
+            <span class="c1"># service_name=&#39;webapp&#39;,</span>
+            <span class="c1"># agent_host_name=&#39;127.0.0.1&#39;,</span>
+            <span class="n">agent_host_name</span><span class="o">=</span><span class="n">OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span><span class="p">,</span>
+            <span class="c1"># Direct to jaeger</span>
+            <span class="c1"># agent_port=6831,</span>
+            <span class="c1"># Send to otelcol</span>
+            <span class="c1"># agent_port=26831,</span>
+            <span class="n">agent_port</span><span class="o">=</span><span class="n">OTEL_JAEGEREXPORTER_AGENT_PORT</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">span_processor</span> <span class="o">=</span> <span class="n">BatchSpanProcessor</span><span class="p">(</span><span class="n">jaeger_exporter</span><span class="p">)</span>
+        <span class="n">trace</span><span class="o">.</span><span class="n">get_tracer_provider</span><span class="p">()</span><span class="o">.</span><span class="n">add_span_processor</span><span class="p">(</span><span class="n">span_processor</span><span class="p">)</span></div>
+
+        <span class="c1"># Meter is responsible for creating and recording metrics</span>
+    <span class="c1">#    metrics.set_meter_provider(MeterProvider())</span>
+        <span class="c1"># opentelemetry.metrics.get_meter(instrumenting_module_name, instrumenting_library_version=&#39;&#39;, meter_provider=None)</span>
+    <span class="c1">#    meter = metrics.get_meter(__name__)</span>
+        <span class="c1"># controller collects metrics created from meter and exports it via the</span>
+        <span class="c1"># exporter every interval</span>
+    <span class="c1">#    controller = PushController(meter, metric_exporter, 60)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

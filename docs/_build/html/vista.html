@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Vista &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vista &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Redis integration" href="redis-integration.html" />
-    <link rel="prev" title="upload_data to Flux - EXPERIMENTAL" href="upload-data-to-flux.html" /> 
+    <link rel="next" title="SNAB" href="SNAB.html" />
+    <link rel="prev" title="Thunder - Horizon" href="thunder/thunder_horizon.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,10 +71,15 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Vista</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#important-note-intended-use">Important note - Intended use</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#very-important-note-variations-in-data-and-graphs">Very important note - Variations in data and graphs</a><ul>
@@ -135,6 +101,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#missing-data">Missing data</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -142,6 +110,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -150,71 +121,32 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Vista</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Vista</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/vista.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="vista">
-<h1>Vista<a class="headerlink" href="#vista" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="vista">
+<h1>Vista<a class="headerlink" href="#vista" title="Permalink to this heading"></a></h1>
 <p>Vista is the Skyline service that enables Skyline to fetch metrics from Graphite
 and Prometheus servers and populate your Skyline Graphite instance with
 them or derivatives of those metrics, via Skyline Flux, so they can be pickled
@@ -243,16 +175,24 @@ fetch tuple would take <cite>sumSeries(stats.*.procs_running)</cite> and create 
 <p>This will result in a new metric in Graphite named
 <cite>vista.stats.cumulative.procs_running</cite>, that will have its own time series data
 for seasonal analysis, correlation and visualisation.</p>
-<div class="section" id="important-note-intended-use">
-<h2>Important note - Intended use<a class="headerlink" href="#important-note-intended-use" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you create a metric from a Graphite function/s on metrics your
+<code class="docutils literal notranslate"><span class="pre">populate_at_resolutions</span></code> tuple should be only be set to the duration of the
+first Graphite retention.  A metric created from function/s over metrics from
+aggregated data retentions will not have the result a user may expect as the
+function is applied to the aggregated values.</p>
+</div>
+<section id="important-note-intended-use">
+<h2>Important note - Intended use<a class="headerlink" href="#important-note-intended-use" title="Permalink to this heading"></a></h2>
 <p>Vista is intended to be used to fetch tens to hundreds of metrics, it is not
 intended to fetch thousands of metrics.  Although theoretically it could
 probably fetch thousands of metrics, it is not intended for this purpose, that
 type of implementation would much better suited to a Graphite to Graphite pickle
 or Prometheus <cite>remote_storage_adapter</cite> to Graphite.</p>
-</div>
-<div class="section" id="very-important-note-variations-in-data-and-graphs">
-<h2>Very important note - Variations in data and graphs<a class="headerlink" href="#very-important-note-variations-in-data-and-graphs" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="very-important-note-variations-in-data-and-graphs">
+<h2>Very important note - Variations in data and graphs<a class="headerlink" href="#very-important-note-variations-in-data-and-graphs" title="Permalink to this heading"></a></h2>
 <p>Variations in the remote and Graphite data SHOULD be expected.  This applies to
 both:
 - Prometheus &lt;- Vista -&gt; Graphite and;
@@ -271,8 +211,8 @@ be perfect, all of the time.  Those people have unrealistic expectations and
 probably a limited understanding of the time series data stores in question.</p>
 <p>There will always be the potential for slight differences.  Usefulness outweighs
 perfection and given the variables, perfection cannot be achieved.</p>
-<div class="section" id="prometheus-vs-graphite-graphs-and-data-sets">
-<h3>Prometheus vs Graphite graphs and data sets<a class="headerlink" href="#prometheus-vs-graphite-graphs-and-data-sets" title="Permalink to this headline">¶</a></h3>
+<section id="prometheus-vs-graphite-graphs-and-data-sets">
+<h3>Prometheus vs Graphite graphs and data sets<a class="headerlink" href="#prometheus-vs-graphite-graphs-and-data-sets" title="Permalink to this heading"></a></h3>
 <p>Be aware that graphs rendered by Prometheus and Graphite may present different
 values in terms of max and min values.  Th raw data points in both Prometheus at
 <cite>step=60s</cite> and in Graphite in its first retention for a specific time period
@@ -295,10 +235,10 @@ other from Graphite that was populated by Vista from the Prometheus
   <span class="p">[</span><span class="mi">1568691960</span><span class="p">,</span> <span class="mf">1.15</span><span class="p">]]</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>skyline@skyline ~<span class="o">]</span> cat /var/log/skyline/flux.log <span class="p">|</span> grep <span class="m">1568691840</span> <span class="p">|</span> grep node_load1
-<span class="m">2019</span>-09-17 <span class="m">03</span>:46:00 :: <span class="m">7818</span> :: listen :: GET request - <span class="nv">metric</span><span class="o">=</span>vista.demo_prometheus.prometheus.node_load1<span class="p">&amp;</span><span class="nv">value</span><span class="o">=</span><span class="m">1</span>.04<span class="p">&amp;</span><span class="nv">timestamp</span><span class="o">=</span><span class="m">1568691840</span><span class="p">&amp;</span><span class="nv">key</span><span class="o">=</span>xxxx
-<span class="m">2019</span>-09-17 <span class="m">03</span>:46:00 :: <span class="m">7818</span> :: listen :: GET request data added to flux.httpMetricDataQueue - <span class="o">[</span><span class="s1">&#39;vista.demo_prometheus.prometheus.node_load1&#39;</span>, <span class="m">1</span>.04, <span class="m">1568691840</span><span class="o">]</span>
-<span class="o">[</span>skyline@skyline ~<span class="o">]</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">[</span>skyline@skyline<span class="w"> </span>~<span class="o">]</span><span class="w"> </span>cat<span class="w"> </span>/var/log/skyline/flux.log<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="m">1568691840</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>node_load1
+<span class="m">2019</span>-09-17<span class="w"> </span><span class="m">03</span>:46:00<span class="w"> </span>::<span class="w"> </span><span class="m">7818</span><span class="w"> </span>::<span class="w"> </span>listen<span class="w"> </span>::<span class="w"> </span>GET<span class="w"> </span>request<span class="w"> </span>-<span class="w"> </span><span class="nv">metric</span><span class="o">=</span>vista.demo_prometheus.prometheus.node_load1<span class="p">&amp;</span><span class="nv">value</span><span class="o">=</span><span class="m">1</span>.04<span class="p">&amp;</span><span class="nv">timestamp</span><span class="o">=</span><span class="m">1568691840</span><span class="p">&amp;</span><span class="nv">key</span><span class="o">=</span>xxxx
+<span class="m">2019</span>-09-17<span class="w"> </span><span class="m">03</span>:46:00<span class="w"> </span>::<span class="w"> </span><span class="m">7818</span><span class="w"> </span>::<span class="w"> </span>listen<span class="w"> </span>::<span class="w"> </span>GET<span class="w"> </span>request<span class="w"> </span>data<span class="w"> </span>added<span class="w"> </span>to<span class="w"> </span>flux.httpMetricDataQueue<span class="w"> </span>-<span class="w"> </span><span class="o">[</span><span class="s1">&#39;vista.demo_prometheus.prometheus.node_load1&#39;</span>,<span class="w"> </span><span class="m">1</span>.04,<span class="w"> </span><span class="m">1568691840</span><span class="o">]</span>
+<span class="o">[</span>skyline@skyline<span class="w"> </span>~<span class="o">]</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Prometheus time series - called later to verify the data via the query_range API method</span>
@@ -331,10 +271,10 @@ same query_range and time period was issued few hours later.</p>
 </div>
 <p>Small variations such as these SHOULD be expected, the data sets will probably
 never be identical, but they should be very similar.</p>
-</div>
-</div>
-<div class="section" id="important-note-graphite-aggregations">
-<h2>Important note - Graphite aggregations<a class="headerlink" href="#important-note-graphite-aggregations" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="important-note-graphite-aggregations">
+<h2>Important note - Graphite aggregations<a class="headerlink" href="#important-note-graphite-aggregations" title="Permalink to this heading"></a></h2>
 <p>Be aware that Vista is intended to fetch only the latest data points from the
 remote endpoint, at their highest resolution or relevant step.  In terms of the
 metric data being aggregated on your Graphite instance, the fetched metrics
@@ -347,9 +287,9 @@ retentions/aggregations, over time at lower resolutions, you may find that your
 Graphite data and graphs differ slightly from the remote source.</p>
 <p>This also pertains the pre-population of metric data to Graphite, see the below
 section on Pre-populating metrics with historic data.</p>
-</div>
-<div class="section" id="how-vista-works">
-<h2>How Vista works<a class="headerlink" href="#how-vista-works" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="how-vista-works">
+<h2>How Vista works<a class="headerlink" href="#how-vista-works" title="Permalink to this heading"></a></h2>
 <p>A key thing to understand is that metrics fetched by Vista are near real time.
 Vista will always be submitting data for the previous completed minute and never
 the current minute, therefore Vista related metrics are always being analysed by
@@ -378,9 +318,9 @@ pickle will push the data to Skyline for analysis as per usual.</p>
 <p>Vista can also pre-populate Graphite with metric data when new metrics are
 added to Vista, see the below section on Pre-populating metrics with historic
 data.</p>
-</div>
-<div class="section" id="graphite-and-prometheus-metrics">
-<h2>Graphite and Prometheus metrics<a class="headerlink" href="#graphite-and-prometheus-metrics" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="graphite-and-prometheus-metrics">
+<h2>Graphite and Prometheus metrics<a class="headerlink" href="#graphite-and-prometheus-metrics" title="Permalink to this heading"></a></h2>
 <p>Although Graphite and Prometheus are somewhat similar in nature, they have
 subtle differences.  Seeing as Skyline is already very tightly integrated with
 Graphite, in order to integrate the analysis of Prometheus metrics into Skyline,
@@ -408,15 +348,15 @@ namespaces per se, therefore labelled/tagged/function based metric
 namespaces are converted into and stored as Graphite absolute namespaces for
 Skyline to analyse.</p></li>
 </ul>
-</div>
-<div class="section" id="configuration">
-<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h2>
 <p>The Vista configuration variables are in <cite>settings.py</cite> under the Vista settings
 block and they are all prefixed with <cite>VISTA_</cite>.  All the settings variables have
 docstrings documenting their use and values, the main user setting is further
 described below.</p>
-<div class="section" id="settings-vista-fetch-metrics">
-<h3>settings.VISTA_FETCH_METRICS<a class="headerlink" href="#settings-vista-fetch-metrics" title="Permalink to this headline">¶</a></h3>
+<section id="settings-vista-fetch-metrics">
+<h3>settings.VISTA_FETCH_METRICS<a class="headerlink" href="#settings-vista-fetch-metrics" title="Permalink to this heading"></a></h3>
 <p>The metrics you want Vista to fetch from remote sources are defined in the
 <a class="reference internal" href="skyline.html#settings.VISTA_FETCH_METRICS" title="settings.VISTA_FETCH_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_FETCH_METRICS</span></code></a> tuple.</p>
 <p>The setting consists of a tuple of tuples, like the Analyzer
@@ -424,8 +364,8 @@ described below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">VISTA_FETCH_METRICS</span> <span class="o">=</span> <span class="p">(</span>
     <span class="c1"># (remote_host, remote_host_type, frequency, remote_target, graphite_target, uri, namespace_prefix, api_key, token, user, password, (populate_at_resolution_1, populate_at_resolution_2, ...)),</span>
     <span class="c1"># Example with no authentication</span>
-    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;sumSeries(stats.*.cpu.user)&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.cumulative.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;until=-1minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;sumSeries(stats.*.cpu.user)&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.cumulative.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-24hours&amp;until=-1minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;6days&#39;</span><span class="p">)),</span>
     <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="s1">&#39;swell.tar.hm0&#39;</span><span class="p">,</span> <span class="s1">&#39;swell.tar.hm0&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-120minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
     <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">)),</span>
     <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total{device=&quot;eth0&quot;}&#39;</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total.eth0&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">,)),</span>
@@ -442,26 +382,26 @@ them work.</p>
 <p>No authentication methods have been added to Vista yet although the
 they are defined in the fetch tuples.</p>
 </div>
-</div>
-<div class="section" id="remote-target">
-<h3>remote_target<a class="headerlink" href="#remote-target" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="remote-target">
+<h3>remote_target<a class="headerlink" href="#remote-target" title="Permalink to this heading"></a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Only absolute name spaces must be declared in the tuple, wildcard
 metric name spaces are NOT be handled, unless the wildcard namespace is
 declared in a function that results in a single time series.</p>
 </div>
-</div>
-<div class="section" id="frequency">
-<h3>frequency<a class="headerlink" href="#frequency" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="frequency">
+<h3>frequency<a class="headerlink" href="#frequency" title="Permalink to this heading"></a></h3>
 <p>How often to fetch new data from the remote host, under normal circumstances
 this would generally be 60 seconds, however it can be set to any frequency.  It
 must be noted that the metric in the fetch tuple is bound by frequency.  As
 shown in the example above, there are two fetch tuples for graphite.example.org
 one that specifies metrics at 60 seconds and one for 3600 seconds (hourly).</p>
-</div>
-<div class="section" id="uri">
-<h3>uri<a class="headerlink" href="#uri" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="uri">
+<h3>uri<a class="headerlink" href="#uri" title="Permalink to this heading"></a></h3>
 <p><strong>Graphite</strong></p>
 <p>The uri parameter is currently always applied to Graphite sources.  The time frame
 you use in the uri should be short, this results in less bandwidth and less load
@@ -499,9 +439,9 @@ for example:</p>
 <p>and declares the query API method and <cite>[5m]</cite> which is the last 5 minutes
 of raw data and url encodes the necessary parts.  You would not use this, it is
 just an example.</p>
-</div>
-<div class="section" id="namespace-prefix">
-<h3>namespace_prefix<a class="headerlink" href="#namespace-prefix" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="namespace-prefix">
+<h3>namespace_prefix<a class="headerlink" href="#namespace-prefix" title="Permalink to this heading"></a></h3>
 <p>If you do not want to pass a namespace_prefix for metrics, set this to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;&#39;</span>
 </pre></div>
@@ -524,9 +464,9 @@ space on your Graphite:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;vista.graphite_example_org&#39;</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="populate-at-resolutions">
-<h3>populate_at_resolutions<a class="headerlink" href="#populate-at-resolutions" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="populate-at-resolutions">
+<h3>populate_at_resolutions<a class="headerlink" href="#populate-at-resolutions" title="Permalink to this heading"></a></h3>
 <p>You may wish to pre-populate your Graphite with historic data for metrics so
 that Skyline can immediately begin analysing the metric with historic data and
 seasonality patterns.</p>
@@ -577,10 +517,10 @@ to add the trailing comma, ‘15d’ will be interpreted as:</p>
 <p>d</p>
 <p>Not 15d.</p>
 </div>
-</div>
-</div>
-<div class="section" id="missing-data">
-<h2>Missing data<a class="headerlink" href="#missing-data" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="missing-data">
+<h2>Missing data<a class="headerlink" href="#missing-data" title="Permalink to this heading"></a></h2>
 <p>Vista makes best effort to retrieve any missing metric data by referring to the
 last timestamp for data reported by flux.  Take for example a case where the
 Vista service has stopped or there was a network partition between your Skyline
@@ -589,63 +529,38 @@ points for metrics it fetches, either itself, if the gap is less than
 <cite>(frequency + 300)</cite> seconds or with /flux/populate_metric if the gap is longer.
 Once again this may result in some small dissimilarities between the data sets,
 which is better than air gaps.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="redis-integration.html" class="btn btn-neutral float-right" title="Redis integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="upload-data-to-flux.html" class="btn btn-neutral float-left" title="upload_data to Flux - EXPERIMENTAL" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="thunder/thunder_horizon.html" class="btn btn-neutral float-left" title="Thunder - Horizon" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SNAB.html" class="btn btn-neutral float-right" title="SNAB" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

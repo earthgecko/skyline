@@ -60,6 +60,14 @@ skyline.flux.populate\_metric\_worker module
    :undoc-members:
    :show-inheritance:
 
+skyline.flux.prometheus module
+------------------------------
+
+.. automodule:: flux.prometheus
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.flux.uploaded\_data\_worker module
 ------------------------------------------
 

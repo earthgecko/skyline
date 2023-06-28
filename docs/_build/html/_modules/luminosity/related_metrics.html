@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>luminosity.related_metrics &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">luminosity.related_metrics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for luminosity.related_metrics</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_metric_latest_anomaly</span> <span class="kn">import</span> <span class="n">get_metric_latest_anomaly</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_metric_group_info</span> <span class="kn">import</span> <span class="n">get_metric_group_info</span>
+<span class="kn">from</span> <span class="nn">functions.luminosity.get_cross_correlation_relationships</span> <span class="kn">import</span> <span class="n">get_cross_correlation_relationships</span>
+<span class="kn">from</span> <span class="nn">functions.luminosity.update_metric_group</span> <span class="kn">import</span> <span class="n">update_metric_group</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;luminosity&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="RelatedMetrics"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.related_metrics.RelatedMetrics">[docs]</a><span class="k">class</span> <span class="nc">RelatedMetrics</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The RelatedMetrics class controls the luminosity/related_metrics thread and</span>
+<span class="sd">    spawned processes. luminosity/related_metrics analyses the results of</span>
+<span class="sd">    luminosity cross_correlations and related_metricss to create and maintain</span>
+<span class="sd">    metric groups.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize RelatedMetrics</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RelatedMetrics</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+
+<div class="viewcode-block" id="RelatedMetrics.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.related_metrics.RelatedMetrics.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RelatedMetrics.find_related"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.related_metrics.RelatedMetrics.find_related">[docs]</a>    <span class="k">def</span> <span class="nf">find_related</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Determine when a metric group was last updated.</span>
+<span class="sd">        - Determine if any new anomalies have occurred on the metric.</span>
+<span class="sd">        - If there are any new anomalies on the metric, determine if new</span>
+<span class="sd">          cross_correlations or related_metrics have occured on a metric</span>
+<span class="sd">        - If there are new cross_correlations or related_metricss calculate the</span>
+<span class="sd">          metric group with the new data</span>
+<span class="sd">        - Determine if the new data modifies the metric group, if so update.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">max_execution_seconds</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="n">find_related_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: process </span><span class="si">%s</span><span class="s1"> started&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">current_5min_loadavg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getloadavg</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">current_5min_loadavg</span> <span class="o">&gt;</span> <span class="n">LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: not processing any metrics as current_5min_loadavg: </span><span class="si">%s</span><span class="s1">, exceeds LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">current_5min_loadavg</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG</span><span class="p">)))</span>
+            <span class="k">return</span>
+
+        <span class="n">metrics_to_process</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># If a set exists process that</span>
+        <span class="n">force_process</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_to_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.related_metrics.process_immediate&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">metrics_to_process</span><span class="p">:</span>
+                <span class="n">force_process</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> metrics found in luminosity.related_metrics.process_immediate: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_process</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_process</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;luminosity.related_metrics.process_immediate&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: failed get aet.analyzer.smtp_alerter_metrics Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="n">metrics_to_process</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Get all alerting metric basenames</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metrics_to_process</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metrics_to_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;aet.analyzer.smtp_alerter_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: failed get aet.analyzer.smtp_alerter_metrics Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="n">metrics_to_process</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20230321 - Feature #4874: luminosity - related_metrics - labelled_metrics</span>
+            <span class="n">active_labelled_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">active_labelled_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hkeys</span><span class="p">(</span><span class="s1">&#39;aet.metrics_manager.active_labelled_metrics_with_id&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: hkeys on aet.metrics_manager.active_labelled_metrics_with_id Redis hash - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">active_labelled_metrics</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: adding </span><span class="si">%s</span><span class="s1"> labelled_metrics to the </span><span class="si">%s</span><span class="s1"> metrics_to_process&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">active_labelled_metrics</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_process</span><span class="p">))))</span>
+                <span class="n">all_metrics_to_process</span> <span class="o">=</span> <span class="n">active_labelled_metrics</span> <span class="o">+</span> <span class="n">metrics_to_process</span>
+                <span class="n">metrics_to_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_metrics_to_process</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">all_metrics_to_process</span>
+                <span class="k">del</span> <span class="n">active_labelled_metrics</span>
+
+        <span class="n">metrics_to_process_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_process</span><span class="p">)</span>
+        <span class="c1"># Get through the population once per day</span>
+        <span class="n">optimal_metrics_per_minute</span> <span class="o">=</span> <span class="n">metrics_to_process_count</span> <span class="o">/</span> <span class="mi">1440</span>
+        <span class="c1"># optimal_metrics_per_minute = metrics_to_process_count / 360</span>
+
+        <span class="k">if</span> <span class="n">force_process</span><span class="p">:</span>
+            <span class="n">optimal_metrics_per_minute</span> <span class="o">=</span> <span class="n">metrics_to_process_count</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: force_process so optimal metrics to process per minute: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimal_metrics_per_minute</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">optimal_metrics_per_minute</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">optimal_metrics_per_minute</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: optimal metrics to process per minute: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimal_metrics_per_minute</span><span class="p">))</span>
+
+        <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">ids_with_metric_names</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;aet.metrics_manager.metric_names_with_ids&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to get Redis hash aet.metrics_manager.metric_names_with_ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">metric_names_with_ids</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c_metric_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metric_names_with_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">c_metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">c_metric_name</span><span class="p">]))</span>
+                <span class="n">ids_with_metric_names</span><span class="p">[</span><span class="n">c_metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">c_metric_name</span>
+
+        <span class="n">metric_group_last_updated</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_group_last_updated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;luminosity.metric_group.last_updated&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to get Redis hash luminosity.metric_group.last_updated - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="n">metric_group_last_updated</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: all eligible metric names and ids determined&#39;</span><span class="p">)</span>
+
+        <span class="n">latest_anomalies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">latest_anomalies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;panorama.metrics.latest_anomaly&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to get Redis hash luminosity.metric_group.last_updated - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="n">metric_group_last_updated</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">metrics_checked</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metric_groups_updated</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metrics_to_check</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metrics_skipped_recently_checked</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metrics_skipped_recent_anomaly</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metrics_skipped_no_anomaly</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Determine which metrics have new anomalies and may require their</span>
+        <span class="c1"># metric_group updated</span>
+        <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">metrics_to_process</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_check</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">optimal_metrics_per_minute</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># Determine if the metric group needs to be built or checked</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">metric_id_str</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_id_str</span> <span class="o">=</span> <span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">metric_id_str</span><span class="p">:</span>
+                    <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1"># @added 20230322 - Feature #4874: luminosity - related_metrics - labelled_metrics</span>
+                <span class="c1"># The metric_names_with_ids is based on active metrics, if there is</span>
+                <span class="c1"># a KeyError the metric was not added to metric_names_with_ids so</span>
+                <span class="c1"># continue as it cannot be correlated if it is inactive, rather</span>
+                <span class="c1"># than erroring below.</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to get determine metric id for </span><span class="si">%s</span><span class="s1"> from Redis hash data aet.metrics_manager.metric_names_with_ids&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># force_process</span>
+            <span class="k">if</span> <span class="n">force_process</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: force_process, </span><span class="si">%s</span><span class="s1"> adding to check&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">base_name</span><span class="p">))</span>
+                <span class="n">metrics_to_check</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">])</span>
+                <span class="k">continue</span>
+
+            <span class="n">metric_info_last_updated</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_info_last_updated_str</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># Get the entire hash key once</span>
+                <span class="c1"># metric_info_last_updated_str = self.redis_conn_decoded.hget(&#39;luminosity.metric_group.last_updated&#39;, metric_id)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_info_last_updated_str</span> <span class="o">=</span> <span class="n">metric_group_last_updated</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">metric_info_last_updated_str</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">metric_info_last_updated_str</span><span class="p">:</span>
+                    <span class="n">metric_info_last_updated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_info_last_updated_str</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to get Redis hash aet.metrics_manager.metric_names_with_ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+            <span class="c1"># Check the DB just in case Redis data was lost this will stop all</span>
+            <span class="c1"># metrics being reanalysed if the Redis data is lost</span>
+            <span class="n">metric_group_info</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_info_last_updated</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> last_updated timestamp not found in Redis hash luminosity.metric_group.last_updated querying DB&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">base_name</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_group_info</span> <span class="o">=</span> <span class="n">get_metric_group_info</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: get_metric_group_info failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_info_last_updated</span> <span class="o">=</span> <span class="n">metric_group_info</span><span class="p">[</span><span class="n">metric_id</span><span class="p">][</span><span class="s1">&#39;last_updated&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">metric_info_last_updated</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># Never checked</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_info_last_updated</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> has no last_updated timestamp adding to check&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">base_name</span><span class="p">))</span>
+                <span class="n">metrics_to_check</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">])</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># if metric_info_last_updated &gt; (int(find_related_start) - 86400):</span>
+            <span class="k">if</span> <span class="n">metric_info_last_updated</span> <span class="o">&gt;</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">find_related_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">14400</span><span class="p">):</span>
+                <span class="n">metrics_skipped_recently_checked</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">latest_anomaly</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">latest_anomaly_str</span> <span class="o">=</span> <span class="n">latest_anomalies</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">latest_anomaly_str</span><span class="p">:</span>
+                    <span class="n">latest_anomaly</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">latest_anomaly_str</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">latest_anomaly</span><span class="p">:</span>
+                    <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="n">latest_anomaly</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed literal_eval latest_anomaly - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_last_anomaly_ts</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># TODO optimise anomalies DB requests to be Redis instead</span>
+                    <span class="c1"># params = {&#39;latest&#39;: True}</span>
+                    <span class="c1"># latest_metric_anomaly = get_anomalies(skyline_app, metric_id, params)</span>
+                    <span class="c1"># Causes a lot of DB queries for metrics without anomalies</span>
+                    <span class="c1"># latest_anomaly = get_metric_latest_anomaly(skyline_app, base_name, metric_id, False)</span>
+                    <span class="n">latest_anomaly</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">if</span> <span class="n">latest_anomaly</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="n">latest_anomaly</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to determine anomaly_timestamp for get_anomalies dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                            <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: get_anomalies failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                    <span class="n">metric_last_anomaly_ts</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_last_anomaly_ts</span><span class="p">:</span>
+                <span class="n">metrics_skipped_no_anomaly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;luminosity.metric_group.last_updated&#39;</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">find_related_start</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to update in metric_id: </span><span class="si">%s</span><span class="s1"> luminosity.metric_group.last_updated - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Allow correlations to occur</span>
+            <span class="k">if</span> <span class="n">metric_last_anomaly_ts</span> <span class="o">&gt;</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">find_related_start</span><span class="p">)</span> <span class="o">-</span> <span class="mi">900</span><span class="p">):</span>
+                <span class="n">metrics_skipped_recent_anomaly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">metric_last_anomaly_ts</span> <span class="o">&gt;</span> <span class="n">metric_info_last_updated</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: recent anomaly on </span><span class="si">%s</span><span class="s1"> adding to check&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">metrics_to_check</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> metrics in metrics_to_check&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_check</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: metrics_to_check: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_check</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">metrics_to_check</span><span class="p">:</span>
+            <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">running_for</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">find_related_start</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">running_for</span> <span class="o">&gt;</span> <span class="n">max_execution_seconds</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: stopping after running for </span><span class="si">%s</span><span class="s1"> seconds, reaching max_execution_seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">running_for</span><span class="p">))</span>
+                <span class="k">break</span>
+            <span class="n">metrics_checked</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+            <span class="n">cross_correlation_relationships</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cross_correlation_relationships_dict</span> <span class="o">=</span> <span class="n">get_cross_correlation_relationships</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_names_with_ids</span><span class="o">=</span><span class="n">metric_names_with_ids</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cross_correlation_relationships_dict</span><span class="p">:</span>
+                    <span class="n">cross_correlation_relationships</span> <span class="o">=</span> <span class="n">cross_correlation_relationships_dict</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;cross_correlation_relationships&#39;</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> cross_correlation_relationships for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cross_correlation_relationships</span><span class="o">.</span><span class="n">keys</span><span class="p">()))),</span> <span class="n">base_name</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: get_cross_correlation_relationships failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;luminosity.metric_group.last_updated&#39;</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">find_related_start</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: find_related :: failed to update in metric_id: </span><span class="si">%s</span><span class="s1"> luminosity.metric_group.last_updated - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="n">metric_group_update</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">cross_correlation_relationships</span><span class="p">:</span>
+                <span class="n">metric_group_update</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">metric_group_info</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">metric_group_info</span><span class="p">[</span><span class="s1">&#39;related_metrics&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">metric_group_update</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">force_process</span><span class="p">:</span>
+                <span class="n">metric_group_update</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">metric_group_update</span><span class="p">:</span>
+                <span class="n">updated_metric_group</span> <span class="o">=</span> <span class="n">update_metric_group</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">cross_correlation_relationships</span><span class="p">,</span> <span class="n">ids_with_metric_names</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">updated_metric_group</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: updated metric group for </span><span class="si">%s</span><span class="s1">, updated_metric_group: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">update_metric_group</span><span class="p">)))</span>
+                    <span class="n">metric_groups_updated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="c1"># metrics_skipped_recently_checked.append(base_name)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> metrics skipped as recently checked&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_skipped_recently_checked</span><span class="p">))))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> metrics skipped as recently they have a recent anomaly&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_skipped_recent_anomaly</span><span class="p">))))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> metrics skipped as they have no anomalies&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_skipped_no_anomaly</span><span class="p">))))</span>
+
+        <span class="n">find_related_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">find_related_start</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related :: </span><span class="si">%s</span><span class="s1"> metrics checked and </span><span class="si">%s</span><span class="s1"> metric_groups were updated, analysed took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_checked</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_groups_updated</span><span class="p">)),</span>
+            <span class="n">find_related_end</span><span class="p">))</span>
+
+        <span class="c1"># related_metrics table</span>
+        <span class="c1"># id, source_metric_id, timestamp, full_duration, resolution, processed</span>
+        <span class="c1"># related_metricss table</span>
+        <span class="c1"># id, related_metrics_id, related_metric_id, ppscore_1, ppscore_2</span>
+        <span class="c1"># Maybe do not just do ppscore maybe use ruptures to identify metrics</span>
+        <span class="c1"># that have changespoints in the same window</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="RelatedMetrics.run"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.related_metrics.RelatedMetrics.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+
+<span class="sd">        - Determine if Redis is up</span>
+
+<span class="sd">        - Spawn a process_metric process to do analysis</span>
+
+<span class="sd">        - Wait for the process to finish.</span>
+
+<span class="sd">        - run_every 300 seconds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: starting&#39;</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics cannot connect to get_redis_conn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Report app up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;luminosity.related_metrics&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: set luminosity.related_metrics Redis key&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: could not update the Redis luminosity.related_metrics key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+
+            <span class="n">now_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+            <span class="c1"># Spawn process</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">find_related</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,))</span>
+                    <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics starting </span><span class="si">%s</span><span class="s1"> of 1 find_related processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">)))</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                    <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: failed to spawn find_related_metrics process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Self monitor processes and terminate if any find_related</span>
+            <span class="c1"># has run for longer than run_every - 10</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">120</span> <span class="o">-</span> <span class="mi">10</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: find_related process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: timed out, killing find_related process&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: killing find_related process&#39;</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: killed find_related process&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: stopping find_related - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: failed to stop find_related - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="n">run_every</span> <span class="o">=</span> <span class="mi">60</span>
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="n">run_every</span><span class="p">:</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_every</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+
+                <span class="n">process_runtime_now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_every</span> <span class="o">-</span> <span class="n">process_runtime_now</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;related_metrics :: sleeping for </span><span class="si">%.2f</span><span class="s1"> seconds due to low run time...&#39;</span> <span class="o">%</span> <span class="n">sleep_for</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">sleep_for</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: failed to del sleep_for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">process_runtime</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: related_metrics :: failed to del process_runtime - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>skyline.analyzer package &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skyline.analyzer package &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="skyline.analyzer_dev package" href="skyline.analyzer_dev.html" />
     <link rel="prev" title="skyline package" href="skyline.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,11 +71,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -122,6 +90,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -138,18 +109,23 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-analyzer.algorithms_batch">skyline.analyzer.algorithms_batch module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-analyzer.analyzer">skyline.analyzer.analyzer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-analyzer.analyzer_batch">skyline.analyzer.analyzer_batch module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer.analyzer_labelled_metrics">skyline.analyzer.analyzer_labelled_metrics module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-analyzer.metrics_manager">skyline.analyzer.metrics_manager module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-analyzer">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.custom_algorithms.html">skyline.custom_algorithms package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.snab.html">skyline.snab package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.thunder.html">skyline.thunder package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
@@ -157,128 +133,93 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms">skyline.custom_algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-fp_match_plots">skyline.fp_match_plots module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-matched_or_regexed_in_list">skyline.matched_or_regexed_in_list module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-motif_match_types">skyline.motif_match_types module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-motif_plots">skyline.motif_plots module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-plot_motif_window">skyline.plot_motif_window module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-slack_functions">skyline.slack_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings_test">skyline.validate_settings_test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline">Module contents</a></li>
 </ul>
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="skyline.html">skyline package</a> &raquo;</li>
-        
-      <li>skyline.analyzer package</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skyline.html">skyline package</a></li>
+      <li class="breadcrumb-item active">skyline.analyzer package</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/skyline.analyzer.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="skyline-analyzer-package">
-<h1>skyline.analyzer package<a class="headerlink" href="#skyline-analyzer-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="skyline-analyzer-agent-module">
-<h2>skyline.analyzer.agent module<a class="headerlink" href="#skyline-analyzer-agent-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-analyzer.agent_batch">
-<span id="skyline-analyzer-agent-batch-module"></span><h2>skyline.analyzer.agent_batch module<a class="headerlink" href="#module-analyzer.agent_batch" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="skyline-analyzer-package">
+<h1>skyline.analyzer package<a class="headerlink" href="#skyline-analyzer-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="skyline-analyzer-agent-module">
+<h2>skyline.analyzer.agent module<a class="headerlink" href="#skyline-analyzer-agent-module" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-analyzer.agent_batch">
+<span id="skyline-analyzer-agent-batch-module"></span><h2>skyline.analyzer.agent_batch module<a class="headerlink" href="#module-analyzer.agent_batch" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt id="analyzer.agent_batch.AnalyzerBatchAgent">
-<em class="property">class </em><code class="sig-name descname">AnalyzerBatchAgent</code><a class="reference internal" href="_modules/analyzer/agent_batch.html#AnalyzerBatchAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.agent_batch.AnalyzerBatchAgent" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.agent_batch.AnalyzerBatchAgent">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalyzerBatchAgent</span></span><a class="reference internal" href="_modules/analyzer/agent_batch.html#AnalyzerBatchAgent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.agent_batch.AnalyzerBatchAgent" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The AnalyzerBatchAgent class does the follow:</p>
 <p>ensures that the required OS resources as defined by the various settings
 are available for the app.</p>
 <dl class="py method">
-<dt id="analyzer.agent_batch.AnalyzerBatchAgent.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/agent_batch.html#AnalyzerBatchAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.agent_batch.AnalyzerBatchAgent.run" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.agent_batch.AnalyzerBatchAgent.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/agent_batch.html#AnalyzerBatchAgent.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.agent_batch.AnalyzerBatchAgent.run" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.agent_batch.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/agent_batch.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.agent_batch.run" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.agent_batch.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/agent_batch.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.agent_batch.run" title="Permalink to this definition"></a></dt>
 <dd><p>Check that all the <cite>ALGORITHMS</cite> can be run.</p>
 <p>Start the AnalyzerBatchAgent.</p>
 <p>Start the logger.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-analyzer.alerters">
-<span id="skyline-analyzer-alerters-module"></span><h2>skyline.analyzer.alerters module<a class="headerlink" href="#module-analyzer.alerters" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-analyzer.alerters">
+<span id="skyline-analyzer-alerters-module"></span><h2>skyline.analyzer.alerters module<a class="headerlink" href="#module-analyzer.alerters" title="Permalink to this heading"></a></h2>
 <dl class="py data">
-<dt id="analyzer.alerters.LOCAL_DEBUG">
-<code class="sig-name descname">LOCAL_DEBUG</code><em class="property"> = False</em><a class="headerlink" href="#analyzer.alerters.LOCAL_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.LOCAL_DEBUG">
+<span class="sig-name descname"><span class="pre">LOCAL_DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#analyzer.alerters.LOCAL_DEBUG" title="Permalink to this definition"></a></dt>
 <dd><p>Create any alerter you want here. The function will be invoked from
 trigger_alert.</p>
 <p>Three arguments will be passed, two of them tuples: alert and metric, and context</p>
@@ -287,6 +228,15 @@ trigger_alert.</p>
 <div><p>alert[0]: The matched substring of the anomalous metric</p>
 <p>alert[1]: the name of the strategy being used to alert</p>
 <p>alert[2]: The timeout of the alert that was triggered</p>
+<p>alert[3]: The type [optional for http_alerter only] (dict)</p>
+<blockquote>
+<div><p>The snab_details [optional for SNAB and slack only] (list)</p>
+<p>Alert testing (dict) e.g. {‘test alert’: True}</p>
+</div></blockquote>
+<p>alert[4]: The snab_details [optional for SNAB and slack only] (list)</p>
+<blockquote>
+<div><p>The anomaly_id [optional for http_alerter only] (list)</p>
+</div></blockquote>
 </div></blockquote>
 <p>metric: information about the anomaly itself</p>
 <blockquote>
@@ -298,65 +248,79 @@ trigger_alert.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_smtp">
-<code class="sig-name descname">alert_smtp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_smtp">
+<span class="sig-name descname"><span class="pre">alert_smtp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_smtp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_smtp" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends an alert via smtp to the
 recipients that are configured for the metric.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_pagerduty">
-<code class="sig-name descname">alert_pagerduty</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_pagerduty">
+<span class="sig-name descname"><span class="pre">alert_pagerduty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_pagerduty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_pagerduty" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends an alert via PagerDuty</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_hipchat">
-<code class="sig-name descname">alert_hipchat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_hipchat">
+<span class="sig-name descname"><span class="pre">alert_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_hipchat" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends an alert the hipchat room that is
 configured in settings.py.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_syslog">
-<code class="sig-name descname">alert_syslog</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_syslog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_syslog" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_syslog">
+<span class="sig-name descname"><span class="pre">alert_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_syslog" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and logs anomalies to syslog.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_stale_digest">
-<code class="sig-name descname">alert_stale_digest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_stale_digest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_stale_digest" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_stale_digest">
+<span class="sig-name descname"><span class="pre">alert_stale_digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_stale_digest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_stale_digest" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends a digest alert via smtp of the
 stale metrics to the default recipient</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_slack">
-<code class="sig-name descname">alert_slack</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_slack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_slack" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_slack">
+<span class="sig-name descname"><span class="pre">alert_slack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_slack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_slack" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.alert_http">
-<code class="sig-name descname">alert_http</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_http"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.alert_http" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_http">
+<span class="sig-name descname"><span class="pre">alert_http</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_http"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_http" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends and resend anomalies to a http
 endpoint.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.alerters.trigger_alert">
-<code class="sig-name descname">trigger_alert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.alerters.alert_sms">
+<span class="sig-name descname"><span class="pre">alert_sms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#alert_sms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.alert_sms" title="Permalink to this definition"></a></dt>
+<dd><p>Called by <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends anomalies to a SMS endpoint.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.alerters.trigger_alert">
+<span class="sig-name descname"><span class="pre">trigger_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#trigger_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.alerters.trigger_alert" title="Permalink to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#analyzer.analyzer.Analyzer.spawn_alerter_process" title="analyzer.analyzer.Analyzer.spawn_alerter_process"><code class="xref py py-func docutils literal notranslate"><span class="pre">skyline.analyzer.Analyzer.spawn_alerter_process</span></code></a> to trigger an alert.</p>
 <p>Analyzer passes three arguments, two of them tuples. The alerting strategy
 is determined and the approriate alert def is then called and passed the
 tuples.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>alert</strong> – <p>The alert tuple specified in settings.py e.g. (‘stats.*’, ‘smtp’, 3600, 168)</p>
 <p>alert[0]: The matched substring of the anomalous metric (str)</p>
 <p>alert[1]: the name of the strategy being used to alert (str)</p>
 <p>alert[2]: The timeout of the alert that was triggered (int)</p>
-<p>alert[3]: The second order resolution hours [optional for Mirage] (int)</p>
+<p>alert[3]: The type [optional for http_alerter only] (dict)</p>
+<blockquote>
+<div><p>The snab_details [optional for SNAB and slack only] (list)</p>
+<p>Alert testing (dict) e.g. {‘test alert’: True}</p>
+</div></blockquote>
+<p>alert[4]: The snab_details [optional for SNAB and slack only] (list)</p>
+<blockquote>
+<div><p>The anomaly_id [optional for http_alerter only] (list)</p>
+</div></blockquote>
 </p></li>
 <li><p><strong>metric</strong> – <p>The metric tuple e.g. (2.345, ‘server-1.cpu.user’, 1462172400)</p>
 <p>metric[0]: the anomalous value (float)</p>
@@ -369,12 +333,25 @@ tuples.</p>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-analyzer.algorithms">
-<span id="skyline-analyzer-algorithms-module"></span><h2>skyline.analyzer.algorithms module<a class="headerlink" href="#module-analyzer.algorithms" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-analyzer.algorithms">
+<span id="skyline-analyzer-algorithms-module"></span><h2>skyline.analyzer.algorithms module<a class="headerlink" href="#module-analyzer.algorithms" title="Permalink to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="analyzer.algorithms.USE_NUMBA">
+<span class="sig-name descname"><span class="pre">USE_NUMBA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#analyzer.algorithms.USE_NUMBA" title="Permalink to this definition"></a></dt>
+<dd><p>This is no man’s land. Do anything you want in here,
+as long as you return a boolean that determines whether the input timeseries is
+anomalous or not.</p>
+<p>The key here is to return a True or False boolean.</p>
+<p>You should use the pythonic except mechanism to ensure any excpetions do not
+cause things to halt and the record_algorithm_error utility can be used to
+sample any algorithm errors to log.</p>
+<p>To add an algorithm, define it here, and add its name to settings.ALGORITHMS.</p>
+</dd></dl>
+
 <dl class="py function">
-<dt id="analyzer.algorithms.tail_avg">
-<code class="sig-name descname">tail_avg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#tail_avg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.tail_avg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.tail_avg">
+<span class="sig-name descname"><span class="pre">tail_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#tail_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.tail_avg" title="Permalink to this definition"></a></dt>
 <dd><p>This is a utility function used to calculate the average of the last three
 datapoints in the series as a measure, instead of just the last datapoint.
 It reduces noise, but it also reduces sensitivity and increases the delay
@@ -382,29 +359,42 @@ to detection.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.median_absolute_deviation">
-<code class="sig-name descname">median_absolute_deviation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#median_absolute_deviation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.median_absolute_deviation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.numba_median_absolute_deviation">
+<span class="sig-name descname"><span class="pre">numba_median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_np_array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#numba_median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.numba_median_absolute_deviation" title="Permalink to this definition"></a></dt>
+<dd><p>This is a numba implementation of median_absolute_deviation, it speeds up
+the computation on a 1000 timeseries from 1.593684 seconds to
+0.029051 seconds.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.median_absolute_deviation">
+<span class="sig-name descname"><span class="pre">median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.median_absolute_deviation" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the deviation of its latest datapoint with
 respect to the median is X times larger than the median of deviations.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.grubbs">
-<code class="sig-name descname">grubbs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#grubbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.grubbs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.grubbs">
+<span class="sig-name descname"><span class="pre">grubbs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#grubbs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.grubbs" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the Z score is greater than the Grubb’s score.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.first_hour_average">
-<code class="sig-name descname">first_hour_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#first_hour_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.first_hour_average" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.first_hour_average">
+<span class="sig-name descname"><span class="pre">first_hour_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#first_hour_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.first_hour_average" title="Permalink to this definition"></a></dt>
 <dd><p>Calcuate the simple average over one hour, FULL_DURATION seconds ago.
 A timeseries is anomalous if the average of the last three datapoints
 are outside of three standard deviations of this value.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.stddev_from_average">
-<code class="sig-name descname">stddev_from_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#stddev_from_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.stddev_from_average" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.numba_stddev_from_average">
+<span class="sig-name descname"><span class="pre">numba_stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#numba_stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.numba_stddev_from_average" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.stddev_from_average">
+<span class="sig-name descname"><span class="pre">stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.stddev_from_average" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the average. This does not exponentially weight the MA and so
@@ -412,8 +402,8 @@ is better for detecting anomalies with respect to the entire series.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.stddev_from_moving_average">
-<code class="sig-name descname">stddev_from_moving_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#stddev_from_moving_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.stddev_from_moving_average" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.stddev_from_moving_average">
+<span class="sig-name descname"><span class="pre">stddev_from_moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#stddev_from_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.stddev_from_moving_average" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the moving average. This is better for finding anomalies with
@@ -421,23 +411,63 @@ respect to the short term trends.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.mean_subtraction_cumulation">
-<code class="sig-name descname">mean_subtraction_cumulation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.mean_subtraction_cumulation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.numba_mean_subtraction_cumulation">
+<span class="sig-name descname"><span class="pre">numba_mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_np_array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#numba_mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.numba_mean_subtraction_cumulation" title="Permalink to this definition"></a></dt>
+<dd><p>This is a numba implementation of mean_subtraction_cumulation, it speeds up
+the computation on a 1000 timeseries from 7.042794 seconds to
+0.041275 seconds.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.mean_subtraction_cumulation">
+<span class="sig-name descname"><span class="pre">mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.mean_subtraction_cumulation" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the value of the next datapoint in the
 series is farther than three standard deviations out in cumulative terms
 after subtracting the mean from each data point.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.least_squares">
-<code class="sig-name descname">least_squares</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#least_squares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.least_squares" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.numba_projected_errors">
+<span class="sig-name descname"><span class="pre">numba_projected_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#numba_projected_errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.numba_projected_errors" title="Permalink to this definition"></a></dt>
+<dd><p>This is a numba implementation of the original calculation of the errors
+loop.  It speeds up the loop on a 1000 timeseries from 8.727679 seconds to
+2.785311 seconds.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.least_squares">
+<span class="sig-name descname"><span class="pre">least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#least_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.least_squares" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints
 on a projected least squares model is greater than three sigma.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.histogram_bins">
-<code class="sig-name descname">histogram_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#histogram_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.histogram_bins" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.get_bin_edges">
+<span class="sig-name descname"><span class="pre">get_bin_edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#get_bin_edges"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.get_bin_edges" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference external" href="https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html">https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.compute_bin">
+<span class="sig-name descname"><span class="pre">compute_bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_edges</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#compute_bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.compute_bin" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference external" href="https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html">https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.numba_histogram">
+<span class="sig-name descname"><span class="pre">numba_histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#numba_histogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.numba_histogram" title="Permalink to this definition"></a></dt>
+<dd><p><a class="reference external" href="https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html">https://numba.pydata.org/numba-examples/examples/density_estimation/histogram/results.html</a></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.numba_histogram_bins">
+<span class="sig-name descname"><span class="pre">numba_histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_np_array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#numba_histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.numba_histogram_bins" title="Permalink to this definition"></a></dt>
+<dd><p>Pass the tail average and the y np array</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analyzer.algorithms.histogram_bins">
+<span class="sig-name descname"><span class="pre">histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.histogram_bins" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints falls
 into a histogram bin with less than 20 other datapoints (you’ll need to tweak
 that number depending on your data)</p>
@@ -446,8 +476,8 @@ means more anomalous.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.ks_test">
-<code class="sig-name descname">ks_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#ks_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.ks_test" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.ks_test">
+<span class="sig-name descname"><span class="pre">ks_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#ks_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.ks_test" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
 that data distribution for last 10 minutes is different from last hour.
 It produces false positives on non-stationary series so Augmented
@@ -455,15 +485,15 @@ Dickey-Fuller test applied to check for stationarity.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.get_function_name">
-<code class="sig-name descname">get_function_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#get_function_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.get_function_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.get_function_name">
+<span class="sig-name descname"><span class="pre">get_function_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#get_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.get_function_name" title="Permalink to this definition"></a></dt>
 <dd><p>This is a utility function is used to determine what algorithm is reporting
 an algorithm error when the record_algorithm_error is used.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.record_algorithm_error">
-<code class="sig-name descname">record_algorithm_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">algorithm_name</span></em>, <em class="sig-param"><span class="n">traceback_format_exc_string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#record_algorithm_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.record_algorithm_error" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.record_algorithm_error">
+<span class="sig-name descname"><span class="pre">record_algorithm_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback_format_exc_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#record_algorithm_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.record_algorithm_error" title="Permalink to this definition"></a></dt>
 <dd><p>This utility function is used to facilitate the traceback from any algorithm
 errors.  The algorithm functions themselves we want to run super fast and
 without fail in terms of stopping the function returning and not reporting
@@ -479,20 +509,20 @@ tons of errors into the log.</p>
 </dl>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>algorithm_name</strong> (<em>str</em>) – the algoritm function name</p></li>
 <li><p><strong>traceback_format_exc_string</strong> (<em>str</em>) – the traceback_format_exc string</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">True</span></code> the error string was written to the algorithm_error_file</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">False</span></code> the error string was not written to the algorithm_error_file</p></li>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
 <li><p>boolean</p></li>
 </ul>
@@ -502,20 +532,20 @@ tons of errors into the log.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.determine_median">
-<code class="sig-name descname">determine_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#determine_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.determine_median" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.determine_median">
+<span class="sig-name descname"><span class="pre">determine_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#determine_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.determine_median" title="Permalink to this definition"></a></dt>
 <dd><p>Determine the median of the values in the timeseries</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.determine_array_median">
-<code class="sig-name descname">determine_array_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#determine_array_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.determine_array_median" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.determine_array_median">
+<span class="sig-name descname"><span class="pre">determine_array_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#determine_array_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.determine_array_median" title="Permalink to this definition"></a></dt>
 <dd><p>Determine the median of the values in an array</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.identify_airgaps">
-<code class="sig-name descname">identify_airgaps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_name</span></em>, <em class="sig-param"><span class="n">timeseries</span></em>, <em class="sig-param"><span class="n">airgapped_metrics</span></em>, <em class="sig-param"><span class="n">airgapped_metrics_filled</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#identify_airgaps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.identify_airgaps" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.identify_airgaps">
+<span class="sig-name descname"><span class="pre">identify_airgaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airgapped_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airgapped_metrics_filled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#identify_airgaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.identify_airgaps" title="Permalink to this definition"></a></dt>
 <dd><p>Identify air gaps in metrics to populate the analyzer.airgapped_metrics
 Redis set with the air gaps if the specific air gap it is not present in the
 set. If there is a start_airgap timestamp and no end_airgap is set then the
@@ -524,7 +554,7 @@ the netric starts sending data again, it will have the end_airgap set and be
 added to the analyzer.airgapped_metrics Redis set.  Also Identify if a time
 series is unordered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>metric_name</strong> (<em>str</em>) – the FULL_NAMESPACE metric name</p></li>
 <li><p><strong>timeseries</strong> (<em>list</em>) – the metric time series</p></li>
@@ -532,41 +562,76 @@ series is unordered.</p>
 analyzer.airgapped_metrics Redis set</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of air gapped metrics and a boolean as to whether the time
 series is unordered</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list, boolean</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.negatives_present">
-<code class="sig-name descname">negatives_present</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#negatives_present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.negatives_present" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.negatives_present">
+<span class="sig-name descname"><span class="pre">negatives_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#negatives_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.negatives_present" title="Permalink to this definition"></a></dt>
 <dd><p>Determine if there are negative number present in a time series</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.is_anomalously_anomalous">
-<code class="sig-name descname">is_anomalously_anomalous</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_name</span></em>, <em class="sig-param"><span class="n">ensemble</span></em>, <em class="sig-param"><span class="n">datapoint</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#is_anomalously_anomalous"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.is_anomalously_anomalous" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms.is_anomalously_anomalous">
+<span class="sig-name descname"><span class="pre">is_anomalously_anomalous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#is_anomalously_anomalous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.is_anomalously_anomalous" title="Permalink to this definition"></a></dt>
 <dd><p>This method runs a meta-analysis on the metric to determine whether the
 metric has a past history of triggering. TODO: weight intervals based on datapoint</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms.run_selected_algorithm">
-<code class="sig-name descname">run_selected_algorithm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em>, <em class="sig-param"><span class="n">metric_name</span></em>, <em class="sig-param"><span class="n">airgapped_metrics</span></em>, <em class="sig-param"><span class="n">airgapped_metrics_filled</span></em>, <em class="sig-param"><span class="n">run_negatives_present</span></em>, <em class="sig-param"><span class="n">check_for_airgaps_only</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#run_selected_algorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms.run_selected_algorithm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filter timeseries and run selected algorithm.</p>
+<dt class="sig sig-object py" id="analyzer.algorithms.run_selected_algorithm">
+<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airgapped_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">airgapped_metrics_filled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_negatives_present</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_for_airgaps_only</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_stale_metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms.run_selected_algorithm" title="Permalink to this definition"></a></dt>
+<dd><p>Run selected algorithm if not Stale, Boring or TooShort</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timeseries</strong> (<em>list</em>) – the time series data</p></li>
+<li><p><strong>metric_name</strong> (<em>str</em>) – the full Redis metric name</p></li>
+<li><p><strong>airgapped_metrics</strong> (<em>list</em>) – a list of airgapped metrics</p></li>
+<li><p><strong>airgapped_metrics_filled</strong> (<em>list</em>) – a list of filled airgapped metrics</p></li>
+<li><p><strong>run_negatives_present</strong> (<em>boolean</em>) – whether to determine if there are negative
+values in the time series</p></li>
+<li><p><strong>check_for_airgaps_only</strong> – whether to only check for airgaps in the
+time series and NOT do analysis</p></li>
+<li><p><strong>custom_stale_metrics_dict</strong> (<em>dict</em>) – the dictionary containing the
+CUSTOM_STALE_PERIOD to metrics with a custom stale period defined</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>anomalous, ensemble, datapoint, negatives_found, algorithms_run</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(boolean, list, float, boolean, list)</p>
+</dd>
+</dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-analyzer.algorithms_batch">
-<span id="skyline-analyzer-algorithms-batch-module"></span><h2>skyline.analyzer.algorithms_batch module<a class="headerlink" href="#module-analyzer.algorithms_batch" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-analyzer.algorithms_batch">
+<span id="skyline-analyzer-algorithms-batch-module"></span><h2>skyline.analyzer.algorithms_batch module<a class="headerlink" href="#module-analyzer.algorithms_batch" title="Permalink to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.LOCAL_DEBUG">
+<span class="sig-name descname"><span class="pre">LOCAL_DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#analyzer.algorithms_batch.LOCAL_DEBUG" title="Permalink to this definition"></a></dt>
+<dd><p>This is no man’s land. Do anything you want in here,
+as long as you return a boolean that determines whether the input timeseries is
+anomalous or not.</p>
+<p>The key here is to return a True or False boolean.</p>
+<p>You should use the pythonic except mechanism to ensure any excpetions do not
+cause things to halt and the record_algorithm_error utility can be used to
+sample any algorithm errors to log.</p>
+<p>To add an algorithm, define it here, and add its name to settings.ALGORITHMS.</p>
+</dd></dl>
+
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.tail_avg">
-<code class="sig-name descname">tail_avg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#tail_avg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.tail_avg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.tail_avg">
+<span class="sig-name descname"><span class="pre">tail_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#tail_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.tail_avg" title="Permalink to this definition"></a></dt>
 <dd><p>This is a utility function used to calculate the average of the last three
 datapoints in the series as a measure, instead of just the last datapoint.
 It reduces noise, but it also reduces sensitivity and increases the delay
@@ -574,29 +639,29 @@ to detection.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.median_absolute_deviation">
-<code class="sig-name descname">median_absolute_deviation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#median_absolute_deviation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.median_absolute_deviation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.median_absolute_deviation">
+<span class="sig-name descname"><span class="pre">median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.median_absolute_deviation" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the deviation of its latest datapoint with
 respect to the median is X times larger than the median of deviations.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.grubbs">
-<code class="sig-name descname">grubbs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#grubbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.grubbs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.grubbs">
+<span class="sig-name descname"><span class="pre">grubbs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#grubbs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.grubbs" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the Z score is greater than the Grubb’s score.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.first_hour_average">
-<code class="sig-name descname">first_hour_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#first_hour_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.first_hour_average" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calcuate the simple average over one hour, FULL_DURATION seconds ago.
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.first_hour_average">
+<span class="sig-name descname"><span class="pre">first_hour_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#first_hour_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.first_hour_average" title="Permalink to this definition"></a></dt>
+<dd><p>Calcuate the simple average over one hour, use_full_duration seconds ago.
 A timeseries is anomalous if the average of the last three datapoints
 are outside of three standard deviations of this value.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.stddev_from_average">
-<code class="sig-name descname">stddev_from_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#stddev_from_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.stddev_from_average" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.stddev_from_average">
+<span class="sig-name descname"><span class="pre">stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.stddev_from_average" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the average. This does not exponentially weight the MA and so
@@ -604,8 +669,8 @@ is better for detecting anomalies with respect to the entire series.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.stddev_from_moving_average">
-<code class="sig-name descname">stddev_from_moving_average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#stddev_from_moving_average"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.stddev_from_moving_average" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.stddev_from_moving_average">
+<span class="sig-name descname"><span class="pre">stddev_from_moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#stddev_from_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.stddev_from_moving_average" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the moving average. This is better for finding anomalies with
@@ -613,23 +678,23 @@ respect to the short term trends.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.mean_subtraction_cumulation">
-<code class="sig-name descname">mean_subtraction_cumulation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#mean_subtraction_cumulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.mean_subtraction_cumulation" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.mean_subtraction_cumulation">
+<span class="sig-name descname"><span class="pre">mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.mean_subtraction_cumulation" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the value of the next datapoint in the
 series is farther than three standard deviations out in cumulative terms
 after subtracting the mean from each data point.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.least_squares">
-<code class="sig-name descname">least_squares</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#least_squares"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.least_squares" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.least_squares">
+<span class="sig-name descname"><span class="pre">least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#least_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.least_squares" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints
 on a projected least squares model is greater than three sigma.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.histogram_bins">
-<code class="sig-name descname">histogram_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#histogram_bins"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.histogram_bins" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.histogram_bins">
+<span class="sig-name descname"><span class="pre">histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.histogram_bins" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints falls
 into a histogram bin with less than 20 other datapoints (you’ll need to tweak
 that number depending on your data)</p>
@@ -638,8 +703,8 @@ means more anomalous.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.ks_test">
-<code class="sig-name descname">ks_test</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#ks_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.ks_test" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.ks_test">
+<span class="sig-name descname"><span class="pre">ks_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#ks_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.ks_test" title="Permalink to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
 that data distribution for last 10 minutes is different from last hour.
 It produces false positives on non-stationary series so Augmented
@@ -647,15 +712,15 @@ Dickey-Fuller test applied to check for stationarity.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.get_function_name">
-<code class="sig-name descname">get_function_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#get_function_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.get_function_name" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.get_function_name">
+<span class="sig-name descname"><span class="pre">get_function_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#get_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.get_function_name" title="Permalink to this definition"></a></dt>
 <dd><p>This is a utility function is used to determine what algorithm is reporting
 an algorithm error when the record_algorithm_error is used.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.record_algorithm_error">
-<code class="sig-name descname">record_algorithm_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">algorithm_name</span></em>, <em class="sig-param"><span class="n">traceback_format_exc_string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#record_algorithm_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.record_algorithm_error" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.record_algorithm_error">
+<span class="sig-name descname"><span class="pre">record_algorithm_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback_format_exc_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#record_algorithm_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.record_algorithm_error" title="Permalink to this definition"></a></dt>
 <dd><p>This utility function is used to facilitate the traceback from any algorithm
 errors.  The algorithm functions themselves we want to run super fast and
 without fail in terms of stopping the function returning and not reporting
@@ -671,20 +736,20 @@ tons of errors into the log.</p>
 </dl>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>algorithm_name</strong> (<em>str</em>) – the algoritm function name</p></li>
 <li><p><strong>traceback_format_exc_string</strong> (<em>str</em>) – the traceback_format_exc string</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">True</span></code> the error string was written to the algorithm_error_file</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">False</span></code> the error string was not written to the algorithm_error_file</p></li>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><ul class="simple">
 <li><p>boolean</p></li>
 </ul>
@@ -694,51 +759,52 @@ tons of errors into the log.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.determine_median">
-<code class="sig-name descname">determine_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#determine_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.determine_median" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.determine_median">
+<span class="sig-name descname"><span class="pre">determine_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#determine_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.determine_median" title="Permalink to this definition"></a></dt>
 <dd><p>Determine the median of the values in the timeseries</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.determine_array_median">
-<code class="sig-name descname">determine_array_median</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#determine_array_median"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.determine_array_median" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.determine_array_median">
+<span class="sig-name descname"><span class="pre">determine_array_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#determine_array_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.determine_array_median" title="Permalink to this definition"></a></dt>
 <dd><p>Determine the median of the values in an array</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.negatives_present">
-<code class="sig-name descname">negatives_present</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#negatives_present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.negatives_present" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.negatives_present">
+<span class="sig-name descname"><span class="pre">negatives_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#negatives_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.negatives_present" title="Permalink to this definition"></a></dt>
 <dd><p>Determine if there are negative number present in a time series</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="analyzer.algorithms_batch.run_selected_batch_algorithm">
-<code class="sig-name descname">run_selected_batch_algorithm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em>, <em class="sig-param"><span class="n">metric_name</span></em>, <em class="sig-param"><span class="n">run_negatives_present</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#run_selected_batch_algorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.algorithms_batch.run_selected_batch_algorithm" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.algorithms_batch.run_selected_batch_algorithm">
+<span class="sig-name descname"><span class="pre">run_selected_batch_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_negatives_present</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/algorithms_batch.html#run_selected_batch_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.algorithms_batch.run_selected_batch_algorithm" title="Permalink to this definition"></a></dt>
 <dd><p>Filter timeseries and run selected algorithm.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-analyzer.analyzer">
-<span id="skyline-analyzer-analyzer-module"></span><h2>skyline.analyzer.analyzer module<a class="headerlink" href="#module-analyzer.analyzer" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-analyzer.analyzer">
+<span id="skyline-analyzer-analyzer-module"></span><h2>skyline.analyzer.analyzer module<a class="headerlink" href="#module-analyzer.analyzer" title="Permalink to this heading"></a></h2>
+<p>analyzer.py</p>
 <dl class="py class">
-<dt id="analyzer.analyzer.Analyzer">
-<em class="property">class </em><code class="sig-name descname">Analyzer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_pid</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
+<dt class="sig sig-object py" id="analyzer.analyzer.Analyzer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The Analyzer class which controls the analyzer thread and spawned processes.</p>
 <dl class="py method">
-<dt id="analyzer.analyzer.Analyzer.check_if_parent_is_alive">
-<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer.Analyzer.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="analyzer.analyzer.Analyzer.uniq_datapoints">
-<code class="sig-name descname">uniq_datapoints</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timeseries</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.uniq_datapoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.uniq_datapoints" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer.Analyzer.uniq_datapoints">
+<span class="sig-name descname"><span class="pre">uniq_datapoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.uniq_datapoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.uniq_datapoints" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt id="analyzer.analyzer.Analyzer.spawn_alerter_process">
-<code class="sig-name descname">spawn_alerter_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">alert</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.spawn_alerter_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.spawn_alerter_process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer.Analyzer.spawn_alerter_process">
+<span class="sig-name descname"><span class="pre">spawn_alerter_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.spawn_alerter_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.spawn_alerter_process" title="Permalink to this definition"></a></dt>
 <dd><p>Spawn a process to trigger an alert.</p>
 <p>This is used by smtp alerters so that matplotlib objects are cleared
 down and the alerter cannot create a memory leak in this manner and
@@ -755,8 +821,8 @@ memory leaks in the parent.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="analyzer.analyzer.Analyzer.spin_process">
-<code class="sig-name descname">spin_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">unique_metrics</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.spin_process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer.Analyzer.spin_process">
+<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_metrics</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.spin_process" title="Permalink to this definition"></a></dt>
 <dd><p>Assign a bunch of metrics for a process to analyze.</p>
 <p>Multiple get the assigned_metrics to the process from Redis.</p>
 <p>For each metric:</p>
@@ -783,8 +849,8 @@ anomaly.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="analyzer.analyzer.Analyzer.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.run" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer.Analyzer.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer.html#Analyzer.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer.Analyzer.run" title="Permalink to this definition"></a></dt>
 <dd><ul>
 <li><p>Called when the process intializes.</p></li>
 <li><p>Determine if Redis is up and discover the number of <cite>unique metrics</cite>.</p></li>
@@ -808,13 +874,14 @@ and assign each process a set of metrics to analyse for anomalies.</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-analyzer.analyzer_batch">
-<span id="skyline-analyzer-analyzer-batch-module"></span><h2>skyline.analyzer.analyzer_batch module<a class="headerlink" href="#module-analyzer.analyzer_batch" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-analyzer.analyzer_batch">
+<span id="skyline-analyzer-analyzer-batch-module"></span><h2>skyline.analyzer.analyzer_batch module<a class="headerlink" href="#module-analyzer.analyzer_batch" title="Permalink to this heading"></a></h2>
+<p>analyzer_batch.py</p>
 <dl class="py class">
-<dt id="analyzer.analyzer_batch.AnalyzerBatch">
-<em class="property">class </em><code class="sig-name descname">AnalyzerBatch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_pid</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
+<dt class="sig sig-object py" id="analyzer.analyzer_batch.AnalyzerBatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalyzerBatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The AnalyzerBatch class which controls the analyzer.batch thread and spawned
 processes.</p>
 <p>Made with love to the analyzer_batch playlist:
@@ -832,17 +899,17 @@ processes.</p>
 <a class="reference external" href="https://soundcloud.com/watergaterecords/matthias-meyer-november-rain">https://soundcloud.com/watergaterecords/matthias-meyer-november-rain</a>
 <a class="reference external" href="https://soundcloud.com/musicthatmakesmewannasurf/mixtape-2-w-kosson">https://soundcloud.com/musicthatmakesmewannasurf/mixtape-2-w-kosson</a></p>
 <dl class="py method">
-<dt id="analyzer.analyzer_batch.AnalyzerBatch.check_if_parent_is_alive">
-<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer_batch.AnalyzerBatch.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="analyzer.analyzer_batch.AnalyzerBatch.spin_batch_process">
-<code class="sig-name descname">spin_batch_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">run_timestamp</span></em>, <em class="sig-param"><span class="n">metric_name</span></em>, <em class="sig-param"><span class="n">last_analyzed_timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch.spin_batch_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch.spin_batch_process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer_batch.AnalyzerBatch.spin_batch_process">
+<span class="sig-name descname"><span class="pre">spin_batch_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_analyzed_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch.spin_batch_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch.spin_batch_process" title="Permalink to this definition"></a></dt>
 <dd><p>Assign a metric and last_analyzed_timestamp for a process to analyze.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>i</strong> – python process id</p></li>
 <li><p><strong>run_timestamp</strong> – the epoch timestamp at which this process was called</p></li>
@@ -851,15 +918,15 @@ processes.</p>
 in the Redis key last_timestamp.basename key.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>returns True</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="analyzer.analyzer_batch.AnalyzerBatch.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch.run" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="analyzer.analyzer_batch.AnalyzerBatch.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_batch.html#AnalyzerBatch.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_batch.AnalyzerBatch.run" title="Permalink to this definition"></a></dt>
 <dd><ul>
 <li><p>Called when the process intializes.</p></li>
 <li><p>Determine if Redis is up and discover the number of <cite>unique metrics</cite>.</p></li>
@@ -883,66 +950,202 @@ and assign each process a set of metrics to analyse for anomalies.</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-analyzer">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-analyzer" title="Permalink to this headline">¶</a></h2>
-</div>
-</div>
+</section>
+<section id="module-analyzer.analyzer_labelled_metrics">
+<span id="skyline-analyzer-analyzer-labelled-metrics-module"></span><h2>skyline.analyzer.analyzer_labelled_metrics module<a class="headerlink" href="#module-analyzer.analyzer_labelled_metrics" title="Permalink to this heading"></a></h2>
+<p>analyzer_labelled_metrics.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalyzerLabelledMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_labelled_metrics.html#AnalyzerLabelledMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<p>The AnalyzerLabelledMetrics class which controls the analyzer_labelled_metrics
+thread and spawned processes.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_labelled_metrics.html#AnalyzerLabelledMetrics.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<dd><p>Self explanatory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.spawn_alerter_process">
+<span class="sig-name descname"><span class="pre">spawn_alerter_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_labelled_metrics.html#AnalyzerLabelledMetrics.spawn_alerter_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.spawn_alerter_process" title="Permalink to this definition"></a></dt>
+<dd><p>Spawn a process to trigger an alert.</p>
+<p>This is used by smtp alerters so that matplotlib objects are cleared
+down and the alerter cannot create a memory leak in this manner and
+plt.savefig keeps the object in memory until the process terminates.
+Seeing as data is being surfaced and processed in the alert_smtp
+context, multiprocessing the alert creation and handling prevents any
+memory leaks in the parent.</p>
+<p>Added 20160814 relating to:</p>
+<ul class="simple">
+<li><p>Bug #1558: Memory leak in Analyzer</p></li>
+<li><p>Issue #21 Memory leak in Analyzer see <a class="reference external" href="https://github.com/earthgecko/skyline/issues/21">https://github.com/earthgecko/skyline/issues/21</a></p></li>
+</ul>
+<p>Parameters as per <a class="reference internal" href="#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">skyline.analyzer.alerters.trigger_alert</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.metric_name_labels_parser">
+<span class="sig-name descname"><span class="pre">metric_name_labels_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_labelled_metrics.html#AnalyzerLabelledMetrics.metric_name_labels_parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.metric_name_labels_parser" title="Permalink to this definition"></a></dt>
+<dd><p>Given a Prometheus metric string return a dict of the metric name and labels.
+:param metric: the prometheus metric
+:type metric: str
+:return: metric_dict
+:rtype: dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.labelled_metrics_spin_process">
+<span class="sig-name descname"><span class="pre">labelled_metrics_spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i_process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned_metrics_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_labelled_metrics.html#AnalyzerLabelledMetrics.labelled_metrics_spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.labelled_metrics_spin_process" title="Permalink to this definition"></a></dt>
+<dd><p>Assign a bunch of metrics for a process to analyze.</p>
+<p>Multiple get the assigned_metrics to the process from Redis.</p>
+<p>For each metric:</p>
+<ul class="simple">
+<li><p>unpack the <cite>raw_timeseries</cite> for the metric.</p></li>
+<li><p>Analyse each timeseries against <cite>ALGORITHMS</cite> to determine if it is
+anomalous.</p></li>
+<li><p>If anomalous add it to the Redis set analyzer.anomalous_metrics</p></li>
+<li><p>Add what algorithms triggered to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.anomaly_breakdown_q</span></code>
+queue</p></li>
+<li><p>If <a class="reference internal" href="skyline.html#settings.ENABLE_CRUCIBLE" title="settings.ENABLE_CRUCIBLE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ENABLE_CRUCIBLE</span></code></a> is <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
+<ul>
+<li><p>Add a crucible data file with the details about the timeseries and
+anomaly.</p></li>
+<li><p>Write the timeseries to a json file for crucible.</p></li>
+</ul>
+</li>
+</ul>
+<p>Add keys and values to the queue so the parent process can collate for:</p>
+<ul class="simple">
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.anomaly_breakdown_q</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">self.exceptions_q</span></code></p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/analyzer_labelled_metrics.html#AnalyzerLabelledMetrics.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.analyzer_labelled_metrics.AnalyzerLabelledMetrics.run" title="Permalink to this definition"></a></dt>
+<dd><ul>
+<li><p>Called when the process intializes.</p></li>
+<li><p>Determine if Redis is up and discover the number of <cite>unique metrics</cite>.</p></li>
+<li><p>Divide the <cite>unique_labelled_metrics</cite> between the number of <cite>ANALYZER_LABELLED_METRICS_PROCESSES</cite>
+and assign each process a set of metrics to analyse for anomalies.</p></li>
+<li><p>Wait for the processes to finish.</p></li>
+<li><p>Determine whether if any anomalous metrics require:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Alerting on (and set <cite>EXPIRATION_TIME</cite> key in Redis for alert).</p></li>
+<li><p>Feed to another module e.g. mirage.</p></li>
+<li><p>Alert to syslog.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Populate the webapp json with the anomalous_metrics details.</p></li>
+<li><p>Log the details about the run to the skyline analyzer log.</p></li>
+<li><p>Send skyline.analyzer metrics to <cite>GRAPHITE_HOST</cite></p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-analyzer.metrics_manager">
+<span id="skyline-analyzer-metrics-manager-module"></span><h2>skyline.analyzer.metrics_manager module<a class="headerlink" href="#module-analyzer.metrics_manager" title="Permalink to this heading"></a></h2>
+<p>metrics_manager.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Metrics_Manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<p>The Metrics_Manager class which controls the metrics_manager thread and
+spawned processes.</p>
+<p>All of this functionality was previously done in the Analyzer thread itself
+however with 10s of 1000s of metrics, this process can take longer than a
+minute to achieve, which would make Analyzer lag.  All the original commits
+and references from the Analyzer code have been maintained here, although
+the logical order has been changed and the blocks ordered in a different,
+but more appropriate and efficient manner than they were laid out in Analyzer.
+Further some blocks from Analyzer were removed with the new consolidated
+methods using sets, they were no longer required.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<dd><p>Self explanatory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager.assigned_to_shard">
+<span class="sig-name descname"><span class="pre">assigned_to_shard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager.assigned_to_shard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager.assigned_to_shard" title="Permalink to this definition"></a></dt>
+<dd><p>Determine which shard a metric is assigned to.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager.get_remote_data">
+<span class="sig-name descname"><span class="pre">get_remote_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remote_skyline_instance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_required</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager.get_remote_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager.get_remote_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager.sync_cluster_files">
+<span class="sig-name descname"><span class="pre">sync_cluster_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager.sync_cluster_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager.sync_cluster_files" title="Permalink to this definition"></a></dt>
+<dd><p>Fetch any missing training_data and features_profiles directories and
+files from REMOTE_SKYLINE_INSTANCES</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager.metric_management_process">
+<span class="sig-name descname"><span class="pre">metric_management_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager.metric_management_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager.metric_management_process" title="Permalink to this definition"></a></dt>
+<dd><p>Create and manage the required lists and Redis sets</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="analyzer.metrics_manager.Metrics_Manager.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/metrics_manager.html#Metrics_Manager.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analyzer.metrics_manager.Metrics_Manager.run" title="Permalink to this definition"></a></dt>
+<dd><ul class="simple">
+<li><p>Called when the process intializes.</p></li>
+<li><p>Determine if Redis is up</p></li>
+<li><p>Spawn a process to manage metrics lists and Redis sets</p></li>
+<li><p>Wait for the process to finish.</p></li>
+<li><p>Log the details about the run to the skyline analyzer log.</p></li>
+<li><p>Send skyline.analyzer.metrics_manager metrics to <cite>GRAPHITE_HOST</cite></p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-analyzer">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-analyzer" title="Permalink to this heading"></a></h2>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="skyline.analyzer_dev.html" class="btn btn-neutral float-right" title="skyline.analyzer_dev package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="skyline.html" class="btn btn-neutral float-left" title="skyline package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skyline.html" class="btn btn-neutral float-left" title="skyline package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skyline.analyzer_dev.html" class="btn btn-neutral float-right" title="skyline.analyzer_dev package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

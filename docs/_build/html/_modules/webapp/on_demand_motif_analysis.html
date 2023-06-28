@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.on_demand_motif_analysis &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.on_demand_motif_analysis</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.on_demand_motif_analysis</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="c1"># import string</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">mass_ts</span> <span class="k">as</span> <span class="nn">mts</span>
+
+<span class="c1"># @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
+<span class="c1">#                   Task #4778: v4.0.0 - update dependencies</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">select</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span>
+    <span class="n">mysql_select</span><span class="p">,</span>
+    <span class="n">mirage_load_metric_vars</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
+<span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+<span class="c1"># Use sqlalchemy rather than string-based query construction</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span>
+
+<span class="c1"># @added 20210414 - Feature #4014: Ionosphere - inference</span>
+<span class="c1">#                   Branch #3590: inference</span>
+<span class="kn">from</span> <span class="nn">motif_plots</span> <span class="kn">import</span> <span class="n">plot_motif_match</span>
+<span class="kn">from</span> <span class="nn">motif_match_types</span> <span class="kn">import</span> <span class="n">motif_match_types_dict</span>
+
+<span class="kn">from</span> <span class="nn">functions.memcache.get_fp_timeseries</span> <span class="kn">import</span> <span class="n">get_fp_timeseries</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_ionosphere_fp_row</span> <span class="kn">import</span> <span class="n">get_ionosphere_fp_db_row</span>
+<span class="kn">from</span> <span class="nn">functions.numpy.percent_different</span> <span class="kn">import</span> <span class="n">get_percent_different</span>
+<span class="kn">from</span> <span class="nn">ionosphere.common_functions</span> <span class="kn">import</span> <span class="n">get_metrics_db_object</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+
+<span class="c1"># @added 20210415 - Feature #4014: Ionosphere - inference</span>
+<span class="c1"># @modified 20210417 - Feature #4014: Ionosphere - inference</span>
+<span class="c1"># Allow the user to define the batch_size per similarity search</span>
+<span class="c1"># @modified 20210425 - Feature #4014: Ionosphere - inference</span>
+<span class="c1"># Added max_area_percent_diff for computing the area under the curve</span>
+<div class="viewcode-block" id="on_demand_motif_analysis"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.on_demand_motif_analysis.on_demand_motif_analysis">[docs]</a><span class="k">def</span> <span class="nf">on_demand_motif_analysis</span><span class="p">(</span>
+        <span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">similarity</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">top_matches</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span>
+        <span class="n">range_padding</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process a motif similarity search on demand</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># logger = logging.getLogger(skyline_app_logger)</span>
+    <span class="n">dev_null</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;on_demand_motif_analysis&#39;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: with parameters :: metric: </span><span class="si">%s</span><span class="s1">, timestamp: </span><span class="si">%s</span><span class="s1">, similarity: </span><span class="si">%s</span><span class="s1">, batch_size:</span><span class="si">%s</span><span class="s1">, top_matches: </span><span class="si">%s</span><span class="s1">, max_distance: </span><span class="si">%s</span><span class="s1">, range_padding: </span><span class="si">%s</span><span class="s1">, max_area_percent_diff: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">similarity</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">range_padding</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_area_percent_diff</span><span class="p">)))</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">start_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">metric_vars_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">not_similar_enough_sample</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">not_similar_motifs</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">similar_motifs</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">exact_motifs</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">distance_motifs</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">motifs_found</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">find_exact_matches_run</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">exact_matches_found</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">fps_timeseries</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># A motif_analysis dict to add to and return</span>
+    <span class="n">motif_analysis</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;started&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;exact_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exact_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;similar_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">similar_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;not_similar_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_similar_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;not_similar_enough_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_similar_enough_sample</span>
+    <span class="c1"># @added 20210417 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1"># Allow the user to define the batch_size per similarity search</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;top_matches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">top_matches</span><span class="p">)</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;max_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_distance</span><span class="p">)</span>
+    <span class="c1"># @added 20210425 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1"># Added max_area_percent_diff for computing the area under the curve</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;max_area_percent_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_area_percent_diff</span><span class="p">)</span>
+
+    <span class="n">fps_checked_for_motifs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">metric_dir</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">metric_dir</span><span class="p">)</span>
+
+    <span class="c1"># @added 20210418 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1"># Allow for the similarity search on saved_training_data</span>
+    <span class="k">if</span> <span class="s1">&#39;saved_training_data&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">saved_training_data_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;saved_training_data&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">saved_training_data_str</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="n">saved_metric_timeseries_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_saved/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">metric_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">saved_metric_timeseries_dir</span><span class="p">):</span>
+                <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="n">saved_metric_timeseries_dir</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: using saved training_data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">saved_metric_timeseries_dir</span><span class="p">))</span>
+
+    <span class="n">metric_vars_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+    <span class="n">full_duration_timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_vars_dict</span> <span class="o">=</span> <span class="n">mirage_load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to load metric variables from check file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">metric_vars_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_vars_dict</span><span class="p">:</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;could not load training data variables&#39;</span>
+        <span class="k">return</span> <span class="n">motif_analysis</span>
+
+    <span class="n">full_duration</span> <span class="o">=</span> <span class="n">metric_vars_dict</span><span class="p">[</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">][</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Determine the metric details from the database</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">metric_db_object</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_metrics_db_object</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get_metrics_db_object - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_db_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to determine metric_id from metric_db_object </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_db_object</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get metric id for </span><span class="si">%s</span><span class="s1"> from the database&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;failed to get metric id&#39;</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;could not determine metric id&#39;</span>
+        <span class="k">return</span> <span class="n">motif_analysis</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="c1"># @modified 20210419 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1"># Create a unique dir for each batch_size max_distance</span>
+    <span class="c1"># motif_images_dir = &#39;%s/motifs&#39; % metric_timeseries_dir</span>
+    <span class="n">motif_images_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/motifs/batch_size.</span><span class="si">%s</span><span class="s1">/top_matches.</span><span class="si">%s</span><span class="s1">/max_distance.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">motif_images_dir</span><span class="p">):</span>
+        <span class="c1"># provision motifs image resources</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">motif_images_dir</span><span class="p">)</span>
+
+    <span class="n">full_durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">full_duration</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">full_duration_timeseries_json</span><span class="p">):</span>
+        <span class="n">full_durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">full_duration</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: full_durations - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_durations</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
+    <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+    <span class="c1"># Use sqlalchemy rather than string-based query construction</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get MySQL engine - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fail_msg</span>
+        <span class="k">return</span> <span class="n">motif_analysis</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get ionosphere_table meta - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: engine.dispose() failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fail_msg</span>
+        <span class="k">return</span> <span class="n">motif_analysis</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+    <span class="c1"># Loop through analysis per full_duration</span>
+    <span class="k">for</span> <span class="n">full_duration</span> <span class="ow">in</span> <span class="n">full_durations</span><span class="p">:</span>
+        <span class="n">start_full_duration</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># @modified 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
+            <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+            <span class="c1"># Use sqlalchemy rather than string-based query construction</span>
+            <span class="c1"># query = &#39;SELECT id,last_matched from ionosphere WHERE metric_id=%s AND full_duration=%s AND enabled=1 ORDER BY last_matched DESC&#39; % (</span>
+            <span class="c1">#     str(metric_id), str(full_duration))</span>
+            <span class="c1"># results = mysql_select(skyline_app, query)</span>
+            <span class="c1"># for row in results:</span>
+            <span class="c1">#     fp_ids.append(int(row[0]))</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">full_duration</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">order_by</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">last_matched</span><span class="o">.</span><span class="n">desc</span><span class="p">())</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get fp ids for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: metric_id: </span><span class="si">%s</span><span class="s1">, full_duration: </span><span class="si">%s</span><span class="s1">, fp_ids: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_ids</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Now there are known fps, load the timeseries</span>
+        <span class="k">if</span> <span class="n">full_duration</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">:</span>
+            <span class="n">timeseries_json_file</span> <span class="o">=</span> <span class="n">full_duration_timeseries_json</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timeseries_json_file</span> <span class="o">=</span> <span class="n">timeseries_json</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">timeseries_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">raw_timeseries</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">timeseries_array_str</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to load timeseries for </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">timeseries_json_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">continue</span>
+
+        <span class="n">anomalous_timeseries_subsequence</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">timestamp_float</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):]:</span>
+            <span class="n">anomalous_timeseries_subsequence</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp_float</span><span class="p">),</span> <span class="n">value</span><span class="p">])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: looking for motif in trained fps of full_duration: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="p">(</span><span class="n">full_duration</span><span class="p">)))</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">]</span>
+
+        <span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+        <span class="c1"># full_y_range = max_y - min_y</span>
+
+        <span class="c1"># range_padding_percent = range_padding</span>
+        <span class="c1"># This was just a test that did not have the desired results</span>
+        <span class="c1"># if full_y_range &lt; 10:</span>
+        <span class="c1">#     range_padding_percent = 35</span>
+        <span class="c1"># if full_y_range &lt; 5:</span>
+        <span class="c1">#     range_padding_percent = 75</span>
+        <span class="c1"># if full_y_range &lt; 2:</span>
+        <span class="c1">#    range_padding_percent = 100</span>
+
+        <span class="n">use_range_padding</span> <span class="o">=</span> <span class="p">((</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">range_padding</span>
+        <span class="k">if</span> <span class="n">min_y</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">min_y</span> <span class="o">-</span> <span class="n">use_range_padding</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">min_y</span> <span class="o">-</span> <span class="n">use_range_padding</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">min_y</span>
+        <span class="n">max_y_padded</span> <span class="o">=</span> <span class="n">max_y</span> <span class="o">+</span> <span class="n">use_range_padding</span>
+        <span class="k">if</span> <span class="n">min_y_padded</span> <span class="o">==</span> <span class="n">max_y_padded</span><span class="p">:</span>
+            <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">min_y_padded</span> <span class="o">-</span> <span class="p">((</span><span class="n">min_y_padded</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">range_padding</span><span class="p">)</span>
+            <span class="n">max_y_padded</span> <span class="o">=</span> <span class="n">max_y_padded</span> <span class="o">+</span> <span class="p">((</span><span class="n">max_y_padded</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">range_padding</span><span class="p">)</span>
+
+        <span class="c1"># anomalous_ts = np.array(dataset)</span>
+        <span class="n">anomalous_ts</span> <span class="o">=</span> <span class="n">dataset</span>
+
+        <span class="n">mass2_batch_times</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">exact_match_times</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
+        <span class="n">nanj</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span>
+        <span class="n">empty_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nan</span> <span class="o">+</span> <span class="n">nanj</span><span class="p">)</span>
+
+        <span class="c1"># plotted = False</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># fp_ids = [fp_id for index, fp_id in enumerate(fp_ids) if index == 0]</span>
+
+        <span class="c1"># motifs_found = []</span>
+        <span class="c1"># exact_matches_found = []</span>
+        <span class="c1"># fps_timeseries = {}</span>
+
+        <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">20</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="c1"># Attempt to surface the fp timeseries from memcache and/or db</span>
+            <span class="c1"># @modified 20210424 - Feature #4014: Ionosphere - inference</span>
+            <span class="c1">#                      Task #4030: refactoring</span>
+            <span class="n">fp_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_timeseries</span> <span class="o">=</span> <span class="n">get_fp_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: did not get fp timeseries with get_fp_timeseries(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_timeseries</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">relate_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fp_timeseries</span><span class="p">]</span>
+
+            <span class="n">fps_timeseries</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_timeseries</span>
+
+            <span class="n">current_best_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">current_best_dists</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">best_indices</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">best_dists</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: running mts.mass2_batch fp_id: </span><span class="si">%s</span><span class="s1">, length: </span><span class="si">%s</span><span class="s1">, full_duration: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1">, top_matches: </span><span class="si">%s</span><span class="s1">, max_distance: </span><span class="si">%s</span><span class="s1">, motif_size: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalous_ts</span><span class="p">))))</span>
+
+                <span class="c1"># @added 20210418 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Handle top_matches being greater than possible kth that can be found</span>
+                <span class="c1"># mts.mass2_batch error: kth(=50) out of bounds (16)</span>
+                <span class="n">use_top_matches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">top_matches</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">top_matches</span><span class="p">):</span>
+                    <span class="c1"># @modified 20230110 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+                    <span class="c1"># use_top_matches = round(len(fp_timeseries) / int(batch_size)) - 1</span>
+                    <span class="c1"># floor could be used instead of round here but - 2 is what</span>
+                    <span class="c1"># is used in the other contexts so using - 2</span>
+                    <span class="n">use_top_matches</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span>
+                    <span class="k">if</span> <span class="n">use_top_matches</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">use_top_matches</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: adjusting top_matches to </span><span class="si">%s</span><span class="s1"> (the maximum possible top - 1) as kth(=</span><span class="si">%s</span><span class="s1">) will be out of bounds mts.mass2_batch&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_top_matches</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">)))</span>
+
+                <span class="n">start_mass2_batch</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="c1"># @modified 20210418 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Handle top_matches being greater than possible kth that can be found</span>
+                <span class="c1"># best_indices, best_dists = mts.mass2_batch(relate_dataset, anomalous_ts, batch_size=int(batch_size), top_matches=int(top_matches))</span>
+                <span class="n">best_indices</span><span class="p">,</span> <span class="n">best_dists</span> <span class="o">=</span> <span class="n">mts</span><span class="o">.</span><span class="n">mass2_batch</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">,</span> <span class="n">anomalous_ts</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">top_matches</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">use_top_matches</span><span class="p">))</span>
+                <span class="n">end_mass2_batch</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">mass2_batch_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_mass2_batch</span> <span class="o">-</span> <span class="n">start_mass2_batch</span><span class="p">))</span>
+                <span class="n">current_best_indices</span> <span class="o">=</span> <span class="n">best_indices</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">current_best_dists</span> <span class="o">=</span> <span class="n">best_dists</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+                <span class="c1"># @added 20210412 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                   Branch #3590: inference</span>
+                <span class="c1"># Add fp_id to fps_checked_for_motifs to enable ionosphere to update the</span>
+                <span class="c1"># motif related columns in the ionosphere database table</span>
+                <span class="n">fps_checked_for_motifs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> mts.mass2_batch error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">empty_dists</span><span class="p">)):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: mts.mass2_batch no similar motif from fp id </span><span class="si">%s</span><span class="s1"> - best_dists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))))</span>
+                    <span class="k">continue</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">continue</span>
+            <span class="c1"># if list(best_indices)[0] != anomalous_index:</span>
+            <span class="c1">#     continue</span>
+            <span class="c1"># If the best_dists is &gt; 1 they are not very similar</span>
+            <span class="c1"># if list(best_dists)[0].real &gt; 1.0:</span>
+            <span class="c1">#     continue</span>
+            <span class="c1"># if list(best_indices)[0] and best_dists:</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">best_dist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">motif_added</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1"># Note: mass_ts finds similar motifs NOT the same motif, the same motif</span>
+                    <span class="c1"># will result in the best_dists being a nan+nanj</span>
+                    <span class="c1"># So it is DIYed</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @modified 20210414 - Feature #4014: Ionosphere - inference</span>
+                        <span class="c1">#                      Branch #3590: inference</span>
+                        <span class="c1"># Store the not anomalous motifs</span>
+                        <span class="c1"># motif = [fp_id, current_best_indices[index], best_dist.real]</span>
+                        <span class="n">motif</span> <span class="o">=</span> <span class="p">[</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">best_dist</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+                        <span class="n">motif</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1"># if list(best_indices)[0] and best_dists:</span>
+                    <span class="c1"># If it is greater than 1.0 it is not similar</span>
+                    <span class="c1"># if best_dist.real &gt; 1.0:</span>
+                    <span class="c1"># if best_dist.real &gt; IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE:</span>
+                    <span class="k">if</span> <span class="n">best_dist</span><span class="o">.</span><span class="n">real</span> <span class="o">&gt;</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_distance</span><span class="p">):</span>
+                        <span class="k">continue</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">motif</span><span class="p">:</span>
+                            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">motif</span><span class="p">)</span>
+                            <span class="n">motif_added</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">motif_added</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">best_dist</span> <span class="o">==</span> <span class="n">nanj</span><span class="p">:</span>
+                            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">motif</span><span class="p">)</span>
+                            <span class="n">motif_added</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">motif_added</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_dist</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;nan+nanj&#39;</span><span class="p">:</span>
+                            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">])</span>
+                            <span class="n">motif_added</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">motif_added</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">best_dist</span> <span class="o">==</span> <span class="n">empty_dists</span><span class="p">:</span>
+                            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">motif</span><span class="p">)</span>
+                            <span class="n">motif_added</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: could not determine is if fp id </span><span class="si">%s</span><span class="s1"> timeseries at index </span><span class="si">%s</span><span class="s1"> was a match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]),</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># FIND EXACT MATCHES</span>
+            <span class="c1"># Seeing as I cannot reproduce finding nan+nanj which represents an</span>
+            <span class="c1"># exact match with mts.mass2_batch, do it DIY style - iterate the</span>
+            <span class="c1"># timeseries and create a batch_size subsequence for every index and</span>
+            <span class="c1"># compare the values to the anomalous_ts for an exact match.</span>
+            <span class="c1"># This takes ~0.024850 seconds on a timeseries with 10079 datapoints</span>
+            <span class="c1"># @modified 20210418 - Feature #4014: Ionosphere - inference</span>
+            <span class="c1"># However fiding exact matches can add ~2.5 seconds on 90 minute</span>
+            <span class="c1"># batch_size and with a proproptionally scaled max_distance of say 15</span>
+            <span class="c1"># finding an exact match in a longer sequence is less important,</span>
+            <span class="c1"># the greater the batch_size the most likely greater the variability</span>
+            <span class="c1"># and the chance of an exact match decreases.  So save 2.5 seconds.</span>
+            <span class="c1"># UNLESS</span>
+            <span class="c1"># At a 5 (to 10) batch_size and max_distance of 1.0 an exact match</span>
+            <span class="c1"># can be found. Exact matches are quite frequent and sometimes with</span>
+            <span class="c1"># such little variability, similar matchs may not be found.</span>
+            <span class="c1"># Therefore find find_exact_matches has its place.  MASS</span>
+            <span class="c1"># A CAVEAT here is that boring metrics and that change and have a</span>
+            <span class="c1"># low variability even at a larger batch_size could also benefit and</span>
+            <span class="c1"># possibly achieve better accruracy from the use of find_exact_matches</span>
+            <span class="c1"># as they can be shapelets resemble a batch_size 5 shapelet.</span>
+            <span class="c1"># It would perhaps be possible to use one or more of the features</span>
+            <span class="c1"># profile tsfresh values to identify these types of shapelets, if</span>
+            <span class="c1"># you knew which feature/s were most descriptive of this type of</span>
+            <span class="c1"># shapelet, e.g. &#39;value__skewness&#39;: 3.079477685394873, etc (maybe)</span>
+            <span class="c1"># However I predict that this method will perform worst on these</span>
+            <span class="c1"># types of shapelets.</span>
+            <span class="c1"># find_exact_matches = False</span>
+            <span class="c1"># exact matches can be found in batch sizes of 500 and similar not</span>
+            <span class="c1"># So actually always run it.</span>
+            <span class="n">find_exact_matches</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">find_exact_matches_run</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">find_exact_matches</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">find_exact_matches_run</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">find_exact_matches</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">start_exact_match</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="n">indexed_relate_dataset</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">):</span>
+                        <span class="n">indexed_relate_dataset</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">])</span>
+                    <span class="n">last_index</span> <span class="o">=</span> <span class="n">indexed_relate_dataset</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">current_index</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">while</span> <span class="n">current_index</span> <span class="o">&lt;</span> <span class="n">last_index</span><span class="p">:</span>
+                        <span class="n">subsequence</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">indexed_relate_dataset</span><span class="p">[</span><span class="n">current_index</span><span class="p">:(</span><span class="n">current_index</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))]]</span>
+                        <span class="k">if</span> <span class="n">subsequence</span> <span class="o">==</span> <span class="n">anomalous_ts</span><span class="p">:</span>
+                            <span class="n">exact_matches_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">])</span>
+                            <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">])</span>
+                        <span class="n">current_index</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">end_exact_match</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="n">exact_match_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_exact_match</span> <span class="o">-</span> <span class="n">start_exact_match</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: could not determine it any exact matches could be found in fp id </span><span class="si">%s</span><span class="s1"> timeseries - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: mts.mass2_batch runs on </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mass2_batch_times</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mass2_batch_times</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">find_exact_matches_run</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: exact_match runs on </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exact_match_times</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exact_match_times</span><span class="p">)))</span>
+        <span class="n">end_full_duration</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: analysed </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="p">(</span><span class="n">end_full_duration</span> <span class="o">-</span> <span class="n">start_full_duration</span><span class="p">)))</span>
+
+        <span class="c1"># Patterns are sorted</span>
+        <span class="n">sorted_motifs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">motifs_found_in_fps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">motifs_found</span><span class="p">:</span>
+            <span class="n">sorted_motifs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">motifs_found</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sorted_motifs</span><span class="p">:</span>
+                <span class="n">motifs_found_in_fps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> motifs found&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sorted_motifs</span><span class="p">))))</span>
+
+        <span class="k">for</span> <span class="n">motif</span> <span class="ow">in</span> <span class="n">sorted_motifs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">25</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">add_match</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="n">fp_id</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">best_index</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">best_dist</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="c1"># @added 20210414 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                   Branch #3590: inference</span>
+                <span class="c1"># Store the not anomalous motifs</span>
+                <span class="n">motif_sequence</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+                <span class="n">motif_full_duration</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+                <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;not_similar_enough&#39;</span>
+
+                <span class="k">if</span> <span class="n">motif</span> <span class="ow">in</span> <span class="n">exact_matches_found</span><span class="p">:</span>
+                    <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;exact&#39;</span>
+                    <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">exact_motifs</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">full_relate_timeseries</span> <span class="o">=</span> <span class="n">fps_timeseries</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span>
+                <span class="c1"># full_relate_dataset = [float(item[1]) for item in full_relate_timeseries]</span>
+                <span class="n">relate_timeseries</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">full_relate_timeseries</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">best_index</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">best_index</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))]</span>
+                <span class="n">relate_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">relate_timeseries</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">add_match</span><span class="p">:</span>
+                    <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">relate_dataset</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">min_y_padded</span><span class="p">:</span>
+                            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
+                        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">max_y_padded</span><span class="p">:</span>
+                            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">all_in_range</span><span class="p">:</span>
+                        <span class="n">related_max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">related_max_y</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">range_padding</span><span class="p">):</span>
+                            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">related_max_y</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">max_y</span> <span class="o">+</span> <span class="n">range_padding</span><span class="p">):</span>
+                            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">related_min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">related_min_y</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">min_y</span> <span class="o">-</span> <span class="n">range_padding</span><span class="p">):</span>
+                            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">related_min_y</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">min_y</span> <span class="o">+</span> <span class="n">range_padding</span><span class="p">):</span>
+                            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">all_in_range</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: ALL IN RANGE - all_in_range: </span><span class="si">%s</span><span class="s1">, motif: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_in_range</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])))</span>
+                        <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;all_in_range&#39;</span>
+                        <span class="n">similar_motifs</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># @added 20210425 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1"># Compute the area using the composite trapezoidal rule.</span>
+                    <span class="n">motif_area</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">fp_motif_area</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">percent_different</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">batch_size_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">motif_sequence</span><span class="p">]</span>
+                        <span class="n">y_motif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">batch_size_dataset</span><span class="p">)</span>
+                        <span class="n">motif_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y_motif</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get motif_area with np.trapz - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">function_str</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">y_fp_motif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span>
+                        <span class="n">fp_motif_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y_fp_motif</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get fp_motif_area with np.trapz - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">function_str</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="c1"># Determine the percentage difference (as a</span>
+                    <span class="c1"># positive value) of the areas under the</span>
+                    <span class="c1"># curves.</span>
+                    <span class="k">if</span> <span class="n">motif_area</span> <span class="ow">and</span> <span class="n">fp_motif_area</span><span class="p">:</span>
+                        <span class="n">percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="n">fp_motif_area</span><span class="p">,</span> <span class="n">motif_area</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&gt;</span> <span class="n">max_area_percent_diff</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">add_match</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: AREA TOO DIFFERENT - not adding all_in_range match&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">function_str</span><span class="p">))</span>
+                                <span class="n">add_match</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="c1"># BUT ...</span>
+                            <span class="k">if</span> <span class="n">best_dist</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">add_match</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: DISTANCE VERY SIMILAR - adding match even though area_percent_diff is greater than max_area_percent_diff because best_dist: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_dist</span><span class="p">)))</span>
+                                <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;distance&#39;</span>
+                                <span class="n">distance_motifs</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">similarity</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">add_match</span><span class="p">:</span>
+                        <span class="n">not_similar_motifs</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">not_similar_enough_sample</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">not_similar_enough_sample</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;not_similar_enough&#39;</span>
+
+                <span class="k">if</span> <span class="n">add_match</span><span class="p">:</span>
+                    <span class="n">generation</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">fp_id_row</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">fp_id_row</span> <span class="o">=</span> <span class="n">get_ionosphere_fp_db_row</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get_ionosphere_fp_db_row for fp_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">fp_id_row</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">generation</span> <span class="o">=</span> <span class="n">fp_id_row</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to generation from fp_id_row for fp_id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">generation</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">generation_str</span> <span class="o">=</span> <span class="s1">&#39;trained&#39;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">generation_str</span> <span class="o">=</span> <span class="s1">&#39;LEARNT&#39;</span>
+                    <span class="n">motif_match_types</span> <span class="o">=</span> <span class="n">motif_match_types_dict</span><span class="p">()</span>
+                    <span class="n">type_id</span> <span class="o">=</span> <span class="n">motif_match_types</span><span class="p">[</span><span class="n">match_type</span><span class="p">]</span>
+
+                    <span class="n">motif_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_index</span><span class="p">))</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_id</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;fp_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_id</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;generation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">generation</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_index</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_dist</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;max_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_distance</span><span class="p">)</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamp</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">type_id</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match_type</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_full_duration</span>
+                    <span class="c1"># @added 20210414 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1">#                   Branch #3590: inference</span>
+                    <span class="c1"># Store the not anomalous motifs</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous_timeseries_subsequence</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_sequence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_sequence</span>
+                    <span class="n">not_anomalous_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomalous_timeseries_subsequence</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">graph_period_seconds</span> <span class="o">=</span> <span class="n">not_anomalous_timestamp</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomalous_timeseries_subsequence</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_period_seconds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_period_seconds</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_period_minutes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">graph_period_seconds</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_area</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;fp_motif_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_motif_area</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;area_percent_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">percent_different</span>
+                    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;max_area_percent_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_area_percent_diff</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">25</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">graph_image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/motif.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.with_max_distance.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">motif_images_dir</span><span class="p">,</span> <span class="n">motif_id</span><span class="p">,</span> <span class="n">match_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">))</span>
+                    <span class="n">plotted_image</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">on_demand_motif_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graph_image_file</span><span class="p">):</span>
+                        <span class="n">plotted_image</span><span class="p">,</span> <span class="n">plotted_image_file</span> <span class="o">=</span> <span class="n">plot_motif_match</span><span class="p">(</span>
+                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span>
+                            <span class="n">generation_str</span><span class="p">,</span> <span class="n">motif_id</span><span class="p">,</span> <span class="n">best_index</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span>
+                            <span class="n">best_dist</span><span class="p">,</span> <span class="n">type_id</span><span class="p">,</span> <span class="n">relate_dataset</span><span class="p">,</span>
+                            <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">graph_image_file</span><span class="p">,</span>
+                            <span class="n">on_demand_motif_analysis</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">plotted_image</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: plot already exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graph_image_file</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">plotted_image</span><span class="p">:</span>
+                        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">][</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;image&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_image_file</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to plot motif match plot&#39;</span><span class="p">)</span>
+                        <span class="n">graph_image_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: proceesing motif at index: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">motif</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="k">continue</span>
+    <span class="n">end_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;fps_checked&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps_checked_for_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;exact_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exact_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;similar_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">similar_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;distance_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">distance_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;not_similar_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_similar_motifs</span>
+    <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;not_similar_enough_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_similar_enough_sample</span>
+
+    <span class="n">motif_analysis_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/motif.analysis.similarity_</span><span class="si">%s</span><span class="s1">.batch_size_</span><span class="si">%s</span><span class="s1">.top_matches_</span><span class="si">%s</span><span class="s1">.max_distance_</span><span class="si">%s</span><span class="s1">.dict&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">motif_images_dir</span><span class="p">,</span> <span class="n">similarity</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">motif_analysis_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">motif_analysis</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error :: failed to write motif_analysis_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">motif_analysis_file</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+    <span class="n">motif_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;motifs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> motif matches found, </span><span class="si">%s</span><span class="s1"> fps where checked and motifs plotted in </span><span class="si">%.6f</span><span class="s1"> seconds for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">motif_ids</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fps_checked_for_motifs</span><span class="p">)),</span> <span class="p">(</span><span class="n">end_timer</span> <span class="o">-</span> <span class="n">start_timer</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">dev_null</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">dev_null</span>
+    <span class="k">return</span> <span class="n">motif_analysis</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

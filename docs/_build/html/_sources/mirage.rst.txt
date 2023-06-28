@@ -2,8 +2,8 @@
 Mirage
 ######
 
-The Mirage service is responsible for analyzing selected timeseries at custom
-time ranges when a timeseries seasonality does not fit within
+The Mirage service is responsible for analyzing selected time series at custom
+time ranges when a time series seasonality does not fit within
 :mod:`settings.FULL_DURATION`.  Mirage allows for testing of real time data
 and algorithms in parallel to Analyzer.  Mirage was inspired by Abe Stanway's
 Crucible and the desire to extend the temporal data pools available to Skyline
@@ -13,10 +13,16 @@ specifically on seasonal metrics.
 An overview of Mirage
 =====================
 
-- Mirage is fed specific user defined metrics by Analyzer.
-- Mirage gets timeseries data for metrics from Graphite.
-- Mirage does not have its own ``ALERTS`` settings it uses :mod:`settings.ALERTS`
-  just like Analyzer does.
+- Mirage is fed specific user defined metrics by Analyzer when Analyzer triggers
+  them as anomalous over a 24 hour period.
+- Mirage gets 7 days of time series data for the metric from Graphite and
+  analyses the time series with the same 9 three-sigma algortihms as Analyzer
+  does (and any additional custom algorithms).
+- If the instance is still found to be anomalous, Mirage forwards on any trained
+  metrics to Ionosphere for further analysis or alerts if the metric is not
+  trained.
+- Mirage does not have its own ``ALERTS`` settings it uses the same
+  :mod:`settings.ALERTS` as Analyzer.
 - Mirage also sends anomaly details to Panorama, like Analyzer does.
 
 .. figure:: images/crucible/mirage/skyline.mirage.overview.png
@@ -64,179 +70,13 @@ consumption in an office building is a good example of a multi-seasonal data set
 
 For now let us just consider the daily and weekly seasonality.
 
-The difference between the Analyzer and Mirage views of a timeseries
---------------------------------------------------------------------
+The difference between the Analyzer and Mirage views of a time series
+---------------------------------------------------------------------
 
-.. plot::
+.. figure:: images/mirage/mirage-1.png
+   :alt: Mirage
 
-    # A bit of a contrived example...
-    import numpy as np
-
-    # @added 20161119 - Task #1758: Update deps in Ionosphere
-    # The update to Sphinx or matplotlib is causing a user error warning
-    # This call to matplotlib.use() has no effect
-    # because the backend has already been chosen;
-    # matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
-    # or matplotlib.backends is imported for the first time.
-    # Seen in adding Redis data plot to the alerters, fixes like this
-    import matplotlib
-    matplotlib.use('Agg')
-
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    import matplotlib.patches as mpatches
-    import csv
-    import string
-    import os
-    import datetime as dt
-    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-    # import urllib2
-    from urllib.request import urlopen
-
-    # Department for Education real-time energy data: October 2015
-    # https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv
-    datafile = '../examples/data/Real_time_energy_data_October.csv'
-    if not os.path.exists(datafile):
-        datafile = '/tmp/Real_time_energy_data_October.csv'
-        url = 'https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv'
-        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-        # Change to urlopen and added nosec for bandit [B310:blacklist] Audit
-        # url open for permitted schemes. Allowing use of file:/ or custom
-        # schemes is often unexpected.
-        # response = urllib2.urlopen(url)
-        if url.lower().startswith('http'):
-            response = urlopen(url)  # nosec
-        else:
-            response = None
-
-        with open(datafile, 'w') as fw:
-            fw.write(response.read())
-
-    values = []
-    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-    # with open(datafile, 'rb') as csvfile:
-    with open(datafile, 'rt') as csvfile:
-        reader = csv.reader(csvfile, delimiter=',')
-        for row in reader:
-            values_row = ', '.join(row)
-            # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-            # values_only_string = string.replace(values_row, ' ', '')
-            values_only_string = values_row.replace(' ', '')
-            values_list = values_only_string.split(',')
-            values.append(values_list)
-
-    hours = []
-    current_index = 2
-    for index, value in enumerate(values):
-        if value[1] == 'Day/Time':
-            while current_index < 50:
-                hours.append(value[current_index])
-                current_index += 1
-    two_weeks = '01/10/2015 02/10/2015 03/10/2015 04/10/2015 05/10/2015 06/10/2015 07/10/2015 08/10/2015 09/10/2015 10/10/2015 11/10/2015 12/10/2015 13/10/2015 14/10/2015'
-    data = []
-    for index, value in enumerate(values):
-        # if value[0] != 'Site' and value[1] != '31/10/2015':
-        if value[1] in two_weeks:
-            current_index = 2
-            current_hour = 0
-            while current_index < 50:
-                date = '%s %s' % (value[1], hours[current_hour])
-                line_data = [date, value[current_index]]
-                data.append(line_data)
-                current_index += 1
-                current_hour += 1
-
-    tmp_datafile = '/tmp/skyline.docs.mirage.energy_data.csv'
-    if os.path.exists(tmp_datafile):
-        os.remove(tmp_datafile)
-
-    for element in data:
-        ts_line = '%s, %.2f\n' % (element[0], float(element[1]))
-        with open(tmp_datafile, 'a') as fw:
-            fw.write(ts_line)
-
-    # @added 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-    def bytespdate2num(b):
-        return mdates.datestr2num(b)
-
-    hours, consumption = np.loadtxt(
-        tmp_datafile, unpack=True,
-        delimiter=',',
-        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-        # converters={0: mdates.strpdate2num('%d/%m/%Y %H:%M')},
-        # converters={0: mdates.datestr2num('%d/%m/%Y %H:%M')},
-        converters={0: bytespdate2num},
-        encoding='latin1')
-
-    if os.path.exists(tmp_datafile):
-        os.remove(tmp_datafile)
-
-    fig = plt.figure(figsize=(14, 5))
-
-    x_anno1 = dt.datetime.strptime('02/10/2015 06:00', '%d/%m/%Y %H:%M')
-    x_anno2 = dt.datetime.strptime('03/10/2015 06:00', '%d/%m/%Y %H:%M')
-    plt.annotate(
-        'Analyzer at 86400\nFULL_DURATION\nwould probably fire\naround here',
-        xy=(x_anno2, 130), xycoords='data',
-        xytext=(0.2, 0.5), textcoords='axes fraction',
-        arrowprops=dict(facecolor='red', shrink=0.01),
-        horizontalalignment='right', verticalalignment='top')
-
-    plt.axvspan(x_anno1, x_anno2, alpha=0.4, color='pink')
-    analyzer_full_duration = mpatches.Patch(color='pink', label='Analyzer FULL_DURATION')
-    plt.legend(handles=[analyzer_full_duration])
-
-    x_anno3 = dt.datetime.strptime('09/10/2015 06:00', '%d/%m/%Y %H:%M')
-    x_anno4 = dt.datetime.strptime('10/10/2015 06:00', '%d/%m/%Y %H:%M')
-    plt.annotate(
-        'Analyzer at 86400\nFULL_DURATION\nwould probably fire\naround here',
-        xy=(x_anno4, 130), xycoords='data',
-        xytext=(0.7, 0.5), textcoords='axes fraction',
-        arrowprops=dict(facecolor='red', shrink=0.01),
-        horizontalalignment='right', verticalalignment='top')
-
-    plt.axvspan(x_anno3, x_anno4, alpha=0.4, color='pink')
-
-    x_anno5 = dt.datetime.strptime('03/10/2015 06:00', '%d/%m/%Y %H:%M')
-    x_anno6 = dt.datetime.strptime('09/10/2015 06:00', '%d/%m/%Y %H:%M')
-    plt.axvspan(x_anno5, x_anno6, alpha=0.4, color='blue')
-    x_anno7 = dt.datetime.strptime('02/10/2015 04:00', '%d/%m/%Y %H:%M')
-    x_anno8 = dt.datetime.strptime('02/10/2015 06:00', '%d/%m/%Y %H:%M')
-    plt.axvspan(x_anno7, x_anno8, alpha=0.4, color='blue')
-    x_anno9 = dt.datetime.strptime('10/10/2015 06:00', '%d/%m/%Y %H:%M')
-    x_anno10 = dt.datetime.strptime('10/10/2015 08:00', '%d/%m/%Y %H:%M')
-    plt.axvspan(x_anno9, x_anno10, alpha=0.4, color='blue')
-
-    mirage_full_duration = mpatches.Patch(color='blue', label='Mirage FULL_DURATION')
-
-    plt.annotate(
-        '', xy=(x_anno7, 370), xycoords='data',
-        xytext=(x_anno10, 370), textcoords='data',
-        arrowprops={'arrowstyle': '<->'})
-    plt.text(x_anno1, 375, 'Mirage FULL_DURATION period')
-
-    plt.annotate(
-        '', xy=(x_anno2, 310), xycoords='data',
-        xytext=(x_anno1, 310), textcoords='data',
-        arrowprops={'arrowstyle': '<->'})
-    plt.text(x_anno1, 310, 'Analyzer FULL_DURATION period')
-
-    plt.annotate(
-        '', xy=(x_anno3, 310), xycoords='data',
-        xytext=(x_anno4, 310), textcoords='data',
-        arrowprops={'arrowstyle': '<->'})
-    plt.text(x_anno3, 310, 'Analyzer FULL_DURATION period')
-
-    plt.legend(handles=[analyzer_full_duration, mirage_full_duration])
-
-    plt.title('Department of Education Sanctuary Buildings - energy consumption\nAn example of Skyline Analyzer and Mirage data views')
-    plt.figtext(0.99, 0.01, 'Sample data from https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv', horizontalalignment='right')
-    plt.plot_date(x=hours, y=consumption, markersize=1.3)
-    plt.gcf().autofmt_xdate()
-
-    plt.show()
-
-`Fullsize image <_images/mirage-1.png>`_ for a clearer picture.
+`Fullsize image <images/mirage/mirage-1.png>`_ for a clearer picture.
 
 As we can see above, on a Saturday morning the energy consumption does not
 increase as it normally does during the week days. Analyzer would probably find
@@ -322,7 +162,7 @@ To enable Analyzer to send the metric to Mirage we append the metric alert tuple
 in :mod:`settings.ALERTS` with the ``SECOND_ORDER_RESOLUTION_HOURS`` value.
 Below we have used 168 hours to get Mirage to analyze **any** anomalous metric
 in the 'stats_counts.http.rpm.publishers.*' namespace using using 7 days worth
-of timeseries data from Graphite:
+of time series data from Graphite:
 
 .. code-block:: python
 
@@ -395,7 +235,7 @@ Rate limited
 
 Mirage is rate limited to analyze 30 metrics per minute, this is by design and
 desired. Surfacing data from Graphite and analyzing ~1000 data points in a
-timeseries takes less than 1 second and is much less CPU intensive than
+time series takes less than 1 second and is much less CPU intensive than
 Analyzer in general, but it is probably sufficient to have 30 calls to Graphite
 per minute.  If a large number of metrics went anomalous, even with Mirage
 discarding :mod:`settings.MIRAGE_STALE_SECONDS` checks due to processing limit,
@@ -460,9 +300,9 @@ What Mirage does
 - When a check is found, Mirage determines what the configured
   ``SECOND_ORDER_RESOLUTION_HOURS`` is for the metric from the tuple in
   :mod:`settings.ALERTS`
-- Mirage queries graphite to surface the json data for the metric timeseries at
+- Mirage queries graphite to surface the json data for the metric time series at
   ``SECOND_ORDER_RESOLUTION_HOURS``.
-- Mirage then analyses the retrieved metric timeseries against the configured
+- Mirage then analyses the retrieved metric time series against the configured
   :mod:`settings.MIRAGE_ALGORITHMS`.
 - If a metric is an Ionosphere enabled metric, then Mirage does not alert,
   but hands the metric off to Ionosphere by adding an Ionosphere check

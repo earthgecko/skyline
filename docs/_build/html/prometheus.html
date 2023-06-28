@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prometheus &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Vortex" href="vortex.html" />
+    <link rel="prev" title="upload_data to Flux - EXPERIMENTAL" href="upload-data-to-flux.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Prometheus</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ingestion">Ingestion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#format">Format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#considerations">Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#remote-storage-adapter">remote_storage_adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Prometheus</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/prometheus.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="prometheus">
+<h1>Prometheus<a class="headerlink" href="#prometheus" title="Permalink to this heading"></a></h1>
+<p>Skyline can ingest Prometheus metrics.  This requires Prometheus to be
+configured to send data to Skyline using the Prometheus <cite>remote_write</cite>
+configuration option or using a Prometheus <cite>remote_storage_adapter</cite>.</p>
+<p>Skyline does not use Prometheus as a data source.  Skyline uses RedisTimeSeries
+for storing <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data and VictoriaMetrics as it’s long
+term backend storage and for queries longer than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>.
+There are a number of reasons for this.</p>
+<ul class="simple">
+<li><p>Skyline can receive data from multiple Prometheus servers and using a
+VictoriaMetrics server removes any reliance on Skyline having to have access
+to the Prometheus source server/s.</p></li>
+<li><p>Each Prometheus server has it’s metrics labelled with a <code class="docutils literal notranslate"><span class="pre">x_tenant_id</span></code> and
+<code class="docutils literal notranslate"><span class="pre">_server</span></code> in both RedisTimeSeries and VictoriaMetrics data so that each
+Prometheus server’s metrics can be uniquely identified and isolated, ensuring
+no there are no metric name conflicts or duplications.</p></li>
+<li><p>It isolates Skyline in terms of data from the Prometheus server/s so it will
+not overload the source Prometheus server/s with lots of long queries.</p></li>
+</ul>
+<p>The architecture decision to use VictoriaMetrics is based on performance and
+totally isolating Skyline in terms of load on your Prometheus monitoring.
+Given that enabling <code class="docutils literal notranslate"><span class="pre">remote_write</span></code> on Prometheus generally results in ~25%
+increased memory usage, adding additional load with lots of long duration
+queries is probably undesirable.  Even if you are only using one Prometheus
+server to send Skyline metrics, it is recommended that you still use
+VictoriaMetrics as the Skyline backend store to allow for greater data retention
+than the default Prometheus 14 days, because Skyline uses longer duration data
+for learning.</p>
+<section id="ingestion">
+<h2>Ingestion<a class="headerlink" href="#ingestion" title="Permalink to this heading"></a></h2>
+<p>Skyline Flux accepts metrics from Prometheus and appends them to a Redis set.
+Every 60 seconds Skyline Horizon processes the Redis set and does a number of
+things depending on the Skyline set up.</p>
+<ul class="simple">
+<li><p>x-tenant-id</p></li>
+<li><p>x-server-id</p></li>
+<li><p>x-server-url</p></li>
+</ul>
+<p>Each x-tenant-id can have multiple x-server-ids and x-server-urls, one for
+each sending server.</p>
+<p>If a target is sending any noisy metrics that you don’t want sent, you can
+either specify that Prometheus should drop that data in the remote_write config
+using the write_relabel_configs and drop options</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">write_relabel_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;__name__&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;instance&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;(node_memory_active_bytes|localhost:9100)&#39;</span>
+<span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;drop&#39;</span>
+</pre></div>
+</div>
+<p>Or you can add these as a comma separated list of patterns (including regex
+patterns) to the remote_write dropMetrics header.</p>
+<p>In order to remove specific labels or attributes from data points if a target is
+sending labels you are not interested in receiving, you can remove these from the
+metrics.  Often targets will send labels you are not interested in, like high
+cardinality attributes such as container ids or other unique identifiers. To
+achieve this in Prometheus you need to change both the remote_write and the
+scrape_configs sections.  However changing the scrape_configs on your side will
+remove those labels from your Prometheus as well.  This can be troublesome as
+you also need to define the labels to keep in the scrape_configs too.  Skyline
+therefore allows you to pass the dropLabels header with a comma separated
+list of labels (also with a value pattern) to drop in the remote_write
+dropLabels header which means that these labels will still be recorded on your
+Prometheus but Skyline will remove the labels without any change to your
+existing scrape_configs.  You can also pass a dropMetrics in the headers to tell
+Skyine to drop metrics that match a pattern in the dropMetrics list.  Obviously
+you can also apply normal Prometheus remote_write configuration blocks to the
+remote_write seciton such as <code class="docutils literal notranslate"><span class="pre">write_relabel_configs</span></code> as well.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">remote_write</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://&lt;YOUR_SKYLINE_FQDN&gt;/flux/prometheus/write</span>
+<span class="w">  </span><span class="nt">queue_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+<span class="w">  </span><span class="nt">write_relabel_configs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">alias</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(Loki|Prometheus|Grafana|Telegraf)&quot;</span>
+<span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">drop</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">job</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(loki_exporter)&quot;</span>
+<span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">drop</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">__name__</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(code:prometheus_http_requests_total:sum)&quot;</span>
+<span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">drop</span>
+<span class="w">  </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;FLUX_SELF_API_KEY or a FLUX_API_KEYS&gt;</span>
+<span class="w">    </span><span class="nt">x-tenant-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">x-server-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">    </span><span class="nt">x-server-url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://&lt;YOUR_PROMETHEUS_FQDN&gt;</span>
+<span class="w">    </span><span class="nt">dropLabels</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[[&#39;monitor&#39;,&#39;master&#39;],[&#39;another_label_to_drop&#39;,&#39;with_value_of_*&#39;]]&quot;</span>
+<span class="w">    </span><span class="nt">dropMetrics</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;[&#39;^flag.*&#39;,&#39;^go_.*&#39;,&#39;^info_.*&#39;]&quot;</span>
+<span class="w">  </span><span class="nt">metadata_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">send_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1m</span>
+<span class="w">    </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+</pre></div>
+</div>
+</section>
+<section id="format">
+<h2>Format<a class="headerlink" href="#format" title="Permalink to this heading"></a></h2>
+<p>Skyline supports the standard Prometheus protobuf data ingestion and influxdb
+format therefore you can send Prometheus data to Skyline in two ways:</p>
+<ul class="simple">
+<li><p>Directly from Prometheus using remote_write to Skyline/flux</p></li>
+<li><p>Using Prometheus remote_write sending to a Prometheus remote_storage_adapter
+and configuring the remote_storage_adapter to forward data in influxdb format
+to Skyline/flux.</p></li>
+</ul>
+<p>However do note that the preferred and more featureful method is to use
+remote_write directly.  The remote_storage_adapter method is very limited in
+terms of information that can be passed with the data.  It is not possible to
+use any of the headers functionality (dropMetrics, dropLabels, etc) with the
+remote_storage_adapter, it’s functionality is very basic.</p>
+<p>Given the large number of metrics that can be generated by Prometheus exporters
+users are encouraged to assess all the metrics that Prometheus will send to
+Skyline and implement appropriate <a class="reference internal" href="skyline.html#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKIP_LIST</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.DO_NOT_SKIP_LIST" title="settings.DO_NOT_SKIP_LIST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DO_NOT_SKIP_LIST</span></code></a> rules to ensure that you are only storing and
+analysing the key metrics and Skyline/horizon is dropping metrics that are of no
+interest.  Although flux ingests the Prometheus metrics they are processed and
+submitted to Redis via the normal horizon route, therefore the normal horizon
+SKIP_LIST and DO_NOT_SKIP_LIST methods are still applicable.</p>
+<p>In order to manage Prometheus metrics all Prometheus metrics must be prefixed
+with a namespace that can be used to manage the metrics.  The namespace prefixing
+is done using the <a class="reference internal" href="skyline.html#settings.FLUX_API_KEYS" title="settings.FLUX_API_KEYS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_API_KEYS</span></code></a> mapping.  In the case of using
+the remote_storage_adapter method the <code class="docutils literal notranslate"><span class="pre">--influxdb.database=&lt;PREFIX&gt;</span></code> is also
+used, more on this in the remote_storage_adapter section.</p>
+<p>It is recommended that you add the Prometheus namespace globally to the SKIP_LIST
+and then add metrics that you want to analyse to the DO_NOT_SKIP_LIST.</p>
+<p>Both ways work almost the same with the exception of a prefix must be appended to</p>
+</section>
+<section id="considerations">
+<h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this heading"></a></h2>
+<p>There is an issue in Prometheus metric types in so far as developers will not always
+adhere to metric typing rules and in some exporter you will find COUNTER and GAUGE
+metrics in the same metric namespace.  To overcome this analyzer periodically checks
+the metrics and identifies the skyline_metric_type, because the Prometheus metadata
+cannot be trusted.</p>
+<p>Skyline is not storing the data for longer than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
+and it is storing preprocessed data.  Consider Skyline analysis as a broad
+overview of your Prometheus metrics, it is not about fine granular data it is a
+set of tradeoffs.  It gives you real time monitoring your metrics in broad
+strokes, but it has cardinality and resolution limitations.</p>
+<p>Skyline requires the following additional information per request to be passed
+along with the metric data.</p>
+<ul class="simple">
+<li><p>source: the Prometheus URL at which the metrics being submitted are available at.</p></li>
+<li><p>key: the FLUX_API_KEYS key</p></li>
+<li><p>prefix: a string to prefix the metrics with internally in Skyline</p></li>
+</ul>
+<p>Although the Prometheus metric name may be something along the lines of:
+<code class="docutils literal notranslate"><span class="pre">prometheus_http_requests_total{alias=&quot;Prometheus&quot;,code=&quot;200&quot;,handler=&quot;/graph&quot;,instance=&quot;localhost:9090&quot;,job=&quot;prometheus&quot;}</span></code>
+Skyline’s internal representation of that would be prefixed the x-tenant-id and x-server-id labels:
+<code class="docutils literal notranslate"><span class="pre">prometheus_http_requests_total{_tenant_id=&quot;&lt;x-tenant-id&gt;&quot;,_server_id=&quot;&lt;x-tenant-id&gt;&quot;,alias=&quot;Prometheus&quot;,code=&quot;200&quot;,handler=&quot;/graph&quot;,instance=&quot;localhost:9090&quot;,job=&quot;prometheus&quot;}</span></code></p>
+<p>The reason these labels are required is because Skyline may be receiving metrics
+from multiple Prometheus instances and whereas each metric and labels may
+be unique on one Prometheus server the same metric and labels may exist on
+another Prometheus server, so Skyline adds labels to every Prometheus metric.</p>
+<p>Pass this additional information using the remote_write method is easy, passing
+it using the remote_storage_adapter is a bit more obfuscate.</p>
+</section>
+<section id="remote-storage-adapter">
+<h2>remote_storage_adapter<a class="headerlink" href="#remote-storage-adapter" title="Permalink to this heading"></a></h2>
+<p>Due to the limited number of config options that the remote_storage_adapter
+can be run with some config options are used for different purposes than they
+are intended for.  This is because there is no ability to add headers to the
+remote_storage_adapter requests, therefore we have to use what options are
+available to relay the required parameters to Skyline.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--influxdb.database</span></code> - in terms of Skyline the database option is used to
+prefix the metric with this string.
+Skyline uses the
+<code class="docutils literal notranslate"><span class="pre">--influxdb.username</span></code> - dict with all the required headers/labels?</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">remote_write</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://skyline.example.org/flux/prometheus/write&quot;</span>
+<span class="w">    </span><span class="nt">queue_config</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">headers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1234hbfq89iUGGDn9qiUHuads7we1234</span>
+<span class="w">      </span><span class="nt">x-tenant-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span>
+<span class="w">      </span><span class="nt">x-server-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">      </span><span class="nt">x-server-url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://minikube.mc12</span>
+<span class="w">      </span><span class="nt">dropMetrics</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dropLabels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">write_relabel_configs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;x_org_id&quot;</span>
+<span class="w">        </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">target_label</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;x_server_id&quot;</span>
+<span class="w">        </span><span class="nt">replacement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">    </span><span class="nt">metadata_config</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">send_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1m</span>
+<span class="w">      </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="upload-data-to-flux.html" class="btn btn-neutral float-left" title="upload_data to Flux - EXPERIMENTAL" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="vortex.html" class="btn btn-neutral float-right" title="Vortex" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

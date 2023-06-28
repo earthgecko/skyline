@@ -60,6 +60,10 @@ Overview
   time series using |tsfresh| to "fingerprint" the data set.
 - This allows the operator to fingerprint and profile what is not anomalous, but
   normal and to be expected, even if 3sigma will always detect it as anomalous.
+- Further to this, Ionosphere uses the trained data to create 1000s of motifs
+  (small patterns) of what normal is and supplements the feature profile
+  comparisons by evaluating the current potentially anomaly against the 1000s of
+  trained normal motifs from the features profiles.
 - Ionosphere also allows for the creation of layers rules which allow the
   operator to define ad hoc boundaries and conditions that can be considered as
   not anomalous for each features profile that is created.
@@ -316,7 +320,7 @@ The validate features profile page is useful for this. See
    <a href="_static/ionosphere_demo/fp_validate_demo_page/validate_features_profiles.demo.html" target="_blank">Ionosphere validate features profile demo page</a>
 
 .. warning:: A **important** note on learning.  When you let Ionosphere learn
-  you create a lot of work for yourself in terms of validating every learnt
+  you create work for yourself in terms of validating every learnt
   profile that Ionosphere learns.  If Ionosphere learns badly and you do not
   keep up to date with validating learnt features profiles, Ionosphere could end
   up silencing genuine anomalies which you would **want** to be alerted on.
@@ -747,6 +751,9 @@ programmatic decisions based on the data it is provided with, things a human
 operator tells it are not anomalous.  Ionosphere is an attempt to give Skyline
 an Apollo Program refit.  Enabling the pilots to take control, have inputs.
 
+A benefit here is that the method does not suffer from underspecification that
+is prevalent in machine learning models.
+
 For Humans
 ----------
 
@@ -870,6 +877,20 @@ MySQL configuration
 
 There could be a lot of tables. **DEFINITELY** implement ``innodb_file_per_table``
 in MySQL.
+
+IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+----------------------------------------------
+
+Enabling :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR` allows
+you to not remove training data when it is :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`
+seconds old.  Instead for any training data for metrics that match a namespace
+substring declared in the :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`
+list will be moved to :mod:`settings.IONOSPHERE_HISTORICAL_DATA_FOLDER`
+This is an advance feature and not for general purpose, please read the
+documentation in the docstrings for more info, see:
+:mod:`settings.IONOSPHERE_HISTORICAL_DATA_FOLDER` and
+:mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR`
+
 
 Ionosphere - autobuild features_profiles dir
 --------------------------------------------

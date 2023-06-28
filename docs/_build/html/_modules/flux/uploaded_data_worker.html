@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>flux.uploaded_data_worker &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flux.uploaded_data_worker &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,67 +98,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>flux.uploaded_data_worker</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flux.uploaded_data_worker</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for flux.uploaded_data_worker</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
@@ -205,7 +138,7 @@
 <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
 <span class="c1"># bandit [B403:blacklist] Consider possible security implications associated</span>
 <span class="c1"># with pickle module.  These have been considered.</span>
-<span class="kn">import</span> <span class="nn">pickle</span>  <span class="c1"># nosec</span>
+<span class="kn">import</span> <span class="nn">pickle</span>  <span class="c1"># nosec B403</span>
 
 <span class="kn">import</span> <span class="nn">struct</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -214,6 +147,11 @@
 <span class="kn">import</span> <span class="nn">zipfile</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="c1"># @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES</span>
+<span class="c1"># Better handle multiple workers</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pytz</span>
 <span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
@@ -227,6 +165,8 @@
     <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">sort_timeseries</span><span class="p">,</span>
         <span class="n">filesafe_metricname</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">)</span>
+    <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+    <span class="kn">from</span> <span class="nn">functions.flux.get_last_metric_data</span> <span class="kn">import</span> <span class="n">get_last_metric_data</span>
 
 <span class="c1"># Consolidate flux logging</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
@@ -271,7 +211,7 @@
 
 
 <div class="viewcode-block" id="UploadedDataWorker"><a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker">[docs]</a><span class="k">class</span> <span class="nc">UploadedDataWorker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The worker grabs data files from the :mod:`settings.DATA_UPLOADS_PATH` and</span>
 <span class="sd">    processes the data files and sends to data to Graphite.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -284,16 +224,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="UploadedDataWorker.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics</span>
+            <span class="c1"># Log warning</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UploadedDataWorker.run"><a class="viewcode-back" href="../../skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -394,6 +337,12 @@
                 <span class="k">continue</span>
 
             <span class="n">uploads_to_process</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES</span>
+            <span class="c1"># Better handle multiple workers</span>
+            <span class="n">sleep_for</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># nosec B311</span>
+            <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Get uploads to process from the Redis set which the webapp</span>
                 <span class="c1"># /upload_data populates</span>
@@ -404,8 +353,13 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to query Redis for flux.uploaded_data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">uploads_to_process</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds&#39;</span><span class="p">)</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+                <span class="c1"># @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES</span>
+                <span class="c1"># Better handle multiple workers</span>
+                <span class="c1"># logger.info(&#39;uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds&#39;)</span>
+                <span class="c1"># sleep(30)</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># nosec B311</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds and some random </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">((</span><span class="mi">30</span> <span class="o">+</span> <span class="n">sleep_for</span><span class="p">))</span>
                 <span class="k">continue</span>
 
             <span class="n">processing_upload_failed</span> <span class="o">=</span> <span class="kc">False</span>
@@ -435,6 +389,17 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to literal_eval the upload_dict from upload_to_process - </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">upload_to_process</span><span class="p">))</span>
                     <span class="n">processing_upload_failed</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES</span>
+            <span class="c1"># Better handle multiple workers, remove the item from the set</span>
+            <span class="c1"># immediately so another worker does not assign itself to same work</span>
+            <span class="k">if</span> <span class="n">upload_dict</span><span class="p">:</span>
+                <span class="n">item_removed</span> <span class="o">=</span> <span class="n">remove_redis_set_item</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">upload_dict</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">item_removed</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: removed failed upload from the flux.uploaded_data Redis set&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to remove item from the Redis flux.uploaded_data set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">upload_dict</span><span class="p">))</span>
+
             <span class="k">if</span> <span class="n">upload_dict</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">parent_metric_namespace</span> <span class="o">=</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s1">&#39;parent_metric_namespace&#39;</span><span class="p">]</span>
@@ -493,6 +458,9 @@
 
             <span class="n">upload_info</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">info_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @added 20210504  - Task #4030: refactoring</span>
+            <span class="n">open_info_file</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="k">if</span> <span class="n">upload_id</span> <span class="ow">and</span> <span class="n">info_filename</span><span class="p">:</span>
                 <span class="n">info_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">DATA_UPLOADS_PATH</span><span class="p">,</span> <span class="n">upload_id</span><span class="p">,</span> <span class="n">info_filename</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">info_file</span><span class="p">):</span>
@@ -503,9 +471,17 @@
                         <span class="n">upload_error</span> <span class="o">=</span> <span class="s1">&#39;info file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">info_filename</span>
                         <span class="n">upload_status</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">upload_error</span><span class="p">])</span>
                         <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">upload_error</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">info_file</span><span class="p">:</span>
+                <span class="c1"># @added 20210504  - Task #4030: refactoring</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">open_info_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">info_file</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">info_file</span><span class="p">))</span>
+
+            <span class="c1"># @modified 20210504  - Task #4030: refactoring</span>
+            <span class="c1"># if info_file:</span>
+            <span class="k">if</span> <span class="n">open_info_file</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">info_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="c1"># @modified 20210504  - Task #4030: refactoring</span>
+                    <span class="c1"># with open(info_file) as f:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">open_info_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                         <span class="n">dict_data_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                     <span class="n">upload_info</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">dict_data_str</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -657,7 +633,13 @@
             <span class="k">if</span> <span class="n">refresh_info</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: refresh info for the info.json included in the data archive - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">info_file</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">info_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+                    <span class="c1"># @added 20210504  - Task #4030: refactoring</span>
+                    <span class="n">open_info_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">info_file</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">info_file</span><span class="p">))</span>
+
+                    <span class="c1"># @modified 20210504  - Task #4030: refactoring</span>
+                    <span class="c1"># with open(info_file) as f:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">open_info_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                         <span class="n">dict_data_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                     <span class="n">upload_info</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">dict_data_str</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -1063,38 +1045,18 @@
                 <span class="n">processed_data_columns</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">successful</span> <span class="ow">and</span> <span class="n">data_columns</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">data_col</span> <span class="ow">in</span> <span class="n">data_columns</span><span class="p">:</span>
-                        <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="n">data_df</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="n">data_col_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_col</span><span class="p">,</span> <span class="n">processing_filename</span><span class="p">)</span>
-                        <span class="n">upload_status</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;processing&#39;</span><span class="p">])</span>
+                        <span class="c1"># @modified 20220506 - wrapped in try</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">data_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">,</span> <span class="n">data_col</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: created dataframe for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span><span class="p">)</span>
-                        <span class="k">except</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                            <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to create dataframe for pandas_utc_timestamp and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
-                            <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
-                            <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
-                            <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
+                            <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">data_df</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">data_col_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_col</span><span class="p">,</span> <span class="n">processing_filename</span><span class="p">)</span>
+                            <span class="n">upload_status</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;processing&#39;</span><span class="p">])</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="k">del</span> <span class="n">data_df</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="k">pass</span>
-                            <span class="k">continue</span>
-                        <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="n">original_timeseries_length</span> <span class="o">=</span> <span class="mi">0</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span><span class="p">:</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">data_col</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                                <span class="n">original_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: created timeseries for </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">original_timeseries_length</span><span class="p">)))</span>
+                                <span class="n">data_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">,</span> <span class="n">data_col</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: created dataframe for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span><span class="p">)</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to create timeseries from pandas_utc_timestamp and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to create dataframe for pandas_utc_timestamp and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
                                 <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1105,101 +1067,70 @@
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="k">pass</span>
                                 <span class="k">continue</span>
-                        <span class="n">original_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
-                            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">sorted_timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                                <span class="k">if</span> <span class="n">sorted_timeseries</span><span class="p">:</span>
-                                    <span class="n">sorted_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_timeseries</span><span class="p">)</span>
-                                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sorted_timeseries</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sorted timeseries for </span><span class="si">%s</span><span class="s1"> which has </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sorted_timeseries_length</span><span class="p">)))</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">original_timeseries_length</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">data_col</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">data_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                                    <span class="n">original_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: created timeseries for </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">original_timeseries_length</span><span class="p">)))</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to create timeseries from pandas_utc_timestamp and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                    <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                                    <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
                                     <span class="k">try</span><span class="p">:</span>
-                                        <span class="k">del</span> <span class="n">sorted_timeseries</span>
+                                        <span class="k">del</span> <span class="n">data_df</span>
                                     <span class="k">except</span><span class="p">:</span>
                                         <span class="k">pass</span>
-                                <span class="k">else</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: sorted_timeseries does not exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="n">sorted_timeseries</span><span class="p">)))</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to sort timeseries of pandas_utc_timestamp and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">original_timeseries</span>
-
-                        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+                            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
+                                <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">original_timeseries</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">full_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent_metric_namespace</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_col</span><span class="p">))</span>
-                                <span class="n">metric</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="n">full_metric_name</span><span class="p">)</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: interpolated metric name to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to interpolated metric name for </span><span class="si">%s</span><span class="s1">, cannot continue&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
-                                <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                    <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">data_df</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">timeseries</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">continue</span>
-
-                        <span class="c1"># Best effort to de-duplicate the data sent to Graphite</span>
-                        <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
-                            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
-                            <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="kc">None</span>
-                            <span class="c1"># @added 20200521 - Feature #3538: webapp - upload_data endpoint</span>
-                            <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
-                            <span class="c1"># Added the ability to ignore_submitted_timestamps and not</span>
-                            <span class="c1"># check flux.last metric timestamp</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_submitted_timestamps</span><span class="p">:</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                                    <span class="n">sorted_timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">sorted_timeseries</span><span class="p">:</span>
+                                        <span class="n">sorted_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_timeseries</span><span class="p">)</span>
+                                        <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sorted_timeseries</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sorted timeseries for </span><span class="si">%s</span><span class="s1"> which has </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sorted_timeseries_length</span><span class="p">)))</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="k">del</span> <span class="n">sorted_timeseries</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: sorted_timeseries does not exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">sorted_timeseries</span><span class="p">)))</span>
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
-                                    <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                            <span class="k">if</span> <span class="n">redis_last_metric_data</span><span class="p">:</span>
+                                    <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to sort timeseries of pandas_utc_timestamp and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">original_timeseries</span>
+
+                            <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">original_timeseries</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">last_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_metric_data</span><span class="p">)</span>
-                                    <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                    <span class="n">full_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">parent_metric_namespace</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_col</span><span class="p">))</span>
+                                    <span class="n">metric</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="n">full_metric_name</span><span class="p">)</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: interpolated metric name to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
-                                    <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="n">valid_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
-                        <span class="k">if</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: determined last timestamp from Redis for </span><span class="si">%s</span><span class="s1"> as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">)))</span>
-                                <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
-                                    <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
-                                        <span class="n">valid_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
-                                <span class="n">valid_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_timeseries</span><span class="p">)</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: deduplicated timeseries based on last_flux_timestamp for </span><span class="si">%s</span><span class="s1"> which now has </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">valid_timeseries_length</span><span class="p">)))</span>
-                                <span class="k">if</span> <span class="n">valid_timeseries</span><span class="p">:</span>
-                                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">valid_timeseries</span>
-                                <span class="k">else</span><span class="p">:</span>
-                                    <span class="n">newest_data_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: none of the timestamps in </span><span class="si">%s</span><span class="s1"> data are older than </span><span class="si">%s</span><span class="s1">, the newset being </span><span class="si">%s</span><span class="s1">, nothing to submit continuing&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">),</span> <span class="n">newest_data_timestamp</span><span class="p">))</span>
+                                    <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to interpolated metric name for </span><span class="si">%s</span><span class="s1">, cannot continue&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                    <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                                    <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
                                     <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;processed - no new timestamps, all already known&#39;</span><span class="p">)</span>
+                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
                                     <span class="k">try</span><span class="p">:</span>
                                         <span class="k">del</span> <span class="n">data_df</span>
                                     <span class="k">except</span><span class="p">:</span>
@@ -1209,142 +1140,83 @@
                                     <span class="k">except</span><span class="p">:</span>
                                         <span class="k">pass</span>
                                     <span class="k">continue</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to determine if timestamps for </span><span class="si">%s</span><span class="s1"> are newer than the last_flux_timestamp, cannot continue&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
-                                <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                    <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;failed to determine if timestamps for </span><span class="si">%s</span><span class="s1"> are newer than the last known timestamp, cannot continue&#39;</span><span class="p">)</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">data_df</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">timeseries</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">continue</span>
 
-                        <span class="n">valid_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
-                            <span class="n">datapoints_with_no_value</span> <span class="o">=</span> <span class="mi">0</span>
-                            <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                            <span class="c1"># Best effort to de-duplicate the data sent to Graphite</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
+                                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+                                <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+                                <span class="c1"># @added 20220506 - Feature #4536: Handle Redis failure</span>
+                                <span class="c1"># Declare before the ignore_submitted_timestamps</span>
+                                <span class="c1"># condition</span>
+                                <span class="n">use_old_timestamp_keys</span> <span class="o">=</span> <span class="kc">True</span>
+
+                                <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                                <span class="c1"># Swap to using a Redis hash instead of the</span>
+                                <span class="c1"># flux.last.&lt;metric&gt; keys</span>
+                                <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_submitted_timestamps</span><span class="p">:</span>
+                                    <span class="c1"># @modified 20220506 - Feature #4536: Handle Redis failure</span>
+                                    <span class="c1"># Declare before the ignore_submitted_timestamps</span>
+                                    <span class="c1"># condition</span>
+                                    <span class="c1"># use_old_timestamp_keys = True</span>
+                                    <span class="n">redis_last_metric_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
                                     <span class="k">try</span><span class="p">:</span>
-                                        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                                            <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
-                                            <span class="k">continue</span>
-                                        <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                                        <span class="n">valid_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">float_value</span><span class="p">])</span>
-                                    <span class="k">except</span><span class="p">:</span>
-                                        <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
-                                        <span class="k">continue</span>
-                            <span class="k">if</span> <span class="n">datapoints_with_no_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: dropped </span><span class="si">%s</span><span class="s1"> timestamps from </span><span class="si">%s</span><span class="s1"> which have no value&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_with_no_value</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                            <span class="k">if</span> <span class="n">valid_timeseries</span><span class="p">:</span>
-                                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">valid_timeseries</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">valid_timeseries</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: none of the timestamps have value data in </span><span class="si">%s</span><span class="s1"> data, nothing to submit continuing&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="n">data_col</span><span class="p">))</span>
-                                <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                    <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;failed - no timestamps have value data&#39;</span><span class="p">)</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">data_df</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">timeseries</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">continue</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="c1"># Deal with lower frequency data</span>
-                                <span class="c1"># Determine resolution from the last 30 data points</span>
-                                <span class="n">resolution_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="k">for</span> <span class="n">metric_datapoint</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]:</span>
-                                    <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                                    <span class="n">resolution_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-                                <span class="n">timestamp_resolutions</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="k">if</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
-                                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                                    <span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
-                                        <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
-                                            <span class="n">resolution</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
-                                            <span class="n">timestamp_resolutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
-                                            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
-                                        <span class="k">else</span><span class="p">:</span>
-                                            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
-                                    <span class="k">try</span><span class="p">:</span>
-                                        <span class="k">del</span> <span class="n">resolution_timestamps</span>
-                                    <span class="k">except</span><span class="p">:</span>
-                                        <span class="k">pass</span>
-                                <span class="k">if</span> <span class="n">timestamp_resolutions</span><span class="p">:</span>
-                                    <span class="k">try</span><span class="p">:</span>
-                                        <span class="n">timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">timestamp_resolutions</span><span class="p">)</span>
-                                        <span class="n">ordered_timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">timestamp_resolutions_count</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
-                                        <span class="n">metric_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ordered_timestamp_resolutions_count</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-                                        <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                                            <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">True</span>
-                                    <span class="k">except</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to determine metric_resolution from timeseries&#39;</span><span class="p">)</span>
-                                    <span class="k">try</span><span class="p">:</span>
-                                        <span class="k">del</span> <span class="n">timestamp_resolutions</span>
-                                    <span class="k">except</span><span class="p">:</span>
-                                        <span class="k">pass</span>
-                                <span class="c1"># Resample</span>
-                                <span class="n">resample_at</span> <span class="o">=</span> <span class="kc">None</span>
-                                <span class="k">if</span> <span class="n">metric_resolution_determined</span> <span class="ow">and</span> <span class="n">metric_resolution</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
-                                    <span class="n">resample_at</span> <span class="o">=</span> <span class="s1">&#39;1Min&#39;</span>
-                                <span class="k">if</span> <span class="n">resample_at</span><span class="p">:</span>
-                                    <span class="k">try</span><span class="p">:</span>
-                                        <span class="n">high_res_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                                        <span class="n">high_res_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">data_col</span><span class="p">]</span>
-                                        <span class="n">high_res_df</span> <span class="o">=</span> <span class="n">high_res_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">)</span>
-                                        <span class="n">high_res_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">high_res_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
-                                        <span class="n">resample_at</span> <span class="o">=</span> <span class="s1">&#39;1Min&#39;</span>
-                                        <span class="k">if</span> <span class="n">resample_method</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
-                                            <span class="n">resampled_df</span> <span class="o">=</span> <span class="n">high_res_df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">resample_at</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-                                        <span class="k">else</span><span class="p">:</span>
-                                            <span class="n">resampled_df</span> <span class="o">=</span> <span class="n">high_res_df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">resample_at</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: resampled </span><span class="si">%s</span><span class="s1"> data by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">data_col</span><span class="p">,</span> <span class="n">resample_method</span><span class="p">))</span>
+                                        <span class="n">redis_last_metric_data_dict</span> <span class="o">=</span> <span class="n">get_last_metric_data</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: get_last_metric_data failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">err</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="n">redis_last_metric_data_dict</span><span class="p">:</span>
                                         <span class="k">try</span><span class="p">:</span>
-                                            <span class="k">del</span> <span class="n">high_res_df</span>
-                                        <span class="k">except</span><span class="p">:</span>
-                                            <span class="k">pass</span>
-                                        <span class="n">resampled_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                                        <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="n">pytz_tz</span><span class="p">)</span>
-                                        <span class="n">dates</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-                                        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[]</span>
-                                        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
-                                            <span class="n">timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)))</span>
-                                        <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamps</span>
-                                        <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">data_col</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                                        <span class="n">timeseries</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="n">redis_last_metric_data_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+                                            <span class="n">use_old_timestamp_keys</span> <span class="o">=</span> <span class="kc">False</span>
+                                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to get timestamp from - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">redis_last_metric_data_dict</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+                                <span class="k">if</span> <span class="n">use_old_timestamp_keys</span><span class="p">:</span>
+                                    <span class="c1"># @added 20200521 - Feature #3538: webapp - upload_data endpoint</span>
+                                    <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
+                                    <span class="c1"># Added the ability to ignore_submitted_timestamps and not</span>
+                                    <span class="c1"># check flux.last metric timestamp</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_submitted_timestamps</span><span class="p">:</span>
                                         <span class="k">try</span><span class="p">:</span>
-                                            <span class="k">del</span> <span class="n">resampled_df</span>
+                                            <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
                                         <span class="k">except</span><span class="p">:</span>
-                                            <span class="k">pass</span>
-                                        <span class="n">resampled_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: created resampled timeseries for </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">resampled_timeseries_length</span><span class="p">)))</span>
-                                    <span class="k">except</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                        <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to create resampled timeseries from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                        <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
-                                        <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">if</span> <span class="n">redis_last_metric_data</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">last_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_metric_data</span><span class="p">)</span>
+                                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">valid_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="k">if</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: determined last timestamp from Redis for </span><span class="si">%s</span><span class="s1"> as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">)))</span>
+                                    <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&gt;</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
+                                            <span class="n">valid_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+                                    <span class="n">valid_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_timeseries</span><span class="p">)</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: deduplicated timeseries based on last_flux_timestamp for </span><span class="si">%s</span><span class="s1"> which now has </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">valid_timeseries_length</span><span class="p">)))</span>
+                                    <span class="k">if</span> <span class="n">valid_timeseries</span><span class="p">:</span>
+                                        <span class="n">timeseries</span> <span class="o">=</span> <span class="n">valid_timeseries</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">newest_data_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: none of the timestamps in </span><span class="si">%s</span><span class="s1"> data are older than </span><span class="si">%s</span><span class="s1">, the newset being </span><span class="si">%s</span><span class="s1">, nothing to submit continuing&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">),</span> <span class="n">newest_data_timestamp</span><span class="p">))</span>
                                         <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                            <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                            <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;processed - no new timestamps, all already known&#39;</span><span class="p">)</span>
                                         <span class="k">try</span><span class="p">:</span>
                                             <span class="k">del</span> <span class="n">data_df</span>
                                         <span class="k">except</span><span class="p">:</span>
@@ -1354,177 +1226,342 @@
                                         <span class="k">except</span><span class="p">:</span>
                                             <span class="k">pass</span>
                                         <span class="k">continue</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to resampled timeseries for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
-                                <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
-                                <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                                    <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">data_df</span>
                                 <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="k">del</span> <span class="n">timeseries</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="k">pass</span>
-                                <span class="k">continue</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="k">del</span> <span class="n">data_df</span>
-                        <span class="k">except</span><span class="p">:</span>
-                            <span class="k">pass</span>
-                        <span class="n">sent_to_graphite</span> <span class="o">=</span> <span class="mi">0</span>
-                        <span class="n">last_timestamp_sent</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="n">last_value_sent</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
-                            <span class="n">timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: after preprocessing there are </span><span class="si">%s</span><span class="s1"> data points to send to Graphite for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to determine if timestamps for </span><span class="si">%s</span><span class="s1"> are newer than the last_flux_timestamp, cannot continue&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                    <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                                    <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;failed to determine if timestamps for </span><span class="si">%s</span><span class="s1"> are newer than the last known timestamp, cannot continue&#39;</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">data_df</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">timeseries</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                    <span class="k">continue</span>
 
-                            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
-                                <span class="n">timeseries_debug_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">upload_id</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
-                                <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">write_data_to_file</span><span class="p">(</span>
-                                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">timeseries_debug_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: added timeseries_debug_file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timeseries_debug_file</span><span class="p">))</span>
-                                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
-                                    <span class="c1"># Move to Redis set block below</span>
-                                    <span class="c1"># self.sent_to_panorama.append(base_name)</span>
-                                <span class="k">except</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add timeseries_debug_file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timeseries_debug_file</span><span class="p">))</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-
-                            <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                            <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
-                            <span class="n">start_populating</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-                            <span class="n">listOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
-                            <span class="k">try</span><span class="p">:</span>
+                            <span class="n">valid_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
+                                <span class="n">datapoints_with_no_value</span> <span class="o">=</span> <span class="mi">0</span>
                                 <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
-                                    <span class="n">tuple_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
-                                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">or</span> <span class="n">debug_enabled_in_info</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: uploaded_data_worker :: sending - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tuple_data</span><span class="p">))</span>
-                                    <span class="n">listOfMetricTuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tuple_data</span><span class="p">)</span>
-                                    <span class="n">sent_to_graphite</span> <span class="o">+=</span> <span class="mi">1</span>
-                                    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
-                                        <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
-                                    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                                        <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
-                                    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
-                                        <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
-                                    <span class="k">if</span> <span class="n">has_value</span><span class="p">:</span>
-                                        <span class="n">last_timestamp_sent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-                                        <span class="n">last_value_sent</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                            <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
+                                            <span class="k">continue</span>
+                                        <span class="n">float_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                                        <span class="n">valid_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">float_value</span><span class="p">])</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
+                                        <span class="k">continue</span>
+                                <span class="k">if</span> <span class="n">datapoints_with_no_value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: dropped </span><span class="si">%s</span><span class="s1"> timestamps from </span><span class="si">%s</span><span class="s1"> which have no value&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_with_no_value</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                <span class="k">if</span> <span class="n">valid_timeseries</span><span class="p">:</span>
+                                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">valid_timeseries</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">valid_timeseries</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: none of the timestamps have value data in </span><span class="si">%s</span><span class="s1"> data, nothing to submit continuing&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">data_col</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="s1">&#39;failed - no timestamps have value data&#39;</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">data_df</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">timeseries</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                    <span class="k">continue</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="c1"># Deal with lower frequency data</span>
+                                    <span class="c1"># Determine resolution from the last 30 data points</span>
+                                    <span class="n">resolution_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+                                    <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">False</span>
+                                    <span class="k">for</span> <span class="n">metric_datapoint</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]:</span>
+                                        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                        <span class="n">resolution_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                                    <span class="n">timestamp_resolutions</span> <span class="o">=</span> <span class="p">[]</span>
+                                    <span class="k">if</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+                                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                        <span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+                                            <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                                                <span class="n">resolution</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
+                                                <span class="n">timestamp_resolutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+                                                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="k">del</span> <span class="n">resolution_timestamps</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                    <span class="k">if</span> <span class="n">timestamp_resolutions</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">timestamp_resolutions</span><span class="p">)</span>
+                                            <span class="n">ordered_timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">timestamp_resolutions_count</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+                                            <span class="n">metric_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ordered_timestamp_resolutions_count</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                                            <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                                <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to determine metric_resolution from timeseries&#39;</span><span class="p">)</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="k">del</span> <span class="n">timestamp_resolutions</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                    <span class="c1"># Resample</span>
+                                    <span class="n">resample_at</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">if</span> <span class="n">metric_resolution_determined</span> <span class="ow">and</span> <span class="n">metric_resolution</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+                                        <span class="n">resample_at</span> <span class="o">=</span> <span class="s1">&#39;1Min&#39;</span>
+                                    <span class="k">if</span> <span class="n">resample_at</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">high_res_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                                            <span class="n">high_res_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">data_col</span><span class="p">]</span>
+                                            <span class="n">high_res_df</span> <span class="o">=</span> <span class="n">high_res_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">)</span>
+                                            <span class="n">high_res_df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">high_res_df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+                                            <span class="n">resample_at</span> <span class="o">=</span> <span class="s1">&#39;1Min&#39;</span>
+                                            <span class="k">if</span> <span class="n">resample_method</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+                                                <span class="n">resampled_df</span> <span class="o">=</span> <span class="n">high_res_df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">resample_at</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">resampled_df</span> <span class="o">=</span> <span class="n">high_res_df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">resample_at</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: resampled </span><span class="si">%s</span><span class="s1"> data by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">data_col</span><span class="p">,</span> <span class="n">resample_method</span><span class="p">))</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="k">del</span> <span class="n">high_res_df</span>
+                                            <span class="k">except</span><span class="p">:</span>
+                                                <span class="k">pass</span>
+                                            <span class="n">resampled_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                            <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">tz_localize</span><span class="p">(</span><span class="n">pytz_tz</span><span class="p">)</span>
+                                            <span class="n">dates</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                                            <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+                                            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dates</span><span class="p">:</span>
+                                                <span class="n">timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)))</span>
+                                            <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamps</span>
+                                            <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;pandas_utc_timestamp&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">data_col</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                                            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">resampled_df</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="k">del</span> <span class="n">resampled_df</span>
+                                            <span class="k">except</span><span class="p">:</span>
+                                                <span class="k">pass</span>
+                                            <span class="n">resampled_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: created resampled timeseries for </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> timestamps and values&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">data_col</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">resampled_timeseries_length</span><span class="p">)))</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to create resampled timeseries from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                            <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                                            <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
+                                            <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                                <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="k">del</span> <span class="n">data_df</span>
+                                            <span class="k">except</span><span class="p">:</span>
+                                                <span class="k">pass</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="k">del</span> <span class="n">timeseries</span>
+                                            <span class="k">except</span><span class="p">:</span>
+                                                <span class="k">pass</span>
+                                            <span class="k">continue</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">failure_reason</span> <span class="o">=</span> <span class="s1">&#39;failed to resampled timeseries for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data_col</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                    <span class="n">data_df_successful</span> <span class="o">=</span> <span class="kc">False</span>
+                                    <span class="n">data_df_failures</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                        <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">failure_reason</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">data_df</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="k">del</span> <span class="n">timeseries</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="k">pass</span>
+                                    <span class="k">continue</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">data_df</span>
                             <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to populate listOfMetricTuples for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
-                            <span class="k">if</span> <span class="n">listOfMetricTuples</span><span class="p">:</span>
-                                <span class="n">data_points_sent</span> <span class="o">=</span> <span class="mi">0</span>
-                                <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
-                                <span class="c1"># @added 20200617 - Feature #3550: flux.uploaded_data_worker</span>
-                                <span class="c1"># Reduce the speed of submissions to Graphite</span>
-                                <span class="c1"># if there are lots of data points</span>
-                                <span class="n">number_of_datapoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">listOfMetricTuples</span><span class="p">)</span>
+                                <span class="k">pass</span>
+                            <span class="n">sent_to_graphite</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">last_timestamp_sent</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">last_value_sent</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="n">data_df_successful</span> <span class="ow">and</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">metric</span><span class="p">:</span>
+                                <span class="n">timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: after preprocessing there are </span><span class="si">%s</span><span class="s1"> data points to send to Graphite for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
 
-                                <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">listOfMetricTuples</span><span class="p">:</span>
-                                    <span class="n">smallListOfMetricTuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                                    <span class="n">tuples_added</span> <span class="o">+=</span> <span class="mi">1</span>
-                                    <span class="k">if</span> <span class="n">tuples_added</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                                    <span class="n">timeseries_debug_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">upload_id</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">write_data_to_file</span><span class="p">(</span>
+                                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">timeseries_debug_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: added timeseries_debug_file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timeseries_debug_file</span><span class="p">))</span>
+                                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                                        <span class="c1"># Move to Redis set block below</span>
+                                        <span class="c1"># self.sent_to_panorama.append(base_name)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add timeseries_debug_file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">timeseries_debug_file</span><span class="p">))</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                                <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="n">start_populating</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                                <span class="n">listOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                                        <span class="n">tuple_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+                                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">or</span> <span class="n">debug_enabled_in_info</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: uploaded_data_worker :: sending - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">tuple_data</span><span class="p">))</span>
+                                        <span class="n">listOfMetricTuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tuple_data</span><span class="p">)</span>
+                                        <span class="n">sent_to_graphite</span> <span class="o">+=</span> <span class="mi">1</span>
+                                        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="k">if</span> <span class="n">has_value</span><span class="p">:</span>
+                                            <span class="n">last_timestamp_sent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                                            <span class="n">last_value_sent</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to populate listOfMetricTuples for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                                <span class="k">if</span> <span class="n">listOfMetricTuples</span><span class="p">:</span>
+                                    <span class="n">data_points_sent</span> <span class="o">=</span> <span class="mi">0</span>
+                                    <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
+                                    <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
+                                    <span class="c1"># @added 20200617 - Feature #3550: flux.uploaded_data_worker</span>
+                                    <span class="c1"># Reduce the speed of submissions to Graphite</span>
+                                    <span class="c1"># if there are lots of data points</span>
+                                    <span class="n">number_of_datapoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">listOfMetricTuples</span><span class="p">)</span>
+
+                                    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">listOfMetricTuples</span><span class="p">:</span>
+                                        <span class="n">smallListOfMetricTuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                                        <span class="n">tuples_added</span> <span class="o">+=</span> <span class="mi">1</span>
+                                        <span class="k">if</span> <span class="n">tuples_added</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+                                            <span class="k">if</span> <span class="n">dryrun</span><span class="p">:</span>
+                                                <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="kc">True</span>
+                                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: DRYRUN :: faking sending data&#39;</span><span class="p">)</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="n">pickle_data_to_graphite</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
+                                                <span class="c1"># @added 20200617 - Feature #3550: flux.uploaded_data_worker</span>
+                                                <span class="c1"># Reduce the speed of submissions to Graphite</span>
+                                                <span class="c1"># if there are lots of data points</span>
+                                                <span class="k">if</span> <span class="n">number_of_datapoints</span> <span class="o">&gt;</span> <span class="mi">4000</span><span class="p">:</span>
+                                                    <span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+                                            <span class="k">if</span> <span class="n">pickle_data_sent</span><span class="p">:</span>
+                                                <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_added</span>
+                                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sent </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                    <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
+                                                    <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                                <span class="n">sent_to_graphite</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
+                                                <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
+                                                <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
+                                            <span class="k">else</span><span class="p">:</span>
+                                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to send </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                    <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="n">smallListOfMetricTuples</span><span class="p">:</span>
+                                        <span class="n">tuples_to_send</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
                                         <span class="k">if</span> <span class="n">dryrun</span><span class="p">:</span>
                                             <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="kc">True</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: DRYRUN :: faking sending data&#39;</span><span class="p">)</span>
                                         <span class="k">else</span><span class="p">:</span>
                                             <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="n">pickle_data_to_graphite</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                                            <span class="c1"># @added 20200617 - Feature #3550: flux.uploaded_data_worker</span>
-                                            <span class="c1"># Reduce the speed of submissions to Graphite</span>
-                                            <span class="c1"># if there are lots of data points</span>
-                                            <span class="k">if</span> <span class="n">number_of_datapoints</span> <span class="o">&gt;</span> <span class="mi">4000</span><span class="p">:</span>
-                                                <span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
                                         <span class="k">if</span> <span class="n">pickle_data_sent</span><span class="p">:</span>
-                                            <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_added</span>
-                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sent </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                                <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
+                                            <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_to_send</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sent the last </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
                                                 <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                                            <span class="n">sent_to_graphite</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                                            <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
-                                            <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
                                         <span class="k">else</span><span class="p">:</span>
-                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to send </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                                <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                                <span class="k">if</span> <span class="n">smallListOfMetricTuples</span><span class="p">:</span>
-                                    <span class="n">tuples_to_send</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="n">dryrun</span><span class="p">:</span>
-                                        <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="kc">True</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: DRYRUN :: faking sending data&#39;</span><span class="p">)</span>
-                                    <span class="k">else</span><span class="p">:</span>
-                                        <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="n">pickle_data_to_graphite</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="n">pickle_data_sent</span><span class="p">:</span>
-                                        <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_to_send</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sent the last </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
-                                            <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                                    <span class="k">else</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to send the last </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="k">del</span> <span class="n">timeseries</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="k">pass</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="k">del</span> <span class="n">listOfMetricTuples</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="k">pass</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="k">del</span> <span class="n">smallListOfMetricTuples</span>
-                            <span class="k">except</span><span class="p">:</span>
-                                <span class="k">pass</span>
-
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sent </span><span class="si">%s</span><span class="s1"> data points to Graphite for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-
-                            <span class="k">if</span> <span class="n">last_timestamp_sent</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to send the last </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="c1"># Update Redis flux key</span>
-                                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
-                                    <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp_sent</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">last_value_sent</span><span class="p">)]</span>
-                                    <span class="k">if</span> <span class="n">dryrun</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: DRYRUN :: faking updating </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
-                                    <span class="c1"># @added 20200521 - Feature #3538: webapp - upload_data endpoint</span>
-                                    <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
-                                    <span class="c1"># Added the ability to ignore_submitted_timestamps and not</span>
-                                    <span class="c1"># check flux.last metric timestamp</span>
-                                    <span class="k">elif</span> <span class="n">ignore_submitted_timestamps</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: ignore_submitted_timestamps :: not updating </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
-                                        <span class="c1"># @added 20200527 - Feature #3550: flux.uploaded_data_worker</span>
-                                        <span class="c1"># If submitted timestamps are ignored</span>
-                                        <span class="c1"># add the the Redis set for analyzer to</span>
-                                        <span class="c1"># sorted and deduplicated the time</span>
-                                        <span class="c1"># series data in Redis</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;flux.sort_and_dedup.metrics&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: added </span><span class="si">%s</span><span class="s1"> to flux.sort_and_dedup.metrics Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">metric</span><span class="p">))</span>
-                                    <span class="k">else</span><span class="p">:</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: set the metric Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                            <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                                    <span class="k">del</span> <span class="n">timeseries</span>
                                 <span class="k">except</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to set Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                                    <span class="k">pass</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">del</span> <span class="n">listOfMetricTuples</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="k">pass</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">del</span> <span class="n">smallListOfMetricTuples</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="k">pass</span>
 
-                            <span class="n">processed_data_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_col</span><span class="p">)</span>
-                            <span class="n">end_populating</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-                            <span class="n">seconds_to_run</span> <span class="o">=</span> <span class="n">end_populating</span> <span class="o">-</span> <span class="n">start_populating</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: </span><span class="si">%s</span><span class="s1"> populated to Graphite in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="n">metric</span><span class="p">,</span> <span class="n">seconds_to_run</span><span class="p">))</span>
-                        <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
-                            <span class="n">new_status</span> <span class="o">=</span> <span class="s1">&#39;processed - </span><span class="si">%s</span><span class="s1"> data points submitted&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">)</span>
-                            <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">new_status</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: sent </span><span class="si">%s</span><span class="s1"> data points to Graphite for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+
+                                <span class="k">if</span> <span class="n">last_timestamp_sent</span><span class="p">:</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="c1"># Update Redis flux key</span>
+                                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+                                        <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp_sent</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">last_value_sent</span><span class="p">)]</span>
+                                        <span class="k">if</span> <span class="n">dryrun</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: DRYRUN :: faking updating </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                                        <span class="c1"># @added 20200521 - Feature #3538: webapp - upload_data endpoint</span>
+                                        <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
+                                        <span class="c1"># Added the ability to ignore_submitted_timestamps and not</span>
+                                        <span class="c1"># check flux.last metric timestamp</span>
+                                        <span class="k">elif</span> <span class="n">ignore_submitted_timestamps</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: ignore_submitted_timestamps :: not updating </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                                            <span class="c1"># @added 20200527 - Feature #3550: flux.uploaded_data_worker</span>
+                                            <span class="c1"># If submitted timestamps are ignored</span>
+                                            <span class="c1"># add the the Redis set for analyzer to</span>
+                                            <span class="c1"># sorted and deduplicated the time</span>
+                                            <span class="c1"># series data in Redis</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;flux.sort_and_dedup.metrics&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: added </span><span class="si">%s</span><span class="s1"> to flux.sort_and_dedup.metrics Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">metric</span><span class="p">))</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="c1"># @modified 20220429 - Feature #4536: Handle Redis failure</span>
+                                            <span class="c1"># Swap to using a Redis hash instead of the</span>
+                                            <span class="c1"># flux.last.&lt;metric&gt; keys make existing keys</span>
+                                            <span class="c1"># expire</span>
+                                            <span class="c1"># self.redis_conn.set(cache_key, str(metric_data))</span>
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: set the metric Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+
+                                            <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                                            <span class="c1"># Swap to using a Redis hash instead of the</span>
+                                            <span class="c1"># flux.last.&lt;metric&gt; keys</span>
+                                            <span class="n">metric_data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp_sent</span><span class="p">),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">last_value_sent</span><span class="p">)}</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;flux.last.metric_data&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_dict</span><span class="p">))</span>
+                                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to hset flux.last.metric_data Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to set Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+
+                                <span class="n">processed_data_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_col</span><span class="p">)</span>
+                                <span class="n">end_populating</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                                <span class="n">seconds_to_run</span> <span class="o">=</span> <span class="n">end_populating</span> <span class="o">-</span> <span class="n">start_populating</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;uploaded_data_worker :: </span><span class="si">%s</span><span class="s1"> populated to Graphite in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">metric</span><span class="p">,</span> <span class="n">seconds_to_run</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
+                                <span class="n">new_status</span> <span class="o">=</span> <span class="s1">&#39;processed - </span><span class="si">%s</span><span class="s1"> data points submitted&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">)</span>
+                                <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">data_col_key</span><span class="p">,</span> <span class="n">new_status</span><span class="p">)</span>
+
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: uploaded_data_worker :: failed to process - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">data_col</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                     <span class="k">if</span> <span class="n">upload_status</span><span class="p">:</span>
                         <span class="n">upload_status</span> <span class="o">=</span> <span class="n">new_upload_status</span><span class="p">(</span><span class="n">upload_status</span><span class="p">,</span> <span class="n">processing_filename</span><span class="p">,</span> <span class="s1">&#39;complete&#39;</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -1682,49 +1719,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

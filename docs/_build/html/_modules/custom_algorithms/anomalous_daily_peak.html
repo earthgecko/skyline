@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>custom_algorithms.anomalous_daily_peak &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_algorithms.html">custom_algorithms</a></li>
+      <li class="breadcrumb-item active">custom_algorithms.anomalous_daily_peak</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for custom_algorithms.anomalous_daily_peak</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">anomalous_daily_peak.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># REQUIRED Skyline imports.  All custom algorithms MUST have the following two</span>
+<span class="c1"># imports.  These are required for exception handling and to record algorithm</span>
+<span class="c1"># errors regardless of debug_logging setting for the custom_algorithm</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">record_algorithm_error</span>
+
+<span class="c1"># Import ALL modules that the custom algorithm requires.  Remember that if a</span>
+<span class="c1"># requirement is not one that is provided by the Skyline requirements.txt you</span>
+<span class="c1"># must ensure it is installed in the Skyline virtualenv</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">find_peaks</span>
+
+<span class="kn">from</span> <span class="nn">functions.numpy.percent_different</span> <span class="kn">import</span> <span class="n">get_percent_different</span>
+
+<span class="c1"># The name of the function MUST be the same as the name declared in</span>
+<span class="c1"># settings.CUSTOM_ALGORITHMS.</span>
+<span class="c1"># It MUST have 3 parameters:</span>
+<span class="c1"># current_skyline_app, timeseries, algorithm_parameters</span>
+<span class="c1"># See https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</span>
+<span class="c1"># for a full explanation about each.</span>
+<span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and except</span>
+
+
+<span class="c1"># @added 20221105 - Feature #4724: custom_algorithms - anomalous_daily_peak</span>
+<div class="viewcode-block" id="anomalous_daily_peak"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.anomalous_daily_peak.anomalous_daily_peak">[docs]</a><span class="k">def</span> <span class="nf">anomalous_daily_peak</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A 7 day timeseries is NOT anomalous if the last datapoints are in a peak whose</span>
+<span class="sd">    values are within 3 standard deviations of the mean of x number of similar</span>
+<span class="sd">    peaks (+/- 20%) that occurred in windows that are 24 hours apart.</span>
+
+<span class="sd">    Only timeseries that are thought to be anomalous should be run through this</span>
+<span class="sd">    algorithm.  It is meant to be run in Mirage after all algorithms, including</span>
+<span class="sd">    custom algorithms have been run and found a metric to be ANOMALOUS.  This</span>
+<span class="sd">    algorithm does a final check to see in the anomaly is repetetive daily</span>
+<span class="sd">    pattern which occurs more than x times a week.</span>
+
+<span class="sd">    Be aware that this algorithm will identify ANY datapoint that is NOT in a</span>
+<span class="sd">    repetitive peak and within 3-sigma (+/- 20%) of the other peaks as ANOMALOUS.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app executing the algorithm.  This</span>
+<span class="sd">        will be passed to the algorithm by Skyline.  This is **required** for</span>
+<span class="sd">        error handling and logging.  You do not have to worry about handling the</span>
+<span class="sd">        argument in the scope of the custom algorithm itself,  but the algorithm</span>
+<span class="sd">        must accept it as the first agrument.</span>
+<span class="sd">    :param parent_pid: the parent pid which is executing the algorithm, this is</span>
+<span class="sd">        **required** for error handling and logging.  You do not have to worry</span>
+<span class="sd">        about handling this argument in the scope of algorithm, but the</span>
+<span class="sd">        algorithm must accept it as the second argument.</span>
+<span class="sd">    :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],</span>
+<span class="sd">        [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``</span>
+<span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
+<span class="sd">        custom_algorithm and algorithm itself.  For the anomalous_daily_peak</span>
+<span class="sd">        custom algorithm no specific algorithm_parameters are required apart</span>
+<span class="sd">        from an empty dict, example: ``algorithm_parameters={}``.  But the</span>
+<span class="sd">        number_of_daily_peaks can be passed define how many peaks must exist in</span>
+<span class="sd">        the window period to be classed as normal.  If this is set to 3 and say</span>
+<span class="sd">        that we are checking a possible anomaly at 00:05, there need to be 3</span>
+<span class="sd">        peaks that occur over the past 7 days in the dialy 23:35 to 00:05 window</span>
+<span class="sd">        if there are not at least 3 then this is considered as anomalous.</span>
+<span class="sd">        ``algorithm_parameters={&#39;number_of_daily_peaks&#39;: 3}``</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type parent_pid: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :type algorithm_parameters: dict</span>
+<span class="sd">    :return: anomalous, anomalyScore</span>
+<span class="sd">    :rtype: tuple(boolean, float)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># You MUST define the algorithm_name</span>
+    <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s1">&#39;anomalous_daily_peak&#39;</span>
+
+    <span class="c1"># Define the default state of None and None, anomalous does not default to</span>
+    <span class="c1"># False as that is not correct, False is only correct if the algorithm</span>
+    <span class="c1"># determines the data point is not anomalous.  The same is true for the</span>
+    <span class="c1"># anomalyScore.</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># If you wanted to log, you can but this should only be done during</span>
+    <span class="c1"># testing and development</span>
+    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">current_logger</span>
+
+    <span class="c1"># Use the algorithm_parameters to determine the sample_period</span>
+    <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: debug_logging enabled with algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+            <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+            <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+            <span class="c1"># But we do not want the function returning and not reporting</span>
+            <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+            <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+            <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">print_debug</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">print_debug</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;print_debug&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">print_debug</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">number_of_daily_peaks</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">number_of_daily_peaks</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;number_of_daily_peaks&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;algorithm_parameters[&#39;number_of_daily_peaks&#39;]:&quot;</span><span class="p">,</span> <span class="n">number_of_daily_peaks</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">number_of_daily_peaks</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="n">within_percent_of_normal_peaks</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">within_percent_of_normal_peaks</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;within_percent_of_normal_peaks&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;algorithm_parameters[&#39;within_percent_of_normal_peaks&#39;]:&quot;</span><span class="p">,</span> <span class="n">within_percent_of_normal_peaks</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">within_percent_of_normal_peaks</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="n">after_peak</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">after_peak</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;after_peak&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;algorithm_parameters[&#39;after_peak&#39;]:&quot;</span><span class="p">,</span> <span class="n">after_peak</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">after_peak</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @added 20230424 - Feature #4724: custom_algorithms - anomalous_daily_peak</span>
+    <span class="c1"># Added expiry to record metrics identified as normal by anomalous_daily_peaks</span>
+    <span class="c1"># to allow Mirage to set a key in a hash and to allow Analyzer labelled_metrics</span>
+    <span class="c1"># to skip analysis of those metrics in their expiry period.  This is to reduce</span>
+    <span class="c1"># metrics that are experiencing a normal anomalous daily peak to not have to</span>
+    <span class="c1"># be analysed by Analyzer every run and pushed to Mirage to check as this</span>
+    <span class="c1"># results in Mirage getting lots of unnecessary checks which caused feedback</span>
+    <span class="c1"># for the period in question.</span>
+    <span class="n">expiry</span> <span class="o">=</span> <span class="mi">180</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">expiry</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;expiry&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;algorithm_parameters[&#39;expiry&#39;]:&quot;</span><span class="p">,</span> <span class="n">expiry</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">expiry</span> <span class="o">=</span> <span class="mi">180</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+        <span class="n">np_timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+        <span class="n">ts_diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_timestamps</span><span class="p">)</span>
+        <span class="n">resolution_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ts_diffs</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_counts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">resolution_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="mi">900</span><span class="p">:</span>
+            <span class="c1"># Not suited to low resolution data</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">duration</span> <span class="o">&lt;</span> <span class="mi">446400</span><span class="p">:</span>
+            <span class="c1"># Not suitable for less than 5.25 days worth of data</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># @added 20230323 - Feature #4724: custom_algorithms - anomalous_daily_peak</span>
+        <span class="c1"># Remove non aligned peaks.</span>
+        <span class="c1"># Before surfacing peaks, set all values that do not occur in the daily</span>
+        <span class="c1"># windows as the mean value.  This removes peaks that are not periodic</span>
+        <span class="c1"># in a 24 hour period and if the data that remains in the daily windows</span>
+        <span class="c1"># are peaks, they will be identified as such.  This mitigates large</span>
+        <span class="c1"># spikes that are not aligned in a 24 hour window from not suppressing</span>
+        <span class="c1"># daily peaks that do occur and align.  The algorithm is only concerned</span>
+        <span class="c1"># with windows of 4 datapoints that are separated by ~24 hours, not any</span>
+        <span class="c1"># large peaks that occurred at any other times.</span>
+        <span class="n">remove_non_aligned_peaks</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">remove_non_aligned_peaks</span><span class="p">:</span>
+            <span class="n">daily_peak_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">)):</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">anomaly_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">daily_peak_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+                    <span class="n">tt</span> <span class="o">=</span> <span class="n">t</span> <span class="o">-</span> <span class="p">(</span><span class="n">resolution</span> <span class="o">*</span> <span class="n">ii</span><span class="p">)</span>
+                    <span class="n">daily_peak_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span>
+            <span class="n">daily_peak_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+                <span class="n">tt</span> <span class="o">=</span> <span class="n">anomaly_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="n">resolution</span> <span class="o">*</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">daily_peak_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span>
+            <span class="n">daily_peak_timestamps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">daily_peak_timestamps</span><span class="p">)</span>
+            <span class="n">non_daily_peaks_removed_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ts</span> <span class="o">&lt;</span> <span class="n">anomaly_timestamp</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ts</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">daily_peak_timestamps</span><span class="p">:</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">mean</span>
+                <span class="n">non_daily_peaks_removed_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">])</span>
+            <span class="n">adjusted_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">non_daily_peaks_removed_timeseries</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adjusted_values</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">non_daily_peaks_removed_timeseries</span><span class="p">]</span>
+
+        <span class="c1"># pad the trailing end of the timeseries otherwise</span>
+        <span class="c1"># if the final peak is at the very end and does</span>
+        <span class="c1"># not drop off it will not be identified as a peak</span>
+        <span class="n">padded_y</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">)):</span>
+            <span class="n">padded_y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">padded_y</span><span class="p">)</span>
+
+        <span class="c1"># The distance should cover a 23 hour period, meaning the peaks should</span>
+        <span class="c1"># be at least 23 hours apart.  Do not that find_peaks WILL return peaks</span>
+        <span class="c1"># even if there are none and the values in the distance period are all</span>
+        <span class="c1"># 0s, this is handled later.</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">3600</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="mi">23</span><span class="p">)</span>
+        <span class="c1"># peaks, _ = find_peaks(y, distance=(6 * 23))</span>
+        <span class="n">peaks</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">distance</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of peaks:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: number of peaks: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">))))</span>
+
+        <span class="n">anomaly_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span> <span class="k">if</span> <span class="n">ts</span> <span class="o">==</span> <span class="n">anomaly_timestamp</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">anomaly_peak_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_index</span><span class="p">)</span>
+
+        <span class="c1"># Allow the anomaly to be a few datapoints either side of the peak</span>
+        <span class="c1"># because often an anomaly will still trigger after a peak on the</span>
+        <span class="c1"># downside of the peak.</span>
+        <span class="n">allow_for</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="mi">600</span><span class="p">:</span>
+            <span class="n">allow_for</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">anomaly_index_in_window</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">anomaly_index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+            <span class="n">anomaly_index_in_window</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">anomaly_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">((</span><span class="n">allow_for</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">anomaly_index</span> <span class="o">==</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="n">ii</span><span class="p">):</span>
+                        <span class="n">anomaly_index_in_window</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">anomaly_peak_index</span> <span class="o">=</span> <span class="n">index</span>
+                        <span class="k">break</span>
+                <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">allow_for</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">anomaly_index</span> <span class="o">==</span> <span class="p">(</span><span class="n">index</span> <span class="o">+</span> <span class="n">ii</span><span class="p">):</span>
+                        <span class="n">anomaly_index_in_window</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">anomaly_peak_index</span> <span class="o">=</span> <span class="n">index</span>
+                        <span class="k">break</span>
+        <span class="k">if</span> <span class="n">anomaly_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">peaks</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">anomaly_index_in_window</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">timestamps_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+            <span class="n">timestamps_dict</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">timestamps_reversed</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+        <span class="n">timestamps_reversed</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="c1"># Define the peak periods as 3 data points before the peak, the peak</span>
+        <span class="c1"># itself and the 3 data points after the peak, from which the 4</span>
+        <span class="c1"># consecutive values with the largest sum will be considered the peak</span>
+        <span class="n">peak_periods</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">peak_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">peak_period_indices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">last_peak</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">use_old_method</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">peaks</span><span class="p">)):</span>
+            <span class="n">period_indices</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">last_peak</span><span class="p">:</span>
+                <span class="n">period_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">period_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">((</span><span class="n">i</span> <span class="o">-</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">use_old_method</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">after_peak</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">last_peak</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">behind</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+                            <span class="n">period_indices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="n">behind</span><span class="p">))</span>
+                    <span class="n">period_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">last_peak</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">ahead</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span>
+                            <span class="n">period_indices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="n">ahead</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">behind</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+                        <span class="n">period_indices</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="n">behind</span><span class="p">))</span>
+                    <span class="n">period_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">peak_period_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">period_indices</span>
+            <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">timestamps_reversed</span><span class="p">:</span>
+            <span class="n">ts_index</span> <span class="o">=</span> <span class="n">timestamps_dict</span><span class="p">[</span><span class="n">ts</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">peak_period_indices</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">peak_period_timestamp_indices</span> <span class="o">=</span> <span class="n">peak_period_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">ts_index</span> <span class="ow">in</span> <span class="n">peak_period_timestamp_indices</span><span class="p">:</span>
+                    <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">ts_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
+                    <span class="k">if</span> <span class="n">ts_index</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+                        <span class="n">peak_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># Ensure that each peak is within ~24 hours of each other</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">peak_timestamps</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">83000</span><span class="p">,</span> <span class="mi">89000</span><span class="p">))</span>
+        <span class="n">daily_peaks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">time_diff</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">diffs</span><span class="p">):</span>
+            <span class="c1"># if time_diff in window:</span>
+            <span class="k">if</span> <span class="n">time_diff</span> <span class="ow">in</span> <span class="n">window</span> <span class="ow">or</span> <span class="n">peak_timestamps</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="n">anomaly_timestamp</span><span class="p">:</span>
+                <span class="n">daily_peaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak_timestamps</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;daily_peaks:&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">daily_peaks</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: daily_peaks: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">daily_peaks</span><span class="p">))))</span>
+
+        <span class="c1"># if len(daily_peaks) &lt; 5:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">daily_peaks</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">number_of_daily_peaks</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">anomaly_peak_ts</span> <span class="o">=</span> <span class="n">daily_peaks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">last_peak_periods_index</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">peak_periods</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">period_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="n">anomaly_peak_ts</span> <span class="ow">in</span> <span class="n">period_timestamps</span><span class="p">:</span>
+                <span class="n">target_peak_value_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+        <span class="n">largest_sum_method</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">closest_sum_method</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Calculate the sum of the values in each peak period</span>
+        <span class="n">peak_period_values</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">peak_ts</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">daily_peaks</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">peak_periods</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">period_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">peak_ts</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">period_timestamps</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+                <span class="n">values_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+                <span class="c1"># Determine which combination of 4 consecutive values result out</span>
+                <span class="c1"># of the 7 result in the largest sum, which is considered the</span>
+                <span class="c1"># peak</span>
+                <span class="k">if</span> <span class="n">largest_sum_method</span><span class="p">:</span>
+                    <span class="n">window_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="n">max_sum</span> <span class="o">=</span> <span class="n">window_sum</span>
+                    <span class="n">max_index</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="n">window_sum</span> <span class="o">=</span> <span class="n">window_sum</span> <span class="o">-</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">window_sum</span> <span class="o">&gt;</span> <span class="n">max_sum</span><span class="p">:</span>
+                            <span class="n">max_sum</span> <span class="o">=</span> <span class="n">window_sum</span>
+                            <span class="n">max_index</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">selected_peak_values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">max_index</span><span class="p">:</span><span class="n">max_index</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span>
+
+                <span class="c1"># Determine which combination of 4 consecutive values out of the</span>
+                <span class="c1"># 7 values, result in the sum closest to the sum of the anomaly</span>
+                <span class="c1"># peak period, which is considered the instance peak.  This is</span>
+                <span class="c1"># due to the fact that the anomaly peak period is defined as the</span>
+                <span class="c1"># sum of the 3 data points BEFORE the anomaly datapoint plus the</span>
+                <span class="c1"># anomaly datapoint, with no datapoints after the anomaly being</span>
+                <span class="c1"># consider.  However each other peak period has 3 before, the</span>
+                <span class="c1"># peak and 3 after.  Therefore this method allows for finding</span>
+                <span class="c1"># the peak range sum in a peak of the sum of 4 consecutive</span>
+                <span class="c1"># datapoints which are closest to the anomaly peak sum.</span>
+                <span class="c1"># Methods have been tested using only values before the peak,</span>
+                <span class="c1"># only values after the peak, but this method provides the most</span>
+                <span class="c1"># robust method of having 0 values either in the before or after</span>
+                <span class="c1"># period, which do occur and can skew the sums undesirably.</span>
+                <span class="k">if</span> <span class="n">closest_sum_method</span><span class="p">:</span>
+                    <span class="n">window_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+                    <span class="n">closest_sum</span> <span class="o">=</span> <span class="n">window_sum</span>
+                    <span class="n">closest_values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="n">window_sum</span> <span class="o">=</span> <span class="n">window_sum</span> <span class="o">-</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">window_sum</span> <span class="o">-</span> <span class="n">target_peak_value_sum</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">closest_sum</span> <span class="o">-</span> <span class="n">target_peak_value_sum</span><span class="p">):</span>
+                            <span class="n">closest_sum</span> <span class="o">=</span> <span class="n">window_sum</span>
+                            <span class="n">closest_values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">4</span><span class="p">]</span>
+                    <span class="n">selected_peak_values</span> <span class="o">=</span> <span class="n">closest_values</span>
+
+                <span class="n">values_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">selected_peak_values</span><span class="p">)</span>
+
+                <span class="c1"># Becasue scipy will periods even if there are no peaks,</span>
+                <span class="c1"># which can result in the values_sum equalling 0, if</span>
+                <span class="c1"># this happens do not add the peak</span>
+                <span class="k">if</span> <span class="n">values_sum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">peak_ts</span> <span class="ow">in</span> <span class="n">period_timestamps</span><span class="p">:</span>
+                    <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;peak_ts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak_ts</span>
+                    <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;peak_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">peak_periods</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">peak_ts</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="c1"># peak_period_values[index][&#39;values&#39;] = [item[1] for item in peak_periods[index]]</span>
+                    <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">selected_peak_values</span>
+                    <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values_sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values_sum</span>
+        
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;daily_peaks (after 0 sum peaks removed):&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: daily_peaks (after 0 sum peaks removed): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">))))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">number_of_daily_peaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;peak_period_values only has </span><span class="si">%s</span><span class="s1"> items before calculating peak_values&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: peak_period_values only has </span><span class="si">%s</span><span class="s1"> items before calculating peak_values&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">))))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">peak_value_sums</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">peak_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">anomaly_peak_values_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">anomaly_peak_index_timestamp</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">anomaly_peak_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Calculate the sum of the values in each peak period excl the anomalous</span>
+        <span class="c1"># peak period, which is calculated individually</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">peak_period_values</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">peak_value_sums</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;peak_ts&#39;</span><span class="p">:</span> <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;peak_ts&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;values_sum&#39;</span><span class="p">:</span> <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values_sum&#39;</span><span class="p">],</span>
+            <span class="p">}</span>
+            <span class="c1"># if peak_period_values[index][&#39;peak_ts&#39;] != anomaly_timestamp:</span>
+            <span class="k">if</span> <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;peak_ts&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">anomaly_peak_index_timestamp</span><span class="p">:</span>
+                <span class="n">peak_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values_sum&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">anomaly_peak_values_sum</span> <span class="o">=</span> <span class="n">peak_period_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;values_sum&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">number_of_daily_peaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;peak_period_values only has </span><span class="si">%s</span><span class="s1"> items&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: peak_period_values only has </span><span class="si">%s</span><span class="s1"> items&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_period_values</span><span class="p">))))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak_values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">number_of_daily_peaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;peak_values only has </span><span class="si">%s</span><span class="s1"> items&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_values</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: peak_values only has </span><span class="si">%s</span><span class="s1"> items&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_values</span><span class="p">))))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1"># Determine the mean and stdDev of the sums of each peak period (excl</span>
+        <span class="c1"># the anomalous peak period)</span>
+        <span class="n">peak_values_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">peak_values</span><span class="p">)</span>
+        <span class="n">peak_values_stdDev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">peak_values</span><span class="p">)</span>
+
+        <span class="n">peak_difference</span> <span class="o">=</span> <span class="n">anomaly_peak_values_sum</span> <span class="o">-</span> <span class="n">peak_values_mean</span>
+        <span class="n">threesigma3_peak_values_stdDev</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">peak_values_stdDev</span>
+
+        <span class="k">if</span> <span class="n">anomaly_peak_values_sum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;peak_difference&#39;</span><span class="p">:</span> <span class="n">peak_difference</span><span class="p">,</span>
+                <span class="s1">&#39;peak_period_values&#39;</span><span class="p">:</span> <span class="n">peak_period_values</span><span class="p">,</span>
+                <span class="s1">&#39;peak_values&#39;</span><span class="p">:</span> <span class="n">peak_values</span><span class="p">,</span>
+                <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
+                <span class="s1">&#39;anomaly_peak_values_sum&#39;</span><span class="p">:</span> <span class="n">anomaly_peak_values_sum</span><span class="p">,</span>
+                <span class="s1">&#39;peak_values_mean&#39;</span><span class="p">:</span> <span class="n">peak_values_mean</span><span class="p">,</span>
+                <span class="s1">&#39;peak_values_stdDev&#39;</span><span class="p">:</span> <span class="n">peak_values_stdDev</span><span class="p">,</span>
+                <span class="s1">&#39;3 * peak_values_stdDev&#39;</span><span class="p">:</span> <span class="n">threesigma3_peak_values_stdDev</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;anomaly_peak_values_sum is 0&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: anomaly_peak_values_sum is 0, debug_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="c1"># The algorithm</span>
+        <span class="n">anomalous</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">peak_difference</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threesigma3_peak_values_stdDev</span>
+
+        <span class="n">percent_different</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">within_percent_of_normal_peaks</span> <span class="ow">and</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="n">percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">peak_difference</span><span class="p">),</span> <span class="n">threesigma3_peak_values_stdDev</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">percent_different</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="mi">100</span>
+            <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_pdiff</span> <span class="o">=</span> <span class="n">percent_different</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="n">new_pdiff</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">percent_different</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;=</span> <span class="n">within_percent_of_normal_peaks</span><span class="p">:</span>
+                <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">debug_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;peak_difference&#39;</span><span class="p">:</span> <span class="n">peak_difference</span><span class="p">,</span>
+            <span class="s1">&#39;peak_period_values&#39;</span><span class="p">:</span> <span class="n">peak_period_values</span><span class="p">,</span>
+            <span class="s1">&#39;peak_values&#39;</span><span class="p">:</span> <span class="n">peak_values</span><span class="p">,</span>
+            <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
+            <span class="s1">&#39;anomaly_peak_values_sum&#39;</span><span class="p">:</span> <span class="n">anomaly_peak_values_sum</span><span class="p">,</span>
+            <span class="s1">&#39;peak_values_mean&#39;</span><span class="p">:</span> <span class="n">peak_values_mean</span><span class="p">,</span>
+            <span class="s1">&#39;peak_values_stdDev&#39;</span><span class="p">:</span> <span class="n">peak_values_stdDev</span><span class="p">,</span>
+            <span class="s1">&#39;3 * peak_values_stdDev&#39;</span><span class="p">:</span> <span class="n">threesigma3_peak_values_stdDev</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">debug_dict</span><span class="p">[</span><span class="s1">&#39;(anomaly_peak_values_sum - peak_values_mean)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomaly_peak_values_sum</span> <span class="o">-</span> <span class="n">peak_values_mean</span>
+        <span class="k">if</span> <span class="n">within_percent_of_normal_peaks</span><span class="p">:</span>
+            <span class="n">debug_dict</span><span class="p">[</span><span class="s1">&#39;within_percent_of_normal_peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">within_percent_of_normal_peaks</span>
+            <span class="n">debug_dict</span><span class="p">[</span><span class="s1">&#39;percent_different&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">percent_different</span>
+
+        <span class="k">if</span> <span class="n">print_debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: debug_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">debug_dict</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>flux.populate_metric_worker &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flux.populate_metric_worker &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,67 +98,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>flux.populate_metric_worker</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flux.populate_metric_worker</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for flux.populate_metric_worker</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
@@ -211,7 +144,7 @@
 <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
 <span class="c1"># bandit [B403:blacklist] Consider possible security implications associated</span>
 <span class="c1"># with pickle module.  These have been considered.</span>
-<span class="kn">import</span> <span class="nn">pickle</span>  <span class="c1"># nosec</span>
+<span class="kn">import</span> <span class="nn">pickle</span>  <span class="c1"># nosec B403</span>
 
 <span class="kn">import</span> <span class="nn">struct</span>
 
@@ -230,16 +163,32 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
-<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+<span class="c1"># This prevents flake8 E402 - module level import not at top of file</span>
+<span class="n">load_settings</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">if</span> <span class="n">load_settings</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">settings</span>
     <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
-        <span class="n">send_graphite_metric</span><span class="p">,</span>
+        <span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
+        <span class="c1">#                   Branch #4300: prometheus</span>
+        <span class="c1"># Moved send_graphite_metric</span>
+        <span class="c1"># send_graphite_metric,</span>
         <span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
         <span class="c1">#                   Branch #3262: py3</span>
         <span class="n">get_redis_conn</span><span class="p">,</span>
         <span class="c1"># @added 20191128 - Bug #3266: py3 Redis binary objects not strings</span>
         <span class="c1">#                   Branch #3262: py3</span>
-        <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+        <span class="n">get_redis_conn_decoded</span><span class="p">,</span>
+        <span class="c1"># @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
+        <span class="c1">#                   Bug #3778: Handle single encoded forward slash requests to Graphite</span>
+        <span class="n">sanitise_graphite_url</span><span class="p">,</span>
+        <span class="c1"># @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
+        <span class="c1">#                   Bug #3778: Handle single encoded forward slash requests to Graphite</span>
+        <span class="n">encode_graphite_metric_name</span><span class="p">)</span>
+    <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+    <span class="kn">from</span> <span class="nn">functions.flux.get_last_metric_data</span> <span class="kn">import</span> <span class="n">get_last_metric_data</span>
+    <span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                   Branch #4300: prometheus</span>
+    <span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
 
 <span class="c1"># @modified 20191129 - Branch #3262: py3</span>
 <span class="c1"># Consolidate flux logging</span>
@@ -283,7 +232,7 @@
 
 
 <div class="viewcode-block" id="PopulateMetricWorker"><a class="viewcode-back" href="../../skyline.flux.html#flux.populate_metric_worker.PopulateMetricWorker">[docs]</a><span class="k">class</span> <span class="nc">PopulateMetricWorker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The worker grabs metrics from the queue, surfaces the data from the remote</span>
 <span class="sd">    Graphite and sends them to the Skyline Graphite.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -309,16 +258,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="PopulateMetricWorker.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.flux.html#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics</span>
+            <span class="c1"># Log warning</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PopulateMetricWorker.run"><a class="viewcode-back" href="../../skyline.flux.html#flux.populate_metric_worker.PopulateMetricWorker.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -370,10 +322,19 @@
                     <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
                     <span class="c1"># else:</span>
                     <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: get_redis_conn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
                     <span class="c1"># @added 20191128 - Bug #3266: py3 Redis binary objects not strings</span>
                     <span class="c1">#                   Branch #3262: py3</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: get_redis_conn_decoded - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
             <span class="n">metricDict</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
@@ -429,7 +390,10 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: metric from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: namespace_prefix from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">namespace_prefix</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: key from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: token from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">token</span><span class="p">)</span>
+                    <span class="c1"># @modified 20210421 - Task #4030: refactoring</span>
+                    <span class="c1"># semgrep - python-logger-credential-disclosure</span>
+                    <span class="c1"># logger.info(&#39;populate_metric_worker :: token from metricData set to %s&#39; % token)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: token from metricData was set (no discloure)&#39;</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: user from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">user</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: password from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">password</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: fetch_resolution_urls from metricData set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_resolution_urls</span><span class="p">))</span>
@@ -442,19 +406,59 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to read from metricData&#39;</span><span class="p">)</span>
 
             <span class="c1"># Best effort to de-duplicate the data sent to Graphite</span>
-            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
-            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># @modified 20191128 - Bug #3266: py3 Redis binary objects not strings</span>
-                <span class="c1">#                      Branch #3262: py3</span>
-                <span class="c1"># redis_last_metric_data = self.redis_conn.get(cache_key).decode(&#39;utf-8&#39;)</span>
-                <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
-                <span class="n">last_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_metric_data</span><span class="p">)</span>
-                <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
-                <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: could not interpolate flux.last. cache_key name - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+            <span class="c1"># Swap to using a Redis hash instead of the</span>
+            <span class="c1"># flux.last.&lt;metric&gt; keys</span>
+            <span class="n">use_old_timestamp_keys</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">redis_last_metric_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_last_metric_data_dict</span> <span class="o">=</span> <span class="n">get_last_metric_data</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: get_last_metric_data failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">redis_last_metric_data_dict</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="n">redis_last_metric_data_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+                    <span class="n">use_old_timestamp_keys</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to get timestamp from - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">redis_last_metric_data_dict</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+            <span class="c1"># Only check if cache_key</span>
+            <span class="k">if</span> <span class="n">cache_key</span><span class="p">:</span>
+                <span class="c1"># @modified 20220429 - Feature #4536: Handle Redis failure</span>
+                <span class="c1"># Swap to using a Redis hash instead of the</span>
+                <span class="c1"># flux.last.&lt;metric&gt; keys</span>
+                <span class="k">if</span> <span class="n">use_old_timestamp_keys</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @modified 20191128 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># redis_last_metric_data = self.redis_conn.get(cache_key).decode(&#39;utf-8&#39;)</span>
+                        <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">redis_last_metric_data</span><span class="p">:</span>
+                            <span class="n">last_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_metric_data</span><span class="p">)</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning ::populate_metric_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                        <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="n">recent_last_flux_timestamp_present</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
@@ -487,6 +491,16 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: checking </span><span class="si">%s</span><span class="s1"> in Graphite from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">))</span>
                     <span class="n">got_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="c1"># @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
+                    <span class="c1">#                   Bug #3778: Handle single encoded forward slash requests to Graphite</span>
+                    <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">encoded_graphite_metric_name</span> <span class="o">=</span> <span class="n">encode_graphite_metric_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: encode_graphite_metric_name error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                        <span class="n">encoded_graphite_metric_name</span> <span class="o">=</span> <span class="n">metric</span>
+
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># We use absolute time so that if there is a lag in mirage the correct</span>
                         <span class="c1"># timeseries data is still surfaced relevant to the anomalous datapoint</span>
@@ -495,13 +509,18 @@
                             <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;target=</span><span class="si">%s</span><span class="s1">&amp;format=json&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">),</span>
-                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                <span class="c1"># @modified 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
+                                <span class="c1"># settings.GRAPHITE_RENDER_URI, graphite_from, metric)</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">encoded_graphite_metric_name</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;target=</span><span class="si">%s</span><span class="s1">&amp;format=json&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                                <span class="c1"># @modified 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
+                                <span class="c1"># settings.GRAPHITE_RENDER_URI, graphite_from, metric)</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">encoded_graphite_metric_name</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: using Graphite URL - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">url</span><span class="p">))</span>
+
                         <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                             <span class="n">js</span> <span class="o">=</span> <span class="p">[]</span>
@@ -547,24 +566,29 @@
                         <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                             <span class="k">continue</span>
                     <span class="n">last_timestamp_with_data</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-                        <span class="n">has_value</span> <span class="o">=</span> <span class="kc">False</span>
-                        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
-                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
-                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">if</span> <span class="n">has_value</span><span class="p">:</span>
-                            <span class="n">last_timestamp_with_data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-                            <span class="n">datapoint</span> <span class="o">=</span> <span class="n">value</span>
-                            <span class="k">break</span>
-                    <span class="k">if</span> <span class="n">last_timestamp_with_data</span><span class="p">:</span>
-                        <span class="c1"># Here we set this as the missing last_flux_timestamp</span>
-                        <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="n">last_timestamp_with_data</span>
-                        <span class="n">recent_last_flux_timestamp_present</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> last timestamp in Graphite from </span><span class="si">%s</span><span class="s1"> is </span><span class="si">%s</span><span class="s1">, using as last_flux_timestamp&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">)))</span>
+
+                    <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">has_value</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                                <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                                <span class="n">has_value</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">has_value</span><span class="p">:</span>
+                                <span class="n">last_timestamp_with_data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                                <span class="n">datapoint</span> <span class="o">=</span> <span class="n">value</span>
+                                <span class="k">break</span>
+                        <span class="k">if</span> <span class="n">last_timestamp_with_data</span><span class="p">:</span>
+                            <span class="c1"># Here we set this as the missing last_flux_timestamp</span>
+                            <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="n">last_timestamp_with_data</span>
+                            <span class="n">recent_last_flux_timestamp_present</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> last timestamp in Graphite from </span><span class="si">%s</span><span class="s1"> is </span><span class="si">%s</span><span class="s1">, using as last_flux_timestamp&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_flux_timestamp</span><span class="p">)))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error determining last_flux_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
             <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">start_populating</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
@@ -616,17 +640,70 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to rewrite URL&#39;</span><span class="p">)</span>
 
+                <span class="c1"># @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url</span>
+                <span class="c1">#                   Bug #3778: Handle single encoded forward slash requests to Graphite</span>
+                <span class="n">sanitised</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sanitised</span><span class="p">,</span> <span class="n">fetch_url</span> <span class="o">=</span> <span class="n">sanitise_graphite_url</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">fetch_url</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: sanitise_graphite_url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
                 <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: getting data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">))</span>
                     <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                         <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: http status code - </span><span class="si">%s</span><span class="s1">, reason - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">)))</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to get data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: got responses from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="c1"># @modified 2023024 - Task #4824: vista - warn on remote_error</span>
+                    <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="s1">&#39;Failed to establish a new connection&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                        <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="s1">&#39;Errno 111&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                        <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="s1">&#39;Connection refused&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                        <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="s1">&#39;Connection aborted&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                        <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="s1">&#39;RemoteDisconnected&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                        <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="s1">&#39;Remote end closed connection without response&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                        <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">remote_error</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: fetcher :: failed to get data from </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="c1"># @modified 20230118 - Feature #4756: Use gevent gunicorn worker_class</span>
+                        <span class="c1">#                      Feature #4732: flux vortex</span>
+                        <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+                        <span class="c1"># This can causes the process to hang on a failure</span>
+                        <span class="c1"># and results in a [CRITICAL] WORKER TIMEOUT which seemingly</span>
+                        <span class="c1"># was not experienced the same way with the sync worker</span>
+                        <span class="c1"># class as the gevent worker class. Loki reports that</span>
+                        <span class="c1"># although [CRITICAL] WORKER TIMEOUT instances were</span>
+                        <span class="c1"># experienced pre 20221206 when gevent was introduced, sync</span>
+                        <span class="c1"># never resulted in the error of:</span>
+                        <span class="c1">#  str(response.status_code), str(response.reason)))</span>
+                        <span class="c1"># UnboundLocalError: local variable &#39;response&#39; referenced before assignment</span>
+                        <span class="c1"># causing monit to fail checks and restarted the flux service.  Since the</span>
+                        <span class="c1"># switch to gevent this error causing the [CRITICAL] WORKER TIMEOUT</span>
+                        <span class="c1"># now results in monit restarting flux every time this was</span>
+                        <span class="c1"># experienced around 11 min 30 secs later.  It appears as if</span>
+                        <span class="c1"># the sync worker just exited the process and spawned a new</span>
+                        <span class="c1"># one, but with gevent this causes the monit check on</span>
+                        <span class="c1"># [127.0.0.1]:8000/metric_data?status=true [TCP/IP] -- HTTP: Error receiving data -- Resource temporarily unavailable (attempt 1/5)</span>
+                        <span class="c1"># to fail 5 times and monit restarts flux.  So fixing as it</span>
+                        <span class="c1"># has always been incorrect, just never resulted in occasional</span>
+                        <span class="c1"># service failures as it was handled differently.</span>
+                        <span class="c1"># logger.error(&#39;error :: populate_metric_worker :: http status code - %s, reason - %s&#39; % (</span>
+                        <span class="c1">#     str(response.status_code), str(response.reason)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: requests reports - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">err</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: populate_metric_worker :: failed to get data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
                     <span class="k">continue</span>
@@ -641,6 +718,13 @@
                     <span class="n">datapoints_fetched</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">datapoints</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: retrieved </span><span class="si">%s</span><span class="s1"> data points from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_fetched</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">)))</span>
+                <span class="c1"># @added 20220214 -  Task #3864: flux - try except everything</span>
+                <span class="c1"># Handle list index out of range as a warning</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="c1"># File &quot;/opt/skyline/github/skyline/skyline/flux/populate_metric_worker.py&quot;, line 509, in run</span>
+                    <span class="c1">#   datapoints = js[0][&#39;datapoints&#39;]</span>
+                    <span class="c1"># IndexError: list index out of range</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: populate_metric_worker :: failed to get any datapoints from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to get data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_url</span><span class="p">))</span>
@@ -656,51 +740,65 @@
 
                 <span class="c1"># @added 20191108 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
                 <span class="n">valid_datapoints</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
-                        <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
-                        <span class="n">raw_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
 
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
+                            <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+                            <span class="n">raw_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">raw_value</span> <span class="o">=</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="k">continue</span>
+                                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                <span class="n">valid_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">])</span>
+                            <span class="k">except</span><span class="p">:</span>
                                 <span class="k">continue</span>
-                            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                            <span class="n">valid_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">])</span>
-                        <span class="k">except</span><span class="p">:</span>
-                            <span class="k">continue</span>
-                    <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">:</span>
-                        <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
-                        <span class="n">raw_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+                        <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">:</span>
+                            <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+                            <span class="n">raw_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">raw_value</span> <span class="o">=</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="k">continue</span>
+                                <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">except</span><span class="p">:</span>
                                 <span class="k">continue</span>
-                            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                        <span class="k">except</span><span class="p">:</span>
-                            <span class="k">continue</span>
-                        <span class="n">valid_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
-                <span class="n">datapoints</span> <span class="o">=</span> <span class="n">valid_datapoints</span>
+                            <span class="n">valid_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error determining valid_datapoints - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
-                <span class="c1"># Order the time series by timestamp as the tuple can shift</span>
-                <span class="c1"># order resulting in more recent data being added before older</span>
-                <span class="c1"># data</span>
-                <span class="n">datapoints</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">datapoints</span> <span class="o">=</span> <span class="n">valid_datapoints</span>
+                    <span class="c1"># Order the time series by timestamp as the tuple can shift</span>
+                    <span class="c1"># order resulting in more recent data being added before older</span>
+                    <span class="c1"># data</span>
+                    <span class="n">datapoints</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error set datapoints from valid_datapoints - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
                 <span class="c1"># Determine the timestamp of the current minute to apply</span>
                 <span class="c1"># VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</span>
-                <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-                <span class="n">current_minute_hour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">time_now</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H&#39;</span><span class="p">))</span>
-                <span class="n">current_minute_minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">time_now</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%M&#39;</span><span class="p">))</span>
-                <span class="n">current_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">time_now</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="n">current_minute_hour</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="n">current_minute_minute</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">current_minute_timestamp_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                    <span class="n">current_minute_hour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">time_now</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H&#39;</span><span class="p">))</span>
+                    <span class="n">current_minute_minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">time_now</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%M&#39;</span><span class="p">))</span>
+                    <span class="n">current_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">time_now</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">hour</span><span class="o">=</span><span class="n">current_minute_hour</span><span class="p">,</span> <span class="n">minute</span><span class="o">=</span><span class="n">current_minute_minute</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">current_minute_timestamp_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">current_datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error determining current_minute_timestamp_start - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                    <span class="n">current_minute_timestamp_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                 <span class="n">datapoints_in_current_minute</span> <span class="o">=</span> <span class="mi">0</span>
 
                 <span class="n">last_error</span> <span class="o">=</span> <span class="kc">None</span>
@@ -749,20 +847,24 @@
                         <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">continue</span>
 
-                <span class="k">if</span> <span class="n">last_error</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">last_error</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: the above is the last_error encountered processing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
-                <span class="k">if</span> <span class="n">datapoints_with_no_value</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> of the fetched records were discarded as they had value None&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_with_no_value</span><span class="p">)))</span>
-                <span class="k">if</span> <span class="n">datapoints_in_current_minute</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> of the fetched records were discarded as they fall within the current minute&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_in_current_minute</span><span class="p">)))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> of the fetched data points are older than the last known flux timestamp&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_already_populated</span><span class="p">)))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: added </span><span class="si">%s</span><span class="s1"> data points to the time series to submit to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_added_to_timeseries</span><span class="p">)))</span>
+                <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">last_error</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">last_error</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: the above is the last_error encountered processing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">datapoints_with_no_value</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> of the fetched records were discarded as they had value None&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_with_no_value</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">datapoints_in_current_minute</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> of the fetched records were discarded as they fall within the current minute&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_in_current_minute</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: </span><span class="si">%s</span><span class="s1"> of the fetched data points are older than the last known flux timestamp&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_already_populated</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: added </span><span class="si">%s</span><span class="s1"> data points to the time series to submit to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_added_to_timeseries</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error logging some info - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
             <span class="n">end_fecthing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
             <span class="n">seconds_to_fetch</span> <span class="o">=</span> <span class="n">end_fecthing</span> <span class="o">-</span> <span class="n">start_populating</span>
@@ -777,14 +879,19 @@
             <span class="c1"># And set flux.last key is the returned value from the remote is</span>
             <span class="c1"># null so that time series that are mostly null do not keep on</span>
             <span class="c1"># getting added to flux populate_metric by Vista</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="c1"># @modified 20210504 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+            <span class="c1"># Added raw_timeseries to execute only if there is a raw_timeseries</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span> <span class="ow">and</span> <span class="n">raw_timeseries</span><span class="p">:</span>
                 <span class="n">set_flux_key</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">sorted_raw_timeseries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">last_ts</span> <span class="o">=</span> <span class="n">sorted_raw_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">end_fecthing</span> <span class="o">-</span> <span class="mi">120</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="n">sorted_raw_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">set_flux_key</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># @modified 20210504 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+                    <span class="c1"># Only determine the last_ts if there is a sorted_raw_timeseries</span>
+                    <span class="k">if</span> <span class="n">sorted_raw_timeseries</span><span class="p">:</span>
+                        <span class="n">last_ts</span> <span class="o">=</span> <span class="n">sorted_raw_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">end_fecthing</span> <span class="o">-</span> <span class="mi">120</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">sorted_raw_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">set_flux_key</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to determine if last value was null&#39;</span><span class="p">)</span>
@@ -793,13 +900,30 @@
                         <span class="c1"># Update Redis flux key</span>
                         <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
                         <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">last_ts</span><span class="p">),</span> <span class="kc">None</span><span class="p">]</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                        <span class="c1"># @modified 20220429 - Feature #4536: Handle Redis failure</span>
+                        <span class="c1"># Swap to using a Redis hash instead of the</span>
+                        <span class="c1"># flux.last.&lt;metric&gt; keys make existing keys</span>
+                        <span class="c1"># expire</span>
+                        <span class="c1"># @modified 20220505 - Feature #4536: Handle Redis failure</span>
+                        <span class="c1"># Change to corret setex method so the keys expire</span>
+                        <span class="c1"># self.redis_conn.set(cache_key, str(metric_data))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: even though no data points so as to not loop round on this metric, set the metric Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: even though no data points, failed to set Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+
+                    <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                    <span class="c1"># Swap to using a Redis hash instead of the</span>
+                    <span class="c1"># flux.last.&lt;metric&gt; keys</span>
+                    <span class="n">metric_data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_ts</span><span class="p">),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;flux.last.metric_data&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_dict</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to hset flux.last.metric_data Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+
                     <span class="c1"># Adding to the vista.fetcher.unique_metrics Redis set</span>
                     <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.unique_metrics&#39;</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">)</span>
@@ -827,18 +951,28 @@
             <span class="n">resolution_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">metric_datapoint</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]:</span>
-                <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="n">resolution_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">resolution_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error constructing resolution_timestamps - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
             <span class="n">timestamp_resolutions</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
                 <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
-                        <span class="n">resolution</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
-                        <span class="n">timestamp_resolutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
-                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                    <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                            <span class="n">resolution</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
+                            <span class="n">timestamp_resolutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+                            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error constructing timestamp_resolutions - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
             <span class="k">if</span> <span class="n">timestamp_resolutions</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">timestamp_resolutions</span><span class="p">)</span>
@@ -862,7 +996,11 @@
 
             <span class="c1"># Resample</span>
             <span class="n">resample_at</span> <span class="o">=</span> <span class="s1">&#39;1Min&#39;</span>
-            <span class="k">if</span> <span class="n">resample_at</span><span class="p">:</span>
+            <span class="c1"># @modified 20210421 - Task #4030: refactoring</span>
+            <span class="c1"># semgrep - rule:python.lang.correctness.useless-comparison.no-strings-as-booleans</span>
+            <span class="c1"># if resample_at:</span>
+            <span class="n">resample_data</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">resample_data</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
                     <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
@@ -918,32 +1056,50 @@
                     <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">listOfMetricTuples</span><span class="p">:</span>
-                        <span class="n">smallListOfMetricTuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                        <span class="n">tuples_added</span> <span class="o">+=</span> <span class="mi">1</span>
-                        <span class="k">if</span> <span class="n">tuples_added</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+                        <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">smallListOfMetricTuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                            <span class="n">tuples_added</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="c1"># @modified 20210115 - Task #3864: flux - try except everything</span>
+                            <span class="c1"># Bring into line with flux worker performance changes</span>
+                            <span class="c1"># if tuples_added &gt;= 1000:</span>
+                            <span class="k">if</span> <span class="n">tuples_added</span> <span class="o">&gt;=</span> <span class="mi">480</span><span class="p">:</span>
+                                <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="n">pickle_data_to_graphite</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">pickle_data_sent</span><span class="p">:</span>
+                                    <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_added</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: sent </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                    <span class="n">sent_to_graphite</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
+                                    <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
+                                    <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
+                                <span class="c1"># @added 20210115 - Task #3864: flux - try except everything</span>
+                                <span class="c1"># Bring into line with flux worker performance changes</span>
+                                <span class="c1"># Reduce the speed of submissions to Graphite</span>
+                                <span class="c1"># if there are lots of data points</span>
+                                <span class="k">if</span> <span class="n">timeseries_length</span> <span class="o">&gt;</span> <span class="mi">4000</span><span class="p">:</span>
+                                    <span class="n">sleep</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to send </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error while iterating to pickle_data_to_graphite(smallListOfMetricTuples) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="n">smallListOfMetricTuples</span><span class="p">:</span>
+                        <span class="c1"># @modified 20201207 - Task #3864: flux - try except everything</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">tuples_to_send</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
                             <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="n">pickle_data_to_graphite</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">pickle_data_sent</span><span class="p">:</span>
-                                <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_added</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: sent </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
+                                <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_to_send</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: sent the last </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                                <span class="n">sent_to_graphite</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                                <span class="n">smallListOfMetricTuples</span> <span class="o">=</span> <span class="p">[]</span>
-                                <span class="n">tuples_added</span> <span class="o">=</span> <span class="mi">0</span>
                             <span class="k">else</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to send </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">tuples_added</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="n">smallListOfMetricTuples</span><span class="p">:</span>
-                        <span class="n">tuples_to_send</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                        <span class="n">pickle_data_sent</span> <span class="o">=</span> <span class="n">pickle_data_to_graphite</span><span class="p">(</span><span class="n">smallListOfMetricTuples</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">pickle_data_sent</span><span class="p">:</span>
-                            <span class="n">data_points_sent</span> <span class="o">+=</span> <span class="n">tuples_to_send</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: sent the last </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_points_sent</span><span class="p">),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_length</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to send the last </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to send the last </span><span class="si">%s</span><span class="s1"> data points to Graphite via pickle for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">tuples_to_send</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: error while pickle_data_to_graphite(smallListOfMetricTuples) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: sent </span><span class="si">%s</span><span class="s1"> data points to Graphite for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
@@ -951,7 +1107,7 @@
                 <span class="n">skyline_metric</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.datapoints_sent_to_graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app_graphite_namespace</span><span class="p">)</span>
                 <span class="c1"># @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
                 <span class="c1"># graphyte.send(skyline_metric, float(sent_to_graphite), int(time()))</span>
-                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">skyline_metric</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">))</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">skyline_metric</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">))</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: submitted </span><span class="si">%s</span><span class="s1"> to Graphite for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sent_to_graphite</span><span class="p">)),</span> <span class="n">skyline_metric</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
@@ -971,13 +1127,26 @@
                     <span class="c1"># Update Redis flux key</span>
                     <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
                     <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                    <span class="c1"># @modified 20220429 - Feature #4536: Handle Redis failure</span>
+                    <span class="c1"># Swap to using a Redis hash instead of the</span>
+                    <span class="c1"># flux.last.&lt;metric&gt; keys make existing keys</span>
+                    <span class="c1"># expire</span>
+                    <span class="c1"># self.redis_conn.set(cache_key, str(metric_data))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_metric_worker :: set the metric Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_metric_worker :: failed to set Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                <span class="c1"># @added 20220429 - Feature #4536: Handle Redis failure</span>
+                <span class="c1"># Swap to using a Redis hash instead of the</span>
+                <span class="c1"># flux.last.&lt;metric&gt; keys</span>
+                <span class="n">metric_data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;flux.last.metric_data&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_dict</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to set flux.last.metric_data Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
 
                 <span class="c1"># Adding to the vista.fetcher.unique_metrics Redis set</span>
                 <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.unique_metrics&#39;</span>
@@ -998,49 +1167,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

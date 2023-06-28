@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>crucible.crucible_algorithms &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>crucible.crucible_algorithms &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,67 +98,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>crucible.crucible_algorithms</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">crucible.crucible_algorithms</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for crucible.crucible_algorithms</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
@@ -228,6 +161,24 @@
         <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
         <span class="n">CONSENSUS</span><span class="p">,</span>
     <span class="p">)</span>
+
+    <span class="c1"># @added 20220430 - Feature #4118: crucible - custom_algorithms</span>
+    <span class="c1">#                   Feature #3566: custom_algorithms</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">,</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">custom_algorithms_to_run</span> <span class="kn">import</span> <span class="n">get_custom_algorithms_to_run</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">get_custom_algorithms_to_run</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">run_custom_algorithm_on_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">write_data_to_file</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
@@ -249,7 +200,7 @@
 
 
 <div class="viewcode-block" id="tail_avg"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.tail_avg">[docs]</a><span class="k">def</span> <span class="nf">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a utility function used to calculate the average of the last three</span>
 <span class="sd">    datapoints in the series as a measure, instead of just the last datapoint.</span>
 <span class="sd">    It reduces noise, but it also reduces sensitivity and increases the delay</span>
@@ -263,7 +214,7 @@
 
 
 <div class="viewcode-block" id="median_absolute_deviation"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.median_absolute_deviation">[docs]</a><span class="k">def</span> <span class="nf">median_absolute_deviation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the deviation of its latest datapoint with</span>
 <span class="sd">    respect to the median is X times larger than the median of deviations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -304,7 +255,7 @@
 
 
 <div class="viewcode-block" id="grubbs"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.grubbs">[docs]</a><span class="k">def</span> <span class="nf">grubbs</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the Z score is greater than the Grubb&#39;s score.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -332,7 +283,7 @@
         <span class="n">tail_average</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span>
         <span class="n">z_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">tail_average</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">stdDev</span>
         <span class="n">len_series</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
-        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="o">.</span><span class="mi">05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="mf">.05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">threshold_squared</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">threshold</span>
         <span class="n">grubbs_score</span> <span class="o">=</span> <span class="p">((</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">len_series</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">threshold_squared</span> <span class="o">/</span> <span class="p">(</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">threshold_squared</span><span class="p">))</span>
 
@@ -342,7 +293,7 @@
 
 
 <div class="viewcode-block" id="first_hour_average"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.first_hour_average">[docs]</a><span class="k">def</span> <span class="nf">first_hour_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calcuate the simple average over 60 datapoints (maybe one hour),</span>
 <span class="sd">    FULL_DURATION seconds ago.</span>
 <span class="sd">    A timeseries is anomalous if the average of the last three datapoints</span>
@@ -362,9 +313,14 @@
         <span class="c1"># ten_data_point_seconds = resolution * 10</span>
         <span class="n">sixty_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">60</span>
         <span class="n">sixty_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">sixty_data_point_seconds</span>
-        <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="n">int_full_duration</span> <span class="o">-</span> <span class="n">sixty_datapoints_ago</span><span class="p">)</span>
+        <span class="c1"># @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution</span>
+        <span class="c1"># last_hour_threshold = int_end_timestamp - (int_full_duration - sixty_datapoints_ago)</span>
+        <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">int_full_duration</span>
 
-        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_hour_threshold</span><span class="p">])</span>
+        <span class="c1"># series = pandas.Series([x[1] for x in timeseries if x[0] &lt; last_hour_threshold])</span>
+        <span class="n">last_hour_threshold_end</span> <span class="o">=</span> <span class="n">last_hour_threshold</span> <span class="o">+</span> <span class="mi">3600</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">last_hour_threshold</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_hour_threshold_end</span><span class="p">])</span>
+
         <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">stdDev</span> <span class="o">=</span> <span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span>
@@ -377,7 +333,7 @@
 
 
 <div class="viewcode-block" id="stddev_from_average"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.stddev_from_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the absolute value of the average of the latest</span>
 <span class="sd">    three datapoint minus the moving average is greater than one standard</span>
 <span class="sd">    deviation of the average. This does not exponentially weight the MA and so</span>
@@ -397,7 +353,7 @@
 
 
 <div class="viewcode-block" id="stddev_from_moving_average"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.stddev_from_moving_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_moving_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the absolute value of the average of the latest</span>
 <span class="sd">    three datapoint minus the moving average is greater than three standard</span>
 <span class="sd">    deviations of the moving average. This is better for finding anomalies with</span>
@@ -424,7 +380,7 @@
 
 
 <div class="viewcode-block" id="mean_subtraction_cumulation"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.mean_subtraction_cumulation">[docs]</a><span class="k">def</span> <span class="nf">mean_subtraction_cumulation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the value of the next datapoint in the</span>
 <span class="sd">    series is farther than three standard deviations out in cumulative terms</span>
 <span class="sd">    after subtracting the mean from each data point.</span>
@@ -451,7 +407,7 @@
 
 
 <div class="viewcode-block" id="least_squares"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.least_squares">[docs]</a><span class="k">def</span> <span class="nf">least_squares</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the average of the last three datapoints</span>
 <span class="sd">    on a projected least squares model is greater than three sigma.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -518,7 +474,7 @@
 
 
 <div class="viewcode-block" id="histogram_bins"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.histogram_bins">[docs]</a><span class="k">def</span> <span class="nf">histogram_bins</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the average of the last three datapoints falls</span>
 <span class="sd">    into a histogram bin with less than 20 other datapoints (you&#39;ll need to tweak</span>
 <span class="sd">    that number depending on your data)</span>
@@ -532,7 +488,11 @@
         <span class="n">int_start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">int_full_duration</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">int_start_timestamp</span>
 
-        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="c1"># @modified 20210420 - Support #4026: Change from scipy array to numpy array</span>
+        <span class="c1"># Deprecation of scipy.array</span>
+        <span class="c1"># series = scipy.array([x[1] for x in timeseries])</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+
         <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">int_end_timestamp</span><span class="p">,</span> <span class="n">int_full_duration</span><span class="p">)</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -544,7 +504,7 @@
                         <span class="k">return</span> <span class="kc">True</span>
                 <span class="c1"># Is it in the current bin?</span>
                 <span class="k">elif</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
-                        <span class="k">return</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
 
@@ -552,7 +512,7 @@
 
 
 <div class="viewcode-block" id="ks_test"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.ks_test">[docs]</a><span class="k">def</span> <span class="nf">ks_test</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates</span>
 <span class="sd">    that data distribution for last 10 datapoints (might be 10 minutes) is</span>
 <span class="sd">    different from the last 60 datapoints (might be an hour).</span>
@@ -575,8 +535,12 @@
         <span class="n">ten_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">ten_data_point_seconds</span>
         <span class="n">sixty_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">60</span>
         <span class="n">sixty_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">sixty_data_point_seconds</span>
-        <span class="n">reference</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">sixty_datapoints_ago</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
-        <span class="n">probe</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
+        <span class="c1"># @modified 20210420 - Support #4026: Change from scipy array to numpy array</span>
+        <span class="c1"># Deprecation of scipy.array</span>
+        <span class="c1"># reference = scipy.array([x[1] for x in timeseries if x[0] &gt;= sixty_datapoints_ago and x[0] &lt; ten_datapoints_ago])</span>
+        <span class="c1"># probe = scipy.array([x[1] for x in timeseries if x[0] &gt;= ten_datapoints_ago])</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">sixty_datapoints_ago</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
+        <span class="n">probe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span> <span class="ow">or</span> <span class="n">probe</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -594,7 +558,7 @@
 
 
 <div class="viewcode-block" id="detect_drop_off_cliff"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.detect_drop_off_cliff">[docs]</a><span class="k">def</span> <span class="nf">detect_drop_off_cliff</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the average of the last ten datapoints is &lt;trigger&gt;</span>
 <span class="sd">    times greater than the last data point.  This algorithm is most suited to</span>
 <span class="sd">    timeseries with most datapoints being &gt; 100 (e.g high rate).  The arbitrary</span>
@@ -613,7 +577,11 @@
         <span class="n">ten_data_point_seconds</span> <span class="o">=</span> <span class="n">resolution</span> <span class="o">*</span> <span class="mi">10</span>
         <span class="n">ten_datapoints_ago</span> <span class="o">=</span> <span class="n">int_end_timestamp</span> <span class="o">-</span> <span class="n">ten_data_point_seconds</span>
 
-        <span class="n">ten_datapoint_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">int_end_timestamp</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
+        <span class="c1"># @modified 20210420 - Support #4026: Change from scipy array to numpy array</span>
+        <span class="c1"># Deprecation of scipy.array</span>
+        <span class="c1"># ten_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] &lt;= int_end_timestamp and x[0] &gt; ten_datapoints_ago])</span>
+        <span class="n">ten_datapoint_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">int_end_timestamp</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ten_datapoints_ago</span><span class="p">])</span>
+
         <span class="n">ten_datapoint_array_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ten_datapoint_array</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ten_datapoint_array_len</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="c1"># DO NOT handle if negative integers in range, where is the bottom of</span>
@@ -650,7 +618,12 @@
                 <span class="n">trigger</span> <span class="o">=</span> <span class="mi">7</span>
             <span class="c1"># Filter low rate and variable between 0 and 100 metrics</span>
             <span class="k">if</span> <span class="n">ten_datapoint_value</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ten_datapoint_array_sum</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">ten_datapoint_array_sum</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">all_datapoints_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+
+                <span class="c1"># @modified 20210420 - Support #4026: Change from scipy array to numpy array</span>
+                <span class="c1"># Deprecation of scipy.array</span>
+                <span class="c1"># all_datapoints_array = scipy.array([x[1] for x in timeseries])</span>
+                <span class="n">all_datapoints_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+
                 <span class="n">all_datapoints_max_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">all_datapoints_array</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">all_datapoints_max_value</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
                     <span class="c1"># print &quot;max_value for all datapoints at - &quot; + str(int_end_timestamp) + &quot; - &quot; + str(all_datapoints_max_value)</span>
@@ -679,7 +652,7 @@
         <span class="n">timeseries</span><span class="p">,</span> <span class="n">timeseries_name</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span>
         <span class="n">timeseries_file</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">alert_interval</span><span class="p">,</span>
         <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">padded_timeseries</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iteratively run algorithms.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -723,6 +696,29 @@
         <span class="n">check_algorithms</span> <span class="o">=</span> <span class="n">ALGORITHMS</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">)))</span>
 
+    <span class="c1"># @added 20220430 - Feature #4118: crucible - custom_algorithms</span>
+    <span class="c1">#                   Feature #3566: custom_algorithms</span>
+    <span class="n">custom_algorithms_to_check</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">custom_algorithms_to_remove</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">check_algorithms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">CUSTOM_ALGORITHMS</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="n">custom_algorithms_to_check</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">custom_algorithms_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to check if </span><span class="si">%s</span><span class="s1"> in is in CUSTOM_ALGORITHMS - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">custom_algorithms_to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">custom_algorithms_to_remove</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: removing unknown custom algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithms_to_remove</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">custom_algorithms_to_remove</span><span class="p">:</span>
+            <span class="n">check_algorithms</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">custom_algorithms_to_check</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;CUSTOM_ALGORITHMS to check - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithms_to_check</span><span class="p">))</span>
+
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking algorithms - </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
 
     <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
@@ -744,7 +740,24 @@
                 <span class="k">break</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;padded_timeseries - default range set to </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">default_range</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
 
+    <span class="c1"># @added 20220516 - Feature #4118: crucible - custom_algorithms</span>
+    <span class="c1">#                   Feature #3566: custom_algorithms</span>
+    <span class="c1"># Run certain algorithms on the entire timeseries rather than on</span>
+    <span class="c1"># slices</span>
+    <span class="n">one_shot_algorithms</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;adtk_level_shift&#39;</span><span class="p">,</span> <span class="s1">&#39;adtk_persist&#39;</span><span class="p">,</span> <span class="s1">&#39;adtk_seasonal&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;adtk_volatility_shift&#39;</span>
+    <span class="p">]</span>
+    <span class="n">timeseries_timestamp_index_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+        <span class="n">timeseries_timestamp_index_dict</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="n">index</span>
+
     <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">check_algorithms</span><span class="p">:</span>
+
+        <span class="c1"># @added 20220430 - Feature #4118: crucible - custom_algorithms</span>
+        <span class="c1">#                   Feature #3566: custom_algorithms</span>
+        <span class="n">custom_algorithm_errors</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="n">detected</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">x_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>
@@ -753,6 +766,34 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.86</span><span class="p">,</span> <span class="mf">3.08</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">)</span>
 
+            <span class="n">slices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">default_range</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+            <span class="n">algorithm_start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">last_log_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_start</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;running </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> slices&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slices</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20220516 - Feature #4118: crucible - custom_algorithms</span>
+            <span class="c1">#                   Feature #3566: custom_algorithms</span>
+            <span class="c1"># Run certain algorithms on the entire timeseries rather than on</span>
+            <span class="c1"># slices</span>
+            <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">one_shot_algorithms</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">custom_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;return_anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;realtime_analysis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">custom_anomalies</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">timeseries_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">],</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">custom_algorithm_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+                <span class="c1"># Point out the datapoints that are anomalous</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">custom_anomalies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">custom_anomalies</span><span class="p">:</span>
+                        <span class="n">item_index</span> <span class="o">=</span> <span class="n">timeseries_timestamp_index_dict</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">item_index</span><span class="p">],</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="s1">&#39;ro&#39;</span><span class="p">)</span>
+                        <span class="n">detected</span> <span class="o">=</span> <span class="s2">&quot;DETECTED&quot;</span>
+                        <span class="n">anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">algorithm</span><span class="p">])</span>
+
             <span class="c1"># Start a couple datapoints in for the tail average</span>
             <span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
             <span class="c1">#                      Feature #1448: Crucible web UI</span>
@@ -760,8 +801,34 @@
             <span class="c1"># that the padded period data points are not analysed for anomalies</span>
             <span class="c1"># for index in range(10, len(timeseries)):</span>
             <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">default_range</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)):</span>
+
+                <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">one_shot_algorithms</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="n">log_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+                <span class="k">if</span> <span class="p">((</span><span class="n">log_time</span> <span class="o">-</span> <span class="n">start_analysis</span><span class="p">)</span> <span class="o">%</span> <span class="mi">30</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">last_log_time</span> <span class="o">!=</span> <span class="n">log_time</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stilling running </span><span class="si">%s</span><span class="s1"> on slice </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> slices&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slices</span><span class="p">)))</span>
+                        <span class="n">last_log_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">log_time</span><span class="p">)</span>
+
                 <span class="n">sliced</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
-                <span class="n">anomaly</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">sliced</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span>
+                <span class="c1"># @modified 20220430 - Feature #4118: crucible - custom_algorithms</span>
+                <span class="c1">#                      Feature #3566: custom_algorithms</span>
+                <span class="n">anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">:</span>
+                    <span class="n">anomaly</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">sliced</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">custom_algorithms_to_check</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">timeseries_name</span><span class="p">,</span> <span class="n">sliced</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">],</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                            <span class="n">anomaly</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">del</span> <span class="n">anomalyScore</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">custom_algorithm_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
 
                 <span class="c1"># Point out the datapoint if it&#39;s anomalous</span>
                 <span class="k">if</span> <span class="n">anomaly</span><span class="p">:</span>
@@ -792,6 +859,18 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to save </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">results_filename</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20220430 - Feature #4118: crucible - custom_algorithms</span>
+            <span class="c1">#                   Feature #3566: custom_algorithms</span>
+            <span class="k">if</span> <span class="n">custom_algorithm_errors</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> custom algorithm errors encountered with </span><span class="si">%s</span><span class="s1">, last error - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">custom_algorithm_errors</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm_errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])))</span>
+
+            <span class="n">algorithm_end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ran </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_end</span> <span class="o">-</span> <span class="n">algorithm_start</span><span class="p">)))</span>
+
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: error thrown in algorithm running and plotting - </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
@@ -852,6 +931,23 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied to create sorted_anomalies on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
 
+    <span class="c1"># @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms</span>
+    <span class="c1"># Allow the user to pass run_algorithms to run</span>
+    <span class="n">use_consensus</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">CONSENSUS</span> <span class="k">as</span> <span class="n">use_consensus</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied to set uSE_CONSENSUS&#39;</span><span class="p">)</span>
+            <span class="n">use_consensus</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">use_consensus</span><span class="p">:</span>
+            <span class="n">use_consensus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_algorithms passed with the number of algorithms less than CONSENSUS, use_consensus set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">use_consensus</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied to set CONSENSUS&#39;</span><span class="p">)</span>
+
     <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
     <span class="c1"># Plot Skyline anomalies where CONSENSUS achieved and create file resources</span>
     <span class="c1"># skyline.anomalies_score.txt and skyline.anomalies.csv</span>
@@ -884,7 +980,9 @@
                     <span class="c1">#                      Feature #1448: Crucible web UI</span>
                     <span class="c1"># Added last_anomaly_timestamp to apply alert_interval against and</span>
                     <span class="c1"># alert_interval_discarded_anomalies.  If the alert interval is passed</span>
-                    <span class="k">if</span> <span class="n">consensus</span> <span class="o">&gt;=</span> <span class="n">CONSENSUS</span><span class="p">:</span>
+                    <span class="c1"># @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms</span>
+                    <span class="c1"># if consensus &gt;= CONSENSUS:</span>
+                    <span class="k">if</span> <span class="n">consensus</span> <span class="o">&gt;=</span> <span class="n">use_consensus</span><span class="p">:</span>
                         <span class="n">current_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">alert_interval</span> <span class="ow">and</span> <span class="n">last_anomaly_timestamp</span><span class="p">:</span>
                             <span class="n">time_between_anomalies</span> <span class="o">=</span> <span class="n">current_anomaly_timestamp</span> <span class="o">-</span> <span class="n">last_anomaly_timestamp</span>
@@ -908,7 +1006,9 @@
                     <span class="c1"># anomalies_score.append([ts, value, consensus, algorithms_triggered])</span>
                     <span class="k">if</span> <span class="n">append_anomaly</span><span class="p">:</span>
                         <span class="n">anomalies_score</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span><span class="p">])</span>
-                        <span class="k">if</span> <span class="n">consensus</span> <span class="o">&gt;=</span> <span class="n">CONSENSUS</span><span class="p">:</span>
+                        <span class="c1"># @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms</span>
+                        <span class="c1"># if consensus &gt;= CONSENSUS:</span>
+                        <span class="k">if</span> <span class="n">consensus</span> <span class="o">&gt;=</span> <span class="n">use_consensus</span><span class="p">:</span>
                             <span class="n">last_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -935,7 +1035,9 @@
                 <span class="n">sliced</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">anomalies_score</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">sliced</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                        <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">CONSENSUS</span><span class="p">:</span>
+                        <span class="c1"># @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms</span>
+                        <span class="c1"># if i[2] &gt;= CONSENSUS:</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">use_consensus</span><span class="p">:</span>
                             <span class="n">anomaly</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="c1"># Point out the datapoint if it is anomalous according to</span>
                 <span class="c1"># Skyline CONSENSUS</span>
@@ -965,7 +1067,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: creating anomalies_csv - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;timstamp,value,consensus_count,triggered_algorithms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;timestamp,value,consensus_count,triggered_algorithms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span> <span class="ow">in</span> <span class="n">anomalies_score</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">algos_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms_triggered</span><span class="p">)</span>
@@ -997,7 +1099,7 @@
                 <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
-                    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;timstamp,value,consensus,triggered_algorithms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;timestamp,value,consensus,triggered_algorithms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span> <span class="ow">in</span> <span class="n">alert_interval_discarded_anomalies</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">consensus</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms_triggered</span><span class="p">))</span>
@@ -1020,49 +1122,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

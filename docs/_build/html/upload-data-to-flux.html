@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>upload_data to Flux - EXPERIMENTAL &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>upload_data to Flux - EXPERIMENTAL &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Vista" href="vista.html" />
+    <link rel="next" title="Prometheus" href="prometheus.html" />
     <link rel="prev" title="Flux" href="flux.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,11 +71,21 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">upload_data to Flux - EXPERIMENTAL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-note-on-date-formats">A note on date formats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -122,6 +93,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -130,71 +104,32 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>upload_data to Flux - EXPERIMENTAL</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">upload_data to Flux - EXPERIMENTAL</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/upload-data-to-flux.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="upload-data-to-flux-experimental">
-<h1>upload_data to Flux - EXPERIMENTAL<a class="headerlink" href="#upload-data-to-flux-experimental" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="upload-data-to-flux-experimental">
+<h1>upload_data to Flux - EXPERIMENTAL<a class="headerlink" href="#upload-data-to-flux-experimental" title="Permalink to this heading"></a></h1>
 <p><strong>POST variables may change as this is a experimental feature</strong></p>
 <p><strong>SIMPLE</strong> data files can be uploaded via the /upload_data HTTP/S endpoint for
 Flux to process and fed to Graphite.  A number of things need to be enabled and
@@ -233,9 +168,9 @@ the upload (the /api?upload_status link is return on the Flux_frontend page or
 in the json response), continue with the next upload, etc.</p>
 <p>Skyline automates the conversion of SIMPLE columnar data into time series data,
 however seeing as not all data is defined or created equally, some information
-about the data needs to be passed with the data file/s to inform Skyline about
-the metric structure.  This makes setting up a upload process more work, but if
-you are uploading frequently then it is one off work.</p>
+about the data needs to be passed <a href="#id1"><span class="problematic" id="id2">*</span></a>info.json) with the data file/s to inform
+Skyline about the metric structure.  This makes setting up a upload process more
+work, but if you are uploading frequently then it is one off work.</p>
 <p>To ensure that naive data in the datetime column  can be handled, meaning not
 timezone aware date times e.g. <cite>16-05-2020 11:00</cite> you always need to pass a
 valid pytz timezone as listed in <a class="reference external" href="development/pytz.html#timezones-list-for-pytz-version">Timezones list for pytz version</a>.
@@ -266,22 +201,14 @@ lets call it 2020-05-16-11.device_id.012383.csv</p>
 <p>This data informs us of the times and values and things, but it does not tell us
 what metrics they should represent.  Skyline also needs to be informed about the
 header row and rows to ignore.  A info file is used to inform Skyline how to
-read and metric the data, take 2020-05-16-11.device_id.012383.info.json
-Note, in processing rows are 0-indexed</p>
-<p>Your mileage may vary on different date formats, use as acceptable pandas date
-formats.  Tested date formats known to work:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">16</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">2020</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span>     <span class="c1"># %d-%m-%Y %H:%M</span>
-<span class="mi">16</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">2020</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  <span class="c1"># %d-%m-%Y %H:%M:%S</span>
-<span class="mi">2020</span><span class="o">/</span><span class="mi">05</span><span class="o">/</span><span class="mi">16</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  <span class="c1"># %Y/%m/%d %H:%M:%S</span>
-<span class="mi">1589623200</span>           <span class="c1"># unix timestamp</span>
-</pre></div>
-</div>
-<p>Known incapable date format, this date format has failed to be interpreted as a
-naive date column in the <code class="docutils literal notranslate"><span class="pre">pandas.to_datetime</span></code> conversion:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2020</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">16</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  <span class="c1"># %Y-%m-%d %H:%M:%S</span>
-</pre></div>
+read and metric the data, take the info.json example below that would describe
+the 2020-05-16-11.device_id.012383.csv data above.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>in processing rows are 0-indexed</p>
 </div>
 <p><strong>info.json</strong></p>
+<p>The info.json file that would need to be uploaded with the</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="s2">&quot;parent_metric_namespace&quot;</span><span class="p">:</span> <span class="s2">&quot;temp_monitoring.warehouse.2.012383&quot;</span><span class="p">,</span>
   <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;GMT&quot;</span><span class="p">,</span>
@@ -292,7 +219,25 @@ naive date column in the <code class="docutils literal notranslate"><span class=
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Your date time column MUST be named date in the columns_to_metrics mapping.</p>
+<p><code class="docutils literal notranslate"><span class="pre">parent_metric_namespace</span></code> tells Skyline what metric names should be created.
+In this example the would result in metrics:</p>
+<ul class="simple">
+<li><p>temp_monitoring.warehouse.2.012383.roof</p></li>
+<li><p>temp_monitoring.warehouse.2.012383.floor</p></li>
+</ul>
+<p>Only alphanumeric chars and ‘.’, ‘_’, ‘-’ are allowed in the metric name, e.g.
+the <code class="docutils literal notranslate"><span class="pre">parent_metric_namespace</span></code> and <code class="docutils literal notranslate"><span class="pre">columns_to_metrics</span></code> that you pass.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>xlsx files <strong>are</strong> 0-indexed, csv files <strong>are not</strong> 0-indexed</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">skip_rows</span></code> tells Skyline to ignore rows 1, 2, 3, 4, 5 (but if it were
+0-indexed in a xlsx <code class="docutils literal notranslate"><span class="pre">skip_rows</span></code> would be set to 4).</p>
+<p><code class="docutils literal notranslate"><span class="pre">header_row</span></code> tells Skyline to use row 0 as the header row, e.g. the column
+names. Note that if you <code class="docutils literal notranslate"><span class="pre">skip_rows</span></code> your header row <strong>must</strong> be 0.</p>
+<p><code class="docutils literal notranslate"><span class="pre">columns_to_metrics</span></code> tells Skyline how to map the column names to metric
+names.  A one to one mapping is required for every column.  Your date time
+column <strong>must</strong> be named <code class="docutils literal notranslate"><span class="pre">date</span></code> in the <code class="docutils literal notranslate"><span class="pre">columns_to_metrics</span></code> mapping.</p>
 <p>For convenience sake you can also add additional elements to the info.json:</p>
 <ul class="simple">
 <li><p><cite>“debug”: “true”</cite> which outputs additional information regarding the imported
@@ -307,23 +252,8 @@ do <strong>note</strong>,  if you wish to resubmit data that is <strong>NOT IN T
 Graphite retention (old data) this will not have the desired affect as
 Graphite down sampling (aggregation) will already have occurred.</p></li>
 </ul>
-<p>This tells Skyline what the parent metric namespace should be which would
-result in metrics:</p>
-<ul class="simple">
-<li><p>temp_monitoring.warehouse.2.012383.roof</p></li>
-<li><p>temp_monitoring.warehouse.2.012383.floor</p></li>
-</ul>
-<p>xlsx files are 0-indexed, csv files are not 0-indexed.</p>
-<p>It tells Skyline to ignore rows 1, 2, 3, 4, 5 (but if it were 0-indexed skip_row
-would be set to 4).
-It tells Skyline to use row 0 as the header row, e.g. column names. Note that
-if you skip_rows your header row must be 0.
-It tells Skyline how to map the column names to metric names.  A one to one
-mapping it required for every column.  Once again, your date time column MUST be
-named date in the columns_to_metrics mapping.</p>
-<p>Only alphanumeric chars and ‘.’, ‘_’, ‘-‘ are allowed in the metric name, e.g.
-the parent_metric_namespace and columns_to_metrics that you pass.</p>
-<p>Requirements of the data file.  The data file must have a header row.</p>
+<p>Requirements of the data file.  The data file must have a header row e.g column
+names and must have at least one date time column and at least one value column.</p>
 <p>The required information elements are in the POST variables are:</p>
 <ul class="simple">
 <li><p>key (str)</p></li>
@@ -339,87 +269,78 @@ the parent_metric_namespace and columns_to_metrics that you pass.</p>
 <li><p>info_file (file)</p></li>
 <li><p>json_response</p></li>
 </ul>
-<p>An example of how to POST the above csv and info.csv with curl be would be as
+<p>An example of how to POST the above csv and info.json with curl be would be as
 follows.  Note that in this instance you would need a your
 <a class="reference internal" href="skyline.html#settings.FLUX_UPLOADS_KEYS" title="settings.FLUX_UPLOADS_KEYS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_UPLOADS_KEYS</span></code></a> to be set with:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">FLUX_UPLOADS_KEYS</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;temp_monitoring.warehouse.2.012383&#39;</span><span class="p">:</span> <span class="s1">&#39;484166bf-df66-4f7d-ad4a-9336da9ef620&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;484166bf-df66-4f7d-ad4a-9336da9ef620&#39;</span><span class="p">:</span> <span class="s1">&#39;temp_monitoring.warehouse.2.012383&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <p>curl request.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl <span class="se">\</span>
-     -F <span class="s2">&quot;key=484166bf-df66-4f7d-ad4a-9336da9ef620&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;timezone=GMT&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;parent_metric_namespace=temp_monitoring.warehouse.2.012383&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;archive=none&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;format=csv&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;skip_rows=5&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;header_row=0&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;date_orientation=rows&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;columns_to_metrics=date,roof,floor&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;data_file=@&lt;FULL_PATH_TO_FILE&gt;/2020-05-16-11.device_id.012383.csv&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;info_file=@&lt;FULL_PATH_TO_FILE&gt;/info.json&quot;</span> <span class="se">\</span>
-     -F <span class="s2">&quot;json_response=true&quot;</span> <span class="se">\</span>
-     https://<span class="nv">$SKYLINE_HOST</span>/upload_data
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;key=484166bf-df66-4f7d-ad4a-9336da9ef620&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;timezone=GMT&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;parent_metric_namespace=temp_monitoring.warehouse.2.012383&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;archive=none&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;format=csv&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;skip_rows=5&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;header_row=0&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;date_orientation=rows&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;columns_to_metrics=date,roof,floor&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;data_file=@&lt;FULL_PATH_TO_FILE&gt;/2020-05-16-11.device_id.012383.csv&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;info_file=@&lt;FULL_PATH_TO_FILE&gt;/info.json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-F<span class="w"> </span><span class="s2">&quot;json_response=true&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>https://<span class="nv">$SKYLINE_HOST</span>/upload_data
 </pre></div>
 </div>
+<section id="a-note-on-date-formats">
+<h2>A note on date formats<a class="headerlink" href="#a-note-on-date-formats" title="Permalink to this heading"></a></h2>
+<p>Your mileage may vary on different date formats, use as acceptable pandas date
+formats.  Tested date formats known to work:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">16</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">2020</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span>     <span class="c1"># %d-%m-%Y %H:%M</span>
+<span class="mi">16</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">2020</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  <span class="c1"># %d-%m-%Y %H:%M:%S</span>
+<span class="mi">2020</span><span class="o">/</span><span class="mi">05</span><span class="o">/</span><span class="mi">16</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  <span class="c1"># %Y/%m/%d %H:%M:%S</span>
+<span class="mi">1589623200</span>           <span class="c1"># unix timestamp</span>
+</pre></div>
 </div>
+<p>Known incapable date format, this date format has failed to be interpreted as a
+naive date column in the <code class="docutils literal notranslate"><span class="pre">pandas.to_datetime</span></code> conversion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2020</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">16</span> <span class="mi">11</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">00</span>  <span class="c1"># %Y-%m-%d %H:%M:%S</span>
+</pre></div>
+</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="vista.html" class="btn btn-neutral float-right" title="Vista" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="flux.html" class="btn btn-neutral float-left" title="Flux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="flux.html" class="btn btn-neutral float-left" title="Flux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="prometheus.html" class="btn btn-neutral float-right" title="Prometheus" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

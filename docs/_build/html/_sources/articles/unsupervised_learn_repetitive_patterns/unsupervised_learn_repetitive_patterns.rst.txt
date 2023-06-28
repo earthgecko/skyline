@@ -1,0 +1,79 @@
+.. role:: skyblue
+.. role:: red
+
+Unsupervised learning of repetitive patterns
+============================================
+
+Unsupervised learning is difficult for a number of reasons.
+
+Regardless of the method/s employed one of the main reasons it is difficult is
+because getting it wrong makes the process useless in practical terms. When
+unsupervised learning gets things wrong, even with a tiny error rate, it
+invalidates the trust that we have in ALL the results.
+
+Take for example an unsupervised method of identifying cancer in x-ray images.
+If the method achieved a success rate of 98% positively identifying cases, but
+did not correctly identify 2% of positive cases, it would be useful.  However
+traditional methods would still need to be employed to check all the negative
+results because there would be a possibility that the method had achieved a
+false negative on every negative result and every negative result would have to
+verified.
+
+In this scenario the method identifying false positives, although bad, is nowhere
+near as bad as the method returning false negatives.  Being diagnosis with cancer
+and NOT having cancer is far better than being diagnosed as NOT having cancer
+but actually having it.
+
+There is a lot of hype around unsupervised learning, but if we look at it
+critically it is easy to see how easily undesirable results could be achieved.
+It is very short sighted to simply put one's faith in some marketing hype or
+simply accept the blurb without simply thinking about the HOW.
+
+In all honesty the machine learning domain is still fairly primitive, this is
+especially the case in unsupervised learning.  In the domain you will encounter
+concepts such as drift (gradual change over time), model updating and retraining,
+etc, etc.  Everyone is out to tell you how good it is, this AI thing and that AI
+thing.
+
+What are the consequences of it getting it wrong?  Which it inevitably will at
+some point.  How are machine learning and AI so different from us?  How is it
+possible that this domain is somehow immune from learning well / good and
+learning badly?
+
+The truth is it is not.  It can learn badly and it can, does and will get it
+wrong.
+
+So how does this reality of the inconveniences of unsupervised learning fit into
+the anomaly detection arena?  Proceed with caution.
+
+What use is it employing some methodology that is supposed to be autonomous but
+cannot be trusted all of the time and probably needs an eye kept on it to make
+sure it does not start producing undesirable results?  The method may be
+unsupervised, but that does not mean it does not need to be supervised itself!
+
+
+
+
+
+
+How well does it work?
+
+This is a graph of the impact that Ionosphere has had on the anomaly count of
+`ionosphere_enabled` metrics before and after the deployment of Ionosphere.
+
+.. image:: images/ionosphere/ionosphere_impact_on_anomaly_count.png
+
+
+So Ionosphere gives you 2 options:
+
+.. figure:: images/ionosphere/create.and.do.not.learn.png
+
+  Only make a features profile based on the :mod:`settings.FULL_DURATION` data or the Mirage ``SECOND_ORDER_RESOLUTION_SECONDS``
+
+.. figure:: images/ionosphere/create.and.learn.png
+
+  This is not an anomaly now or then or in the forseeable future if it
+  looks anything like the :mod:`settings.FULL_DURATION` or any of the multiple
+  resolution Graphite graphs, LEARN it at the ``learn_full_duration``.
+
+This means you do not have to ship that earthquake that happened 17 days ago into
