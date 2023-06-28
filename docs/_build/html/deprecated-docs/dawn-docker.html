@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Debian and Vagrant Installation Tips &mdash; Skyline 4.0.0 documentation</title>
+  <title>Development - dawn-docker &mdash; Skyline 4.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="docker" href="docker.html" />
-    <link rel="prev" title="Deprecated docs" href="index.html" /> 
+    <link rel="next" title="Release Notes" href="../releases.html" />
+    <link rel="prev" title="Running Skyline in a Python 2.7 virtualenv" href="running-in-python-virtualenv-py2.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -94,10 +94,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Deprecated docs</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
 <li class="toctree-l2"><a class="reference internal" href="docker.html">docker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="dawn-docker.html">Development - dawn-docker</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Development - dawn-docker</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#no-longer-maintained">No longer maintained</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-script-utils-dawn-skyline-docker-dawn-sh">Build script - utils/dawn/skyline.docker.dawn.sh</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#important-notes">IMPORTANT NOTES</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#user-defined-variables">USER DEFINED VARIABLES</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deploying-skyline-on-centos-7-6-using-skyline-docker-dawn-sh">Deploying Skyline on CentOS 7.6 using skyline.docker.dawn.sh</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
@@ -122,9 +131,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">Deprecated docs</a></li>
-      <li class="breadcrumb-item active">Debian and Vagrant Installation Tips</li>
+      <li class="breadcrumb-item active">Development - dawn-docker</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/deprecated-docs/debian-and-vagrant-installation-tips.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/deprecated-docs/dawn-docker.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -132,92 +141,72 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="debian-and-vagrant-installation-tips">
-<h1>Debian and Vagrant Installation Tips<a class="headerlink" href="#debian-and-vagrant-installation-tips" title="Permalink to this heading"></a></h1>
-<p>Please note that this info is old and has not been updated since 25 Sep 2013</p>
-<p>### Get a Wheezy box
-From this useful [tutorial](<a class="reference external" href="http://dominique.broeglin.fr/2012/02/25/wheezy-64-vagrant-base-box.html">http://dominique.broeglin.fr/2012/02/25/wheezy-64-vagrant-base-box.html</a>)</p>
-<p>The previous version, Debian Squeeze, struggled with an easy installation of
-Redis and you can get it working with back-ports.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">vagrant</span> <span class="pre">box</span> <span class="pre">add</span> <span class="pre">wheezy64</span> <span class="pre">http://dl.dropbox.com/u/937870/VMs/wheezy64.box</span>
-<span class="pre">mkdir</span> <span class="pre">skyline</span>
-<span class="pre">cd</span> <span class="pre">skyline</span>
-<span class="pre">vagrant</span> <span class="pre">init</span> <span class="pre">wheezy64</span>
-<span class="pre">`</span></code></p>
-<p>### Extra Vagrant configuration
-Forward the port required for the web application</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">config.vm.network</span> <span class="pre">:forwarded_port,</span> <span class="pre">guest:</span> <span class="pre">1500,</span> <span class="pre">host:</span> <span class="pre">1500</span>
-<span class="pre">`</span></code></p>
-<p>### Python requirements
-You’ll need <strong>pip</strong> to be able to add some of the requirements for python, as
-well as <strong>python-dev</strong> without which some of the packages used with pip will
-not work!</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python-dev</span>
-<span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python-pip</span>
-<span class="pre">`</span></code></p>
-<p>After that we can clone the project’s repository</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/earthgecko/skyline.git</span>
-<span class="pre">`</span></code></p>
-<p>Once we have the project we can change into the folder and start going through
-all the python dependencies.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">cd</span> <span class="pre">skyline</span>
-<span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span>
-<span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python-numpy</span> <span class="pre">python-scipy</span> <span class="pre">python-scikits.statsmodels</span>
-<span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">patsy</span> <span class="pre">msgpack_python</span>
-<span class="pre">`</span></code></p>
-<p>### Skyline dependencies</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span>
-<span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python-numpy</span> <span class="pre">python-scipy</span> <span class="pre">python-scikits.statsmodels</span>
-<span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">patsy</span> <span class="pre">msgpack_python</span>
-<span class="pre">`</span></code></p>
-<p>### Redis 2.6 on Debian Wheezy
-Version 2.6 is available on the Wheezy back-port which means it will be
-available in the next Debian stable version and was back ported to Wheezy.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">sudo</span> <span class="pre">vim</span> <span class="pre">/etc/apt/sources.list</span>
-<span class="pre">`</span></code></p>
-<p>Add the back-port, replace <strong>$YOUR_CONFIGURATION</strong> according to your local
-configuration.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">deb</span> <span class="pre">http://**$YOUR_CONFIGURATION**.debian.org/debian/</span> <span class="pre">wheezy-backports</span> <span class="pre">main</span>
-<span class="pre">`</span></code></p>
-<p>Update and install Redis-Server, don’t forget to kill the process as it will be
-started with the default config right after the installation.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">update</span>
-<span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">-t</span> <span class="pre">wheezy-backports</span> <span class="pre">install</span> <span class="pre">redis-server</span>
-<span class="pre">sudo</span> <span class="pre">pkill</span> <span class="pre">redis</span>
-<span class="pre">`</span></code></p>
-<p>### Skyline configuration
-With all dependencies installed you can now copy an example for the settings
-file. This will be the place to add your Graphite URL and other details but for
-now we only need to update the IP bound to the web application so the Vagrant
-host will display it.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">cp</span> <span class="pre">src/settings.py.example</span> <span class="pre">src/settings.py</span>
-<span class="pre">`</span></code></p>
-<p>Edit file for bind.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">vim</span> <span class="pre">src/settings.py</span>
-<span class="pre">`</span></code></p>
-<p>And change the IP to listen on host’s requests.</p>
-<p><code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">WEBAPP_IP</span> <span class="pre">=</span> <span class="pre">'0.0.0.0'</span>
-<span class="pre">`</span></code></p>
+  <section id="development-dawn-docker">
+<h1>Development - dawn-docker<a class="headerlink" href="#development-dawn-docker" title="Permalink to this heading"></a></h1>
+<section id="no-longer-maintained">
+<h2>No longer maintained<a class="headerlink" href="#no-longer-maintained" title="Permalink to this heading"></a></h2>
+<p>Running Skyline on docker is possible but it is no longer maintained.</p>
+</section>
+<section id="build-script-utils-dawn-skyline-docker-dawn-sh">
+<h2>Build script - utils/dawn/skyline.docker.dawn.sh<a class="headerlink" href="#build-script-utils-dawn-skyline-docker-dawn-sh" title="Permalink to this heading"></a></h2>
+<p>The Skyline dawn docker build script is for <strong>TESTING</strong> only, it is not
+recommended for production use and it is not meant for localhost (unless you
+have a CentOS 7.6 VM running on you localhost).  If you want to run Skyline on
+docker on your localhost see the <a class="reference external" href="docker.html">Docker</a> page.</p>
+<p>This script installs and sets up the required components to run and test Skyline
+running in docker containers on CentOS 7.6.</p>
+<section id="important-notes">
+<h3>IMPORTANT NOTES<a class="headerlink" href="#important-notes" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p>The script is IPv4 ONLY.  It DISABLES IPv6 is on the system.</p></li>
+<li><p>This script manages the basic requirements on firewall-cmd and firewalld
+it allows public access to port 22, 80 and 443 and restricted access to port
+8888 for Graphite.</p></li>
+</ul>
+</section>
+<section id="user-defined-variables">
+<h3>USER DEFINED VARIABLES<a class="headerlink" href="#user-defined-variables" title="Permalink to this heading"></a></h3>
+<p>Please populate these variables as appropriate with the values of YOUR set up
+and write them to /etc/skyline/skyline.dawn.conf to be sourced by the build
+script.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">YOUR_SERVER_IP_ADDRESS</span><span class="o">=</span><span class="s2">&quot;x.x.x.x&quot;</span><span class="w">  </span><span class="c1"># YOUR Skyline server public IPv4 address</span>
+<span class="nv">YOUR_OTHER_IP_ADDRESS</span><span class="o">=</span><span class="s2">&quot;x.x.x.x&quot;</span><span class="w">   </span><span class="c1"># YOUR current public IPv4 address that you will be connecting from</span>
+<span class="nv">SKYLINE_RELEASE</span><span class="o">=</span><span class="s2">&quot;v1.2.18&quot;</span><span class="w">         </span><span class="c1"># The Skyline release to deploy</span>
+</pre></div>
+</div>
+</section>
+<section id="deploying-skyline-on-centos-7-6-using-skyline-docker-dawn-sh">
+<h3>Deploying Skyline on CentOS 7.6 using skyline.docker.dawn.sh<a class="headerlink" href="#deploying-skyline-on-centos-7-6-using-skyline-docker-dawn-sh" title="Permalink to this heading"></a></h3>
+<p>Use sudo as appropriate.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the skyline.dawn.conf files and add the USER DEFINED VARIABLES</span>
+vi<span class="w"> </span>/etc/skyline/skyline.dawn.conf
+
+<span class="c1"># Fetch the build script</span>
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>wget
+wget<span class="w"> </span>-O<span class="w"> </span>/tmp/skyline.docker.dawn.sh<span class="w"> </span>https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.docker.dawn.sh
+
+<span class="c1"># Always review scripts before running them</span>
+cat<span class="w"> </span>/tmp/skyline.docker.dawn.sh
+
+<span class="c1"># Run the build script</span>
+chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/tmp/skyline.docker.dawn.sh
+/tmp/skyline.docker.dawn.sh
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span><span class="w"> </span>/var/log/skyline/*.log
+</pre></div>
+</div>
+</section>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Deprecated docs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="docker.html" class="btn btn-neutral float-right" title="docker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="running-in-python-virtualenv-py2.html" class="btn btn-neutral float-left" title="Running Skyline in a Python 2.7 virtualenv" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../releases.html" class="btn btn-neutral float-right" title="Release Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
