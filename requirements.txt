@@ -36,12 +36,14 @@ gunicorn==20.1.0
 pipdeptree==2.9.3
 scikit-learn==1.2.2
 future==0.18.3
+git+https://github.com/earthgecko/tsfresh@3d5a320#egg=tsfresh
 termcolor==2.3.0
 py==1.11.0
 pytest==7.4.0
 SQLAlchemy==1.4.48
 pymemcache==3.5.2
 PyJWT==2.7.0
+git+https://github.com/earthgecko/luminol@40791e2#egg=luminol
 slackclient==2.9.4
 aiohttp==3.8.4
 urllib3==1.26.16
@@ -51,6 +53,7 @@ falcon==3.1.1
 xlrd==1.2.0
 pandas_log==0.1.6
 timeout-decorator==0.5.0
+git+https://github.com/earthgecko/adtk@895c517#egg=adtk
 mass-ts==0.1.4
 boto3==1.26.160
 bottleneck==1.3.2
