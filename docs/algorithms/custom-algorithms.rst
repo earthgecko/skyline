@@ -15,6 +15,21 @@ algorithms.  This will save you time if you do it properly from the beginning.
 Custom algorithms are currently only implemented in analyzer (also covers
 analyzer_batch), crucible and mirage.
 
+Available custom algorithms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is a collection of custom algorithms already available in Skyline and each
+has a page here.  However currently most are only documented in the code and their
+pages refer to the source code.
+
+The performance and accuracy of the available algorithms vary, their inclusion is
+not a validation of the method, simply that they can function as outlier detectors.
+Each generates different results and few seldom agree.  The Vortex webapp UI can be
+used to run them adhoc on any time series should you wish to assess there performance.
+
+Implementing a custom algorithm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 To implement a custom algorithm, you need to define it in
 :mod:`settings.CUSTOM_ALGORITHMS` and add the Python source custom algorithm
 file.
@@ -403,17 +418,6 @@ once.  As shown in the example below.
 This allows for errors to be encountered while not spewing 1000s and 1000s of
 lines of errors to disk based the application logs and incurring masses of I/O.
 
-Available custom algorithms
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-There is a collection of custom algorithms already available in Skyline and each
-has a page here.  However currently most are only documented in the code and their
-pages refer to the source code.
-
-The performance and accuracy of the available algorithms vary, their inclusion is
-not a validation of the method, simply that they can function as outlier detectors.
-Each generates different results and few seldom agree.  The Vortex webapp UI can be
-used to run them adhoc on any time series should you wish to assess there performance.
 
 Example custom algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~~~

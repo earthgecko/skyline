@@ -60,7 +60,8 @@ Realistic expectations
 Anomaly detection is not easy.  Skyline is not easy to set up, it has a number
 of moving parts that need to be orchestrated.  Further to this, for Skyline to
 be configured, trained and start learning takes time.  But rest assured once set
-up, it just runs and runs and runs, requiring minimal maintenance, if any.
+up, it just runs and runs and runs, requiring minimal maintenance, if any (apart
+from when things need to be upgraded).
 
 Anomaly detection is a journey not an app
 -----------------------------------------
@@ -154,10 +155,19 @@ Train Ionosphere
 Via the alert emails or in the Skyline Ionosphere UI, train Ionosphere on what
 is NOT anomalous.
 
+Play with Vortex
+~~~~~~~~~~~~~~~~
+
+After you have over 7 days of data in the system, you can run whatever metrics
+you want through all the different algorithms and see their results, just for
+fun.
+
 Ignore Crucible
 ---------------
 
 Still EXPERIMENTAL - for the time being.
+
+You will probably like Vortex more.
 
 By default Crucible is enabled in the ``settings.py`` however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate
