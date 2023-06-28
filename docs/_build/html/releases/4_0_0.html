@@ -237,6 +237,9 @@ they are not intended to be used as custom_algorithms in Analyzer):</p>
 </ul>
 <p>Learning repetitive patterns has been added.</p>
 <p>An adhoc analysis service has been added called Vortex.</p>
+<p>There is a new internal monitoring service named Thunder that handles and routes
+internal alerts relating to metric namespaces and monitors the internal
+availability and functioning of the Skyline apps.</p>
 <p>There has been a lot of computationally performance improvements by refactoring
 all/most viable methods in algorithms and data processing into numba functions
 where appropriate.</p>
@@ -296,63 +299,14 @@ stumpy version if available.  matrixprofile has been removed as a dependency.</p
 </section>
 <section id="prometheus-victoriametrics-metrics">
 <h2>Prometheus/VictoriaMetrics metrics<a class="headerlink" href="#prometheus-victoriametrics-metrics" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Accept labelled metrics data from Prometheus, InfluxDB (telegraf) and VictoriaMetrics.</p></li>
+<li><p>Use VictoriaMetrics as Skyline’s longer term TSDB for labelled metrics.</p></li>
+</ul>
 </section>
 <section id="changes">
 <h2>Changes<a class="headerlink" href="#changes" title="Permalink to this heading"></a></h2>
 <p>The changes list is LONG, so listed at the end of this page.</p>
-<ul class="simple">
-<li><p>Handle multiple metrics in victoriametrics response (4776)</p></li>
-<li><p>webapp - link to current VictoriaMetrics graph (4772)</p></li>
-<li><p>analyzer_labelled_metrics - monotonicity checked incorrect classification (4766)</p></li>
-<li><p>custom_algorithms - normal_peaks (4764)</p></li>
-<li><p>Group metrics based on names and labels (4762)</p></li>
-<li><p>Use gevent gunicorn worker_class (4756)</p></li>
-<li><p>csv_to_timeseries (4754)</p></li>
-<li><p>custom_algorithm - pca (4750)</p></li>
-<li><p>custom_algorithm - isolation_forest (4748)</p></li>
-<li><p>custom_algorithm - dbscan (4746)</p></li>
-<li><p>custom_algorithms - spectral_residual (4744)</p></li>
-<li><p>custom_algorithms - skyline_prophet (4742)</p></li>
-<li><p>custom_algorithms - lof (4740)</p></li>
-<li><p>Allow first_hour_average to handle different resolution (4738)</p></li>
-<li><p>custom_algorithms - sigma (4736)</p></li>
-<li><p>mirage_vortex (4734)</p></li>
-<li><p>flux vortex (4732)</p></li>
-<li><p>vortex (4728)</p></li>
-<li><p>custom_algorithms - anomalous_daily_peak (4724)</p></li>
-<li><p>Handle alert and waterfall alert overlap (4722)</p></li>
-<li><p>dotted_representation breaking alert resend_queue (4720)</p></li>
-<li><p>ionosphere.learn_repetitive_patterns - learning repetitively from recent patterns (4718)</p></li>
-<li><p>opentelemetry check is_instrumented_by_opentelemetry (4714)</p></li>
-<li><p>Reset mirage trigger_history on Ionosphere match (4712)</p></li>
-<li><p>ionosphere - store and cache fp minmax data (4708)</p></li>
-<li><p>Add request id and timing to ionosphere requests (4706)</p></li>
-<li><p>get_ionosphere_performance - allow multiple metric_like string (4704)</p></li>
-<li><p>numba optimisations (4702)</p></li>
-<li><p>algorithms - single series (4700)</p></li>
-<li><p>Optimise Ionosphere Redis sets refresh when busy (4698)</p></li>
-<li><p>analyzer - anomalous metrics sets not flushing (4696)</p></li>
-<li><p>analyzer - illuminance.all key (4676)</p></li>
-<li><p>cloudburst active events only (4674)</p></li>
-<li><p>ionosphere_downsampled (4672)</p></li>
-<li><p>settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS (4662)</p></li>
-<li><p>ionosphere.learn_repetitive_patterns (4658)</p></li>
-<li><p>http_alerter - dotted_representation (4652)</p></li>
-<li><p>luminosity.aligned.metrics (4648)</p></li>
-<li><p>functions.metrics.labelled_metrics_remove_labels (4632)</p></li>
-<li><p>Change all dict copy to deepcopy (4624)</p></li>
-<li><p>Support labelled metrics (4614)</p></li>
-<li><p>POC - prometheus, redistimeseries, victoriametrics (4610)</p></li>
-<li><p>functions.settings.manage_external_settings - use cache data on bad response (4608)</p></li>
-<li><p>Ionosphere - inference - further validate all_in_range (4588)</p></li>
-<li><p>custom_algorithm - skyline_ARTime (4584)</p></li>
-<li><p>POC ARTime (4582)</p></li>
-<li><p>webapp - api_get_fp_timeseries (4578)</p></li>
-<li><p>mirage - process multiple metrics (4576)</p></li>
-<li><p>Reduce cluster logging (4568)</p></li>
-<li><p>http_alerter - discard after x resend attempts (4566)</p></li>
-<li><p>authoritative_node (4564)</p></li>
-</ul>
 </section>
 <section id="upgrade-notes">
 <h2>Upgrade notes<a class="headerlink" href="#upgrade-notes" title="Permalink to this heading"></a></h2>
@@ -391,7 +345,6 @@ to make a decision and assess whether you want to upgrade to use redis-stack-ser
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the new version</span>
 <span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v4.0.0&quot;</span><span class="w">    </span><span class="c1"># Your new Skyline version</span>
 <span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v3.0.4&quot;</span><span class="w">    </span><span class="c1"># Your old Skyline version</span>
-<span class="c1"># OLD_SKYLINE_VERSION=&quot;v3.0.0&quot;    # Your old Skyline version</span>
 
 <span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span><span class="w">                 </span><span class="c1"># Your Skyline path</span>
 <span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">  </span><span class="c1"># Your new Skyline path</span>
