@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upgrading - Redis to redis-stack-server &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Upgrading - Redis to redis-stack-server</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/upgrading/redis-to-redis-stack-server.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="upgrading-redis-to-redis-stack-server">
+<h1>Upgrading - Redis to redis-stack-server<a class="headerlink" href="#upgrading-redis-to-redis-stack-server" title="Permalink to this heading"></a></h1>
+<p>This section covers the steps required to upgrade from running Skyline Redis to
+redis-stack-server.  It requires the Redis server version to be &gt;= 5 as the RDB
+data from Redis 5 is compatibile with Redis 6.2</p>
+<p><strong>This is a guide only</strong>, your Redis set up and configuration may be different, first
+read through all the steps and determine how they fit in with your set up, paths,
+ports, etc.</p>
+<p>Although redis.io has yum/apt repos with a packaged version they provide
+redis-stack-server RC (release candidate) packages at times and in terms of Skyline
+Redis needs to be stable, using the download binaries for the OS is a more stable
+method and the method described here.</p>
+<p>Assumptions made:
+- Your Redis is on port 6379
+- YOU read the paths in the below guide and assess them relating to your set up</p>
+<p>Things you need to determine beforehand:
+- Your Redis password
+- The path to your existing Redis dump.rdb (e.g. /var/lib/redis/6379/dump.rdb)
+- Whether you just want to add <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">redistimeseries.so</span></code> to your Redis config</p>
+<blockquote>
+<div><p>or whether you want to run the Redis 6.2 config.</p>
+</div></blockquote>
+<p>The upgrade process.  First we install redis-stack-server (CentOS and Ubuntu
+patterns below), then we stop Skyline services, stop Redis, copy the dump.rdb
+file to redis-stack-server and then start redis-stack-server and start the
+Skyline services again.</p>
+<p>You will then need to update any of your own things that start/stop or
+control/monitor the redis-server process and update to use the
+redis-stack-server process.</p>
+<ul class="simple">
+<li><p>First install redis-stack-server</p></li>
+<li><p>For CentOS 8 Stream (Ubuntu is below)</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CentOS 8</span>
+<span class="nv">REDIS_STACK_VERSION</span><span class="o">=</span><span class="s2">&quot;redis-stack-server-6.2.6-v7&quot;</span>
+mkdir<span class="w"> </span>/opt/redis-stack-server
+wget<span class="w"> </span>-O<span class="w"> </span><span class="s2">&quot;/opt/redis-stack-server/</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">.rhel8.x86_64.tar.gz&quot;</span><span class="w"> </span><span class="s2">&quot;https://packages.redis.io/redis-stack/</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">.rhel8.x86_64.tar.gz&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/redis-stack-server
+tar<span class="w"> </span>-zxvf<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">.rhel8.x86_64.tar.gz&quot;</span>
+<span class="c1"># Deploy as the redis.io yum package deploys</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/redis-stack
+chown<span class="w"> </span>nobody:nobody<span class="w"> </span>/opt/redis-stack
+rsync<span class="w"> </span>-az<span class="w"> </span><span class="s2">&quot;/opt/redis-stack-server/</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">/&quot;</span><span class="w"> </span>/opt/redis-stack/
+chown<span class="w"> </span>-R<span class="w"> </span>nobody:nobody<span class="w"> </span>/opt/redis-stack
+mkdir<span class="w"> </span>-p<span class="w"> </span>/var/lib/redis-stack
+chown<span class="w"> </span>-R<span class="w"> </span>nobody:nobody<span class="w"> </span>/var/lib/redis-stack
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Ubuntu</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Ubuntu 20.04 and 22.04</span>
+<span class="nb">source</span><span class="w"> </span>/etc/lsb-release
+<span class="nv">REDIS_STACK_VERSION</span><span class="o">=</span><span class="s2">&quot;redis-stack-server-6.2.6-v7&quot;</span>
+mkdir<span class="w"> </span>/opt/redis-stack-server
+wget<span class="w"> </span>-O<span class="w"> </span><span class="s2">&quot;/opt/redis-stack-server/</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">DISTRIB_CODENAME</span><span class="si">}</span><span class="s2">.x86_64.tar.gz&quot;</span><span class="w"> </span><span class="s2">&quot;https://packages.redis.io/redis-stack/</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">DISTRIB_CODENAME</span><span class="si">}</span><span class="s2">.x86_64.tar.gz&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>/opt/redis-stack-server
+tar<span class="w"> </span>-zxvf<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">CODENAME</span><span class="si">}</span><span class="s2">.x86_64.tar.gz&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/redis-stack
+chown<span class="w"> </span>nobody:nogroup<span class="w"> </span>/opt/redis-stack
+rsync<span class="w"> </span>-az<span class="w"> </span><span class="s2">&quot;/opt/redis-stack-server/</span><span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span><span class="s2">/&quot;</span><span class="w"> </span>/opt/redis-stack/
+chown<span class="w"> </span>-R<span class="w"> </span>nobody:nogroup<span class="w"> </span>/opt/redis-stack
+mkdir<span class="w"> </span>-p<span class="w"> </span>/var/lib/redis-stack
+chown<span class="w"> </span>-R<span class="w"> </span>nobody:nogroup<span class="w"> </span>/var/lib/redis-stack
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>On both CentOS and Ubuntu create the systemd service file</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Unit]</span>
+<span class="s2">Description=Redis stack server</span>
+<span class="s2">Documentation=https://redis.io/</span>
+<span class="s2">After=network.target</span>
+
+<span class="s2">[Service]</span>
+<span class="s2">Type=simple</span>
+<span class="s2">User=nobody</span>
+<span class="s2">ExecStart=/opt/redis-stack/bin/redis-server /etc/redis-stack.conf</span>
+<span class="s2">WorkingDirectory=/var/lib/redis-stack</span>
+<span class="s2">UMask=0077</span>
+
+<span class="s2">[Install]</span>
+<span class="s2">WantedBy=multi-user.target&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/systemd/system/redis-stack-server.service
+systemctl<span class="w"> </span>daemon-reload
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Decide on the Redis config you want to use.  If you want to use your own, then
+copy it to the redis-stack.conf and add <code class="docutils literal notranslate"><span class="pre">loadmodule</span> <span class="pre">/opt/redis-stack/lib/redistimeseries.so</span></code>:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># SET THIS TO YOUR_REDIS_CONFIG</span>
+<span class="c1">#REDIS_CONF=/etc/redis.conf</span>
+<span class="c1">#REDIS_CONF=/etc/redis/6379/redis.conf</span>
+<span class="nv">REDIS_CONF</span><span class="o">=</span>&lt;YOUR_REDIS_CONFIG&gt;
+
+cp<span class="w"> </span>/etc/redis-stack.conf<span class="w"> </span>/etc/redis-stack.conf.<span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span>.bak
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REDIS_CONF</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# loadmodule \/path\/to\/other_module.so/# loadmodule \/path\/to\/other_module\.so\nloadmodule \/opt\/redis-stack\/lib\/redistimeseries\.so/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span>/etc/redis-stack.conf
+<span class="c1"># Whichs adds the following line</span>
+<span class="c1"># loadmodule /opt/redis-stack/lib/redistimeseries.so</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>If you want to use the default Redis 6.2 config with the required changes
+then do the following</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># SET THIS TO YOUR REDIS PASSWORD</span>
+<span class="nv">REDIS_PASSWORD</span><span class="o">=</span>&lt;YOUR_REDIS_PASSWORD&gt;
+
+cp<span class="w"> </span>/etc/redis-stack.conf<span class="w"> </span>/etc/redis-stack.conf.<span class="si">${</span><span class="nv">REDIS_STACK_VERSION</span><span class="si">}</span>.bak
+wget<span class="w"> </span>-O<span class="w"> </span>/opt/redis-stack-server/redis.6.2.github.conf<span class="w"> </span>https://raw.githubusercontent.com/redis/redis/6.2/redis.conf
+cat<span class="w"> </span>/opt/redis-stack-server/redis.6.2.github.conf<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# unixsocketperm 700/# unixsocketperm 700\nunixsocket \/tmp\/redis\.sock\nunixsocketperm 777/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# requirepass foobared/# requirepass foobared\nrequirepass &#39;</span><span class="nv">$REDIS_PASSWORD</span><span class="s1">&#39;/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# loadmodule \/path\/to\/other_module.so/# loadmodule \/path\/to\/other_module\.so\nloadmodule \/opt\/redis-stack\/lib\/redistimeseries\.so/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/bind 127\.0\.0\.1 -::1/# bind 127\.0\.0\.1 -::1\nbind 127\.0\.0\.1/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# supervised auto/# supervised auto\nsupervised systemd/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/dir \.\//# dir \.\/\ndir \/var\/lib\/redis-stack/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# maxmemory-policy noeviction/# maxmemory-policy noeviction\nmaxmemory-policy noeviction/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/appendonly no/# appendonly no\nappendonly yes/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/# save 60 10000/# save 60 10000\n# Skyline reduce save I\/O\nsave 300 1\n save 60 200000\nsave 10 500000/1&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>&gt;<span class="w"> </span>/opt/redis-stack-server/skyline.redis.6.2.conf
+cat<span class="w"> </span>/opt/redis-stack-server/skyline.redis.6.2.conf<span class="w"> </span>&gt;<span class="w"> </span>/etc/redis-stack.conf
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>redis-stack-server is now installed</p></li>
+<li><p>Stop/disable any/all service controls like monit, etc that are controlling
+Skyline services.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop/disable any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+
+<span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># or do not wish to run.</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">snab</span>
+<span class="s2">flux</span>
+<span class="s2">horizon&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Stop/disable any/all service controls like monit, etc that are controlling
+Redis, for example.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop/disable any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Redis.</span>
+systemctl<span class="w"> </span>stop<span class="w"> </span>redis
+systemctl<span class="w"> </span>disable<span class="w"> </span>redis
+<span class="c1"># ALSO REMOVE ANY CHECKS THAT WOULD RESTART THE REDIS SERVICE</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Copy the dump.rdb file to redis-stack-server</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># SET THE PATH TO YOUR dump.rdb file, e.g.</span>
+<span class="c1"># RDB_FILE=&quot;/var/lib/redis/6379/dump.rdb&quot;</span>
+<span class="nv">RDB_FILE</span><span class="o">=</span><span class="s2">&quot;&lt;YOUR_RDB_FILE&gt;&quot;</span>
+
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$RDB_FILE</span><span class="s2">&quot;</span><span class="w"> </span>/var/lib/redis-stack/
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start redis-stack-server</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl<span class="w"> </span>start<span class="w"> </span>redis-stack-server
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>redis-stack-server
+<span class="c1"># Test</span>
+/opt/redis-stack/bin/redis-cli<span class="w"> </span>-a<span class="w"> </span><span class="nv">$REDIS_PASSWORD</span><span class="w"> </span>INFO
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start your Skyline services.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>start<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Ensure you update your builds/config_management to use and monitor
+the redis-stack-server service and remove the redis service and
+add also add the new changes and new config file.</p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

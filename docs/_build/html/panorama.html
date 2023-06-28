@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Panorama &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panorama &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Webapp" href="webapp.html" />
     <link rel="prev" title="Crucible" href="crucible.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -107,17 +68,30 @@
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Panorama</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#create-a-mysql-database">Create a MySQL database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-skyline-database">The skyline database</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#innodb-tables">InnoDB tables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#myisam-and-innodb-or-innodb-only">MyISAM and InnoDB or InnoDB only</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id-offsets">ID offsets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-the-skyline-mariadb-database">Create the skyline MariaDB database</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -125,6 +99,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -133,71 +110,32 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Panorama</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Panorama</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/panorama.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="panorama">
-<h1>Panorama<a class="headerlink" href="#panorama" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="panorama">
+<h1>Panorama<a class="headerlink" href="#panorama" title="Permalink to this heading"></a></h1>
 <p>The Panorama service is responsible for recording data for each anomaly.</p>
 <p>It is important to remember that the Skyline analysis apps only alert on metrics
 that have alert tuples set.  However if you have <a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>
@@ -206,55 +144,92 @@ pagerduty alerter.  Therefore having this set to <code class="docutils literal n
 will record samples of <strong>all</strong> metrics that are flagged as anomalous.  Sampling
 at <a class="reference internal" href="skyline.html#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_EXPIRY_TIME</span></code></a>, the default is 900 seconds.  Although
 this may result in a lot of entries in the anomalies DB table, it is useful for
-helping with root cause analysis.</p>
+helping with root cause analysis and correlations.</p>
 <p>New records are used to trigger further analysis of the metric population in
 Luminosity to analyse the metric population for cross correlations.  However,
 only metrics with a <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> tuple trigger Luminosity, but all
 metric anomalies are recorded.</p>
 <p>The <a class="reference internal" href="skyline.html#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_CHECK_MAX_AGE</span></code></a> ensures that Panorama only processes
 checks that are not older than this value.  This mitigates against Panorama
-stampeding against the MySQL database, if either Panorama or MySQL were stopped
-and there are a lot of Panorama check files queued to process.  If this is set
-to 0, Panorama will process all checks, regardless of age.</p>
+stampeding against the MariaDB database, if either Panorama or MariaDB were
+stopped and there are a lot of Panorama check files queued to process.  If this
+is set to 0, Panorama will process all checks, regardless of age.</p>
 <p>There is a Panorama view in the Skyline Webapp frontend UI to allow you to
 search and view historic anomalies.</p>
-<div class="section" id="create-a-mysql-database">
-<h2>Create a MySQL database<a class="headerlink" href="#create-a-mysql-database" title="Permalink to this headline">¶</a></h2>
-<p>You can install and run MySQL on the Skyline server or use any existing MySQL
-server to create the database on.  The Skyline server just has to be able to
-access the database with the user and password you configure in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>
-<a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSER</span></code></a> and <a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSERPASS</span></code></a></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>It is recommended, if possible that MySQL is configured to use a single
-file per InnoDB table with the MySQL config option - <code class="docutils literal notranslate"><span class="pre">innodb_file_per_table=1</span></code>
-This is due to the fact that the anomalies and Ionosphere related MySQL tables
-are InnoDB tables and all the other core Skyline DB tables are MyISAM.
-If you are adding the Skyline DB to an existing MySQL database server please
-consider the ramifications to your setup.  It is not a requirement, just a
-tidier and more efficient way to run MySQL InnoDB tables in terms of
-managing space allocations with InnoDB and it segregates databases from each
-other in the context on the .ibd file spaces, making for easier management of
-each individual database in terms of ibd file space.  However that was really
-only an additional caution.  Retrospectively, it is unlikely that the
-anomalies table will ever really be a major problem in terms of the page space
-requirements any time soon.  It appears and it is hoped anyway, time and
-really big data sets may invalidate this in the future, Gaia DR1 MySQL say :)</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>It is assumed that the database is not running with an offset and
-the database increments ids by 1.  If you are running an offset please review
-all SQL updates to determine if you need to change anything in the SQL when
-you apply Skyline SQL updates.</p>
-</div>
+<section id="the-skyline-database">
+<h2>The skyline database<a class="headerlink" href="#the-skyline-database" title="Permalink to this heading"></a></h2>
+<p>You can install and run MariaDB on the Skyline server itself or use any
+existing MariaDB server to create the database on or use a Galera cluster.
+The Skyline server just has to be able to access the database with the user and
+password you configure in  <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> <a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSER</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSERPASS</span></code></a></p>
+<p>Skyline has moved to MariaDB and although MySQL and MariaDB should be
+interoperable, MariaDB has recently departed from full MySQL compatibility so
+it is recommended that you use the official MariaDB-server rather than MySQL if
+possible.  Skyline is only be developed and tested against MariaDB.</p>
+<section id="innodb-tables">
+<h3>InnoDB tables<a class="headerlink" href="#innodb-tables" title="Permalink to this heading"></a></h3>
+<p>It is recommended, if possible that MariaDB is configured to use a single
+file per InnoDB table with the MariaDB config option -
+<code class="docutils literal notranslate"><span class="pre">innodb_file_per_table=1</span></code>.  This is due to the fact that the anomalies and
+Ionosphere related MariaDB tables are InnoDB tables and all the other
+core Skyline DB tables are MyISAM.</p>
+<p>The MyISAM storage engine is used for the metadata type tables because it is
+a simpler structure and faster for data which is often queried and FULL TEXT
+searching.</p>
+<p>The InnoDB storage engine is used for the anomaly table - mostly writes.
+<code class="docutils literal notranslate"><span class="pre">z_fp_</span></code> tables are InnoDB tables and each metric that has an Ionosphere features
+profile created (e.g. has been trained) has a <code class="docutils literal notranslate"><span class="pre">z_fp_&lt;metric_id&gt;</span></code> and a
+<code class="docutils literal notranslate"><span class="pre">z_ts_&lt;metric_id&gt;</span></code> table created, therefore if you have 10000 metrics and you
+created features profiles (trained) for each one, there would be 20000 tables.
+Bear in mind, that not all metrics will have features profiles created as you
+have to manually train to create each one.</p>
+<p>If you are adding the Skyline database to an existing MariaDB database
+server please consider the ramifications to your set up.  It is not a
+requirement, just a tidier and more efficient way to run MariaDB InnoDB
+tables in terms of managing space allocations with InnoDB and it segregates
+databases from each other in the context on the .ibd file spaces, making for
+easier management of each individual database in terms of ibd file space.
+However that was really only an additional caution.  Retrospectively, it is
+unlikely that the anomalies table will ever really be a major problem in terms
+of the page space requirements any time soon.</p>
+</section>
+<section id="myisam-and-innodb-or-innodb-only">
+<h3>MyISAM and InnoDB or InnoDB only<a class="headerlink" href="#myisam-and-innodb-or-innodb-only" title="Permalink to this heading"></a></h3>
+<p>The default Skyline database schema is designed for optimum performance
+through the use of MyISAM and InnoDB tables where appropriate for the data and
+table usage.  However the Skyline database can be run with InnoDB only tables.
+The small performance loss that may result from not using the MyISAM tables
+where appropriate is gained in the ability to run the database on a MariaDB
+Galera cluster to achieve high availability and resilience on the database.
+If you wish to use InnoDB tables only, see the lines to uncomment in the snippet
+below.</p>
+</section>
+<section id="id-offsets">
+<h3>ID offsets<a class="headerlink" href="#id-offsets" title="Permalink to this heading"></a></h3>
+<p>It is assumed that the database is not running with an offset and the database
+increments ids by 1.  If you are running an offset please review all SQL updates
+to determine if you need to change anything in the SQL when you apply Skyline
+SQL updates.  Although it is highly unlikely to ever need to be considered.</p>
+</section>
+<section id="create-the-skyline-mariadb-database">
+<h3>Create the skyline MariaDB database<a class="headerlink" href="#create-the-skyline-mariadb-database" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>See <code class="docutils literal notranslate"><span class="pre">skyline.sql</span></code> in your cloned Skyline repo for the schema creation script
 and create the skyline database (also create a user with permissions on the
 database, e.g.</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mysql -u root -p &lt; /opt/skyline/github/skyline/skyline/skyline.sql
-mysql -u root -p -e <span class="s2">&quot;GRANT ALL ON skyline.* TO &#39;skyline&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;</span><span class="nv">$YOUR_MYSQL_SKYLINE_PASSWORD</span><span class="s2">&#39; \</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># IF YOU WISH TO USE INNODB TABLES ONLY UNCOMMENT THE FOLLOWING LINES</span>
+<span class="c1"># For Galera clustering</span>
+<span class="c1">#cp /opt/skyline/github/skyline/skyline/skyline.sql /opt/skyline/github/skyline/skyline/skyline.myisam.sql</span>
+<span class="c1">#cat /opt/skyline/github/skyline/skyline/skyline.myisam.sql | sed -e &#39;s/MyISAM/InnoDB/g&#39; &gt; /opt/skyline/github/skyline/skyline/skyline.sql</span>
+
+<span class="c1"># Note if you are using MariaDB on the database host, the password is longer</span>
+<span class="c1"># required for the root user.  If you are using MySQL use password as</span>
+<span class="c1"># appropriate</span>
+mysql<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>&lt;<span class="w"> </span>/opt/skyline/github/skyline/skyline/skyline.sql
+<span class="c1"># Example permissions, change localhost to as appropriate for your set up</span>
+mysql<span class="w"> </span>-u<span class="w"> </span>root<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;GRANT ALL ON skyline.* TO &#39;skyline&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;</span><span class="nv">$YOUR_MYSQL_SKYLINE_PASSWORD</span><span class="s2">&#39; \</span>
 <span class="s2">FLUSH PRIVILEGES;&quot;</span>
 </pre></div>
 </div>
@@ -264,66 +239,42 @@ mysql -u root -p -e <span class="s2">&quot;GRANT ALL ON skyline.* TO &#39;skylin
 continue with the installation steps and Panorama will be started later in the
 installation process.</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/panorama.d start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>systemctl<span class="w"> </span>start<span class="w"> </span>panorama
 </pre></div>
 </div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="webapp.html" class="btn btn-neutral float-right" title="Webapp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="crucible.html" class="btn btn-neutral float-left" title="Crucible" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="crucible.html" class="btn btn-neutral float-left" title="Crucible" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="webapp.html" class="btn btn-neutral float-right" title="Webapp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Boundary &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boundary &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Crucible" href="crucible.html" />
     <link rel="prev" title="Mirage" href="mirage.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -106,6 +67,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Boundary</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#configuration-and-running-boundary">Configuration and running Boundary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#an-example">An example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#detect-drop-off-cliff-algorithm">detect_drop_off_cliff algorithm</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#what-boundary-does">What <strong>Boundary</strong> does</a></li>
 </ul>
@@ -117,11 +79,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -129,6 +98,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -137,71 +109,32 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Boundary</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Boundary</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/boundary.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="boundary">
-<h1>Boundary<a class="headerlink" href="#boundary" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="boundary">
+<h1>Boundary<a class="headerlink" href="#boundary" title="Permalink to this heading"></a></h1>
 <p>Boundary is an extension of Skyline that enables very specific analysis
 of specified metrics with specified algorithms, with specified alerts.</p>
 <p>Boundary was added to allow for threshold-like monitoring to the Skyline
@@ -228,11 +161,11 @@ most recent (the now) portion of the timeseries data.</p>
 </ul>
 <p>Boundary is run as a separate process just like Analyzer, horizon and
 mirage. It was not envisaged to analyze all your metrics, but rather
-your key metrics in additional dimension/s. If it was run across all of your
+your key metrics with additional analysis. If it was run across all of your
 metrics it would probably be:</p>
 <ul class="simple">
 <li><p>VERY noisy</p></li>
-<li><p>CPU intensive</p></li>
+<li><p>VERY CPU intensive</p></li>
 </ul>
 <p>If deployed only key metrics it has a very low footprint (9 seconds on
 150 metrics with 2 processes assigned) and a high return. If deployed as
@@ -245,11 +178,12 @@ featureful and introduces the ability to rate limit alerts per alerter
 channel, as it is not beyond the realms of possibility that at some
 point all your key metrics may drop off a cliff, but maybe 15 pagerduty
 alerts every 30 minutes is sufficient, so alert rates are configurable.</p>
-<div class="section" id="configuration-and-running-boundary">
-<h2>Configuration and running Boundary<a class="headerlink" href="#configuration-and-running-boundary" title="Permalink to this headline">¶</a></h2>
+<section id="configuration-and-running-boundary">
+<h2>Configuration and running Boundary<a class="headerlink" href="#configuration-and-running-boundary" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">settings.py</span></code> has an independent setting blocks and has detailed information
-on each setting in its docstring, the main difference from Analyzer being in
-terms of number of variables that have to be declared in the alert tuples, e.g:</p>
+on each setting and the parameter in its docstring, the main difference from
+Analyzer being in terms of number of variables that have to be declared in the
+alert tuples, e.g:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="p">(</span>
     <span class="c1"># (&#39;metric&#39;, &#39;algorithm&#39;, EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, &#39;ALERT_VIAS&#39;),</span>
     <span class="p">(</span><span class="s1">&#39;metric1&#39;</span><span class="p">,</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">),</span>
@@ -261,12 +195,37 @@ terms of number of variables that have to be declared in the alert tuples, e.g:<
 <p>For all the specific alert configurations see the <a class="reference external" href="alerts.html">Alerts</a> page.</p>
 <p>Once <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> has all the Boundary configuration done, start
 Boundary:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/boundary.d start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/boundary.d<span class="w"> </span>start
 </pre></div>
 </div>
-</div>
-<div class="section" id="detect-drop-off-cliff-algorithm">
-<h2>detect_drop_off_cliff algorithm<a class="headerlink" href="#detect-drop-off-cliff-algorithm" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="an-example">
+<h2>An example<a class="headerlink" href="#an-example" title="Permalink to this heading"></a></h2>
+<p>Here is an example of what you can use Boundary for.  If you look at the graph
+below, you can see that the minimum value is around 1000.  Let us say that this
+metric is a fairly reliable and important global metric, like the number of page
+impression per minute in your shop.</p>
+<img alt="_images/boundary_example.png" src="_images/boundary_example.png" />
+<p>We can configure Boundary to monitor this metric.  Although you can use Boundary
+to monitor any metric, it works best if only monitoring your important and
+reliable global metrics with Boundary.</p>
+<p>:: .. code-block:: python</p>
+<blockquote>
+<div><p>(‘example_org.shop.total.page_impressions’, ‘detect_drop_off_cliff’, 1800, 800, 300, 0, 1, ‘smtp|slack|pagerduty’),
+(‘example_org.shop.total.page_impressions’, ‘less_than’, 1800, 0, 0, 1000, 7, ‘smtp|slack|pagerduty’),</p>
+</div></blockquote>
+<p>The above <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> enables 2 algorithms to check this
+metric against every minute, <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff" title="boundary.boundary_algorithms.detect_drop_off_cliff"><code class="xref py py-func docutils literal notranslate"><span class="pre">boundary_algorithms.detect_drop_off_cliff()</span></code></a>
+and <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.less_than" title="boundary.boundary_algorithms.less_than"><code class="xref py py-func docutils literal notranslate"><span class="pre">boundary_algorithms.less_than()</span></code></a>.  Although the <code class="docutils literal notranslate"><span class="pre">less_than</span></code> check
+should normally be sufficient on it’s own, the <code class="docutils literal notranslate"><span class="pre">detect_drop_off_cliff</span></code> check
+will ensure that nothing is missed.  For instance that metric could drop to
+between 2 and 15 for 6 minutes and then go back up to 1600 and then drop again
+for 5 minutes and go back up again and enter a “flapping” state.  There are
+instances where <code class="docutils literal notranslate"><span class="pre">less_than</span></code> may not fire, but <code class="docutils literal notranslate"><span class="pre">detect_drop_off_cliff</span></code>
+would.</p>
+</section>
+<section id="detect-drop-off-cliff-algorithm">
+<h2>detect_drop_off_cliff algorithm<a class="headerlink" href="#detect-drop-off-cliff-algorithm" title="Permalink to this heading"></a></h2>
 <p>The detect_drop_off_cliff algorithm provides a method for analysing a
 timeseries to determine is the timeseries “dropped off a cliff”. The
 standard Skyline Analyzer algorithms do not detect the drop off cliff
@@ -306,8 +265,8 @@ experience true cliff drops.</p></li>
 </ul>
 <p>For more info see:
 <a class="reference external" href="https://github.com/earthgecko/crucible/tree/master/examples/detect_drop_off_cliff">detect_drop_off_cliff</a></p>
-<div class="section" id="what-boundary-does">
-<h3>What <strong>Boundary</strong> does<a class="headerlink" href="#what-boundary-does" title="Permalink to this headline">¶</a></h3>
+<section id="what-boundary-does">
+<h3>What <strong>Boundary</strong> does<a class="headerlink" href="#what-boundary-does" title="Permalink to this heading"></a></h3>
 <p>Boundary is very similar in work flow to Analyzer in terms of how it
 surfaces and analyzes metrics.</p>
 <ul class="simple">
@@ -337,64 +296,39 @@ anomalous metrics details will be inserted into the database.</p></li>
 </ul>
 </li>
 </ul>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="crucible.html" class="btn btn-neutral float-right" title="Crucible" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="mirage.html" class="btn btn-neutral float-left" title="Mirage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mirage.html" class="btn btn-neutral float-left" title="Mirage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="crucible.html" class="btn btn-neutral float-right" title="Crucible" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

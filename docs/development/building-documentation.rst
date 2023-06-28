@@ -36,7 +36,7 @@ docs-requirements.txt (as per documented `Running in Python virtualenv
 
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3816"
+    PROJECT="skyline-py3817"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate

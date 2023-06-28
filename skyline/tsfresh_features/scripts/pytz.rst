@@ -9,7 +9,7 @@ Development - pytz
 pytz.all_timezones
 ==================
 
-**pytz version: 2020.5**
+**pytz version: 2023.3**
 
 This is an automatically generated list of all pytz timezones for the specified
 pytz version generated using pytz.all_timezones.  It is generated so there is an
@@ -33,7 +33,7 @@ It is hoped that the methods used handle daylight savings timezones (DST), the
 methods implemented has been taken from some best practices, however they are
 not tested on DST changes, so the outcome is somewhat unknown.
 
-**pytz version: 2020.5**
+**pytz version: 2023.3**
 
 Timezones list for pytz version
 -------------------------------
@@ -227,6 +227,8 @@ America/Cayman
 America/Chicago
 
 America/Chihuahua
+
+America/Ciudad_Juarez
 
 America/Coral_Harbour
 
@@ -936,6 +938,8 @@ Europe/Kiev
 
 Europe/Kirov
 
+Europe/Kyiv
+
 Europe/Lisbon
 
 Europe/Ljubljana
@@ -1123,6 +1127,8 @@ Pacific/Guam
 Pacific/Honolulu
 
 Pacific/Johnston
+
+Pacific/Kanton
 
 Pacific/Kiritimati
 

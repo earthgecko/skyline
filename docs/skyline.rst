@@ -11,6 +11,7 @@ Subpackages
    skyline.analyzer_dev
    skyline.boundary
    skyline.crucible
+   skyline.custom_algorithms
    skyline.flux
    skyline.horizon
    skyline.ionosphere
@@ -34,18 +35,18 @@ skyline.algorithm\_exceptions module
    :undoc-members:
    :show-inheritance:
 
-skyline.create\_matplotlib\_graph module
-----------------------------------------
+skyline.algorithm\_scores\_plot module
+--------------------------------------
 
-.. automodule:: create_matplotlib_graph
+.. automodule:: algorithm_scores_plot
    :members:
    :undoc-members:
    :show-inheritance:
 
-skyline.custom\_algorithms module
----------------------------------
+skyline.create\_matplotlib\_graph module
+----------------------------------------
 
-.. automodule:: custom_algorithms
+.. automodule:: create_matplotlib_graph
    :members:
    :undoc-members:
    :show-inheritance:
@@ -66,14 +67,6 @@ skyline.database module
    :undoc-members:
    :show-inheritance:
 
-skyline.determine\_data\_frequency module
------------------------------------------
-
-.. automodule:: determine_data_frequency
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 skyline.external\_alert\_configs module
 ---------------------------------------
 
@@ -86,6 +79,14 @@ skyline.features\_profile module
 --------------------------------
 
 .. automodule:: features_profile
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.fp\_match\_plots module
+-------------------------------
+
+.. automodule:: fp_match_plots
    :members:
    :undoc-members:
    :show-inheritance:
@@ -118,6 +119,14 @@ skyline.motif\_plots module
 ---------------------------
 
 .. automodule:: motif_plots
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.plot\_motif\_window module
+----------------------------------
+
+.. automodule:: plot_motif_window
    :members:
    :undoc-members:
    :show-inheritance:

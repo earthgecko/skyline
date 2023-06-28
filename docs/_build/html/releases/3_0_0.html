@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3.0.0 &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.0.0" href="2_0_0.html" />
+    <link rel="prev" title="3.0.2" href="3_0_2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="4_0_0.html">4.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_4.html">3.0.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_3.html">3.0.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3_0_2.html">3.0.2</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.0.0</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#important-notice-for-current-users">IMPORTANT NOTICE FOR CURRENT USERS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary-of-some-key-changes-in-v3-0-0">Summary of some key changes in v3.0.0</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#notable-changes-for-users-that-were-moving-with-master">Notable changes for users that were moving with master</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#update-notes">Update notes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#settings-py-changes">settings.py Changes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v2-0-0">How to update from v2.0.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#considerations">Considerations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="2_0_0.html">2.0.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_3_1.html">1.3.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_3_0.html">1.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_17.html">1.2.17</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_16.html">1.2.16</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_15.html">1.2.15</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_14.html">1.2.14</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_13.html">1.2.13</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_12.html">1.2.12</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_11.html">1.2.11 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_10.html">1.2.10 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_9.html">1.2.9 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_8.html">1.2.8 - the luminosity and dawn branches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_7.html">1.2.7 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_6.html">1.2.6 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_5.html">1.2.5 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_4.html">1.2.4 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_3.html">1.2.3 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_2.html">1.2.2 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_1.html">1.2.1 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_2_0.html">1.2.0 - the luminosity branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_11.html">1.1.11 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_10.html">1.1.10 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_9.html">1.1.9 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_8.html">1.1.8 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_7.html">1.1.7 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_6.html">1.1.6 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_5.html">1.1.5 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_4.html">1.1.4 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_3.html">1.1.3 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_2.html">1.1.2 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_1.html">1.1.1 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_1_0.html">1.1.0 - the ionosphere branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_8.html">1.0.8 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_7.html">1.0.7 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_6.html">1.0.6 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_5.html">1.0.5 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_4.html">1.0.4 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_3.html">1.0.3 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_2.html">1.0.2 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_1.html">1.0.1 - the crucible branch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../releases.html">Release Notes</a></li>
+      <li class="breadcrumb-item active">3.0.0</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/releases/3_0_0.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>3.0.0<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<p>v3.0.0 - May 1, 2022</p>
+<p>This is a major release with additional apps, features and functionality.</p>
+<section id="important-notice-for-current-users">
+<h2>IMPORTANT NOTICE FOR CURRENT USERS<a class="headerlink" href="#important-notice-for-current-users" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Skyline requires a modification to the runner.py of the python-daemon 2.3.0
+package to allow it to run on Python 3 properly in the manner in which
+Skyline runs it.</p></li>
+<li><p>settings.py is now validated when the Skyline apps are started.  If a variable
+is not defined in your settings.py Skyline apps <strong>will fail to start</strong>.
+Ensure that your settings are up to date and have all the latest variables defined
+properly.</p></li>
+</ul>
+</section>
+<section id="summary-of-some-key-changes-in-v3-0-0">
+<h2>Summary of some key changes in v3.0.0<a class="headerlink" href="#summary-of-some-key-changes-in-v3-0-0" title="Permalink to this heading"></a></h2>
+<p>Lots of changes and new functionality have been introduced in v3.0.0 the key
+new features are listed below.  This is a <strong>major</strong> update to all Skyline apps
+with the addition of some new apps too.</p>
+<ul class="simple">
+<li><p>The ability to use your own or any custom algorithms in analysis.</p></li>
+<li><p>The ability to use the matrixprofile algorithm as a custom algorithm with
+Mirage to greatly reduce three-sigma false positives.</p></li>
+<li><p>The ability to use MASS (Mueen’s Algorithm for Similarity Search) to
+discover, compare and match short period shapelets against trained data.  This
+maximises the use of any existing trained features profiles greatly.  The
+features profiles trained data is used to turn a single trained resource into
+10s of 1000s of trained resources by dividing it up into shapelets.</p></li>
+<li><p>The ability to classify anomalies by types.</p></li>
+<li><p>Various adtk based custom algorithms have been added.</p></li>
+<li><p>The addition of the Skyline Thunder app which monitors all the Skyline apps.</p></li>
+<li><p>Support for running on <strong>docker</strong> has been <strong>discontinued</strong>.</p></li>
+<li><p>The addition of monitoring on the data of metric population as a whole in
+terms of increasing and decreasing sparsity.</p></li>
+<li><p>Miscellaneous clustering improvements.</p></li>
+<li><p>The addition of the Skyline SNAB app which allows for the testing of the
+performance and correctness of algorithms in a real time ongoing manner.</p></li>
+<li><p>The automatic learning of related metrics if enabled.</p></li>
+<li><p>Flux can ingest metrics from telegraf.</p></li>
+<li><p>The addition of waterfall alerting, so no alerts are missed if Skyline is
+super busy.</p></li>
+<li><p>The ability to send SMS alerts via AWS.</p></li>
+<li><p>The ability to use an external SMTP server/service.</p></li>
+<li><p>The use of downsampled FULL_DURATION data in Mirage where appropriate to
+replace the partially filled bucket in the last Graphite aggregated data to
+reduce these types of false positives.</p></li>
+<li><p>The creation of match comparison graphs in the UI.</p></li>
+<li><p>systemd units have been added see /opt/skyline/github/skyline/etc/systemd/system
+after cloning the new version or in github directly.</p></li>
+<li><p>There are many ADVANCED FEATURE additions as well.  These are described by new
+settings in settings.py, their docstrings and related documentation pages for
+those interested.</p></li>
+</ul>
+</section>
+<section id="breaking-changes">
+<h2>Breaking changes<a class="headerlink" href="#breaking-changes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Skyline is no longer supported on docker.</p></li>
+<li><p>Skyline is now only supported on CentOS Stream 8, Ubuntu 18.04 and 20.04.</p></li>
+<li><p>settings.py is now validated when the Skyline apps are started.  If a variable
+is not defined in your settings.py Skyline apps <strong>will fail to start</strong>.  Ensure
+your settings are up to date and have all the latest variables defined
+properly.</p></li>
+<li><p>Skyline has now moved to supporting nginx only and support for Apache has been
+discontinued.  Although you can still use Apache there is no support (examples)
+of Apache configurations for new features.</p></li>
+</ul>
+</section>
+<section id="notable-changes-for-users-that-were-moving-with-master">
+<h2>Notable changes for users that were moving with master<a class="headerlink" href="#notable-changes-for-users-that-were-moving-with-master" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Only for users that have been running versions of master &gt; v2.0.0. The
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">SKYLINE_FEEDBACK_NAMESPACES</span></code> was introduced and it defaulted to the
+Skyline node hostname and the GRAPHITE_HOST.  As of version v3.0.0
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES</span></code> has been introduced to allow
+you to declare metrics that are not feedback metrics in the
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">SKYLINE_FEEDBACK_NAMESPACES</span></code> so these will always be analysed even if
+Skyline is very busy.</p></li>
+</ul>
+</section>
+<section id="update-notes">
+<h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>These update instruction apply to upgrading from v2.0.0 to v3.0.0 (through
+to v3.0.4) only. However as with all Skyline updates it is possible to go
+through the update notes for each version and make your own update notes/process
+to take you from version x to version y.</p></li>
+<li><p>If you have been running on the rolling master and unreleased rolling v2.1.0
+version, please determine what SQL updates you have applied and apply only
+further v2.1.0 SQL updates as appropriate.</p></li>
+<li><p>There are changes to the DB in v3.0.0</p></li>
+<li><p>There are changes to settings.py in v3.0.0, please ensure you diff your
+current and the new settings.py as there are appended additions but there are
+also additional settings that have been added to existing settings blocks.
+The additions and changes described below.</p></li>
+<li><p>Ensure you <strong>TEST</strong> your new settings.py before continuing with the upgrade.</p></li>
+</ul>
+<section id="settings-py-changes">
+<h3>settings.py Changes<a class="headerlink" href="#settings-py-changes" title="Permalink to this heading"></a></h3>
+<p><strong>IMPORTANT</strong> in the new version of Skyline <strong>ALL</strong> settings must be defined in
+your settings.py because they are now tested when the services start.  If any
+settings are missing or ill-defined in your settings.py the Skyline services
+will <strong>fail</strong> to start.</p>
+<p>Modified settings:</p>
+<p>A number of docstrings have been corrected, changed or have been updated for
+various settings, these are not listed here.  This list only details where the
+setting itself has changed not the docstring.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_PROCESSING</span></code></a> default changed from <code class="docutils literal notranslate"><span class="pre">None</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.BATCH_PROCESSING_DEBUG" title="settings.BATCH_PROCESSING_DEBUG"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_PROCESSING_DEBUG</span></code></a> default changed from <code class="docutils literal notranslate"><span class="pre">None</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CANARY_METRIC</span></code></a> changed from <code class="docutils literal notranslate"><span class="pre">statsd.numStats</span></code></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> the default has changed.</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a> the default has changed to declare the <code class="docutils literal notranslate"><span class="pre">smtp_server</span></code></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.MAX_QUEUE_SIZE" title="settings.MAX_QUEUE_SIZE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MAX_QUEUE_SIZE</span></code></a> changed from 500 to 50000</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.DO_NOT_SKIP_LIST" title="settings.DO_NOT_SKIP_LIST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DO_NOT_SKIP_LIST</span></code></a> has <strong>new</strong> Skyline metrics added to it,
+ensure these are added to yours.</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_SEND_TO_CARBON" title="settings.FLUX_SEND_TO_CARBON"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SEND_TO_CARBON</span></code></a> default has changed from <code class="docutils literal notranslate"><span class="pre">False</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_STATSD_HOST" title="settings.FLUX_STATSD_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_STATSD_HOST</span></code></a> default changed from <code class="docutils literal notranslate"><span class="pre">None</span></code> to <code class="docutils literal notranslate"><span class="pre">''</span></code></p></li>
+</ul>
+<p>New settings:</p>
+<p>Most of these are set to reasonable defaults and those you need to consider are
+flagged with <code class="docutils literal notranslate"><span class="pre">[USER</span> <span class="pre">DEFINED]</span></code>.  All new settings and their function are
+described in their docstrings in settings.py</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../skyline.html#settings.SKYLINE_DIR" title="settings.SKYLINE_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_DIR</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES" title="settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ANALYZER_VERBOSE_LOGGING" title="settings.ANALYZER_VERBOSE_LOGGING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_VERBOSE_LOGGING</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.CUSTOM_STALE_PERIOD" title="settings.CUSTOM_STALE_PERIOD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_STALE_PERIOD</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.CHECK_DATA_SPARSITY" title="settings.CHECK_DATA_SPARSITY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CHECK_DATA_SPARSITY</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES" title="settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FULLY_POPULATED_PERCENTAGE" title="settings.FULLY_POPULATED_PERCENTAGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULLY_POPULATED_PERCENTAGE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SPARSELY_POPULATED_PERCENTAGE" title="settings.SPARSELY_POPULATED_PERCENTAGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SPARSELY_POPULATED_PERCENTAGE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ANALYZER_CHECK_LAST_TIMESTAMP" title="settings.ANALYZER_CHECK_LAST_TIMESTAMP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_CHECK_LAST_TIMESTAMP</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS" title="settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ANALYZER_SKIP" title="settings.ANALYZER_SKIP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_SKIP</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.MONOTONIC_METRIC_NAMESPACES" title="settings.MONOTONIC_METRIC_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MONOTONIC_METRIC_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ZERO_FILL_NAMESPACES" title="settings.ZERO_FILL_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ZERO_FILL_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LAST_KNOWN_VALUE_NAMESPACES" title="settings.LAST_KNOWN_VALUE_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LAST_KNOWN_VALUE_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.AWS_SNS_SMS_ALERTS_ENABLED" title="settings.AWS_SNS_SMS_ALERTS_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.AWS_SNS_SMS_ALERTS_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SMS_ALERT_OPTS" title="settings.SMS_ALERT_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMS_ALERT_OPTS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ROOMBA_OPTIMUM_RUN_DURATION" title="settings.ROOMBA_OPTIMUM_RUN_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ROOMBA_OPTIMUM_RUN_DURATION</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS" title="settings.ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.BATCH_METRICS_CUSTOM_FULL_DURATIONS" title="settings.BATCH_METRICS_CUSTOM_FULL_DURATIONS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_METRICS_CUSTOM_FULL_DURATIONS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.HORIZON_SHARDS" title="settings.HORIZON_SHARDS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HORIZON_SHARDS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.HORIZON_SHARD_PICKLE_PORT" title="settings.HORIZON_SHARD_PICKLE_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HORIZON_SHARD_PICKLE_PORT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.HORIZON_SHARD_DEBUG" title="settings.HORIZON_SHARD_DEBUG"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HORIZON_SHARD_DEBUG</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SYNC_CLUSTER_FILES" title="settings.SYNC_CLUSTER_FILES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SYNC_CLUSTER_FILES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.THUNDER_ENABLED" title="settings.THUNDER_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.THUNDER_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.THUNDER_CHECKS" title="settings.THUNDER_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.THUNDER_CHECKS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.THUNDER_OPTS" title="settings.THUNDER_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.THUNDER_OPTS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.MIRAGE_PROCESSES" title="settings.MIRAGE_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_PROCESSES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.WEBAPP_GUNICORN_WORKERS" title="settings.WEBAPP_GUNICORN_WORKERS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_GUNICORN_WORKERS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.WEBAPP_GUNICORN_BACKLOG" title="settings.WEBAPP_GUNICORN_BACKLOG"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_GUNICORN_BACKLOG</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_VERBOSE_LOGGING" title="settings.IONOSPHERE_VERBOSE_LOGGING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_VERBOSE_LOGGING</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_HISTORICAL_DATA_FOLDER" title="settings.IONOSPHERE_HISTORICAL_DATA_FOLDER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_HISTORICAL_DATA_FOLDER</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE" title="settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH" title="settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_ENABLED" title="settings.IONOSPHERE_INFERENCE_MOTIFS_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS" title="settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES" title="settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE" title="settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING" title="settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH" title="settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY" title="settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_DATA_FOLDER" title="settings.LUMINOSITY_DATA_FOLDER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_DATA_FOLDER</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CORRELATE_ALL" title="settings.LUMINOSITY_CORRELATE_ALL"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CORRELATE_ALL</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CORRELATION_MAPS" title="settings.LUMINOSITY_CORRELATION_MAPS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CORRELATION_MAPS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT" title="settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES" title="settings.LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLASSIFY_ANOMALIES" title="settings.LUMINOSITY_CLASSIFY_ANOMALIES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLASSIFY_ANOMALIES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLASSIFY_ANOMALY_ALGORITHMS" title="settings.LUMINOSITY_CLASSIFY_ANOMALY_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLASSIFY_ANOMALY_ALGORITHMS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS" title="settings.LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLOUDBURST_ENABLED" title="settings.LUMINOSITY_CLOUDBURST_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLOUDBURST_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLOUDBURST_PROCESSES" title="settings.LUMINOSITY_CLOUDBURST_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLOUDBURST_PROCESSES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_CLOUDBURST_RUN_EVERY" title="settings.LUMINOSITY_CLOUDBURST_RUN_EVERY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLOUDBURST_RUN_EVERY</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_RELATED_METRICS" title="settings.LUMINOSITY_RELATED_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_RELATED_METRICS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG" title="settings.LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE" title="settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT" title="settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_VERBOSE_LOGGING" title="settings.FLUX_VERBOSE_LOGGING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_VERBOSE_LOGGING</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_API_KEYS" title="settings.FLUX_API_KEYS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_API_KEYS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_PERSIST_QUEUE" title="settings.FLUX_PERSIST_QUEUE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_PERSIST_QUEUE</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_CHECK_LAST_TIMESTAMP" title="settings.FLUX_CHECK_LAST_TIMESTAMP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CHECK_LAST_TIMESTAMP</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_GRAPHITE_WHISPER_PATH" title="settings.FLUX_GRAPHITE_WHISPER_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_GRAPHITE_WHISPER_PATH</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_ZERO_FILL_NAMESPACES" title="settings.FLUX_ZERO_FILL_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_ZERO_FILL_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_LAST_KNOWN_VALUE_NAMESPACES" title="settings.FLUX_LAST_KNOWN_VALUE_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_LAST_KNOWN_VALUE_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_AGGREGATE_NAMESPACES" title="settings.FLUX_AGGREGATE_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_AGGREGATE_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_EXTERNAL_AGGREGATE_NAMESPACES" title="settings.FLUX_EXTERNAL_AGGREGATE_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_EXTERNAL_AGGREGATE_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_NAMESPACE_QUOTAS" title="settings.FLUX_NAMESPACE_QUOTAS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_NAMESPACE_QUOTAS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_OTEL_ENABLED" title="settings.FLUX_OTEL_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_OTEL_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.VISTA_VERBOSE_LOGGING" title="settings.VISTA_VERBOSE_LOGGING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_VERBOSE_LOGGING</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_DATA_DIR" title="settings.SNAB_DATA_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_DATA_DIR</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_anomalyScore" title="settings.SNAB_anomalyScore"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_anomalyScore</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_LOAD_TEST_ANALYZER" title="settings.SNAB_LOAD_TEST_ANALYZER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_LOAD_TEST_ANALYZER</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_FLUX_LOAD_TEST_ENABLED" title="settings.SNAB_FLUX_LOAD_TEST_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_FLUX_LOAD_TEST_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_FLUX_LOAD_TEST_METRICS" title="settings.SNAB_FLUX_LOAD_TEST_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_FLUX_LOAD_TEST_METRICS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_FLUX_LOAD_TEST_METRICS_PER_POST" title="settings.SNAB_FLUX_LOAD_TEST_METRICS_PER_POST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_FLUX_LOAD_TEST_METRICS_PER_POST</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX" title="settings.SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.EXTERNAL_SETTINGS" title="settings.EXTERNAL_SETTINGS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.LOCAL_EXTERNAL_SETTINGS" title="settings.LOCAL_EXTERNAL_SETTINGS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LOCAL_EXTERNAL_SETTINGS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.PROMETHEUS_SETTINGS" title="settings.PROMETHEUS_SETTINGS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PROMETHEUS_SETTINGS</span></code></a> - experimental and not functional</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.OTEL_ENABLED" title="settings.OTEL_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_ENABLED</span></code></a> - experimental</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME" title="settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span></code></a> - experimental</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.OTEL_JAEGEREXPORTER_AGENT_PORT" title="settings.OTEL_JAEGEREXPORTER_AGENT_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_JAEGEREXPORTER_AGENT_PORT</span></code></a> - experimental</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.WEBAPP_SERVE_JAEGER" title="settings.WEBAPP_SERVE_JAEGER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_SERVE_JAEGER</span></code></a> - experimental</p></li>
+</ul>
+</section>
+</section>
+<section id="how-to-update-from-v2-0-0">
+<h2>How to update from v2.0.0<a class="headerlink" href="#how-to-update-from-v2-0-0" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</p></li>
+<li><p>Get your new settings.py ready</p></li>
+<li><p><strong>NOTE</strong> you must currently set <a class="reference internal" href="../skyline.html#settings.OTEL_ENABLED" title="settings.OTEL_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_ENABLED</span></code></a> to <cite>True</cite>, even if
+you are not using it.  This is to simply prevent an unhandled error in v3.0.0
+relating to opentelemetry, resulting traces will be sent to 127.0.0.1:26831
+via UDP so will fail silently with no ill effects.</p></li>
+<li><p>Deploy a new Python-3.8.13 virtualenv</p></li>
+<li><p>Ensure all the dependencies are at the correct versions in the new
+Python-3.8.13 virtualenv</p></li>
+<li><p>Stop the Skyline apps, backup the database and Redis, move to the new version,
+start the Skyline apps.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the new version</span>
+<span class="c1"># NEW_SKYLINE_VERSION=&quot;v3.0.0&quot;    # Your new Skyline version</span>
+<span class="c1"># Updated to v3.0.4</span>
+<span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v3.0.4&quot;</span><span class="w">    </span><span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v2.0.0&quot;</span><span class="w">    </span><span class="c1"># Your old Skyline version</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span><span class="w">                 </span><span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">  </span><span class="c1"># Your new Skyline path</span>
+
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/earthgecko/skyline<span class="w"> </span>.
+git<span class="w"> </span>checkout<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+<span class="c1"># DEPLOY A NEW Python 3.8.13 virtualenv</span>
+<span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.13&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+wget<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;https://www.python.org/ftp/python/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
+tar<span class="w"> </span>-zxvf<span class="w"> </span><span class="s2">&quot;Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/Python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+./configure<span class="w"> </span>--prefix<span class="o">=</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+make<span class="w"> </span>-j4
+make<span class="w"> </span>altinstall
+
+<span class="c1"># Create a new skyline-py3813 virtualenv</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py3813&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+virtualenv<span class="w"> </span>--python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
+ln<span class="w"> </span>-sf<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/skyline&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="c1"># Ensure the requirements are installed in your new Python 3.8.13 virtualenv</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+
+<span class="c1"># Deploy the new requirements.  Unfortunately this must be done in 5 stages</span>
+<span class="c1"># due to some version conflict on some packages that are lagging in their</span>
+<span class="c1"># own dependencies.  This staged install has the desired effect and the</span>
+<span class="c1"># lagging packages still work as desired even with the new later dependencies.</span>
+<span class="c1"># Note that there will be read pip warnings for matrixprofile, protobuf and</span>
+<span class="c1"># opentelemetry related contrib packages, this is expected.</span>
+
+<span class="c1"># As of statsmodels 0.9.0 numpy, et al need to be installed before</span>
+<span class="c1"># statsmodels in requirements</span>
+<span class="c1"># https://github.com/statsmodels/statsmodels/issues/4654</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^numpy\|^scipy\|^patsy&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/requirements.1.txt
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements.1.txt
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^pandas==&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/requirements.2.txt
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements.2.txt
+
+<span class="c1"># Currently matrixprofile protobuf version conflicts with the opentelemetry</span>
+<span class="c1"># required version</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;^opentelemetry&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/requirements.3.txt
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements.3.txt
+
+<span class="c1"># Handle conflict between opentelemetry contrib packages and opentelemetry</span>
+<span class="c1"># main because opentelemetry contibs are behind main</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^opentelemetry&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;1.11.1&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/requirements.4.txt
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements.4.txt
+
+<span class="c1"># opentelemetry main</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;^opentelemetry&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;1.11.1&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/tmp/requirements.5.txt
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/tmp/requirements.5.txt
+<span class="c1"># The pip error is expected</span>
+<span class="c1"># ERROR: pip&#39;s dependency resolver does not currently take into account all the packages that are installed ....</span>
+
+deactivate
+<span class="nb">cd</span>
+
+<span class="c1"># Fix python-daemon - which fails to run on Python 3 (numerous PRs are waiting</span>
+<span class="c1"># to fix it https://pagure.io/python-daemon/pull-requests)</span>
+cp<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py.original.bak&quot;</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/utils/python-daemon/runner.2.3.0.py&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span>
+<span class="c1"># minor change related to unbuffered bytes I/O</span>
+diff<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py.original.bak&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span>
+
+<span class="c1"># settings.py</span>
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span>
+<span class="c1"># You can diff your settings.py with the new settings.py if you wish but there</span>
+<span class="c1"># will be lots on changes</span>
+<span class="c1">#diff &quot;${CURRENT_SKYLINE_PATH}/skyline/settings.py&quot; &quot;$NEW_SKYLINE_PATH/skyline/settings.py.${NEW_SKYLINE_VERSION}.bak&quot;</span>
+
+<span class="c1"># You can create a new settings.py file in the new version based on your existing</span>
+<span class="c1"># settings.py file but it is probably better to do locally on your desktop/laptop</span>
+<span class="c1"># using a GUI diff editor and create your new settings.py based on your current</span>
+<span class="c1"># cat &quot;${CURRENT_SKYLINE_PATH}/skyline/settings.py&quot; &gt; &quot;$NEW_SKYLINE_PATH/skyline/settings.py&quot;</span>
+
+<span class="c1"># ADD the appropriate new settings to your settings file and modify any</span>
+<span class="c1"># changed settings as appropriate for your set up.</span>
+vi<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># There will be lots of changes, consider using a GUI diff editor and create your</span>
+<span class="c1"># new settings.py</span>
+
+<span class="c1"># NOTE you must currently set OTEL_ENABLED to True in settings.py, even if</span>
+<span class="c1"># you are not using it.  This is to simply prevent an unhandled error in</span>
+<span class="c1"># v3.0.0 relating to opentelemetry.</span>
+
+<span class="c1"># **TEST**</span>
+<span class="c1"># **TEST**</span>
+<span class="c1"># **TEST**</span>
+<span class="c1"># Test your new settings.py BEFORE continuing with the upgrade,</span>
+<span class="c1"># test_settings.sh runs the validate_settings.py that the Skyline apps run</span>
+<span class="c1"># when they start</span>
+<span class="nv">$NEW_SKYLINE_PATH</span>/bin/test_settings.sh
+
+<span class="c1"># Stop/disable any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+
+<span class="c1"># Stop Skyline services that use the DB</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;webapp</span>
+<span class="s2">analyzer</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span><span class="c1"># /etc/init.d/$i stop</span>
+<span class="w">  </span><span class="c1"># or</span>
+<span class="w">  </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="nv">$i</span>
+<span class="k">done</span>
+
+<span class="c1"># BACKUP THE DB AND APPLY THE NEW SQL</span>
+<span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span><span class="w">  </span><span class="c1"># Where you want to backup the DB to</span>
+<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>
+<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="w">  </span><span class="c1"># Your MySQL IP</span>
+<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span><span class="w">  </span><span class="c1"># Your MySQL Skyline DB name</span>
+
+<span class="c1">####    IMPORTANT NOTICE    ####</span>
+<span class="c1"># If you have been running on the rolling master and unreleased rolling v2.1.0</span>
+<span class="c1"># version, please determine what SQL updates you have applied and apply only</span>
+<span class="c1"># further v2.1.0 SQL updates as appropriate.  Compare your</span>
+<span class="c1"># &quot;${CURRENT_SKYLINE_PATH}/updates/sql&quot; to</span>
+<span class="c1"># &quot;${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}/updates/sql&quot; and your</span>
+<span class="c1"># .bash_history, .sql_history or notes to determine the last SQL patch you</span>
+<span class="c1"># applied from the v2.1.0 patches.</span>
+
+<span class="c1"># Backup DB</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$BACKUP_DIR</span>
+mysqldump<span class="w"> </span>-u<span class="nv">$MYSQL_USER</span><span class="w"> </span>-p<span class="w"> </span><span class="nv">$MYSQL_DB</span><span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$BACKUP_DIR</span>/pre.<span class="nv">$NEW_SKYLINE_VERSION</span>.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Check you dump exists and has data</span>
+ls<span class="w"> </span>-al<span class="w"> </span><span class="nv">$BACKUP_DIR</span>/pre.<span class="nv">$NEW_SKYLINE_VERSION</span>.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Update DB</span>
+mysql<span class="w"> </span>-u<span class="nv">$MYSQL_USER</span><span class="w"> </span>-p<span class="w"> </span><span class="nv">$MYSQL_DB</span><span class="w"> </span>&lt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/v3.0.0.sql&quot;</span>
+
+<span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># or do not wish to run.</span>
+
+<span class="c1"># Stop all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">flux&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Move your current Skyline directory to a backup directory and move the new
+Skyline v3.0.0 with your new settings.py from the temp location to your
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
+
+<span class="c1"># Set permission on the dump dir</span>
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>/skyline/webapp/static/dump
+
+<span class="c1"># Update to the new skyline.conf</span>
+cp<span class="w"> </span>/etc/skyline/skyline.conf<span class="w"> </span><span class="s2">&quot;/etc/skyline/skyline.conf.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>/etc/skyline.conf<span class="w"> </span>&gt;<span class="w"> </span>/etc/skyline/skyline.conf
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>If you wish to deploy the new systemd unit files then do the following, but
+<strong>do note they use the skyline user and group</strong></p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>find<span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system<span class="w"> </span>-type<span class="w"> </span>f<span class="k">)</span>
+<span class="k">do</span>
+<span class="w">  </span>/bin/cp<span class="w"> </span>-f<span class="w"> </span><span class="nv">$i</span><span class="w"> </span>/etc/systemd/system/
+<span class="k">done</span>
+systemctl<span class="w"> </span>daemon-reload
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># apart from the new thunder Skyline app</span>
+
+<span class="c1"># Start all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">flux</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">snab</span>
+<span class="s2">thunder&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>start<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;failed to start </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;started </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="k">done</span>
+<span class="c1"># Restart any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Check the logs</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>/var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>skyline_logfile
+<span class="k">do</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+<span class="w">  </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-B2<span class="w"> </span>-A10<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;error ::\|traceback&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<p>Congratulations, you are now running the best open source anomaly detection
+stack in the world (probably).  Have a look at the new functionality in the UI
+and enjoy.</p>
+<section id="considerations">
+<h3>Considerations<a class="headerlink" href="#considerations" title="Permalink to this heading"></a></h3>
+<p>By default in v3.0.0 matrixprofile is not enabled as an additional algorithm to
+run.  This is because it is a user decision as to whether they wish to implement
+matrixprofile as an algorithm to be added to the analysis pipeline.  The
+addition of matrixprofile has a significant impact on the amount of events that
+are recorded and alerted on.  This is due to matrixprofile significantly
+decreasing the number of false positive alerts that are sent.  <strong>HOWEVER</strong> due
+to this being a fundamental change to Skyline, the user must be aware of what
+this means in practice.</p>
+<ol class="arabic simple">
+<li><p>matrixprofile will result in a small number of false negatives (~2.48%)</p></li>
+<li><p>matrixprofile will filter out a very large number of false positives (~88.4%)</p></li>
+</ol>
+<p>These two points must be stressed because for any users that are accustomed to
+using Skyline as an information stream of changes in your environments, if you
+turn on matrixprofile, you may question if Skyline is running properly with
+matrixprofile probably result in filtering out ~88.4% of your events.</p>
+<p>Although the paneacea of anomaly detection <strong>alerting</strong> is 0 false positives and
+0 false negatives, anomaly detection is about the bad, the good and the unknown.
+This drastic decrease in events also results in a reduction of correlation data,
+training data opportunities and an overall reduced picture events in your
+timeline.</p>
+<p>If you implement matrixprofile be prepared to most of the events you are
+accustomed too, when you or developers deploy something, those subtle changes
+that used to trigger and send an event into slack, probably will not happen
+any more.  Most if not all of the events triggered when changes are made to
+things will stop.  This results in those feedback reinforcements events that
+used to trigger in slack vanishing.  You will be accustomed to making changes
+and often seeing events being triggered in slack, that reinforcement feedback
+mostly gets lost with addition of maxtrixprofile as an algorithm.</p>
+<p>This can be somewhat mitigated by setting the <code class="docutils literal notranslate"><span class="pre">'trigger_history_override':</span> <span class="pre">5,</span></code>
+in <code class="docutils literal notranslate"><span class="pre">skyline_matrixprofile</span></code> <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>.  This means that
+if three-sigma has triggered 5 runs in a row the matrixprofile result will be
+overridden and an anomaly will be triggered.</p>
+<p>Consider adding some namespaces to be analysed by matrixprofile and assess the
+results before jumping in with both feet, it really depends if you are wanting
+to use Skyline as an alerter only or as an informational stream of the bad, the
+good and the unknown.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="3_0_2.html" class="btn btn-neutral float-left" title="3.0.2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="2_0_0.html" class="btn btn-neutral float-right" title="2.0.0" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

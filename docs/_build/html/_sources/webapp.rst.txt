@@ -38,17 +38,15 @@ Deploying the Webapp
 Originally the Webapp was deployed behind the simple Flask development server,
 however for numerous reasons, this is less than ideal.  Although the Webapp can
 still be run with Flask only, the recommended way to run the Webapp is via
-gunicorn, which can be HTTP proxied by Apache or nginx, etc.  The gunicorn
-Webapp can be exposed just like the Flask Webapp, but it is recommended to run
-it HTTP proxied.
+gunicorn, which is HTTP proxied by nginx.  The gunicorn Webapp can be exposed
+just like the Flask Webapp, but it is recommended to run it HTTP proxied.
 
 Using a production grade HTTP application
 -----------------------------------------
 
 It must be noted and stated that you **should** consider running the Skyline
 Webapp behind a production grade HTTP application, regardless of the
-implemented basic security measures.  Something like Apache or nginx serving the
-Webapp via gunicorn.
+implemented basic security measures with nginx serving the Webapp via gunicorn.
 
 This may seem like overkill, however there are a number of valid reasons for
 this.
@@ -66,33 +64,28 @@ production environments.  See http://flask.pocoo.org/docs/0.11/deploying/
 In addition to that, considering that the Webapp has MySQL in the mix, this
 element adds further reason to properly secure the environment.
 
-There is potential for XSS and SQL injection via the Webapp, ensure TRUSTED
-access only.
+There might be possible potential for XSS and SQL injection via the Webapp,
+therefore ensure TRUSTED access only.
 
-Apache and gunicorn
--------------------
+nginx and gunicorn
+------------------
 
 Although there are a number of options to run a production grade wsgi frontend,
-the example here will document serving gunicorn via Apache reverse proxy with
-authentication.  Although Apache mod_wsgi may seem like the natural fit here, in
-terms of virtualenv and Python ``make_altinstall``, gunicorn has much less
-external dependencies.  gunicorn can be easily installed and run in any
-virtualenv, therefore it keeps it within the Skyline Python environment, rather
-than offloading very complex Python and mod_wsgi compiles to the user,
-orchestration and package management.
+the example here will document serving gunicorn via nginx reverse proxy with
+authentication.
 
-Apache nd ngiinx are common webservers and gunicorn can be handled within the
-Skyline package and requirements.txt
+nginx is a common webserver and gunicorn is handled within the Skyline package
+and requirements.txt
 
-See ``etc/skyline.httpd.conf.d.example`` or ``etc/skyline.nginx.conf.d.example``
-for examples Apache aand ngnx conf.d configuration files to serve the Webapp via
-gunicorn and reverse proxy on port 443 with basic HTTP authentication and
-restricted IP access.  Note that your username and password must match in both
-the Apache htpasswd and the :mod:`settings.WEBAPP_AUTH_USER`/
-:mod:`settings.WEBAPP_AUTH_USER_PASSWORD` contexts as Apache/nginx will
-authenticate the user and forward on the authentication details to gunicorn for
-the Webapp to also authenticate the user.  Authentication is enabled by default
-in ``settings.py``.
+See ``etc/skyline.nginx.conf.d.example`` for an example of the nginx conf.d
+configuration file to serve the Webapp via gunicorn and reverse proxy on port
+443 with basic HTTP authentication and restricted IP access.  The config is set
+to read the htpasswd file from /etc/nginx/conf.d/.skyline.htpasswd.  Note that
+your username and password must match in both the Apache htpasswd and the
+:mod:`settings.WEBAPP_AUTH_USER`/:mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
+contexts as nginx will authenticate the user and forward on the authentication
+details to gunicorn for the Webapp to also authenticate the user.
+Authentication is enabled by default in ``settings.py``.
 
 Securing the Webapp
 ===================
@@ -103,7 +96,15 @@ Firewall rules
 The Webapp **should** be secured with proper firewall rules that restrict access
 to the :mod:`settings.WEBAPP_IP` and :mod:`settings.WEBAPP_PORT` (and/or just
 the reverse proxy port for gunicorn if being used) from trusted IP
-addresses only.
+addresses only.  It is best to keep the :mod:`settings.WEBAPP_IP` set to
+127.0.0.1 and access it via the reverse proxy.  Note that the webapp will bind
+to the :mod:`settings.WEBAPP_PORT` and :mod:`settings.WEBAPP_PORT` + 1.  This is
+because the main webapp runs gunicorn with a gevent worker_class and there are
+some problems running some multiprocessing functions with gevent in the webapp
+layout, therefore the webapp also starts another gunicorn process that has the
+sync worker_class for handling functions that require multiprocessing.  So if
+your :mod:`settings.WEBAPP_PORT` is set to 1500, webapp will bind to
+127.0.0.1:1500 and 127.0.0.1:1501.
 
 Basic security
 --------------

@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>custom_algorithms.adtk_level_shift &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_algorithms.html">custom_algorithms</a></li>
+      <li class="breadcrumb-item active">custom_algorithms.adtk_level_shift</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for custom_algorithms.adtk_level_shift</h1><div class="highlight"><pre>
+<span></span><span class="c1"># @added 20210223 - Feature #3970: custom_algorithm - adtk_level_shift</span>
+<span class="c1">#                   Task #3664:: POC with adtk</span>
+<span class="c1">#                   Feature #3642: Anomaly type classification</span>
+<span class="c1">#                   Info #3324: adtk</span>
+<span class="c1"># REQUIRED Skyline imports.  All custom algorithms MUST have the following two</span>
+<span class="c1"># imports.  These are required for exception handling and to record algorithm</span>
+<span class="c1"># errors regardless of debug_logging setting for the custom_algorithm</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span> <span class="k">as</span> <span class="n">os_path_dirname</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span> <span class="k">as</span> <span class="n">os_path_exists</span>
+
+<span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">record_algorithm_error</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c1"># Import ALL modules that the custom algorithm requires.  Remember that if a</span>
+<span class="c1"># requirement is not one that is provided by the Skyline requirements.txt you</span>
+<span class="c1"># must ensure it is installed in the Skyline virtualenv</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">zlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">adtk.data</span> <span class="kn">import</span> <span class="n">validate_series</span>
+<span class="kn">from</span> <span class="nn">adtk.detector</span> <span class="kn">import</span> <span class="n">LevelShiftAD</span>
+
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span><span class="p">,</span> <span class="n">mkdir_p</span>
+
+<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">FULL_DURATION</span>
+
+<span class="c1"># The name of the fucntion MUST be the same as the name declared in</span>
+<span class="c1"># settings.CUSTOM_ALGORITHMS.</span>
+<span class="c1"># It MUST have 3 parameters:</span>
+<span class="c1"># current_skyline_app, timeseries, algorithm_parameters</span>
+<span class="c1"># See https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</span>
+<span class="c1"># for a full explanation about each.</span>
+<span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and except</span>
+
+
+<div class="viewcode-block" id="adtk_level_shift"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.adtk_level_shift.adtk_level_shift">[docs]</a><span class="k">def</span> <span class="nf">adtk_level_shift</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A timeseries is anomalous if a level shift occurs in a 5 window period bound</span>
+<span class="sd">    by a factor of 9 of the normal range based on historical interquartile range.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app executing the algorithm.  This</span>
+<span class="sd">        will be passed to the algorithm by Skyline.  This is **required** for</span>
+<span class="sd">        error handling and logging.  You do not have to worry about handling the</span>
+<span class="sd">        argument in the scope of the custom algorithm itself,  but the algorithm</span>
+<span class="sd">        must accept it as the first agrument.</span>
+<span class="sd">    :param parent_pid: the parent pid which is executing the algorithm, this is</span>
+<span class="sd">        **required** for error handling and logging.  You do not have to worry</span>
+<span class="sd">        about handling this argument in the scope of algorithm, but the</span>
+<span class="sd">        algorithm must accept it as the second argument.</span>
+<span class="sd">    :param timeseries: the time series as a list e.g. ``[[1578916800.0, 29.0],</span>
+<span class="sd">        [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``</span>
+<span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
+<span class="sd">        custom_algorithm and algorithm itself.  For the matrixprofile custom</span>
+<span class="sd">        algorithm the following parameters are required, example:</span>
+<span class="sd">        ``algorithm_parameters={</span>
+<span class="sd">            &#39;c&#39;: 9.0,</span>
+<span class="sd">            &#39;run_every&#39;: 5,</span>
+<span class="sd">            &#39;side&#39;: &#39;both&#39;,</span>
+<span class="sd">            &#39;window&#39;: 5</span>
+<span class="sd">        }``</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type parent_pid: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :type algorithm_parameters: dict</span>
+<span class="sd">    :return: True, False or Non</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    Performance is of paramount importance in Skyline, especially in terms of</span>
+<span class="sd">    computational complexity, along with execution time and CPU usage. The</span>
+<span class="sd">    adtk LevelShiftAD algortihm is not O(n) and it is not fast either, not when</span>
+<span class="sd">    compared to the normal three-sigma triggered algorithms.  However it is</span>
+<span class="sd">    useful if you care about detecting all level shifts.  The normal three-sigma</span>
+<span class="sd">    triggered algorithms do not always detect a level shift, especially if the</span>
+<span class="sd">    level shift does not breach the three-sigma limits.  Therefore you may find</span>
+<span class="sd">    over time that you encounter alerts that contain level shifts that you</span>
+<span class="sd">    thought should have been detected.  On these types of metrics and events,</span>
+<span class="sd">    the adtk LevelShiftAD algortihm can be implemented to detect and alert on</span>
+<span class="sd">    these.  It is not recommended to run on all your metrics as it would</span>
+<span class="sd">    immediately triple the analyzer runtime every if only run every 5 windows/</span>
+<span class="sd">    minutes.</span>
+
+<span class="sd">    Due to the computational complexity and long run time of the adtk</span>
+<span class="sd">    LevelShiftAD algorithm on the size of timeseries data used by Skyline, if</span>
+<span class="sd">    you consider the following timings of all three-sigma triggered algorithms</span>
+<span class="sd">    and compare them to the to the adtk_level_shift results in the last 2 rows</span>
+<span class="sd">    of the below log, it is clear that the running adtk_level_shift on all</span>
+<span class="sd">    metrics is probably not desirable, even if it is possible to do, it is very</span>
+<span class="sd">    noisy.</span>
+
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - histogram_bins run 567 times</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - histogram_bins has 567 timings</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - histogram_bins - total: 1.051136 - median: 0.001430</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - first_hour_average run 567 times</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - first_hour_average has 567 timings</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - first_hour_average - total: 1.322432 - median: 0.001835</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - stddev_from_average run 567 times</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - stddev_from_average has 567 timings</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - stddev_from_average - total: 1.097290 - median: 0.001641</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - grubbs run 567 times</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - grubbs has 567 timings</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - grubbs - total: 1.742929 - median: 0.002438</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - ks_test run 147 times</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - ks_test has 147 timings</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - ks_test - total: 0.127648 - median: 0.000529</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm run count - mean_subtraction_cumulation run 40 times</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - mean_subtraction_cumulation has 40 timings</span>
+<span class="sd">    2021-03-06 10:46:38 :: 1582754 :: algorithm timing - mean_subtraction_cumulation - total: 0.152515 - median: 0.003152</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - median_absolute_deviation run 35 times</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - median_absolute_deviation has 35 timings</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - median_absolute_deviation - total: 0.143770 - median: 0.003248</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - stddev_from_moving_average run 30 times</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - stddev_from_moving_average has 30 timings</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - stddev_from_moving_average - total: 0.125173 - median: 0.003092</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - least_squares run 16 times</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - least_squares has 16 timings</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - least_squares - total: 0.089108 - median: 0.005538</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - abs_stddev_from_median run 1 times</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - abs_stddev_from_median has 1 timings</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - abs_stddev_from_median - total: 0.036797 - median: 0.036797</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm run count - adtk_level_shift run 271 times</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timings count - adtk_level_shift has 271 timings</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: algorithm timing - adtk_level_shift - total: 13.729565 - median: 0.035791</span>
+<span class="sd">    ...</span>
+<span class="sd">    ...</span>
+<span class="sd">    2021-03-06 10:46:39 :: 1582754 :: seconds to run     :: 27.93  # THE TOTAL ANALYZER RUNTIME</span>
+
+<span class="sd">    Therefore the analysis methodology implemented for the adtk_level_shift</span>
+<span class="sd">    custom_algorithm is as folows:</span>
+
+<span class="sd">    - When new metrics are added either to the configuration or by actual new</span>
+<span class="sd">    metrics coming online that match the ``algorithm_parameters[&#39;namespace&#39;]``,</span>
+<span class="sd">    Skyline implements sharding on new metrics into time slots to prevent a</span>
+<span class="sd">    thundering herd situation from developing.  A newly added metrics will</span>
+<span class="sd">    eventually be assigned into a time shard and be added and the last analysed</span>
+<span class="sd">    timestamp will be added to the ``analyzer.last.adtk_level_shift`` Redis hash</span>
+<span class="sd">    key to determine the next scheduled run with</span>
+<span class="sd">    ``algorithm_parameters[&#39;namespace&#39;]``</span>
+
+<span class="sd">    - A ``run_every`` parameter is implemented so that the algorithm can be</span>
+<span class="sd">    configured to run on a metric once every ``run_every`` minutes.  The default</span>
+<span class="sd">    is to run it every 5 minutes using window 5 (rolling) and trigger as</span>
+<span class="sd">    anomalous if the algorithm labels any of the last 5 datapoints as anomalous.</span>
+<span class="sd">    This means that there could be up to a 5 minute delay on an alert on the</span>
+<span class="sd">    60 second, 168 SECOND_ORDER_RESOLUTION_HOURS metrics in the example, but a</span>
+<span class="sd">    ``c=9.0`` level shift would be detected and would be alerted on (if both</span>
+<span class="sd">    analyzer and mirage triggered on it).  This periodic running of the</span>
+<span class="sd">    algorithm is a tradeoff so that the adtk_level_shift load and runtime can be</span>
+<span class="sd">    spread over ``run_every`` minutes.</span>
+
+<span class="sd">    - The algorithm is not run against metrics that are sparsely populated.</span>
+<span class="sd">    When the algorithm is run on sparsely populated metrics it results in lots</span>
+<span class="sd">    of false positives and noise.</span>
+
+<span class="sd">    The Skyline CUSTOM_ALGORITHMS implementation of the adtk LevelShiftAD</span>
+<span class="sd">    algorithm is configured as the example shown below.  However please note</span>
+<span class="sd">    that the algorithm_parameters shown in this example configuration are</span>
+<span class="sd">    suitiable for metrics that have a 60 second relation and have a</span>
+<span class="sd">    :mod:`settings.ALERTS` Mirage SECOND_ORDER_RESOLUTION_HOURS of 168 (7 days).</span>
+<span class="sd">    For metrics with a different resolution/frequency may require different</span>
+<span class="sd">    values appropriate for metric resolution.</span>
+
+<span class="sd">    Example CUSTOM_ALGORITHMS configuration:</span>
+
+<span class="sd">    &#39;adtk_level_shift&#39;: {</span>
+<span class="sd">        &#39;namespaces&#39;: [</span>
+<span class="sd">            &#39;skyline.analyzer.run_time&#39;, &#39;skyline.analyzer.total_metrics&#39;,</span>
+<span class="sd">            &#39;skyline.analyzer.exceptions&#39;</span>
+<span class="sd">        ],</span>
+<span class="sd">        &#39;algorithm_source&#39;: &#39;/opt/skyline/github/skyline/skyline/custom_algorithms/adtk_level_shift.py&#39;,</span>
+<span class="sd">        &#39;algorithm_parameters&#39;: {&#39;c&#39;: 9.0, &#39;run_every&#39;: 5, &#39;side&#39;: &#39;both&#39;, &#39;window&#39;: 5},</span>
+<span class="sd">        &#39;max_execution_time&#39;: 0.5,</span>
+<span class="sd">        &#39;consensus&#39;: 1,</span>
+<span class="sd">        &#39;algorithms_allowed_in_consensus&#39;: [&#39;adtk_level_shift&#39;],</span>
+<span class="sd">        &#39;run_3sigma_algorithms&#39;: True,</span>
+<span class="sd">        &#39;run_before_3sigma&#39;: True,</span>
+<span class="sd">        &#39;run_only_if_consensus&#39;: False,</span>
+<span class="sd">        &#39;use_with&#39;: [&quot;analyzer&quot;, &quot;mirage&quot;],</span>
+<span class="sd">        &#39;debug_logging&#39;: False,</span>
+<span class="sd">    },</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># You MUST define the algorithm_name</span>
+    <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s1">&#39;adtk_level_shift&#39;</span>
+
+    <span class="c1"># Define the default state of None and None, anomalous does not default to</span>
+    <span class="c1"># False as that is not correct, False is only correct if the algorithm</span>
+    <span class="c1"># determines the data point is not anomalous.  The same is true for the</span>
+    <span class="c1"># anomalyScore.</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># @aded 20210308 - Feature #3978: luminosity - classify_metrics</span>
+    <span class="c1">#                  Feature #3642: Anomaly type classification</span>
+    <span class="n">return_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">realtime_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+    <span class="c1"># like other custom algorithms that vortex can run</span>
+    <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">adtk_scores</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">results_anomalies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
+        <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="n">results_anomalies</span><span class="p">,</span>
+        <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">anomalyScore_list</span><span class="p">,</span>
+        <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">adtk_scores</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># If you wanted to log, you can but this should only be done during</span>
+    <span class="c1"># testing and development</span>
+    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">current_logger</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+    <span class="c1"># Use the algorithm_parameters to determine the sample_period</span>
+    <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: debug_logging enabled with algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+            <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+            <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+            <span class="c1"># But we do not want the function returning and not reporting</span>
+            <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+            <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+            <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Allow the LevelShiftAD window parameter to be passed in the</span>
+    <span class="c1"># algorithm_parameters</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Allow the LevelShiftAD c parameter to be passed in the</span>
+    <span class="c1"># algorithm_parameters</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mf">9.0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">run_every</span> <span class="o">=</span> <span class="n">window</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_every</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;run_every&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">side</span> <span class="o">=</span> <span class="s1">&#39;both&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">side</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;side&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithm_parameters :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20210714 - Feature #4164: luminosity - cloudbursts</span>
+    <span class="n">min_periods</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">min_periods</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;min_periods&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">min_periods</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># @added 20210308 - Feature #3978: luminosity - classify_metrics</span>
+    <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">return_anomalies</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;return_anomalies&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">return_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">realtime_analysis</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;realtime_analysis&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">realtime_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @added 20210316 - Feature #3978: luminosity - classify_metrics</span>
+    <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+    <span class="n">save_plots_to</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">save_plots_to</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;save_plots_to&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># @added 20210323 - Feature #3978: luminosity - classify_metrics</span>
+    <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+    <span class="n">save_plots_to_absolute_dir</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">save_plots_to_absolute_dir</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;save_plots_to_absolute_dir&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">filename_prefix</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">filename_prefix</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;filename_prefix&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># @added 20210318 - Feature #3978: luminosity - classify_metrics</span>
+    <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+    <span class="n">run_PersistAD</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_PersistAD</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;run_PersistAD&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithm_parameters :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+    <span class="c1"># like other custom algorithms that vortex can run</span>
+    <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">return_results</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;return_results&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+    <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomaly_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;base_name&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+
+        <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+        <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+        <span class="c1"># like other custom algorithms that vortex can run</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: base_name - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
+    <span class="c1"># Due to the load and runtime of LevelShiftAD it is only run in analyzer</span>
+    <span class="c1"># periodically</span>
+    <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;analyzer&#39;</span><span class="p">:</span>
+        <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">last_hash_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">algorithm_name</span>
+        <span class="n">last_check</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_last_check</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="n">last_hash_key</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="n">last_check</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_last_check</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">last_check</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">last_window_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">run_every</span><span class="p">:]]</span>
+        <span class="k">if</span> <span class="n">last_check</span> <span class="ow">in</span> <span class="n">last_window_timestamps</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: run_every period is not over yet, skipping base_name - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+            <span class="c1"># like other custom algorithms that vortex can run</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># If there is no last timestamp, shard the metric, it will eventually</span>
+        <span class="c1"># be added.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">last_check</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+            <span class="n">now_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="o">.</span><span class="n">second</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">now_seconds</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">now_seconds</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">period_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">60</span> <span class="o">/</span> <span class="n">run_every</span><span class="p">)</span>
+            <span class="n">shard</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">period_seconds</span><span class="p">)</span>
+            <span class="n">last_shard</span> <span class="o">=</span> <span class="mi">60</span>
+            <span class="n">shard</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">period_seconds</span><span class="p">)</span>
+            <span class="n">shards</span> <span class="o">=</span> <span class="p">[</span><span class="n">shard</span><span class="p">]</span>
+            <span class="k">while</span> <span class="n">shard</span> <span class="o">&lt;</span> <span class="n">last_shard</span><span class="p">:</span>
+                <span class="n">shard</span> <span class="o">=</span> <span class="n">shard</span> <span class="o">+</span> <span class="n">period_seconds</span>
+                <span class="n">shards</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">shard</span><span class="p">))</span>
+            <span class="n">shard_value</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">now_seconds</span> <span class="o">/</span> <span class="n">shards</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">shards</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">shard_value</span> <span class="o">&lt;=</span> <span class="n">shards</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">shard_value</span> <span class="o">=</span> <span class="n">shards</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">metric_as_bytes</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">adler32</span><span class="p">(</span><span class="n">metric_as_bytes</span><span class="p">)</span>
+            <span class="n">shard_index</span> <span class="o">=</span> <span class="p">[(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">s_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shards</span><span class="p">)</span> <span class="k">if</span> <span class="n">s_value</span> <span class="o">==</span> <span class="n">shard_value</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">modulo_result</span> <span class="o">=</span> <span class="n">value</span> <span class="o">%</span> <span class="n">shard_index</span>
+            <span class="k">if</span> <span class="n">modulo_result</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: skipping as not sharded into this run - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+            <span class="c1"># like other custom algorithms that vortex can run</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: analysing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">int_metric_timestamp</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span>
+                    <span class="n">last_hash_key</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span>
+                    <span class="n">int_metric_timestamp</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and the BELOW except</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start_preprocessing</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+        <span class="c1"># INFO: Sorting time series of 10079 data points took 0.002215 seconds</span>
+        <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series of length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+
+        <span class="c1"># Testing the data to ensure it meets minimum requirements, in the case</span>
+        <span class="c1"># of Skyline&#39;s use of the LevelShiftAD algorithm this means that:</span>
+        <span class="c1"># - the time series must have at least 75% of its full_duration</span>
+        <span class="c1"># - the time series must have at least 99% of the data points for the</span>
+        <span class="c1">#   in the sample being analysed.</span>
+        <span class="n">do_not_use_sparse_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;analyzer&#39;</span><span class="p">:</span>
+            <span class="n">do_not_use_sparse_data</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20210305 - Feature #3970: custom_algorithm - adtk_level_shift</span>
+        <span class="c1">#                   Task #3664:: POC with adtk</span>
+        <span class="c1"># With mirage also do not run LevelShiftAD on sparsely populated data</span>
+        <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
+            <span class="n">do_not_use_sparse_data</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @aded 20210309 - Feature #3978: luminosity - classify_metrics</span>
+        <span class="c1">#                  Feature #3642: Anomaly type classification</span>
+        <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;luminosity&#39;</span><span class="p">:</span>
+            <span class="n">do_not_use_sparse_data</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">do_not_use_sparse_data</span><span class="p">:</span>
+
+            <span class="n">total_period</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">total_datapoints</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">total_period</span> <span class="o">=</span> <span class="n">end_timestamp</span> <span class="o">-</span> <span class="n">start_timestamp</span>
+                <span class="n">total_datapoints</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called, exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                <span class="c1"># like other custom algorithms that vortex can run</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to determine total_period and total_datapoints&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">))</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                <span class="c1"># like other custom algorithms that vortex can run</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;analyzer&#39;</span><span class="p">:</span>
+                <span class="c1"># Default for analyzer at required period to 18 hours</span>
+                <span class="n">period_required</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">FULL_DURATION</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Determine from timeseries</span>
+                <span class="k">if</span> <span class="n">total_period</span> <span class="o">&lt;</span> <span class="n">FULL_DURATION</span><span class="p">:</span>
+                    <span class="n">period_required</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">FULL_DURATION</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">period_required</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_period</span> <span class="o">*</span> <span class="mf">0.75</span><span class="p">)</span>
+
+            <span class="c1"># If the time series does not have 75% of its full_duration it does not</span>
+            <span class="c1"># have sufficient data to sample</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">total_period</span> <span class="o">&lt;</span> <span class="n">period_required</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series does not have sufficient data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">))</span>
+                    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                    <span class="c1"># like other custom algorithms that vortex can run</span>
+                    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called, exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                <span class="c1"># like other custom algorithms that vortex can run</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: falied to determine if time series has sufficient data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">))</span>
+                <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                <span class="c1"># like other custom algorithms that vortex can run</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+            <span class="c1"># If the time series does not have 75% of its full_duration data points</span>
+            <span class="c1"># it does not have sufficient data to sample</span>
+
+            <span class="c1"># Determine resolution from the last 30 data points</span>
+            <span class="c1"># INFO took 0.002060 seconds</span>
+            <span class="n">resolution_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">metric_resolution</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">metric_datapoint</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]:</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">resolution_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">timestamp_resolutions</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                        <span class="n">resolution</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
+                        <span class="n">timestamp_resolutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">resolution_timestamps</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">timestamp_resolutions</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">timestamp_resolutions</span><span class="p">)</span>
+                    <span class="n">ordered_timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">timestamp_resolutions_count</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+                    <span class="n">metric_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ordered_timestamp_resolutions_count</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called, exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                    <span class="c1"># like other custom algorithms that vortex can run</span>
+                    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to determine if time series has sufficient data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">timestamp_resolutions</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="n">minimum_datapoints</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">metric_resolution</span><span class="p">:</span>
+                <span class="n">minimum_datapoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">period_required</span> <span class="o">/</span> <span class="n">metric_resolution</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">minimum_datapoints</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">total_datapoints</span> <span class="o">&lt;</span> <span class="n">minimum_datapoints</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series does not have sufficient data, minimum_datapoints required is </span><span class="si">%s</span><span class="s1"> and time series has </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">minimum_datapoints</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">total_datapoints</span><span class="p">)))</span>
+                    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                    <span class="c1"># like other custom algorithms that vortex can run</span>
+                    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+            <span class="c1"># Is the time series fully populated?</span>
+            <span class="c1"># full_duration_datapoints = int(full_duration / metric_resolution)</span>
+            <span class="n">total_period_datapoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_period</span> <span class="o">/</span> <span class="n">metric_resolution</span><span class="p">)</span>
+            <span class="c1"># minimum_percentage_sparsity = 95</span>
+            <span class="n">minimum_percentage_sparsity</span> <span class="o">=</span> <span class="mi">90</span>
+            <span class="n">sparsity</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_datapoints</span> <span class="o">/</span> <span class="p">(</span><span class="n">total_period_datapoints</span> <span class="o">/</span> <span class="mi">100</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">sparsity</span> <span class="o">&lt;</span> <span class="n">minimum_percentage_sparsity</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series does not have sufficient data, minimum_percentage_sparsity required is </span><span class="si">%s</span><span class="s1"> and time series has </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">minimum_percentage_sparsity</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">sparsity</span><span class="p">)))</span>
+                <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                <span class="c1"># like other custom algorithms that vortex can run</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series does not have sufficient variability, all the values are the same&#39;</span> <span class="o">%</span> <span class="n">algorithm_name</span><span class="p">)</span>
+                <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                <span class="c1"># like other custom algorithms that vortex can run</span>
+                <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+        <span class="n">end_preprocessing</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">preprocessing_runtime</span> <span class="o">=</span> <span class="n">end_preprocessing</span> <span class="o">-</span> <span class="n">start_preprocessing</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: preprocessing took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">preprocessing_runtime</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: LevelShiftAD not run as no data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">))</span>
+            <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+            <span class="c1"># like other custom algorithms that vortex can run</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: timeseries length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series does not have sufficient data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">))</span>
+            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+            <span class="c1"># like other custom algorithms that vortex can run</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+        <span class="n">start_analysis</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: starting analysis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+            <span class="n">datetime_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">datetime_index</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">validate_series</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            <span class="c1"># @modified 20210714 - Feature #4164: luminosity - cloudbursts</span>
+            <span class="c1"># level_shift_ad = LevelShiftAD(c=c, side=side, window=window)</span>
+            <span class="n">level_shift_ad</span> <span class="o">=</span> <span class="n">LevelShiftAD</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="n">side</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="n">min_periods</span><span class="p">)</span>
+            <span class="n">anomaly_df</span> <span class="o">=</span> <span class="n">level_shift_ad</span><span class="o">.</span><span class="n">fit_detect</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">anomalies</span> <span class="o">=</span> <span class="n">anomaly_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">anomaly_df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: analysis run, anomalies found </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies</span><span class="p">))))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">anomaly_timestamps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">anomalies</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">realtime_analysis</span><span class="p">:</span>
+                    <span class="n">last_window_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">window</span><span class="p">:]]</span>
+                    <span class="c1"># if timeseries[-1][0] in anomaly_timestamps:</span>
+                    <span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">last_window_timestamps</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">anomaly_timestamps</span><span class="p">:</span>
+                            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="c1"># Convert anomalies dataframe to anomalies_list</span>
+                    <span class="n">anomalies_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1"># @added 20210316 - Feature #3978: luminosity - classify_metrics</span>
+                    <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+                    <span class="c1"># Convert anomalies dataframe to anomalies_dict</span>
+                    <span class="n">anomalies_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+                    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm_name</span>
+                    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                    <span class="c1"># @modified 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                    <span class="c1"># like other custom algorithms that vortex can run</span>
+                    <span class="c1"># for ts, value in timeseries:</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                        <span class="n">ts</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="ow">in</span> <span class="n">anomaly_timestamps</span><span class="p">:</span>
+                            <span class="n">anomalies_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="n">value</span><span class="p">])</span>
+                            <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+                            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                            <span class="c1"># like other custom algorithms that vortex can run</span>
+                            <span class="n">results_anomalies</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+                            <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+                    <span class="n">anomalies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">anomalies_list</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                    <span class="c1"># like other custom algorithms that vortex can run</span>
+                    <span class="n">adtk_scores</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                        <span class="n">anomaly_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">[</span><span class="o">-</span><span class="n">anomaly_window</span><span class="p">:])</span>
+                        <span class="k">if</span> <span class="n">anomaly_sum</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+                            <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
+                            <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="n">results_anomalies</span><span class="p">,</span>
+                            <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">anomalyScore_list</span><span class="p">,</span>
+                            <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="n">adtk_scores</span><span class="p">,</span>
+                        <span class="p">}</span>
+
+                    <span class="c1"># @added 20210316 - Feature #3978: luminosity - classify_metrics</span>
+                    <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+                    <span class="k">if</span> <span class="n">save_plots_to</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="kn">from</span> <span class="nn">adtk.visualization</span> <span class="kn">import</span> <span class="n">plot</span>
+                            <span class="n">metric_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                            <span class="n">timestamp_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                            <span class="n">save_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">save_plots_to</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">metric_dir</span><span class="p">,</span>
+                                <span class="n">timestamp_dir</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">save_plots_to_absolute_dir</span><span class="p">:</span>
+                                <span class="n">save_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">save_plots_to</span>
+                            <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;file_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_path</span>
+                            <span class="n">save_to_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">save_path</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">filename_prefix</span><span class="p">:</span>
+                                <span class="n">save_to_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">save_path</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span>
+                                    <span class="n">base_name</span><span class="p">)</span>
+                            <span class="n">save_to_path</span> <span class="o">=</span> <span class="n">os_path_dirname</span><span class="p">(</span><span class="n">save_to_file</span><span class="p">)</span>
+                            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">os_path_exists</span><span class="p">(</span><span class="n">save_to_path</span><span class="p">):</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">mkdir_p</span><span class="p">(</span><span class="n">save_to_path</span><span class="p">)</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create dir - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">save_to_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="n">os_path_exists</span><span class="p">(</span><span class="n">save_to_path</span><span class="p">):</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">plot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">anomaly</span><span class="o">=</span><span class="n">anomaly_df</span><span class="p">,</span> <span class="n">anomaly_color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">save_to_file</span><span class="o">=</span><span class="n">save_to_file</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: plot saved to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">save_to_file</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to plot - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                            <span class="n">anomalies_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.anomalies_list.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">save_path</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomalies_list</span><span class="p">))</span>
+                                <span class="c1"># os.chmod(anomalies_file, mode=0o644)</span>
+                            <span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/data.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">save_path</span><span class="p">)</span>
+                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomalies_dict</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called during save plot, exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+                            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+                            <span class="c1"># like other custom algorithms that vortex can run</span>
+                            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to plot or save anomalies file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20210318 - Feature #3978: luminosity - classify_metrics</span>
+            <span class="c1">#                   Feature #3642: Anomaly type classification</span>
+            <span class="c1"># @modified 20210627 - Feature #3978: luminosity - classify_metrics</span>
+            <span class="c1"># Handle ValueError by testing the length of the anomalies DataFrame</span>
+            <span class="c1"># ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()</span>
+            <span class="c1"># if anomalies and run_PersistAD and not realtime_analysis:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">run_PersistAD</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">realtime_analysis</span><span class="p">:</span>
+                <span class="n">persist_ad_algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">persist_ad_algorithm_parameters</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;persist_ad_algorithm_parameters&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="n">persist_ad_window</span> <span class="o">=</span> <span class="mi">20</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">persist_ad_window</span> <span class="o">=</span> <span class="n">persist_ad_algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="n">persist_ad_c</span> <span class="o">=</span> <span class="mf">9.9</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">persist_ad_c</span> <span class="o">=</span> <span class="n">persist_ad_algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;c&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">adtk.detector</span> <span class="kn">import</span> <span class="n">PersistAD</span>
+                    <span class="n">persist_ad</span> <span class="o">=</span> <span class="n">PersistAD</span><span class="p">(</span><span class="n">c</span><span class="o">=</span><span class="n">persist_ad_c</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">persist_ad_window</span><span class="p">)</span>
+                    <span class="n">persist_ad_anomaly_df</span> <span class="o">=</span> <span class="n">persist_ad</span><span class="o">.</span><span class="n">fit_detect</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                    <span class="n">persist_ad_anomalies</span> <span class="o">=</span> <span class="n">persist_ad_anomaly_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">persist_ad_anomaly_df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">persist_ad_anomalies</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> anomalies found with PersistAD on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">persist_ad_anomalies</span><span class="p">)),</span>
+                            <span class="n">base_name</span><span class="p">))</span>
+                        <span class="n">persist_ad_anomaly_timestamps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">persist_ad_anomalies</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+                        <span class="c1"># Convert persist_ad_anomalies dataframe to persist_ad_anomalies_list</span>
+                        <span class="n">persist_ad_anomalies_list</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">persist_ad_anomalies_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+                        <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;adtk_PersistAD&#39;</span>
+                        <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                        <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="ow">in</span> <span class="n">persist_ad_anomaly_timestamps</span><span class="p">:</span>
+                                <span class="n">persist_ad_anomalies_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="n">value</span><span class="p">])</span>
+                                <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+                        <span class="n">persist_ad_anomalies</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">persist_ad_anomalies_list</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">save_plots_to</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="kn">from</span> <span class="nn">adtk.visualization</span> <span class="kn">import</span> <span class="n">plot</span>
+                                <span class="n">metric_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                                <span class="n">timestamp_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                                <span class="n">save_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">save_plots_to</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">metric_dir</span><span class="p">,</span>
+                                    <span class="n">timestamp_dir</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">save_plots_to_absolute_dir</span><span class="p">:</span>
+                                    <span class="n">save_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">save_plots_to</span>
+                                <span class="n">persist_ad_anomalies_dict</span><span class="p">[</span><span class="s1">&#39;file_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_path</span>
+                                <span class="n">save_to_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.PersistAD.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">save_path</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">filename_prefix</span><span class="p">:</span>
+                                    <span class="n">save_to_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">save_path</span><span class="p">,</span> <span class="n">filename_prefix</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span>
+                                        <span class="n">base_name</span><span class="p">)</span>
+                                <span class="n">save_to_path</span> <span class="o">=</span> <span class="n">os_path_dirname</span><span class="p">(</span><span class="n">save_to_file</span><span class="p">)</span>
+                                <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - PersistAD verification</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">os_path_exists</span><span class="p">(</span><span class="n">save_to_path</span><span class="p">):</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">save_to_path</span><span class="p">)</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create dir - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">save_to_path</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                <span class="k">if</span> <span class="n">os_path_exists</span><span class="p">(</span><span class="n">save_to_path</span><span class="p">):</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">plot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">anomaly</span><span class="o">=</span><span class="n">persist_ad_anomaly_df</span><span class="p">,</span> <span class="n">anomaly_color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">save_to_file</span><span class="o">=</span><span class="n">save_to_file</span><span class="p">)</span>
+                                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                                            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: plot saved to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">save_to_file</span><span class="p">))</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to plot - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                <span class="n">anomalies_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.PersistAD.anomalies_list.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">save_path</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                                    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">persist_ad_anomalies</span><span class="p">))</span>
+                                    <span class="c1"># os.chmod(anomalies_file, mode=0o644)</span>
+                                <span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/PersistAD.data.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">save_path</span><span class="p">)</span>
+                                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                                    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">persist_ad_anomalies_dict</span><span class="p">))</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                                <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to plot or save PersistAD anomalies file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to analysis with PersistAD anomalies file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">df</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called, during analysis, exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+            <span class="c1"># like other custom algorithms that vortex can run</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to run on ts&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">))</span>
+            <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+            <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+            <span class="c1"># like other custom algorithms that vortex can run</span>
+            <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+        <span class="n">end_analysis</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">analysis_runtime</span> <span class="o">=</span> <span class="n">end_analysis</span> <span class="o">-</span> <span class="n">start_analysis</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: LevelShiftAD took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">analysis_runtime</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: anomalous - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">processing_runtime</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: completed analysis in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">processing_runtime</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timeseries</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+        <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+        <span class="c1"># like other custom algorithms that vortex can run</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called (before StopIteration), exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+        <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+        <span class="c1"># like other custom algorithms that vortex can run</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+
+        <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+        <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+        <span class="c1"># like other custom algorithms that vortex can run</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+
+        <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+        <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+        <span class="c1"># like other custom algorithms that vortex can run</span>
+        <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># @added 20230613 - Feature #4948: vortex - adtk algorithms</span>
+    <span class="c1"># Changed the adtk algorithms to return a results dict</span>
+    <span class="c1"># like other custom algorithms that vortex can run</span>
+    <span class="k">if</span> <span class="n">return_results</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

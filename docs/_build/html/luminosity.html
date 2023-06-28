@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Luminosity &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminosity &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Flux" href="flux.html" />
     <link rel="prev" title="tsfresh" href="tsfresh.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,17 +71,27 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Luminosity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#luminosity-correlation">Luminosity correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#luminosity-classifications">Luminosity classifications</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#luminosity-as-a-replacement-for-kale-oculus">Luminosity as a replacement for Kale Oculus</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#differences-between-oculus-and-luminosity">Differences between Oculus and Luminosity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#luminosity-adds">Luminosity adds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#luminosity-related-metrics">Luminosity related_metrics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#running-luminosity-on-multiple-distributed-skyline-instances">Running Luminosity on multiple, distributed Skyline instances</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -128,6 +99,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -136,103 +110,105 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Luminosity</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Luminosity</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/luminosity.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="luminosity">
-<h1>Luminosity<a class="headerlink" href="#luminosity" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="luminosity">
+<h1>Luminosity<a class="headerlink" href="#luminosity" title="Permalink to this heading"></a></h1>
 <p>Requires - Panorama to be enabled and running.  It is enabled and configured
 via the <code class="docutils literal notranslate"><span class="pre">LUMINOSITY_</span></code> variables in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>.</p>
+<p>Luminosity handles correlation and classification of anomalies and metrics.
+Luminosity also learns what metrics are related to each other using all the
+previous discovered correlations data for metrics.</p>
+<section id="luminosity-correlation">
+<h2>Luminosity correlation<a class="headerlink" href="#luminosity-correlation" title="Permalink to this heading"></a></h2>
 <p>Luminosity takes the time series of an anomalous metric and then cross
-correlates the time series against all the other metrics time series to find and
-record metrics that are strongly correlated to the anomalous metric, using
-Linkedin’s Luminol library.</p>
+correlates the time series against all the other metrics (or correlation mapped
+namespaces metrics, see <a class="reference internal" href="skyline.html#settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY" title="settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.LUMINOSITY_CORRELATION_MAPS" title="settings.LUMINOSITY_CORRELATION_MAPS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CORRELATION_MAPS</span></code></a>) time series to find and record
+metrics that are strongly correlated to the anomalous metric, using Linkedin’s
+Luminol library.</p>
 <p>This information can help in root cause analysis and gives the operator a view
 of other metrics, perhaps on different servers or in different namespaces that
 could be related to anomalous event.</p>
-<p>It handles metrics having a time lagged effect on other metrics is handled with
-time shifted cross correlations time shifted too.  So that if metric.a did
-something 120 seconds ago and metric.b become anomalous 120 seconds later, if
-there is correlation between the time shifted time series, these will be found
-as well and recorded with time shifted value e.g. -120 and a
-shifted_coefficient</p>
+<p>It handles metrics having a time lagged effect on other metrics this is handled
+with time shifted cross correlations too.  So that if <code class="docutils literal notranslate"><span class="pre">metric.a</span></code> did
+something 120 seconds ago and <code class="docutils literal notranslate"><span class="pre">metric.b</span></code> become anomalous 120 seconds later,
+if there is correlation between the time shifted time series, these will be
+found as well and recorded with time shifted value e.g. -120 and a
+shifted_coefficient value.</p>
 <p>Cross correlations are only currently viewable in Ionosphere on training_data
 and features profile pages, however you can query MySQL directly to report on
 any <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> anomalies ad hoc until a full Luminosity webapp page
 is created.</p>
-<p>These are the correlations from the entire metric population that fall within
+<p>These are the correlations from the entire metric population (or or correlation
+mapped namespaces metrics) that fall within
 <a class="reference internal" href="skyline.html#settings.LUMINOL_CROSS_CORRELATION_THRESHOLD" title="settings.LUMINOL_CROSS_CORRELATION_THRESHOLD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOL_CROSS_CORRELATION_THRESHOLD</span></code></a>, they are not necessarily
 all contextually related, but the contextually related correlations are listed
 for the anomaly.  These are simply the numeric correlations it is currently
 up to the operator to review them.  As it is assumed that the operator may know
 which metrics are likely to correlate with this anomaly on the specific metric,
-until such a time as Skyline can, something on the roadmap.</p>
-<p>At the current at this stage of development Luminosity adds lots of noise along
-with the signals in the correlations, somewhat similar to the original Analyzer.
+until such a time as Skyline can do so on its own (something on the roadmap).</p>
+<p>At the current stage of development Luminosity adds lots of noise along with the
+signals in the correlations, somewhat similar to the original Analyzer.
 This is just the start, to be able to try and make it better and useful, the
 data is needed first.</p>
-<div class="section" id="luminosity-as-a-replacement-for-kale-oculus">
-<h2>Luminosity as a replacement for Kale Oculus<a class="headerlink" href="#luminosity-as-a-replacement-for-kale-oculus" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="luminosity-classifications">
+<h2>Luminosity classifications<a class="headerlink" href="#luminosity-classifications" title="Permalink to this heading"></a></h2>
+<p>Luminosity can also be enabled to classify metrics and timeseries.
+There are a number of classifications the luminosity/classify_metrics can be
+enabled to do.  These different types of classifications are required to enable
+certain functionalities.</p>
+<p>Enabling <a class="reference internal" href="skyline.html#settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT" title="settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT</span></code></a> results in
+identifying metrics that can experience significant level shifts using the <a class="reference external" href="https://github.com/arundo/adtk">adtk</a>
+<a class="reference external" href="https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.LevelShiftAD">LevelShiftAD</a> and <a class="reference external" href="https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.PersistAD">PersistAD</a> algorithms.  When this classification is enabled
+luminosity/classify_metrics iterates through all the metrics (once every 4 hours)
+and runs LevelShiftAD and PersistAD algorithms against the previous 7 days of
+data for the metric and identifies any significant level shifts.  Both algorithms
+are configured with <code class="docutils literal notranslate"><span class="pre">c=9.9</span></code> to ensure as few false positives as possible.
+<a class="reference external" href="https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.PersistAD">PersistAD</a> is evaluated if <a class="reference external" href="https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.LevelShiftAD">LevelShiftAD</a> triggers and a significant
+level shift will only be identified if both <a class="reference external" href="https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.LevelShiftAD">LevelShiftAD</a> anomalies and
+<a class="reference external" href="https://adtk.readthedocs.io/en/stable/api/detectors.html#adtk.detector.PersistAD">PersistAD</a> anomalies align, this identifies a true persisted level shift was
+experienced.  When first enabled luminosity/classify_metrics checks each 7 day
+window in the last 6 months of data for each metric, to identify if any historic
+level shifts were experienced. Thereafter each metric will only have the last 7
+day window checked per 4 hours.  Once a metric has been identified as level
+shift metric, the level shift classification will not been run again.  This is
+also true if the metric is in a known or configured namespace.</p>
+<p>The purpose of identifying metrics that can experience genuine level shifts, is
+to feed them back into custom_algorithms/adtk_level_shift for level shift
+analysis at runtime.  There are certain types of metrics that could level shift
+without the bounds of the three-sigma based analysis and not trigger as
+anomalous or another custom_algorithm may not trigger them as anomalous, but
+these level shifts are important and should be alerted on with some metrics.
+Identifying with metrics or namespaces that can experience significant level
+shifts is useful to identify and automatically add them to the metrics on which
+to run custom_algorithms/adtk_level_shift on.</p>
+</section>
+<section id="luminosity-as-a-replacement-for-kale-oculus">
+<h2>Luminosity as a replacement for Kale Oculus<a class="headerlink" href="#luminosity-as-a-replacement-for-kale-oculus" title="Permalink to this heading"></a></h2>
 <p>Luminosity is the beginning of an attempt to implement a pure Python replacement
 for the Oculus anomaly correlation component of the Etsy Kale stack.</p>
 <p>Oculus was not moved forward with Skyline in this version of Skyline for a
@@ -244,9 +220,9 @@ Detection and Correlation library to add this near real time correlation back
 into Skyline.</p>
 <p>Luminosity is different to Oculus in a number of ways, however it does provide
 similar information.</p>
-</div>
-<div class="section" id="differences-between-oculus-and-luminosity">
-<h2>Differences between Oculus and Luminosity<a class="headerlink" href="#differences-between-oculus-and-luminosity" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="differences-between-oculus-and-luminosity">
+<h2>Differences between Oculus and Luminosity<a class="headerlink" href="#differences-between-oculus-and-luminosity" title="Permalink to this heading"></a></h2>
 <p>Oculus had a very large architectural footprint.
 Luminosity runs in parallel to all the other Skyline apps on the same Skyline
 commodity machine, with very little overhead.</p>
@@ -262,9 +238,9 @@ correlation coefficients of each metric pulling the data directly from Redis
 only when an anomaly alert is triggered.  The resulting cross correlated metrics
 and their results are then recorded in the Skyline MySQL database and related to
 the anomaly.  Viewable via the Ionosphere and Luminosity UI pages.</p>
-</div>
-<div class="section" id="luminosity-adds">
-<h2>Luminosity adds<a class="headerlink" href="#luminosity-adds" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="luminosity-adds">
+<h2>Luminosity adds<a class="headerlink" href="#luminosity-adds" title="Permalink to this heading"></a></h2>
 <p>Luminosity has the advantage over Oculus of storing the history of metrics,
 anomalies and their correlations.  This gives Skyline a near real time root
 cause analysis component and over time enables Skyline to determine and report
@@ -273,67 +249,80 @@ the most strongly correlated metrics.</p>
 and for the purposes of understanding the luminol.correlate, a pure Python
 implementation of the Paul Bourke method was implemented and verified with the
 results of the luminol.correlate.</p>
-</div>
-<div class="section" id="running-luminosity-on-multiple-distributed-skyline-instances">
-<h2>Running Luminosity on multiple, distributed Skyline instances<a class="headerlink" href="#running-luminosity-on-multiple-distributed-skyline-instances" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="luminosity-related-metrics">
+<h2>Luminosity related_metrics<a class="headerlink" href="#luminosity-related-metrics" title="Permalink to this heading"></a></h2>
+<p>Luminosity can also be enabled to analyse what metrics relate to what other
+metrics.  The resulting metric_group data can then be used to for further
+analysis and information/categorisation for the user.</p>
+<p>It is important to understand that metrics are only related to other metrics
+when there is <strong>sufficient correlations</strong> and <strong>meaningful</strong> data to classify
+the metrics as related. This point must be stressed to ensure that the relevant
+<cite>settings.LUMINOSITY_RELATED_METRICS_*</cite> are set to realistic values.  The
+cross correlations algorithm used by Luminosity in a large, high frequency
+metric population finds a lot of correlations which are often of a coincidental
+nature and of numerical significance only, there is no contextual aspect.  The
+related_metrics analysis is therefore designed to use strict configurations to
+terms of settings ensuring that only the high confidence metrics are grouped
+together.</p>
+<p>This means metric groups take time for the system to learn because there needs
+to be a history of data to work with.  This grows over time.  It may be possible
+to speed up that process with the addition of something like JumpStarter
+(<a class="reference external" href="https://github.com/NetManAIOps/JumpStarter">https://github.com/NetManAIOps/JumpStarter</a>) which looks to be a promising
+new method of multivariate time series anomaly detection approach based on
+Compressed Sensing (CS), which would at least decrease the time learn and live.</p>
+<p>For now it is based on Skyline’s own history and even when other methods are
+introduced, these Skyline metric groups of related_metrics is a dynamic and
+fully relevant source of truth based on past observations, allowing Skyline to
+infer what metrics are related.  Even if the metric groups are not 100%
+representative <strong>all</strong> the metrics that have been related to a metric, they are
+descriptive enough to represent a large proportion of the most strongly related
+metrics (enough so to say “these” metrics are related and create relevant
+multivariate groups).</p>
+<p>The related_metrics process runs as a low priority process and
+creates and updates metric_group data structures as and when the Skyline
+instance is not heavily loaded.  The features of these metric groups are
+stored in the database as avg_coefficient, shifted_counts and
+avg_shifted_coefficient values.  These metric groups are <strong>dynamic</strong> and can and
+do change as the system and it metric population run over time.  There is also
+an unordered list (not sorted by any feature) of metrics in each metric_group
+stored in Redis.</p>
+</section>
+<section id="running-luminosity-on-multiple-distributed-skyline-instances">
+<h2>Running Luminosity on multiple, distributed Skyline instances<a class="headerlink" href="#running-luminosity-on-multiple-distributed-skyline-instances" title="Permalink to this heading"></a></h2>
 <p>Please see <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="flux.html" class="btn btn-neutral float-right" title="Flux" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="tsfresh.html" class="btn btn-neutral float-left" title="tsfresh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tsfresh.html" class="btn btn-neutral float-left" title="tsfresh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="flux.html" class="btn btn-neutral float-right" title="Flux" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

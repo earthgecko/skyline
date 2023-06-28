@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>custom_algorithms.moving_sum_and_value_decrease &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../custom_algorithms.html">custom_algorithms</a></li>
+      <li class="breadcrumb-item active">custom_algorithms.moving_sum_and_value_decrease</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for custom_algorithms.moving_sum_and_value_decrease</h1><div class="highlight"><pre>
+<span></span><span class="c1"># @added 20210717 - Feature #4180: custom_algorithm - moving_sum_decrease</span>
+<span class="c1">#                   Feature #4164: luminosity - cloudbursts</span>
+<span class="c1">#                   Task #4096: POC cloudbursts</span>
+<span class="c1"># REQUIRED Skyline imports.  All custom algorithms MUST have the following two</span>
+<span class="c1"># imports.  These are required for exception handling and to record algorithm</span>
+<span class="c1"># errors regardless of debug_logging setting for the custom_algorithm</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c1"># Import ALL modules that the custom algorithm requires.  Remember that if a</span>
+<span class="c1"># requirement is not one that is provided by the Skyline requirements.txt you</span>
+<span class="c1"># must ensure it is installed in the Skyline virtualenv</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">bottleneck</span> <span class="k">as</span> <span class="nn">bn</span>
+
+<span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">record_algorithm_error</span>
+<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">FULL_DURATION</span>
+<span class="kn">from</span> <span class="nn">functions.numpy.percent_different</span> <span class="kn">import</span> <span class="n">get_percent_different</span>
+
+<span class="c1"># The name of the fucntion MUST be the same as the name declared in</span>
+<span class="c1"># settings.CUSTOM_ALGORITHMS.</span>
+<span class="c1"># It MUST have 3 parameters:</span>
+<span class="c1"># current_skyline_app, timeseries, algorithm_parameters</span>
+<span class="c1"># See https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</span>
+<span class="c1"># for a full explanation about each.</span>
+<span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and except</span>
+
+
+<div class="viewcode-block" id="moving_sum_and_value_decrease"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.moving_sum_and_value_decrease.moving_sum_and_value_decrease">[docs]</a><span class="k">def</span> <span class="nf">moving_sum_and_value_decrease</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A time series is anomalous if the moving sum datapoint of the window is 0 or</span>
+<span class="sd">    percent_different is greater than the defined percentage_difference and the</span>
+<span class="sd">    datapoint is less than the moving average of the window.  This algorithm is</span>
+<span class="sd">    useful for detecting persistent decreases and drop offs in low resolution</span>
+<span class="sd">    timeseries (one datapoint per day) which do not have constant variability.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app executing the algorithm.  This</span>
+<span class="sd">        will be passed to the algorithm by Skyline.  This is **required** for</span>
+<span class="sd">        error handling and logging.  You do not have to worry about handling the</span>
+<span class="sd">        argument in the scope of the custom algorithm itself,  but the algorithm</span>
+<span class="sd">        must accept it as the first agrument.</span>
+<span class="sd">    :param parent_pid: the parent pid which is executing the algorithm, this is</span>
+<span class="sd">        **required** for error handling and logging.  You do not have to worry</span>
+<span class="sd">        about handling this argument in the scope of algorithm, but the</span>
+<span class="sd">        algorithm must accept it as the second argument.</span>
+<span class="sd">    :param timeseries: the time series as a list e.g. ``[[1578916800.0, 29.0],</span>
+<span class="sd">        [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``</span>
+<span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
+<span class="sd">        custom_algorithm and algorithm itself for example:</span>
+<span class="sd">        ``algorithm_parameters={</span>
+<span class="sd">            &#39;window&#39;: 7,</span>
+<span class="sd">            &#39;percent_different&#39;: 70,</span>
+<span class="sd">            &#39;less_than_moving_sum_average&#39;: 3,</span>
+<span class="sd">            &#39;realtime_analysis&#39;: True</span>
+<span class="sd">        }``</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type parent_pid: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :type algorithm_parameters: dict</span>
+<span class="sd">    :return: True, False or Non</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    Example CUSTOM_ALGORITHMS configuration:</span>
+
+<span class="sd">    &#39;moving_sum_and_value_decrease&#39;: {</span>
+<span class="sd">        &#39;namespaces&#39;: [&#39;app1.daily.ad_requests&#39;],</span>
+<span class="sd">        &#39;algorithm_source&#39;: &#39;/opt/skyline/github/skyline/skyline/custom_algorithms/moving_sum_and_value_decrease.py&#39;,</span>
+<span class="sd">        &#39;algorithm_parameters&#39;: {</span>
+<span class="sd">            &#39;window&#39;: 7,</span>
+<span class="sd">            &#39;percentage_difference&#39;: 70,</span>
+<span class="sd">            &#39;realtime_analysis&#39;: True,</span>
+<span class="sd">        },</span>
+<span class="sd">        &#39;max_execution_time&#39;: 1.0</span>
+<span class="sd">        &#39;consensus&#39;: 1,</span>
+<span class="sd">        &#39;algorithms_allowed_in_consensus&#39;: [&#39;moving_sum_and_value_decrease&#39;],</span>
+<span class="sd">        &#39;run_3sigma_algorithms&#39;: True,</span>
+<span class="sd">        &#39;run_before_3sigma&#39;: True,</span>
+<span class="sd">        &#39;run_only_if_consensus&#39;: False,</span>
+<span class="sd">        &#39;use_with&#39;: [&#39;analyzer&#39;, &#39;analyzer_batch&#39;, &#39;mirage&#39;],</span>
+<span class="sd">        &#39;debug_logging&#39;: False,</span>
+<span class="sd">    },</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># You MUST define the algorithm_name</span>
+    <span class="n">algorithm_name</span> <span class="o">=</span> <span class="s1">&#39;moving_sum_and_value_decrease&#39;</span>
+
+    <span class="c1"># Define the default state of None and None, anomalous does not default to</span>
+    <span class="c1"># False as that is not correct, False is only correct if the algorithm</span>
+    <span class="c1"># determines the data point is not anomalous.  The same is true for the</span>
+    <span class="c1"># anomalyScore.</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">anomalies_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm_name</span>
+
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">dev_null</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># If you wanted to log, you can but this should only be done during</span>
+    <span class="c1"># testing and development</span>
+    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">current_logger</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+    <span class="c1"># Use the algorithm_parameters to determine the sample_period</span>
+    <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: debug_logging enabled with algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+            <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+            <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+            <span class="c1"># But we do not want the function returning and not reporting</span>
+            <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+            <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+            <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+            <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+            <span class="k">del</span> <span class="n">dev_null</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+    <span class="c1"># Allow parameters to be passed in the algorithm_parameters</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="mi">60</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+    <span class="n">percentage_difference</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">percentage_difference</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;percentage_difference&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">percentage_difference</span> <span class="o">=</span> <span class="mi">70</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+    <span class="n">less_than_moving_sum_average</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">less_than_moving_sum_average</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;less_than_moving_sum_average&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">less_than_moving_sum_average</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithm_parameters :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+
+    <span class="n">return_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">return_anomalies</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;return_anomalies&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">return_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+    <span class="n">realtime_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">realtime_analysis</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;realtime_analysis&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">realtime_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;base_name&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+        <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="k">del</span> <span class="n">dev_null</span>
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: base_name - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
+    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+    <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># ALWAYS WRAP YOUR ALGORITHM IN try and the BELOW except</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">start_preprocessing</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+
+        <span class="c1"># INFO: Sorting time series of 10079 data points took 0.002215 seconds</span>
+        <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: time series of length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+
+        <span class="n">end_preprocessing</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">preprocessing_runtime</span> <span class="o">=</span> <span class="n">end_preprocessing</span> <span class="o">-</span> <span class="n">start_preprocessing</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: preprocessing took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">preprocessing_runtime</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: moving_sum_decrease not run as no data&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">))</span>
+            <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: timeseries length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+
+        <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">start_analysis</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># bottleneck is used because it is much faster</span>
+            <span class="c1"># pd dataframe method (1445 data point - 24hrs): took 0.077915 seconds</span>
+            <span class="c1"># bottleneck method (1445 data point - 24hrs): took 0.005692 seconds</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">window</span> <span class="o">*</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+            <span class="n">original_timeseries_use_last</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">realtime_analysis</span><span class="p">:</span>
+                <span class="n">use_last</span> <span class="o">=</span> <span class="p">(</span><span class="n">window</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">original_timeseries_use_last</span> <span class="o">=</span> <span class="n">original_timeseries</span><span class="p">[</span><span class="n">use_last</span><span class="p">:]</span>
+                <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">use_last</span><span class="p">:]])</span>
+                <span class="n">moving_sum_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bn</span><span class="o">.</span><span class="n">move_sum</span><span class="p">(</span><span class="n">x_np</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">))</span>
+                <span class="n">y_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="n">use_last</span><span class="p">:]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+                <span class="n">moving_sum_values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bn</span><span class="o">.</span><span class="n">move_sum</span><span class="p">(</span><span class="n">x_np</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">))</span>
+                <span class="n">y_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+
+            <span class="n">moving_sum_ts</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y_np</span><span class="p">):</span>
+                <span class="n">moving_sum_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">moving_sum_values</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">moving_sum_ts</span><span class="p">)</span>
+            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">original_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">results_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: last 10 datapoints - timeseries: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:])))</span>
+
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">window</span><span class="p">:</span>
+                    <span class="n">results_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="k">continue</span>
+                <span class="n">sample</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[(</span><span class="n">index</span> <span class="o">-</span> <span class="n">window</span><span class="p">):(</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+                <span class="n">last_datapoints</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sample</span><span class="p">]</span>
+                <span class="n">moving_sum_average</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">last_datapoints</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">last_datapoints</span><span class="p">)</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="n">moving_sum_average</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">percent_different</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">new_pdiff</span> <span class="o">=</span> <span class="n">percent_different</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                        <span class="n">percent_different</span> <span class="o">=</span> <span class="n">new_pdiff</span>
+<span class="c1">#                    if percent_different &gt; percentage_difference and item[1] &lt; (moving_sum_average * 3):</span>
+                    <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&gt;</span> <span class="n">percentage_difference</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">moving_sum_average</span> <span class="o">/</span> <span class="n">less_than_moving_sum_average</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">results_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mf">0.7</span>
+                            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                                    <span class="c1"># anomaly_trigger = &#39;moving_sum less_than 3 * moving_sum_average&#39;</span>
+                                    <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="s1">&#39;moving_sum moving_sum_average is less_than moving_sum_average / </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">less_than_moving_sum_average</span><span class="p">)</span>
+                                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: percent_different (</span><span class="si">%s</span><span class="s1">) &gt; percentage_difference and item[1] (</span><span class="si">%s</span><span class="s1">) &lt; (</span><span class="si">%s</span><span class="s1"> * moving_sum_average) (</span><span class="si">%s</span><span class="s1">) for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">percent_different</span><span class="p">),</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">moving_sum_average</span><span class="p">),</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">less_than_moving_sum_average</span><span class="p">),</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">percent_different</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">results_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">moving_sum_average</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+                    <span class="k">continue</span>
+                <span class="n">last_moving_sum_average</span> <span class="o">=</span> <span class="n">results_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">constant_decrease</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">decreases</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">window_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">window</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">moving_sum_average</span> <span class="o">&lt;</span> <span class="n">last_moving_sum_average</span><span class="p">:</span>
+                    <span class="n">last_value</span> <span class="o">=</span> <span class="n">last_moving_sum_average</span>
+                    <span class="c1"># for i in [2, 3, 4, 5, 6]:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">window_indices</span><span class="p">:</span>
+                        <span class="n">i_index</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                        <span class="n">new_last_value</span> <span class="o">=</span> <span class="n">results_timeseries</span><span class="p">[</span><span class="n">i_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="n">lm_percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="n">new_last_value</span><span class="p">,</span> <span class="n">last_value</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">last_value</span> <span class="o">&lt;</span> <span class="n">new_last_value</span> <span class="ow">and</span> <span class="n">lm_percent_different</span> <span class="o">&gt;</span> <span class="n">percentage_difference</span><span class="p">:</span>
+                            <span class="n">constant_decrease</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">last_value</span> <span class="o">=</span> <span class="n">new_last_value</span>
+                            <span class="n">decreases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_value</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">constant_decrease</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="c1"># break</span>
+                <span class="c1"># if constant_decrease or len(decreases) &gt;= (len(window_indices) - 1):</span>
+                <span class="k">if</span> <span class="n">constant_decrease</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">decreases</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">window_indices</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mf">0.8</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                            <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="s1">&#39;moving_sum_average of moving_sum has decreased </span><span class="si">%s</span><span class="s1"> times&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">decreases</span><span class="p">))</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: moving_sum_average of moving_sum has decreased </span><span class="si">%s</span><span class="s1"> times, anomaly_score: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">decreases</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_score</span><span class="p">)))</span>
+
+                <span class="c1"># Big increase</span>
+                <span class="k">if</span> <span class="n">percent_different</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&gt;</span> <span class="n">percentage_difference</span> <span class="ow">and</span> <span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">moving_sum_average</span> <span class="o">*</span> <span class="mi">3</span><span class="p">):</span>
+                        <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mf">0.7</span>
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                                <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="s1">&#39;significant increase, datapoint &gt; 3 * moving_sum_average of moving_sum&#39;</span>
+                                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: large increase percent_different (</span><span class="si">%s</span><span class="s1">) &gt; percentage_difference and datapoint (</span><span class="si">%s</span><span class="s1">) &gt; (moving_sum_average * 3) (</span><span class="si">%s</span><span class="s1">) for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">percent_different</span><span class="p">),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">((</span><span class="n">moving_sum_average</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+
+                <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># if results_timeseries[-1][1][1] &gt; 0 and original_timeseries_use_last[index][1] == 0:</span>
+                    <span class="n">zeros_in_last_moving_sums</span> <span class="o">=</span> <span class="p">[</span><span class="n">i_item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i_item</span> <span class="ow">in</span> <span class="n">results_timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">window</span><span class="p">:]</span> <span class="k">if</span> <span class="n">i_item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">results_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">zeros_in_last_moving_sums</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mf">1.0</span>
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                                <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="s1">&#39;moving_sum and datapoint are 0&#39;</span>
+                                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: moving_sum is 0 for </span><span class="si">%s</span><span class="s1">, anomaly_score: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_score</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">anomaly_score</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<span class="c1">#                    if realtime_analysis:</span>
+<span class="c1">#                        if item[0] == last_timestamp:</span>
+<span class="c1">#                            anomalous = True</span>
+                <span class="n">results_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">moving_sum_average</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">percent_different</span><span class="p">,</span> <span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> after moving_sum_decrease, anomaly_score: </span><span class="si">%s</span><span class="s1">, continuing with longest_zero_streak&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_score</span><span class="p">)))</span>
+
+            <span class="c1"># longest zero streak</span>
+            <span class="n">min_zero_streak</span> <span class="o">=</span> <span class="mi">8</span>
+            <span class="n">max_zero_streak</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="n">longest_zero_streak_anomaly</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">anomaly_score</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">zero_streaks</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">current_zero_streak</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">longest_found_zero_streak</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">zero_streak_lengths</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">original_timeseries_use_last</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
+                            <span class="k">continue</span>
+                    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">zero_streaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span>
+                            <span class="n">current_zero_streak</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">current_zero_streak</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">zero_streaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span>
+                    <span class="n">current_zero_streak</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">zero_streaks</span><span class="p">:</span>
+                    <span class="n">zero_streak_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">zero_streak_length</span> <span class="o">&lt;</span> <span class="n">min_zero_streak</span><span class="p">:</span>
+                        <span class="n">zero_streak_lengths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zero_streak_length</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">zero_streak_lengths</span><span class="p">:</span>
+                    <span class="n">longest_found_zero_streak</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">zero_streak_lengths</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: longest_found_zero_streak: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">longest_found_zero_streak</span><span class="p">)))</span>
+
+                <span class="n">current_zero_streak</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">min_zero_streak</span> <span class="o">+</span> <span class="mi">4</span><span class="p">):]:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
+                            <span class="k">continue</span>
+                    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">current_zero_streak</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">current_zero_streak</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> in a row, current_zero_streak: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)))</span>
+
+    <span class="c1">#            if len(current_zero_streak) &gt; longest_found_zero_streak:</span>
+    <span class="c1">#                anomaly_score = 1</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span> <span class="o">==</span> <span class="n">min_zero_streak</span><span class="p">:</span>
+                    <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="s1">&#39;min_zero_streak&#39;</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">min_zero_streak</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="s1">&#39;min_zero_streak&#39;</span>
+                <span class="n">long_zero_streak</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">original_timeseries_use_last</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">min_zero_streak</span> <span class="o">+</span> <span class="mi">4</span><span class="p">):]</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">long_zero_streak</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">min_zero_streak</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">anomaly_score</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">anomaly_trigger</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1">#                if len(current_zero_streak) &gt;= max_zero_streak:</span>
+<span class="c1">#                    anomaly_score = 0</span>
+<span class="c1">#                if longest_found_zero_streak &gt;= max_zero_streak:</span>
+<span class="c1">#                    anomaly_score = 0</span>
+
+<span class="c1">#                if zero_streak_lengths:</span>
+<span class="c1">#                    current_zero_streak_length = zero_streak_lengths[-1]</span>
+<span class="c1">#                    if current_zero_streak_length &gt;= max_zero_streak:</span>
+<span class="c1">#                        anomaly_score = 0</span>
+<span class="c1">#                        if debug_logging:</span>
+<span class="c1">#                            current_logger.debug(&#39;debug :: %s :: the current_zero_streak_length: %s is greater than the max_zero_streak not anomalous&#39; % (</span>
+<span class="c1">#                                algorithm_name, str(len(current_zero_streak_length))))</span>
+
+<span class="c1">#                if anomaly_score == 1:</span>
+                    <span class="c1"># Do not alert repetively</span>
+<span class="c1">#                    fetch_index = (min_zero_streak + 2) * -1</span>
+<span class="c1">#                    last_zeros_in_window = [item[1] for item in original_timeseries_use_last[fetch_index:-2] if item[1] == 0]</span>
+<span class="c1">#                    if len(last_zeros_in_window) &gt;= min_zero_streak:</span>
+<span class="c1">#                        anomaly_score = 0</span>
+<span class="c1">#                        if debug_logging:</span>
+<span class="c1">#                            current_logger.debug(&#39;debug :: %s :: previous window had min_zero_streak - not anomalous&#39; % (</span>
+<span class="c1">#                                algorithm_name))</span>
+
+                <span class="k">if</span> <span class="n">anomaly_score</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: current_zero_streak: </span><span class="si">%s</span><span class="s1"> &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_zero_streak</span><span class="p">)),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">min_zero_streak</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">realtime_analysis</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">anomalies</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">results_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: last 10 datapoints results_timeseries: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">results_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:])))</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: anomaly_trigger: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_trigger</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+                <span class="n">anomalies_data</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">anomaly_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">anomalies</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">in</span> <span class="n">anomaly_timestamps</span><span class="p">:</span>
+                        <span class="n">anomalies_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">anomalies_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">anomalies_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="ow">in</span> <span class="n">anomaly_timestamps</span><span class="p">:</span>
+                        <span class="n">anomalies_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="n">value</span><span class="p">])</span>
+                        <span class="n">anomalies_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called, during analysis, exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">traceback_msg</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_msg</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug_logging :: </span><span class="si">%s</span><span class="s1"> :: failed to run on ts&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">algorithm_name</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+        <span class="n">end_analysis</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">analysis_runtime</span> <span class="o">=</span> <span class="n">end_analysis</span> <span class="o">-</span> <span class="n">start_analysis</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: analysis with </span><span class="si">%s</span><span class="s1"> took </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">analysis_runtime</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: anomalous - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">processing_runtime</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: completed in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">processing_runtime</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timeseries</span>
+            <span class="k">del</span> <span class="n">results_timeseries</span>
+            <span class="k">del</span> <span class="n">moving_sum_ts</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug_logging :: </span><span class="si">%s</span><span class="s1"> :: SystemExit called (before StopIteration), exiting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="c1"># This except pattern MUST be used in ALL custom algortihms to</span>
+        <span class="c1"># facilitate the traceback from any errors.  The algorithm we want to</span>
+        <span class="c1"># run super fast and without spamming the log with lots of errors.</span>
+        <span class="c1"># But we do not want the function returning and not reporting</span>
+        <span class="c1"># anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+        <span class="c1"># algorithm errors to a tmp file and report once per run rather than</span>
+        <span class="c1"># spewing tons of errors into the log e.g. analyzer.log</span>
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="c1"># Return None and None as the algorithm could not determine True or False</span>
+        <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>matrixprofile &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="spectral_residual" href="spectral_residual.html" />
+    <link rel="prev" title="Custom algorithms" href="custom-algorithms.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Algorithms</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="custom-algorithms.html">Custom algorithms</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">matrixprofile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#considerations-when-implementing-matrixprofile">Considerations when implementing matrixprofile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#however-trigger-history-override">HOWEVER - trigger_history_override</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#enabling-matrixprofile-to-run-in-mirage">Enabling matrixprofile to run in Mirage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="spectral_residual.html">spectral_residual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dbscan.html">DBSCAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pca.html">PCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="isolation_forest.html">isolation_forest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prophet.html">prophet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="one_class_svm.html">one_class_svm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Algorithms</a></li>
+      <li class="breadcrumb-item active">matrixprofile</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/algorithms/matrixprofile.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="matrixprofile">
+<h1><a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a><a class="headerlink" href="#matrixprofile" title="Permalink to this heading"></a></h1>
+<p>The Matrix Profile algorithm was pioneered by Professor Eamonn Keogh at the
+University of California-Riverside and Professor Abdullah Mueen at the
+University of New Mexico in 2015.  When it came onto the scene in 2015 it made
+some remarkable claims, unfortunately its initial implementation was in matlab
+but the claims made by Eamonn Keogh et al could not be ignored, the algorithm
+was set to change the face of time series mining and it has.  Those claims were
+not unfounded and thanks to the efforts of the matrixprofile.org team the
+<a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> algorithm is now available in Python and if you want a CUDA
+enabled version there is STUMPY.</p>
+<p>UPDATE - Skyline as of v4.0.0 uses <a class="reference external" href="https://github.com/TDAmeritrade/stumpy">stumpy</a> as <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> development was
+discontinued.</p>
+<p><a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> uses the <a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> similarity search method to identify motifs (
+shapelets, a short subsequence of a time series) that are discords (not similar
+or least similar to anything else in the time series) and these are anomalies.</p>
+<p>Skyline can use <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> as additional algorithm in the analysis pipeline.
+The use of <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> massively reduces false positive detections compared to
+the basic three-sigma based algorithm methods on time series of 7 days in length.
+However as the saying goes, all magic comes with a price.</p>
+<p>The price in the case of <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> is a few false negatives.  Where
+three-sigma based algorithms would detect an instance as anomalous and you would
+agree it was, rarely, but occasionally <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> will identify it as not
+anomalous.  A comparison of three-sigma vs. <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> after the review of
+859 real production data events are as follows:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>algorithm_group</p></th>
+<th class="head"><p>tP</p></th>
+<th class="head"><p>fP</p></th>
+<th class="head"><p>tN</p></th>
+<th class="head"><p>fN</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>three-sigma</p></td>
+<td><p>69</p></td>
+<td><p>790</p></td>
+<td><p>N/A</p></td>
+<td><p>N/A</p></td>
+</tr>
+<tr class="row-odd"><td><p>matrixprofile</p></td>
+<td><p>50</p></td>
+<td><p>93</p></td>
+<td><p>697</p></td>
+<td><p>19</p></td>
+</tr>
+</tbody>
+</table>
+<p>tN and fN are not scored for three-sigma as it was the baseline.  Each
+three-sigma triggered instance was sent to SNAB and <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> was run
+against the instance results recorded for comparison.</p>
+<p>The logical place for <a class="reference external" href="https://github.com/matrix-profile-foundation/matrixprofile">matrixprofile</a> to sit in Skyline is as a custom algorithm
+that is run only by Mirage after three-sigma consensus has been achieved.  It is
+too computationally and time expensive to run in Analyzer, although it could run
+in Analyzer if you only have a few 100 metrics.</p>
+<section id="considerations-when-implementing-matrixprofile">
+<h2>Considerations when implementing matrixprofile<a class="headerlink" href="#considerations-when-implementing-matrixprofile" title="Permalink to this heading"></a></h2>
+<p>By default in v3.0.0 matrixprofile is not enabled as an additional algorithm to
+run.  This is because it is a user decision as to whether they wish to implement
+matrixprofile as an algorithm to be added to the analysis pipeline.  The
+addition of matrixprofile has a significant impact on the amount of events that
+are recorded and alerted on.  This is due to matrixprofile significantly
+decreasing the number of false positive alerts that are sent.  <strong>HOWEVER</strong> due
+to this being a fundamental change to Skyline, the current Skyline users (
+running v2.0.0) must be aware of what this means in practice.</p>
+<ol class="arabic simple">
+<li><p>matrixprofile will result in a small number of false negatives (~2.48%)</p></li>
+<li><p>matrixprofile will filter out a very large number of false positives (~88.4%)</p></li>
+</ol>
+<p>These two points must be stressed because for any users that are accustomed to
+using Skyline as an information stream of changes in your environments, if you
+turn on matrixprofile, you may question if Skyline is running properly with
+matrixprofile probably result in filtering out ~88.4% of your events.</p>
+<p>Although the paneacea of anomaly detection <strong>alerting</strong> is 0 false positives and
+0 false negatives, anomaly detection is not only about alerting, it is about the
+bad, the good and the unknown.  This drastic decrease in events also results in
+a reduction of correlation data, training data opportunities and an overall
+reduced picture events in your timeline.</p>
+<p>If you are a current Skyline user and you implement matrixprofile be prepared
+for most of the events you have become accustomed too vanishing.  For instance
+when you or developers deploy something, those subtle changes that used to
+trigger and send an event into slack, probably will not happen any more.  Most,
+if not all of the events triggered when changes were made to things or some
+action was taken will stop. This results in those feedback reinforcements events
+that used to trigger in slack vanishing.  You will be accustomed to making
+changes or doing something and often seeing events being triggered in slack,
+that reinforcement feedback mostly gets lost with addition of maxtrixprofile as
+an algorithm.</p>
+<p>For users of Skyline who have possibly learnt a lot about their systems and
+specifically the interactions between the components in those systems,
+discovering related things that were unknown, discovering and learning what
+metrics they had never heard of and found things that they should watch and
+understand more.  A lot of our learnings have been as a result of these
+events that fired on subtle changes.  So make a careful consideration and
+assessment before thinking that anomaly <strong>alerting</strong> panacea is what you
+really want.</p>
+<p>However that said, if you are already running 1000s of metrics in Skyline and
+you have training on metrics, you have probably learnt a lot already, so you
+would probably want to enable it.  Just prepare yourself for a big change.</p>
+<p>To further inform your considerations, it must be pointed out that although
+matrixprofile is not enabled by default, the use of <a class="reference external" href="https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">MASS</a> in the Ionosphere is
+enabled by default.  This means that the core functionality of matrixprofile is
+implemented in the pattern matching side of things.  If you find Skyline very
+useful an informational stream and not simply for alerting becasue of the above
+stated reasons, carefully consider whether you want to use matrixprofile in
+the analysis workflow as you will lose a lot of visibility you have become
+accustom to having.  The consideration here is that if you do not enable
+matrixprofile on the algorithm analysis side, Skyline can still provides its get
+core similar search functionality on all your trained features profiles.  Maybe
+that is the best of both worlds, the decision in yours.</p>
+<p>You can consider adding some namespaces to be analyzed by matrixprofile and
+assess the results before jumping in with both feet, it really depends if you
+are wanting to use Skyline as an alerter only or as an informational stream of
+the bad, the good and the unknown, that YOU learn from.</p>
+</section>
+<section id="however-trigger-history-override">
+<h2>HOWEVER - trigger_history_override<a class="headerlink" href="#however-trigger-history-override" title="Permalink to this heading"></a></h2>
+<p>To overcome matrixprofile perhaps silencing too much, the <code class="docutils literal notranslate"><span class="pre">trigger_history_override</span></code>
+parameter can be passed on skyline_matrixprofile <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>
+a tradeoff value to use here is 6, meaning that if sigma algorithms have triggered
+6 times in a row and matrixprofile does not trigger and classifies the datapoint
+as NOT anomalous, this result will be overridden and the datapoint will be
+recorded as an anomaly (unless there is Ionosphere training the matches
+further down the analysis pipeline).</p>
+</section>
+<section id="enabling-matrixprofile-to-run-in-mirage">
+<h2>Enabling matrixprofile to run in Mirage<a class="headerlink" href="#enabling-matrixprofile-to-run-in-mirage" title="Permalink to this heading"></a></h2>
+<p>See the current <code class="docutils literal notranslate"><span class="pre">'skyline_matrixprofile'</span></code> example in
+<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> and change the <code class="docutils literal notranslate"><span class="pre">'namespaces':</span></code> parameter as
+appropriate.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="custom-algorithms.html" class="btn btn-neutral float-left" title="Custom algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectral_residual.html" class="btn btn-neutral float-right" title="spectral_residual" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

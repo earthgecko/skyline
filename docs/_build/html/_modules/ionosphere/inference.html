@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ionosphere.inference &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ionosphere.inference</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ionosphere.inference</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">inference.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="c1"># @added 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">mass_ts</span> <span class="k">as</span> <span class="nn">mts</span>
+
+<span class="c1"># import matplotlib.image as mpimg</span>
+<span class="c1"># %matplotlib inline</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline&#39;</span><span class="p">)</span>
+    <span class="kn">import</span> <span class="nn">settings</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">mirage_load_metric_vars</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span>
+        <span class="c1"># mysql_select,</span>
+        <span class="c1"># get_redis_conn, get_redis_conn_decoded, mkdir_p,</span>
+        <span class="c1"># is_derivative_metric, get_graphite_graph_image, nonNegativeDerivative,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">common_functions</span> <span class="kn">import</span> <span class="n">get_metrics_db_object</span>
+    <span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
+    <span class="c1"># from determine_data_frequency import determine_data_frequency</span>
+    <span class="kn">from</span> <span class="nn">functions.timeseries.determine_data_frequency</span> <span class="kn">import</span> <span class="n">determine_data_frequency</span>
+    <span class="kn">from</span> <span class="nn">motif_match_types</span> <span class="kn">import</span> <span class="n">motif_match_types_dict</span>
+    <span class="kn">from</span> <span class="nn">functions.memcache.get_fp_timeseries</span> <span class="kn">import</span> <span class="n">get_fp_timeseries</span>
+    <span class="kn">from</span> <span class="nn">functions.database.queries.fp_timeseries</span> <span class="kn">import</span> <span class="n">get_db_fp_timeseries</span>
+    <span class="kn">from</span> <span class="nn">functions.numpy.percent_different</span> <span class="kn">import</span> <span class="n">get_percent_different</span>
+    <span class="kn">from</span> <span class="nn">functions.database.queries.get_ionosphere_fp_ids_for_full_duration</span> <span class="kn">import</span> <span class="n">get_ionosphere_fp_ids_for_full_duration</span>
+
+    <span class="c1"># @added 20220731 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                   Branch #4300: prometheus</span>
+    <span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_labelled_metrics_name</span> <span class="kn">import</span> <span class="n">get_base_name_from_labelled_metrics_name</span>
+
+    <span class="kn">import</span> <span class="nn">warnings</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
+<span class="c1"># long string otherwise.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine SERVER_METRIC_PATH from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SINGLE_MATCH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">SINGLE_MATCH</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># @modified 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+    <span class="c1"># IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES</span> <span class="o">=</span> <span class="mf">20.0</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE</span> <span class="o">=</span> <span class="mf">20.0</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_inference&#39;</span>
+
+
+<div class="viewcode-block" id="ionosphere_motif_inference"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.inference.ionosphere_motif_inference">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_motif_inference</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+
+    <span class="c1"># logger = logging.getLogger(skyline_app_logger)</span>
+    <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: running for process_pid - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+    <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">metric_vars_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">matched_motifs</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="c1">#    motifs_found_in_fps = []</span>
+    <span class="n">motifs_found</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dev_null</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">mass2_batch_times</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mass3_times</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">exact_match_times</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">])</span>
+    <span class="n">nanj</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">))</span>
+    <span class="n">empty_dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nan</span> <span class="o">+</span> <span class="n">nanj</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">motifs_found</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">exact_matches_found</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">fps_timeseries</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">motif_match_types</span> <span class="o">=</span> <span class="n">motif_match_types_dict</span><span class="p">()</span>
+
+    <span class="c1"># @added 20210412 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1">#                   Branch #3590: inference</span>
+    <span class="c1"># Added fps_checked_for_motifs to enable ionosphere to up the database ionosphere</span>
+    <span class="c1"># motif related columns</span>
+    <span class="n">fps_checked_for_motifs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># @added 20210426 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1"># Optimise the database select time by getting each ionosphere table fp id</span>
+    <span class="c1"># row for each fp, so that the single resulting object can be referred to</span>
+    <span class="c1"># in later in the evaluation stage, rather than making another database</span>
+    <span class="c1"># select to get the fp generation</span>
+    <span class="n">fp_id_rows</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matched_motifs</span><span class="p">,</span> <span class="n">fps_checked_for_motifs</span>
+
+    <span class="c1"># @added 20220731 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                   Branch #4300: prometheus</span>
+    <span class="c1"># Handle labelled_metric name</span>
+    <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+        <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: labelled_metric_name: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">base_name</span><span class="p">:</span>
+                <span class="n">labelled_metric_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">labelled_metric_base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_base_name_from_labelled_metrics_name failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">metric_dir</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+        <span class="n">metric_dir</span> <span class="o">=</span> <span class="n">labelled_metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+    <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">metric_dir</span><span class="p">)</span>
+
+    <span class="n">metric_vars_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">full_duration_timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+        <span class="n">metric_vars_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+        <span class="n">timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+        <span class="n">full_duration_timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_vars_dict</span> <span class="o">=</span> <span class="n">mirage_load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to load metric variables from check file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">metric_vars_file</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_vars_dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matched_motifs</span><span class="p">,</span> <span class="n">fps_checked_for_motifs</span>
+
+    <span class="n">full_duration</span> <span class="o">=</span> <span class="n">metric_vars_dict</span><span class="p">[</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">][</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+
+    <span class="c1"># TODO</span>
+    <span class="c1"># Optimize determine metric id from Redis</span>
+
+    <span class="c1"># Determine the metric details from the database</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">metric_db_object</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">start_get_metrics_db_object</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+            <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_metrics_db_object</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">metric_db_object</span> <span class="o">=</span> <span class="n">get_metrics_db_object</span><span class="p">(</span><span class="n">labelled_metric_name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to get_metrics_db_object - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">))</span>
+    <span class="n">end_get_metrics_db_object</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: get_metrics_db_object in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">end_get_metrics_db_object</span> <span class="o">-</span> <span class="n">start_get_metrics_db_object</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_db_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to determine metric_id from metric_db_object </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_db_object</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">matched_motifs</span><span class="p">,</span> <span class="n">fps_checked_for_motifs</span>
+
+    <span class="n">full_duration_fp_count</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">full_durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">full_duration</span><span class="p">]</span>
+
+    <span class="n">full_duration_fp_count</span><span class="p">[</span><span class="n">full_duration</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">full_duration_fp_count</span><span class="p">[</span><span class="n">full_duration</span><span class="p">][</span><span class="s1">&#39;fp_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">full_duration_timeseries_json</span><span class="p">):</span>
+        <span class="n">full_durations</span> <span class="o">=</span> <span class="p">[</span><span class="n">full_duration</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">]</span>
+        <span class="n">full_duration_fp_count</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">full_duration_fp_count</span><span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">][</span><span class="s1">&#39;fp_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">full_duration</span> <span class="ow">in</span> <span class="n">full_durations</span><span class="p">:</span>
+
+        <span class="c1"># if SINGLE_MATCH and matched_motifs:</span>
+        <span class="c1">#     break</span>
+        <span class="k">if</span> <span class="n">SINGLE_MATCH</span> <span class="ow">and</span> <span class="n">exact_matches_found</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">start_full_duration</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">full_duration_fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">fps_full_duration</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># @modified 20210426 - Feature #4014: Ionosphere - inference</span>
+            <span class="c1"># Optimize determine FULL row from DB in one request for all fps</span>
+            <span class="c1"># query = &#39;SELECT id from ionosphere WHERE metric_id=%s AND full_duration=%s AND enabled=1&#39; % (</span>
+            <span class="c1">#     str(metric_id), str(full_duration))</span>
+            <span class="c1"># results = mysql_select(skyline_app, query)</span>
+            <span class="n">fps_full_duration</span> <span class="o">=</span> <span class="n">get_ionosphere_fp_ids_for_full_duration</span><span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">fps_full_duration</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">current_fp_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">fps_full_duration</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_fp_id</span><span class="p">)</span>
+                        <span class="n">full_duration_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_fp_id</span><span class="p">)</span>
+                        <span class="n">fp_id_rows</span><span class="p">[</span><span class="n">current_fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps_full_duration</span><span class="p">[</span><span class="n">current_fp_id</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to iterate results from get_ionosphere_fp_ids_for_full_duration for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># @modified 20230106 - Task #4778: v4.0.0 - update dependencies</span>
+            <span class="c1"># bandit incorrectly flagging up B608:hardcoded_sql_expressions and</span>
+            <span class="c1"># the log should have change when the above switch was made to use</span>
+            <span class="c1"># get_ionosphere_fp_ids_for_full_duration</span>
+            <span class="c1"># logger.error(&#39;error :: inference :: failed to get fp ids via mysql_select from %s - %s&#39; % (metric, err))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to get fp ids via get_ionosphere_fp_ids_for_full_duration for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: metric_id: </span><span class="si">%s</span><span class="s1">, full_duration: </span><span class="si">%s</span><span class="s1">, full_duration_fp_ids: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_fp_ids</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">full_duration_fp_ids</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: metric_id: </span><span class="si">%s</span><span class="s1">, full_duration: </span><span class="si">%s</span><span class="s1">, full_duration_fp_ids: </span><span class="si">%s</span><span class="s1">, continuing no fps&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_fp_ids</span><span class="p">)))</span>
+            <span class="k">continue</span>
+
+        <span class="n">full_duration_fp_count</span><span class="p">[</span><span class="n">full_duration</span><span class="p">][</span><span class="s1">&#39;fp_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_duration_fp_ids</span><span class="p">)</span>
+
+        <span class="c1"># Now there are known fps, load the timeseries</span>
+        <span class="k">if</span> <span class="n">full_duration</span> <span class="o">==</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">:</span>
+            <span class="n">timeseries_json_file</span> <span class="o">=</span> <span class="n">full_duration_timeseries_json</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timeseries_json_file</span> <span class="o">=</span> <span class="n">timeseries_json</span>
+        <span class="c1"># TODO</span>
+        <span class="c1"># Optimize?  Takes just less than a second to load each file, get data</span>
+        <span class="c1"># from Redis?  But literal_eval of the data from Redis will probably</span>
+        <span class="c1"># have similar overhead, given the overhead literal_eval has on the</span>
+        <span class="c1"># memcache get_fp_timeseries displayed below.</span>
+        <span class="n">start_load_timeseries_json</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">timeseries_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">raw_timeseries</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">timeseries_array_str</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to load timeseries for </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">timeseries_json_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="n">end_load_timeseries_json</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: load_timeseries_json in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">end_load_timeseries_json</span> <span class="o">-</span> <span class="n">start_load_timeseries_json</span><span class="p">)))</span>
+
+        <span class="n">metric_resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: looking for similar motifs in trained fps of full_duration: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">full_duration_fp_ids</span><span class="p">:</span>
+
+            <span class="c1"># if SINGLE_MATCH and matched_motifs:</span>
+            <span class="c1">#    break</span>
+            <span class="k">if</span> <span class="n">SINGLE_MATCH</span> <span class="ow">and</span> <span class="n">exact_matches_found</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">motifs_found_in_fp</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">exact_match_times</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># Surprisingly this can take up to a second or more to get data from</span>
+            <span class="c1"># memcache and transform it with literal_eval with long timeseries</span>
+            <span class="c1"># even when the data is in memcache, no with no database query</span>
+            <span class="n">fp_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># But DO query memcache first if the timeseries is less than 2000</span>
+            <span class="c1"># because shorter timeseries are just as fast with memcache and</span>
+            <span class="c1"># results in less queries to the database</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2000</span><span class="p">:</span>
+                <span class="n">start_get_fp_timeseries</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fp_timeseries</span> <span class="o">=</span> <span class="n">get_fp_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: did not get fp timeseries with get_fp_timeseries(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">end_get_fp_timeseries</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: get_fp_timeseries in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">end_get_fp_timeseries</span> <span class="o">-</span> <span class="n">start_get_fp_timeseries</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_timeseries</span><span class="p">:</span>
+                <span class="n">start_get_fp_timeseries</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Generally quicker to use DB than to literal_eval the memcache</span>
+                    <span class="c1"># data</span>
+                    <span class="c1"># fp_timeseries = get_fp_timeseries(skyline_app, metric_id, fp_id)</span>
+                    <span class="n">fp_timeseries</span> <span class="o">=</span> <span class="n">get_db_fp_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: did not get fp timeseries with get_db_fp_timeseries(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">end_get_fp_timeseries</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: get_db_fp_timeseries in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">end_get_fp_timeseries</span> <span class="o">-</span> <span class="n">start_get_fp_timeseries</span><span class="p">)))</span>
+
+            <span class="c1"># If there is a problem with the database, try memcache</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_timeseries</span><span class="p">:</span>
+                <span class="n">start_get_fp_timeseries</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fp_timeseries</span> <span class="o">=</span> <span class="n">get_fp_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: did not get fp timeseries with get_fp_timeseries(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">end_get_fp_timeseries</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: get_fp_timeseries in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">end_get_fp_timeseries</span> <span class="o">-</span> <span class="n">start_get_fp_timeseries</span><span class="p">)))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_timeseries</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">start_determine_data_frequency</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">fp_timeseries_resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">fp_timeseries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">!=</span> <span class="n">fp_timeseries_resolution</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: potentially anomalous timeseries snippet data frequency does not match fp data frequency&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">end_determine_data_frequency</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: determine_data_frequency in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">end_determine_data_frequency</span> <span class="o">-</span> <span class="n">start_determine_data_frequency</span><span class="p">)))</span>
+
+            <span class="c1"># Add the timeseries to the fps_timeseries dict for later use in</span>
+            <span class="c1"># the all_in_range and areas under a curve evaluation</span>
+            <span class="n">fps_timeseries</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_timeseries</span>
+
+            <span class="n">relate_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fp_timeseries</span><span class="p">]</span>
+
+            <span class="n">pattern_found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">namespace_key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">pattern_found</span><span class="p">,</span> <span class="n">matched_by_result</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="p">[</span><span class="n">namespace_key</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">matched_by_result</span>
+                <span class="k">if</span> <span class="n">pattern_found</span><span class="p">:</span>
+                    <span class="n">namespace_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace_key</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_found</span><span class="p">:</span>
+                <span class="n">namespace_key</span> <span class="o">=</span> <span class="s1">&#39;default_inference_batch_sizes&#39;</span>
+            <span class="k">for</span> <span class="n">batch_size</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: invalid batch_size IONOSPHERE_INFERENCE_MOTIFS_SETTINGS[namespace_key] - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">])))</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># if SINGLE_MATCH and matched_motifs:</span>
+                <span class="c1">#     break</span>
+
+                <span class="c1"># @added 20210423 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># The convenience mass2_batch method will not work to find</span>
+                <span class="c1"># top matches if the number of top_matches to be found are</span>
+                <span class="c1"># greater than the number of indices in which a match can be</span>
+                <span class="c1"># found.  In these cases such as trying to find the:</span>
+                <span class="c1"># batch_size: 1440, top_matches: 50, max_distance: 30, fp_timeseries_length: 1451</span>
+                <span class="c1"># even setting the top_matches to 1 will result in</span>
+                <span class="c1"># mass2_batch throwing the error:</span>
+                <span class="c1"># mts.mass2_batch error: kth(=1) out of bounds (1)</span>
+                <span class="c1"># So use mass3 as appropriate.</span>
+                <span class="n">use_mass3</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">use_mass2_batch</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span>
+                <span class="n">indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">batch_size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">))</span>
+                <span class="c1"># mass2_batch default is 3 so if there are less than 3</span>
+                <span class="c1"># indices in which the best macthes can be found, use mass3</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">use_mass3</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">use_mass2_batch</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1">, fp_timeseries length: </span><span class="si">%s</span><span class="s1">, len(indices) &lt; 3, using mass3&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">top_matches</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;top_matches&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">top_matches</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: failed to determine a value from IONOSPHERE_INFERENCE_MOTIFS_SETTINGS top_matches - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="p">))</span>
+                    <span class="n">top_matches</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">max_distance</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;max_distance&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">max_distance</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: failed to determine a value from IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE max_distance - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="p">))</span>
+                    <span class="n">max_distance</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">range_padding_percent</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;range_padding_percent&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">range_padding_percent</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: failed to determine a value from IONOSPHERE_INFERENCE_MOTIFS_SETTINGS range_padding_percent - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="p">))</span>
+                    <span class="n">range_padding_percent</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING</span>
+
+                <span class="c1"># @added 20210425 - Feature #4014: Ionosphere - inference</span>
+                <span class="n">max_area_percent_diff</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;max_area_percent_diff&#39;</span><span class="p">]</span>
+
+                <span class="c1"># @added 20210427 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Finding exact matches can result is more than doubling the</span>
+                <span class="c1"># runtime when used after mass2_batch runs (which do not find)</span>
+                <span class="c1"># exact matches, mass3 does.  However the amount of time an</span>
+                <span class="c1"># exact match is found, is very rare</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">find_exact_matches</span> <span class="o">=</span> <span class="n">IONOSPHERE_INFERENCE_MOTIFS_SETTINGS</span><span class="p">[</span><span class="n">namespace_key</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;find_exact_matches&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">find_exact_matches</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;inference :: failed to determine a value from IONOSPHERE_INFERENCE_MOTIFS_SETTINGS find_exact_matches - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="p">))</span>
+                    <span class="n">find_exact_matches</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># if use_mass2_batch:</span>
+                <span class="n">adjusted_batch_size</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+                    <span class="n">adjusted_batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+                    <span class="n">batch_size_seconds</span> <span class="o">=</span> <span class="n">batch_size</span> <span class="o">*</span> <span class="mi">60</span>
+                    <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">batch_size_seconds</span> <span class="o">/</span> <span class="n">metric_resolution</span><span class="p">)</span>
+                    <span class="n">adjusted_max_distance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_distance</span><span class="p">)</span>
+                    <span class="n">max_distance_factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">adjusted_batch_size</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_distance</span><span class="p">)))</span>
+                    <span class="c1"># max_distance = int(round(adjusted_batch_size / max_distance_factor))</span>
+                    <span class="n">max_distance</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">batch_size</span> <span class="o">/</span> <span class="n">max_distance_factor</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">adjusted_batch_size</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: analysis run - fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1"> (adjusted from </span><span class="si">%s</span><span class="s1">), top_matches: </span><span class="si">%s</span><span class="s1">, max_distance: </span><span class="si">%s</span><span class="s1"> (adjusted from </span><span class="si">%s</span><span class="s1">), fp_timeseries_length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">adjusted_batch_size</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">adjusted_max_distance</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">))))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: analysis run - fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1">, top_matches: </span><span class="si">%s</span><span class="s1">, max_distance: </span><span class="si">%s</span><span class="s1">, fp_timeseries_length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">))))</span>
+
+                <span class="c1"># Create the subsequence that is being searched for</span>
+                <span class="n">batch_size_anomalous_timeseries_subsequence</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">batch_size</span><span class="p">:]</span>
+                <span class="n">batch_size_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">batch_size_anomalous_timeseries_subsequence</span><span class="p">]</span>
+
+                <span class="c1"># Determine the range_padding and range max and min of the</span>
+                <span class="c1"># subsequence</span>
+                <span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">batch_size_dataset</span><span class="p">)</span>
+                <span class="n">min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">batch_size_dataset</span><span class="p">)</span>
+                <span class="n">range_padding</span> <span class="o">=</span> <span class="p">((</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">range_padding_percent</span>
+                <span class="k">if</span> <span class="n">min_y</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">min_y</span> <span class="o">-</span> <span class="n">range_padding</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">min_y</span> <span class="o">-</span> <span class="n">range_padding</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">min_y</span>
+                <span class="n">max_y_padded</span> <span class="o">=</span> <span class="n">max_y</span> <span class="o">+</span> <span class="n">range_padding</span>
+                <span class="k">if</span> <span class="n">min_y_padded</span> <span class="o">==</span> <span class="n">max_y_padded</span><span class="p">:</span>
+                    <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">min_y_padded</span> <span class="o">-</span> <span class="p">((</span><span class="n">min_y_padded</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">range_padding_percent</span><span class="p">)</span>
+                    <span class="n">max_y_padded</span> <span class="o">=</span> <span class="n">max_y_padded</span> <span class="o">+</span> <span class="p">((</span><span class="n">max_y_padded</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="n">range_padding_percent</span><span class="p">)</span>
+
+                <span class="c1"># Set defaults</span>
+                <span class="n">current_best_indices</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">current_best_dists</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">best_indices</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">best_dists</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="c1"># POC running all through mass3 with maximum pieces (SUPER FAST)</span>
+                <span class="c1"># and then filtering on max_distance, all_in_range and area</span>
+                <span class="c1"># percent_different</span>
+                <span class="c1"># use_mass3 = True</span>
+                <span class="c1"># use_mass2_batch = False</span>
+
+                <span class="c1"># POC running all through mass3 and then filtering FALIED in</span>
+                <span class="c1"># terms of time taken... due to having to run 22421 motifs</span>
+                <span class="c1"># through all_in_range and percent_different functions ...</span>
+                <span class="c1"># just these motifs checked took 62.036366 seconds, the surfacing</span>
+                <span class="c1"># and transforming of the data AND mass3 to only 2 seconds</span>
+                <span class="c1"># 2021-04-27 13:45:59 :: 3586421 :: inference :: analysed 2 fps of full_duration 86400 in 0.330732 seconds</span>
+                <span class="c1"># 2021-04-27 13:45:59 :: 3586421 :: inference :: 22421 distance_valid_motifs determined in 0.346807 seconds from 81432 motifs_found</span>
+                <span class="c1"># 2021-04-27 13:45:59 :: 3586421 :: inference :: sorted_motifs from distance_valid_motifs in 0.048316 seconds</span>
+                <span class="c1"># 2021-04-27 13:46:01 :: 3586421 :: inference :: percent_different in 0.000590 seconds</span>
+                <span class="c1"># 2021-04-27 13:46:01 :: 3586421 :: inference :: percent_different in 0.000271 seconds</span>
+                <span class="c1"># ...</span>
+                <span class="c1"># ...</span>
+                <span class="c1"># 2021-04-27 13:46:57 :: 3586421 :: inference :: percent_different in 0.000373 seconds</span>
+                <span class="c1"># 2021-04-27 13:46:57 :: 3586421 :: inference :: percent_different in 0.000381 seconds</span>
+                <span class="c1"># 2021-04-27 13:46:58 :: 3586421 :: inference :: percent_different in 0.000363 seconds</span>
+                <span class="c1"># 2021-04-27 13:46:58 :: 3586421 :: inference :: percent_different in 0.000348 seconds</span>
+                <span class="c1"># 2021-04-27 13:47:01 :: 3586421 :: inference :: motifs checked in 62.036366 seconds</span>
+                <span class="c1"># 2021-04-27 13:47:01 :: 3586421 :: inference :: 0 motif best match found from 81432 motifs_found, 4 fps where checked {604800: {&#39;fp_count&#39;: 2}, 86400: {&#39;fp_count&#39;: 2}} (motifs remove due to not in range 22325, percent_different 96) and it took a total of 64.761969 seconds (only mass3) to process telegraf.ssdnodes-26840.mariadb.localhost:3306.mysql.bytes_sent</span>
+                <span class="c1"># 2021-04-27 13:47:01 :: 3586421 :: inference found 0 matching similar motifs, checked 0 fps in 64.790198 seconds</span>
+
+                <span class="k">if</span> <span class="n">use_mass2_batch</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @added 20210419 - Feature #4014: Ionosphere - inference</span>
+                        <span class="c1"># Handle top_matches being greater than possible kth that can be found</span>
+                        <span class="c1"># mts.mass2_batch error: kth(=50) out of bounds (16)</span>
+                        <span class="n">use_top_matches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">top_matches</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">top_matches</span><span class="p">):</span>
+                            <span class="n">use_top_matches</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span>
+                            <span class="k">if</span> <span class="n">use_top_matches</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                                <span class="n">use_top_matches</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">use_top_matches</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                                <span class="n">use_top_matches</span> <span class="o">=</span> <span class="mi">1</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: adjusting top_matches for mass2_batch to </span><span class="si">%s</span><span class="s1"> (the maximum possible top - 1) as top_matches=</span><span class="si">%s</span><span class="s1"> will be out of bounds mts.mass2_batch&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">use_top_matches</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">)))</span>
+
+                        <span class="n">start_mass2_batch</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                        <span class="n">best_indices</span><span class="p">,</span> <span class="n">best_dists</span> <span class="o">=</span> <span class="n">mts</span><span class="o">.</span><span class="n">mass2_batch</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">,</span> <span class="n">batch_size_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">top_matches</span><span class="o">=</span><span class="n">use_top_matches</span><span class="p">)</span>
+                        <span class="n">end_mass2_batch</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                        <span class="n">mass2_batch_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_mass2_batch</span> <span class="o">-</span> <span class="n">start_mass2_batch</span><span class="p">))</span>
+                        <span class="n">current_best_indices</span> <span class="o">=</span> <span class="n">best_indices</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">current_best_dists</span> <span class="o">=</span> <span class="n">best_dists</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: mass2_batch run on fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1">, top_matches: </span><span class="si">%s</span><span class="s1">, in </span><span class="si">%6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_top_matches</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">end_mass2_batch</span> <span class="o">-</span> <span class="n">start_mass2_batch</span><span class="p">)))</span>
+                        <span class="c1"># @added 20210412 - Feature #4014: Ionosphere - inference</span>
+                        <span class="c1">#                   Branch #3590: inference</span>
+                        <span class="c1"># Add fp_id to fps_checked_for_motifs to enable ionosphere to update the</span>
+                        <span class="c1"># motif related columns in the ionosphere database table</span>
+                        <span class="n">fps_checked_for_motifs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: inference :: fp_id: </span><span class="si">%s</span><span class="s1">, full_duration: </span><span class="si">%s</span><span class="s1">, best_indices: </span><span class="si">%s</span><span class="s1">, best_dists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">)))</span>
+                    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="c1"># If mass2_batch reports out of bounds, use mass3</span>
+                        <span class="k">if</span> <span class="s1">&#39;out of bounds&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                            <span class="n">use_mass3</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">best_dists</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;use_mass3&#39;</span><span class="p">]</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: mts.mass2_batch will be out of bounds running mass3&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: </span><span class="si">%s</span><span class="s1"> mts.mass2_batch error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_mass3</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">empty_dists</span><span class="p">)):</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: mts.mass2_batch no similar motif from fp id </span><span class="si">%s</span><span class="s1"> - best_dists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))))</span>
+                                <span class="k">continue</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+
+                <span class="c1"># @added 20210423 -</span>
+                <span class="k">if</span> <span class="n">use_mass3</span><span class="p">:</span>
+                    <span class="c1"># pieces should be larger than the query length and as many</span>
+                    <span class="c1"># as possible, a power of two would be best, but as many</span>
+                    <span class="c1"># pieces as possible is the best we can achieve above 265</span>
+                    <span class="n">query_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_size_dataset</span><span class="p">)</span>
+                    <span class="c1"># if query_length &lt; 256:</span>
+                    <span class="c1">#     pieces = 256</span>
+                    <span class="c1"># else:</span>
+                    <span class="c1">#     pieces = query_length + 2</span>
+                    <span class="n">pieces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">-</span> <span class="n">query_length</span>
+                    <span class="k">if</span> <span class="n">pieces</span> <span class="o">&lt;</span> <span class="n">query_length</span><span class="p">:</span>
+                        <span class="n">pieces</span> <span class="o">=</span> <span class="n">query_length</span> <span class="o">+</span> <span class="mi">2</span>
+
+                    <span class="c1"># @modified 20210504 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1"># Handle the fp_timeseries being the same length (meaning</span>
+                    <span class="c1"># too short) as the query length</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">pieces</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: skipping running mass3 with </span><span class="si">%s</span><span class="s1"> pieces on on fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1"> because fp_timeseries length is not long enough for the query size&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">pieces</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)))</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># @modified 20210505 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1"># Skip the batch size if the fp_timeseries is a similar</span>
+                    <span class="c1"># length as the batch_size.  This was specifically added to</span>
+                    <span class="c1"># reduce errors were there may be missing data points in a</span>
+                    <span class="c1"># timeseries and the lengths are not the same.  This was</span>
+                    <span class="c1"># encountered on a batch_size of 1440 with FULL_DURATION</span>
+                    <span class="c1"># 86400 60 second data.   A match was never found at a</span>
+                    <span class="c1"># batch_size &gt; 720 on that data, but errors were occassionally</span>
+                    <span class="c1"># encountered.</span>
+                    <span class="n">ten_percent_of_batch_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span> <span class="o">/</span> <span class="mi">10</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_timeseries</span><span class="p">)</span> <span class="o">-</span> <span class="n">ten_percent_of_batch_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">batch_size</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: skipping running mass3 on fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1"> because the batch_size is too close to length&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)))</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: running mass3 with </span><span class="si">%s</span><span class="s1"> pieces on on fp_id: </span><span class="si">%s</span><span class="s1">, batch_size: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">pieces</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)))</span>
+                    <span class="n">start_mass3</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">best_dists</span> <span class="o">=</span> <span class="n">mts</span><span class="o">.</span><span class="n">mass3</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">,</span> <span class="n">batch_size_dataset</span><span class="p">,</span> <span class="n">pieces</span><span class="p">)</span>
+                        <span class="n">end_mass3</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: fp id </span><span class="si">%s</span><span class="s1"> mts.mass3 error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                        <span class="k">continue</span>
+                    <span class="n">mass3_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_mass3</span> <span class="o">-</span> <span class="n">start_mass3</span><span class="p">))</span>
+                    <span class="c1"># Add fp_id to fps_checked_for_motifs to enable ionosphere to update the</span>
+                    <span class="c1"># motif related columns in the ionosphere database table</span>
+                    <span class="n">fps_checked_for_motifs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+
+                    <span class="n">current_best_dists</span> <span class="o">=</span> <span class="n">best_dists</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+                    <span class="c1"># Create current_best_indices as mass2_batch returns</span>
+                    <span class="n">current_best_indices</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">batch_size</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">):</span>
+                            <span class="c1"># if index[0] &gt;= (batch_size - 1):</span>
+                            <span class="c1"># The array starts at batch_size + 1</span>
+                            <span class="c1"># if index[0] &gt;= (batch_size + 1):</span>
+                            <span class="c1"># but that fails on the add_motifs comprehension</span>
+                            <span class="c1"># add_motifs = [[fp_id, current_best_indices[index], best_dist.real, batch_size_anomalous_timeseries_subsequence, batch_size, max_distance, max_area_percent_diff, max_y, min_y, range_padding, min_y_padded, max_y_padded] for index, best_dist in enumerate(current_best_dists)]</span>
+                            <span class="c1"># IndexError: list index out of range</span>
+                            <span class="k">if</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">batch_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                                <span class="n">current_best_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                        <span class="c1"># @modified 20210505 - Feature #4014: Ionosphere - inference</span>
+                        <span class="c1"># Handle the query_length being shorter than the batch_size</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">):</span>
+                            <span class="n">current_best_indices</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="c1"># @modified 20220329 - Feature #4014: Ionosphere - inference</span>
+                            <span class="c1"># Re-iterate because this was using the previously</span>
+                            <span class="c1"># defined loop index</span>
+                            <span class="c1"># if index[0] &gt;= (query_length - 1):</span>
+                            <span class="c1">#     current_best_indices.append(index[0])</span>
+                            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">query_length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                                    <span class="n">current_best_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">):</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: discarding mass3 results as current_best_dists length: </span><span class="si">%s</span><span class="s1">, current_best_indices length: </span><span class="si">%s</span><span class="s1"> do not match, took </span><span class="si">%6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">)),</span>
+                                <span class="p">(</span><span class="n">end_mass3</span> <span class="o">-</span> <span class="n">start_mass3</span><span class="p">)))</span>
+                            <span class="k">continue</span>
+
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: mass3 run, current_best_dists length: </span><span class="si">%s</span><span class="s1">, current_best_indices length: </span><span class="si">%s</span><span class="s1">, took </span><span class="si">%6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">)),</span>
+                        <span class="p">(</span><span class="n">end_mass3</span> <span class="o">-</span> <span class="n">start_mass3</span><span class="p">)))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">use_mass3</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">use_mass3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">current_best_indices</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">iterate_add_motifs</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">iterate_add_motifs</span><span class="p">:</span>
+                    <span class="n">start_add_motifs_found</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="n">add_motifs_count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">best_dist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Note: mass2_batch finds similar motifs NOT the same</span>
+                            <span class="c1"># motif, the same motif will result in the best_dists</span>
+                            <span class="c1"># being a 0j with mass3.</span>
+                            <span class="c1"># So it is DIYed with FIND EXACT MATCHES</span>
+
+                            <span class="c1"># Do all in one in the distance_valid_motifs</span>
+                            <span class="c1"># comprehension after the loop</span>
+                            <span class="c1"># if best_dist.real &gt; max_distance:</span>
+                            <span class="c1">#     continue</span>
+                            <span class="c1"># The list produced with the mass3 method will include</span>
+                            <span class="c1"># nans</span>
+                            <span class="c1"># if np.isnan(best_dist.real):</span>
+                            <span class="c1">#     continue</span>
+
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># @modified 20210414 - Feature #4014: Ionosphere - inference</span>
+                                <span class="c1">#                      Branch #3590: inference</span>
+                                <span class="c1"># Store the not anomalous motifs</span>
+                                <span class="c1"># motif = [fp_id, current_best_indices[index], best_dist.real]</span>
+                                <span class="c1"># @modified 20210419 - Feature #4014: Ionosphere - inference</span>
+                                <span class="c1"># Added batch_size and more</span>
+                                <span class="n">motif</span> <span class="o">=</span> <span class="p">[</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">best_dist</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">batch_size_anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">range_padding</span><span class="p">,</span> <span class="n">min_y_padded</span><span class="p">,</span> <span class="n">max_y_padded</span><span class="p">]</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
+                                <span class="n">motif</span> <span class="o">=</span> <span class="p">[]</span>
+
+                            <span class="k">if</span> <span class="n">motif</span><span class="p">:</span>
+                                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">motif</span><span class="p">)</span>
+                                <span class="n">add_motifs_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: could not determine is if fp id </span><span class="si">%s</span><span class="s1"> timeseries at index </span><span class="si">%s</span><span class="s1"> was a match - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">[</span><span class="n">index</span><span class="p">]),</span> <span class="n">e</span><span class="p">))</span>
+                            <span class="k">continue</span>
+                    <span class="n">end_add_motifs_found</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: added </span><span class="si">%s</span><span class="s1"> motifs to motifs_found in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">add_motifs_count</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">end_add_motifs_found</span> <span class="o">-</span> <span class="n">start_add_motifs_found</span><span class="p">)))</span>
+
+                <span class="c1"># All in one quicker?  Yes</span>
+                <span class="n">start_add_motifs</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">add_motifs</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">add_motifs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">best_dist</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">batch_size_anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">range_padding</span><span class="p">,</span> <span class="n">min_y_padded</span><span class="p">,</span> <span class="n">max_y_padded</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">best_dist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">current_best_dists</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="n">add_motifs</span><span class="p">:</span>
+                        <span class="n">motifs_found</span> <span class="o">=</span> <span class="n">motifs_found</span> <span class="o">+</span> <span class="n">add_motifs</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: could not add_motifs to motifs_found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">e</span><span class="p">))</span>
+                <span class="n">end_add_motifs</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: added </span><span class="si">%s</span><span class="s1"> motifs to motifs_found in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">add_motifs</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="n">end_add_motifs</span> <span class="o">-</span> <span class="n">start_add_motifs</span><span class="p">)))</span>
+                <span class="c1"># Break if an exact match is found</span>
+                <span class="c1"># @modified 20210430 - Bug #4044: inference - motif distance override - exact match</span>
+                <span class="c1"># @modified 20210504 - Bug #4044: inference - motif distance override - exact match</span>
+                <span class="c1"># if len([item for item in add_motifs if item[2] == 0]) &gt; 0:</span>
+                <span class="c1">#     exact_matches_found = exact_matches_found + [item for item in add_motifs if item[2] == 0]</span>
+                <span class="c1">#     break</span>
+
+                <span class="c1"># @modified 20210427 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Finding exact matches can result is more than doubling the</span>
+                <span class="c1"># runtime when used after mass2_batch runs (which do not find)</span>
+                <span class="c1"># exact matches, mass3 does.  However the amount of time an</span>
+                <span class="c1"># exact match is found, is very rare</span>
+                <span class="c1"># if not use_mass3:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">use_mass3</span> <span class="ow">and</span> <span class="n">find_exact_matches</span><span class="p">:</span>
+                    <span class="c1"># mass3 finds exact matches, mass2_batch does not, so</span>
+                    <span class="c1"># there is no need to find exacts matchs if mass3 was</span>
+                    <span class="c1"># run.</span>
+                    <span class="c1"># FIND EXACT MATCHES</span>
+                    <span class="c1"># Seeing as I cannot reproduce finding nan+nanj which represents an</span>
+                    <span class="c1"># exact match with mts.mass2_batch, do it DIY style - iterate the</span>
+                    <span class="c1"># timeseries and create a batch_size subsequence for every index and</span>
+                    <span class="c1"># compare the values to the anomalous_ts for an exact match.</span>
+                    <span class="c1"># This takes ~0.024850 seconds on a timeseries with 10079 datapoints</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">start_exact_match</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                        <span class="n">indexed_relate_dataset</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">):</span>
+                            <span class="n">indexed_relate_dataset</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">])</span>
+                        <span class="n">last_index</span> <span class="o">=</span> <span class="n">indexed_relate_dataset</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">current_index</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">while</span> <span class="n">current_index</span> <span class="o">&lt;</span> <span class="n">last_index</span><span class="p">:</span>
+                            <span class="n">subsequence</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">indexed_relate_dataset</span><span class="p">[</span><span class="n">current_index</span><span class="p">:(</span><span class="n">current_index</span> <span class="o">+</span> <span class="n">batch_size</span><span class="p">)]]</span>
+                            <span class="k">if</span> <span class="n">subsequence</span> <span class="o">==</span> <span class="n">batch_size_dataset</span><span class="p">:</span>
+                                <span class="c1"># @modified 20210419 - Feature #4014: Ionosphere - inference</span>
+                                <span class="c1"># Added batch_size</span>
+                                <span class="n">exact_matches_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">batch_size_anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">range_padding</span><span class="p">,</span> <span class="n">min_y_padded</span><span class="p">,</span> <span class="n">max_y_padded</span><span class="p">])</span>
+                                <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">batch_size_anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">range_padding</span><span class="p">,</span> <span class="n">min_y_padded</span><span class="p">,</span> <span class="n">max_y_padded</span><span class="p">])</span>
+                                <span class="n">motifs_found_in_fp</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">batch_size_anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">min_y</span><span class="p">,</span> <span class="n">range_padding</span><span class="p">,</span> <span class="n">min_y_padded</span><span class="p">,</span> <span class="n">max_y_padded</span><span class="p">])</span>
+                            <span class="n">current_index</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">end_exact_match</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                        <span class="n">exact_match_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_exact_match</span> <span class="o">-</span> <span class="n">start_exact_match</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: could not determine it any exact matches could be found in fp id </span><span class="si">%s</span><span class="s1"> timeseries - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: exact matches checked in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">end_exact_match</span> <span class="o">-</span> <span class="n">start_exact_match</span><span class="p">)))</span>
+
+                <span class="c1"># TODO</span>
+                <span class="c1"># mass3 ALL, then evaluate, would it be quicker?  No see POC</span>
+                <span class="c1"># above</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: mts.mass2_batch runs on </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mass2_batch_times</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mass2_batch_times</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: exact_match runs on </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exact_match_times</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exact_match_times</span><span class="p">)))</span>
+        <span class="n">end_full_duration</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: analysed </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">full_duration_fp_ids</span><span class="p">))),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">end_full_duration</span> <span class="o">-</span> <span class="n">start_full_duration</span><span class="p">)))</span>
+
+    <span class="c1"># Patterns are sorted by distance</span>
+    <span class="c1"># The list produced with the mass3 method will include</span>
+    <span class="c1"># nans</span>
+    <span class="n">start_distance_valid_motifs</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">distance_valid_motifs</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">motifs_found</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">]]</span>
+    <span class="n">end_distance_valid_motifs</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: </span><span class="si">%s</span><span class="s1"> distance_valid_motifs determined in </span><span class="si">%.6f</span><span class="s1"> seconds from </span><span class="si">%s</span><span class="s1"> motifs_found&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">distance_valid_motifs</span><span class="p">)),</span>
+        <span class="p">(</span><span class="n">end_distance_valid_motifs</span> <span class="o">-</span> <span class="n">start_distance_valid_motifs</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">motifs_found</span><span class="p">))))</span>
+
+    <span class="n">start_sorted_motifs</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">sorted_motifs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">motifs_found</span><span class="p">:</span>
+        <span class="n">sorted_motifs</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">distance_valid_motifs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="c1"># If the areas under the curve were calculated, the</span>
+        <span class="c1"># list could be sorted by area_percent_diff then by</span>
+        <span class="c1"># distance.</span>
+        <span class="c1"># import operator</span>
+        <span class="c1"># sorted_motifs = sorted(motifs_found_in_fp, key=operator.itemgetter(2, 2))</span>
+    <span class="n">end_sorted_motifs</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: sorted_motifs from distance_valid_motifs in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">end_sorted_motifs</span> <span class="o">-</span> <span class="n">start_sorted_motifs</span><span class="p">)))</span>
+
+    <span class="n">percent_different_removed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">not_in_range_removed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">start_motifs_check</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">motif</span> <span class="ow">in</span> <span class="n">sorted_motifs</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="n">add_match</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="n">current_fp_id</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">best_index</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">best_dist</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="c1"># @added 20210414 - Feature #4014: Ionosphere - inference</span>
+            <span class="c1">#                   Branch #3590: inference</span>
+            <span class="c1"># Store the not anomalous motifs</span>
+            <span class="n">motif_sequence</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+            <span class="c1"># @modified 20210419 - Feature #4014: Ionosphere - inference</span>
+            <span class="c1"># Added batch_size</span>
+            <span class="n">motif_size</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="n">motif_max_distance</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">motif_max_area_percent_diff</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">max_y</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+            <span class="n">min_y</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">range_padding</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+            <span class="n">min_y_padded</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+            <span class="n">max_y_padded</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">motif</span> <span class="ow">in</span> <span class="n">exact_matches_found</span><span class="p">:</span>
+                <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;exact&#39;</span>
+                <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: inference :: exact match: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">motif</span><span class="p">)))</span>
+
+            <span class="n">full_relate_timeseries</span> <span class="o">=</span> <span class="n">fps_timeseries</span><span class="p">[</span><span class="n">current_fp_id</span><span class="p">]</span>
+            <span class="c1"># @modified 20220526 - Bug #4588: Ionosphere - inference - further validate all_in_range</span>
+            <span class="c1"># The change to a simplified chained comparison between the operands</span>
+            <span class="c1"># did not have the desired result.  The index to end of timeseries</span>
+            <span class="c1"># was being selected rather than index to index+size.  This resulted</span>
+            <span class="c1"># in the fp_motifs being incorrect and having incorrect areas, etc.</span>
+            <span class="c1"># Reverted back to the original method, occassionally pylint is not</span>
+            <span class="c1"># useful.</span>
+            <span class="c1"># relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index &gt;= best_index and index &lt; (best_index + motif_size)]</span>
+            <span class="c1"># relate_timeseries = [item for index, item in enumerate(full_relate_timeseries) if index &gt;= best_index &lt; (best_index + motif_size)]</span>
+            <span class="n">relate_timeseries</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">full_relate_timeseries</span><span class="p">)</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">best_index</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">best_index</span> <span class="o">+</span> <span class="n">motif_size</span><span class="p">)]</span>
+            <span class="n">relate_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">relate_timeseries</span><span class="p">]</span>
+            <span class="c1"># relate_dataset_timestamps = [int(item[0]) for item in relate_timeseries]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">add_match</span><span class="p">:</span>
+                <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># Just check min and max, faster than loop iteration</span>
+                <span class="c1"># for value in relate_dataset:</span>
+                <span class="c1">#     if value &lt; min_y_padded:</span>
+                <span class="c1">#         all_in_range = False</span>
+                <span class="c1">#         break</span>
+                <span class="c1">#     if value &gt; max_y_padded:</span>
+                <span class="c1">#         all_in_range = False</span>
+                <span class="c1">#         break</span>
+                <span class="n">min_relate_dataset</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">min_relate_dataset</span> <span class="o">&lt;</span> <span class="n">min_y_padded</span><span class="p">:</span>
+                    <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">max_relate_dataset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">max_relate_dataset</span> <span class="o">&gt;</span> <span class="n">max_y_padded</span><span class="p">:</span>
+                    <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="n">all_in_range</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">max_relate_dataset</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">range_padding</span><span class="p">):</span>
+                        <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: inference :: all_in_range: related_max_y: </span><span class="si">%s</span><span class="s1"> less than (max_y - range_padding): (</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">) = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">max_relate_dataset</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_y</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">range_padding</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">((</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">range_padding</span><span class="p">))))</span>
+                    <span class="k">if</span> <span class="n">min_relate_dataset</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">min_y</span> <span class="o">+</span> <span class="n">range_padding</span><span class="p">):</span>
+                        <span class="n">all_in_range</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: inference :: all_in_range: related_min_y: </span><span class="si">%s</span><span class="s1"> greater than (min_y + range_padding): (</span><span class="si">%s</span><span class="s1"> + </span><span class="si">%s</span><span class="s1">) = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">min_relate_dataset</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_y</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">range_padding</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">((</span><span class="n">min_y</span> <span class="o">+</span> <span class="n">range_padding</span><span class="p">))))</span>
+
+                <span class="k">if</span> <span class="n">all_in_range</span><span class="p">:</span>
+                    <span class="c1"># logger.info(&#39;inference :: ALL IN RANGE - all_in_range: %s, distance: %s&#39; % (str(all_in_range), str(best_dist)))</span>
+                    <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;all_in_range&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">not_in_range_removed</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">compare_percent_different</span> <span class="o">=</span> <span class="mi">100</span>
+
+            <span class="c1"># @added 20210423 - Feature #4014: Ionosphere - inference</span>
+            <span class="c1"># Compute the area using the composite trapezoidal rule to determine</span>
+            <span class="c1"># if the similarity is similar enough.</span>
+            <span class="k">if</span> <span class="n">add_match</span><span class="p">:</span>
+                <span class="n">calculate_areas_under_curves</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">motif_area</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">fp_motif_area</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">calculate_areas_under_curves</span> <span class="ow">and</span> <span class="n">add_match</span><span class="p">:</span>
+                    <span class="n">start_percent_different</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="c1"># dx = int(metric_resolution / 60)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">batch_size_dataset</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">motif_sequence</span><span class="p">]</span>
+                        <span class="n">y_motif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">batch_size_dataset</span><span class="p">)</span>
+                        <span class="c1"># motif_area = np.trapz(y_motif, dx=dx)</span>
+                        <span class="n">motif_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y_motif</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to get motif_area with np.trapz - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">e</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">y_fp_motif</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">)</span>
+                        <span class="c1"># fp_motif_area = np.trapz(y_fp_motif, dx=dx)</span>
+                        <span class="n">fp_motif_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">y_fp_motif</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to get fp_motif_area with np.trapz - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">e</span><span class="p">))</span>
+                    <span class="c1"># @added 20210424 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1"># Determine the percentage difference (as a</span>
+                    <span class="c1"># positive value) of the areas under the</span>
+                    <span class="c1"># curves.</span>
+                    <span class="c1"># percent_different = get_percent_different(fp_motif_area, motif_area, True)</span>
+                    <span class="n">percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="n">fp_motif_area</span><span class="p">,</span> <span class="n">motif_area</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20210424 - Feature #4014: Ionosphere - inference</span>
+                    <span class="c1"># For the purpose of the comparison, if the get_percent_different</span>
+                    <span class="c1"># returns None set percent_different to 100 as 100 will</span>
+                    <span class="c1"># always be greater than the motif_max_area_percent_diff</span>
+                    <span class="k">if</span> <span class="n">percent_different</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">percent_different</span> <span class="o">=</span> <span class="mi">100</span>
+
+                    <span class="k">if</span> <span class="n">percent_different</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">new_pdiff</span> <span class="o">=</span> <span class="n">percent_different</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+                        <span class="n">compare_percent_different</span> <span class="o">=</span> <span class="n">new_pdiff</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">compare_percent_different</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">percent_different</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">compare_percent_different</span> <span class="o">&gt;</span> <span class="n">motif_max_area_percent_diff</span><span class="p">:</span>
+                        <span class="n">add_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">percent_different_removed</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="c1"># logger.info(&#39;inference :: all_in_range match removed area_percent_diff: %s&#39; % (str(percent_different)))</span>
+                        <span class="c1"># BUT ...</span>
+                        <span class="c1"># @modified 20210504 - Bug #4044: inference - motif distance override - exact match</span>
+                        <span class="c1"># Do not add as similar just based on distance</span>
+                        <span class="c1"># if motif_max_distance &gt; 10:</span>
+                        <span class="c1">#     if best_dist &lt; 3 and not add_match:</span>
+                        <span class="c1">#         logger.info(&#39;inference :: DISTANCE VERY SIMILAR - adding match even though area_percent_diff is greater than max_area_percent_diff because best_dist: %s&#39; % (</span>
+                        <span class="c1">#             str(best_dist)))</span>
+                        <span class="c1">#         add_match = True</span>
+                        <span class="c1">#         percent_different_removed -= 1</span>
+                        <span class="c1">#         # match_type = &#39;distance&#39;</span>
+                        <span class="c1"># if best_dist &lt; 1 and not add_match:</span>
+                        <span class="c1">#     logger.info(&#39;inference :: DISTANCE VERY SIMILAR - adding match even though area_percent_diff is greater than max_area_percent_diff because best_dist: %s&#39; % (</span>
+                        <span class="c1">#         str(best_dist)))</span>
+                        <span class="c1">#     add_match = True</span>
+                        <span class="c1">#     percent_different_removed -= 1</span>
+                        <span class="c1">#     # match_type = &#39;distance&#39;</span>
+
+                    <span class="n">end_percent_different</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: percent_different in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">end_percent_different</span> <span class="o">-</span> <span class="n">start_percent_different</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20210430 - Bug #4044: inference - motif distance override - exact match</span>
+            <span class="k">if</span> <span class="n">compare_percent_different</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">best_dist</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;exact&#39;</span>
+                <span class="c1"># @added 20210504 - Bug #4044: inference - motif distance override - exact match</span>
+                <span class="c1"># Handle exact matches here</span>
+                <span class="n">exact_matches_found</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">motif</span><span class="p">)</span>
+
+            <span class="n">generation</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">add_match</span><span class="p">:</span>
+                <span class="c1"># @modified 20210426 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Optimize - remove SELECT generation mysql_select</span>
+                <span class="c1"># method and use fp_id_rows dict</span>
+                <span class="c1"># start_select_generation = timer()</span>
+                <span class="c1"># try:</span>
+                <span class="c1">#     query = &#39;SELECT generation FROM ionosphere WHERE id=%s&#39; % (str(fp_id))</span>
+                <span class="c1">#     results = mysql_select(skyline_app, query)</span>
+                <span class="c1">#     for result in results:</span>
+                <span class="c1">#         generation = int(result[0])</span>
+                <span class="c1"># except Exception as e:</span>
+                <span class="c1">#     logger.error(&#39;error :: inference :: failed to get generation from the database for fp_id %s from ionoshere table - %s&#39; % (</span>
+                <span class="c1">#         str(fp_id), e))</span>
+                <span class="c1"># end_select_generation = timer()</span>
+                <span class="c1"># logger.info(&#39;inference :: select_generation in %.6f seconds&#39; % (</span>
+                <span class="c1">#     (end_select_generation - start_select_generation)))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">generation</span> <span class="o">=</span> <span class="n">fp_id_rows</span><span class="p">[</span><span class="n">current_fp_id</span><span class="p">][</span><span class="s1">&#39;generation&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to get generation from fp_id_rows dict for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">current_fp_id</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+
+                <span class="n">motif_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">current_fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_index</span><span class="p">))</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_id</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;fp_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_fp_id</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_index</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_dist</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;max_distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_max_distance</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_size</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timestamp</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">match_type</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;type_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_match_types</span><span class="p">[</span><span class="n">match_type</span><span class="p">]</span>
+                <span class="c1"># @added 20210414 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                   Branch #3590: inference</span>
+                <span class="c1"># Store the not anomalous motifs</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_sequence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_sequence</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_duration</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;generation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">generation</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;fp_motif_sequence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">relate_timeseries</span>
+                <span class="c1"># @added 20210423 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Compute the area using the composite trapezoidal rule.</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;motif_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_area</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;fp_motif_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_motif_area</span>
+                <span class="c1"># @added 20210424 - Feature #4014: Ionosphere - inference</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;area_percent_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">percent_different</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;max_area_percent_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">motif_max_area_percent_diff</span>
+                <span class="c1"># @added 20210428 - Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Add time taken and fps checked</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;fps_checked&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fps_checked_for_motifs</span><span class="p">)))</span>
+                <span class="n">runtime_end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">runtime_end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">SINGLE_MATCH</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: fp id </span><span class="si">%s</span><span class="s1"> and motif: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">motif</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">motif</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="k">continue</span>
+    <span class="n">end_motifs_check</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: motifs checked in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">end_motifs_check</span> <span class="o">-</span> <span class="n">start_motifs_check</span><span class="p">)))</span>
+
+    <span class="c1"># Sort by distance AND area_percent_diff</span>
+    <span class="n">sorted_ordered_matched_motifs_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">matched_motifs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">matched_motifs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ordered_matched_motifs_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">motif_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">matched_motifs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span>
+            <span class="n">area_percent_diff</span> <span class="o">=</span> <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">][</span><span class="s1">&#39;area_percent_diff&#39;</span><span class="p">]</span>
+            <span class="n">ordered_matched_motifs_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">motif_id</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">area_percent_diff</span><span class="p">])</span>
+        <span class="c1"># If the areas under the curve were calculated, the</span>
+        <span class="c1"># list could be sorted by area_percent_diff then by</span>
+        <span class="c1"># distance.</span>
+        <span class="n">sorted_matched_motifs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">sorted_ordered_matched_motifs_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ordered_matched_motifs_list</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: sorting </span><span class="si">%s</span><span class="s1"> matched_motifs by distance and area_percent_diff&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sorted_ordered_matched_motifs_list</span><span class="p">))))</span>
+        <span class="k">if</span> <span class="n">sorted_ordered_matched_motifs_list</span><span class="p">:</span>
+            <span class="c1"># inference_debug_file = &#39;%s/%s.%s.fp_id.%s.inference.sorted_ordered_matched_motifs.list&#39; % (</span>
+            <span class="c1">#     metric_timeseries_dir, str(timestamp), metric, str(fp_id))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+                <span class="n">inference_debug_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.inference.sorted_ordered_matched_motifs.list&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inference_debug_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.inference.sorted_ordered_matched_motifs.list&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inference_debug_file</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">inference_debug_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sorted_ordered_matched_motifs_list</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: added inference.sorted_ordered_matched_motifs list file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">inference_debug_file</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file to create inference_debug_file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">inference_debug_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">motif_id</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">area_percent_diff</span> <span class="ow">in</span> <span class="n">sorted_ordered_matched_motifs_list</span><span class="p">:</span>
+            <span class="n">sorted_matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">matched_motifs</span><span class="p">[</span><span class="n">motif_id</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">SINGLE_MATCH</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="c1"># @modified 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+        <span class="c1"># matched_motifs = sorted_matched_motifs.copy()</span>
+        <span class="n">matched_motifs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sorted_matched_motifs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">matched_motifs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+            <span class="n">inference_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.inference.matched_motifs.dict&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inference_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.inference.matched_motifs.dict&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">inference_file</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">inference_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">matched_motifs</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: added inference.matched_motifs dict file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">inference_file</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file to create inference_file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">inference_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+    <span class="c1"># @added 20210423 - Feature #4014: Ionosphere - inference</span>
+    <span class="c1"># Since implementing the analyse in loop method of every batch size per fp</span>
+    <span class="c1"># the motifs_checked_count double increased as the fp_id is added each</span>
+    <span class="c1"># batch_size, only return uniques to ionosphere</span>
+    <span class="n">unique_fps_checked_for_motifs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">fps_checked_for_motifs</span><span class="p">))</span>
+
+    <span class="n">end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">dev_null</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">dev_null</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inference :: </span><span class="si">%s</span><span class="s1"> motif best match found from </span><span class="si">%s</span><span class="s1"> motifs_found, </span><span class="si">%s</span><span class="s1"> fps where checked from </span><span class="si">%s</span><span class="s1"> (motifs removed due to not_in_range </span><span class="si">%s</span><span class="s1">, percent_different </span><span class="si">%s</span><span class="s1">) and it took a total of </span><span class="si">%.6f</span><span class="s1"> seconds (all mass2/mass3) to process </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="c1"># str(len(matched_motifs)), str(len(motifs_found)), str(len(fps_checked_for_motifs)),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matched_motifs</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">motifs_found</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_fps_checked_for_motifs</span><span class="p">)),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_fp_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_in_range_removed</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">percent_different_removed</span><span class="p">),</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+    <span class="c1"># return matched_motifs, fps_checked_for_motifs</span>
+    <span class="k">return</span> <span class="n">matched_motifs</span><span class="p">,</span> <span class="n">unique_fps_checked_for_motifs</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

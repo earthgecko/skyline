@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Flux &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flux &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="upload_data to Flux - EXPERIMENTAL" href="upload-data-to-flux.html" />
     <link rel="prev" title="Luminosity" href="luminosity.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,18 +71,31 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Flux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sending-metrics-from-prometheus">Sending metrics from Prometheus</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flux-is-not-an-aggregator">Flux is <strong>not</strong> an aggregator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#de-duplication">De-duplication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vista-and-settings-flux-check-last-timestamp">Vista and <code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CHECK_LAST_TIMESTAMP</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#allowed-characters-in-metric-names">Allowed characters in metric names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#webserver-configuration-to-limit-content-size-on-flux-post-requests">Webserver configuration to limit content size on flux POST requests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#post-request">POST request</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#get-request">GET request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#telegraf">telegraf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#populate-metric-endpoint">populate_metric endpoint</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#process-uploaded-data">Process uploaded data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -129,6 +103,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -137,119 +114,393 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Flux</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Flux</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/flux.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="flux">
-<h1>Flux<a class="headerlink" href="#flux" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="flux">
+<h1>Flux<a class="headerlink" href="#flux" title="Permalink to this heading"></a></h1>
 <p>Flux enables Skyline to receive metrics via HTTP GET and POST requests and
-submits them to Graphite, so they can be pickled to Skyline for analysis in near
-real time via the normal Skyline pipeline.</p>
-<p>Flux uses falcon the bare-metal web API framework for Python to serve the API
-via gunicorn.  The normal Apache/nginx reverse proxy Skyline vhost is used to
+submits them to Graphite so they can be pickled to Skyline.  Flux can also
+forward labelled metric data from Prometheus remote_write to RedisTimeseries and
+VictoriaMetrics, for analysis in real time via the normal Skyline pipeline.</p>
+<p>Flux uses falcon, the bare-metal web API framework for Python to serve the API
+via gunicorn/gevent.  The normal nginx reverse proxy Skyline vhost is used to
 serve the /flux endpoint and proxy requests to flux.</p>
 <p>It is preferable to use the POST Flux endpoint to submit metrics so that the
 Skyline flux API key can be encrypted via SSL in the POST data.</p>
-<div class="section" id="de-duplication">
-<h2>De-duplication<a class="headerlink" href="#de-duplication" title="Permalink to this headline">¶</a></h2>
-<p>Flux de-duplicates metric data that it receives by maintaining a Redis key for
-each metric that is submitted.  When the flux worker successfully submits a data
-point and timestamp for a metric to Graphite, flux updates the
-<cite>flux.last.&lt;metric&gt;</cite> Redis key with the data point timestamp.  If a data point
-is submitted to flux with a timestamp &lt;= to the timestamp value in the metric
-Redis key, flux discards the data.</p>
-</div>
-<div class="section" id="post-request">
-<h2>POST request<a class="headerlink" href="#post-request" title="Permalink to this headline">¶</a></h2>
-<p>The POST endpoint is <cite>/flux/metric_data_post</cite> and this accepts JSON data.
-Here is an example of the data it requires and an example POST request.</p>
+<p>Flux can accept data in the following formats:</p>
+<ul class="simple">
+<li><p>HTTP JSON</p></li>
+<li><p>telegraf json format</p></li>
+<li><p>Prometheus protobuf data</p></li>
+</ul>
+<section id="sending-metrics-from-prometheus">
+<h2>Sending metrics from Prometheus<a class="headerlink" href="#sending-metrics-from-prometheus" title="Permalink to this heading"></a></h2>
+<p>See the <a class="reference external" href="prometheus.html">Prometheus</a> page</p>
+</section>
+<section id="flux-is-not-an-aggregator">
+<h2>Flux is <strong>not</strong> an aggregator<a class="headerlink" href="#flux-is-not-an-aggregator" title="Permalink to this heading"></a></h2>
+<p>One data point per metric per Graphite retention time period.</p>
+<p>Flux is <strong>not</strong> an aggregator.  A metric sent to flux should only have a single
+data point submitted per time period.  Flux should not be used like statsd,
+meaning that if a metric retention in Graphite 1 data point per 60 seconds then
+only 1 data point should be submitted.  If multiple data points are submitted
+for a period for the same metric, flux will submit them all <strong>but</strong> Graphite
+will only record the last submitted value as the value for the period.  This is
+just how Graphite works.</p>
+<p>For example if you sent the following 3 data points to flux for a metric:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-      <span class="nt">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;1478021700&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-      <span class="nt">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.multiple_timestamps_per_period.3&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1478021701</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">3.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span>
+<span class="p">}</span>
+
+<span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.multiple_timestamps_per_period.3&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1478021715</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">6.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span>
+<span class="p">}</span>
+
+<span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.multiple_timestamps_per_period.3&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1478021745</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -vvv -u username:password -d <span class="s1">&#39;{&quot;metric&quot;:&quot;vista.nodes.skyline-1.cpu.user&quot;,&quot;timestamp&quot;:&quot;1478021700&quot;,&quot;value&quot;:&quot;1.0&quot;,&quot;key&quot;:&quot;YOURown32charSkylineAPIkeySecret&quot;}&#39;</span> -H <span class="s2">&quot;Content-Type: application/json&quot;</span> -X POST https://skyline.example.org/flux/metric_data_post
+<p>Graphite would store the last submitted value for the period, e.g:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;target&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.multiple_timestamps_per_period.3&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tags&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.multiple_timestamps_per_period.3&quot;</span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;datapoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mi">147802170</span><span class="p">]]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
 </pre></div>
 </div>
+</section>
+<section id="de-duplication">
+<h2>De-duplication<a class="headerlink" href="#de-duplication" title="Permalink to this heading"></a></h2>
+<p>Flux can de-duplicates metric data that it receives by maintaining a Redis key
+for each metric that is submitted.  When the flux worker successfully submits a
+data point and timestamp for a metric to Graphite, flux updates the
+<cite>flux.last.&lt;metric&gt;</cite> Redis key with the data point timestamp.  If a data point
+is submitted to flux with a timestamp &lt;= to the timestamp value in the metric
+Redis key, flux discards the data.  However this comes with a computational cost
+of Redis keys having to be maintained for each metric, if you have lots of
+metrics coming into flux, it is better to ensure that your application/s are
+submitting to flux correctly and set <a class="reference internal" href="skyline.html#settings.FLUX_CHECK_LAST_TIMESTAMP" title="settings.FLUX_CHECK_LAST_TIMESTAMP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CHECK_LAST_TIMESTAMP</span></code></a>
+to <code class="docutils literal notranslate"><span class="pre">False</span></code>.  Considering that if your application does resubmit data, as long
+as the data is the same data as previously sent, it will be sent to Graphite and
+Graphite will just update the value to the same value that was already stored
+(as described above).</p>
+</section>
+<section id="vista-and-settings-flux-check-last-timestamp">
+<h2>Vista and <a class="reference internal" href="skyline.html#settings.FLUX_CHECK_LAST_TIMESTAMP" title="settings.FLUX_CHECK_LAST_TIMESTAMP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CHECK_LAST_TIMESTAMP</span></code></a><a class="headerlink" href="#vista-and-settings-flux-check-last-timestamp" title="Permalink to this heading"></a></h2>
+<p>Do note that <cite>flux.last.&lt;metric&gt;</cite> Redis keys are still used in Vista even if
+<a class="reference internal" href="skyline.html#settings.FLUX_CHECK_LAST_TIMESTAMP" title="settings.FLUX_CHECK_LAST_TIMESTAMP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CHECK_LAST_TIMESTAMP</span></code></a> is set to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Vista uses the
+same key namespace to handle data fetched from remote hosts even if it is
+disabled and Flux will still use the keys for all vista.metrics even if it is
+disabled.</p>
+</section>
+<section id="allowed-characters-in-metric-names">
+<h2>Allowed characters in metric names<a class="headerlink" href="#allowed-characters-in-metric-names" title="Permalink to this heading"></a></h2>
+<p>As below.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALLOWED_CHARS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">:</span>
+    <span class="n">ALLOWED_CHARS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span><span class="p">:</span>
+    <span class="n">ALLOWED_CHARS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">:</span>
+    <span class="n">ALLOWED_CHARS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="get-request">
-<h2>GET request<a class="headerlink" href="#get-request" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="webserver-configuration-to-limit-content-size-on-flux-post-requests">
+<h2>Webserver configuration to limit content size on flux POST requests<a class="headerlink" href="#webserver-configuration-to-limit-content-size-on-flux-post-requests" title="Permalink to this heading"></a></h2>
+<p>Because flux uses falcon, you should consider limiting the content length in
+your webserver configuration, because falcon (being a bare-metal web API
+framework) does not check content length.  See a basic nginx example using
+<code class="docutils literal notranslate"><span class="pre">client_max_body_size</span></code> in the location /flux/ block in
+<a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example">https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example</a></p>
+</section>
+<section id="post-request">
+<h2>POST request<a class="headerlink" href="#post-request" title="Permalink to this heading"></a></h2>
+<p>The POST endpoint is <cite>/flux/metric_data_post</cite> and this accepts JSON data.  The
+json can have data for a single metric or for multiple metrics in a single POST.
+POST requests which submit multiple metrics <strong>should be limited</strong> to a maximum
+of <strong>450 metrics per request</strong>.</p>
+<p>A successful POST will respond with no content and a 204 HTTP response code.
+Unsuccessful requests will respond with a 4xx code and a json body with
+additional information about why the request failed.</p>
+<p>Here is an example of the data a single metric POST requires and an example POST
+request.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1478021700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-vvv<span class="w"> </span>-u<span class="w"> </span>username:password<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;key&quot;:&quot;YOURown32charSkylineAPIkeySecret&quot;,&quot;metric&quot;:&quot;vista.nodes.skyline-1.cpu.user&quot;,&quot;timestamp&quot;:1478021700,&quot;value&quot;:1.0}&#39;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://skyline.example.org/flux/metric_data_post
+</pre></div>
+</div>
+<p>Here is an example of the data a multiple metrics POST requires and an example
+POST request for multiple metrics:</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When submitting multiple metrics in a POST, if <strong>any</strong> one element
+of any metric is not valid the entire POST will be rejected.</p>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metrics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1478021700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.system&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1478021700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-v<span class="w"> </span>-u<span class="w"> </span>username:password<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;key&quot;:&quot;YOURown32charSkylineAPIkeySecret&quot;,&quot;metrics&quot;:[{&quot;metric&quot;:&quot;vista.nodes.skyline-1.cpu.user&quot;,&quot;timestamp&quot;:1478021700,&quot;value&quot;:1.0},{&quot;metric&quot;:&quot;vista.nodes.skyline-1.cpu.system&quot;,&quot;timestamp&quot;:1478021700,&quot;value&quot;:0.2}]}&#39;</span><span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://skyline.example.org/flux/metric_data_post
+</pre></div>
+</div>
+<p>It is possible to test what metrics would be ingested BEFORE submitting them for
+real.  You can add the test key and Flux will simply receive the metrics and
+report what metrics would be ingested, without actually sending the metrics to
+the backend store/s.  For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;test&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metrics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1374341700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.system&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1374341700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>It is also possible to backfill old data via flux, using the <code class="docutils literal notranslate"><span class="pre">&quot;fill&quot;:</span> <span class="pre">&quot;true&quot;</span></code>
+element in the json.  By default flux checks timestamps to see if they are
+sensible and valid, however if <code class="docutils literal notranslate"><span class="pre">&quot;fill&quot;:</span> <span class="pre">&quot;true&quot;</span></code> is present in the metric
+json, these checks will be skipped and the data will be submitted to Graphite
+as is.  For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;metrics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1374341700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;metric&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;vista.nodes.skyline-1.cpu.system&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1374341700</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;fill&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;true&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>HOWEVER</strong> be aware that if you are back filling old data, ensure that Graphite
+does not have multiple retentions for the namespace and that the single
+retention is sufficient to hold all the data at the resolution it is being
+submitted at.  Once the metrics have been back filled you can use the Graphite
+whisper-resize.py to resize the metric whispers files to the desired retentions
+and update the Graphite storage-schema.conf to reflect the desired retentions.</p>
+<p>Also to note is that when back filling via flux, although Graphite will pickle
+the data to Horizon, Horizon will not submit data older though
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> to Redis, because that is how Horizon is supposed
+to work.  When the back fill timestamps are within the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
+period, Horizon will then add the last days worth of data to Redis as normal and
+the metrics will begin to be analysed as soon as real time data for the metrics
+comes in.</p>
+</section>
+<section id="get-request">
+<h2>GET request<a class="headerlink" href="#get-request" title="Permalink to this heading"></a></h2>
 <p>However if the flux instance in question is only receiving metrics on a local
 network or protected network and you do not mind sending the API key in
 plaintext, the GET method can be used.</p>
+<p>A successful GET request will respond with no content and a 204 HTTP response code.</p>
 <p>The <cite>/flux/metric_data</cite> endpoint is called via a GET request with the URI
 parameters as defined below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># /flux/metric_data?metric=&lt;metric|str&gt;&amp;timestamp=&lt;timestamp|int&gt;&amp;value=&lt;value|float&gt;&amp;key=&lt;key|str&gt;</span>
 <span class="c1"># For example:</span>
-curl -vvv -u username:password <span class="s2">&quot;https://skyline.example.org/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&amp;value=1.0&amp;key=YOURown32charSkylineAPIkeySecret&quot;</span>
+curl<span class="w"> </span>-v<span class="w"> </span>-u<span class="w"> </span>username:password<span class="w"> </span><span class="s2">&quot;https://skyline.example.org/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&amp;value=1.0&amp;key=YOURown32charSkylineAPIkeySecret&quot;</span>
 </pre></div>
 </div>
+</section>
+<section id="telegraf">
+<h2>telegraf<a class="headerlink" href="#telegraf" title="Permalink to this heading"></a></h2>
+<p>Flux can accept metrics from directly from telegraf in the telegraf json format.
+To configure telegraf to send metrics to Flux you can enable the
+<cite>[[outputs.http]]</cite> plugin in telegraf as shown below.</p>
+<p>Firstly a few things must be pointed out:</p>
+<ul class="simple">
+<li><p>Flux applies the same logic that is used by the telegraf Graphite template
+pattern e.g. <cite>template = “host.tags.measurement.field”</cite> - <a class="reference external" href="https://github.com/influxdata/telegraf/tree/master/plugins/serializers/graphite">https://github.com/influxdata/telegraf/tree/master/plugins/serializers/graphite</a></p></li>
+<li><p>Flux replaces  <code class="docutils literal notranslate"><span class="pre">.</span></code> for <code class="docutils literal notranslate"><span class="pre">_</span></code> and <code class="docutils literal notranslate"><span class="pre">/</span></code> for <code class="docutils literal notranslate"><span class="pre">-</span></code> in any tags, measurement or fields
+in which these characters are found.</p></li>
+<li><p>Some telegraf outputs send string/boolean values, by default Flux drops
+metrics with string/boolean values, e.g.
+<code class="docutils literal notranslate"><span class="pre">{'fields':</span> <span class="pre">{...,</span> <span class="pre">'aof_last_bgrewrite_status':</span> <span class="pre">'ok',</span> <span class="pre">...},</span> <span class="pre">'name':</span> <span class="pre">'redis',</span> <span class="pre">...}</span></code>
+One way to deal with string/boolean values metrics if you want to record them
+numerically as metrics is to convert them in telegraf itself using the
+appropriate telegraf processors and filters (see telegraf documentation).  If
+Flux receives string/boolean value metrics it will report what metrics were
+dropped in a HTTP status code 207 response in the json body and not the normal
+204 response.  However string/boolean value metrics will not cause errors and
+all other metrics with numerical values in the POST will be accepted.</p></li>
+<li><p>The additional <cite>outputs.http.headers</cite> <strong>must</strong> be specified.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">content_encoding</span></code> must be set to gzip</p></li>
+<li><p>There are a number of status codes that telegraf should not resubmit data on
+these are to ensure telegraf does not attempt to send the same bad data or
+too much data over and over again (coming soon in the upcoming telegraf March
+2022 release).</p></li>
+<li><p>If there is a long network partition between telegraf agents and Flux,
+sometimes some data may be dropped, but this can often be preferable to the
+thundering herd swamping I/O</p></li>
+</ul>
+<p>To use the telegraf Graphite template pattern the following options in the
+telegraf <code class="docutils literal notranslate"><span class="pre">[agent]</span></code> configuration section are required for telegraf to add the
+host to the tags:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="c1">## Override default hostname, if empty use os.Hostname()</span>
+<span class="na">hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&quot;</span>
+<span class="c1">## If set to true, do no set the &quot;host&quot; tag in the telegraf agent.</span>
+<span class="na">omit_hostname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
+</pre></div>
 </div>
-<div class="section" id="populate-metric-endpoint">
-<h2>populate_metric endpoint<a class="headerlink" href="#populate-metric-endpoint" title="Permalink to this headline">¶</a></h2>
+<p>Also add the <code class="docutils literal notranslate"><span class="pre">[[outputs.http]]</span></code> to the telegraf config as below replacing
+<code class="docutils literal notranslate"><span class="pre">&lt;YOUR_SKYLINE_HOST&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;settings.FLUX_SELF_API_KEY&gt;</span></code>:</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[[outputs.http]]</span>
+<span class="w">  </span><span class="c1">## URL is the Skyline flux address to send metrics to</span>
+<span class="w">  </span><span class="na">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://&lt;YOUR_SKYLINE_HOST&gt;/flux/metric_data_post&quot;</span>
+<span class="w">  </span><span class="c1">## Set a long timeout because if a network partition occurs between telegraf</span>
+<span class="w">  </span><span class="c1">## and the flux, telegraf will keep and batch the metrics to send through AND</span>
+<span class="w">  </span><span class="c1">## 10s of 1000s of metrics can then be sent when the network partition is</span>
+<span class="w">  </span><span class="c1">## resolved, these can take a while to process as often many other telegraf</span>
+<span class="w">  </span><span class="c1">## instances may have been partitioned at the same time, so a thundering herd</span>
+<span class="w">  </span><span class="c1">## is sent to flux.</span>
+<span class="w">  </span><span class="na">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;120s&quot;</span>
+<span class="w">  </span><span class="na">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;POST&quot;</span>
+<span class="w">  </span><span class="na">data_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;json&quot;</span>
+<span class="w">  </span><span class="na">use_batch_format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="w">  </span><span class="na">json_timestamp_units</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;1s&quot;</span>
+<span class="w">  </span><span class="na">content_encoding</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;gzip&quot;</span>
+<span class="w">  </span><span class="c1">## A list of statuscodes (&lt;200 or &gt;300) upon which requests should not be retried</span>
+<span class="w">  </span><span class="c1">## Coming soon to a version of telegraf March 2022.</span>
+<span class="w">  </span><span class="c1"># non_retryable_statuscodes = [400, 403, 409, 413, 499, 500, 502, 503]</span>
+<span class="w">  </span><span class="k">[outputs.http.headers]</span>
+<span class="w">    </span><span class="na">Content-Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;application/json&quot;</span>
+<span class="w">    </span><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;&lt;settings.FLUX_SELF_API_KEY&gt;&quot;</span>
+<span class="w">    </span><span class="na">telegraf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="w">    </span><span class="c1">## Optionally you can pass a prefix e.g.</span>
+<span class="w">    </span><span class="c1"># prefix = &quot;telegraf&quot;</span>
+</pre></div>
+</div>
+<p>Ideally telegraf would be configured for optimum Flux performance, however
+seeing as the <code class="docutils literal notranslate"><span class="pre">[[outputs.http]]</span></code> may simply be added to existing telegraf
+instances, you may already have the following <code class="docutils literal notranslate"><span class="pre">[agent]</span></code> configuration options
+tuned to how you like them and performs well for you.  However the following are
+commented suggestions for the optimal settings to send telegraf data to Flux.
+Bear in mind that it is also possible to run another independent instance over
+telegraf on the same machine, although this adds another overhead and collection
+processing it does allow for isolation of your existing telegraf and one
+specifically running for Flux.  To reduce collection processing your current
+telegraf instance could additionally send to <code class="docutils literal notranslate"><span class="pre">[[outputs.file]]</span></code> and your Flux
+telegraf could use <code class="docutils literal notranslate"><span class="pre">[[inputs.file]]</span></code>.</p>
+<p>The following <code class="docutils literal notranslate"><span class="pre">[agent]</span></code> configuration options are recommended for sending
+teleraf data to flux.</p>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="c1"># Configuration for telegraf agent</span>
+<span class="k">[agent]</span>
+<span class="w">  </span><span class="c1">## Default data collection interval for all inputs</span>
+<span class="w">  </span><span class="c1">## IDEALLY for Skyline and Flux change 10s to 60s</span>
+<span class="w">  </span><span class="c1"># interval = &quot;10s&quot;</span>
+<span class="w">  </span><span class="na">interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;60s&quot;</span>
+
+<span class="w">  </span><span class="c1">## Rounds collection interval to &#39;interval&#39;</span>
+<span class="w">  </span><span class="c1">## ie, if interval=&quot;10s&quot; then always collect on :00, :10, :20, etc.</span>
+<span class="w">  </span><span class="na">round_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+
+<span class="w">  </span><span class="c1">## Telegraf will send metrics to outputs in batches of at most</span>
+<span class="w">  </span><span class="c1">## metric_batch_size metrics.</span>
+<span class="w">  </span><span class="c1">## This controls the size of writes that Telegraf sends to output plugins.</span>
+<span class="w">  </span><span class="na">metric_batch_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">1000</span>
+
+<span class="w">  </span><span class="c1">## Maximum number of unwritten metrics per output.  Increasing this value</span>
+<span class="w">  </span><span class="c1">## allows for longer periods of output downtime without dropping metrics at the</span>
+<span class="w">  </span><span class="c1">## cost of higher maximum memory usage.</span>
+<span class="w">  </span><span class="na">metric_buffer_limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">10000</span>
+
+<span class="w">  </span><span class="c1">## Collection jitter is used to jitter the collection by a random amount.</span>
+<span class="w">  </span><span class="c1">## Each plugin will sleep for a random time within jitter before collecting.</span>
+<span class="w">  </span><span class="c1">## This can be used to avoid many plugins querying things like sysfs at the</span>
+<span class="w">  </span><span class="c1">## same time, which can have a measurable effect on the system.</span>
+<span class="w">  </span><span class="c1">## IDEALLY for your own devices change this from 0s to 5s</span>
+<span class="w">  </span><span class="c1"># collection_jitter = &quot;0s&quot;</span>
+<span class="w">  </span><span class="na">collection_jitter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;5s&quot;</span>
+
+<span class="w">  </span><span class="c1">## Collection offset is used to shift the collection by the given amount.</span>
+<span class="w">  </span><span class="c1">## This can be be used to avoid many plugins querying constraint devices</span>
+<span class="w">  </span><span class="c1">## at the same time by manually scheduling them in time.</span>
+<span class="w">  </span><span class="c1"># collection_offset = &quot;0s&quot;</span>
+
+<span class="w">  </span><span class="c1">## Default flushing interval for all outputs. Maximum flush_interval will be</span>
+<span class="w">  </span><span class="c1">## flush_interval + flush_jitter</span>
+<span class="w">  </span><span class="c1">## IDEALLY for Skyline and Flux change 10s to 60s</span>
+<span class="w">  </span><span class="c1"># flush_interval = &quot;10s&quot;</span>
+<span class="w">  </span><span class="na">flush_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;60s&quot;</span>
+<span class="w">  </span><span class="c1">## Jitter the flush interval by a random amount. This is primarily to avoid</span>
+<span class="w">  </span><span class="c1">## large write spikes for users running a large number of telegraf instances.</span>
+<span class="w">  </span><span class="c1">## ie, a jitter of 5s and interval 10s means flushes will happen every 10-15s</span>
+<span class="w">  </span><span class="c1">## IDEALLY for Skyline and Flux change 0s to 5s</span>
+<span class="w">  </span><span class="na">flush_jitter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;5s&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="populate-metric-endpoint">
+<h2>populate_metric endpoint<a class="headerlink" href="#populate-metric-endpoint" title="Permalink to this heading"></a></h2>
 <p>Skyline Vista is tightly integrated with Flux. Vista uses flux to submit metric
 data to Graphite for the metrics that Vista fetches.  Vista does not connect
 to flux via the reverse proxy, it connects directly to flux and uses the
@@ -271,9 +522,9 @@ PICKLE_RECEIVER_PORT, therefore ensure that there is a firewall rule allowing
 the Skyline node to connect to the Graphite node on this port.</p>
 <p>The populate_metric_worker applies resampling at 1Min, but see Vista
 populate_at_resolutions for more detailed information.</p>
-</div>
-<div class="section" id="process-uploaded-data">
-<h2>Process uploaded data<a class="headerlink" href="#process-uploaded-data" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="process-uploaded-data">
+<h2>Process uploaded data<a class="headerlink" href="#process-uploaded-data" title="Permalink to this heading"></a></h2>
 <p>Skyline Flux can be enabled to process data uploaded via the webapp and submit
 data to Graphite.  This allows for the automated uploading and processing of
 batched measurements data and reports to time series data which is analysed in
@@ -314,63 +565,38 @@ uploaded data.</p></li>
 <p>For specific details about the data formats and methods for uploading and
 processing data files see the <a class="reference external" href="upload-data-to-flux.html">upload_data to Flux</a>
 page.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="upload-data-to-flux.html" class="btn btn-neutral float-right" title="upload_data to Flux - EXPERIMENTAL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="luminosity.html" class="btn btn-neutral float-left" title="Luminosity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="luminosity.html" class="btn btn-neutral float-left" title="Luminosity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="upload-data-to-flux.html" class="btn btn-neutral float-right" title="upload_data to Flux - EXPERIMENTAL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

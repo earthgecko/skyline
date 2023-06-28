@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>horizon.worker &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>horizon.worker &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,78 +98,42 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>horizon.worker</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">horizon.worker</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for horizon.worker</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">worker.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="c1"># from os import kill, system</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span><span class="p">,</span> <span class="n">WatchError</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">packb</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 
 <span class="kn">import</span> <span class="nn">traceback</span>
@@ -213,9 +147,28 @@
 <span class="c1"># @added 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
 <span class="c1">#                   Branch #3262: py3</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">exit</span> <span class="k">as</span> <span class="n">sys_exit</span>
+
+<span class="c1"># @added 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span><span class="p">,</span> <span class="n">WatchError</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+<span class="c1"># @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+<span class="c1"># Added get_redis_conn_decoded</span>
+<span class="c1"># @modified 20220726 - Task #2732: Prometheus to Skyline</span>
+<span class="c1">#                      Branch #4300: prometheus</span>
+<span class="c1"># Moved send_graphite_metric</span>
+<span class="c1"># from skyline_functions import send_graphite_metric, get_redis_conn_decoded</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+<span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
+<span class="c1">#                   Branch #4300: prometheus</span>
+<span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+
+<span class="c1"># @added 20230512 - Feature #4904: Handle send_graphite_metric failure</span>
+<span class="kn">from</span> <span class="nn">functions.horizon.process_graphite_fail_queue</span> <span class="kn">import</span> <span class="n">process_graphite_fail_queue</span>
 
 <span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;horizon&#39;</span>
 <span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;worker&#39;</span>
@@ -245,17 +198,40 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">DO_NOT_SKIP_LIST</span> <span class="o">=</span> <span class="p">[]</span>
 
+<span class="c1"># @added 20201103 - Feature #3820: HORIZON_SHARDS</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># @modified 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+    <span class="c1"># HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()</span>
+    <span class="n">HORIZON_SHARDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">HORIZON_SHARDS</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARDS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARD_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HORIZON_SHARD_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARD_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">number_of_horizon_shards</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">HORIZON_SHARD</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">zlib</span>
+    <span class="n">number_of_horizon_shards</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">HORIZON_SHARDS</span><span class="p">)</span>
+    <span class="n">HORIZON_SHARD</span> <span class="o">=</span> <span class="n">HORIZON_SHARDS</span><span class="p">[</span><span class="n">this_host</span><span class="p">]</span>
+
 <span class="c1"># @added 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
 <span class="c1">#                   Branch #3262: py3</span>
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 
 <div class="viewcode-block" id="Worker"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker">[docs]</a><span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The worker processes chunks from the queue and appends</span>
 <span class="sd">    the latest datapoints to their respective timesteps in Redis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">skip_mini</span><span class="p">,</span> <span class="n">canary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># @modified 20201017 - Feature #3788: snab_flux_load_test</span>
+    <span class="c1">#                      Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+    <span class="c1"># Added worker_number</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">skip_mini</span><span class="p">,</span> <span class="n">worker_number</span><span class="p">,</span> <span class="n">canary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
@@ -271,18 +247,28 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">canary</span> <span class="o">=</span> <span class="n">canary</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">skip_mini</span> <span class="o">=</span> <span class="n">skip_mini</span>
+        <span class="c1"># @added 20201017 - Feature #3788: snab_flux_load_test</span>
+        <span class="c1">#                   Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+        <span class="c1"># Added worker_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">worker_number</span> <span class="o">=</span> <span class="n">worker_number</span>
+        <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+        <span class="c1"># Added get_redis_conn_decoded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Worker.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+            <span class="c1"># @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics</span>
+            <span class="c1"># Log warning</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
+            <span class="n">sys_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Worker.in_skip_list"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.in_skip_list">[docs]</a>    <span class="k">def</span> <span class="nf">in_skip_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if the metric is in SKIP_LIST.</span>
 
 <span class="sd">        # @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST</span>
@@ -335,41 +321,74 @@
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
+<span class="c1"># @added 20201103 - Feature #3820: HORIZON_SHARDS</span>
+<div class="viewcode-block" id="Worker.in_shard"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.in_shard">[docs]</a>    <span class="k">def</span> <span class="nf">in_shard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the metric belongs to the Horizon instance shard.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="n">metric_as_bytes</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">adler32</span><span class="p">(</span><span class="n">metric_as_bytes</span><span class="p">)</span>
+        <span class="n">modulo_result</span> <span class="o">=</span> <span class="n">value</span> <span class="o">%</span> <span class="n">number_of_horizon_shards</span>
+        <span class="k">if</span> <span class="n">modulo_result</span> <span class="o">==</span> <span class="n">HORIZON_SHARD</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
 <div class="viewcode-block" id="Worker.run"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Log management to prevent overwriting</span>
         <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
-                <span class="k">pass</span>
+        <span class="c1"># @modified 20201017 - Feature #3788: snab_flux_load_test</span>
+        <span class="c1">#                      Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+        <span class="c1"># Only do log management with the canary worker</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canary</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
 
         <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
         <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
-                <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> worker number </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">worker_number</span><span class="p">))</span>
+        <span class="c1"># @modified 20201017 - Feature #3788: snab_flux_load_test</span>
+        <span class="c1">#                      Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canary</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os_remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: started worker&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: started worker </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_number</span><span class="p">)))</span>
+
+        <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+        <span class="n">skip_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">do_not_skip_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">skip_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">do_not_skip_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">checked_for_skip_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">checked_through_skip_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @added 20201103 - Feature #3820: HORIZON_SHARDS</span>
+        <span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: HORIZON_SHARDS declared, this horizon instance is assigned shard </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">HORIZON_SHARD</span><span class="p">)))</span>
 
         <span class="n">FULL_NAMESPACE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
         <span class="n">MINI_NAMESPACE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MINI_NAMESPACE</span>
@@ -380,6 +399,20 @@
 
         <span class="n">last_send_to_graphite</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">queue_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric</span>
+        <span class="n">last_log_queue_size</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">queue_sizes_60_seconds</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+        <span class="n">datapoints_sent_to_redis</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">last_datapoints_to_redis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+        <span class="c1"># @added 20201103 - Feature #3820: HORIZON_SHARDS</span>
+        <span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+            <span class="n">horizon_shard_assigned_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">horizon_shard_dropped_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># @added 20201120 - Feature #3820: HORIZON_SHARDS</span>
+        <span class="n">metrics_received</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># python-2.x and python3.x handle while 1 and while True differently</span>
         <span class="c1"># while 1:</span>
@@ -404,6 +437,22 @@
                 <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_metrics_dict</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">skip_metrics_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;horizon.skip_metrics&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: got </span><span class="si">%s</span><span class="s1"> metrics from horizon.skip_metrics from Redis hash as not set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skip_metrics_dict</span><span class="p">))))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on hgetall horizon.skip_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">do_not_skip_metrics_dict</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">do_not_skip_metrics_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;horizon.do_not_skip_metrics&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: got </span><span class="si">%s</span><span class="s1"> metrics from horizon.do_not_skip_metrics from Redis hash as not set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">do_not_skip_metrics_dict</span><span class="p">))))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on hgetall horizon.do_not_skip_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Get a chunk from the queue with a 15 second timeout</span>
                 <span class="n">chunk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
@@ -413,9 +462,56 @@
 
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
 
-                    <span class="c1"># Check if we should skip it</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_skip_list</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                        <span class="k">continue</span>
+                    <span class="c1"># @added 20201120 - Feature #3820: HORIZON_SHARDS</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metrics_received</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="c1"># @added 20201103 - Feature #3820: HORIZON_SHARDS</span>
+                    <span class="c1"># If a metric does not map to the HORIZON_SHARD, drop it</span>
+                    <span class="c1"># and continue</span>
+                    <span class="k">if</span> <span class="n">HORIZON_SHARDS</span> <span class="ow">and</span> <span class="n">number_of_horizon_shards</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_shard</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                            <span class="n">horizon_shard_dropped_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="k">continue</span>
+                        <span class="n">horizon_shard_assigned_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+                    <span class="n">found_in_do_not_skip_dict</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">do_not_skip_metrics_dict</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">found_in_do_not_skip_dict</span> <span class="o">=</span> <span class="n">do_not_skip_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">found_in_do_not_skip_dict</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">found_in_do_not_skip_dict</span><span class="p">:</span>
+                            <span class="n">do_not_skip_metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">found_in_skip_dict</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">found_in_do_not_skip_dict</span> <span class="ow">and</span> <span class="n">skip_metrics_dict</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">found_in_skip_dict</span> <span class="o">=</span> <span class="n">skip_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">found_in_skip_dict</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">found_in_skip_dict</span><span class="p">:</span>
+                            <span class="n">skip_metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="k">continue</span>
+
+                    <span class="c1"># @modified 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">found_in_do_not_skip_dict</span><span class="p">:</span>
+                        <span class="n">checked_for_skip_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">checked_through_skip_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                        <span class="c1"># Check if we should skip it</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">in_skip_list</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+
+                            <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+                            <span class="n">skip_metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                            <span class="k">continue</span>
+
+                    <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">found_in_do_not_skip_dict</span><span class="p">:</span>
+                        <span class="n">do_not_skip_metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
                     <span class="c1"># Bad data coming in</span>
                     <span class="c1"># @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
@@ -443,10 +539,14 @@
                     <span class="c1">#                      Bug #3266: py3 Redis binary objects not strings</span>
                     <span class="c1"># pipe.append(key, packb(metric[1]))</span>
                     <span class="c1"># pipe.sadd(full_uniques, key)</span>
+
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on pipe.append: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                        <span class="c1"># @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+                        <span class="n">datapoints_sent_to_redis</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: error on pipe.append to </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># pipe.sadd(full_uniques, key)</span>
                         <span class="n">pipe</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">full_uniques</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
@@ -487,12 +587,19 @@
 
             <span class="c1"># Log progress</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canary</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: queue size at </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">qsize</span><span class="p">()))</span>
+                <span class="c1"># @modified 20210511</span>
+                <span class="c1"># Do not logg queue size for every chunk</span>
+                <span class="c1"># logger.info(&#39;%s :: queue size at %d&#39; % (skyline_app, self.q.qsize()))</span>
+
                 <span class="n">queue_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">qsize</span><span class="p">())</span>
                 <span class="c1"># Only send average queue mertics to graphite once per 10 seconds</span>
                 <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-                <span class="n">last_sent_graphite</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_send_to_graphite</span>
-                <span class="k">if</span> <span class="n">last_sent_graphite</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+
+                <span class="c1"># @modified 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric</span>
+                <span class="c1"># last_sent_graphite = now - last_send_to_graphite</span>
+                <span class="c1"># if last_sent_graphite &gt; 10:</span>
+                <span class="n">last_logged_queue_size</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_log_queue_size</span>
+                <span class="k">if</span> <span class="n">last_logged_queue_size</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
                     <span class="n">number_queue_sizes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue_sizes</span><span class="p">)</span>
                     <span class="n">total_of_queue_sizes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">queue_sizes</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">total_of_queue_sizes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -505,57 +612,272 @@
                     <span class="c1"># self.send_graphite_metric(&#39;skyline.horizon.&#39; + SERVER_METRIC_PATH + &#39;queue_size&#39;, self.q.qsize())</span>
                     <span class="c1"># self.send_graphite_metric(&#39;queue_size&#39;, average_queue_size)</span>
                     <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.queue_size&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
-                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">average_queue_size</span><span class="p">)</span>
-
-                    <span class="c1"># reset queue_sizes and last_sent_graphite</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">average_queue_size</span><span class="p">)</span>
+                    <span class="c1"># @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric</span>
+                    <span class="k">for</span> <span class="n">size_value</span> <span class="ow">in</span> <span class="n">queue_sizes</span><span class="p">:</span>
+                        <span class="n">queue_sizes_60_seconds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">size_value</span><span class="p">)</span>
+                    <span class="c1"># reset queue_sizes</span>
                     <span class="n">queue_sizes</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="n">last_send_to_graphite</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span></div></div>
+                    <span class="c1"># last_send_to_graphite = time()</span>
+                    <span class="n">last_log_queue_size</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+                <span class="c1"># @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric</span>
+                <span class="c1"># Moved from the 10 second block above to its own 60 seconds block</span>
+                <span class="n">last_sent_graphite</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_send_to_graphite</span>
+                <span class="k">if</span> <span class="n">last_sent_graphite</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">number_queue_sizes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">queue_sizes_60_seconds</span><span class="p">)</span>
+                        <span class="n">total_of_queue_sizes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">queue_sizes_60_seconds</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">total_of_queue_sizes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">average_queue_size</span> <span class="o">=</span> <span class="n">total_of_queue_sizes</span> <span class="o">/</span> <span class="n">number_queue_sizes</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">average_queue_size</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: total queue size for the last 60 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_of_queue_sizes</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: total queue values known for the last 60 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_queue_sizes</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: average queue size for the last 60 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">average_queue_size</span><span class="p">)))</span>
+                        <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.queue_size_60s_avg&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                        <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">average_queue_size</span><span class="p">)</span>
+                        <span class="c1"># reset queue_sizes_60_seconds and last_sent_graphite</span>
+                        <span class="n">queue_sizes_60_seconds</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">last_send_to_graphite</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+                    <span class="c1"># @added 20210520 - Branch #1444: thunder</span>
+                    <span class="c1"># Added Redis hash keys for thunder to monitor the horizon</span>
+                    <span class="c1"># listen state, inferred via the</span>
+                    <span class="c1"># horizon.worker.average_queue_size, without incurring the</span>
+                    <span class="c1"># addition of Redis to horizon/listen.  This is used by</span>
+                    <span class="c1"># Thunder notify on degradation of service and operational</span>
+                    <span class="c1"># changes.</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;horizon.worker.average_queue_size&#39;</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">average_queue_size</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon :: worker :: could not update the Redis </span><span class="si">%s</span><span class="s1"> key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+                    <span class="c1"># @added 20230512 - Feature #4904: Handle send_graphite_metric failure</span>
+                    <span class="c1"># Process any metrics to be submitted in the fail queue</span>
+                    <span class="n">graphite_fail_queue_exists</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">graphite_fail_queue_exists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;skyline.graphite_fail_queue&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error: exists failed on Redis set skyline.graphite_fail_queue - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">graphite_fail_queue_exists</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">sent_count</span> <span class="o">=</span> <span class="n">process_graphite_fail_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon :: worker :: process_graphite_fail_queue failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">err</span><span class="p">))</span>
+
+            <span class="c1"># @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+            <span class="c1"># @modified 20201017 - Feature #3788: snab_flux_load_test</span>
+            <span class="c1">#                      Feature #3680: horizon.worker.datapoints_sent_to_redis</span>
+            <span class="c1"># Send for each worker</span>
+            <span class="n">last_datapoints_count_to_redis</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last_datapoints_to_redis</span>
+            <span class="k">if</span> <span class="n">last_datapoints_count_to_redis</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: datapoints_sent_to_redis in last 60 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_sent_to_redis</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canary</span><span class="p">:</span>
+                    <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.datapoints_sent_to_redis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app_graphite_namespace</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.datapoints_sent_to_redis_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app_graphite_namespace</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">worker_number</span><span class="p">))</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">datapoints_sent_to_redis</span><span class="p">)</span>
+                <span class="n">datapoints_sent_to_redis</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">last_datapoints_to_redis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+                <span class="c1"># @added 20201120 - Feature #3820: HORIZON_SHARDS</span>
+                <span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;horizon.shards.metrics_assigned&#39;</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">horizon_shard_assigned_metrics</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error adding horizon.shard.metrics_assigned: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;horizon.shard.metrics_dropped&#39;</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">horizon_shard_dropped_metrics</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error adding horizon.shard.metrics_dropped: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+                <span class="c1"># @added 20201103 - Feature #3820: HORIZON_SHARDS</span>
+                <span class="k">if</span> <span class="n">HORIZON_SHARDS</span> <span class="ow">and</span> <span class="n">HORIZON_SHARD_DEBUG</span><span class="p">:</span>
+                    <span class="n">horizon_shard_assigned_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">horizon_shard_assigned_metrics</span><span class="p">)</span>
+                    <span class="n">horizon_shard_dropped_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">horizon_shard_dropped_metrics</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> assigned metrics to HORIZON_SHARD </span><span class="si">%s</span><span class="s1"> and dropped </span><span class="si">%s</span><span class="s1"> metrics in last 60 seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">horizon_shard_assigned_metrics_count</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">HORIZON_SHARD</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">horizon_shard_dropped_metrics_count</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: horizon_shard_assigned_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">horizon_shard_assigned_metrics</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: horizon_shard_dropped_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">horizon_shard_dropped_metrics</span><span class="p">)))</span>
+                    <span class="n">horizon_shard_assigned_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">horizon_shard_dropped_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="c1"># @added 20201120 - Feature #3820: HORIZON_SHARDS</span>
+                <span class="k">if</span> <span class="n">metrics_received</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;horizon.metrics_received&#39;</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">metrics_received</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error adding horizon.metrics_received&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canary</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: renaming key horizon.metrics_received to aet.horizon.metrics_received&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;horizon.metrics_received&#39;</span><span class="p">,</span> <span class="s1">&#39;aet.horizon.metrics_received&#39;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+                        <span class="n">metrics_received_count</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">metrics_received_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scard</span><span class="p">(</span><span class="s1">&#39;aet.horizon.metrics_received&#39;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: running redis_conn.scard(</span><span class="se">\&#39;</span><span class="s1">aet.horizon.metrics_received</span><span class="se">\&#39;</span><span class="s1">) - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;thunder.horizon.worker.metrics_received&#39;</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_received_count</span><span class="p">))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon :: worker :: could not update the Redis </span><span class="si">%s</span><span class="s1"> key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.metrics_received&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">skyline_app_graphite_namespace</span><span class="p">)</span>
+                        <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">metrics_received_count</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20210520 - Branch #1444: thunder</span>
+                    <span class="c1"># Added Redis hash keys for thunder to monitor the horizon</span>
+                    <span class="c1"># listen state, inferred via the</span>
+                    <span class="c1"># horizon.worker.average_queue_size, without incurring the</span>
+                    <span class="c1"># addition of Redis to horizon/listen.  This is used by</span>
+                    <span class="c1"># Thunder notify on degradation of service and operational</span>
+                    <span class="c1"># changes.</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;horizon&#39;</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon :: worker :: could not update the Redis </span><span class="si">%s</span><span class="s1"> key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">cache_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+                <span class="n">metrics_received</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="c1"># @added 20220216 - Feature #4446: Optimise horizon worker in_skip_list</span>
+                <span class="k">if</span> <span class="n">skip_metrics_list</span><span class="p">:</span>
+                    <span class="n">update_skip_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">skip_metrics_list</span><span class="p">)):</span>
+                        <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">skip_metrics_dict</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># Only update skip metrics every hour to save on</span>
+                                <span class="c1"># Redis overhead</span>
+                                <span class="n">last_update_timestamp_str</span> <span class="o">=</span> <span class="n">skip_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">last_update_timestamp_str</span><span class="p">:</span>
+                                    <span class="n">last_update_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">last_update_timestamp_str</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="n">last_update_timestamp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3600</span><span class="p">:</span>
+                                        <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                                <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">update_entry</span><span class="p">:</span>
+                            <span class="n">update_skip_metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">update_skip_metrics</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;horizon.skip_metrics&#39;</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">update_skip_metrics</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to update horizon.skip_metrics Redis hash - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">err</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">do_not_skip_metrics_list</span><span class="p">:</span>
+                    <span class="n">update_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">do_not_skip_metrics_list</span><span class="p">)):</span>
+                        <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">do_not_skip_metrics_dict</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># Only update skip metrics every hour to save on</span>
+                                <span class="c1"># Redis overhead</span>
+                                <span class="n">last_update_timestamp_str</span> <span class="o">=</span> <span class="n">skip_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="n">last_update_timestamp_str</span><span class="p">:</span>
+                                    <span class="n">last_update_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">last_update_timestamp_str</span><span class="p">))</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="n">last_update_timestamp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3600</span><span class="p">:</span>
+                                        <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                                <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">update_entry</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">update_entry</span><span class="p">:</span>
+                            <span class="n">update_metrics</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">update_metrics</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;horizon.do_not_skip_metrics&#39;</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">update_metrics</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to update horizon.do_not_skip_metrics Redis hash - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">err</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">skip_metrics_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;horizon.skip_metrics&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: got </span><span class="si">%s</span><span class="s1"> metrics from horizon.skip_metrics from Redis hash on minutely run&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skip_metrics_dict</span><span class="p">))))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on hgetall horizon.skip_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">do_not_skip_metrics_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;horizon.do_not_skip_metrics&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: got </span><span class="si">%s</span><span class="s1"> metrics from horizon.do_not_skip_metrics from Redis hash on minutely run&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">do_not_skip_metrics_dict</span><span class="p">))))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on hgetall horizon.do_not_skip_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: checked </span><span class="si">%s</span><span class="s1"> metrics through in_skip_list&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">checked_for_skip_count</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">checked_through_skip_list</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;horizon.checked_through_skip_list&#39;</span><span class="p">,</span> <span class="o">*</span><span class="nb">set</span><span class="p">(</span><span class="n">checked_through_skip_list</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="s1">&#39;horizon.checked_through_skip_list&#39;</span><span class="p">,</span> <span class="mi">86400</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: updated horizon.checked_through_skip_list Redis set on minutely run&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">skyline_app</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: sadd failed on horizon.checked_through_skip_list - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                    <span class="n">checked_through_skip_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">skip_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">do_not_skip_metrics_list</span> <span class="o">=</span> <span class="p">[]</span></div></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

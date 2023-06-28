@@ -41,7 +41,7 @@ in the webapp itself, this ported version is modified in the following ways:
 - It adds the ability to authenticate with Redis, inspired by the elky84 PR
   https://github.com/marians/rebrow/pull/20 which adds very basic Redis auth to
   rebrow (not really fit for production but inspiring)
-- To make Rebrow Redis authentication production suitable,  JWT encoding has
+- To make Rebrow Redis authentication production suitable, JWT encoding has
   been add to a encoded token instead of the password parameter that the
   elky84 PR describes.
 

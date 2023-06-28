@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>ionosphere.common_functions &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ionosphere.common_functions &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,67 +98,30 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>ionosphere.common_functions</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ionosphere.common_functions</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for ionosphere.common_functions</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
@@ -197,6 +130,7 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">csv</span>
 <span class="c1"># from ast import literal_eval</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
 
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
 <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
@@ -204,12 +138,24 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">tsfresh.feature_extraction</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">extract_features</span><span class="p">,</span> <span class="n">ReasonableFeatureExtractionSettings</span><span class="p">)</span>
+    <span class="c1"># @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method</span>
+    <span class="c1"># extract_features, ReasonableFeatureExtractionSettings)</span>
+    <span class="n">extract_features</span><span class="p">,</span> <span class="n">EfficientFCParameters</span><span class="p">)</span>
+<span class="c1"># @added 20221024 - Feature #4702: numba optimisations</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">jit</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_memcache_metric_object</span>
 <span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">get_engine</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">)</span>
+<span class="c1"># @added 20210425 - Task #4030: refactoring</span>
+<span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+<span class="kn">from</span> <span class="nn">functions.numpy.percent_different</span> <span class="kn">import</span> <span class="n">get_percent_different</span>
+
+<span class="c1"># @added 20220731 - Task #2732: Prometheus to Skyline</span>
+<span class="c1">#                   Branch #4300: prometheus</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_labelled_metrics_name</span> <span class="kn">import</span> <span class="n">get_base_name_from_labelled_metrics_name</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_metric_id_from_base_name</span> <span class="kn">import</span> <span class="n">get_metric_id_from_base_name</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -225,8 +171,37 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: layers :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: layers :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings&#39;</span><span class="p">)</span>
     <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20220405 - Task #4514: Integrate opentelemetry</span>
+<span class="c1">#                   Feature #4516: flux - opentelemetry traces</span>
+<span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTEL_ENABLED</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">OTEL_ENABLED</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">opentelemetry.instrumentation.pymemcache</span> <span class="kn">import</span> <span class="n">PymemcacheInstrumentor</span>
+
+    <span class="c1"># @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry</span>
+    <span class="n">instrumented</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">instrumented</span> <span class="o">=</span> <span class="n">PymemcacheInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">is_instrumented_by_opentelemetry</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: common_functions - PymemcacheInstrumentor().is_instrumented_by_opentelemetry failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">instrumented</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;common_functions - starting PymemcacheInstrumentor&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20220505 - Task #4514: Integrate opentelemetry</span>
+        <span class="c1"># Fail gracefully if opentelemetry breaks it breaks</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">PymemcacheInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
 
 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
     <span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
@@ -237,7 +212,7 @@
 
 
 <div class="viewcode-block" id="get_metrics_db_object"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.common_functions.get_metrics_db_object">[docs]</a><span class="k">def</span> <span class="nf">get_metrics_db_object</span><span class="p">(</span><span class="n">base_name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the data of a metric from metrics table as an object and populates</span>
 <span class="sd">    memcached with a dict of the object</span>
 
@@ -267,12 +242,42 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: calling engine.dispose()&#39;</span><span class="p">)</span>
         <span class="k">return</span>
 
+    <span class="c1"># @added 20220731 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                   Branch #4300: prometheus</span>
+    <span class="c1"># Handle labelled_metric name</span>
+    <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;{&#39;</span> <span class="ow">in</span> <span class="n">base_name</span> <span class="ow">and</span> <span class="s1">&#39;}&#39;</span> <span class="ow">in</span> <span class="n">base_name</span> <span class="ow">and</span> <span class="s1">&#39;_tenant_id=&quot;&#39;</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">get_metric_id_from_base_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_metric_id_from_base_name failed with base_name: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+            <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="s1">&#39;labelled_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">base_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+        <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">metric</span><span class="p">:</span>
+                <span class="n">labelled_metric_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">labelled_metric_base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_base_name_from_labelled_metrics_name failed for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">base_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
     <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">metrics_db_object_key</span> <span class="o">=</span> <span class="s1">&#39;metrics_db_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+        <span class="n">metrics_db_object_key</span> <span class="o">=</span> <span class="s1">&#39;metrics_db_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">metrics_db_object_key</span> <span class="o">=</span> <span class="s1">&#39;metrics_db_object.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">labelled_metric_name</span><span class="p">)</span>
+
     <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
-        <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+            <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="n">get_memcache_metric_object</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">)</span>
 
     <span class="n">query_metric_table</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">memcache_metric_dict</span><span class="p">:</span>
@@ -372,7 +377,7 @@
 
 
 <div class="viewcode-block" id="get_calculated_features"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.common_functions.get_calculated_features">[docs]</a><span class="k">def</span> <span class="nf">get_calculated_features</span><span class="p">(</span><span class="n">calculated_feature_file</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :class:`~skyline.skyline.Ionosphere.spin_process` to</span>
 <span class="sd">    create a list of feature_names and their calc_values.</span>
 
@@ -439,11 +444,26 @@
     <span class="k">return</span> <span class="n">calculated_features</span></div>
 
 
+<span class="c1"># @added 20221024 - Feature #4702: numba optimisations</span>
+<div class="viewcode-block" id="numba_minmax"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.common_functions.numba_minmax">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">numba_minmax</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This a numba minmax function, the normal minmax function for 1000 loops on a</span>
+<span class="sd">    timeseries of length 1448 took 6.046057 seconds, the numba_minmax function</span>
+<span class="sd">    took 3.808568 seconds.</span>
+<span class="sd">    On a single run normal minmax took 0.016309 seconds and numba_minmax took</span>
+<span class="sd">    0.006180 seconds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y_minmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+    <span class="n">np_minmax_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y_minmax</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np_minmax_array</span></div>
+
+
 <div class="viewcode-block" id="minmax_scale_check"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.common_functions.minmax_scale_check">[docs]</a><span class="k">def</span> <span class="nf">minmax_scale_check</span><span class="p">(</span>
     <span class="n">fp_id_metric_ts</span><span class="p">,</span> <span class="n">anomalous_timeseries</span><span class="p">,</span> <span class="n">range_tolerance</span><span class="p">,</span>
         <span class="n">range_tolerance_percentage</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span>
         <span class="n">features_percentage_diff</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by nothing yet.  Used to run a minmax scaling check and determine if</span>
 <span class="sd">    the features_sum of the 2 minmax scaled timeseries match.</span>
 
@@ -535,22 +555,44 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the ranges of fp_id_metric_ts and anomalous_timeseries differ significantly Min-Max scaling will be skipped&#39;</span><span class="p">)</span>
 
+    <span class="c1"># @added 20221024 - Feature #4702: numba optimisations</span>
+    <span class="n">use_numba</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="n">minmax_fp_ts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># if fp_id_metric_ts:</span>
     <span class="k">if</span> <span class="n">range_similar</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: creating minmax_fp_ts from minmax scaled fp_id_metric_ts&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">minmax_fp_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fp_id_metric_ts</span><span class="p">]</span>
-            <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">minmax_fp_values</span><span class="p">)</span>
-            <span class="c1"># Min-Max scaling</span>
-            <span class="n">np_minmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_np</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-            <span class="k">for</span> <span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">,</span> <span class="n">np_minmax</span><span class="p">):</span>
-                <span class="n">minmax_fp_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">])</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;minmax_fp_ts list populated with the minmax scaled time series with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">minmax_fp_ts</span><span class="p">)))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not minmax scale fp id </span><span class="si">%s</span><span class="s1"> time series for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
+        <span class="c1"># @added 20221024 - Feature #4702: numba optimisations</span>
+        <span class="k">if</span> <span class="n">use_numba</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">minmax_fp_start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">fp_timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fp_id_metric_ts</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">fp_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fp_id_metric_ts</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">numba_minmax_array</span> <span class="o">=</span> <span class="n">numba_minmax</span><span class="p">(</span><span class="n">fp_timestamps</span><span class="p">,</span> <span class="n">fp_values</span><span class="p">)</span>
+                <span class="n">minmax_fp_ts</span> <span class="o">=</span> <span class="n">numba_minmax_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;minmax_fp_ts list populated with the numba minmax scaled time series with </span><span class="si">%s</span><span class="s1"> data points in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">minmax_fp_ts</span><span class="p">)),</span> <span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">minmax_fp_start</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not minmax scale fp id </span><span class="si">%s</span><span class="s1"> time series for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+
+        <span class="c1"># @modified 20221024 - Feature #4702: numba optimisations</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_numba</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">minmax_fp_ts</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">minmax_fp_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fp_id_metric_ts</span><span class="p">]</span>
+                <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">minmax_fp_values</span><span class="p">)</span>
+                <span class="c1"># Min-Max scaling</span>
+                <span class="n">np_minmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_np</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+                <span class="k">for</span> <span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">,</span> <span class="n">np_minmax</span><span class="p">):</span>
+                    <span class="n">minmax_fp_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">])</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;minmax_fp_ts list populated with the minmax scaled time series with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">minmax_fp_ts</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not minmax scale fp id </span><span class="si">%s</span><span class="s1"> time series for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">minmax_fp_ts</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: minmax_fp_ts list not populated&#39;</span><span class="p">)</span>
 
@@ -560,16 +602,29 @@
         <span class="c1"># Only process if they are approximately the same length</span>
         <span class="n">minmax_fp_ts_values_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">minmax_fp_ts</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">minmax_fp_ts_values_count</span> <span class="o">-</span> <span class="n">anomalous_ts_values_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">minmax_anomalous_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x2</span> <span class="ow">in</span> <span class="n">anomalous_timeseries</span><span class="p">]</span>
-                <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">minmax_anomalous_values</span><span class="p">)</span>
-                <span class="c1"># Min-Max scaling</span>
-                <span class="n">np_minmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_np</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-                <span class="k">for</span> <span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">,</span> <span class="n">np_minmax</span><span class="p">):</span>
-                    <span class="n">minmax_anomalous_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">])</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not minmax scale current time series anomalous_timeseries for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20221024 - Feature #4702: numba optimisations</span>
+            <span class="k">if</span> <span class="n">use_numba</span><span class="p">:</span>
+                <span class="n">minmax_anomalous_ts_start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">anomalous_timestamps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">anomalous_timeseries</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">anomalous_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">anomalous_timeseries</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">numba_anomalous_minmax_array</span> <span class="o">=</span> <span class="n">numba_minmax</span><span class="p">(</span><span class="n">anomalous_timestamps</span><span class="p">,</span> <span class="n">anomalous_values</span><span class="p">)</span>
+                <span class="n">minmax_anomalous_ts</span> <span class="o">=</span> <span class="n">numba_anomalous_minmax_array</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;minmax_anomalous_ts list populated with the numba minmax scaled anomalous time series with </span><span class="si">%s</span><span class="s1"> data points in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">minmax_anomalous_ts</span><span class="p">)),</span> <span class="p">(</span><span class="n">timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">minmax_anomalous_ts_start</span><span class="p">)))</span>
+
+            <span class="c1"># @modified 20221024 - Feature #4702: numba optimisations</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">use_numba</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">minmax_anomalous_ts</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">minmax_anomalous_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">x2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x2</span> <span class="ow">in</span> <span class="n">anomalous_timeseries</span><span class="p">]</span>
+                    <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">minmax_anomalous_values</span><span class="p">)</span>
+                    <span class="c1"># Min-Max scaling</span>
+                    <span class="n">np_minmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_np</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">x_np</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_np</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">,</span> <span class="n">np_minmax</span><span class="p">):</span>
+                        <span class="n">minmax_anomalous_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">])</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not minmax scale current time series anomalous_timeseries for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">minmax_anomalous_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;minmax_anomalous_ts is populated with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">minmax_anomalous_ts</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -584,8 +639,10 @@
         <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
     <span class="n">anomalous_fp_fname_out</span> <span class="o">=</span> <span class="n">anomalous_ts_csv</span> <span class="o">+</span> <span class="s1">&#39;.transposed.csv&#39;</span>
 
-    <span class="n">tsf_settings</span> <span class="o">=</span> <span class="n">ReasonableFeatureExtractionSettings</span><span class="p">()</span>
-    <span class="n">tsf_settings</span><span class="o">.</span><span class="n">disable_progressbar</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method</span>
+    <span class="c1"># tsf_settings = ReasonableFeatureExtractionSettings()</span>
+    <span class="c1"># tsf_settings.disable_progressbar = True</span>
+
     <span class="n">minmax_fp_features_sum</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">minmax_anomalous_features_sum</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">minmax_anomalous_ts</span> <span class="ow">and</span> <span class="n">minmax_fp_ts</span><span class="p">:</span>
@@ -631,8 +688,12 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to created data frame from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_ts_csv</span><span class="p">)))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">df_features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span>
-                <span class="n">df</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_extraction_settings</span><span class="o">=</span><span class="n">tsf_settings</span><span class="p">)</span>
+                <span class="c1"># @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method</span>
+                <span class="c1"># df, column_id=&#39;metric&#39;, column_sort=&#39;timestamp&#39;, column_kind=None,</span>
+                <span class="c1"># column_value=None, feature_extraction_settings=tsf_settings)</span>
+                <span class="n">df</span><span class="p">,</span> <span class="n">default_fc_parameters</span><span class="o">=</span><span class="n">EfficientFCParameters</span><span class="p">(),</span>
+                <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disable_progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to created df_features from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">minmax_fp_ts_csv</span><span class="p">)))</span>
@@ -682,8 +743,12 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">anomalous_ts_csv</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
         <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
         <span class="n">df_features_current</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span>
-            <span class="n">df</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feature_extraction_settings</span><span class="o">=</span><span class="n">tsf_settings</span><span class="p">)</span>
+            <span class="c1"># @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method</span>
+            <span class="c1"># df, column_id=&#39;metric&#39;, column_sort=&#39;timestamp&#39;, column_kind=None,</span>
+            <span class="c1"># column_value=None, feature_extraction_settings=tsf_settings)</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">default_fc_parameters</span><span class="o">=</span><span class="n">EfficientFCParameters</span><span class="p">(),</span>
+            <span class="n">column_id</span><span class="o">=</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">column_kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">column_value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disable_progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># Create transposed features csv</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomalous_fp_fname_out</span><span class="p">):</span>
@@ -705,22 +770,31 @@
 
     <span class="k">if</span> <span class="n">minmax_fp_features_sum</span> <span class="ow">and</span> <span class="n">minmax_anomalous_features_sum</span><span class="p">:</span>
         <span class="n">percent_different</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># @modified 20210425 - Task #4030: refactoring</span>
+        <span class="c1">#                      Feature #4014: Ionosphere - inference</span>
+        <span class="c1"># Use the common function added</span>
+        <span class="c1"># try:</span>
+        <span class="c1">#     fp_sum_array = [minmax_fp_features_sum]</span>
+        <span class="c1">#     calc_sum_array = [minmax_anomalous_features_sum]</span>
+        <span class="c1">#     percent_different = 100</span>
+        <span class="c1">#     sums_array = np.array([minmax_fp_features_sum, minmax_anomalous_features_sum], dtype=float)</span>
+        <span class="c1">#     calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.</span>
+        <span class="c1">#     percent_different = calc_percent_different[0]</span>
+        <span class="c1">#     logger.info(&#39;percent_different between minmax scaled features sums - %s&#39; % str(percent_different))</span>
+        <span class="c1"># except:</span>
+        <span class="c1">#     logger.error(traceback.format_exc())</span>
+        <span class="c1">#     logger.error(&#39;error :: failed to calculate percent_different from minmax scaled features sums&#39;)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">fp_sum_array</span> <span class="o">=</span> <span class="p">[</span><span class="n">minmax_fp_features_sum</span><span class="p">]</span>
-            <span class="n">calc_sum_array</span> <span class="o">=</span> <span class="p">[</span><span class="n">minmax_anomalous_features_sum</span><span class="p">]</span>
-            <span class="n">percent_different</span> <span class="o">=</span> <span class="mi">100</span>
-            <span class="n">sums_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">minmax_fp_features_sum</span><span class="p">,</span> <span class="n">minmax_anomalous_features_sum</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-            <span class="n">calc_percent_different</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sums_array</span><span class="p">)</span> <span class="o">/</span> <span class="n">sums_array</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mf">100.</span>
-            <span class="n">percent_different</span> <span class="o">=</span> <span class="n">calc_percent_different</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="n">minmax_fp_features_sum</span><span class="p">,</span> <span class="n">minmax_anomalous_features_sum</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;percent_different between minmax scaled features sums - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">percent_different</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to calculate percent_different from minmax scaled features sums&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to calculate percent_different between minmax scaled features sums - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">percent_different</span><span class="p">:</span>
             <span class="n">almost_equal</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">fp_sum_array</span><span class="p">,</span> <span class="n">calc_sum_array</span><span class="p">)</span>
+                <span class="c1"># np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_array_almost_equal</span><span class="p">(</span><span class="n">minmax_fp_features_sum</span><span class="p">,</span> <span class="n">minmax_anomalous_features_sum</span><span class="p">)</span>
                 <span class="n">almost_equal</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">almost_equal</span> <span class="o">=</span> <span class="kc">False</span>
@@ -755,49 +829,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

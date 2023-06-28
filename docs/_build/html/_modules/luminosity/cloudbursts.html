@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>luminosity.cloudbursts &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">luminosity.cloudbursts</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for luminosity.cloudbursts</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
+<span class="c1"># @added 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="n">get_engine</span><span class="p">,</span> <span class="n">cloudburst_table_meta</span>
+<span class="c1"># from functions.database.queries.base_name_from_metric_id import base_name_from_metric_id</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_metric_id</span> <span class="kn">import</span> <span class="n">get_base_name_from_metric_id</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;luminosity&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+<span class="n">full_uniques</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">run_every</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">current_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">root_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">current_path</span><span class="p">)</span>
+
+
+<span class="c1"># @added 20210805 - Feature #4164: luminosity - cloudbursts</span>
+<div class="viewcode-block" id="Cloudbursts"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.cloudbursts.Cloudbursts">[docs]</a><span class="k">class</span> <span class="nc">Cloudbursts</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Cloudbursts class which controls the luminosity/cloudbursts thread and</span>
+<span class="sd">    spawned processes. luminosity/cloudbursts finds metrics related to each</span>
+<span class="sd">    cloudburst that have been identified by significant changepoints using the</span>
+<span class="sd">    m66 algorithm.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#### NOT USED ####</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize Cloudbursts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Cloudbursts</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Cloudbursts.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.cloudbursts.Cloudbursts.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cloudbursts.find_related"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.cloudbursts.Cloudbursts.find_related">[docs]</a>    <span class="k">def</span> <span class="nf">find_related</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find metrics that are related to cloudbursts using the ppscore</span>
+<span class="sd">        correlations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: find_related :: process started&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">log_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: cloudbursts :: find_related :: failed to get MySQL engine - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: failed to get MySQL engine - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: calling engine.dispose() - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">last_processed_cloudburst_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">last_processed_cloudburst_id_key</span> <span class="o">=</span> <span class="s1">&#39;luminosity.cloudbursts.find_related.last_processed_cloudburst_id&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">last_processed_cloudburst_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_processed_cloudburst_id_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: failed to get id from </span><span class="si">%s</span><span class="s1"> Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">last_processed_cloudburst_id_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="n">last_processed_cloudburst_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: could not get a MySQL engine to update cloudburst table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: engine not obtained to to update cloudburst table&#39;</span><span class="p">)</span>
+
+        <span class="n">cloudburst_table</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cloudburst_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">cloudburst_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: find_related :: cloudburst_table OK&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get cloudburst_table meta - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="n">cloudburst_table</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">return</span>
+
+        <span class="n">new_cloudbursts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">one_hour_ago</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="mi">3600</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">last_processed_cloudburst_id</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_processed_cloudburst_id</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># stmt = select([cloudburst_table]).\</span>
+                <span class="c1">#     where(cloudburst_table.c.timestamp &gt;= one_hour_ago)</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">added_at</span> <span class="o">&gt;=</span> <span class="n">one_hour_ago</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">cloudburst_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloudburst_id</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;duration&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span>
+                <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;added_at&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;added_at&#39;</span><span class="p">]</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: could not determine new cloudbursts from cloudburst table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: find_related :: </span><span class="si">%s</span><span class="s1"> cloudbursts to check&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_cloudbursts</span><span class="p">)))</span>
+
+        <span class="c1"># Consolidate by from_timestamp so that the data is pulled from Graphite</span>
+        <span class="c1"># once</span>
+        <span class="n">sorted_from_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_cloudbursts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">from_timestamps_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">cloudburst_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_cloudbursts</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">from_timestamps_dict</span><span class="p">[</span><span class="n">from_timestamp</span><span class="p">][</span><span class="n">cloudburst_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">from_timestamp</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">from_timestamps_dict</span><span class="p">[</span><span class="n">from_timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">from_timestamps_dict</span><span class="p">[</span><span class="n">from_timestamp</span><span class="p">][</span><span class="n">cloudburst_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">from_timestamp</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: find_related :: find to consolidate new cloudburst to from_timestamps_dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="n">from_timestamps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">from_timestamps_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">sorted_from_timestamps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">from_timestamps</span><span class="p">)</span>
+
+        <span class="n">pp_relationships</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">working_from_timestamp</span> <span class="ow">in</span> <span class="n">sorted_from_timestamps</span><span class="p">:</span>
+            <span class="n">source_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">cloudburst_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_cloudbursts</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">cloudburst_from_timestamp</span> <span class="o">=</span> <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">cloudburst_from_timestamp</span> <span class="o">==</span> <span class="n">working_from_timestamp</span><span class="p">:</span>
+                    <span class="n">metric_id</span> <span class="o">=</span> <span class="n">new_cloudbursts</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+                    <span class="c1"># base_name = base_name_from_metric_id(skyline_app, metric_id, False)</span>
+                    <span class="c1"># @modified 20230116 - Bug #4816: Handle error in sqlalchemy change</span>
+                    <span class="c1">#                      Task #4022: Move mysql_select calls to SQLAlchemy</span>
+                    <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+                    <span class="c1"># Removed False argument</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">get_base_name_from_metric_id</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">)</span>
+                    <span class="n">source_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+            <span class="c1">#### FROM HERE ON</span>
+            <span class="k">for</span> <span class="n">source_metric</span> <span class="ow">in</span> <span class="n">source_metrics</span><span class="p">:</span>
+                <span class="n">source_metrics_timeseries</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">source_metrics_timeseries</span><span class="p">[</span><span class="n">source_metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">source_metric</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">until_timestamp</span> <span class="o">-</span> <span class="mi">86400</span><span class="p">)]</span>
+                <span class="c1"># source_metrics_timeseries[source_metric][&#39;timeseries&#39;] = metrics_timeseries[source_metric][&#39;timeseries&#39;]</span>
+                <span class="n">source_metrics_timeseries</span><span class="p">[</span><span class="n">source_metric</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries</span>
+                <span class="n">source_metrics_timeseries</span><span class="p">[</span><span class="n">source_metric</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                <span class="n">timer_start</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">related_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">all_ppscores</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">all_pps</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">all_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">m66_candidate_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">all_metrics</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">source_metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">source_metric</span><span class="p">,</span>
+                        <span class="n">base_name</span><span class="p">,</span>
+                    <span class="p">]</span>
+                    <span class="c1"># @modified 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+                    <span class="c1"># current_metrics_timeseries = source_metrics_timeseries.copy()</span>
+                    <span class="n">current_metrics_timeseries</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">source_metrics_timeseries</span><span class="p">)</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">r_base_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">r_base_name</span> <span class="o">==</span> <span class="n">source_metric</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">r_base_name</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">until_timestamp</span> <span class="o">-</span> <span class="mi">86400</span><span class="p">)]</span>
+                            <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">r_base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                            <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">r_base_name</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">longest_timeseries</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">current_metrics_timeseries</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">shortest_timeseries</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">current_metrics_timeseries</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">longest_timeseries_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">longest_timeseries</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]]</span>
+                    <span class="k">if</span> <span class="n">longest_timeseries</span> <span class="o">==</span> <span class="n">shortest_timeseries</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">r_base_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">r_base_name</span> <span class="o">!=</span> <span class="n">longest_timeseries</span><span class="p">:</span>
+                                <span class="n">shortest_timeseries</span> <span class="o">=</span> <span class="n">r_base_name</span>
+                    <span class="n">source_longest</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">longest_timeseries</span> <span class="o">==</span> <span class="n">source_metric</span><span class="p">:</span>
+                        <span class="n">source_longest</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">shortest_timeseries</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">longest_timeseries_timestamps</span><span class="p">:</span>
+                            <span class="n">x_value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">longest_timeseries</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ts</span><span class="p">]</span>
+                            <span class="n">x_value</span> <span class="o">=</span> <span class="n">x_value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">x_value</span><span class="p">:</span>
+                                <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_value</span><span class="p">)</span>
+                                <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="c1"># TODO only use if fully populated?</span>
+                    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+                    <span class="n">x_column</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">y_column</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">source_longest</span><span class="p">:</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">x_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">y_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">x_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+                        <span class="n">df</span><span class="p">[</span><span class="n">y_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+                    <span class="c1"># pps.score(df, x_column, y_column)</span>
+                    <span class="n">ppscores_df</span> <span class="o">=</span> <span class="n">pps</span><span class="o">.</span><span class="n">matrix</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+                    <span class="n">ppscores</span> <span class="o">=</span> <span class="n">ppscores_df</span><span class="p">[</span><span class="s1">&#39;ppscore&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                    <span class="n">all_ppscores</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">all_ppscores</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;ppscores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppscores</span>
+                    <span class="n">all_pps</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppscores_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">ppscores</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span> <span class="ow">or</span> <span class="n">ppscores</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+                        <span class="n">related_metrics</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppscores_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                        <span class="n">source_metric_dict_exists</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">source_metric_dict_exists</span> <span class="o">=</span> <span class="n">pp_relationships</span><span class="p">[</span><span class="n">source_metric</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="n">source_metric_dict_exists</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">source_metric_dict_exists</span> <span class="o">=</span> <span class="p">{}</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">source_metric_dict_exists</span><span class="p">:</span>
+                            <span class="n">pp_relationships</span><span class="p">[</span><span class="n">source_metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="n">pp_relationships</span><span class="p">[</span><span class="n">source_metric</span><span class="p">][</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppscores_df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+                <span class="n">timer_end</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> metrics took </span><span class="si">%.6f</span><span class="s1"> seconds, found </span><span class="si">%s</span><span class="s1"> potentially related metrics to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_metrics</span><span class="p">)),</span> <span class="p">(</span><span class="n">timer_end</span> <span class="o">-</span> <span class="n">timer_start</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">related_metrics</span><span class="p">)),</span> <span class="n">source_metric</span><span class="p">))</span>
+                <span class="n">related_metrics_summary</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">related_metrics</span><span class="p">):</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">related_metrics</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;ppscore&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">related_metrics</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;ppscore&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]]</span>
+                    <span class="n">related_metrics_summary</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">scores</span>
+                <span class="c1"># related_metrics_summary</span>
+                <span class="n">unsorted_related_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">related_metrics</span><span class="p">):</span>
+                    <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">related_metrics</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;ppscore&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">related_metrics</span><span class="p">[</span><span class="n">base_name</span><span class="p">][</span><span class="s1">&#39;ppscore&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]]</span>
+                    <span class="n">ppscores_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+                    <span class="n">unsorted_related_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">ppscores_sum</span><span class="p">])</span>
+                <span class="n">sorted_related_metrics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unsorted_related_metrics</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">source_df</span> <span class="o">=</span> <span class="n">timeseries_to_datetime_indexed_df</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">source_metric</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">ppscores</span> <span class="ow">in</span> <span class="n">sorted_related_metrics</span><span class="p">:</span>
+                    <span class="c1"># @modified 20220722 - Task #4624: Change all dict copy to deepcopy</span>
+                    <span class="c1"># current_metrics_timeseries = source_metrics_timeseries.copy()</span>
+                    <span class="n">current_metrics_timeseries</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">source_metrics_timeseries</span><span class="p">)</span>
+                    <span class="n">x_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">y_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">source_metric</span><span class="p">,</span>
+                        <span class="n">base_name</span><span class="p">,</span>
+                    <span class="p">]</span>
+                    <span class="k">for</span> <span class="n">r_base_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                        <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">metrics_timeseries</span><span class="p">[</span><span class="n">r_base_name</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">r_base_name</span> <span class="o">!=</span> <span class="n">source_metric</span><span class="p">:</span>
+                                <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">until_timestamp</span> <span class="o">-</span> <span class="mi">86400</span><span class="p">)]</span>
+                                <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">r_base_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                                <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">r_base_name</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">timeseries</span>
+                    <span class="n">longest_timeseries</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">current_metrics_timeseries</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">shortest_timeseries</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">current_metrics_timeseries</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">longest_timeseries</span> <span class="o">==</span> <span class="n">shortest_timeseries</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">r_base_name</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">r_base_name</span> <span class="o">!=</span> <span class="n">longest_timeseries</span><span class="p">:</span>
+                                <span class="n">shortest_timeseries</span> <span class="o">=</span> <span class="n">r_base_name</span>
+                    <span class="n">longest_timeseries_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">longest_timeseries</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">shortest_timeseries</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">longest_timeseries_timestamps</span><span class="p">:</span>
+                            <span class="n">x_value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">current_metrics_timeseries</span><span class="p">[</span><span class="n">longest_timeseries</span><span class="p">][</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ts</span><span class="p">]</span>
+                            <span class="n">x_value</span> <span class="o">=</span> <span class="n">x_value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">x_value</span><span class="p">:</span>
+                                <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_value</span><span class="p">)</span>
+                                <span class="n">x_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">x_value</span><span class="p">])</span>
+                                <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                                <span class="n">y_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+
+                        <span class="c1"># TODO only use if fully populated?</span>
+                    <span class="c1"># final_df = source_df.copy()</span>
+                    <span class="k">if</span> <span class="n">longest_timeseries</span> <span class="o">==</span> <span class="n">source_metric</span><span class="p">:</span>
+                        <span class="n">final_df</span> <span class="o">=</span> <span class="n">timeseries_to_datetime_indexed_df</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">x_timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                        <span class="n">base_name_df</span> <span class="o">=</span> <span class="n">timeseries_to_datetime_indexed_df</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">y_timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">final_df</span> <span class="o">=</span> <span class="n">timeseries_to_datetime_indexed_df</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">y_timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                        <span class="n">base_name_df</span> <span class="o">=</span> <span class="n">timeseries_to_datetime_indexed_df</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">x_timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="n">final_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">source_metric</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">base_name_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">base_name</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">base_name_values</span> <span class="o">=</span> <span class="n">base_name_df</span><span class="p">[</span><span class="n">base_name</span><span class="p">]</span>
+                    <span class="n">final_df</span> <span class="o">=</span> <span class="n">final_df</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_name_values</span><span class="p">)</span>
+
+                <span class="c1">#    final_df = final_df.resample(&#39;10T&#39;).median()</span>
+                    <span class="n">ppscores_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">related_metrics_summary</span><span class="p">[</span><span class="n">base_name</span><span class="p">])</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;source metric: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">related changepoint: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">ppscore (sum): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_metric</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ppscores_sum</span><span class="p">))</span>
+                    <span class="n">ax</span> <span class="o">=</span> <span class="n">final_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">secondary_y</span><span class="o">=</span><span class="p">[</span><span class="n">base_name</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_alpha</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
+
+        <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: find_related :: would find_related for </span><span class="si">%s</span><span class="s1"> cloudburst - took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_cloudbursts</span><span class="p">)),</span> <span class="n">spin_end</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+        <span class="c1"># cloudburst table</span>
+        <span class="c1"># id, source_metric_id, timestamp, full_duration, resolution, processed</span>
+        <span class="c1"># cloudbursts table</span>
+        <span class="c1"># id, cloudburst_id, related_metric_id, ppscore_1, ppscore_2</span>
+        <span class="c1"># Maybe do not just do ppscore maybe use ruptures to identify metrics</span>
+        <span class="c1"># that have changespoints in the same window</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Cloudbursts.run"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.cloudbursts.Cloudbursts.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+
+<span class="sd">        - Determine if Redis is up</span>
+
+<span class="sd">        - Determine new cloudbursts to find related metrics on</span>
+
+<span class="sd">        - Wait for the process to finish.</span>
+
+<span class="sd">        - run_every 30 seconds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;luminosity/cloudbursts :: starting&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+            <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: luminosity/cloudbursts :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to </span><span class="se">\&#39;\&#39;</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts cannot connect to get_redis_conn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Report app up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;luminosity.cloudbursts&#39;</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: could not update the Redis luminosity.cloudbursts key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Spawn process</span>
+            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">find_related</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: starting find_related process&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: failed to spawn find_related process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Self monitor processes and terminate if any find_cloudbursts</span>
+            <span class="c1"># has run for longer than run_every - 10</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">3600</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: find_related process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: timed out, killing find_related process&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: killing find_related process&#39;</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: killed find_related process&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: stopping find_related - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: failed to stop find_related - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+            <span class="k">if</span> <span class="n">process_runtime</span> <span class="o">&lt;</span> <span class="n">run_every</span><span class="p">:</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_every</span> <span class="o">-</span> <span class="n">process_runtime</span><span class="p">)</span>
+
+                <span class="n">process_runtime_now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="p">(</span><span class="n">run_every</span> <span class="o">-</span> <span class="n">process_runtime_now</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cloudbursts :: sleeping for </span><span class="si">%.2f</span><span class="s1"> seconds due to low run time...&#39;</span> <span class="o">%</span> <span class="n">sleep_for</span><span class="p">)</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">sleep_for</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: failed to del sleep_for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">process_runtime</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cloudbursts :: failed to del process_runtime - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

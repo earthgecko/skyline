@@ -80,6 +80,96 @@ However, you are not limited to 3-sigma based algorithms if you do not
 want to use them - as long as you return a boolean, you can add any sort
 of algorithm you like to run on time series and vote.
 
+A break from traditions
+=======================
+
+As Skyline develops, the addition of non three-sigma algorithms and methodologies
+is inevitable.  Further Skyline was designed to analyse all metrics via the
+three-sigma algorithms, however there are instances where this is not
+necessarily paramount and at times undesirable.  Therefore a number of
+alternative methods and related configurations have been introduced to allow the
+operator to analyse high and low priority metrics differently.
+
+High and low priority metrics
+-----------------------------
+
+This supports the old monitoring mantra of "do not alert on everything, only
+alert on the important things".
+
+- High priority metrics: metrics that belong to a ``smtp`` alert setting are
+  classified as high priority metrics (even if the ``smtp`` alerter is set to
+  ``'no_email'``).
+- Low priority metrics: metrics that do not belong to a ``smtp`` alert setting.
+
+High priority metrics always get routed through all the analysis stages.
+The amount of analysis done on low priority metrics is configurable.
+
+With the default settings all low priority metrics are analysed through all the
+analysis stages just like high priority metrics.  If you are not handling 1000s
+and 1000s of metrics, this default should be fine.
+
+In installations with large metric populations the full analysis of all low
+priority metrics **all** the time is not necessarily desirable as it means that
+Skyline needs a lot more CPU time to analyses all the metrics.
+
+The point of analysing low priority metrics is too also record anomalies on
+these metrics that are not alerted on, for the purpose of being able to related
+anomalies on high priority metrics with anomalies on low priority metrics.
+Although you do not want to be alerted on these, having them referenced in
+high priority metric training pages and in the anomalous events timeline can be
+useful for root cause analysis.  However if there amount of time being taken to
+analyse *all* the metrics is resulting in lagging, Skyline can be configured to
+reduce the amount of analysis on low priority metrics to gain time to focus on
+getting through all the high priority metrics.
+
+This can be achieved using MAD or disabling analysis of low priority metrics.
+
+The analysis of low priority metrics can be turned off by setting
+:mod:`settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS` to ``False``.
+
+Do note that low priority metrics will still always be cross-correlated against
+in Luminosity even if the analysis of low priority is disabled, therefore this
+useful root cause analysis information is not lost.  The total disabling of low
+priority metrics just results in there never being any anomalies recorded on
+low priority metrics.
+
+There is an :mod:`settings.ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS`
+mode which will attempt to dynamically analyse as many low priority metrics as
+possible in the available time, looping through the metrics on a best effort
+basis to analyse low priority metrics as frequently as possible without causing
+lag on the analysis of high priority metrics.
+
+ANALYZER_MAD_LOW_PRIORITY_METRICS
+---------------------------------
+
+In order to reduce the required amount of analysis done by Analyzer to identify
+potential anomalous metrics, the use of the mean absolute deviation (MAD)
+algorithm can be used to determine whether to analyse the metric with the
+three-sigma algorithms or not.  This use of MAD is only implemented against low
+priority metrics.  Low priority metrics being metrics that do not belong to a
+:mod:`settings.ALERTS` ``smtp`` alert setting.  Metrics that belong to a ``smtp``
+alert setting are classified as high priority metrics and are always analysed
+with the three-sigma algorithms.
+
+MAD is a bit faster than running all the three-sigma algorithms, therefore in
+installations with large metric populations, running MAD on low priority metrics
+results in a **marginal** performance gain in terms of overall compute time.  In
+large low priority metric populations the implementation of MAD results in
+approximately 30% of the low priority metrics not being checked with the
+three-sigma algorithms because MAD does not trigger on them and therefore they
+are not submitted to the func:`analyzer.run_selected_algorithms` function.
+
+The use of MAD is not ideally suited to all variations in time series and could
+potentially result in false negatives where you would want the metric to be
+analysed with three-sigma.  However given that this is intended to be used in
+large metric populations on low priority metrics only, occurrences of a few
+false negatives is not significantly important.
+
+The performance benefit is **only** achieved if the number of data points used
+to compute MAD for is very low, less than 16, ideally 10.  Configuring
+:mod:`settings.ANALYZER_MAD_LOW_PRIORITY_METRICS` to any value higher than this
+results in a performance **loss** in terms of overall compute time.
+
 Using custom algorithms
 =======================
 
@@ -100,7 +190,7 @@ This is still of course possible, however it is not greatly useful if you do
 not want your algorithm to be tied into the Skyline `CONSENSUS` methodology or
 maintain the core algorithms files yourself.  Therefore the easier and preferred
 method is to use the :mod:`settings.CUSTOM_ALGORITHMS` functionality, which
-always you to load any Python source algorithm file you want and define the
+allows you to load any Python source algorithm file you want and define the
 algorithm in terms of `CONSENSUS` and what namespaces to run it against.
 
 See `Custom algorithms <algorithms/custom-algorithms.html>`__
@@ -120,6 +210,10 @@ seconds long
 **Boring**: The time series has been the same value for the past
 :mod:`settings.MAX_TOLERABLE_BOREDOM` seconds
 
+**EmptyTimeseries**: The time series has no data and is removed from the
+:mod:`settings.FULL_NAMESPACE` unique_metrics Redis set and no longer submitted
+for analysis.
+
 **Other**: There's probably an error in the code, if you've been making
 changes or we have.
 
@@ -131,20 +225,33 @@ monotonically, metrics that have an incrementing increasing count, so that these
 time series can be handled via their derivative products where appropriate.  For
 full details see `Monotonic metrics <monotonic-metrics.html>`__
 
+Anomaly end_timestamp
+=====================
+
+The `end_timestamp` means that the anomaly has either:
+
+1. Ended, when it is a peak or trough anomaly, and the time series data returns
+   to a state that is represented in the norm in the previous 24 hour period
+2. When the state change, in cases of frequency or level shifts, and occurs for
+   sufficient time to begin to be represented in the norm in the previous 24 hour
+   period (:mod:`settings.FULL_DURATION`).  In these cases you might consider the
+   metric to still be in an anomalous state, but in terms of the
+   :mod:`settings.FULL_DURATION` data, it is no longer anomalous.
+
 Push to Mirage
 ==============
 
 Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than :mod:`settings.FULL_DURATION` to the Mirage
-service, see `Mirage <mirage.html>`__.
+service (so ALL metrics then?), see `Mirage <mirage.html>`__.
 
 Push to Ionosphere
 ==================
 
-Analyzer pushes anomalous metrics that are ionosphere_enabled to Ionosphere
-to check if the anomalous time series is known to be NOT ANOMALOUS due to it's
-features profile matching a known NOT ANOMALOUS trained or learnt features
-profile see `Ionosphere <ionosphere.html>`__.
+Analyzer pushes anomalous metrics that are ionosphere_enabled, but not Mirage
+enabled, to Ionosphere to check if the anomalous time series is known to be
+NOT ANOMALOUS due to it's features profile matching a known NOT ANOMALOUS trained
+or learnt features profile see `Ionosphere <ionosphere.html>`__.
 
 analyzer_batch
 ==============
@@ -184,7 +291,8 @@ In terms of the :mod:`settings.ALERTS` order matters in Analyzer and in the
 Mirage context as well.
 
 .. warning:: It is important to note that Analyzer uses the first alert tuple
-  that matches.
+  that matches.  Unless you have :mod:`settings.EXTERNAL_ALERTS` enabled which
+  is an ADVANCED FEATURE.
 
 So for example, with some annotation.  Let us say we have a set of metrics
 related to how many requests are made per customer.  We have two very important
@@ -266,6 +374,51 @@ Example alert
 .. note:: The Redis data graphs do make the alerter a little more CPU when
   matplotlib plots the alerts and the alert email larger in size.
 
+
+Analyzer metrics_manager
+========================
+
+analyzer/metrics_manager is a process that runs with the sole purpose of
+managing all the aspects and data of the metrics that are required by Skyline.
+It does a mountain of work in optimising the data about the metrics into
+fast to query data structures.  It takes your configuration options and
+metrics and makes lists, sets, dicts and lots of Redis sets and hashes and
+dynamically adjusts the data to changes in your configuration or metric
+populations. It also checks various aspects of the time series data in terms
+of sparisity, resolution, etc.
+
+
+Monitoring data sparsity
+========================
+
+If you have a reliable metrics pipeline this generally is not required, however
+the Analyzer metrics_manager can be enabled to monitor how sparsely populated
+the metric population is.  If the Analyzer metrics_manager is enabled via
+:mod:`settings.CHECK_DATA_SPARSITY`, the metric population will be analysed
+every ``RUN_EVERY`` (which for metrics_manager is 300 seconds) and the
+resolution of each metric will be dynamically determined from the timeseries
+data, the expected number of data points in :mod:`settings.FULL_DURATION` will
+be determined and the data sparsity value will be calculated for each metric.
+A data sparsity of 100% means that the metric is fully populated, as the value
+decreases the metric data becomes increasingly sparsely populated (bad).
+
+Enabling :mod:`settings.CHECK_DATA_SPARSITY` results in Skyline sending 4 new
+metrics to Graphite:
+
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.avg_sparsity - the average sparsity e.g. ``sum(all_sparsities) / len(all_sparsities)``
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_fully_populated - the number of metrics fully (or over populated)
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing - the number of metrics becoming more sparsely populated (bad)
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing - the number of metrics becoming more densely populated (good)
+
+Across the entire population, these are the key metrics regarding the reliability
+of incoming metrics. An increasing `skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing`
+metric indicates that the metric data submission is degraded and could indicate
+a problem.
+
+Of course there may be some metrics that are not expected to send values
+frequently but only occasionally, if you wish to exclude these types of metrics
+they can be declared in :mod:`settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES`.
+
 What **Analyzer** does
 ======================
 
@@ -300,3 +453,12 @@ What **Analyzer** does
   - Analyzer will alert for an Analyzer metric that has been returned from
     Ionosphere as anomalous having not matched any known features profile or
     layers.
+
+- Analyzer also runs a metrics_manager process that runs every ``RUN_EVERY``
+  seconds (currently 300 seconds).  This process is responsible for all metric
+  classification in terms of determining what metrics are Mirage metrics,
+  low priority metrics, what metrics are assigned to each alert group, etc.
+  This is a separate process that run isolated from the analysis processes as
+  these classifications some that they do not impact the analysis run time.
+  metrics_manager creates Redis keys, sets and hash key for the various things
+  which are consumed by the other apps.

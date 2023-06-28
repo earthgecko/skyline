@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.luminosity_backend &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.luminosity_backend</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.luminosity_backend</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
+<span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">luminosity_data_folder</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_DATA_FOLDER</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">luminosity_data_folder</span> <span class="o">=</span> <span class="s1">&#39;/opt/skyline/luminosity&#39;</span>
+<span class="c1"># classify_metrics_dir = &#39;%s/classify_metrics&#39; % luminosity_data_folder</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="get_classify_metrics"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.luminosity_backend.get_classify_metrics">[docs]</a><span class="k">def</span> <span class="nf">get_classify_metrics</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">significant</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a list of all the files for metrics in classify_metrics</span>
+
+<span class="sd">    :param base_name: the name of the metric</span>
+<span class="sd">    :param timestamp: the timestamp</span>
+<span class="sd">    :param algorithm: the algorithm</span>
+<span class="sd">    :param significant: whether to return only significant results</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :type timestamp: str</span>
+<span class="sd">    :type algorithm: str</span>
+<span class="sd">    :return: list of dicts</span>
+<span class="sd">    :rtype:  {}</span>
+
+<span class="sd">    Returns a dict of algorithm, metrics, timestamps and significance</span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;classify_metrics&quot;: {</span>
+<span class="sd">            &quot;level_shift&quot;: {</span>
+<span class="sd">                &#39;metric1&#39;: {</span>
+<span class="sd">                    1604596200: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1606410600: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1607015400: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1602177000: {&#39;siginifcant&#39;: False}</span>
+<span class="sd">                },</span>
+<span class="sd">                &#39;metric2&#39;: {</span>
+<span class="sd">                    1604596200: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1606410600: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1607015400: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1602177000: {&#39;siginifcant&#39;: False}</span>
+<span class="sd">                },</span>
+<span class="sd">            },</span>
+<span class="sd">            &quot;volatility_shift&quot;: {</span>
+<span class="sd">                &#39;metric1&#39;: {</span>
+<span class="sd">                    1604596200: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1606410600: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1607015400: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1602177000: {&#39;siginifcant&#39;: False}</span>
+<span class="sd">                },</span>
+<span class="sd">                &#39;metric2&#39;: {</span>
+<span class="sd">                    1604596200: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1606410600: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1607015400: {&#39;siginifcant&#39;: True},</span>
+<span class="sd">                    1602177000: {&#39;siginifcant&#39;: False}</span>
+<span class="sd">                },</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;get_classify_metrics - base_name: </span><span class="si">%s</span><span class="s1">, timestamp: </span><span class="si">%s</span><span class="s1">, algorithm: </span><span class="si">%s</span><span class="s1">, significant: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">significant</span><span class="p">)))</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+    <span class="c1"># @added 20211001 - reduce os.walk</span>
+    <span class="n">classify_metrics_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/classify_metrics&#39;</span> <span class="o">%</span> <span class="n">luminosity_data_folder</span>
+    <span class="k">if</span> <span class="n">algorithm</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">classify_metrics_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/classify_metrics/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">luminosity_data_folder</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">base_name</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">metric_dir_str</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">classify_metrics_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">classify_metrics_dir</span><span class="p">,</span> <span class="n">metric_dir_str</span><span class="p">)</span>
+
+    <span class="n">classified_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">classify_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">classify_metrics_dir</span><span class="p">):</span>
+
+        <span class="c1"># @added 20211001 - limit default results</span>
+        <span class="k">if</span> <span class="n">base_name</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">root_str</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">root_str</span><span class="p">:</span>
+                <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">base_name</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">classify_metrics_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="k">break</span>
+<span class="c1">#        if int(time()) &gt; (start + 24):</span>
+<span class="c1">#            logger.info(</span>
+<span class="c1">#                &#39;get_classify_metrics - breaking from os.walk due to run time&#39;)</span>
+<span class="c1">#            break</span>
+
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c1"># @added 20211001 - limit default results</span>
+                <span class="k">if</span> <span class="n">base_name</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">classify_metrics_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+                        <span class="k">break</span>
+<span class="c1">#                if int(time()) &gt; (start + 24):</span>
+<span class="c1">#                    logger.info(</span>
+<span class="c1">#                        &#39;get_classify_metrics - breaking from files in os.walk due to run time&#39;)</span>
+<span class="c1">#                    break</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;data.txt&#39;</span><span class="p">:</span>
+                        <span class="n">data_dict</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">data_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">data_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                                    <span class="n">data_dict</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">data_dict</span><span class="p">:</span>
+                                        <span class="k">break</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: get_classify_metrics :: failed to open data_file: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_file</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">data_dict</span><span class="p">:</span>
+                            <span class="n">metric</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">base_name</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">metric</span> <span class="o">!=</span> <span class="n">base_name</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+
+                            <span class="k">if</span> <span class="n">timestamp</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]):</span>
+                                    <span class="k">continue</span>
+
+                            <span class="k">if</span> <span class="n">algorithm</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">algorithm</span> <span class="o">!=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]:</span>
+                                    <span class="k">continue</span>
+
+                            <span class="k">if</span> <span class="n">significant</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="s1">&#39;significant.txt&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+
+                            <span class="k">if</span> <span class="s1">&#39;significant.txt&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                                <span class="n">labelled_significant</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">labelled_significant</span> <span class="o">=</span> <span class="kc">True</span>
+
+                            <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+                                <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                            <span class="n">algorithm</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span>
+                            <span class="n">algorithm_dict</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">algorithm_dict</span> <span class="o">=</span> <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">]</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                                <span class="n">algorithm_dict</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">timestamps_dict</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="n">algorithm_dict</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">timestamps_dict</span> <span class="o">=</span> <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">]</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                                    <span class="n">timestamps_dict</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">timestamps_dict</span><span class="p">:</span>
+                                <span class="n">ts</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;files_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;significant&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">labelled_significant</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;anomalies_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">])</span>
+                                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;file_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;file_path&#39;</span><span class="p">]</span>
+                            <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: get_classify_metrics :: failed to add data to classify_metrics_dict - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+    <span class="n">classified_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">classify_metrics_dict</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">current_metric</span> <span class="ow">in</span> <span class="n">classify_metrics_dict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">current_algorithm</span> <span class="ow">in</span> <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">current_metric</span><span class="p">]:</span>
+                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">current_metric</span><span class="p">][</span><span class="n">current_algorithm</span><span class="p">][</span><span class="s1">&#39;classifications&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">current_metric</span><span class="p">][</span><span class="n">current_algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">])</span>
+                <span class="n">significant_classifications</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">current_metric</span><span class="p">][</span><span class="n">current_algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">current_metric</span><span class="p">][</span><span class="n">current_algorithm</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;significant&#39;</span><span class="p">]:</span>
+                        <span class="n">significant_classifications</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">classify_metrics_dict</span><span class="p">[</span><span class="n">current_metric</span><span class="p">][</span><span class="n">current_algorithm</span><span class="p">][</span><span class="s1">&#39;significant&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">significant_classifications</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_classify_metrics - classify_metrics_dict has </span><span class="si">%s</span><span class="s1"> items&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classify_metrics_dict</span><span class="p">))))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">classify_metrics_dict</span><span class="p">,</span> <span class="n">classified_metrics</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

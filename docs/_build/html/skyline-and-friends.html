@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Skyline and friends &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyline and friends &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Logging" href="logging.html" />
     <link rel="prev" title="Running multiple Skyline instances" href="running-multiple-skylines.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,11 +71,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -133,6 +101,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -141,74 +112,35 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Skyline and friends</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Skyline and friends</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/skyline-and-friends.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="skyline-and-friends">
-<h1>Skyline and friends<a class="headerlink" href="#skyline-and-friends" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="skyline-and-friends">
+<h1>Skyline and friends<a class="headerlink" href="#skyline-and-friends" title="Permalink to this heading"></a></h1>
 <p>Skyline has some close relationships to a number of metric pipelining things.</p>
-<div class="section" id="graphite-a-close-relationship">
-<h2>Graphite - a close relationship<a class="headerlink" href="#graphite-a-close-relationship" title="Permalink to this headline">¶</a></h2>
+<section id="graphite-a-close-relationship">
+<h2>Graphite - a close relationship<a class="headerlink" href="#graphite-a-close-relationship" title="Permalink to this heading"></a></h2>
 <p>Anyone having used Skyline may have wondered in the past why Skyline sent metrics
 to [Graphite](<a class="reference external" href="https://github.com/graphite-project">https://github.com/graphite-project</a>).  One may have also wondered
 why there was never a Statsd option, why just Graphite?</p>
@@ -219,9 +151,9 @@ is quite fortunate.</p>
 monitor each other through a direct feedback loop or interaction.  If Statsd
 was ever an option, it would add a degree of separation between the 2 which is
 not required or desirable, although it would work.</p>
-</div>
-<div class="section" id="feedback-loop">
-<h2>Feedback loop<a class="headerlink" href="#feedback-loop" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="feedback-loop">
+<h2>Feedback loop<a class="headerlink" href="#feedback-loop" title="Permalink to this heading"></a></h2>
 <p>Skyline’s own metrics really are an important aspect of Skyline’s operations
 over time, in terms of:</p>
 <ul class="simple">
@@ -236,20 +168,20 @@ over time, in terms of:</p>
 looked metrics, however over time they will describe your ups and downs,
 your highs and lows and hopefully add to your understanding of your “things”</p></li>
 </ul>
-</div>
-<div class="section" id="statsd">
-<h2>Statsd<a class="headerlink" href="#statsd" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="statsd">
+<h2>Statsd<a class="headerlink" href="#statsd" title="Permalink to this heading"></a></h2>
 <p>Statsd (<a class="reference external" href="https://github.com/etsy/statsd">https://github.com/etsy/statsd</a>) feeds graphite so it is quite handy.
 Use TCP, not UDP</p>
-</div>
-<div class="section" id="buckyserver">
-<h2>BuckyServer<a class="headerlink" href="#buckyserver" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="buckyserver">
+<h2>BuckyServer<a class="headerlink" href="#buckyserver" title="Permalink to this heading"></a></h2>
 <p>Before tcp transport was added to Statsd was
 BuckyServer (<a class="reference external" href="https://github.com/HubSpot/BuckyServer">https://github.com/HubSpot/BuckyServer</a>) for long haul TCP
 transport of your metrics to Statsd -&gt; Graphite.</p>
-</div>
-<div class="section" id="some-advantages-to-using-buckyserver">
-<h2>Some advantages to using Buckyserver<a class="headerlink" href="#some-advantages-to-using-buckyserver" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="some-advantages-to-using-buckyserver">
+<h2>Some advantages to using Buckyserver<a class="headerlink" href="#some-advantages-to-using-buckyserver" title="Permalink to this heading"></a></h2>
 <p>Although the introduction of another node app may seem like too much effort or
 additional complexity, using Buckyserver also has additional advantages.
 Although Statd does allow for Multi-Metric Packets the total length of the
@@ -264,84 +196,59 @@ where each metric can be iterated through in your script/app and sent
 individually, if you do not want the hassle of dealing with Multi-Metric Packet
 payload size.  Running Buckyserver and Statsd on the same instance allows for
 these types of advanced usage and has proved to be very reliable.</p>
-</div>
-<div class="section" id="sensu">
-<h2>Sensu<a class="headerlink" href="#sensu" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="sensu">
+<h2>Sensu<a class="headerlink" href="#sensu" title="Permalink to this heading"></a></h2>
 <p>Sensu (<a class="reference external" href="https://sensuapp.org/">https://sensuapp.org/</a>) can feed Graphite like collectd but uses TCP not
 UDP for transport - Sensu on github (<a class="reference external" href="https://github.com/sensu/sensu">https://github.com/sensu/sensu</a>)</p>
-</div>
-<div class="section" id="riemann">
-<h2>Riemann<a class="headerlink" href="#riemann" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="riemann">
+<h2>Riemann<a class="headerlink" href="#riemann" title="Permalink to this heading"></a></h2>
 <p>Riemann.io (<a class="reference external" href="http://riemann.io">http://riemann.io</a>) can feed Graphite -
 Riemann on github (<a class="reference external" href="https://github.com/riemann/riemann">https://github.com/riemann/riemann</a>)</p>
-</div>
-<div class="section" id="logstash">
-<h2>Logstash<a class="headerlink" href="#logstash" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="logstash">
+<h2>Logstash<a class="headerlink" href="#logstash" title="Permalink to this heading"></a></h2>
 <p>Logstash (<a class="reference external" href="https://www.elastic.co/products/logstash">https://www.elastic.co/products/logstash</a>) can feed Graphite -
 Logstash on github (<a class="reference external" href="https://github.com/elastic/logstash">https://github.com/elastic/logstash</a>)</p>
-</div>
-<div class="section" id="many-more">
-<h2>Many more<a class="headerlink" href="#many-more" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="many-more">
+<h2>Many more<a class="headerlink" href="#many-more" title="Permalink to this heading"></a></h2>
 <p>There are a great deal of apps that can feed Skyline, this is just mentioning
 a few.  However bear in mind, that whatever you use, try and ensure that it is
 TCP and not UDP based.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="logging.html" class="btn btn-neutral float-right" title="Logging" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="running-multiple-skylines.html" class="btn btn-neutral float-left" title="Running multiple Skyline instances" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running-multiple-skylines.html" class="btn btn-neutral float-left" title="Running multiple Skyline instances" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="logging.html" class="btn btn-neutral float-right" title="Logging" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

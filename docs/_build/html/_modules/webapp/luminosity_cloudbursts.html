@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.luminosity_cloudbursts &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.luminosity_cloudbursts</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.luminosity_cloudbursts</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="kn">import</span> <span class="n">select</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="kn">import</span> <span class="n">get_engine</span><span class="p">,</span> <span class="n">cloudburst_table_meta</span>
+
+<span class="c1"># @added 20221103 - Task #2732: Prometheus to Skyline</span>
+<span class="c1">#                   Branch #4300: prometheus</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_name_from_labelled_metrics_name</span> <span class="kn">import</span> <span class="n">get_base_name_from_labelled_metrics_name</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
+<span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">outer_err</span><span class="p">)</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="get_filtered_metrics"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.luminosity_cloudbursts.get_filtered_metrics">[docs]</a><span class="k">def</span> <span class="nf">get_filtered_metrics</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get create a list of filter_by_metrics.</span>
+
+<span class="sd">    :param redis_conn_decoded: the redis_conn_decoded object</span>
+<span class="sd">    :param namespaces: the namespaces to match</span>
+<span class="sd">    :param from_timestamp: the from_timestamp</span>
+<span class="sd">    :param until_timestamp: the until_timestamp</span>
+<span class="sd">    :type redis_conn_decoded: str</span>
+<span class="sd">    :return: list of metrics</span>
+<span class="sd">    :rtype:  list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;get_cloudbursts :: get_filtered_metrics&#39;</span>
+    <span class="n">filter_by_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">redis_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer.metrics_manager.db.metric_names&#39;</span>
+    <span class="n">unique_base_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">unique_base_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_key</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">unique_base_names</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: got </span><span class="si">%s</span><span class="s1"> unique_base_names&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_base_names</span><span class="p">))))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get Redis key </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">unique_base_names</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pattern_match</span><span class="p">,</span> <span class="n">metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                <span class="n">filter_by_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get Redis key </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">redis_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">filter_by_metrics</span></div>
+
+
+<div class="viewcode-block" id="get_metric_ids"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.luminosity_cloudbursts.get_metric_ids">[docs]</a><span class="k">def</span> <span class="nf">get_metric_ids</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="p">,</span> <span class="n">filter_by_metrics</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get create a list of metric ids and dict of metric_names_with_ids.</span>
+
+<span class="sd">    :param redis_conn_decoded: the redis_conn_decoded object</span>
+<span class="sd">    :param namespaces: the namespaces to match</span>
+<span class="sd">    :param from_timestamp: the from_timestamp</span>
+<span class="sd">    :param until_timestamp: the until_timestamp</span>
+<span class="sd">    :type redis_conn_decoded: str</span>
+<span class="sd">    :return: (list of metrics, dict of metric_names_with_ids)</span>
+<span class="sd">    :rtype:  (list, dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;get_cloudbursts :: get_metric_ids&#39;</span>
+    <span class="n">metric_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;aet.metrics_manager.metric_names_with_ids&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get Redis hash aet.metrics_manager.metric_names_with_ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">filter_by_metrics</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">base_name</span><span class="p">]))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to add metric id to metric_ids for </span><span class="si">%s</span><span class="s1"> from metric_names_with_ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">metric_ids</span><span class="p">,</span> <span class="n">metric_names_with_ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_cloudbursts"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.luminosity_cloudbursts.get_cloudbursts">[docs]</a><span class="k">def</span> <span class="nf">get_cloudbursts</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get create a dict of all the cloudbursts.</span>
+
+<span class="sd">    :param metric: the name of the metric</span>
+<span class="sd">    :param namespaces: the namespaces to match</span>
+<span class="sd">    :param from_timestamp: the from_timestamp</span>
+<span class="sd">    :param until_timestamp: the until_timestamp</span>
+<span class="sd">    :type metric: str</span>
+<span class="sd">    :type namespaces: list</span>
+<span class="sd">    :type from_timestamp: int</span>
+<span class="sd">    :type until_timestamp: int</span>
+<span class="sd">    :return: dict of cloudbursts</span>
+<span class="sd">    :rtype:  {}</span>
+
+<span class="sd">    Returns a dict of cloudbursts</span>
+<span class="sd">    {</span>
+<span class="sd">        &quot;cloudbursts&quot;: {</span>
+<span class="sd">            &lt;id&gt;: {</span>
+<span class="sd">                &#39;metric_id&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;metric&#39;: &lt;str&gt;,</span>
+<span class="sd">                &#39;timestamp&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;end&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;duration&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;duration&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;from_timestamp&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;resolution&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;full_duration&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;anomaly_id&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;match_id&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;fp_id&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;layer_id&#39;: &lt;int&gt;,</span>
+<span class="sd">                &#39;added_at&#39;: &lt;int&gt;,</span>
+<span class="sd">            },</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;get_cloudbursts&#39;</span>
+    <span class="n">cloudbursts_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">metric_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">use_filter_by_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">filter_by_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ids_with_metric_names</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;get_cloudbursts - metric: </span><span class="si">%s</span><span class="s1">, namespaces: </span><span class="si">%s</span><span class="s1">, from_timestamp: </span><span class="si">%s</span><span class="s1">, until_timestamp: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespaces</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+
+        <span class="c1"># @added 20221103 - Task #2732: Prometheus to Skyline</span>
+        <span class="c1">#                   Branch #4300: prometheus</span>
+        <span class="n">use_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+            <span class="n">use_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">get_base_name_from_labelled_metrics_name</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">use_metric</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_base_name_from_labelled_metrics_name failed with </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="k">raise</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;get_cloudbursts - looked up </span><span class="si">%s</span><span class="s1"> to metric: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">use_metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to look up metric&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;failed to look up metric&#39;</span><span class="p">)</span>
+
+            <span class="n">filter_by_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+            <span class="n">use_filter_by_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">namespaces</span><span class="p">:</span>
+                <span class="n">namespaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">namespaces</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]:</span>
+                <span class="n">namespaces</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_redis_conn_decoded failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+    <span class="n">filter_by_metrics</span> <span class="o">=</span> <span class="n">get_filtered_metrics</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">namespaces</span><span class="p">:</span>
+        <span class="n">use_filter_by_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;aet.metrics_manager.metric_names_with_ids&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+                <span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_id</span>
+                <span class="n">metric_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get </span><span class="si">%s</span><span class="s1"> from Redis hash aet.metrics_manager.metric_names_with_ids - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="k">raise</span>
+
+    <span class="n">metric_ids</span><span class="p">,</span> <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="n">get_metric_ids</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="p">,</span> <span class="n">filter_by_metrics</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filter_by_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">use_filter_by_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metric_names_with_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">base_name</span><span class="p">])</span>
+        <span class="n">ids_with_metric_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get engine - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cloudburst_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">cloudburst_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get cloudburst_table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">use_filter_by_metrics</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">],</span> <span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">],</span> <span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">],</span> <span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">],</span> <span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">from_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">until_timestamp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">cloudburst_table</span><span class="p">])</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span><span class="o">.</span>\
+                    <span class="n">where</span><span class="p">(</span><span class="n">cloudburst_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;=</span> <span class="n">until_timestamp</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="c1"># @modified 20230126</span>
+            <span class="c1"># Wrapped in try except</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cloudburst_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+                <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ids_with_metric_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                    <span class="n">use_metric_name</span> <span class="o">=</span> <span class="s1">&#39;labelled_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: failed to find metric name for metric id in ids_with_metric_names, using </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="n">use_metric_name</span><span class="p">))</span>
+                    <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_metric_name</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to iterate row from cloudburst_table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get cloudburst_table - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+    <span class="c1"># Reorder the dict keys for the page</span>
+    <span class="n">cloudbursts_dict_keys</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">key_ordered_cloudbursts_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">cloudbursts_dict</span><span class="p">:</span>
+        <span class="n">cloudburst_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cloudbursts_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">first_cloudburst_id</span> <span class="o">=</span> <span class="n">cloudburst_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">first_cloudburst_id</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">cloudbursts_dict_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cloudburst_id</span> <span class="ow">in</span> <span class="n">cloudburst_ids</span><span class="p">:</span>
+            <span class="n">key_ordered_cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span>
+                    <span class="n">key_ordered_cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+                    <span class="n">key_ordered_cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;metric&#39;</span><span class="p">]:</span>
+                    <span class="n">key_ordered_cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">cloudburst_id</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">cloudbursts_dict</span> <span class="o">=</span> <span class="n">key_ordered_cloudbursts_dict</span>
+        <span class="n">cloudburst_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cloudbursts_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">cloudburst_ids</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="n">desc_cloudbursts_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">c_id</span> <span class="ow">in</span> <span class="n">cloudburst_ids</span><span class="p">:</span>
+            <span class="n">desc_cloudbursts_dict</span><span class="p">[</span><span class="n">c_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloudbursts_dict</span><span class="p">[</span><span class="n">c_id</span><span class="p">]</span>
+        <span class="n">cloudbursts_dict</span> <span class="o">=</span> <span class="n">desc_cloudbursts_dict</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: found </span><span class="si">%s</span><span class="s1"> cloudbursts&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cloudbursts_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())))))</span>
+
+    <span class="k">return</span> <span class="n">cloudbursts_dict</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

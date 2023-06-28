@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SNAB &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="settings.EXTERNAL_SETTINGS" href="external_settings.html" />
+    <link rel="prev" title="Vista" href="vista.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SNAB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#snab-components">SNAB components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#settings-py">settings.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-modes">Running Modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-snab-process">The snab process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#snab-checks">SNAB_CHECKS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#snab-load-test-analyzer">SNAB_LOAD_TEST_ANALYZER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#snab-flux-load-tester">SNAB flux load tester</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">SNAB</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/SNAB.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snab">
+<h1>SNAB<a class="headerlink" href="#snab" title="Permalink to this heading"></a></h1>
+<p><em>EXPERIMENTAL</em></p>
+<p>SNAB is for algorithm testing and benchmarking with real time data and
+historic data.  Allowing for custom_algorithms to be run against certain metrics
+in the real time workflow pipeline.</p>
+<p>SNAB was inspired by the The Numenta Anomaly Benchmark project (<a class="reference external" href="https://github.com/numenta/NAB">https://github.com/numenta/NAB</a>)
+and attempts to provide a framework within Skyline for testing and benchmark
+algorithms on real time data.</p>
+<p>SNAB is <em>not a replacement for NAB</em>, it is simply the beginning of a NAB-ish
+like implementation for testing that suits Skyline.</p>
+<section id="snab-components">
+<h2>SNAB components<a class="headerlink" href="#snab-components" title="Permalink to this heading"></a></h2>
+<p>SNAB uses the <a class="reference internal" href="skyline.html#settings.SNAB_DATA_DIR" title="settings.SNAB_DATA_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_DATA_DIR</span></code></a> directory (for time series data),
+the snab database table for results and reports to log and a slack channel (if
+configured too) and it needs to be able to access the algorithm/s code for the
+algorithm/s that are configured to be used.</p>
+</section>
+<section id="settings-py">
+<h2>settings.py<a class="headerlink" href="#settings-py" title="Permalink to this heading"></a></h2>
+<p>Currently the snab module has two relevant settings <a class="reference internal" href="skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a>
+and <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a>.  For Analyzer and Mirage to send anomalies to
+SNAB to check against other algorithms, <a class="reference internal" href="skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a> must be
+set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</section>
+<section id="running-modes">
+<h2>Running Modes<a class="headerlink" href="#running-modes" title="Permalink to this heading"></a></h2>
+<p>SNAB has 2 modes it can run in, <code class="docutils literal notranslate"><span class="pre">testing</span></code> and <code class="docutils literal notranslate"><span class="pre">realtime</span></code> (not tested).
+SNAB has only be tested running with Mirage.</p>
+<p>SNAB is only implemented as on v2.1.0 with the <code class="docutils literal notranslate"><span class="pre">testing</span></code> mode with Mirage with
+a single algorithm.</p>
+</section>
+<section id="the-snab-process">
+<h2>The snab process<a class="headerlink" href="#the-snab-process" title="Permalink to this heading"></a></h2>
+<p>The snab Skyline app is started like the other apps, using bin/snab.d in the
+repo and your choice of process manager, e.g. systemctl, etc.</p>
+<p>In terms of running, when a Skyline app is defined in the <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a>,
+when the app triggers an anomaly on a metric, it will save the time series data
+to the <a class="reference internal" href="skyline.html#settings.SNAB_DATA_DIR" title="settings.SNAB_DATA_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_DATA_DIR</span></code></a> directory (if the time series has not been
+saved for Ionosphere training data) and instruct Panorama to create a snab DB entry for
+the originating algorithm_group and the anomaly_id via the <code class="docutils literal notranslate"><span class="pre">panorama.snab</span></code>
+Redis set.  The app will then send the metric and details through to snab to
+check against the defined algorithm/s.</p>
+<p>SNAB will then load the saved time series from the file specified in the check
+details and run the defined algorithm against it, determine the result, instruct
+Panorama to also create a snab DB entry for the algorithm, anomaly_id and
+algorithm_run_time and snab will post the result to slack for evaluation.</p>
+<p>The operator can then evaluate the results for the originating anomaly and
+algorithm_group and the SNAB algorithm/s in slack and assign a
+tP (true positive), fP (false positive), tN (true negative), fN (false negative)
+or unsure value to the result of each.  This provides data in the snab database
+table with which to evaluate the performance of different algorithms.</p>
+<p>The use of slack is required for evaluation, evaluation from the snab.log and
+manual creation of the webapp API snab endpoint URLs is not really feasible.
+The slack alerts provide all the graphs and data necessary for a proper
+evaluation to be made.</p>
+</section>
+<section id="snab-checks">
+<h2>SNAB_CHECKS<a class="headerlink" href="#snab-checks" title="Permalink to this heading"></a></h2>
+<p>To send any metrics to SNAB for them to be checked they must be defined in an
+item in the <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a> dictionary and <a class="reference internal" href="skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a>
+must be set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.  The <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a> dictionary has the
+following structure:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SNAB_CHECKS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;skyline_app&gt;&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;&lt;mode&gt;&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;&lt;algorithm&gt;&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">&lt;</span><span class="n">metric_namespace_1</span><span class="o">&gt;</span><span class="s1">&#39;, &#39;</span><span class="o">&lt;</span><span class="n">metric_namespace_2</span><span class="o">&gt;</span><span class="s1">&#39;],</span>
+                <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;absolute_path and filename&gt;&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;&lt;algorithm_parameter_1&gt;&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;&lt;algorithm_parameter_2&gt;&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span><span class="p">},</span>
+                <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">seconds</span><span class="o">|</span><span class="nb">float</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">boolean</span><span class="o">&gt;</span><span class="p">,</span>
+                <span class="s1">&#39;alert_slack_channel&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;slack_channel&gt;&#39;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>An example of this would be:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SNAB_CHECKS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;mirage&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;testing&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;telegraf&#39;</span><span class="p">],</span>
+                <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;windows&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;k_discords&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span>
+                <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">,</span>
+                <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;alert_slack_channel&#39;</span><span class="p">:</span> <span class="s1">&#39;#skyline&#39;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="snab-load-test-analyzer">
+<h2>SNAB_LOAD_TEST_ANALYZER<a class="headerlink" href="#snab-load-test-analyzer" title="Permalink to this heading"></a></h2>
+<p>SNAB can be used to load test Analyzer by defining the number of metrics you
+want to load test with is <a class="reference internal" href="skyline.html#settings.SNAB_LOAD_TEST_ANALYZER" title="settings.SNAB_LOAD_TEST_ANALYZER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_LOAD_TEST_ANALYZER</span></code></a>.  The load
+testing is not an exact reflection of the capability of Analyzer but rather an
+indication of the possible capability of Analyzer.  This is becasue of how the
+load test is run.  The load testing is only run after normal analysis and the
+metrics run through the load test are not submitted to any of the normal
+classification that metrics run through the normal process are subjected to.
+Metrics run through the normal analysis process are subjected to any
+classification checks that may be done on metrics, e.g.</p>
+<ul class="simple">
+<li><p>Is this a mirage metric?</p></li>
+<li><p>Is this a strictly increasing monotonic metric? Should the derivative be used?</p></li>
+<li><p>Should airgaps be identified in this metric?</p></li>
+<li><p>Is this a flux filled metric?</p></li>
+<li><p>etc</p></li>
+</ul>
+<p>These classifications and transformations may be done on some metrics during the
+normal analysis process and each takes some time.  However these classifications
+and transformations are not desired in the load testing because during load
+testing, the metric data being used to load test should not impact or modify any
+of the normal analysis process resources in terms of Redis sets and keys, etc.</p>
+<p>The load testing uses the same time series data of the metrics that run through
+the normal analysis process by iterating this data through the three-sigma
+algorithms after normal analysis until:</p>
+<ul class="simple">
+<li><p>The load test has completed the analysis of <a class="reference internal" href="skyline.html#settings.SNAB_LOAD_TEST_ANALYZER" title="settings.SNAB_LOAD_TEST_ANALYZER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_LOAD_TEST_ANALYZER</span></code></a>
+metrics.</p></li>
+<li><p>Or <a class="reference internal" href="skyline.html#settings.MAX_ANALYZER_PROCESS_RUNTIME" title="settings.MAX_ANALYZER_PROCESS_RUNTIME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MAX_ANALYZER_PROCESS_RUNTIME</span></code></a> - 5 is reached and the load
+test exits.</p></li>
+</ul>
+<p>Load test results are reported in the analyzer.log</p>
+<p>Running a load testing is as easy as defining a number in
+<a class="reference internal" href="skyline.html#settings.SNAB_LOAD_TEST_ANALYZER" title="settings.SNAB_LOAD_TEST_ANALYZER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_LOAD_TEST_ANALYZER</span></code></a>, restarting analyzer and checking the
+log.  Remember to set <a class="reference internal" href="skyline.html#settings.SNAB_LOAD_TEST_ANALYZER" title="settings.SNAB_LOAD_TEST_ANALYZER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_LOAD_TEST_ANALYZER</span></code></a> to 0 after your
+load test and restart analyzer again.</p>
+<p>Example of log output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">04</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="nb">set</span> <span class="n">to</span> <span class="n">test</span> <span class="mi">27000</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">04</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">there</span> <span class="n">are</span> <span class="n">currently</span> <span class="mi">1392</span> <span class="n">unique</span> <span class="n">metrics</span><span class="p">,</span> <span class="mi">25608</span> <span class="n">snab</span><span class="o">.</span><span class="n">analyzer_load_test</span> <span class="n">metrics</span> <span class="n">will</span> <span class="n">be</span> <span class="n">added</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">04</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">starting</span> <span class="mi">1</span> <span class="n">of</span> <span class="mi">1</span> <span class="n">spin_process</span><span class="o">/</span><span class="n">es</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">04</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">spin_process</span> <span class="n">started</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">04</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="n">will</span> <span class="n">run</span> <span class="n">after</span> <span class="n">normal</span> <span class="n">analysis</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">17</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="nb">set</span> <span class="n">to</span> <span class="n">test</span> <span class="mi">27000</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">17</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="mi">1392</span> <span class="n">unique</span> <span class="n">metrics</span> <span class="n">were</span> <span class="n">analyzed</span><span class="p">,</span> <span class="mi">25608</span> <span class="n">snab</span><span class="o">.</span><span class="n">analyzer_load_test</span> <span class="n">metrics</span> <span class="n">to</span> <span class="n">be</span> <span class="n">done</span> <span class="n">on</span> <span class="n">this</span> <span class="n">process</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">17</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">1392</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">18</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">2784</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">18</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">4176</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">18</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">5568</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">19</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">6960</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">19</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">8352</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">20</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">9744</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">20</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">11136</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">21</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">12528</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">21</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">13920</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">21</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">15312</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">22</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">16704</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">22</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">18096</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">23</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">19488</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">23</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">20880</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">22272</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">24</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">23664</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">25056</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">25608</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">results</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span> <span class="o">-</span> <span class="n">anomalous</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">not_anomalous</span><span class="p">:</span> <span class="mi">25608</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">SNAB_LOAD_TEST_ANALYZER</span> <span class="o">-</span> <span class="n">load</span> <span class="n">testing</span> <span class="n">completed</span> <span class="n">on</span> <span class="mi">25608</span> <span class="n">load</span> <span class="n">test</span> <span class="n">metrics</span> <span class="ow">in</span> <span class="mf">7.71</span> <span class="n">seconds</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3581073</span> <span class="p">::</span> <span class="n">spin_process</span> <span class="n">took</span> <span class="mf">20.39</span> <span class="n">seconds</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">analyzer</span> <span class="p">::</span> <span class="mi">1</span> <span class="n">spin_process</span><span class="o">/</span><span class="n">es</span> <span class="n">completed</span> <span class="ow">in</span> <span class="mf">20.50</span> <span class="n">seconds</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">25</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">spin_process</span> <span class="k">with</span> <span class="n">pid</span> <span class="mi">3581073</span> <span class="n">completed</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">seconds</span> <span class="n">to</span> <span class="n">run</span>     <span class="p">::</span> <span class="mf">26.42</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">total</span> <span class="n">metrics</span>      <span class="p">::</span> <span class="mi">1392</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">total</span> <span class="n">analyzed</span>     <span class="p">::</span> <span class="mi">531</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">total</span> <span class="n">anomalies</span>    <span class="p">::</span> <span class="mi">1</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">exception</span> <span class="n">stats</span>    <span class="p">::</span> <span class="p">{</span><span class="s1">&#39;Boring&#39;</span><span class="p">:</span> <span class="mi">688</span><span class="p">,</span> <span class="s1">&#39;TooShort&#39;</span><span class="p">:</span> <span class="mi">165</span><span class="p">,</span> <span class="s1">&#39;Stale&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">anomaly</span> <span class="n">breakdown</span>  <span class="p">::</span> <span class="p">{</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;first_hour_average&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;stddev_from_average&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;grubbs&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;ks_test&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;mean_subtraction_cumulation&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;median_absolute_deviation&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;stddev_from_moving_average&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;least_squares&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;abs_stddev_from_median&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;last_same_hours&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">mirage_periodic_checks</span>  <span class="p">::</span> <span class="mi">0</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">sent_to_mirage</span>     <span class="p">::</span> <span class="mi">2</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">Mirage</span> <span class="n">metrics</span>     <span class="p">::</span> <span class="mi">1274</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">mirage_periodic_checks</span>  <span class="p">::</span> <span class="mi">0</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">sent_to_panorama</span>   <span class="p">::</span> <span class="mi">0</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">sent_to_ionosphere</span> <span class="p">::</span> <span class="mi">0</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">Ionosphere</span> <span class="n">metrics</span> <span class="p">::</span> <span class="mi">763</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">canary</span> <span class="n">duration</span>    <span class="p">::</span> <span class="mf">24.17</span>
+<span class="mi">2020</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">07</span> <span class="mi">16</span><span class="p">:</span><span class="mi">52</span><span class="p">:</span><span class="mi">26</span> <span class="p">::</span> <span class="mi">3580119</span> <span class="p">::</span> <span class="n">sleeping</span> <span class="k">for</span> <span class="mf">33.01</span> <span class="n">seconds</span> <span class="n">due</span> <span class="n">to</span> <span class="n">low</span> <span class="n">run</span> <span class="n">time</span><span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="snab-flux-load-tester">
+<h2>SNAB flux load tester<a class="headerlink" href="#snab-flux-load-tester" title="Permalink to this heading"></a></h2>
+<p>So how many metrics can Skyline handle running on that digitalocean droplet?</p>
+<p>It is difficult to tell how many metrics a single Skyline server can handle
+given the myriad combinations of configurations and hardware resources it may be
+run on.</p>
+<p>This is where SNAB flux load tester comes into play.  It allows you to deploy
+Skyline and the snab app can be configured to send as many metrics as you want
+to Graphite and Skyline.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>DO NOT run this on an existing Skyline that is running with real
+data, it is meant to be run on a new, disposal Skyline build.  This because it
+populates Graphite, Redis, the database tables, etc with real data of test
+metrics.  Unless you want to test and remove all the test metrics from Redis,
+Graphite and MariaDB manually, which would be possible, but not advisable.</p>
+</div>
+<p>To enable a snab_flux_load_test set the following in settings.py:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SNAB_FLUX_LOAD_TEST_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="c1"># the number of metrics you want to load test with, use the number appropriate</span>
+<span class="c1"># for you</span>
+<span class="n">SNAB_FLUX_LOAD_TEST_METRICS</span> <span class="o">=</span> <span class="mi">2000</span>
+</pre></div>
+</div>
+<p>Ensure that horizon, analyzer, flux and Graphite are running and start
+snab_flux_load_test.d as appropriate</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>-u<span class="w"> </span>skyline<span class="w"> </span>/opt/skyline/github/skyline/bin/snab_flux_load_test.d<span class="w"> </span>start
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">80</span><span class="w"> </span>/var/log/skyline/snab_flux_load_test.log
+
+<span class="c1"># Stop the load test</span>
+/opt/skyline/github/skyline/bin/snab_flux_load_test.d<span class="w"> </span>stop
+</pre></div>
+</div>
+<p>You will want to let the load test run for a while and you may want to adjust
+the <a class="reference internal" href="skyline.html#settings.SNAB_FLUX_LOAD_TEST_METRICS" title="settings.SNAB_FLUX_LOAD_TEST_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_FLUX_LOAD_TEST_METRICS</span></code></a> value and restart the test a few
+times.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="vista.html" class="btn btn-neutral float-left" title="Vista" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="external_settings.html" class="btn btn-neutral float-right" title="settings.EXTERNAL_SETTINGS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

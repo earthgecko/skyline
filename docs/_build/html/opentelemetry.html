@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opentelemetry &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Trouble shooting" href="troubleshooting.html" />
+    <link rel="prev" title="Skyline metrics" href="skyline_metrics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">opentelemetry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-observability-data">Monitoring observability data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proceed-with-caution">Proceed with caution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-opentelemetry-experimental-architecture">Skyline opentelemetry experimental architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#future-plans">Future plans</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">opentelemetry</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/opentelemetry.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="opentelemetry">
+<h1>opentelemetry<a class="headerlink" href="#opentelemetry" title="Permalink to this heading"></a></h1>
+<p>Skyline webapp can be configured to send opentelemetry traces to Jaeger or the
+opentelemetry collector (otelcol).</p>
+<p>Currently only the webapp is instrumented with traces for a number of reasons.</p>
+<ul class="simple">
+<li><p>It is experimenting with opentelemetry.</p></li>
+<li><p>Given the nature of Skyline itself, it is assumed that metrics will already be
+being collected for all the Skyline components such as Redis, MariaDB and
+memcached via other instrumentation such as Telegraf and being fed to Skyline
+already.  Therefore instrumenting traces from the other Skyline apps could be
+seen as duplication because there will already be monitoring of metrics on
+things like Redis cmd timings, etc.</p></li>
+</ul>
+<section id="monitoring-observability-data">
+<h2>Monitoring observability data<a class="headerlink" href="#monitoring-observability-data" title="Permalink to this heading"></a></h2>
+<p>Skyline is not only experimenting with the addition of traces but also the
+ingestion of opentelemetry OTLP trace data via Flux and converting service/method
+timings and trace counts into aggregated metrics.  With a view to handle OTLP
+metrics and logging when they became stable.</p>
+<p>This experiment is being done to determine whether it is useful to monitor and
+anomaly detect on the observability data itself.</p>
+</section>
+<section id="proceed-with-caution">
+<h2>Proceed with caution<a class="headerlink" href="#proceed-with-caution" title="Permalink to this heading"></a></h2>
+<p>Should you wish to experiment with Flux trace to metric conversions in your own
+apllication/s first assess the total number of Service and Operation counts in
+Jaegar.  And be very aware that instrumentation telemetry has the ability change
+to <strong>high cardinality</strong> if something in your application design changes.</p>
+</section>
+<section id="skyline-opentelemetry-experimental-architecture">
+<h2>Skyline opentelemetry experimental architecture<a class="headerlink" href="#skyline-opentelemetry-experimental-architecture" title="Permalink to this heading"></a></h2>
+<p>Although Skyline webapp can send traces directly to Jaeger, the experimental
+set up is using the opentelemetry collector as a router to send trace data to
+both Jaeger and Flux.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">webapp</span> <span class="o">-&gt;</span> <span class="n">opentelemetry</span> <span class="n">JaegerExporter</span> <span class="o">-&gt;</span> <span class="n">otelcol</span> <span class="o">|-&gt;</span> <span class="n">Jaeger</span>
+                                                  <span class="o">|-&gt;</span> <span class="n">Flux</span>
+</pre></div>
+</div>
+<p>On receiving trace data Flux will automatically aggregate traces and send the
+trace timings and trace counts per method as metrics to Graphite.  In terms of
+monitoring these metrics we want to monitor them as last known value metrics.
+These are similar to statsd gauge type metrics, which means that in the
+analysis stages, a metric will maintain its last value until a new one is
+received.  This results in monitoring the behaviour of the timings and trace
+counts, rather than the frequency.  This method allows for the monitoring of the
+behaviour of the methods rather than their frequency.</p>
+<p>This allows for the identification of significant changes in either
+the time taken for a method/s to complete and the number of traces in a method,
+e.g. the number of methods called by a method.</p>
+<p>For example let us say the skyline.webapp/rebrow/keys method makes on average 8
+GET Redis method calls and we introduce a change to determine the size of each
+key returned and this results in the method making 116 GET Redis method calls,
+Skyline will trigger an anomaly and alert on that change.  The same is true for
+method timings.</p>
+<p>The objective here being to monitor the behaviour of the methods in the traces
+rather than the frequency of the methods.</p>
+<p>It must be stated that this suited to situations where traces fairly frequently,
+at least a few times a day.  If trace data is sent less than once per day this
+analysis method will not detect changes those methods as there is insufficient
+data.</p>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading"></a></h2>
+<p>To achieve the following you need Skyline/flux, Jaeger and otelcol all running
+on the same server.  Although if you have your own otelcol or Jaeger set up you
+can configure this as it suits your set up.</p>
+<p>opentelemetry trace from webapp can be enabled via settings.py under the
+opentelemetry settings section:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="skyline.html#settings.OTEL_ENABLED" title="settings.OTEL_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_ENABLED</span></code></a> to enable traces from the webapp</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME" title="settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_JAEGEREXPORTER_AGENT_HOST_NAME</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.OTEL_JAEGEREXPORTER_AGENT_PORT" title="settings.OTEL_JAEGEREXPORTER_AGENT_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OTEL_JAEGEREXPORTER_AGENT_PORT</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.WEBAPP_SERVE_JAEGER" title="settings.WEBAPP_SERVE_JAEGER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_SERVE_JAEGER</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.FLUX_OTEL_ENABLED" title="settings.FLUX_OTEL_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_OTEL_ENABLED</span></code></a> to enable Flux to accept OTLP traces from
+otelcol and convert them into metrics which will be namespaced as
+<code class="docutils literal notranslate"><span class="pre">otel.traces.skyline.webapp.*</span></code></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.LAST_KNOWN_VALUE_NAMESPACES" title="settings.LAST_KNOWN_VALUE_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LAST_KNOWN_VALUE_NAMESPACES</span></code></a> if you wish to monitor otel trace
+ensure that the <code class="docutils literal notranslate"><span class="pre">otel.traces</span></code> namespace is declared in this setting.</p></li>
+</ul>
+<p>Further to this the <code class="docutils literal notranslate"><span class="pre">OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES</span></code> ENV
+variable must be set to prevent the opentelemetry.exporter.jaeger.thrift
+JaegerExporter from warning that Data exceeds the max UDP packet size and losing
+data on large traces.</p>
+<p>Therefore ensure that your systemd service file has the following declared:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">Environment</span><span class="o">=</span><span class="nv">OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES</span><span class="o">=</span>True
+</pre></div>
+</div>
+<p>If you start the web service differently ensure that the ENV variable is set:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">OTEL_EXPORTER_JAEGER_AGENT_SPLIT_OVERSIZED_BATCHES</span><span class="o">=</span><span class="s2">&quot;True&quot;</span>
+</pre></div>
+</div>
+<p>The general installation of otelcol and Jaeger is not covered here see the
+respective documentation for each:
+<a class="reference external" href="https://www.jaegertracing.io/docs">https://www.jaegertracing.io/docs</a>
+<a class="reference external" href="https://opentelemetry.io/docs/collector/">https://opentelemetry.io/docs/collector/</a></p>
+<p>Skyline specific configurations for otelcol and Jaeger are as follows.</p>
+<p>For an example config.yaml for otelcol to achieve the described set up see:
+<a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/etc/otel.config.yaml.example">https://github.com/earthgecko/skyline/blob/master/etc/otel.config.yaml.example</a></p>
+<p>It is possible to serve Jaeger authenticated via the Skyline nginx config as a
+Skyline endpoint if you do not want to expose Jaeger or set up an another vhost
+to handle Jaeger individually.  See:
+<a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example">https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example</a></p>
+<p>This assumes that there is a local instance of Jaeger running with mostly default
+Jaeger configuration.  However do note if you want to serve Jaeger via the
+Skyline UI <code class="docutils literal notranslate"><span class="pre">--query.base-path=/jaeger</span></code> must be specified, e.g. an all-in-one
+instance with memory-mode:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/jaeger/jaeger-1.32.0-linux-amd64/jaeger-all-in-one<span class="w"> </span>--memory.max-traces<span class="w"> </span><span class="m">10000</span><span class="w"> </span>--query.base-path<span class="o">=</span>/jaeger<span class="w"> </span>&gt;&gt;<span class="w"> </span>/var/log/jaeger.log<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">&amp;</span>
+</pre></div>
+</div>
+</section>
+<section id="future-plans">
+<h2>Future plans<a class="headerlink" href="#future-plans" title="Permalink to this heading"></a></h2>
+<p>Tracing will be added to the other Skyline apps as appropriate.  One possible
+use case is instrumenting SQL traces because the granular timings on SQL queries
+is not something that the current MariaDB metrics cover in a manner which can be
+easily monitored.</p>
+<p>Currently the Redis metric instrumentation is sufficient to monitor the timings
+of all Redis methods in use and therefore to reduce bloat, tracing
+instrumentation will probably not be implemented in the Redis methods context in
+any other apps apart from the webapp itself.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skyline_metrics.html" class="btn btn-neutral float-left" title="Skyline metrics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="troubleshooting.html" class="btn btn-neutral float-right" title="Trouble shooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

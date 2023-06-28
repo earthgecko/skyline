@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>database &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>database &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
@@ -128,69 +98,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="index.html">Module code</a> &raquo;</li>
-        
-      <li>database</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">database</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for database</h1><div class="highlight"><pre>
-<span></span><span class="c1"># coding=utf-8</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">database.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="p">(</span>
@@ -199,21 +134,66 @@
 
 <span class="kn">import</span> <span class="nn">settings</span>
 
+<span class="c1"># @added 20220405 - Task #4514: Integrate opentelemetry</span>
+<span class="c1">#                   Feature #4516: flux - opentelemetry traces</span>
+<span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTEL_ENABLED</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">outer_err</span><span class="p">:</span>
+    <span class="n">OTEL_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+
 
 <div class="viewcode-block" id="get_engine"><a class="viewcode-back" href="../skyline.html#database.get_engine">[docs]</a><span class="k">def</span> <span class="nf">get_engine</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    # @added 20161209 - Branch #922: ionosphere</span>
 <span class="sd">    #                   Task #1658: Patterning Skyline Ionosphere</span>
 <span class="sd">    # Use SQLAlchemy, mysql.connector is still around but starting the</span>
 <span class="sd">    # move to SQLAlchemy now that all the webapp Ionosphere SQLAlchemy patterns</span>
 <span class="sd">    # work</span>
+
+<span class="sd">    Initialize a sqlalchemy engine.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">try</span><span class="p">:</span>
+
+        <span class="c1"># @added 20220405 - Task #4514: Integrate opentelemetry</span>
+        <span class="c1">#                   Feature #4516: flux - opentelemetry traces</span>
+        <span class="k">if</span> <span class="n">OTEL_ENABLED</span> <span class="ow">and</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">opentelemetry.instrumentation.sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemyInstrumentor</span>
+
         <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span>
             <span class="s1">&#39;mysql+mysqlconnector://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">),</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">))</span>
+
+        <span class="c1"># @added 20220405 - Task #4514: Integrate opentelemetry</span>
+        <span class="c1">#                   Feature #4516: flux - opentelemetry traces</span>
+        <span class="k">if</span> <span class="n">OTEL_ENABLED</span> <span class="ow">and</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+
+            <span class="c1"># @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry</span>
+            <span class="n">instrumented</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">instrumented</span> <span class="o">=</span> <span class="n">SQLAlchemyInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">is_instrumented_by_opentelemetry</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+                <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_engine - SQLAlchemyInstrumentor().is_instrumented_by_opentelemetry failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">instrumented</span><span class="p">:</span>
+                <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+                <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_engine - starting SQLAlchemyInstrumentor&#39;</span><span class="p">)</span>
+
+                <span class="n">SQLAlchemyInstrumentor</span><span class="p">()</span><span class="o">.</span><span class="n">instrument</span><span class="p">(</span>
+                    <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+                <span class="p">)</span>
+
         <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="s1">&#39;got MySQL engine&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
@@ -225,8 +205,40 @@
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 
 
-<div class="viewcode-block" id="ionosphere_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="c1"># @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy</span>
+<span class="c1"># Add a global engine_disposal method</span>
+<div class="viewcode-block" id="engine_disposal"><a class="viewcode-back" href="../skyline.html#database.engine_disposal">[docs]</a><span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dispose of the sqlalchemy engine.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: engine_disposal :: calling engine.dispose()&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="ionosphere_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the ionosphere table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -278,7 +290,17 @@
 
 
 <div class="viewcode-block" id="metrics_table_meta"><a class="viewcode-back" href="../skyline.html#database.metrics_table_meta">[docs]</a><span class="k">def</span> <span class="nf">metrics_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the metrics table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -296,7 +318,17 @@
 
 
 <div class="viewcode-block" id="anomalies_table_meta"><a class="viewcode-back" href="../skyline.html#database.anomalies_table_meta">[docs]</a><span class="k">def</span> <span class="nf">anomalies_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the anomalies table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -320,7 +352,17 @@
 <span class="c1"># be reviewed.  It could get big and perhaps should be optional</span>
 
 <div class="viewcode-block" id="ionosphere_matched_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_matched_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_matched_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the ionosphere_matched table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -339,7 +381,17 @@
 
 <span class="c1"># @added 20170305 - Feature #1960: ionosphere_layers</span>
 <div class="viewcode-block" id="ionosphere_layers_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_layers_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_layers_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the ionosphere_layers table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -357,7 +409,17 @@
 
 
 <div class="viewcode-block" id="layers_algorithms_table_meta"><a class="viewcode-back" href="../skyline.html#database.layers_algorithms_table_meta">[docs]</a><span class="k">def</span> <span class="nf">layers_algorithms_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the layers_algorithms table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -375,7 +437,17 @@
 
 
 <div class="viewcode-block" id="ionosphere_layers_matched_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_layers_matched_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_layers_matched_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the ionosphere_layers_matched table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -394,7 +466,17 @@
 
 <span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
 <div class="viewcode-block" id="luminosity_table_meta"><a class="viewcode-back" href="../skyline.html#database.luminosity_table_meta">[docs]</a><span class="k">def</span> <span class="nf">luminosity_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the luminosity table.</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -409,52 +491,269 @@
         <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the luminosity table meta&#39;</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20200928 - Task #3748: POC SNAB</span>
+<span class="c1">#                   Branch #3068: SNAB</span>
+<div class="viewcode-block" id="snab_table_meta"><a class="viewcode-back" href="../skyline.html#database.snab_table_meta">[docs]</a><span class="k">def</span> <span class="nf">snab_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the snab table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the snab table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">snab_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">snab_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;snab&#39;</span><span class="p">,</span> <span class="n">snab_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">snab_table</span><span class="p">,</span> <span class="s1">&#39;snab_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the snab table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20210412 - Feature #4014: Ionosphere - inference</span>
+<span class="c1">#                   Branch #3590: inference</span>
+<div class="viewcode-block" id="motifs_matched_table_meta"><a class="viewcode-back" href="../skyline.html#database.motifs_matched_table_meta">[docs]</a><span class="k">def</span> <span class="nf">motifs_matched_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the motifs_matched table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the motifs_matched table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">motifs_matched_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">motifs_matched_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;motifs_matched&#39;</span><span class="p">,</span> <span class="n">motifs_matched_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">motifs_matched_table</span><span class="p">,</span> <span class="s1">&#39;snab_table meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the motifs_matched table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20210414 - Feature #4014: Ionosphere - inference</span>
+<span class="c1">#                   Branch #3590: inference</span>
+<div class="viewcode-block" id="not_anomalous_motifs_table_meta"><a class="viewcode-back" href="../skyline.html#database.not_anomalous_motifs_table_meta">[docs]</a><span class="k">def</span> <span class="nf">not_anomalous_motifs_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the not_anomalous_motifs table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the not_anomalous_motifs table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">not_anomalous_motifs_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">not_anomalous_motifs_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;not_anomalous_motifs&#39;</span><span class="p">,</span> <span class="n">not_anomalous_motifs_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">not_anomalous_motifs_table</span><span class="p">,</span> <span class="s1">&#39;not_anomalous_motifs meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the not_anomalous_motifs table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20210805 - Feature #4164: luminosity - cloudbursts</span>
+<div class="viewcode-block" id="cloudburst_table_meta"><a class="viewcode-back" href="../skyline.html#database.cloudburst_table_meta">[docs]</a><span class="k">def</span> <span class="nf">cloudburst_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the cloudburst table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the cloudburst table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cloudburst_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">cloudburst_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;cloudburst&#39;</span><span class="p">,</span> <span class="n">cloudburst_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cloudburst_table</span><span class="p">,</span> <span class="s1">&#39;cloudburst meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the cloudburst table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20210805 - Feature #4164: luminosity - cloudbursts</span>
+<div class="viewcode-block" id="cloudbursts_table_meta"><a class="viewcode-back" href="../skyline.html#database.cloudbursts_table_meta">[docs]</a><span class="k">def</span> <span class="nf">cloudbursts_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the cloudbursts table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the cloudbursts table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cloudbursts_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">cloudbursts_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;cloudbursts&#39;</span><span class="p">,</span> <span class="n">cloudbursts_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cloudbursts_table</span><span class="p">,</span> <span class="s1">&#39;cloudbursts meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the cloudbursts table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships</span>
+<div class="viewcode-block" id="metric_group_table_meta"><a class="viewcode-back" href="../skyline.html#database.metric_group_table_meta">[docs]</a><span class="k">def</span> <span class="nf">metric_group_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the metric_group table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the metric_group table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_group_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">metric_group_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;metric_group&#39;</span><span class="p">,</span> <span class="n">metric_group_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metric_group_table</span><span class="p">,</span> <span class="s1">&#39;metric_group meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the metric_group table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships</span>
+<div class="viewcode-block" id="metric_group_info_table_meta"><a class="viewcode-back" href="../skyline.html#database.metric_group_info_table_meta">[docs]</a><span class="k">def</span> <span class="nf">metric_group_info_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the metric_group_info table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the metric_group_info table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_group_info_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">metric_group_info_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;metric_group_info&#39;</span><span class="p">,</span> <span class="n">metric_group_info_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metric_group_info_table</span><span class="p">,</span> <span class="s1">&#39;metric_group_info meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the metric_group_info table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20221026 - Feature #4708: ionosphere - store and cache fp minmax data</span>
+<span class="c1"># Added table to store the results of minmax scaled features profiles.</span>
+<div class="viewcode-block" id="ionosphere_minmax_table_meta"><a class="viewcode-back" href="../skyline.html#database.ionosphere_minmax_table_meta">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_minmax_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Autoload the ionosphere_minmax table.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :param engine: the sqlalchemy engine object</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type engine: object</span>
+<span class="sd">    :return: table_object, fail_msg, trace</span>
+<span class="sd">    :rtype: tuple</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="c1"># Create the ionosphere_minmax_info table MetaData</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_minmax_meta</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+        <span class="n">ionosphere_minmax_table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="s1">&#39;ionosphere_minmax&#39;</span><span class="p">,</span> <span class="n">ionosphere_minmax_meta</span><span class="p">,</span> <span class="n">autoload</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autoload_with</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ionosphere_minmax_table</span><span class="p">,</span> <span class="s1">&#39;ionosphere_minmax meta reflected OK&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to reflect the ionosphere_minmax table meta&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

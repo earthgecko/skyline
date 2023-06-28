@@ -28,6 +28,22 @@ skyline.luminosity.classify\_metrics module
    :undoc-members:
    :show-inheritance:
 
+skyline.luminosity.cloudburst module
+------------------------------------
+
+.. automodule:: luminosity.cloudburst
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.luminosity.cloudbursts module
+-------------------------------------
+
+.. automodule:: luminosity.cloudbursts
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.luminosity.luminosity module
 ------------------------------------
 
@@ -40,6 +56,14 @@ skyline.luminosity.process\_correlations module
 -----------------------------------------------
 
 .. automodule:: luminosity.process_correlations
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.luminosity.related\_metrics module
+------------------------------------------
+
+.. automodule:: luminosity.related_metrics
    :members:
    :undoc-members:
    :show-inheritance:

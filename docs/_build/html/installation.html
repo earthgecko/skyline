@@ -1,117 +1,79 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Installation &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Upgrading" href="upgrading/index.html" />
     <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#intended-audience">Intended audience</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-the-components-do">What the components do</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#sudo"><code class="docutils literal notranslate"><span class="pre">sudo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-configuration">Skyline configuration</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#skyline-configuration">Skyline configuration</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dawn">Dawn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ouickstart-dawn">Ouickstart - Dawn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-installation">Manual Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sudo"><code class="docutils literal notranslate"><span class="pre">sudo</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#python-virtualenv">Python virtualenv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#firewall">Firewall</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#redis">Redis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#memcached">memcached</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-directories">Skyline directories</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-and-dependencies-install">Skyline and dependencies install</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#apache-reverse-proxy">Apache reverse proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nginx-reverse-proxy">nginx reverse proxy</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-database">Skyline database</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-settings">Skyline settings</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#starting-and-testing-the-skyline-installation">Starting and testing the Skyline installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#configure-graphite-to-send-data-to-skyline">Configure Graphite to send data to Skyline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lead-time-to-starting-analysis">Lead time to starting analysis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#other-skyline-components">Other Skyline components</a></li>
 </ul>
 </li>
@@ -135,11 +97,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -147,6 +116,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -155,87 +127,46 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Installation</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
 <p>This is going to take some time.</p>
-<div class="section" id="intended-audience">
-<h2>Intended audience<a class="headerlink" href="#intended-audience" title="Permalink to this headline">¶</a></h2>
-<p>Skyline is not really a <code class="docutils literal notranslate"><span class="pre">localhost</span></code> application, it needs lots of data, unless
-you have a <code class="docutils literal notranslate"><span class="pre">localhost</span></code> Graphite or pickle Graphite to your localhost, however
-Skyline and all its components could be run on localhost if you wanted but it
-is not recommended.</p>
+<section id="intended-audience">
+<h2>Intended audience<a class="headerlink" href="#intended-audience" title="Permalink to this heading"></a></h2>
+<p>Skyline is not a <code class="docutils literal notranslate"><span class="pre">localhost</span></code> application that runs on your laptop it is a
+server application.</p>
 <p>Given the specific nature of Skyline, it is assumed that the audience will have
 a certain level of technical knowledge, e.g. it is assumed that the user will be
 familiar with the installation, configuration, operation and security practices
 and considerations relating to the following components:</p>
 <ul class="simple">
-<li><p>Graphite</p></li>
+<li><p>Graphite (and/or VictoriaMetrics)</p></li>
 <li><p>Redis</p></li>
-<li><p>MySQL</p></li>
-<li><p>Apache (or nginx although there are no examples here)</p></li>
+<li><p>MariaDB</p></li>
+<li><p>nginx</p></li>
 <li><p>memcached</p></li>
 </ul>
 <p>However, these types of assumptions even if stated are not useful or helpful to
@@ -245,83 +176,136 @@ configurations of things that are directly related Skyline.  Although it cannot
 possibly cover all possible set ups or scenarios, it does describe
 recommendations in terms of configurations of the various components and how and
 where they should be run in relation to Skyline.  There are no cfengine, puppet,
-chef or ansible patterns here.</p>
+chef or ansible patterns here, nor helm charts, yaml or dockerfiles.</p>
+<p>Because of the nature of the underlying Python libraries and specifically the
+data science libraries and large dependencies and versions tree, Skyline pins
+to absolute versions of packages and without isolation, stability and
+repeatability would be impossible.  It is for this reason that Skyline is very
+complicated and complex to build and upgrade.  Upgrading is generally doing
+a full new Python and virtualenv install and swapping the directories out.</p>
+<p>There are two methods of installation described here:</p>
+<ul class="simple">
+<li><p>The quickstart standalone build script</p></li>
+<li><p>Manual install</p></li>
+</ul>
 <p>The documentation is aimed at installing Skyline securely by default.  It is
 possible to run Skyline very insecurely, however this documentation does not
-specify how to do that.  Both the set up and documentation are verbose.  Setting
-up Skyline takes a while.</p>
+specify how to do that.  Both the set up and documentation are verbose (but
+do not cover everything).  Setting up Skyline takes a while.</p>
+<p>The quickstart installation script takes about 30 minutes to run.  It downloads
+and builds Python, creates a skyline system user, provisions a virtualenv,
+downloads, builds, configures and installs Redis, installs and configures
+MariaDB, install memcached, nginx, clone skyline, install all the deps, deploys
+the DB schema, installs all the components of Graphite, deploys a nginx reverse
+proxy config for Skyline and Graphite, provisions systemd unit files and starts
+the Skyline and Graphite services.  Optionally it can also install Prometheus
+and VictoriaMetrics as well.</p>
 <p>Skyline’s default settings and documentation are aimed to run behind a SSL
-terminated and authenticated reverse proxy and use Redis authentication.  This
+terminated and authenticated reverse proxy and uses Redis authentication.  This
 makes the installation process more tedious, but it means that all these
 inconvenient factors are not left as an after thought or added to some TODO list
 or issue when you decide after trying Skyline, “Yes! I want Skyline, this is
 cool”.</p>
 <p>For notes regarding automation and configuration management see the section at
 the end of this page.</p>
-</div>
-<div class="section" id="what-the-components-do">
-<h2>What the components do<a class="headerlink" href="#what-the-components-do" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="what-the-components-do">
+<h2>What the components do<a class="headerlink" href="#what-the-components-do" title="Permalink to this heading"></a></h2>
 <ul class="simple">
-<li><p>Graphite - sends metric data to Skyline Horizon via a pickle.  Graphite is a
-separate application that will probably be running on another server, although
-Graphite could run on the same server, in a production environment it would
-probably be a remote machine or container.  Graphite is not part of Skyline.</p></li>
+<li><p>Graphite - is a timeseries database (TSDB) that receives metrics for machines
+and applications, stores the metric data and sends the metric data to the
+Skyline Horizon app via a pickle (Python object serialization).  Graphite is a
+separate application that will probably be running on another server in a
+large production deployment, although Graphite can run on the same server as
+Skyline.  Graphite is not part of Skyline, however the standalone build script
+does install Graphite by default.</p></li>
+<li><p>VictoriaMetrics - (optional) if Skyline is receiving and analysing Prometheus
+format or labelled metrics via Skyline flux, VictoriaMetrics is used as the
+store.  Skyline can used both Graphite and VictoriaMetrics simultaneously.</p></li>
 <li><p>Redis - stores <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> seconds (usefully 24 hours worth)
 of time series data that Graphite sends to Skyline Horizon and Horizon writes
 the data to Redis.  Skyline Analyzer pulls the data from Redis for analysis.
 Redis must run on the same host as Skyline.  It may be possible to run Redis
 in another container or VM that is on the same host.</p></li>
-<li><p>MySQL/mariadb - stores data about anomalies and time series features profile
-fingerprints for matching and learning things that are not anomalous.  MySQL
+<li><p>MariaDB - stores data about anomalies and time series features profile
+fingerprints for matching and learning things that are not anomalous.  mariadb
 can run on the same host as Skyline or it can be remote.  Running the DB
-remotely will make the Skyline UI a bit slower.</p></li>
-<li><p>Apache (or nginx) - Skyline serves the webapp via gunicorn and Apache handles
-endpoint routing, SSL termination and basic http auth.  Ideally Apache should
-be run on the same host as Skyline.</p></li>
-<li><p>memcached - caches Ionosphere MySQL data, memcached should ideally be run on
+remotely will make the Skyline a little bit slower.</p></li>
+<li><p>nginx - Skyline serves the webapp and flux via gunicorn and nginx handles
+endpoint routing, SSL termination and basic http auth.  Ideally the reverse
+proxy should be run on the same host as Skyline.</p></li>
+<li><p>memcached - caches Ionosphere SQL data, memcached should ideally be run on
 the same host as Skyline.</p></li>
 </ul>
-<div class="section" id="sudo">
-<h3><code class="docutils literal notranslate"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h3>
-<p>Use <code class="docutils literal notranslate"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
+<section id="skyline-configuration">
+<h3>Skyline configuration<a class="headerlink" href="#skyline-configuration" title="Permalink to this heading"></a></h3>
+<p>All Skyline configuration is handled in <code class="docutils literal notranslate"><span class="pre">skyline/settings.py</span></code> and in this
+documentation configuration options are referred to via their docstrings name
+e.g. <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> which links to their description in this
+documentation.</p>
+<p>There are lots of settings in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>, 342 at last count, do not feel
+intimidated by this. The default settings should be adequate and reasonable for
+starting out with. The settings that you must change and take note of are all
+documented further on this page and are labelled with <code class="docutils literal notranslate"><span class="pre">[USER_DEFINED]</span></code> in
+the <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You will encounter settings that are described as ADVANCED
+FEATURE or EXPERIMENTAL.  Many of these settings are not necessarily fully
+described or even partially documented as they require a deeper understanding
+of the Skyline internals, generally in terms of how Skyline pipelines, analyses
+and alerts on the data, in order to understand their use, implementation and
+execution.  This knowledge comes from use and experience and the documentation
+cannot describe every aspect of all the highly configurable manners in which
+Skyline can be run.  Further to this any feature labelled with ADVANCED FEATURE
+or EXPERIMENTAL should be considered as not stable and may change rapidly with
+backwards incompatible changes or not entirely fleshed out or used. One
+exception to this being cluster related settings which can be considered
+latest and should be stable.</p>
 </div>
-</div>
-<div class="section" id="steps">
-<h2>Steps<a class="headerlink" href="#steps" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="ouickstart-dawn">
+<h2>Ouickstart - Dawn<a class="headerlink" href="#ouickstart-dawn" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><cite>utils/dawn/skyline.dawn.sh</cite> is a set up script to deploy a standalone Skyline
+and Graphite instance, it is for testing purposes and if used to deploy a
+permanent instance the recommendations regarding security and configuration
+should be followed, see <a class="reference external" href="development/dawn.html">Dawn</a> section.</p></li>
+<li><p>Or if you just wish to review the build steps, component builds and installs
+described below, the steps of the build script steps are described in
+<a class="reference external" href="development/dawn.html">Dawn</a> section.</p></li>
+</ul>
+</section>
+<section id="manual-installation">
+<h2>Manual Installation<a class="headerlink" href="#manual-installation" title="Permalink to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>All the documentation and testing is based on running Skyline in a
-Python-3.8.3 virtualenv, if you choose to deploy Skyline another way, you are
+Python-3.8.17 virtualenv, if you choose to deploy Skyline another way, you are
 on your own.  Although it is possible to run Skyline in a different type of
 environment, it does not lend itself to repeatability or a common known state.</p>
 </div>
-<div class="section" id="skyline-configuration">
-<h3>Skyline configuration<a class="headerlink" href="#skyline-configuration" title="Permalink to this headline">¶</a></h3>
-<p>All Skyline configuration is handled in <code class="docutils literal notranslate"><span class="pre">skyline/settings.py</span></code> and in this
-documentation configuration options are referred to via their docstrings name
-e.g. <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> which links to their description in the
-documentation.</p>
-</div>
-<div class="section" id="dawn">
-<h3>Dawn<a class="headerlink" href="#dawn" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li><p>Should you wish to review the build steps, component builds and installs
-described below, there is a convenience build script for <strong>testing</strong> purposes
-<strong>only</strong> in <cite>utils/dawn/skyline.dawn.sh</cite> see
-<a class="reference external" href="development/dawn.html">Dawn</a> section</p></li>
-</ul>
-</div>
-<div class="section" id="python-virtualenv">
-<h3>Python virtualenv<a class="headerlink" href="#python-virtualenv" title="Permalink to this headline">¶</a></h3>
+<p>Considering Skyline is composed on a number of common open source applications
+the manual installation described here does not cover installing these
+applications other than describing the Skyline specific configurations that they
+require.  Note that deploying Skyline via configuration management is
+non-trivial due to the number of components and configurations involved.</p>
+<section id="sudo">
+<h3><code class="docutils literal notranslate"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this heading"></a></h3>
+<p>Use <code class="docutils literal notranslate"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
+</section>
+<section id="python-virtualenv">
+<h3>Python virtualenv<a class="headerlink" href="#python-virtualenv" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>The first part of the installation is to build Python and create a
-Python-3.8.3 virtualenv for Skyline to run in.  For this first step in the
+Python-3.8.17 virtualenv for Skyline to run in.  For this first step in the
 installation process see and follow the steps laid out in
 <a class="reference external" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></p></li>
 </ul>
-</div>
-<div class="section" id="firewall">
-<h3>Firewall<a class="headerlink" href="#firewall" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="firewall">
+<h3>Firewall<a class="headerlink" href="#firewall" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Please set up all the firewall rules to restrict access to the following
 <strong>before</strong> you continue to install the other components:</p>
@@ -329,10 +313,10 @@ installation process see and follow the steps laid out in
 <li><p>The IP address and port being used to reverse proxy the Webapp e.g.
 &lt;YOUR_SERVER_IP_ADDRESS&gt;:443, ensure that this is only accessible to
 specified IPs in iptables/ip6tables (further these addresses should also be
-added to the reverse proxy conf as <code class="docutils literal notranslate"><span class="pre">Allow</span> <span class="pre">from</span></code> defines when you create
-the reverse proxy conf file).</p></li>
-<li><p>The IP address and port being used by MySQL/mariadb, if you are not binding
-MySQL/mariadb to 127.0.0.1 only, ensure that the MySQL/mariadb port declared
+added to the reverse proxy conf as <code class="docutils literal notranslate"><span class="pre">allow</span></code> defines when you create the
+nginx reverse proxy conf file).</p></li>
+<li><p>The IP address and port being used by MariaDB, if you are not binding
+MariaDB to 127.0.0.1 only, ensure that the MariaDB port declared
 in <a class="reference internal" href="skyline.html#settings.PANORAMA_DBPORT" title="settings.PANORAMA_DBPORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBPORT</span></code></a> (default 3306) is only accessible to
 specified IPs in iptables/ip6tables</p></li>
 <li><p>Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
@@ -347,17 +331,23 @@ should still be bound to 127.0.0.1 only, as Skyline makes an API endpoint
 available to remote Skyline instances for any required remote Redis data
 retrieval and preprocessing.</p></li>
 <li><p>If you are going to run Vista and Flux, ensure that the Skyline IP is
-allowed to connect to the Graphite node on the <cite>PICKLE_RECEIVER_PORT</cite></p></li>
+allowed to connect to the Graphite node on the <cite>[relay]</cite> <code class="docutils literal notranslate"><span class="pre">PICKLE_RECEIVER_PORT</span></code></p></li>
 <li><p>Please ensure you handle all of these with iptables AND ip6tables (or the
 equivalent) <strong>before continuing</strong>.</p></li>
 </ul>
 </li>
 </ul>
-</div>
-<div class="section" id="redis">
-<h3>Redis<a class="headerlink" href="#redis" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="redis">
+<h3>Redis<a class="headerlink" href="#redis" title="Permalink to this heading"></a></h3>
 <ul class="simple">
-<li><p>Install Redis - see <a class="reference external" href="http://redis.io/">Redis.io</a></p></li>
+<li><p>Install Redis - see <a class="reference external" href="https://redis.io/">Redis.io</a> or Redis Stack Server (see
+<a class="reference external" href="https://redis.io/docs/stack/get-started/">Redis.io Redis Stack Server</a>) if
+you want to handle labelled metrics, like InfluxDB or Prometheus metrics.</p></li>
+<li><p>Note Redis is a primary component of Skyline and if you choose to install Redis
+via yum/dnf or apt using the Redis packages.redis.io repos these can often
+provide release candidate (RC) packages.  It is advisable to use a stable
+version wherever possible.</p></li>
 <li><p>Ensure that you review <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a></p></li>
 <li><p>Ensure Redis has socket enabled <strong>with the following permissions</strong> in your
 redis.conf</p></li>
@@ -380,71 +370,73 @@ instances, Skyline gets remote Redis data preprocessed via a Skyline API so
 there is no need to bind Redis to any other IP.</p></li>
 <li><p>Start Redis</p></li>
 </ul>
-</div>
-<div class="section" id="memcached">
-<h3>memcached<a class="headerlink" href="#memcached" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="memcached">
+<h3>memcached<a class="headerlink" href="#memcached" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Install memcached and start memcached see <a class="reference external" href="https://memcached.org/">memcached.org</a></p></li>
 <li><p>Ensure that you start memcached only bound to 127.0.0.1 by passing the daemon
 the option <code class="docutils literal notranslate"><span class="pre">-l</span> <span class="pre">127.0.0.1</span></code>, Skyline only requires memcached locally.</p></li>
 </ul>
-</div>
-<div class="section" id="skyline-directories">
-<h3>Skyline directories<a class="headerlink" href="#skyline-directories" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="skyline-directories">
+<h3>Skyline directories<a class="headerlink" href="#skyline-directories" title="Permalink to this heading"></a></h3>
 <ul class="simple">
+<li><p>Create the skyline user and group with the following options <code class="docutils literal notranslate"><span class="pre">--system</span> <span class="pre">--shell</span> <span class="pre">/sbin/nologin</span> <span class="pre">--home-dir</span> <span class="pre">/opt/skyline</span></code></p></li>
 <li><p>Make the required directories</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /var/log/skyline
-mkdir /var/run/skyline
-mkdir /var/dump
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>/var/log/skyline
+mkdir<span class="w"> </span>/var/run/skyline
+mkdir<span class="w"> </span>/var/dump
 
-mkdir -p /opt/skyline/panorama/check
-mkdir -p /opt/skyline/mirage/check
-mkdir -p /opt/skyline/crucible/check
-mkdir -p /opt/skyline/crucible/data
-mkdir -p /opt/skyline/ionosphere/check
-mkdir -p /opt/skyline/flux/processed_uploads
-mkdir /etc/skyline
-mkdir /tmp/skyline
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/panorama/check
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/mirage/check
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/crucible/check
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/crucible/data
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/ionosphere/check
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/flux/processed_uploads
+mkdir<span class="w"> </span>/etc/skyline
+mkdir<span class="w"> </span>/tmp/skyline
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Ensure you provide the appropriate ownership and permissions to the
-above specified directories for the user you wish to run the Skyline process
-as.</p>
+above specified directories.</p>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Example using user and group Skyline</span>
-chown skyline:skyline /var/log/skyline
-chown skyline:skyline /var/run/skyline
-chown skyline:skyline /var/dump
-chown -R skyline:skyline /opt/skyline/panorama
-chown -R skyline:skyline /opt/skyline/mirage
-chown -R skyline:skyline /opt/skyline/crucible
-chown -R skyline:skyline /opt/skyline/ionosphere
-chown -R skyline:skyline /opt/skyline/flux
-chown skyline:skyline /tmp/skyline
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span>/var/log/skyline
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span>/var/run/skyline
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span>/var/dump
+chown<span class="w"> </span>-R<span class="w"> </span>skyline:skyline<span class="w"> </span>/opt/skyline/panorama
+chown<span class="w"> </span>-R<span class="w"> </span>skyline:skyline<span class="w"> </span>/opt/skyline/mirage
+chown<span class="w"> </span>-R<span class="w"> </span>skyline:skyline<span class="w"> </span>/opt/skyline/crucible
+chown<span class="w"> </span>-R<span class="w"> </span>skyline:skyline<span class="w"> </span>/opt/skyline/ionosphere
+chown<span class="w"> </span>-R<span class="w"> </span>skyline:skyline<span class="w"> </span>/opt/skyline/flux
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span>/tmp/skyline
 </pre></div>
 </div>
-</div>
-<div class="section" id="skyline-and-dependencies-install">
-<h3>Skyline and dependencies install<a class="headerlink" href="#skyline-and-dependencies-install" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="skyline-and-dependencies-install">
+<h3>Skyline and dependencies install<a class="headerlink" href="#skyline-and-dependencies-install" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>git clone Skyline (git should have been installed in the <a class="reference external" href="running-in-python-virtualenv.html">Running in Python
 virtualenv</a> section) and it is
-recommended to then git checkout the commit reference of the latest stable
-release.</p></li>
+recommended to then git checkout the commit reference or tag of the latest
+stable release.</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p /opt/skyline/github
-<span class="nb">cd</span> /opt/skyline/github
-git clone https://github.com/earthgecko/skyline.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/github
+<span class="nb">cd</span><span class="w"> </span>/opt/skyline/github
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/earthgecko/skyline.git
 <span class="c1"># If you wish to switch to a specific commit or the latest release</span>
 <span class="c1">#cd /opt/skyline/github/skyline</span>
 <span class="c1">#git checkout &lt;COMMITREF&gt;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/opt/skyline/github/skyline/skyline/webapp/static/dump
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span>-R<span class="w"> </span>/opt/skyline/github/skyline/skyline/webapp/static/dump
 </pre></div>
 </div>
 <ul class="simple">
-<li><p>Once again using the Python-3.8.3 virtualenv,  install the requirements using
+<li><p>Once again using the Python-3.8.17 virtualenv,  install the requirements using
 the virtualenv pip, this can take some time.</p></li>
 </ul>
 <div class="admonition warning">
@@ -461,93 +453,92 @@ that it is harder for you to err.</p>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py383&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py3817&quot;</span>
 
-<span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nb">source</span> bin/activate
+<span class="c1"># Ensure a symlink exists to the virtualenv</span>
+ln<span class="w"> </span>-sf<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/skyline&quot;</span>
 
-<span class="c1"># As of statsmodels 0.9.0 numpy, et al need to be installed before</span>
-<span class="c1"># statsmodels in requirements</span>
-<span class="c1"># https://github.com/statsmodels/statsmodels/issues/4654</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^numpy\|^scipy\|^patsy&quot;</span> <span class="p">|</span> tr <span class="s1">&#39;\n&#39;</span> <span class="s1">&#39; &#39;</span><span class="k">)</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install <span class="k">$(</span>cat /opt/skyline/github/skyline/requirements.txt <span class="p">|</span> grep <span class="s2">&quot;^pandas&quot;</span><span class="k">)</span>
-
-<span class="c1"># This can take lots of minutes...</span>
-bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> install -r /opt/skyline/github/skyline/requirements.txt
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>/opt/skyline/github/skyline/requirements.txt
 
 deactivate
+
+<span class="c1"># Fix python-daemon=&gt;2.x - which fails to run on Python 3 (numerous PRs are waiting</span>
+<span class="c1"># to fix it https://pagure.io/python-daemon/pull-requests), however will not be</span>
+<span class="c1"># as runner is to be deprecated, so in the future an alternative solution will be</span>
+<span class="c1"># implemented</span>
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python3.8/site-packages/daemon/runner.py&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python3.8/site-packages/daemon/runner.py.bak&quot;</span>
+<span class="c1"># Show minor change related to unbuffered bytes I/O - w+t to wb+</span>
+diff<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python3.8/site-packages/daemon/runner.py.bak&quot;</span><span class="w"> </span>/opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py
+<span class="c1"># Deploy patched version to fix</span>
+cat<span class="w"> </span>/opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python3.8/site-packages/daemon/runner.py&quot;</span>
+
+<span class="c1"># Deploy the systemd files</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>find<span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system<span class="w"> </span>-type<span class="w"> </span>f<span class="k">)</span>
+<span class="k">do</span>
+<span class="w">  </span>/bin/cp<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span><span class="w"> </span>/etc/systemd/system/
+<span class="k">done</span>
+systemctl<span class="w"> </span>daemon-reload
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>Copy the <code class="docutils literal notranslate"><span class="pre">skyline.conf</span></code> and edit the <code class="docutils literal notranslate"><span class="pre">USE_PYTHON</span></code> as appropriate to your
 set up if it is not using PATH
-<code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv/projects/skyline-py383/bin/python3.8</span></code></p></li>
+<code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv/projects/skyline-py3817/bin/python3.8</span></code></p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp /opt/skyline/github/skyline/etc/skyline.conf /etc/skyline/skyline.conf
-vi /etc/skyline/skyline.conf  <span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>/opt/skyline/github/skyline/etc/skyline.conf<span class="w"> </span>/etc/skyline/skyline.conf
+vi<span class="w"> </span>/etc/skyline/skyline.conf<span class="w">  </span><span class="c1"># Set USE_PYTHON as appropriate to your setup</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="apache-reverse-proxy">
-<h3>Apache reverse proxy<a class="headerlink" href="#apache-reverse-proxy" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="nginx-reverse-proxy">
+<h3>nginx reverse proxy<a class="headerlink" href="#nginx-reverse-proxy" title="Permalink to this heading"></a></h3>
+<p>Serving the Webapp via gunicorn with nginx as a reverse proxy.  Below highlights
+the nginx resources and set up the is required.</p>
 <ul class="simple">
-<li><p>OPTIONAL but <strong>recommended</strong>, serving the Webapp via gunicorn with Apache or
-nginx reverse proxy.  Below highlights Apache but similar steps are required
-with nginx.</p>
-<ul>
-<li><p>Setup Apache (httpd) and see the example configuration file in your cloned
-directory <code class="docutils literal notranslate"><span class="pre">/opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example</span></code>
-for nginx see <code class="docutils literal notranslate"><span class="pre">/opt/skyline/github/skyline/etc/skyline.nginx.conf.d.example</span></code>
-modify all the <code class="docutils literal notranslate"><span class="pre">&lt;YOUR_</span></code> variables as appropriate for you environment - see
-<a class="reference external" href="webapp.html#apache-and-gunicorn">Apache and gunicorn</a></p></li>
-<li><p>Create a SSL certificate and update the SSL configurations in the Skyline
-Apache config (or your reverse proxy)</p></li>
-</ul>
-</li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SSLCertificateFile</span> <span class="s2">&quot;&lt;YOUR_PATH_TO_YOUR_CERTIFICATE_FILE&gt;&quot;</span>
-<span class="n">SSLCertificateKeyFile</span> <span class="s2">&quot;&lt;YOUR_PATH_TO_YOUR_KEY_FILE&gt;&quot;</span>
-<span class="n">SSLCertificateChainFile</span> <span class="s2">&quot;&lt;YOUR_PATH_TO_YOUR_CHAIN_FILE_IF_YOU_HAVE_ONE_OTHERWISE_COMMENT_THIS_LINE_OUT&gt;&quot;</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>Update your reverse proxy config with the X-Forwarded-Proto header.</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">RequestHeader</span> <span class="nb">set</span> <span class="n">X</span><span class="o">-</span><span class="n">Forwarded</span><span class="o">-</span><span class="n">Proto</span> <span class="s2">&quot;https&quot;</span>
-</pre></div>
-</div>
-<ul class="simple">
+<li><p>Install and set up nginx.  You will need also need the <cite>htpasswd</cite> program as
+well, depending on your distribution that may be provided by <cite>httpd-tools</cite>
+for rpm based distributions or <cite>apache2-utils</cite> on deb based distributions.</p></li>
+<li><p>Create the htpasswd password file, modify the path/name here and in the
+nginx config if you wish to use a different path or name</p></li>
 <li><p>Add a user and password for HTTP authentication, the user does not have to
 be admin it can be anything, e.g.</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>htpasswd -c /etc/httpd/conf.d/.skyline_htpasswd admin
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>htpasswd<span class="w"> </span>-c<span class="w"> </span>/etc/nginx/conf.d/.skyline_htpasswd<span class="w"> </span>admin
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Ensure that the user and password for Apache match the user and
+<p>Ensure that the user and password for nginx match the user and
 password that you provide in <cite>settings.py</cite> for
 <a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a> and <a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a></p>
 </div>
 <ul class="simple">
-<li><p>Deploy your Skyline Apache or nginx configuration file and restart httpd or
-nginx</p></li>
+<li><p>Create a SSL certificate to use in the SSL configuration in the nginx
+configuration file.</p></li>
+<li><p>See the example configuration file in your cloned directory
+<code class="docutils literal notranslate"><span class="pre">/opt/skyline/github/skyline/etc/skyline.nginx.conf.d.example</span></code> modify all
+the <code class="docutils literal notranslate"><span class="pre">&lt;YOUR_</span></code> variables as appropriate for you environment - see
+<a class="reference external" href="webapp.html#nginx-and-gunicorn">nginx and gunicorn</a></p></li>
+<li><p>Deploy your Skyline nginx configuration file ready to restart nginx later
+when the Skyline services are started.</p></li>
 </ul>
-</div>
-<div class="section" id="skyline-database">
-<h3>Skyline database<a class="headerlink" href="#skyline-database" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="skyline-database">
+<h3>Skyline database<a class="headerlink" href="#skyline-database" title="Permalink to this heading"></a></h3>
 <ul class="simple">
-<li><p>Create the Skyline MySQL/mariadb database for Panorama (see
+<li><p>Create the Skyline MariaDB database for Panorama (see
 <a class="reference external" href="panorama.html">Panorama</a>) and Ionosphere.</p></li>
 </ul>
-</div>
-<div class="section" id="skyline-settings">
-<h3>Skyline settings<a class="headerlink" href="#skyline-settings" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="skyline-settings">
+<h3>Skyline settings<a class="headerlink" href="#skyline-settings" title="Permalink to this heading"></a></h3>
 <p>The Skyline settings are declared in the settings.py file as valid Python
 variables which are used in code.  The settings values therefore need to be
-defined correctly as the required Python types.  Strings, floats, ints, lists
-and tuples are used in the various settings.  Examples of these Python types
-are briefly outlined here to inform the user of the types.</p>
+defined correctly as the required Python types.  Strings, floats, ints, lists,
+dicts and tuples are used in the various settings.  Examples of these Python
+types are briefly outlined here to inform the user of the types.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">a_string</span> <span class="o">=</span> <span class="s1">&#39;single quoted string&#39;</span>  <span class="c1"># str</span>
 <span class="n">another_string</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span>  <span class="c1"># str</span>
 <span class="n">a_float</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># float</span>
@@ -555,17 +546,25 @@ are briefly outlined here to inform the user of the types.</p>
 <span class="n">a_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">]</span>  <span class="c1"># list</span>
 <span class="n">another_list_of_strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;bob&#39;</span><span class="p">]</span>  <span class="c1"># list</span>
 <span class="n">a_list_of_lists</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="mf">23.6</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;server2.cpu.user&#39;</span><span class="p">,</span> <span class="mf">3.22</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">]]</span>  <span class="c1"># list</span>
+<span class="n">a_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}</span>  <span class="c1"># dict</span>
+<span class="n">a_nested_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;server&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="mf">23.6</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="mi">1563912300</span><span class="p">}}</span>  <span class="c1"># dict</span>
 <span class="n">a_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="mf">23.6</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">)</span>  <span class="c1"># tuple</span>
 <span class="n">a_tuple_of_tuples</span> <span class="o">=</span> <span class="p">((</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="mf">23.6</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;server2.cpu.user&#39;</span><span class="p">,</span> <span class="mf">3.22</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">))</span>  <span class="c1"># tuple</span>
 </pre></div>
 </div>
+<p>There are a lot of settings in Skyline because it is highly configurable in many
+different aspects and it has a lot of advanced features in terms of clustering,
+other time series analysis capabilities and analysis methodologies.  This means
+there is a lot of settings that will make no sense to the user initially.  The
+important ones are labelled with <code class="docutils literal notranslate"><span class="pre">[USER_DEFINED]</span></code> in the settings.py</p>
 <p>Required changes to settings.py follow.</p>
 <ul class="simple">
 <li><p>Edit the <code class="docutils literal notranslate"><span class="pre">skyline/settings.py</span></code> file and enter your appropriate settings,
 specifically ensure you set the following variables to the correct
 settings for your environment, see the documentation links and docstrings in
 the <code class="docutils literal notranslate"><span class="pre">skyline/settings.py</span></code> file for the full descriptions of each variable.
-Below are the variables you must set:</p>
+Below are the variables you must set and are labelled in settings.py with
+<code class="docutils literal notranslate"><span class="pre">[USER_DEFINED]</span></code>:</p>
 <ul>
 <li><p><a class="reference internal" href="skyline.html#settings.REDIS_SOCKET_PATH" title="settings.REDIS_SOCKET_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.REDIS_SOCKET_PATH</span></code></a> if different from <code class="docutils literal notranslate"><span class="pre">`/tmp/redis.sock`</span></code></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.REDIS_PASSWORD" title="settings.REDIS_PASSWORD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.REDIS_PASSWORD</span></code></a></p></li>
@@ -574,34 +573,59 @@ Below are the variables you must set:</p>
 <li><p><a class="reference internal" href="skyline.html#settings.GRAPHITE_PORT" title="settings.GRAPHITE_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_PORT</span></code></a></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.CARBON_PORT" title="settings.CARBON_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CARBON_PORT</span></code></a></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.SERVER_METRICS_NAME" title="settings.SERVER_METRICS_NAME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SERVER_METRICS_NAME</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES" title="settings.SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_FEEDBACK_NAMESPACES</span></code></a> - An assumption is made that
+your Skyline and Graphite hosts will have feedback metrics but…</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES" title="settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES</span></code></a> - While the
+assumption is true, please assess metrics in theses namespaces that you
+do not want to classified as feedback metrics. Any metrics that are not
+related to the running of Skyline or Graphite or a few that you do want
+to monitor, e.g. some KPI metrics like <code class="docutils literal notranslate"><span class="pre">load15</span></code> or <code class="docutils literal notranslate"><span class="pre">disk.used_percent</span></code></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_OPTS</span></code></a> if to be used,
+if so ensure that <a class="reference internal" href="skyline.html#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_ENABLED</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_ENABLED</span></code></a> are set to <code class="docutils literal notranslate"><span class="pre">True</span></code> as appropriate.</p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.CANARY_METRIC" title="settings.CANARY_METRIC"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CANARY_METRIC</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.ENABLE_MIRAGE" title="settings.ENABLE_MIRAGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ENABLE_MIRAGE</span></code></a>, it is recommended to set this to <code class="docutils literal notranslate"><span class="pre">True</span></code> the
+default is <code class="docutils literal notranslate"><span class="pre">False</span></code> simply for backwards compatibility.</p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> - remember to only add a few key metrics to begin
 with.  If you want Skyline to start working almost immediately AND you
 have Graphite populated with more than 7 days of data, you can enable and
 start Mirage too and declare the SECOND_ORDER_RESOLUTION_HOURS in each
 ALERTS tuple as 168.</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_OPTS</span></code></a> - if you are going to use Slack</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> - if you are going to use PagerDuty</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.HORIZON_IP" title="settings.HORIZON_IP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HORIZON_IP</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.THUNDER_CHECKS" title="settings.THUNDER_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.THUNDER_CHECKS</span></code></a> by default all thunder checks are done for
+the main analysis apps, if there are any apps you are not running disable
+the appropriate thunder checks.</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.THUNDER_OPTS" title="settings.THUNDER_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.THUNDER_OPTS</span></code></a> ensure you update these</p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_ENABLE_ALERTS</span></code></a> set this to <code class="docutils literal notranslate"><span class="pre">`True`</span></code> if you want to
 have Mirage running as described above.</p></li>
-<li><p><a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a></p></li>
-<li><p><a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_OPTS</span></code></a> if to be used,
-if so ensure that <a class="reference internal" href="skyline.html#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_ENABLED</span></code></a> and
-<a class="reference internal" href="skyline.html#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_ENABLED</span></code></a> are set to <code class="docutils literal notranslate"><span class="pre">True</span></code> as appropriate.</p></li>
-<li><p><a class="reference internal" href="skyline.html#settings.HORIZON_IP" title="settings.HORIZON_IP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HORIZON_IP</span></code></a></p></li>
-<li><p>If you are deploying with a Skyline MySQL Panorama DB straight away ensure
+<li><p>If you are deploying with a Skyline MariaDB Panorama DB straight away ensure
 that <a class="reference internal" href="skyline.html#settings.PANORAMA_ENABLED" title="settings.PANORAMA_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_ENABLED</span></code></a> is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> and set all the
 other Panorama related variables as appropriate.  Enabling Panorama from the
 start is RECOMMENDED as it is integral to Ionosphere and Luminosity.</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.PANORAMA_DBHOST" title="settings.PANORAMA_DBHOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBHOST</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSERPASS</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_ENABLE_ALERTS</span></code></a> set this to <code class="docutils literal notranslate"><span class="pre">`True`</span></code> the default is
+<code class="docutils literal notranslate"><span class="pre">False</span></code> simply for backwards compatibility.</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">BOUNDARY_SMTP_OPTS</span></code> although you will not start with running Boundary
+set the SMTP opts anyway.</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_PAGERDUTY_OPTS" title="settings.BOUNDARY_PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_PAGERDUTY_OPTS</span></code></a> - if you are going to use PagerDuty</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_SLACK_OPTS" title="settings.BOUNDARY_SLACK_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_SLACK_OPTS</span></code></a> - if you are going to use Slack</p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a></p></li>
-<li><p><a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.SKYLINE_URL" title="settings.SKYLINE_URL"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_URL</span></code></a></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.SERVER_PYTZ_TIMEZONE" title="settings.SERVER_PYTZ_TIMEZONE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SERVER_PYTZ_TIMEZONE</span></code></a></p></li>
 <li><p><a class="reference internal" href="skyline.html#settings.MEMCACHE_ENABLED" title="settings.MEMCACHE_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MEMCACHE_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SELF_API_KEY</span></code></a> although you may not use flux, change this
+anyway.</p></li>
 </ul>
 </li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> /opt/skyline/github/skyline/skyline
-vi settings.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/opt/skyline/github/skyline/skyline
+cp<span class="w"> </span>settings.py<span class="w"> </span>settings.py.original.bak
+vi<span class="w"> </span>settings.py<span class="w">    </span><span class="c1"># Probably better to open in your favourite editor</span>
 </pre></div>
 </div>
 <div class="admonition note">
@@ -613,33 +637,59 @@ anomalies to the database not just anomalies for metrics that have a
 <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> tuple defined.  However this is the desired default
 state.  This setting basically enables the anomaly detection on everything
 with 3-sigma and builds the anomalies database, it is not noisy.  At this
-point in your implementation the distinction between alerts and general
+point in your implementation, the distinction between alerts and general
 Skyline anomaly detection and constructing an anomalies data set must once
 again be pointed out.</p>
 </div>
 <ul class="simple">
+<li><p>TEST your settings!</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/test_settings.sh
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The above test is not yet 100% coverage but it covers the main settings.</p></li>
 <li><p>For later implementing and working with Ionosphere and setting up learning (see
 <a class="reference external" href="ionosphere.html">Ionosphere</a>) after you have the other Skyline apps up and
 running.</p></li>
-<li><p>If you are <strong>upgrading</strong>, at this point return to the
-<a class="reference external" href="upgrading/index.html">Upgrading</a> page.</p></li>
 </ul>
-</div>
-<div class="section" id="starting-and-testing-the-skyline-installation">
-<h3>Starting and testing the Skyline installation<a class="headerlink" href="#starting-and-testing-the-skyline-installation" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="starting-and-testing-the-skyline-installation">
+<h3>Starting and testing the Skyline installation<a class="headerlink" href="#starting-and-testing-the-skyline-installation" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Before you test Skyline by seeding Redis with some test data, ensure
 that you have configured the firewall/iptables/ip6tables with the appropriate
 restricted access.</p></li>
-<li><p>Start the Skyline apps</p></li>
+<li><p>Start the Skyline services</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/horizon.d start
-/opt/skyline/github/skyline/bin/analyzer.d start
-/opt/skyline/github/skyline/bin/webapp.d start
-<span class="c1"># And Panorama if you have set up in the DB at this stage</span>
-/opt/skyline/github/skyline/bin/panorama.d start
-/opt/skyline/github/skyline/bin/ionosphere.d start
-/opt/skyline/github/skyline/bin/luminosity.d start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>find<span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system<span class="w"> </span>-type<span class="w"> </span>f<span class="k">)</span>
+<span class="k">do</span>
+<span class="w">  </span>/bin/cp<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span><span class="w"> </span>/etc/systemd/system/
+<span class="k">done</span>
+systemctl<span class="w"> </span>daemon-reload
+systemctl<span class="w"> </span>start<span class="w"> </span>horizon
+systemctl<span class="w"> </span>start<span class="w"> </span>panorama
+systemctl<span class="w"> </span>start<span class="w"> </span>analyzer
+systemctl<span class="w"> </span>start<span class="w"> </span>mirage
+systemctl<span class="w"> </span>start<span class="w"> </span>ionosphere
+systemctl<span class="w"> </span>start<span class="w"> </span>luminosity
+systemctl<span class="w"> </span>start<span class="w"> </span>webapp
+systemctl<span class="w"> </span>start<span class="w"> </span>flux
+systemctl<span class="w"> </span>start<span class="w"> </span>boundary
+
+<span class="c1"># You can also start thunder - Skyline&#39;s internal monitoring but it may</span>
+<span class="c1"># fire a few alerts until you have some metrics being fed in, but that is</span>
+<span class="c1"># OK.</span>
+systemctl<span class="w"> </span>start<span class="w"> </span>thunder
+
+<span class="c1"># Alternatively at a later point you can start any other Skyline services</span>
+<span class="c1"># you may wish to use</span>
+<span class="c1"># systemctl start analyzer_batch</span>
+<span class="c1"># systemctl start snab</span>
+<span class="c1"># systemctl start crucible</span>
+
+<span class="c1"># For any services you start remember to issue</span>
+<span class="c1"># systemctl enable &lt;SERVICE&gt;</span>
 </pre></div>
 </div>
 <ul class="simple">
@@ -653,19 +703,19 @@ time, Skyline can log fast, so short tails may miss some event you expect
 between the restart and tail.</p>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check what the logs reported when the apps started</span>
-head -n <span class="m">20</span> /var/log/skyline/*.log
+head<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>/var/log/skyline/*.log
 
 <span class="c1"># How are they running</span>
-tail -n <span class="m">20</span> /var/log/skyline/*.log
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>/var/log/skyline/*.log
 
 <span class="c1"># Any errors - each app</span>
-find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <span class="p">|</span> <span class="k">while</span> <span class="nb">read</span> skyline_logfile
+find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>skyline_logfile
 <span class="k">do</span>
-  <span class="nb">echo</span> <span class="s2">&quot;#####</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;#####</span>
 <span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
-  cat <span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span> <span class="p">|</span> grep -B2 -A10 -i <span class="s2">&quot;error ::\|traceback&quot;</span> <span class="p">|</span> tail -n <span class="m">60</span>
-  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
-  <span class="nb">echo</span> <span class="s2">&quot;&quot;</span>
+<span class="w">  </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-B2<span class="w"> </span>-A10<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;error ::\|traceback&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
 <span class="k">done</span>
 </pre></div>
 </div>
@@ -683,13 +733,20 @@ store, you can skip seeding data.</p>
 will not work as Horizon/listen will already have a connection and will be
 reading the Graphite pickle.</p>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
-<span class="nb">source</span> bin/activate
-<span class="s2">&quot;bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> /opt/skyline/github/skyline/utils/seed_data.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE: if Graphite carbon-relay is ALREADY sending data to Horizon, seed_data</span>
+<span class="c1">#       will most likely fail as Horizon/listen will already have a connection</span>
+<span class="c1">#       and will be reading the Graphite pickle.  If you wish to test seeding</span>
+<span class="c1">#       data, stop Graphite carbon-relay and restart Horizon, BEFORE running</span>
+<span class="c1">#       seed_data.py.  Run seed_data.py and then restart Horizon and start</span>
+<span class="c1">#       Graphite carbon-relay again after seed data has run.</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+<span class="s2">&quot;bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>/opt/skyline/github/skyline/utils/seed_data.py
 deactivate
 </pre></div>
 </div>
 <ul class="simple">
+<li><p>Restart nginx with the new config.</p></li>
 <li><p>Check the Skyline Webapp frontend on the Skyline machine’s IP address and the
 appropriate port depending whether you are serving it proxied or direct, e.g
 <code class="docutils literal notranslate"><span class="pre">https://YOUR_SKYLINE_IP</span></code>.  The <code class="docutils literal notranslate"><span class="pre">horizon.test.pickle</span></code> metric anomaly should
@@ -705,29 +762,40 @@ no errors.</p></li>
 <li><p>Once you have your <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> configured to test them see
 <a class="reference external" href="alert-testing.html">Alert testing</a></p></li>
 </ul>
-</div>
-<div class="section" id="configure-graphite-to-send-data-to-skyline">
-<h3>Configure Graphite to send data to Skyline<a class="headerlink" href="#configure-graphite-to-send-data-to-skyline" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="configure-graphite-to-send-data-to-skyline">
+<h3>Configure Graphite to send data to Skyline<a class="headerlink" href="#configure-graphite-to-send-data-to-skyline" title="Permalink to this heading"></a></h3>
 <ul class="simple">
 <li><p>Now you can configure your Graphite to pickle data to Skyline see
 <a class="reference external" href="getting-data-into-skyline.html">Getting data into Skyline</a></p></li>
-<li><p>If you have opted to not set up Panorama, later see set up
-<a class="reference external" href="panorama.html">Panorama</a></p></li>
 </ul>
-</div>
-<div class="section" id="other-skyline-components">
-<h3>Other Skyline components<a class="headerlink" href="#other-skyline-components" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="lead-time-to-starting-analysis">
+<h3>Lead time to starting analysis<a class="headerlink" href="#lead-time-to-starting-analysis" title="Permalink to this heading"></a></h3>
+<p>Any metric submitted will only start to be analysed when it has
+<a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a> data points to analyse.  That means when
+you start sending data, Skyline will only start analysing it
+<a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a> minutes later (if you are sending 1 data
+point a minute).</p>
+</section>
+<section id="other-skyline-components">
+<h3>Other Skyline components<a class="headerlink" href="#other-skyline-components" title="Permalink to this heading"></a></h3>
 <ul class="simple">
-<li><p>For Mirage set up see <a class="reference external" href="mirage.html">Mirage</a></p></li>
 <li><p>For Boundary set up see <a class="reference external" href="boundary.html">Boundary</a></p></li>
+<li><p>For Flux set up see <a class="reference external" href="flux.html">Flux</a></p></li>
 <li><p>For more in-depth Ionosphere set up see <a class="reference external" href="ionosphere.html">Ionosphere</a>
 however Ionosphere is only relevant once Skyline has at least
-<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data in Redis.</p></li>
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data in Redis.  But really only consider
+starting use Ionosphere and training after the Skyline has 7 days of data at
+least.</p></li>
 </ul>
-</div>
-</div>
-<div class="section" id="automation-and-configuration-management-notes">
-<h2>Automation and configuration management notes<a class="headerlink" href="#automation-and-configuration-management-notes" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="automation-and-configuration-management-notes">
+<h2>Automation and configuration management notes<a class="headerlink" href="#automation-and-configuration-management-notes" title="Permalink to this heading"></a></h2>
+<p>Deploying Skyline via configuration management is non-trivial due to the number
+of components and configurations involved and is well beyond the scope of this
+documentation.</p>
 <p>The installation of packages in the <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> can take a long time,
 specifically the pandas build.  This will usually take longer than the default
 timeouts in most configuration management.</p>
@@ -746,63 +814,38 @@ directly in configuration management and not use pip to <code class="docutils li
 and pandas needs a LONG timeout value, which not all package classes provide,
 if you use an exec of any sort, ensure the pandas install has a long timeout.</p></li>
 </ol>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="upgrading/index.html" class="btn btn-neutral float-right" title="Upgrading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="running-in-python-virtualenv.html" class="btn btn-neutral float-left" title="Running Skyline in a Python virtualenv" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="running-in-python-virtualenv.html" class="btn btn-neutral float-left" title="Running Skyline in a Python virtualenv" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="upgrading/index.html" class="btn btn-neutral float-right" title="Upgrading" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

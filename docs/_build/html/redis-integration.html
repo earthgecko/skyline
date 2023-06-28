@@ -1,94 +1,55 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Redis integration &mdash; Skyline 2.0.0 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redis integration &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="rebrow" href="rebrow.html" />
-    <link rel="prev" title="Vista" href="vista.html" /> 
+    <link rel="prev" title="settings.EXTERNAL_SETTINGS" href="external_settings.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -110,11 +71,18 @@
 <li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Redis integration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#redis-security">Redis Security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#types-of-skyline-and-redis-implementations">Types of Skyline and Redis implementations</a></li>
@@ -129,6 +97,9 @@
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
@@ -137,77 +108,48 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Redis integration</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Redis integration</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/redis-integration.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="redis-integration">
-<h1>Redis integration<a class="headerlink" href="#redis-integration" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="redis-security">
-<h2>Redis Security<a class="headerlink" href="#redis-security" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="redis-integration">
+<h1>Redis integration<a class="headerlink" href="#redis-integration" title="Permalink to this heading"></a></h1>
+<p>Redis is core to Skyline, it is used to store and query time series data and to
+store and its own internal data.</p>
+<p>Skyline stores time series data for traditional metrics in msgpack in Redis keys.
+labelled metrics - Skyline utilises the RedisTimeseries module to store time
+series for key/value style labelled metrics.</p>
+<p>If you wish to process labelled metrics, there is a minimum requirement of Redis
+server 6.2.x if you wish to load the redistimeseries.so module, or a requirement
+of redis-stack-server 6.2.x with redistimeseries.so loaded.</p>
+<section id="redis-security">
+<h2>Redis Security<a class="headerlink" href="#redis-security" title="Permalink to this heading"></a></h2>
 <p>First please take the time to read and understand Redis security as described
 at <a class="reference external" href="https://redis.io/topics/security">https://redis.io/topics/security</a></p>
 <p>It is important that you understand factors relating to the default Redis
-security model.</p>
+security model.  <strong>UPDATE</strong> the default security model in Redis has changed
+quite significantly and it is no longer insecure by default but rather the
+opposite.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>With the introduction of <span class="red">re</span><span class="brow">brow</span> and Luminosity it
@@ -217,20 +159,20 @@ the recommendations described on redis.io security page and the Redis related
 Skyline recommendations described on the installations page in this
 documentation and <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>.</p>
 </div>
-</div>
-<div class="section" id="types-of-skyline-and-redis-implementations">
-<h2>Types of Skyline and Redis implementations<a class="headerlink" href="#types-of-skyline-and-redis-implementations" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="types-of-skyline-and-redis-implementations">
+<h2>Types of Skyline and Redis implementations<a class="headerlink" href="#types-of-skyline-and-redis-implementations" title="Permalink to this heading"></a></h2>
 <p>There are two different types of Skyline implementations:</p>
 <ul class="simple">
 <li><p>A single Skyline instance, Redis only needs to bind to 127.0.0.1</p></li>
 <li><p>Multiple Skyline instances running in a distributed fashion Redis still
-only needs to bind to 127.0.0.1 but stunnel need to be implmented to allow
-each Skyline server to connect to other Redis instances on Skyline servers via
-a stunnel SSL encrypted connection.  See <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></p></li>
+only need to bind to 127.0.0.1 and each Skyline node in the cluster accesses
+the required shared Redis data via specific API calls through webapp.  See
+<a href="#id1"><span class="problematic" id="id2">`Running multiple Skyline instances&lt;running-multiple-skylines.html&gt;`__</span></a></p></li>
 </ul>
-</div>
-<div class="section" id="how-are-time-series-stored-in-redis">
-<h2>How are time series stored in Redis?<a class="headerlink" href="#how-are-time-series-stored-in-redis" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="how-are-time-series-stored-in-redis">
+<h2>How are time series stored in Redis?<a class="headerlink" href="#how-are-time-series-stored-in-redis" title="Permalink to this heading"></a></h2>
 <p>Part of the Horizon service’s job is to input data into Redis. Skyline uses
 MessagePack to store data in Redis. When a data point comes in, a
 Horizon worker will pack the data point with the schema <code class="docutils literal notranslate"><span class="pre">[timestamp,</span> <span class="pre">value]</span></code>
@@ -243,19 +185,21 @@ long, Redis’ performance suffers. Redis was not designed to contain very large
 strings. We may one day switch to an alternative storage design as proposed by
 Antirez - see <a class="reference external" href="https://github.com/antirez/redis-timeseries">https://github.com/antirez/redis-timeseries</a> - but for now, this is
 how it is. And given that the last update to that repo was in 10 Oct 2012, it is
-highly probable that normal Redis will be used for the forseenable future.</p>
-<p>Using the default mod:<cite>settings.FULL_DURATION</cite> of 86400 (24 hours) ensures that
+highly probable that normal Redis will be used for the forseenable future.
+<strong>UPDATE</strong> the future is here.</p>
+<p>Using the default <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> of 86400 (24 hours) ensures that
 Redis does not hit performance issues in most cases.  Now where Skyline needs
-greater than mod:<cite>settings.FULL_DURATION</cite> data to analyse in Mirage and
-Ionosphere, Skyline fetches that data from Graphite directly when required.
-This overcomes any Redis performance issues and the use of Graphite data removes
-the limitation of Skyline only being able to analyse data and be useful in the
-24 hour time window.</p>
-</div>
-<div class="section" id="what-other-data-are-stored-in-redis">
-<h2>What other data are stored in Redis?<a class="headerlink" href="#what-other-data-are-stored-in-redis" title="Permalink to this headline">¶</a></h2>
+greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data to analyse in Mirage and
+Ionosphere, Skyline fetches that data from Graphite or VictoriaMetrics directly
+when required.  This overcomes any Redis performance issues and the use of Graphite
+data removes the limitation of Skyline only being able to analyse data and be useful
+in the 24 hour time window.</p>
+</section>
+<section id="what-other-data-are-stored-in-redis">
+<h2>What other data are stored in Redis?<a class="headerlink" href="#what-other-data-are-stored-in-redis" title="Permalink to this heading"></a></h2>
 <p>In addition to all the metrics, there are a number of specialized Redis sets and
-keys:</p>
+keys which Skyline uses for metric management and fast querying, e.g. what is the
+id of this metrics?  Skyline periodically calculates:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">metrics.unique_metrics</span></code> and <code class="docutils literal notranslate"><span class="pre">mini.unique_metrics</span></code> These contain every key
 that exists in Redis, and they are used by the Analyzer to make it easier for
@@ -276,72 +220,46 @@ learning.</p></li>
 <li><p>&lt;skyline_app&gt;.last_alert.&lt;alerter&gt;.&lt;metric&gt; keys</p></li>
 <li><p>panorama.mysql_ids.* keys</p></li>
 <li><p>rebrow.client.key.* keys - expiring rebrow Redis password JWT encoded tokens</p></li>
-<li><p>etc, etc, feel free to browser Redis with <span class="red">re</span><span class="brow">brow</span> and take a
-look and please free feel to PR update this doc if you find some that are
-missing here.</p></li>
+<li><p>etc, etc, feel free to browse Redis with <span class="red">re</span><span class="brow">brow</span> and take a
+look.</p></li>
 </ul>
-</div>
-<div class="section" id="what-s-with-the-mini-and-metrics-namespaces">
-<h2>What’s with the ‘mini’ and ‘metrics’ namespaces?<a class="headerlink" href="#what-s-with-the-mini-and-metrics-namespaces" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="what-s-with-the-mini-and-metrics-namespaces">
+<h2>What’s with the ‘mini’ and ‘metrics’ namespaces?<a class="headerlink" href="#what-s-with-the-mini-and-metrics-namespaces" title="Permalink to this heading"></a></h2>
 <p>The ‘mini’ namespace is used by the Webapp to display a <cite>settings.MINI_DURATION</cite>
 seconds long view.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="rebrow.html" class="btn btn-neutral float-right" title="rebrow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="vista.html" class="btn btn-neutral float-left" title="Vista" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="external_settings.html" class="btn btn-neutral float-left" title="settings.EXTERNAL_SETTINGS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rebrow.html" class="btn btn-neutral float-right" title="rebrow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

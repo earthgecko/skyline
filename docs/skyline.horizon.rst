@@ -20,6 +20,14 @@ skyline.horizon.listen module
    :undoc-members:
    :show-inheritance:
 
+skyline.horizon.prometheus module
+---------------------------------
+
+.. automodule:: horizon.prometheus
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.horizon.roomba module
 -----------------------------
 

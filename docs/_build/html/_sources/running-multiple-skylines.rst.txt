@@ -13,12 +13,34 @@ required, e.g. Luminosity.
 Some organisations have multiple Graphite instances for sharding, geographic or
 latency reasons.  In such a case it is possible that each Graphite instance
 would pickle to a Skyline instance and for there to be multiple Skyline
-instances.
+instances.  Or you might want to run mulitple Skyline instances due to the
+number of metrics being handled.  However...
+
+Running Skyline in a distributed, HA manner is mostly related to running the
+components of Skyline in this fashion, for example using Galera cluster to
+provide MariaDB replication.  Each of the components have their own high
+availability and clustering methods in most cases and the addition of haproxy,
+mysqlproxy, load balanced or round robin DNS can achieve a lot of redundancy.
+Defining how Skyline can be run in HA or clustered is beyond the scope of
+Skyline itself, it is more an exercise of operations and distributed systems
+which is beyond the scope of this documentation.
+
+However one word of caution, **do not cluster Redis**.  Although some sharded
+configuration may work, it is simpler just to use local Redis data.  Due to
+the metric time series constantly changing in Redis clustering or slaving
+results in mostly the entire Redis data store being shipped constantly, not
+desired.
+
+That said the actual Skyline modules have certain settings and configurations
+that are HA or distributed _aware_ to allow Skyline itself to provide the
+ability to use HA/clustered/distributed components.  This section deals with
+these.
 
 The following settings pertain to running multiple Skyline instances:
 
-- :mod:`settings.ALTERNATIVE_SKYLINE_URLS`
 - :mod:`settings.REMOTE_SKYLINE_INSTANCES`
+- :mod:`settings.HORIZON_SHARDS`
+- :mod:`settings.SYNC_CLUSTER_FILES`
 
 With the introduction of Luminosity a requirement for Skyline to pull the time
 series data from remote Skyline instances was added to allow for cross
@@ -27,6 +49,31 @@ endpoint and preprocesses the time series data for Luminosity on the remote
 Skyline instance and returns only the fragments (gzipped) of time series
 required for analysis, by default the previous 12 minutes, to minimise bandwidth
 and ensure performance is maintained.
+
+Running Skyline in any form of clustered configuration requires that each
+Skyline instance know about the other instances and has access to them via the
+webapp therefore appropriate firewall, network rules and reverse proxy
+configuration (Apache or nginx) needs to allow this.
+
+:mod:`settings.REMOTE_SKYLINE_INSTANCES` is a required list of alternative URLs,
+username, password and hostname for the other instances in the Skyline cluster
+so that if a request is made to the Skyline webapp for a resource it does not
+have, it can return the other URLs to the client.  This is also used in
+:mod:`settings.SYNC_CLUSTER_FILES` so that each instance in the cluster can
+sync relevant Ionosphere training data and features profiles data to itself.
+
+It is used by Skyline internally to request resources from other Skyline
+instances to:
+
+- Retrieve time series data and general data for metrics served by the other
+  Skyline instance/s.
+- To retrieve resources for certain client and API requests to respond with
+  all the data for the cluster, in terms of unique_metrics, alerting_metrics, etc.
+- To sync Ionosphere data between the cluster instances.
+
+
+Read about :mod:`settings.HORIZON_SHARDS` see
+`HORIZON_SHARDS <horizon.html#HORIZON_SHARDS>`__ section on the Horizon page.
 
 Hot standby configuration
 -------------------------
@@ -51,7 +98,7 @@ center.  Where the primary Graphite is pickling to a primary Skyline instance
 and a standby Graphite instance.  With the standby Graphite instance pickling
 data to the standby Skyline instance.
 
-.. code-block
+.. code-block::
 
                         graphite-1
                             |
@@ -92,9 +139,22 @@ partitioning, etc, are updated.  flock rsyncing all the whisper files daily
 mostly handles this and ensures that you have no gaps in the whisper data on
 your backup Graphite instance.
 
+With the addition of labelled_metrics, one can use a VictoriaMetrics cluster
+to achieve HA of the TSDB data for labelled_metrics.
+
 Webapp UI
 ---------
 
 In terms of the functionality in webapp, the webapp is multiple instance aware.
 Where any "not in Redis" UI errors are found, webapp responds to the request
-with a 301 redirect to the alternate Skyline URL.
+with a 302 redirect to the remote Skyline instance that is assigned the metric.
+
+Cluster sync
+------------
+
+Cluster nodes will sync training data and features profiles data between themselves,
+however currently saved training is not synced between cluster nodes any **user**
+saved training data will only be available on the cluster node on which it was saved.
+Therefore each cluster node has its own saved training data pages.  This only
+relates to training data that is specifically saved by the user and not normal
+operational training data that is generated for Ionosphere.

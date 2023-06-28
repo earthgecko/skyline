@@ -1,92 +1,52 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>mirage.mirage_algorithms &mdash; Skyline 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-
-  
-  
-  
-  
-
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mirage.mirage_algorithms &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
-
-          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
           </a>
-
-          
-            
-            
               <div class="version">
-                2.0
+                4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
@@ -108,11 +68,18 @@
 <li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
@@ -120,6 +87,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
@@ -128,79 +98,47 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Skyline</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-        
-      <li>mirage.mirage_algorithms</li>
-    
-    
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mirage.mirage_algorithms</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for mirage.mirage_algorithms</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
-<span class="kn">import</span> <span class="nn">pandas</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">mirage_algorithms.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
@@ -257,6 +195,35 @@
         <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">run_custom_algorithm_on_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># @added 20230112 - Task #4786: Switch from matrixprofile to stumpy</span>
+    <span class="c1">#                   Task #4778: v4.0.0 - update dependencies</span>
+    <span class="c1"># Call the loaded and compiled skyline_matrixprofile directly</span>
+    <span class="c1"># as incurring the stump jit compile every time without</span>
+    <span class="c1"># njit cache (not available on stumpy - https://github.com/TDAmeritrade/stumpy/issues/699)</span>
+    <span class="c1"># which makes using stumpy as a replacement for matrixprofile</span>
+    <span class="c1"># not straightforward.  It does not lends itself to</span>
+    <span class="c1"># performance in terms of once off initialisation speed.  In</span>
+    <span class="c1"># terms of running as an isolated, new process under the</span>
+    <span class="c1"># run_custom_algorithm_on_timeseries context it means the</span>
+    <span class="c1"># compile overhead is incurred every run, which makes it</span>
+    <span class="c1"># unfeasible to run as a custom_algorithm.  Initialisation</span>
+    <span class="c1"># and compile overhead can take &gt; 30 seconds on a loaded</span>
+    <span class="c1"># running, analysing Skyline server. In Jypter, once the</span>
+    <span class="c1"># first stump run has occurred in Jupyter it drops to the</span>
+    <span class="c1"># between 0.09471047855913639 and 0.2464532721787691 seconds</span>
+    <span class="c1"># range.  Although the use of the matrixprofile algorithm is</span>
+    <span class="c1"># now very mature in Skyline and skyline_matrixprofile has</span>
+    <span class="c1"># run for a few years now and its output and functioning has</span>
+    <span class="c1"># been stable, fun and reliable, with a new library/implementation</span>
+    <span class="c1"># things change even the discords themselves vary slightly</span>
+    <span class="c1"># between matrixprofile-foundation/matrixprofile and stumpy.</span>
+    <span class="c1"># @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy</span>
+    <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+    <span class="c1"># This incurs overhead in mirage_labelled_metrics too...</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">custom_algorithms.skyline_matrixprofile</span> <span class="kn">import</span> <span class="n">skyline_matrixprofile</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">skyline_matrixprofile</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
@@ -274,7 +241,7 @@
 
 
 <div class="viewcode-block" id="tail_avg"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.tail_avg">[docs]</a><span class="k">def</span> <span class="nf">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a utility function used to calculate the average of the last three</span>
 <span class="sd">    datapoints in the series as a measure, instead of just the last datapoint.</span>
 <span class="sd">    It reduces noise, but it also reduces sensitivity and increases the delay</span>
@@ -288,7 +255,7 @@
 
 
 <div class="viewcode-block" id="median_absolute_deviation"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.median_absolute_deviation">[docs]</a><span class="k">def</span> <span class="nf">median_absolute_deviation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the deviation of its latest datapoint with</span>
 <span class="sd">    respect to the median is X times larger than the median of deviations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -335,7 +302,7 @@
 
 
 <div class="viewcode-block" id="grubbs"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.grubbs">[docs]</a><span class="k">def</span> <span class="nf">grubbs</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the Z score is greater than the Grubb&#39;s score.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -362,7 +329,7 @@
         <span class="n">tail_average</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
         <span class="n">z_score</span> <span class="o">=</span> <span class="p">(</span><span class="n">tail_average</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">stdDev</span>
         <span class="n">len_series</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
-        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="o">.</span><span class="mi">05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">isf</span><span class="p">(</span><span class="mf">.05</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">len_series</span><span class="p">),</span> <span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">threshold_squared</span> <span class="o">=</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">threshold</span>
         <span class="n">grubbs_score</span> <span class="o">=</span> <span class="p">((</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">len_series</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">threshold_squared</span> <span class="o">/</span> <span class="p">(</span><span class="n">len_series</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">threshold_squared</span><span class="p">))</span>
 
@@ -375,14 +342,37 @@
 
 
 <div class="viewcode-block" id="first_hour_average"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.first_hour_average">[docs]</a><span class="k">def</span> <span class="nf">first_hour_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calcuate the simple average over one hour, second order resolution seconds ago.</span>
 <span class="sd">    A timeseries is anomalous if the average of the last three datapoints</span>
 <span class="sd">    are outside of three standard deviations of this value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="p">(</span><span class="n">second_order_resolution_seconds</span> <span class="o">-</span> <span class="mi">3600</span><span class="p">)</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_hour_threshold</span><span class="p">])</span>
+
+        <span class="c1"># @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution</span>
+        <span class="c1"># last_hour_threshold = time() - (second_order_resolution_seconds - 3600)</span>
+        <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">86400</span>
+
+        <span class="c1"># @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS</span>
+        <span class="c1"># Calculate the &quot;equivalent&quot; of hour and handle daily frequency data</span>
+        <span class="c1"># Handle daily data</span>
+        <span class="c1"># @modified 20230102 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS</span>
+        <span class="c1"># resolution = (timeseries[-1][0] - timeseries[-2][0])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="s1">&#39;IndexError on first_hour_average determining resolution for timeseries - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:])</span>
+            <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="mi">80000</span> <span class="ow">and</span> <span class="n">resolution</span> <span class="o">&lt;</span> <span class="mi">90000</span><span class="p">:</span>
+            <span class="n">last_hour_threshold</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">((</span><span class="n">resolution</span> <span class="o">*</span> <span class="mi">7</span><span class="p">)</span> <span class="o">-</span> <span class="n">resolution</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20221127 - Task #4738: Allow first_hour_average to handle different resolution</span>
+        <span class="c1"># series = pandas.Series([x[1] for x in timeseries if x[0] &lt; last_hour_threshold])</span>
+        <span class="n">last_hour_threshold_end</span> <span class="o">=</span> <span class="n">last_hour_threshold</span> <span class="o">+</span> <span class="mi">3600</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">last_hour_threshold</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_hour_threshold_end</span><span class="p">])</span>
         <span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
         <span class="n">stdDev</span> <span class="o">=</span> <span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
@@ -396,7 +386,7 @@
 
 
 <div class="viewcode-block" id="stddev_from_average"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.stddev_from_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the absolute value of the average of the latest</span>
 <span class="sd">    three datapoint minus the moving average is greater than three standard</span>
 <span class="sd">    deviations of the average. This does not exponentially weight the MA and so</span>
@@ -418,7 +408,7 @@
 
 
 <div class="viewcode-block" id="stddev_from_moving_average"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.stddev_from_moving_average">[docs]</a><span class="k">def</span> <span class="nf">stddev_from_moving_average</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the absolute value of the average of the latest</span>
 <span class="sd">    three datapoint minus the moving average is greater than three standard</span>
 <span class="sd">    deviations of the moving average. This is better for finding anomalies with</span>
@@ -446,7 +436,7 @@
 
 
 <div class="viewcode-block" id="mean_subtraction_cumulation"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.mean_subtraction_cumulation">[docs]</a><span class="k">def</span> <span class="nf">mean_subtraction_cumulation</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the value of the next datapoint in the</span>
 <span class="sd">    series is farther than three standard deviations out in cumulative terms</span>
 <span class="sd">    after subtracting the mean from each data point.</span>
@@ -476,7 +466,7 @@
 
 
 <div class="viewcode-block" id="least_squares"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.least_squares">[docs]</a><span class="k">def</span> <span class="nf">least_squares</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the average of the last three datapoints</span>
 <span class="sd">    on a projected least squares model is greater than three sigma.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -535,7 +525,7 @@
 
 
 <div class="viewcode-block" id="histogram_bins"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.histogram_bins">[docs]</a><span class="k">def</span> <span class="nf">histogram_bins</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the average of the last three datapoints falls</span>
 <span class="sd">    into a histogram bin with less than 20 other datapoints (you&#39;ll need to</span>
 <span class="sd">    tweak that number depending on your data)</span>
@@ -545,7 +535,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="c1"># @modified 20210420 - Support #4026: Change from scipy array to numpy array</span>
+        <span class="c1"># Deprecation of scipy.array</span>
+        <span class="c1"># series = scipy.array([x[1] for x in timeseries])</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+
         <span class="n">t</span> <span class="o">=</span> <span class="n">tail_avg</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
         <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
         <span class="n">bins</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -557,7 +551,7 @@
                         <span class="k">return</span> <span class="kc">True</span>
                 <span class="c1"># Is it in the current bin?</span>
                 <span class="k">elif</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">bins</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
-                        <span class="k">return</span> <span class="kc">True</span>
+                    <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">except</span><span class="p">:</span>
@@ -568,7 +562,7 @@
 
 
 <div class="viewcode-block" id="ks_test"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.ks_test">[docs]</a><span class="k">def</span> <span class="nf">ks_test</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates</span>
 <span class="sd">    that data distribution for last 10 minutes is different from last hour.</span>
 <span class="sd">    It produces false positives on non-stationary series so Augmented</span>
@@ -578,8 +572,29 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">hour_ago</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="mi">3600</span>
         <span class="n">ten_minutes_ago</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="mi">600</span>
-        <span class="n">reference</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">hour_ago</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
-        <span class="n">probe</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
+
+        <span class="c1"># @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS</span>
+        <span class="c1"># Calculate the &quot;equivalent&quot; of hour and handle daily frequency data</span>
+        <span class="c1"># @modified 20230102 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS</span>
+        <span class="c1"># resolution = (timeseries[-1][0] - timeseries[-2][0])</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="s1">&#39;IndexError on ks_test determining resolution for timeseries - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:])</span>
+            <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+            <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="mi">80000</span> <span class="ow">and</span> <span class="n">resolution</span> <span class="o">&lt;</span> <span class="mi">90000</span><span class="p">:</span>
+            <span class="n">hour_ago</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">*</span> <span class="mi">90</span><span class="p">)</span>
+            <span class="n">ten_minutes_ago</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">*</span> <span class="mi">30</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20210420 - Support #4026: Change from scipy array to numpy array</span>
+        <span class="c1"># Deprecation of scipy.array</span>
+        <span class="c1"># reference = scipy.array([x[1] for x in timeseries if x[0] &gt;= hour_ago and x[0] &lt; ten_minutes_ago])</span>
+        <span class="c1"># probe = scipy.array([x[1] for x in timeseries if x[0] &gt;= ten_minutes_ago])</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">hour_ago</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
+        <span class="n">probe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ten_minutes_ago</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span> <span class="ow">or</span> <span class="n">probe</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -611,7 +626,7 @@
 
 
 <div class="viewcode-block" id="get_function_name"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.get_function_name">[docs]</a><span class="k">def</span> <span class="nf">get_function_name</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a utility function is used to determine what algorithm is reporting</span>
 <span class="sd">    an algorithm error when the record_algorithm_error is used.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -619,7 +634,7 @@
 
 
 <div class="viewcode-block" id="record_algorithm_error"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.record_algorithm_error">[docs]</a><span class="k">def</span> <span class="nf">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This utility function is used to facilitate the traceback from any algorithm</span>
 <span class="sd">    errors.  The algorithm functions themselves we want to run super fast and</span>
 <span class="sd">    without fail in terms of stopping the function returning and not reporting</span>
@@ -657,7 +672,7 @@
 
 
 <div class="viewcode-block" id="determine_median"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.determine_median">[docs]</a><span class="k">def</span> <span class="nf">determine_median</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine the median of the values in the timeseries</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -677,7 +692,7 @@
 
 <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
 <div class="viewcode-block" id="negatives_present"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.negatives_present">[docs]</a><span class="k">def</span> <span class="nf">negatives_present</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine if there are negative number present in a time series</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -702,7 +717,7 @@
 
 
 <div class="viewcode-block" id="is_anomalously_anomalous"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.is_anomalously_anomalous">[docs]</a><span class="k">def</span> <span class="nf">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method runs a meta-analysis on the metric to determine whether the</span>
 <span class="sd">    metric has a past history of triggering. TODO: weight intervals based on datapoint</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -718,9 +733,8 @@
     <span class="n">trigger_history</span> <span class="o">=</span> <span class="n">unpackb</span><span class="p">(</span><span class="n">raw_trigger_history</span><span class="p">)</span>
 
     <span class="c1"># Are we (probably) triggering on the same data?</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">new_trigger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
-            <span class="n">new_trigger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">300</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">new_trigger</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">new_trigger</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">trigger_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">300</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Update the history</span>
     <span class="n">trigger_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_trigger</span><span class="p">)</span>
@@ -744,8 +758,14 @@
 <span class="c1"># @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
 <span class="c1"># Added run_negatives_present</span>
 <span class="c1"># def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds):</span>
-<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># @modified 20210304 - Feature #3642: Anomaly type classification</span>
+<span class="c1">#                      Feature #3970: custom_algorithm - adtk_level_shift</span>
+<span class="c1"># Added triggered_algorithms</span>
+<span class="c1"># @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy</span>
+<span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+<span class="c1"># Added current_func</span>
+<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">current_func</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run selected algorithms</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -761,18 +781,93 @@
     <span class="n">run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">run_3sigma_algorithms_overridden_by</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">custom_algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter</span>
+    <span class="n">run_custom_algorithm_after_3sigma</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">final_after_custom_ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">custom_algorithm_not_anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @added 20211125 - Feature #3566: custom_algorithms</span>
+    <span class="n">custom_algorithms_run</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">custom_algorithms_run_results</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># @added 20220111 - Feature #3566: custom_algorithms</span>
+    <span class="c1"># Set default values</span>
+    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># @added 20220822 - Task #2732: Prometheus to Skyline</span>
+    <span class="c1">#                   Branch #4300: prometheus</span>
+    <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+
+    <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">c_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+    <span class="c1"># @added 20220218 - Bug #4308: matrixprofile - fN on big drops</span>
+    <span class="n">check_trigger_history_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">CUSTOM_ALGORITHMS</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="s1">&#39;use_with&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="s1">&#39;mirage&#39;</span> <span class="ow">in</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;use_with&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="s1">&#39;trigger_history_override&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;trigger_history_override&#39;</span><span class="p">]:</span>
+                            <span class="n">check_trigger_history_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: check_trigger_history_enabled: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">check_trigger_history_enabled</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">check_trigger_history_enabled</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+        <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+        <span class="kn">from</span> <span class="nn">functions.timeseries.determine_data_frequency</span> <span class="kn">import</span> <span class="n">determine_data_frequency</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: get_redis_conn_decoded failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+
+    <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
         <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># @added 20220822 - Task #2732: Prometheus to Skyline</span>
+        <span class="c1">#                   Branch #4300: prometheus</span>
+        <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="n">get_custom_algorithms_to_run</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">,</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">custom_algorithms_to_run</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;algorithms :: debug :: custom algorithms ARE RUN on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: debug :: custom algorithms ARE RUN on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="n">custom_algorithms_to_run</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">custom_algorithms_to_run</span> <span class="ow">or</span> <span class="n">check_trigger_history_enabled</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: get_redis_conn_decoded failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR</span>
+    <span class="c1">#                   Feature #4702: numba optimisations</span>
+    <span class="c1"># Use start up key and allow numba cache files to be created</span>
+    <span class="c1"># it took mirage 246 seconds to build the numba cache files</span>
+    <span class="n">max_custom_algorithm_execution_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">custom_algorithms_to_run</span><span class="p">:</span>
+        <span class="n">start_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.starting&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">starting</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;mirage.starting&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">starting</span><span class="p">:</span>
+                <span class="n">max_custom_algorithm_execution_time</span> <span class="o">=</span> <span class="mi">300</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exists failed on Redis mirage.starting key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">custom_algorithms_to_run</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">custom_algorithms_to_run</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
@@ -780,43 +875,97 @@
                 <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
                 <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># @modified 20210304 - Feature #3642: Anomaly type classification</span>
+            <span class="c1">#                      Feature #3970: custom_algorithm - adtk_level_shift</span>
+            <span class="c1"># Added triggered_algorithms</span>
+            <span class="k">if</span> <span class="n">custom_algorithm</span> <span class="o">==</span> <span class="s1">&#39;adtk_level_shift&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;adtk_level_shift&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">triggered_algorithms</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: custom_algorithms :: NOT running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> as was not in triggered_algorithms&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                    <span class="k">continue</span>
+
+            <span class="c1"># @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter</span>
+            <span class="n">run_before_3sigma</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">run_before_3sigma</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;run_before_3sigma&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">run_before_3sigma</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">run_before_3sigma</span><span class="p">:</span>
+                <span class="n">run_custom_algorithm_after_3sigma</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: NOT running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> BEFORE three-sigma algorithms&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
             <span class="n">run_algorithm</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">run_algorithm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
                 <span class="n">start_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-            <span class="n">run_custom_algorithm_on_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
-                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: loaded run_custom_algorithm_on_timeseries&#39;</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: algorithms :: failed to load run_custom_algorithm_on_timeseries&#39;</span><span class="p">)</span>
+            <span class="c1"># @modified 20230112 - Task #4778: v4.0.0 - update dependencies</span>
+            <span class="c1"># Load run_custom_algorithm_on_timeseries once.  HOWEVER I am not</span>
+            <span class="c1"># 100% certain if this will have the desired effect when multiple</span>
+            <span class="c1"># custom algorithms are run .... TODO check</span>
+            <span class="c1"># run_custom_algorithm_on_timeseries = None</span>
+            <span class="c1"># try:</span>
+            <span class="c1">#     from custom_algorithms import run_custom_algorithm_on_timeseries</span>
+            <span class="c1">#     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:</span>
+            <span class="c1">#         logger.debug(&#39;debug :: mirage_algorithms :: loaded run_custom_algorithm_on_timeseries&#39;)</span>
+            <span class="c1"># except:</span>
+            <span class="c1">#     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:</span>
+            <span class="c1">#         logger.error(traceback.format_exc())</span>
+            <span class="c1">#         logger.error(&#39;error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries&#39;)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">use_debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">use_debug_logging</span> <span class="o">=</span> <span class="kc">True</span>
+
             <span class="k">if</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">:</span>
+
+                <span class="c1"># @added 20211125 - Feature #3566: custom_algorithms</span>
+                <span class="n">custom_algorithms_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+
+                <span class="c1"># @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR</span>
+                <span class="c1">#                   Feature #4702: numba optimisations</span>
+                <span class="c1"># Use start up key and allow numba cache files to be created</span>
+                <span class="k">if</span> <span class="n">max_custom_algorithm_execution_time</span><span class="p">:</span>
+                    <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_custom_algorithm_execution_time</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: mirage.starting key exists so max_custom_algorithm_execution_time set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">max_custom_algorithm_execution_time</span><span class="p">)))</span>
+
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">],</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+                    <span class="c1"># @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy</span>
+                    <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+                    <span class="c1"># Added current_func</span>
+                    <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">],</span> <span class="n">use_debug_logging</span><span class="p">,</span> <span class="n">current_func</span><span class="o">=</span><span class="n">current_func</span><span class="p">)</span>
                     <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="p">]</span>
                     <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+                    <span class="c1"># @added 20211125 - Feature #3566: custom_algorithms</span>
+                    <span class="n">custom_algorithms_run_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
                 <span class="k">except</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: algorithms :: failed to run custom_algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to run custom_algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
                     <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+                    <span class="c1"># @added 20211125 - Feature #3566: custom_algorithms</span>
+                    <span class="n">custom_algorithms_run_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
                 <span class="n">end_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: ran custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> with result of (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: ran custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> with result of (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span>
                     <span class="p">(</span><span class="n">end_debug_timer</span> <span class="o">-</span> <span class="n">start_debug_timer</span><span class="p">)))</span>
@@ -840,16 +989,18 @@
                 <span class="n">custom_run_3sigma_algorithms</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">]</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">custom_run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: error - algorithms :: could not determine custom_run_3sigma_algorithms - default to True&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_run_3sigma_algorithms</span> <span class="ow">and</span> <span class="n">result</span><span class="p">:</span>
                 <span class="n">run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">run_3sigma_algorithms_overridden_by</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: run_3sigma_algorithms is False on </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: run_3sigma_algorithms is False on </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: run_3sigma_algorithms will now be run on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">base_name</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: run_3sigma_algorithms will now be run on </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_run_3sigma_algorithms</span><span class="p">)))</span>
             <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">custom_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;consensus&#39;</span><span class="p">]</span>
@@ -865,21 +1016,44 @@
                     <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">custom_consensus_override</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;algorithms :: overidding the CONSENSUS as custom algorithm </span><span class="si">%s</span><span class="s1"> overides on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: overidding the CONSENSUS as custom algorithm </span><span class="si">%s</span><span class="s1"> overides on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
                 <span class="c1"># TODO - figure out how to handle consensus overrides if</span>
                 <span class="c1">#        multiple custom algorithms are used</span>
     <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">run_3sigma_algorithms</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;algorithms :: not running 3 sigma algorithms&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: not running 3 sigma algorithms&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">run_3sigma_algorithms_overridden_by</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;algorithms :: run_3sigma_algorithms overridden by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: run_3sigma_algorithms overridden by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">run_3sigma_algorithms_overridden_by</span><span class="p">)))</span>
 
     <span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
-    <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_consensus_override</span><span class="p">:</span>
+    <span class="c1"># @modified 20201120 - Feature #3566: custom_algorithms</span>
+    <span class="c1"># ensemble = []</span>
+    <span class="n">ensemble</span> <span class="o">=</span> <span class="n">final_custom_ensemble</span>
+
+    <span class="c1"># @added 20211125 - Feature #3566: custom_algorithms</span>
+    <span class="c1"># If custom_algorithms were run and did not trigger reset the consensus</span>
+    <span class="k">if</span> <span class="n">run_3sigma_algorithms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">custom_algorithms_run</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">none_count</span> <span class="o">=</span> <span class="n">custom_algorithms_run_results</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">false_count</span> <span class="o">=</span> <span class="n">custom_algorithms_run_results</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">not_anomalous_count</span> <span class="o">=</span> <span class="n">none_count</span> <span class="o">+</span> <span class="n">false_count</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">custom_algorithms_run</span><span class="p">)</span> <span class="o">==</span> <span class="n">not_anomalous_count</span><span class="p">:</span>
+                <span class="n">custom_consensus_override</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">custom_consensus</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)</span>
+                <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: reset ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False&#39;</span><span class="p">)</span>
+
+    <span class="c1"># @modified 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter</span>
+    <span class="c1"># Check run_3sigma_algorithms as well to the conditional</span>
+    <span class="c1"># if not custom_consensus_override:</span>
+    <span class="k">if</span> <span class="n">run_3sigma_algorithms</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">custom_consensus_override</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: running three-sigma algorithms&#39;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: running three-sigma algorithms against </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
             <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
                 <span class="n">algorithms_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
@@ -891,9 +1065,391 @@
             <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
             <span class="c1"># Added algorithms_run</span>
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">algorithms_run</span>
+        <span class="c1"># @added 20201124 - Feature #3566: custom_algorithms</span>
+        <span class="k">if</span> <span class="n">final_custom_ensemble</span><span class="p">:</span>
+            <span class="n">ensemble</span> <span class="o">=</span> <span class="n">final_custom_ensemble</span> <span class="o">+</span> <span class="n">ensemble</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> - True count of </span><span class="si">%s</span><span class="s1"> after 3-sigma algorithms&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">))))</span>
+
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
             <span class="n">ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># @added 20201120 - Feature #3566: custom_algorithms</span>
+    <span class="c1"># If 3sigma algorithms have not been run discard the MIRAGE_ALGORITHMS</span>
+    <span class="c1"># added above</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">run_3sigma_algorithms</span><span class="p">:</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="n">final_custom_ensemble</span>
+
+    <span class="c1"># @added 20220218 - Bug #4308: matrixprofile - fN on big drops</span>
+    <span class="k">if</span> <span class="n">check_trigger_history_enabled</span> <span class="ow">and</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">MIRAGE_CONSENSUS</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: getting trigger_history for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">trigger_history</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_trigger_history</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;mirage.trigger_history&#39;</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">raw_trigger_history</span><span class="p">:</span>
+                <span class="n">trigger_history</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">raw_trigger_history</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to evaluate data from mirage.trigger_history Redis hash key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> trigger_history count - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trigger_history</span><span class="p">))))</span>
+        <span class="n">metric_resolution</span> <span class="o">=</span> <span class="mi">60</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: determine_data_frequency failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+        <span class="n">tmp_final_ensemble</span> <span class="o">=</span> <span class="n">ensemble</span> <span class="o">+</span> <span class="n">final_after_custom_ensemble</span>
+
+        <span class="c1"># @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1">#                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1"># Prune entries older than 1 day from the trigger_history</span>
+        <span class="n">new_trigger_history</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">pruned_histories</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">prune_older_than</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="mi">86400</span>
+        <span class="k">for</span> <span class="n">history_timestamp</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">trigger_history</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">history_timestamp</span> <span class="o">&lt;</span> <span class="n">prune_older_than</span><span class="p">:</span>
+                <span class="n">pruned_histories</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="n">new_trigger_history</span><span class="p">[</span><span class="n">history_timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">trigger_history</span><span class="p">[</span><span class="n">history_timestamp</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">pruned_histories</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: pruned </span><span class="si">%s</span><span class="s1"> old entries from trigger_history for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">pruned_histories</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+            <span class="n">trigger_history</span> <span class="o">=</span> <span class="n">new_trigger_history</span>
+
+        <span class="n">trigger_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;true_count&#39;</span><span class="p">:</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span>
+            <span class="s1">&#39;ensemble&#39;</span><span class="p">:</span> <span class="n">ensemble</span><span class="p">,</span>
+            <span class="s1">&#39;final_ensemble&#39;</span><span class="p">:</span> <span class="n">tmp_final_ensemble</span><span class="p">,</span>
+            <span class="s1">&#39;final_ensemble_true_count&#39;</span><span class="p">:</span> <span class="n">tmp_final_ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span>
+            <span class="s1">&#39;algorithms_run&#39;</span><span class="p">:</span> <span class="n">algorithms_run</span><span class="p">,</span>
+            <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s1">&#39;resolution&#39;</span><span class="p">:</span> <span class="n">metric_resolution</span>
+        <span class="p">}</span>
+        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># @modified 20221205 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1"># Use the current timestamp not the timeseries timestamp value because</span>
+        <span class="c1"># that timestamp will be the same each time for the downsampled period</span>
+        <span class="c1"># with the introduction of resampling Graphite and Redis data</span>
+        <span class="c1"># trigger_history[last_timestamp] = trigger_dict</span>
+        <span class="n">trigger_history</span><span class="p">[</span><span class="n">c_time</span><span class="p">]</span> <span class="o">=</span> <span class="n">trigger_dict</span>
+        <span class="c1"># @added 20220416 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1">#                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1"># When checking downsampled FULL_DURATION data and merged Graphite data</span>
+        <span class="c1"># do not set the trigger history again as it will have been set on the</span>
+        <span class="c1"># analysis of the Graphite data</span>
+        <span class="n">trigger_history_set</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">trigger_history_set_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.trigger_history_set.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">trigger_history_set</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">trigger_history_set_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to set key in mirage.trigger_history Redis hash key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">trigger_history_set</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: current trigger_history_set exists for </span><span class="si">%s</span><span class="s1">, not resetting&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20220416 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1">#                     Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+        <span class="c1"># Only set the trigger_history on the first analysis based on Graphite</span>
+        <span class="c1"># data and not if this is the second analysis run on downsampled</span>
+        <span class="c1"># FULL_DURATION data and merged Graphite data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">trigger_history_set</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;mirage.trigger_history&#39;</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">trigger_history</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: added event for </span><span class="si">%s</span><span class="s1"> to mirage.trigger_history: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">trigger_dict</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to set key in mirage.trigger_history Redis hash key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">trigger_history_set_key</span><span class="p">,</span> <span class="mi">59</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: added trigger_history_set_key for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to set trigger_history_set_key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20211104 - Bug #4308: matrixprofile - fN on big drops</span>
+    <span class="c1">#                   Branch #3068: SNAB</span>
+    <span class="n">ensemble_pre_custom_algorithms_true_count</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ensemble_pre_custom_algorithms</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span>
+    <span class="c1"># if ensemble_pre_custom_algorithms_true_count &gt;= 7:</span>
+    <span class="c1">#     skyline_matrixprofile_override = True</span>
+
+    <span class="c1"># check_trigger_history = False</span>
+    <span class="c1"># trigger_history_override = 0</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#     trigger_history_override = custom_algorithms_to_run[custom_algorithm][&#39;trigger_history_override&#39;]</span>
+    <span class="c1">#     logger.info(&#39;mirage_algorithms :: trigger_history_override is set to %s on %s for %s&#39; % (</span>
+    <span class="c1">#         str(trigger_history_override), custom_algorithm, base_name))</span>
+    <span class="c1"># except KeyError:</span>
+    <span class="c1">#     trigger_history_override = 0</span>
+
+    <span class="k">if</span> <span class="n">ensemble_pre_custom_algorithms_true_count</span> <span class="o">&gt;=</span> <span class="n">MIRAGE_CONSENSUS</span> <span class="ow">and</span> <span class="n">check_trigger_history_enabled</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: will check trigger_history on </span><span class="si">%s</span><span class="s1"> during custom_algorithms runs if trigger_history_override is set&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="c1"># @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter</span>
+    <span class="k">if</span> <span class="n">run_custom_algorithm_after_3sigma</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: checking custom algorithms to run AFTER three-sigma algorithms&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">custom_algorithms_to_run</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">run_before_3sigma</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">run_before_3sigma</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;run_before_3sigma&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">run_before_3sigma</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">run_before_3sigma</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: NOT running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> AFTER three-sigma algorithms as run_before_3sigma is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">run_before_3sigma</span><span class="p">)))</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># @added 20220301 - Bug #4308: matrixprofile - fN on big drops</span>
+            <span class="c1">#                   Branch #3068: SNAB</span>
+            <span class="n">trigger_history_override</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">trigger_history_override</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;trigger_history_override&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">trigger_history_override</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">trigger_history_override</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: trigger_history_override is set to </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">trigger_history_override</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">custom_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;consensus&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">custom_consensus</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">custom_consensus_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_consensus</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">custom_consensus</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)</span>
+            <span class="n">run_only_if_consensus</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">run_only_if_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;run_only_if_consensus&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">run_only_if_consensus</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">run_only_if_consensus</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: NOT running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> AFTER three-sigma algorithms as only </span><span class="si">%s</span><span class="s1"> three-sigma algorithms triggered - MIRAGE_CONSENSUS of </span><span class="si">%s</span><span class="s1"> not achieved&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)))</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> AFTER three-sigma algorithms as </span><span class="si">%s</span><span class="s1"> three-sigma algorithms triggered - MIRAGE_CONSENSUS of </span><span class="si">%s</span><span class="s1"> was achieved&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)))</span>
+            <span class="n">run_algorithm</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">run_algorithm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                <span class="n">start_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="c1"># @modified 20230112 - Task #4778: v4.0.0 - update dependencies</span>
+            <span class="c1"># Load run_custom_algorithm_on_timeseries once.  HOWEVER I am not</span>
+            <span class="c1"># 100% certain if this will have the desired effect when multiple</span>
+            <span class="c1"># custom algorithms are run .... TODO check</span>
+            <span class="c1"># run_custom_algorithm_on_timeseries = None</span>
+            <span class="c1"># try:</span>
+            <span class="c1">#     from custom_algorithms import run_custom_algorithm_on_timeseries</span>
+            <span class="c1">#     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:</span>
+            <span class="c1">#         logger.debug(&#39;debug :: mirage_algorithms :: loaded run_custom_algorithm_on_timeseries&#39;)</span>
+            <span class="c1"># except:</span>
+            <span class="c1">#     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:</span>
+            <span class="c1">#         logger.error(traceback.format_exc())</span>
+            <span class="c1">#         logger.error(&#39;error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries&#39;)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">use_debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">use_debug_logging</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">:</span>
+
+                <span class="c1"># @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR</span>
+                <span class="c1">#                   Feature #4702: numba optimisations</span>
+                <span class="c1"># Use start up key and allow numba cache files to be created</span>
+                <span class="k">if</span> <span class="n">max_custom_algorithm_execution_time</span><span class="p">:</span>
+                    <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_custom_algorithm_execution_time</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: mirage.starting key exists so max_custom_algorithm_execution_time set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">max_custom_algorithm_execution_time</span><span class="p">)))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># @modified 20230117 - Task #4786: Switch from matrixprofile to stumpy</span>
+                    <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+                    <span class="c1"># Import skyline_matrixprofile and handle differently as</span>
+                    <span class="c1"># the stumpy implementation has long initial initialisation</span>
+                    <span class="k">if</span> <span class="n">custom_algorithm</span> <span class="o">!=</span> <span class="s1">&#39;skyline_matrixprofile&#39;</span><span class="p">:</span>
+                        <span class="c1"># @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy</span>
+                        <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
+                        <span class="c1"># Added current_func</span>
+                        <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">],</span> <span class="n">use_debug_logging</span><span class="p">,</span> <span class="n">current_func</span><span class="o">=</span><span class="n">current_func</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># logger.debug(&#39;debug :: mirage_algorithms :: running skyline_matrixprofile&#39;)</span>
+                        <span class="n">custom_algorithm_modules</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;custom_algorithm_sources.stumpy.stump&#39;</span><span class="p">,</span> <span class="s1">&#39;stumpy.stump&#39;</span><span class="p">,</span> <span class="s1">&#39;stump&#39;</span><span class="p">]</span>
+                        <span class="n">algorithm_modules_loaded</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">custom_algorithm_modules</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">algorithm_modules_loaded</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: running skyline_matrixprofile, not importing stumpy as it is present in sys.modules&#39;</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: running skyline_matrixprofile, will import stumpy as it is not present in sys.modules&#39;</span><span class="p">)</span>
+                        <span class="n">start_skmp</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">current_func</span><span class="p">:</span>
+                            <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">][</span><span class="s1">&#39;context&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_func</span>
+                        <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">skyline_matrixprofile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">])</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: skyline_matrixprofile took </span><span class="si">%s</span><span class="s1"> seconds to run&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_skmp</span><span class="p">))</span>
+                    <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: metric: </span><span class="si">%s</span><span class="s1">, custom_algorithm: </span><span class="si">%s</span><span class="s1">, result: </span><span class="si">%s</span><span class="s1">, anomalyScore: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">base_name</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to run custom_algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">end_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: ran custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> with result of (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span>
+                    <span class="p">(</span><span class="n">end_debug_timer</span> <span class="o">-</span> <span class="n">start_debug_timer</span><span class="p">)))</span>
+            <span class="n">algorithms_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">final_after_custom_ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># custom_run_3sigma_algorithms = True does not need to be checked</span>
+            <span class="c1"># here as if three-sigma algorithms have run they have already run</span>
+            <span class="c1"># at this point, unlike above in the run_before_3sigma custom</span>
+            <span class="c1"># algorithms run</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">custom_consensus_override</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: overriding the CONSENSUS as custom algorithm </span><span class="si">%s</span><span class="s1"> overides on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># @added 20201127 - Feature #3566: custom_algorithms</span>
+                <span class="c1"># Handle if the result is None</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> failed to run on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># hmmm we are required to hack threshold here</span>
+                        <span class="n">custom_algorithm_not_anomalous</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> did not trigger - custom_algorithm_not_anomalous set to identify as not anomalous&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)))</span>
+
+                <span class="c1"># @added 20211104 - Bug #4308: matrixprofile - fN on big drops</span>
+                <span class="c1">#                   Branch #3068: SNAB</span>
+                <span class="c1"># if custom_algorithm == &#39;skyline_matrixprofile&#39; and check_trigger_history:</span>
+                <span class="k">if</span> <span class="n">trigger_history_override</span><span class="p">:</span>
+                    <span class="n">trigger_history</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">raw_trigger_history</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;mirage.trigger_history&#39;</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">raw_trigger_history</span><span class="p">:</span>
+                            <span class="n">trigger_history</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">raw_trigger_history</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> trigger_history count before removing old entires: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trigger_history</span><span class="p">))))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to evaluate data from mirage.trigger_history Redis hash key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                    <span class="n">metric_resolution</span> <span class="o">=</span> <span class="mi">60</span>
+                    <span class="k">if</span> <span class="n">trigger_history</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">metric_resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: determine_data_frequency failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                    <span class="n">recent_trigger_history</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="c1"># oldest_trigger_timestamp = last_timestamp - (metric_resolution * (trigger_history_override + 1))</span>
+                    <span class="n">oldest_trigger_timestamp</span> <span class="o">=</span> <span class="n">c_time</span> <span class="o">-</span> <span class="p">(</span><span class="n">metric_resolution</span> <span class="o">*</span> <span class="p">(</span><span class="n">trigger_history_override</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+                    <span class="c1"># Self clean trigger_history</span>
+                    <span class="k">for</span> <span class="n">trigger_timestamp</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">trigger_history</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="k">if</span> <span class="n">trigger_timestamp</span> <span class="o">&lt;</span> <span class="n">oldest_trigger_timestamp</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">recent_trigger_history</span><span class="p">[</span><span class="n">trigger_timestamp</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">trigger_history</span><span class="p">[</span><span class="n">trigger_timestamp</span><span class="p">])</span>
+
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> trigger_history count after removing entries older than </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">oldest_trigger_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recent_trigger_history</span><span class="p">))))</span>
+                    <span class="n">tmp_final_ensemble</span> <span class="o">=</span> <span class="n">ensemble</span> <span class="o">+</span> <span class="n">final_after_custom_ensemble</span>
+                    <span class="n">trigger_dict</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="n">ensemble_pre_custom_algorithms_true_count</span><span class="p">,</span>
+                        <span class="s1">&#39;ensemble&#39;</span><span class="p">:</span> <span class="n">ensemble_pre_custom_algorithms</span><span class="p">,</span>
+                        <span class="s1">&#39;final_ensemble&#39;</span><span class="p">:</span> <span class="n">tmp_final_ensemble</span><span class="p">,</span>
+                        <span class="s1">&#39;final_ensemble_count&#39;</span><span class="p">:</span> <span class="n">tmp_final_ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">),</span>
+                        <span class="s1">&#39;algorithms_run&#39;</span><span class="p">:</span> <span class="n">algorithms_run</span><span class="p">,</span>
+                        <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="s1">&#39;resolution&#39;</span><span class="p">:</span> <span class="n">metric_resolution</span>
+                    <span class="p">}</span>
+                    <span class="c1"># @modified 20221205 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS</span>
+                    <span class="c1"># Use the current timestamp not the timeseries timestamp value because</span>
+                    <span class="c1"># that timestamp will be the same each time for the downsampled period</span>
+                    <span class="c1"># with the introduction of resampling Graphite and Redis data</span>
+                    <span class="c1"># recent_trigger_history[last_timestamp] = trigger_dict</span>
+                    <span class="n">recent_trigger_history</span><span class="p">[</span><span class="n">c_time</span><span class="p">]</span> <span class="o">=</span> <span class="n">trigger_dict</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="s1">&#39;mirage.trigger_history&#39;</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">recent_trigger_history</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: added event for </span><span class="si">%s</span><span class="s1"> to mirage.trigger_history: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">trigger_dict</span><span class="p">)))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_algorithms :: failed to set key in mirage.trigger_history Redis hash key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                    <span class="n">recent_trigger_history_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">recent_trigger_history</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: recent_trigger_history_count: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">recent_trigger_history_count</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">recent_trigger_history_count</span> <span class="o">&gt;=</span> <span class="n">trigger_history_override</span> <span class="ow">and</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: </span><span class="si">%s</span><span class="s1"> overriding </span><span class="si">%s</span><span class="s1"> - recent_trigger_history_count breached with </span><span class="si">%s</span><span class="s1"> recent triggers&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">recent_trigger_history_count</span><span class="p">)))</span>
+                        <span class="n">custom_consensus_override</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">custom_algorithm_not_anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: overriding </span><span class="si">%s</span><span class="s1"> result: </span><span class="si">%s</span><span class="s1">, not anomalous custom_consensus of 1&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_algorithms :: custom_consensus_override set to False as original 3-sigma True count is </span><span class="si">%s</span><span class="s1"> along with recent_trigger_history_count breach&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">ensemble_pre_custom_algorithms_true_count</span><span class="p">)))</span>
+                        <span class="n">new_algorithms_run</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">algorithm_run</span> <span class="ow">in</span> <span class="n">algorithms_run</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">algorithm_run</span> <span class="o">==</span> <span class="n">custom_algorithm</span><span class="p">:</span>
+                                <span class="n">algorithm_run</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (override - </span><span class="si">%s</span><span class="s1"> recent 3-sigma triggers)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">recent_trigger_history_count</span><span class="p">))</span>
+                            <span class="n">new_algorithms_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm_run</span><span class="p">)</span>
+                        <span class="n">algorithms_run</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_algorithms_run</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">final_after_custom_ensemble</span><span class="p">:</span>
+        <span class="n">ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
     <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
     <span class="k">try</span><span class="p">:</span>
@@ -902,7 +1458,10 @@
             <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">MIRAGE_CONSENSUS</span>
-        <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+
+        <span class="c1"># @modified 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter</span>
+        <span class="c1"># Added and not custom_algorithm_not_anomalous</span>
+        <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">custom_algorithm_not_anomalous</span><span class="p">:</span>
 
             <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
             <span class="c1"># Only run a negatives_present check if it is anomalous, there</span>
@@ -953,49 +1512,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
-
-    </p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ionosphere learning from repetitive patterns &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tsfresh" href="tsfresh.html" />
+    <link rel="prev" title="Ionosphere inference" href="ionosphere_inference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Ionosphere learning from repetitive patterns</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#exclude-and-include">Exclude and include</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#learn-repetitive-patterns">learn_repetitive_patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#find-repetitive-patterns">find_repetitive_patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Ionosphere learning from repetitive patterns</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ionosphere_learn_repetitive_patterns.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ionosphere-learning-from-repetitive-patterns">
+<h1>Ionosphere learning from repetitive patterns<a class="headerlink" href="#ionosphere-learning-from-repetitive-patterns" title="Permalink to this heading"></a></h1>
+<p>By default learning from repetitive patterns is not enabled because you should
+define the metrics to exclude from this learning <strong>before</strong> enabling it.</p>
+<section id="exclude-and-include">
+<h2>Exclude and include<a class="headerlink" href="#exclude-and-include" title="Permalink to this heading"></a></h2>
+<p>You need to decide what metrics you want to exclude from learning from
+repetitive patterns.  You do not want Skyline learning from repetitive patterns
+on <code class="docutils literal notranslate"><span class="pre">bad</span></code> metrics, like metrics that are related to errors, 50x status codes,
+access_denied, etc.  These types of metrics can be excluded from the learning by
+defining them in the <a class="reference internal" href="skyline.html#settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE" title="settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE</span></code></a>.</p>
+<p>For convenience sake there is a <a class="reference internal" href="skyline.html#settings.IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE" title="settings.IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE</span></code></a>
+setting which allows you to define only certain metrics to be learnt from
+repetitive patterns. If it is defined it is evaluated before the EXCLUDE to
+filter only the metrics that match definitions.  The EXCLUDE (if defined) is
+then applied to the INCLUDE metrics list. This setting is to allow for testing
+repetitive learning with limited set of metrics before implementing it on the
+entire metric population.</p>
+<p>For a detailed description of the data structures both of these dictionaries see
+the annotated example under <a class="reference internal" href="skyline.html#settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE" title="settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE</span></code></a>
+in settings.py</p>
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
+<p>Two methods of learning from repetitive patterns can be implemented in
+Ionosphere.  Each method has slight differences and running both achieves the
+best results.</p>
+<p>Often metrics exhibit repetitive patterns where there are large fluctuations
+periodically.  A number of these are caused by normal operations of a process,
+for example something like <code class="docutils literal notranslate"><span class="pre">prometheus_tsdb_compactions_total</span></code> or VictoriaMetrics
+<code class="docutils literal notranslate"><span class="pre">process_io_write_syscalls_total</span></code> are processes that occur periodically and
+tend to generate spikes of similar and varying magnitude.  There are many other
+types of metrics that fit into this category, things like backups which
+generally cause spikes in disk I/O, network bandwidth, etc, and other things
+like cron jobs, log rotation, etc, that run on a scheduled basis can result in
+these types of patterns in metrics.</p>
+<p>The learn_repetitive_patterns processes evaluates current and previous anomalies
+on metrics and calculate the features profile for each of these, then
+comparisons are made between all the calculated features profiles and if 3 are
+found to be similar then these patterns are learnt as being normal behaviour.</p>
+<p>The two methods, namely <code class="docutils literal notranslate"><span class="pre">learn_repetitive_patterns</span></code> and
+<code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code> are described here, both are similar but each
+searches for a different kind of pattern.</p>
+</section>
+<section id="learn-repetitive-patterns">
+<h2>learn_repetitive_patterns<a class="headerlink" href="#learn-repetitive-patterns" title="Permalink to this heading"></a></h2>
+<p>This method learns daily periodic patterns.  In new metrics these patterns can
+be found and learnt after 10 days.  Thereafter if the pattern changes the method
+can learn the new daily periodic pattern after 7 days.</p>
+<p>This method is run periodically against metrics that have <strong>training data</strong>.  It
+is used to find metrics that exhibit daily patterns in terms of anomalies which
+occur during similar periods, e.g. between 00h00 and 00h15 or 03h15 and 03h30.
+Processes such as cron jobs, compaction, log rotation, storage bucket rolling,
+etc, all tend to cause this type of behaviour in metrics.  The training data
+for each metric is evaluated and any training data that is discovered with
+anomalies aligned in similar periods/windows are evaluated.  The evaluation
+compares the features profile sums of each training data set and if 3 training
+data sets are found to be significantly similar, these are classified as
+normal and they are automatically trained on.</p>
+</section>
+<section id="find-repetitive-patterns">
+<h2>find_repetitive_patterns<a class="headerlink" href="#find-repetitive-patterns" title="Permalink to this heading"></a></h2>
+<p>This method can learn patterns in metrics after 7 days.</p>
+<p>This method is run periodically against all anomalies.  Unlike
+<code class="docutils literal notranslate"><span class="pre">learn_repetitive_patterns</span></code> this method does not use training data or
+period alignment, it uses anomalies from the metric in the last 30 days.  This
+results in finding patterns of normal behaviour that are not necessarily
+periodically aligned but that can occur sporadically but are normal over a
+longer period and happen frequently enough to be considered as normal.</p>
+<p>After the normal Ionosphere learn window has passed, the
+<code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code> process determines all anomalies which have not
+been trained on since the last evaluation (the first run considers only the
+previous 24 hours).</p>
+<ul class="simple">
+<li><p>The process surfaces every anomaly that occurred on the metric in the past 30
+days.</p></li>
+<li><p>The time series data for each of these anomalies is then fetched and the
+features profile sum is calculated for each anomalous time series.</p></li>
+<li><p>These feature profile sums are then compared to the features profile sums of
+all the other anomalies, which do not fall in same weekly period as the
+feature profile sum being evaluated.  This means that only anomalies that are
+in different weeks are evaluated against each other and anomalies in the same
+weekly window are not considered.  Ensuring that the patterns found occur
+frequently and are not just a representation of recent behaviour.</p></li>
+<li><p>A confusion matrix of similarity is generated and if any 3 or more are found
+to be similar they are classified as normal and trained upon.</p></li>
+</ul>
+<p>An implementation factor to be aware of is that due to the fact that normal
+MinMax scaling checks and comparisons that occur in the normal Ionosphere
+process based on similar ranges is not implemented here.  MinMax scaling is
+implemented via threshold on the average value of the time series defined in
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE" title="settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE</span></code></a>.  Due to
+the fact that patterns and not absolutes are being looked for here and that
+the features profiles being compared are separated by at least 7 days, the
+features profile sums should be sufficient to differentiate dissimilar patterns.
+There is a very small possibility that the MinMax scaling will result in
+false positive matches, however the metric would have to change proportionally
+in average, peak and trough values for this to occur which is probably unlikely
+and even if it did, unless those changes were <strong>significant</strong> in magnitude, it
+is desirable that they do match as similar.</p>
+<p><a class="reference internal" href="skyline.html#settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE" title="settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE</span></code></a> can be set
+to 0 to disable MinMax scaling comparisons.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ionosphere_inference.html" class="btn btn-neutral float-left" title="Ionosphere inference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tsfresh.html" class="btn btn-neutral float-right" title="tsfresh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

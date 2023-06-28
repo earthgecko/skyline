@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ionosphere.learn_repetitive_patterns &mdash; Skyline 4.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+              <div class="version">
+                4.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ionosphere.learn_repetitive_patterns</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ionosphere.learn_repetitive_patterns</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">learn_repetitive_patterns.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+
+<span class="kn">from</span> <span class="nn">functions.ionosphere.get_training_data</span> <span class="kn">import</span> <span class="n">get_training_data</span>
+<span class="kn">from</span> <span class="nn">features_profile</span> <span class="kn">import</span> <span class="n">calculate_features_profile</span>
+<span class="kn">from</span> <span class="nn">functions.numpy.percent_different</span> <span class="kn">import</span> <span class="n">get_percent_different</span>
+<span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="kn">import</span> <span class="n">create_features_profile</span>
+<span class="c1"># @added 20221215 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
+<span class="kn">from</span> <span class="nn">functions.ionosphere.get_repetitive_patterns_metrics_list_to_evaluate</span> <span class="kn">import</span> <span class="n">get_repetitive_patterns_metrics_list_to_evaluate</span>
+<span class="kn">from</span> <span class="nn">functions.metrics.get_base_names_and_metric_ids</span> <span class="kn">import</span> <span class="n">get_base_names_and_metric_ids</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Converting one settings variable into a local variable, just because it is a</span>
+<span class="c1"># long string otherwise.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: learn :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings&#39;</span><span class="p">)</span>
+    <span class="n">ENABLE_IONOSPHERE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">learn_full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</span><span class="p">)</span> <span class="o">*</span> <span class="mi">86400</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">learn_full_duration</span> <span class="o">=</span> <span class="mi">86400</span> <span class="o">*</span> <span class="mi">30</span>  <span class="c1"># 2592000</span>
+
+<span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">running_on_docker</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">running_on_docker</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">running_on_docker</span><span class="p">:</span>
+    <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">overall_verify_ssl</span><span class="p">:</span>
+    <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">user</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
+
+<span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;learn_repetitive_patterns&#39;</span>
+
+<span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_training_to_evaluate"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_training_to_evaluate">[docs]</a><span class="k">def</span> <span class="nf">get_training_to_evaluate</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary of training data to evaluate.</span>
+
+<span class="sd">    :param metrics_to_evaluate: the dictionary of metrics_to_evaluate</span>
+<span class="sd">    :type metrics_to_evaluate: dict</span>
+<span class="sd">    :return: training_to_evaluate</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Determine training data sets that are roughly aligned hourly or daily</span>
+    <span class="n">training_to_evaluate</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">hourly_tolerance</span> <span class="o">=</span> <span class="mi">180</span>
+    <span class="n">daily_tolerance</span> <span class="o">=</span> <span class="mi">900</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="c1"># Sort timestamps oldest to latest</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span>
+        <span class="n">aligned_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># @added 20230105 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
+        <span class="c1"># Check that the timestamps are not within recent 1 hour periods of each</span>
+        <span class="c1"># other.  This prevents a similar pattern occurring over short period</span>
+        <span class="c1"># for being identified as a repetitive pattern, which is undesired.  For</span>
+        <span class="c1"># instance if there are training data sets for 16:05, 17:06, 18:07 on</span>
+        <span class="c1"># the same day we do not want to compare those.</span>
+        <span class="n">last_training_data_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps</span><span class="p">):</span>
+            <span class="c1"># The last timestamp, we are done</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">timestamp_difference</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[(</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">-</span> <span class="n">t</span>
+
+            <span class="c1"># @added 20230105 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
+            <span class="c1"># Check that the timestamps are not within recent 1 hour periods of</span>
+            <span class="c1"># each other</span>
+            <span class="k">if</span> <span class="n">last_training_data_timestamp</span> <span class="ow">and</span> <span class="n">last_training_data_timestamp</span> <span class="o">&lt;</span> <span class="n">t</span> <span class="o">+</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">last_training_data_timestamp</span> <span class="o">=</span> <span class="n">t</span>
+                <span class="k">continue</span>
+            <span class="n">last_training_data_timestamp</span> <span class="o">=</span> <span class="n">t</span>
+
+            <span class="k">if</span> <span class="n">timestamp_difference</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">((</span><span class="mi">86400</span> <span class="o">-</span> <span class="n">daily_tolerance</span><span class="p">),</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">+</span> <span class="n">daily_tolerance</span><span class="p">))):</span>
+                <span class="n">aligned_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">timestamp_difference</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">((</span><span class="mi">3600</span> <span class="o">-</span> <span class="n">hourly_tolerance</span><span class="p">),</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">+</span> <span class="n">hourly_tolerance</span><span class="p">))):</span>
+                <span class="n">aligned_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">aligned_count</span> <span class="o">==</span> <span class="p">(</span><span class="n">count</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">training_to_evaluate</span></div>
+
+
+<div class="viewcode-block" id="get_metrics_to_evaluate"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_metrics_to_evaluate">[docs]</a><span class="k">def</span> <span class="nf">get_metrics_to_evaluate</span><span class="p">(</span><span class="n">training_data_dict</span><span class="p">,</span> <span class="n">last_evaluation_timestamp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary of metrics_to_evaluate.</span>
+
+<span class="sd">    :param training_data_dict: the dictionary of training data</span>
+<span class="sd">    :param last_evaluation_timestamp: the last timestamp that training was</span>
+<span class="sd">        evaluated</span>
+<span class="sd">    :type training_data_dict: dict</span>
+<span class="sd">    :type last_evaluation_timestamp: int</span>
+<span class="sd">    :return: metrics_to_evaluate</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">metrics_to_evaluate</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">training_data_dict_by_metric</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">training_to_evaluate</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># @added 20221215 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
+    <span class="c1"># Added exclude_metrics list</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">base_names_with_ids</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">ids_with_base_names</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">base_names_with_ids</span> <span class="o">=</span> <span class="n">get_base_names_and_metric_ids</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">base_names_with_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_base_names_and_metric_ids failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+        <span class="n">ids_with_base_names</span><span class="p">[</span><span class="n">base_names_with_ids</span><span class="p">[</span><span class="n">metric</span><span class="p">]]</span> <span class="o">=</span> <span class="n">metric</span>
+
+    <span class="n">include_metrics</span> <span class="o">=</span> <span class="n">exclude_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">include_metrics</span><span class="p">,</span> <span class="n">exclude_metrics</span> <span class="o">=</span> <span class="n">get_repetitive_patterns_metrics_list_to_evaluate</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_repetitive_patterns_metrics_list_to_evaluate falied - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">training_data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">training_data_dict</span><span class="p">[</span><span class="n">t</span><span class="p">]:</span>
+
+            <span class="c1"># @added 20221215 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
+            <span class="c1"># Added exclude_metrics list</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">):</span>
+                <span class="n">metric_id_str</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;labelled_metrics.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id_str</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">ids_with_base_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">exclude_metrics</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">training_data_dict_by_metric</span><span class="p">:</span>
+                <span class="n">training_data_dict_by_metric</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">training_data_dict_by_metric</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_data_dict</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">last_evaluation_timestamp</span><span class="p">:</span>
+                <span class="c1"># Do not add if already trained</span>
+                <span class="k">if</span> <span class="n">training_data_dict</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;trained&#39;</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">training_to_evaluate</span><span class="p">:</span>
+                    <span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_data_dict</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: there are </span><span class="si">%s</span><span class="s1"> training data set to consider for evaluation&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">))))</span>
+    <span class="c1"># Only evalute metrics that have more than 2 training data sets present</span>
+    <span class="n">training_to_evaluate_counts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">training_data_dict_by_metric</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">training_to_evaluate_counts</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">training_data_dict_by_metric</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+            <span class="n">metrics_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">training_data_dict_by_metric</span><span class="p">[</span><span class="n">metric</span><span class="p">])</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: there are </span><span class="si">%s</span><span class="s1"> metrics with multiple training data sets to check if the events align periodically&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">training_to_evaluate_counts</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="n">metrics_to_evaluate</span></div>
+
+
+<div class="viewcode-block" id="get_features_to_compare"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_features_to_compare">[docs]</a><span class="k">def</span> <span class="nf">get_features_to_compare</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary offeatures_to_compare.</span>
+
+<span class="sd">    :param training_to_evaluate: the dictionary of training data to evaluate</span>
+<span class="sd">    :type training_to_evaluate: dict</span>
+<span class="sd">    :return: features_to_compare</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">features_to_compare</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">features_profile_sums</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">features_profile_details_file</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">fp_details</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">training_data_dir</span> <span class="o">=</span> <span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;training_data_dir&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.details.txt&#39;</span><span class="p">):</span>
+                    <span class="n">features_profile_details_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="s1">&#39;training_data_dir&#39;</span><span class="p">],</span> <span class="n">f</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">features_profile_details_file</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">fp_csv</span><span class="p">,</span> <span class="n">successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">,</span> <span class="n">f_calc</span> <span class="o">=</span> <span class="n">calculate_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;training_data&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: calculate_features_profile failed for metric: </span><span class="si">%s</span><span class="s1">, timestamp: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">dir_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">training_data_dir</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.details.txt&#39;</span><span class="p">):</span>
+                        <span class="n">features_profile_details_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">training_data_dir</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">):</span>
+                <span class="n">fp_details_str</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_profile_details_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">fp_details_str</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_details</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_details_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: literal_eval failed for for fp_details for metric: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                <span class="n">fp_details</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">fp_details</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">features_profile_sums</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_details</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: literal_eval failed for for fp_details for metric: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features_profile_sums</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> has insufficient features sums to learn with, not evaluating&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="n">features_to_compare</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">features_profile_sums</span>
+    <span class="k">return</span> <span class="n">features_to_compare</span></div>
+
+
+<div class="viewcode-block" id="get_metrics_to_train"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_metrics_to_train">[docs]</a><span class="k">def</span> <span class="nf">get_metrics_to_train</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary of metrics_to_train.</span>
+
+<span class="sd">    :param features_to_compare: the dictionary of features_to_compare</span>
+<span class="sd">    :type features_to_compare: dict</span>
+<span class="sd">    :return: metrics_to_train</span>
+<span class="sd">    :rtype: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metrics_to_train</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">metrics_to_train_key_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">features_to_compare</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">comparison_matrix</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;train&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;training&#39;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s1">&#39;timestamps_to_train&#39;</span><span class="p">:</span> <span class="p">[],</span>
+            <span class="s1">&#39;train_count&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span>
+        <span class="p">}</span>
+        <span class="n">training_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+            <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">features_sum</span> <span class="o">=</span> <span class="n">features_to_compare</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">t</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">it</span> <span class="ow">in</span> <span class="p">[[</span><span class="n">index</span><span class="p">,</span> <span class="n">t</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))]:</span>
+                <span class="n">similar_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">other_features_sum</span> <span class="o">=</span> <span class="n">features_to_compare</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">it</span><span class="p">]</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="mi">100</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">percent_different</span> <span class="o">=</span> <span class="n">get_percent_different</span><span class="p">(</span><span class="n">features_sum</span><span class="p">,</span> <span class="n">other_features_sum</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to calculate percent_different for metric: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="n">it</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;percent_different&#39;</span><span class="p">:</span> <span class="n">percent_different</span><span class="p">,</span> <span class="s1">&#39;source_fp_sum&#39;</span><span class="p">:</span> <span class="n">features_sum</span><span class="p">,</span> <span class="s1">&#39;fp_sum&#39;</span><span class="p">:</span> <span class="n">other_features_sum</span><span class="p">}</span>
+                <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">percent_different</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                    <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="n">it</span><span class="p">][</span><span class="s1">&#39;similar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">similar_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">training_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                    <span class="n">training_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">it</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="n">it</span><span class="p">][</span><span class="s1">&#39;similar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">training_timestamps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">training_timestamps</span><span class="p">))</span>
+        <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;train_on_avg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># If the average of the percentages is less than 4 train on</span>
+        <span class="c1"># the timestamps where the percent_difference is less than 2</span>
+        <span class="n">precentages</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">precentages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="n">t</span><span class="p">][</span><span class="n">tt</span><span class="p">][</span><span class="s1">&#39;percent_different&#39;</span><span class="p">])</span>
+        <span class="n">avg_percent_different</span> <span class="o">=</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">precentages</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">precentages</span><span class="p">))</span>
+        <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;avg_percent_different&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">avg_percent_different</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">training_timestamps</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If the average of the percentages is less than 4 train on</span>
+            <span class="c1"># the timestamps where the percent_difference is less than 2</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">training_timestamps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">avg_percent_different</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;train_on_avg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;timestamps_to_train&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_timestamps</span>
+        <span class="n">metrics_to_train_key_data</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">comparison_matrix</span>
+        <span class="k">if</span> <span class="n">comparison_matrix</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">]:</span>
+            <span class="n">metrics_to_train</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">comparison_matrix</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.learn_repetitive_patterns.metrics_to_train_evaluation.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_train_key_data</span><span class="p">))</span>
+        <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">*</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to hset ionosphere.learn_repetitive_patterns.metrics_to_train_evaluation in Redis - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">metrics_to_train</span></div>
+
+
+<div class="viewcode-block" id="ionosphere_learn_repetitive_patterns"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_learn_repetitive_patterns</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :class:`~skyline.skyline.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns` to</span>
+<span class="sd">    re-evaluate anomalies and such, like creating learning features profiles,</span>
+<span class="sd">    when a human makes a features profile and the automated creation of learnt</span>
+<span class="sd">    features profiles and learn features profiles.</span>
+
+<span class="sd">    :param timestamp: timestamp at which learn was called</span>
+<span class="sd">    :type timestamp: int</span>
+<span class="sd">    :return: True or False</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: child_process_pid - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">)))</span>
+
+    <span class="c1"># Get a list of all the training_data and check the following:</span>
+    <span class="c1"># Are there multiple metrics firing at certain times?</span>
+    <span class="c1"># Are there groups of metrics that are aligned at these times?</span>
+    <span class="c1"># If so compare the fp sums of each training data set for each metric that occurs multiple times and is aligned in a group</span>
+
+    <span class="n">last_evaluation_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">last_evaluation_timestamp_data</span> <span class="o">=</span> <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn_repetitive_patterns.last_evaluation_timestamp&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_evaluation_timestamp_data</span><span class="p">:</span>
+            <span class="n">last_evaluation_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_evaluation_timestamp_data</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get ionosphere.learn_repetitive_patterns.last_evaluation_timestamp from Redis - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">last_evaluation_timestamp</span><span class="p">:</span>
+        <span class="n">next_evaluation</span> <span class="o">=</span> <span class="n">last_evaluation_timestamp</span> <span class="o">+</span> <span class="mi">3600</span>
+        <span class="k">if</span> <span class="n">next_evaluation</span> <span class="o">&gt;</span> <span class="n">timestamp</span><span class="p">:</span>
+            <span class="n">second_until</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">next_evaluation</span> <span class="o">-</span> <span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: next training_data evaluation scheduled to run in </span><span class="si">%s</span><span class="s1"> seconds, nothing to do&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">second_until</span><span class="p">)))</span>
+            <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">last_evaluation_timestamp</span><span class="p">:</span>
+        <span class="c1"># Evaluate the last days data if not set</span>
+        <span class="n">last_evaluation_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">last_evaluation_timestamp</span> <span class="o">=</span> <span class="n">last_evaluation_timestamp</span> <span class="o">-</span> <span class="mi">3600</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn_repetitive_patterns.last_evaluation_timestamp&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to set ionosphere.learn_repetitive_patterns.last_evaluation_timestamp from Redis - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">training_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">training_data_dict</span> <span class="o">=</span> <span class="n">get_training_data</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">namespaces</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">key_by</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_training_data failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">training_data_dict</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no training_data_dict to evaluate, nothing to do&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">metrics_to_evaluate</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_to_evaluate</span> <span class="o">=</span> <span class="n">get_metrics_to_evaluate</span><span class="p">(</span><span class="n">training_data_dict</span><span class="p">,</span> <span class="n">last_evaluation_timestamp</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_metrics_to_evaluate failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no metrics to evaluate&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">training_to_evaluate</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">training_to_evaluate</span> <span class="o">=</span> <span class="n">get_training_to_evaluate</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_training_to_evaluate failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: there are </span><span class="si">%s</span><span class="s1"> metrics with multiple training data sets that align periodically&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">))))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no metrics with periodically aligned events to evaluate&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">features_to_compare</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">features_to_compare</span> <span class="o">=</span> <span class="n">get_features_to_compare</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_features_to_compare failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no metrics with features to compare&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">metrics_to_train</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_to_train</span> <span class="o">=</span> <span class="n">get_metrics_to_train</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_metrics_to_train failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_train</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no metrics to train&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> metrics to train based on repetitive patterns&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_train</span><span class="p">))))</span>
+    <span class="n">create_context</span> <span class="o">=</span> <span class="s1">&#39;training_data&#39;</span>
+    <span class="n">created_fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics_to_train</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+
+        <span class="c1"># Do not hold up normal evaluation, run for 50 seconds and then set the</span>
+        <span class="c1"># last evaluation time key appropriately and break so that as so as</span>
+        <span class="c1"># Ionosphere is not busy with normal work the process will run again.</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">now</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">timestamp</span> <span class="o">+</span> <span class="mi">50</span><span class="p">):</span>
+            <span class="n">new_last_evaluation_timestamp</span> <span class="o">=</span> <span class="n">last_evaluation_timestamp</span> <span class="o">+</span> <span class="mi">900</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: stopping due to run time and resetting ionosphere.learn_repetitive_patterns.last_evaluation_timestamp to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_last_evaluation_timestamp</span><span class="p">)))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn_repetitive_patterns.last_evaluation_timestamp&#39;</span><span class="p">,</span> <span class="n">new_last_evaluation_timestamp</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to set ionosphere.learn_repetitive_patterns.last_evaluation_timestamp in Redis - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="k">break</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: training metric: </span><span class="si">%s</span><span class="s1">, training info: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_train</span><span class="p">[</span><span class="n">metric</span><span class="p">])))</span>
+        <span class="n">learn_parent_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Any generation of 0 or 1 is automatically set as validated</span>
+        <span class="c1"># however this is handled in create_features_profile when the</span>
+        <span class="c1"># ionosphere_job is &#39;learn_repetitive_patterns&#39;</span>
+        <span class="n">generation</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metrics_to_train</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;timestamps_to_train&#39;</span><span class="p">]):</span>
+            <span class="n">fetch_graphs</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">training_data_dict</span><span class="p">[</span><span class="n">ts</span><span class="p">][</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;graphite_now&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">fetch_graphs</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">fetch_graphs</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;requested_timestamp=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">user</span> <span class="ow">and</span> <span class="n">password</span><span class="p">:</span>
+                        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: fetch graphs for features profile&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed get training to save graphs from </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+            <span class="n">fp_in_successful</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_learn</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">learn_parent_id</span><span class="p">:</span>
+                    <span class="n">generation</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_repetitive_patterns&#39;</span>
+                <span class="n">slack_ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_repetitive_patterns&#39;</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;LEARNT - repetitive pattern&#39;</span>
+                <span class="n">fp_id</span><span class="p">,</span> <span class="n">fp_in_successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">create_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">create_context</span><span class="p">,</span> <span class="n">ionosphere_job</span><span class="p">,</span> <span class="n">learn_parent_id</span><span class="p">,</span> <span class="n">generation</span><span class="p">,</span> <span class="n">fp_learn</span><span class="p">,</span> <span class="n">slack_ionosphere_job</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">fp_exists</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: </span><span class="si">%s</span><span class="s1"> :: failed to create a features profile for </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> as an fp already exists&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create a features profile for </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">fp_in_successful</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_format_exc</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create a features profile for </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">)))</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_exists</span><span class="p">:</span>
+                <span class="n">created_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features profile with id </span><span class="si">%s</span><span class="s1"> created&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+            <span class="n">learn_parent_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: created </span><span class="si">%s</span><span class="s1"> features profiles: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">created_fp_ids</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">created_fp_ids</span><span class="p">)))</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
