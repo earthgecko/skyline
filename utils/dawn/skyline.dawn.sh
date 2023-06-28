@@ -1008,6 +1008,8 @@ if [ $SKYLINE_USER -eq 0 ]; then
   if [ "$OS" == "Ubuntu" ]; then
     useradd --system --shell /sbin/nologin --home-dir /opt/skyline skyline
   fi
+  # @added 20230628 - Task #4962: Build and test skyline v4.0.0
+  git config --global --add safe.directory /opt/skyline/github/skyline
 else
   echo -e "Skipping, creating the skyline /sbin/nologin user, already exists - \e[32mOK $COLOUR_OFF"
   sleep 1
