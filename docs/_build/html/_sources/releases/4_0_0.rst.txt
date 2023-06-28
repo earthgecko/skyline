@@ -2,7 +2,7 @@
 4.0.0
 =====
 
-v4.0.0 - xxx xx, 2023
+v4.0.0 - 28 June 2023
 
 This is a **MAJOR** release with changes and enhancements across the board,
 including changes and additions to backend components.
