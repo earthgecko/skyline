@@ -54,7 +54,9 @@ hiredis==2.0.0
 # The user requested docutils==0.20.1
 # sphinx 6.2.1 depends on docutils<0.20 and >=0.18.1
 #docutils==0.20.1
-docutils==0.19
+#docutils==0.19
+# sphinx-rtd-theme 1.2.2 depends on docutils<0.19
+docutils==0.18.1
 
 lockfile==0.12.2
 # @modified 20211220 - Task #4344: Update dependencies
