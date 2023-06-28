@@ -1,0 +1,354 @@
+{% block validate_features_profiles_block %}
+<!-- BEGIN /ionosphere>?fp_validate=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere validate_features_profiles block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+<!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
+<!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
+#                           Branch #2270: luminosity
+# Return matches for the last 24 hours as the default -->
+		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		  <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
+		  <li class="active"><a href="?fp_validate=true&metric=all"><span class="logo"><span class="sky">Validate</span></span></a></li>
+		  <li><a href="?performance=true">Performance</a></li>
+		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles to validate</span></span></h4>
+  {% if fp_search_results %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Validate features profile search</td>
+  		        <td><select name="fp_validate">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>validated</td>
+  		        <td><select name="validated_equals">
+                <option value="false">false</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+                <td>limit</td>
+                <td><input type="number" name="limit" min="0" max="100" value="30" /> use 0 for unlimited</td>
+  		      </tr>
+  		      <tr>
+  		        <td>order by:</td>
+  		        <td><select name="order">
+                <option value="DESC">DESC</option>
+                <option value="ASC">ASC</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if features_profiles_to_validate %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+
+{% if not features_profiles_to_validate %}
+  {% if metrics_with_features_profiles_to_validate %}
+	  <div class="tab-pane active" id="validate">
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">metrics :: </span></span>{{ metrics_with_features_profiles_to_validate|length }} metrics with features profiles found to validate</h4>
+
+			<table class="table table-hover">
+				<thead>
+					<tr>
+<!-- [metric_id0, str(metric)1, fps_to_validate_count2] -->
+            <th>metric id</th>
+            <th>metric</th>
+            <th>number of features profiles to validate</th>
+					</tr>
+				</thead>
+				<tbody>
+    {% for item in metrics_with_features_profiles_to_validate %}
+          <tr>
+            <td>{{ item[0] }}</td>
+      {% if '_tenant_id="' in item[1] %}
+        {% set use_metric = 'labelled_metrics.' + item[0]|string %}
+            <td onclick="window.location='?fp_validate=true&metric={{ use_metric }}&validated_equals=false&limit=0&order=DESC'">
+              <a href="?fp_validate=true&metric={{ use_metric }}&validated_equals=false&limit=0&order=DESC">{{ item[1] }}</a>
+            </td>
+      {% else %}
+            <td onclick="window.location='?fp_validate=true&metric={{ item[1] }}&validated_equals=false&limit=0&order=DESC'">
+              <a href="?fp_validate=true&metric={{ item[1] }}&validated_equals=false&limit=0&order=DESC">{{ item[1] }}</a>
+            </td>
+      {% endif %}
+            <td>{{ item[2] }}</td>
+          </tr>
+    {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+{% endif %}
+
+{% if not features_profiles_to_validate %}
+  {% if for_metric != 'all' %}
+	  <div class="tab-pane active" id="validate">
+    {% if labelled_metric_name %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ labelled_metric_name }} - {{ labelled_metric_base_name }} -
+          there were no features profiles found that require validating</h4>
+    {% else %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ for_metric }} -
+          there were no features profiles found that require validating</h4>
+    {% endif %}
+
+<!-- @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page -->
+      {% if all_validated %}
+        {% if validated_count > 0 %}
+    	  <div class="alert alert-success">
+          {% if labelled_metric_name %}
+    	    <strong>Validated</strong>: {{ validated_count }} features profiles for {{ labelled_metric_name }} - {{ labelled_metric_base_name }} - OK
+          {% else %}
+    	    <strong>Validated</strong>: {{ validated_count }} features profiles for {{ for_metric }} - OK
+          {% endif %}
+
+    	  </div>
+        {% endif %}
+      {% endif %}
+
+  {% endif %}
+{% endif %}
+
+{% if features_profiles_to_validate %}
+	  <div class="tab-pane active" id="validate">
+  {% if labelled_metric_name %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ labelled_metric_name }} - {{ labelled_metric_base_name }} -
+          limited by {{ features_profiles_to_validate|length }} features profiles ordered by {{ order }}</h4>
+  {% else %}
+      <h4><span class="logo"><span class="sky">Validate ::</span> <span class="re">features profiles :: </span></span>{{ for_metric }} -
+          limited by {{ features_profiles_to_validate|length }} features profiles ordered by {{ order }}</h4>
+  {% endif %}
+
+
+<!-- @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
+# Allow the operator to validate all learnt features profiles that are to be
+# valiated on the page -->
+		  <table class="table table-hover">
+		    <thead>
+		      <tr>
+		        <th>Validate ALL</th>
+		        <th></th>
+		      </tr>
+		    </thead>
+		    <tbody>
+  {% if labelled_metric_name %}
+    {% set use_metric = labelled_metric_name %}
+    {% set use_metric_name = labelled_metric_name + ' - ' + labelled_metric_base_name %}
+  {% else %}
+    {% set use_metric = for_metric %}
+    {% set use_metric_name = for_metric %}
+  {% endif %}
+		      <tr>
+		        <td>You can validate ALL the learnt features profiles in one action.
+            This will validate all the features profiles listed below.  Please
+            <strong>ensure that you first disable</strong> any of the features
+            profiles below that you <strong>do not want to valdated</strong> and
+            <strong>refresh</strong> this page before you use Validate ALL.
+            This action simply validates ALL enabled features profiles for
+            {{ use_metric_name }} that are not validated.</td>
+		        <td><a href="?fp_validate=true&metric={{ use_metric }}&validated_equals=false&limit=0&order=DESC&validate_all=true&metric_id={{ features_profiles_to_validate[0][1] }}">
+            <button type="button">Validate ALL</button></a></td>
+		      </tr>
+		    </tbody>
+		  </table>
+
+			<table class="table table-hover">
+      The below table gives you a side-by-side visual comparison of the graphs of the features profile
+      and the graphs of the parent (or parent's parent) that the features profile was LEARNT from.
+      You can validate and/or disable each using the checkboxes and buttons provided.
+      In future hopefully you will be able to tick all the boxes you want and
+      submit them with one Submit button.  However until then, each has to be
+      done individually and a new tab is opened, which does at least allow for
+      confirmation that the features profile has actually been validated.<br>
+      Note: In Chrome and Chromium the images may display too large, a quick
+      workaround is to decrease the zoom in your browser window using the
+      combination of the Crtl + - keys.
+				<thead>
+					<tr>
+<!-- # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
+     # Added fp_generation and parent_fp_generation
+      [fp_id0, metric_id1, str(metric)2, full_duration3, anomaly_timestamp4,
+      fp_parent_id5, parent_full_duration6, parent_anomaly_timestamp7,
+      fp_date8, fp_graph_uri9, parent_fp_date10, parent_fp_graph_uri11,
+      parent_parent_fp_id12, fp_learn_graph_uri13,
+      parent_fp_learn_fp_graph_uri14, minimum_full_duration15,
+      maximum_full_duration16, fp_generation17, parent_fp_generation18] -->
+            <th>fp id</th>
+            <th>generation</th>
+            <th>parent fp id</th>
+            <th>parent's parent fp id</th>
+            <th>metric</th>
+            <th>full duration</th>
+            <th>disable</th>
+            <th>validate</th>
+            <th>fp_graph</th>
+            <th>parent fp_graph</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for item in features_profiles_to_validate %}
+    {% if '_tenant_id="' in item[2] %}
+      {% set use_metric = 'labelled_metrics.' + item[1]|string %}
+    {% else %}
+      {% set use_metric = item[2] %}
+    {% endif %}
+          <tr>
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}'">
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}">{{ item[0] }}</a>
+            </td>
+<!-- # @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation
+# Added generation -->
+    {% if item[17] > 1 %}
+            <td>{{ item[17] }}<br><span class="logo"><span class="re">learnt</span></span></td>
+    {% else %}
+            <td>{{ item[17] }}<br><span class="logo"><span class="sky">trained</span></span></td>
+    {% endif %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[5] }}&metric={{ use_metric }}'">
+    {% if item[18] > 1 %}
+              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ use_metric }}">{{ item[5] }}<br><span class="logo"><span class="re">learnt</span></span></a>
+    {% else %}
+              <a href="?fp_view=true&fp_id={{ item[5] }}&metric={{ use_metric }}">{{ item[5] }}<br><span class="logo"><span class="sky">trained</span></span></a>
+    {% endif %}
+            </td>
+    {% if item[12] != 'none' %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[12] }}&metric={{ use_metric }}'">
+              <a href="?fp_view=true&fp_id={{ item[12] }}&metric={{ use_metric }}">{{ item[12] }}</a>
+            </td>
+    {% else %}
+            <td>{{ item[12] }}</td>
+    {% endif %}
+            <td><code>{{ item[2] }}</code></td>
+            <td>{{ item[3] }}</td>
+            <td>
+              <input type="checkbox" name="disable" />&nbsp;
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}&disable_fp={{ item[0] }}" target="_blank">
+              <button type="button">Disable</button></a>
+            </td>
+            <td>
+              <input type="checkbox" name="validate" />&nbsp;
+              <a href="?fp_view=true&fp_id={{ item[0] }}&metric={{ use_metric }}&validate_fp=true" target="_blank">
+              <button type="button">Validate</button></a>
+            </td>
+            <td>
+              {{ item[8] }} fp id {{ item[0] }}<br>
+    {% if item[3] == item[15] %}
+              <br>{{ item[3] / 60 / 60 }} hours at this time was:<br>
+    {% elif item[3] == item[16] %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> resolution {{ item[16] / 60 / 60 }} hours:<br>
+    {% else %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> resolution {{ item[15] / 60 / 60 }} hours:<br>
+    {% endif %}
+              <img src="{{ item[9] }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>{{ item[9] }}
+    {% if item[3] == item[16] %}
+              <br>{{ item[15] / 60 / 60 }} hours at this time was:<br>
+    {% elif item[3] == item[15] %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">from</span></span> resolution ({{ item[16] / 60 / 60 }} hours):<br>
+    {% else %}
+              <br>{{ item[16] / 60 / 60 }} hours at this time was:<br>
+    {% endif %}
+              <img src="{{ item[13] }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>{{ item[13] }}
+            </td>
+
+            <td>
+              {{ item[10] }}<br>
+    {% if item[3] == item[16] %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">with</span></span> resolution ({{ item[3] / 60 / 60 }} hours):<br>
+    {% else %}
+              <br>{{ item[15] / 60 / 60 }} hours at this time was:<br>
+    {% endif %}
+              <img src="{{ item[11] }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              <br>{{ item[11] }}
+    {% if item[3] == item[16] %}
+              <br>{{ item[15] / 60 / 60 }} hours at this time was:<br>
+    {% else %}
+              <br><span class="logo"><span class="sky">LEARNT</span> <span class="re">with</span></span> resolution ({{ item[3] / 60 / 60 }} hours):<br>
+    {% endif %}
+              <img src="{{ item[14] }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% if item[1] == item[12] %}
+              <br>fp id {{ item[1] }}
+    {% else %}
+              <br>fp id {{ item[12] }} at {{ item[15] / 60 / 60 }} hours
+    {% endif %}
+              <br>{{ item[14] }}
+            </td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+{% endif %}
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere?fp_validate=true block -->
+{% endblock %}

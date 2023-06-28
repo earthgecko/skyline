@@ -29,6 +29,13 @@ try:
 except:
     icon_emoji = ':chart_with_upwards_trend:'
 
+# @added 20230605 - Feature #4932: mute_alerts_on
+default_channel = 'general'
+try:
+    default_channel = settings.SLACK_OPTS['default_channel']
+except:
+    default_channel = 'general'
+
 
 def slack_post_message(current_skyline_app, channel, thread_ts, message):
     """
@@ -73,6 +80,10 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
         if thread_ts == 'None':
             thread_ts = None
 
+    # @added 20230605 - Feature #4932: mute_alerts_on
+    if not channel:
+        channel = default_channel
+
     # slack_post = None
 
     # In terms of the generated Slack URLS for threads the
@@ -111,8 +122,8 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
             else:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(
-                    'error :: slack_post_message :: failed to post message to thread %s - %s - %s' % (
-                        thread_ts, message, err))
+                    'error :: slack_post_message :: failed to post message channel: %s, to thread %s - %s - %s' % (
+                        str(channel), str(thread_ts), message, err))
             # @modified 20200826 - Bug #3710: Gracefully handle slack failures
             # return False
             return slack_post
@@ -143,8 +154,8 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
             else:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(
-                    'error :: slack_post_message :: falied to post message to thread %s - %s' % (
-                        thread_ts, message))
+                    'error :: slack_post_message :: failed to post message channel: %s, to thread %s - %s - %s' % (
+                        str(channel), str(thread_ts), message, err))
             # @modified 20200826 - Bug #3710: Gracefully handle slack failures
             # return False
             return slack_post
@@ -155,7 +166,7 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
                 channel, str(thread_ts), message))
     else:
         current_logger.error(
-            'error :: slack_post_message :: falied to post message to channel %s, thread %s - %s' % (
+            'error :: slack_post_message :: failed to post message to channel %s, thread %s - %s' % (
                 channel, str(thread_ts), message))
         current_logger.error(
             'error :: slack_post_message :: slack response dict follows')
@@ -205,7 +216,7 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error(
-            'error :: slack_post_message :: falied to connect slack')
+            'error :: slack_post_message :: failed to connect slack')
         # @modified 20200826 - Bug #3710: Gracefully handle slack failures
         # return False
         return slack_response
@@ -215,6 +226,10 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
     # @added 20220328 - Bug #4448: Handle missing slack response
     # Handle slack SSL errors which occur more than one would expect
     slack_ssl_error = False
+
+    # @added 20230605 - Feature #4932: mute_alerts_on
+    if not channel:
+        channel = default_channel
 
     try:
         # @modified 20200701 - Task #3612: Upgrade to slack v2

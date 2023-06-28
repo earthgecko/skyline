@@ -211,7 +211,7 @@ seconds long
 :mod:`settings.MAX_TOLERABLE_BOREDOM` seconds
 
 **EmptyTimeseries**: The time series has no data and is removed from the
-:mod:`settings.FULL_NAMESPACE`unique_metrics Redis set and no longer submitted
+:mod:`settings.FULL_NAMESPACE` unique_metrics Redis set and no longer submitted
 for analysis.
 
 **Other**: There's probably an error in the code, if you've been making
@@ -243,15 +243,15 @@ Push to Mirage
 
 Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than :mod:`settings.FULL_DURATION` to the Mirage
-service, see `Mirage <mirage.html>`__.
+service (so ALL metrics then?), see `Mirage <mirage.html>`__.
 
 Push to Ionosphere
 ==================
 
-Analyzer pushes anomalous metrics that are ionosphere_enabled to Ionosphere
-to check if the anomalous time series is known to be NOT ANOMALOUS due to it's
-features profile matching a known NOT ANOMALOUS trained or learnt features
-profile see `Ionosphere <ionosphere.html>`__.
+Analyzer pushes anomalous metrics that are ionosphere_enabled, but not Mirage
+enabled, to Ionosphere to check if the anomalous time series is known to be
+NOT ANOMALOUS due to it's features profile matching a known NOT ANOMALOUS trained
+or learnt features profile see `Ionosphere <ionosphere.html>`__.
 
 analyzer_batch
 ==============
@@ -373,6 +373,20 @@ Example alert
 
 .. note:: The Redis data graphs do make the alerter a little more CPU when
   matplotlib plots the alerts and the alert email larger in size.
+
+
+Analyzer metrics_manager
+========================
+
+analyzer/metrics_manager is a process that runs with the sole purpose of
+managing all the aspects and data of the metrics that are required by Skyline.
+It does a mountain of work in optimising the data about the metrics into
+fast to query data structures.  It takes your configuration options and
+metrics and makes lists, sets, dicts and lots of Redis sets and hashes and
+dynamically adjusts the data to changes in your configuration or metric
+populations. It also checks various aspects of the time series data in terms
+of sparisity, resolution, etc.
+
 
 Monitoring data sparsity
 ========================

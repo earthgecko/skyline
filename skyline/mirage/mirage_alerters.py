@@ -1,15 +1,11 @@
 from __future__ import division, print_function
 import logging
-import hashlib
+# import hashlib
 from smtplib import SMTP
 # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
 from smtplib import SMTP_SSL
 
-# @added 20200116: Feature #3396: http_alerter
-import requests
 # import simplejson as json
-
-import mirage_alerters
 
 # @modified 20191115 - Task #3290: Handle urllib2 in py3
 #                      Branch #3262: py3
@@ -32,12 +28,10 @@ import mirage_alerters
 #     from urllib import request as urllib
 
 from ast import literal_eval
-from requests.utils import quote
 
 # Added for graphs showing Redis data
 import traceback
 # import redis
-from msgpack import Unpacker
 import datetime as dt
 # @added 20180809 - Bug #2498: Incorrect scale in some graphs
 # @modified 20181025 - Feature #2618: alert_slack
@@ -47,6 +41,10 @@ import datetime as dt
 from time import gmtime, strftime
 # @added 20200825 - Feature #3704: Add alert to anomalies
 from time import time
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 # @added 20200929 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
@@ -58,6 +56,17 @@ from email import charset
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 from os import uname
 
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
+
+from msgpack import Unpacker
+
+# @added 20200116: Feature #3396: http_alerter
+import requests
+
+from requests.utils import quote
+import pygerduty
+
 # @modified 20160820 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
@@ -68,6 +77,11 @@ if True:
     import matplotlib.pyplot as plt
     from matplotlib.pylab import rcParams
     from matplotlib.dates import DateFormatter
+    # @added 20230626 - Task #4962: Build and test skyline v4.0.0
+    #                   Task #4778: v4.0.0 - update dependencies
+    # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+    from matplotlib import __version__ as matplotlib_version
+
     import io
     import numpy as np
     import pandas as pd
@@ -79,20 +93,12 @@ if True:
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
-python_version = int(sys.version_info[0])
-if python_version == 2:
-    from email.MIMEMultipart import MIMEMultipart
-    from email.MIMEText import MIMEText
-    from email.MIMEImage import MIMEImage
-if python_version == 3:
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.mime.image import MIMEImage
-
 # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
 # Handle flake8 E402
 if True:
     import settings
+    import mirage_alerters
+
     import skyline_version
     from skyline_functions import (
         write_data_to_file, mkdir_p,
@@ -123,6 +129,20 @@ if True:
     from functions.settings.get_sms_recipients import get_sms_recipients
     # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
     from functions.smtp.determine_smtp_server import determine_smtp_server
+    # @added 20220805 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+    from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+    from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+    # @added 20220830 - Feature #4652: http_alerter - dotted_representation
+    #                   Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.metrics.get_dotted_representation import get_dotted_representation
+
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    from functions.mirage.get_vortex_metric_data_archive_filename import get_vortex_metric_data_archive_filename
+    from functions.plots.vortex_training_data_graphs import get_vortex_training_data_graphs
 
 # @added 20200929 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
@@ -133,7 +153,9 @@ except:
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
-    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
 except:
     HORIZON_SHARDS = {}
 this_host = str(uname()[1])
@@ -147,6 +169,7 @@ logger = logging.getLogger(skyline_app_logger)
 skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 skyline_version = skyline_version.__absolute_version__
+python_version = int(sys.version_info[0])
 
 LOCAL_DEBUG = False
 
@@ -213,15 +236,40 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     else:
         base_name = metric_name
 
+    # @added 20220805 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle getting data from Graphite and victoriametrics
+    data_source = 'graphite'
+    use_base_name = str(base_name)
+    if base_name.startswith('labelled_metrics.'):
+        data_source = 'victoriametrics'
+        try:
+            use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                str(base_name), err))
+
+    # @added 20221206 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        data_source = 'vortex'
+        metric_timestamp = metric[2]
+        timeseries_dir = use_base_name.replace('.', '/')
+        metric_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
+            timeseries_dir)
+        anomaly_json = '%s/%s.json' % (metric_data_dir, use_base_name)
+
     # @modified 20191008 - Branch #3002: docker
     # wix-playground added a hashlib hexdigest method which has not been
     # verified so using the originaly method useless the base_name is longer
     # than 254 chars
-    if len(base_name) > 254:
-        base_name = hashlib.sha224(str(metric[1]).replace(
-            settings.FULL_NAMESPACE, '', 1)).hexdigest()
+    # if len(use_base_name) > 254:
+    #     use_base_name = hashlib.sha224(str(use_base_name).encode('utf-8').replace(
+    #         settings.FULL_NAMESPACE, '', 1)).hexdigest()
     if settings.IONOSPHERE_ENABLED:
-        timeseries_dir = base_name.replace('.', '/')
+        timeseries_dir = use_base_name.replace('.', '/')
         training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
@@ -237,6 +285,19 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # @added 20181006 - Feature #2618: alert_slack
     else:
         graphite_image_file = None
+
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        timeseries_dir = use_base_name.replace('.', '/')
+        training_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
+            timeseries_dir)
+        json_file = '%s/%s.json' % (training_data_dir, use_base_name)
+        graphite_image_file = '%s/vortex.analysed.%s.%sh.png' % (
+            training_data_dir, use_base_name,
+            str(int(second_order_resolution_in_hours)))
 
     # For backwards compatibility
     if '@' in alert[1]:
@@ -282,7 +343,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 return False
 
     # Backwards compatibility
-    if type(recipients) is str:
+    if isinstance(recipients, str):
         logger.info('alert_smtp :: recipients is a string')
         recipients = [recipients]
     else:
@@ -478,6 +539,24 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
             str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        if not os.path.isfile(graphite_image_file):
+            metric_data_archive = None
+            try:
+                metric_data_archive = get_vortex_metric_data_archive_filename(training_data_dir)
+            except Exception as err:
+                logger.error('error :: alert_smtp - get_vortex_metric_data_archive_filename failed to determine metric_data_archive from %s - %s' % (
+                    training_data_dir, err))
+            vortex_graphs = []
+            undownsampled_archive = None
+            try:
+                vortex_graphs = get_vortex_training_data_graphs(skyline_app, metric_data_archive, undownsampled_archive)
+            except Exception as err:
+                logger.error('error :: alert_smtp - vortex_training_data_graphs failed - %s' % err)
+
     content_id = metric[1]
     image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
@@ -500,7 +579,45 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         # @added 20191105 - Task #3290: Handle urllib2 in py3
         #                   Branch #3262: py3
         if image_data is None:
-            get_graphite_graph_image(skyline_app, link, graphite_image_file)
+            if not base_name.startswith('labelled_metrics.'):
+                get_graphite_graph_image(skyline_app, link, graphite_image_file)
+
+            # @added 20220805 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Handle getting data from Graphite and victoriametrics
+            if base_name.startswith('labelled_metrics.'):
+                metric_data = None
+                step = 600
+                timeseries_duration = int(until_timestamp) - int(from_timestamp)
+                target_hours = int(timeseries_duration / 3600)
+                logger.info('alert_smtp - getting victoriametrics data for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+                # @added 20230102 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Report correct days for new metrics
+                days = round((timeseries_duration / 86400), 1)
+                if days == 7.0:
+                    days = 7
+
+                if timeseries_duration <= 86401:
+                    step = 60
+                    title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
+                else:
+                    title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+                plot_parameters = {
+                    'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                    'figsize': (8, 4)
+                }
+                try:
+                    # get_victoriametrics_metric automatically applies the rate and
+                    # step required no downsampling or nonNegativeDerivative is
+                    # required.
+                    graphite_image_file = get_victoriametrics_metric(
+                        skyline_app, use_base_name, from_timestamp, until_timestamp, 'image',
+                        graphite_image_file, metric_data, plot_parameters)
+                except Exception as err:
+                    logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                        err))
+
             if os.path.isfile(graphite_image_file):
                 try:
                     # @modified 20191107 - Branch #3262: py3
@@ -568,31 +685,67 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     except:
         plot_redis_data = False
 
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except Exception as err:
+        logger.error('error :: alert_smtp :: get_redis_conn_decoded failed - %s' % (
+            err))
+
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        plot_redis_data = False
+
+    timeseries = []
+    raw_series = []
+    unpacker = None
+    timeseries_x = []
+    timeseries_y = []
+
     if settings.SMTP_OPTS.get('embed-images') and plot_redis_data:
         # Create graph from Redis data
-        redis_metric_key = '%s%s' % (settings.FULL_NAMESPACE, metric[1])
-        try:
-            raw_series = REDIS_ALERTER_CONN.get(redis_metric_key)
-            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                logger.info('debug :: alert_smtp - raw_series: %s' % 'OK')
-        except:
-            if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                logger.info('debug :: alert_smtp - raw_series: %s' % 'FAIL')
+        if not base_name.startswith('labelled_metrics.'):
+            redis_metric_key = '%s%s' % (settings.FULL_NAMESPACE, metric[1])
+            try:
+                raw_series = REDIS_ALERTER_CONN.get(redis_metric_key)
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - raw_series: %s' % 'OK')
+            except:
+                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - raw_series: %s' % 'FAIL')
+            try:
+                if LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - Memory usage before get Redis timeseries data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                unpacker = Unpacker(use_list=True)
+                unpacker.feed(raw_series)
+                timeseries_x = [float(item[0]) for item in unpacker]
+                unpacker = Unpacker(use_list=True)
+                unpacker.feed(raw_series)
+                timeseries_y = [item[1] for item in unpacker]
 
-        try:
-            unpacker = Unpacker(use_list=True)
-            unpacker.feed(raw_series)
-            timeseries_x = [float(item[0]) for item in unpacker]
-            unpacker = Unpacker(use_list=True)
-            unpacker.feed(raw_series)
-            timeseries_y = [item[1] for item in unpacker]
-
-            unpacker = Unpacker(use_list=False)
-            unpacker.feed(raw_series)
-            timeseries = list(unpacker)
-        except:
-            logger.error('error :: alert_smtp - unpack timeseries failed')
-            timeseries = None
+                unpacker = Unpacker(use_list=False)
+                unpacker.feed(raw_series)
+                timeseries = list(unpacker)
+                if LOCAL_DEBUG:
+                    logger.info('debug :: alert_smtp - Memory usage after get Redis timeseries data: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_smtp - unpack timeseries failed')
+                timeseries = None
+        if base_name.startswith('labelled_metrics.'):
+            redis_ts_key = '%s' % base_name
+            timeseries = []
+            try:
+                # redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                timeseries = redis_conn_decoded.ts().range(redis_ts_key, ((until_timestamp - (180 * 60)) * 1000), (until_timestamp * 1000))
+            except Exception as err:
+                logger.error('error :: alert_smtp :: failed to get Redis timeseries for %s - %s' % (
+                    str(base_name), err))
+                timeseries = []
+            if timeseries:
+                # Convert Redis millisecond timestamps to second timestamps
+                timeseries = [[int(mts / 1000), value] for mts, value in timeseries]
 
         # @added 20200507 - Feature #3532: Sort all time series
         # To ensure that there are no unordered timestamps in the time
@@ -849,8 +1002,16 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
 
                 plt.grid(True)
 
-                ax.grid(b=True, which='both', axis='both', color='lightgray',
-                        linestyle='solid', alpha=0.5, linewidth=0.6)
+                # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
+                #                      Task #4778: v4.0.0 - update dependencies
+                # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
+                if matplotlib_version < '3.7.0':
+                    ax.grid(b=True, which='both', axis='both', color='lightgray',
+                            linestyle='solid', alpha=0.5, linewidth=0.6)
+                else:
+                    ax.grid(visible=True, which='both', axis='both', color='lightgray',
+                            linestyle='solid', alpha=0.5, linewidth=0.6)
+
                 # @modified 20180417 - Bug #2358: set_axis_bgcolor method removed from Matplotlib - Luminosity
                 #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
                 # ax.set_axis_bgcolor('black')
@@ -943,8 +1104,14 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         if main_alert_title == 'Skyline':
-            body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
-            body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
+            # @added 20221207 - Feature #4734: mirage_vortex
+            #                   Feature #4732: flux vortex
+            # Add any anomalies discovered by mirage_vortex to be alerted on
+            if context != 'Vortex':
+                body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
+                body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
+            else:
+                body += '<font color="black">Anomalous value: %s (Vortex)</font><br>' % str(metric[0])
         else:
             body += '<font color="black">Anomalous value: %s (seasonal)</font><br>' % str(metric[0])
             body += '<font color="black">Original anomalous value: %s (no seasonal - raw data)</font><br>' % str(original_anomalous_datapoint)
@@ -984,6 +1151,19 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
                 str(metric[1]))
 
+            # @added 20220805 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if base_name.startswith('labelled_metrics.'):
+                metric_id = 0
+                try:
+                    metric_id = get_metric_id_from_base_name(skyline_app, use_base_name)
+                except Exception as err:
+                    logger.error('error :: alert_slack - get_metric_id_from_base_name failed for %s - %s' % (
+                        str(use_base_name), err))
+                ionosphere_link = '%s/%s?timestamp=%s&metric=%s' % (
+                    settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
+                    str(metric_id))
+
             # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
             # Use main_alert_title
             # more_body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
@@ -994,9 +1174,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
 
             more_body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
         if image_data:
-            more_body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
-            more_body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
-            more_body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
+            # @added 20221207 - Feature #4734: mirage_vortex
+            #                   Feature #4732: flux vortex
+            # Add any anomalies discovered by mirage_vortex to be alerted on
+            if context != 'Vortex':
+                more_body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
+                more_body += '<div dir="ltr"><a href="%s">%s</a><br></div><br>' % (link, img_tag)
+                more_body += '<font color="black">Clicking on the above graph will open to the Graphite graph with current data</font><br>'
+            else:
+                more_body += '<h3><font color="black">Vortex analysed data</font></h3>'
         if redis_image_data:
             more_body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
                 str(array_amin), str(array_amax), str(mean))
@@ -1144,6 +1330,17 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         if no_email:
             logger.info('alert_smtp - no_email is set in SMTP_OPTS, not executing SMTP command')
 
+        # @added 20230605 - Feature #4932: mute_alerts_on
+        metric_muted = False
+        try:
+            metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', base_name)
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+        if metric_muted:
+            send_email_alert = False
+            logger.info('alert_smtp - %s is muted, not alerting' % str(metric[1]))
+
         # @modified 20190523 - Branch #3002: docker
         # Wrap the smtp block based on whether to actually send mail or not.
         # This allows for all the steps to be processed in the testing or docker
@@ -1219,7 +1416,6 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds, context, tri
     Called by :func:`~trigger_alert` and sends an alert via PagerDuty
     """
     if settings.PAGERDUTY_ENABLED:
-        import pygerduty
         pager = pygerduty.PagerDuty(settings.PAGERDUTY_OPTS['subdomain'], settings.PAGERDUTY_OPTS['auth_token'])
 
         # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -1243,14 +1439,36 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds, context, tri
                 alert_context = settings.CUSTOM_ALERT_OPTS['ionosphere_alert_heading']
             except:
                 alert_context = 'Ionosphere'
+        # @added 20221207 - Feature #4734: mirage_vortex
+        #                   Feature #4732: flux vortex
+        # Add any anomalies discovered by mirage_vortex to be alerted on
+        if context == 'Vortex':
+            try:
+                alert_context = settings.CUSTOM_ALERT_OPTS['vortex_alert_heading']
+            except:
+                alert_context = 'Vortex'
 
         # @added 20220301 - Feature #4482: Test alerts
         if triggered_algorithms == ['testing']:
             main_alert_title = 'TEST - %s' % main_alert_title
 
+        # @added 20230605 - Feature #4932: mute_alerts_on
+        send_page = True
+        metric_muted = False
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', metric[1])
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+        if metric_muted:
+            send_page = False
+            logger.info('alert_pagerduty - %s is muted, not alerting' % str(metric[1]))
+
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
-        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
+        if send_page:
+            pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
 
         # @added 20200825 - Feature #3704: Add alert to anomalies
         # @modified 20220301 - Feature #4482: Test alerts
@@ -1341,6 +1559,17 @@ def alert_syslog(alert, metric, second_order_resolution_seconds, context, trigge
     """
     if settings.SYSLOG_ENABLED:
         syslog_ident = settings.SYSLOG_OPTS['ident']
+
+        # @added 20230215 - Task #4852: Allow for level to be passed in SYSLOG_OPTS
+        syslog_level = 'warn'
+        try:
+            syslog_level = settings.SYSLOG_OPTS['level']
+            if syslog_level not in ['warn', 'notice', 'info']:
+                logger.warning('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
+                syslog_level = 'warn'
+        except:
+            syslog_level = 'warn'
+
         message = '%s - Anomalous metric: %s (value: %s)' % (context, metric[1], str(metric[0]))
         if sys.version_info[:2] == (2, 6):
             syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
@@ -1349,8 +1578,24 @@ def alert_syslog(alert, metric, second_order_resolution_seconds, context, trigge
         elif sys.version_info[:1] == (3):
             syslog.openlog(ident="skyline", logoption=syslog.LOG_PID, facility=syslog.LOG_LOCAL4)
         else:
-            syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
-        syslog.syslog(4, message)
+            # @modified 20230215 - Task #4852:Allow for level to be passed in SYSLOG_OPTS
+            # syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
+            if syslog_level == 'warn':
+                syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
+            if syslog_level == 'notice':
+                syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL5)
+            if syslog_level == 'info':
+                syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL6)
+
+        # @modified 20230215 - Task #4852:Allow for level to be passed in SYSLOG_OPTS
+        # syslog.syslog(4, message)
+        if syslog_level == 'warn':
+            syslog.syslog(4, message)
+        if syslog_level == 'notice':
+            syslog.syslog(5, message)
+        if syslog_level == 'info':
+            syslog.syslog(6, message)
+
     else:
         return False
 
@@ -1373,7 +1618,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     except:
         logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
         return False
-    if bot_user_oauth_access_token == 'YOUR_slack_bot_user_oauth_access_token':
+    # @modified 20230107 - Task #4778: v4.0.0 - update dependencies
+    # Added nosec for bandit B105:hardcoded_password_string - Possible hardcoded password
+    if bot_user_oauth_access_token == 'YOUR_slack_bot_user_oauth_access_token':  # nosec B105
         logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
 
@@ -1404,13 +1651,32 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     else:
         base_name = metric_name
 
+    # @added 20220805 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle getting data from Graphite and victoriametrics
+    data_source = 'graphite'
+    use_base_name = str(base_name)
+    if base_name.startswith('labelled_metrics.'):
+        try:
+            use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                str(base_name), err))
+        data_source = 'victoriametrics'
+
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        data_source = 'vortex'
+
     # @modified 20191008 - Branch #3002: docker
     # wix-playground added a hashlib hexdigest method which has not been
     # verified so using the original method useless the base_name is longer
     # than 254 chars
-    if len(base_name) > 254:
-        base_name = hashlib.sha224(str(metric[1]).replace(
-            settings.FULL_NAMESPACE, '', 1)).hexdigest()
+    # if len(base_name) > 254:
+    #     base_name = hashlib.sha224(str(metric[1]).encode('utf-8').replace(
+    #         settings.FULL_NAMESPACE, '', 1)).hexdigest()
 
     local_full_duration_in_hours = int(second_order_resolution_seconds) / 3600
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
@@ -1473,6 +1739,14 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
             alert_context = settings.CUSTOM_ALERT_OPTS['ionosphere_alert_heading']
         except:
             alert_context = 'Ionosphere'
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['vortex_alert_heading']
+        except:
+            alert_context = 'Vortex'
 
     if known_derivative_metric:
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -1481,19 +1755,19 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         # slack_title = '*Skyline %s - ALERT* on %s at %s hours - derivative graph - %s' % (
         #     context, str(metric[1]), str(int(second_order_resolution_in_hours)),
         #     str(metric[0]))
-        unencoded_graph_title = '%s %s - ALERT at %s hours - derivative graph - %s' % (
-            main_alert_title, alert_context, str(int(second_order_resolution_in_hours)),
+        unencoded_graph_title = '%s %s - ALERT at %s days - derivative graph - %s' % (
+            main_alert_title, alert_context, str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
-        slack_title = '*%s %s - ALERT* on %s at %s hours - derivative graph - %s' % (
-            main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+        slack_title = '*%s %s - ALERT* on %s at %s days - derivative graph - %s' % (
+            main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
 
         # @added 20210304 - Feature #3642: Anomaly type classification
         #                   Feature #3970: custom_algorithm - adtk_level_shift
         # Added type
         if 'adtk_level_shift' in triggered_algorithms:
-            slack_title = '*%s %s - Level shift ALERT* on %s at %s hours - derivative graph - %s' % (
-                main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+            slack_title = '*%s %s - Level shift ALERT* on %s at %s days - derivative graph - %s' % (
+                main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
                 str(metric[0]))
             logger.info('adtk_level_shift alert - %s' % slack_title)
     else:
@@ -1504,21 +1778,26 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         # slack_title = '*Skyline %s - ALERT* on %s at %s hours - %s' % (
         #     context, str(metric[1]), str(int(second_order_resolution_in_hours)),
         #     str(metric[0]))
-        unencoded_graph_title = '%s %s - ALERT at %s hours - %s' % (
-            main_alert_title, alert_context, str(int(second_order_resolution_in_hours)),
+        unencoded_graph_title = '%s %s - ALERT at %s days - %s' % (
+            main_alert_title, alert_context, str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
-        slack_title = '*%s %s - ALERT* on %s at %s hours - %s' % (
-            main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+        slack_title = '*%s %s - ALERT* on %s at %s days - %s' % (
+            main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
 
         # @added 20210304 - Feature #3642: Anomaly type classification
         #                      Feature #3970: custom_algorithm - adtk_level_shift
         # Added type
         if 'adtk_level_shift' in triggered_algorithms:
-            slack_title = '*%s %s - Level shift ALERT* on %s at %s hours - %s' % (
-                main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+            slack_title = '*%s %s - Level shift ALERT* on %s at %s days - %s' % (
+                main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
                 str(metric[0]))
             logger.info('adtk_level_shift alert - %s' % slack_title)
+
+    if base_name.startswith('labelled_metrics.'):
+        slack_title = '*%s %s - ALERT* on %s - `%s` at %s days - %s' % (
+            main_alert_title, alert_context, str(base_name), str(use_base_name),
+            str(int(int(second_order_resolution_in_hours) / 24)), str(metric[0]))
 
     # @added 20220301 - Feature #4482: Test alerts
     if triggered_algorithms == ['testing']:
@@ -1590,6 +1869,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
             # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
             encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
+    if base_name.startswith('labelled_metrics.'):
+        link = 'None'
+
     # slack does not allow embedded images, nor will it fetch links behind
     # authentication so Skyline uploads a png graphite image with the message
     image_file = None
@@ -1609,9 +1891,79 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         graphite_image_file = None
         logger.info('alert_slack - no Ionosphere Graphite image interpolated')
 
-    # @added 20191105 - Task #3290: Handle urllib2 in py3
-    #                   Branch #3262: py3
-    image_data = get_graphite_graph_image(skyline_app, link, graphite_image_file)
+    # @added 20221207 - Feature #4734: mirage_vortex
+    #                   Feature #4732: flux vortex
+    # Add any anomalies discovered by mirage_vortex to be alerted on
+    if context == 'Vortex':
+        timeseries_dir = use_base_name.replace('.', '/')
+        training_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
+            timeseries_dir)
+        json_file = '%s/%s.json' % (training_data_dir, use_base_name)
+        graphite_image_file = '%s/vortex.analysed.%s.%sh.png' % (
+            training_data_dir, use_base_name,
+            str(int(second_order_resolution_in_hours)))
+        logger.info('alert_slack - interpolated Vortex image :: %s' % (
+            graphite_image_file))
+
+        if not os.path.isfile(graphite_image_file):
+            metric_data_archive = None
+            try:
+                metric_data_archive = get_vortex_metric_data_archive_filename(training_data_dir)
+            except Exception as err:
+                logger.error('error :: alert_slack - get_vortex_metric_data_archive_filename failed to determine metric_data_archive from %s - %s' % (
+                    training_data_dir, err))
+            vortex_graphs = []
+            undownsampled_archive = None
+            try:
+                vortex_graphs = get_vortex_training_data_graphs(skyline_app, metric_data_archive, undownsampled_archive)
+            except Exception as err:
+                logger.error('error :: alert_slack - vortex_training_data_graphs failed - %s' % err)
+
+    if graphite_image_file and os.path.isfile(graphite_image_file):
+        image_data = graphite_image_file
+
+    if graphite_image_file and not os.path.isfile(graphite_image_file):
+        if not base_name.startswith('labelled_metrics.'):
+            # @added 20191105 - Task #3290: Handle urllib2 in py3
+            #                   Branch #3262: py3
+            image_data = get_graphite_graph_image(skyline_app, link, graphite_image_file)
+
+        # @added 20220805 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Handle getting data from Graphite and victoriametrics
+        if base_name.startswith('labelled_metrics.'):
+            metric_data = None
+            step = 600
+            timeseries_duration = int(until_timestamp) - int(from_timestamp)
+            target_hours = int(timeseries_duration / 3600)
+            logger.info('alert_smtp - getting victoriametrics data for %s hours - from_timestamp - %s, until_timestamp - %s' % (str(target_hours), str(from_timestamp), str(until_timestamp)))
+            # @added 20230102 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            # Report correct days for new metrics
+            days = round((timeseries_duration / 86400), 1)
+            if days == 7.0:
+                days = 7
+
+            if timeseries_duration <= 86401:
+                step = 60
+                title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
+            else:
+                title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+            plot_parameters = {
+                'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                'figsize': (8, 4)
+            }
+            try:
+                # get_victoriametrics_metric automatically applies the rate and
+                # step required no downsampling or nonNegativeDerivative is
+                # required.
+                image_data = get_victoriametrics_metric(
+                    skyline_app, use_base_name, from_timestamp, until_timestamp, 'image',
+                    graphite_image_file, metric_data, plot_parameters)
+            except Exception as err:
+                logger.error('error :: get_victoriametrics_metric failed - %s' % (
+                    err))
 
     # @modified 20191115 - Task #3290: Handle urllib2 in py3
     #                      Branch #3262: py3
@@ -1712,6 +2064,19 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
         str(metric[1]))
 
+    # @added 20220805 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    if base_name.startswith('labelled_metrics.'):
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, use_base_name)
+        except Exception as err:
+            logger.error('error :: alert_slack - get_metric_id_from_base_name failed for %s - %s' % (
+                str(use_base_name), err))
+        ionosphere_link = '%s/%s?timestamp=%s&metric_id=%s' % (
+            settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
+            str(metric_id))
+
     # This block is not used but left here as it is the pattern for sending
     # messages using the chat.postMessage methods and could possibly be the
     # failover for a files.upload error or future messages.
@@ -1724,6 +2089,18 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         "color": "#764FA5"
     }])
     send_slack_message = False
+
+    # @added 20230605 - Feature #4932: mute_alerts_on
+    send_msg = True
+    metric_muted = False
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', metric[1])
+    except Exception as err:
+        logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+            err))
+    if metric_muted:
+        send_msg = False
 
     for channel in channels:
         if send_slack_message:
@@ -1814,150 +2191,155 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         slack_file_upload = False
         slack_thread_ts = 0
 
-        try:
-            # slack does not allow embedded images, nor links behind authentication
-            # or color text, so we have jump through all the API hoops to end up
-            # having to upload an image with a very basic message.
-            if os.path.isfile(image_file):
-                # @modified 20200701 - Task #3612: Upgrade to slack v2
-                #                      Task #3608: Update Skyline to Python 3.8.3 and deps
-                #                      Task #3556: Update deps
-                if slack_version == '1.3':
-                    slack_file_upload = sc.api_call(
-                        'files.upload', filename=filename, channels=channel,
-                        initial_comment=initial_comment, file=open(image_file, 'rb'))
-                else:
-                    slack_file_upload = sc.files_upload(
-                        filename=filename, channels=channel,
-                        initial_comment=initial_comment, file=open(image_file, 'rb'))
-                if not slack_file_upload['ok']:
-                    logger.error('error :: alert_slack - failed to send slack message')
-                # @added 20190501 - Branch #2646: slack
-                # The slack message id needs to be determined here so that it
-                # can be recorded against the anamoly id and so that Skyline can
-                # notify the message thread when a training_data page is
-                # reviewed, a feature profile is created and/or a layers profile
-                # is created.
-                else:
-                    logger.info('alert_slack - sent slack message')
-                    if slack_thread_updates:
-                        # @added 20190508 - Bug #2986: New slack messaging does not handle public channel
-                        #                   Issue #111: New slack messaging does not handle public channel
-                        # The sc.api_call 'files.upload' response which generates
-                        # slack_file_upload has a different structure depending
-                        # on whether a channel is private or public.  That also
-                        # goes for free or hosted slack too.
-                        slack_group = None
-                        slack_group_list = None
+        # @added 20230605 - Feature #4932: mute_alerts_on
+        if not send_msg:
+            logger.info('alert_slack - %s is muted, not alerting' % str(metric[1]))
 
-                        # This is basically the channel id of your channel, the
-                        # name could be used so that if in future it is used or
-                        # displayed in a UI
-                        # @modified 20190508 - Bug #2986: New slack messaging does not handle public channel
-                        #                      Issue #111: New slack messaging does not handle public channel
-                        # This block only works for free slack workspace private
-                        # channels.  Although this should be handled in the
-                        # SLACK_OPTS as slack_account_type: 'free|hosted' and
-                        # default_channel_type = 'private|public', it is going
-                        # to be handled in the code for the time being so as not
-                        # to inconvience users to update their settings.py for
-                        # v.1.2.17 # TODO next release with settings change add
-                        # these.
-                        # try:
-                        #     slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
-                        #     slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
-                        #     slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
-                        #     logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
-                        #         str(slack_group), str(slack_thread_ts)))
-                        # except:
-                        #     logger.info(traceback.format_exc())
-                        #     logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+        if send_msg:
+            try:
+                # slack does not allow embedded images, nor links behind authentication
+                # or color text, so we have jump through all the API hoops to end up
+                # having to upload an image with a very basic message.
+                if os.path.isfile(image_file):
+                    # @modified 20200701 - Task #3612: Upgrade to slack v2
+                    #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+                    #                      Task #3556: Update deps
+                    if slack_version == '1.3':
+                        slack_file_upload = sc.api_call(
+                            'files.upload', filename=filename, channels=channel,
+                            initial_comment=initial_comment, file=open(image_file, 'rb'))
+                    else:
+                        slack_file_upload = sc.files_upload(
+                            filename=filename, channels=channel,
+                            initial_comment=initial_comment, file=open(image_file, 'rb'))
+                    if not slack_file_upload['ok']:
+                        logger.error('error :: alert_slack - failed to send slack message')
+                    # @added 20190501 - Branch #2646: slack
+                    # The slack message id needs to be determined here so that it
+                    # can be recorded against the anamoly id and so that Skyline can
+                    # notify the message thread when a training_data page is
+                    # reviewed, a feature profile is created and/or a layers profile
+                    # is created.
+                    else:
+                        logger.info('alert_slack - sent slack message')
+                        if slack_thread_updates:
+                            # @added 20190508 - Bug #2986: New slack messaging does not handle public channel
+                            #                   Issue #111: New slack messaging does not handle public channel
+                            # The sc.api_call 'files.upload' response which generates
+                            # slack_file_upload has a different structure depending
+                            # on whether a channel is private or public.  That also
+                            # goes for free or hosted slack too.
+                            slack_group = None
+                            slack_group_list = None
 
-                        slack_group = None
-                        slack_group_trace_groups = None
-                        slack_group_trace_channels = None
-                        try:
-                            # @modified 20191106 - Branch #3262: py3
-                            # slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
-                            slack_group = slack_file_upload['file']['groups'][0]
-                            logger.info('alert_slack - slack group has been set from \'groups\' as %s' % (
-                                str(slack_group)))
-                            slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
-                            slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
-                            logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
-                                str(slack_group), str(slack_thread_ts)))
-                        except:
-                            slack_group_trace_groups = traceback.format_exc()
-                            logger.info('alert_slack - failed to determine slack_group using groups')
-                        if not slack_group:
-                            # Try by channel
+                            # This is basically the channel id of your channel, the
+                            # name could be used so that if in future it is used or
+                            # displayed in a UI
+                            # @modified 20190508 - Bug #2986: New slack messaging does not handle public channel
+                            #                      Issue #111: New slack messaging does not handle public channel
+                            # This block only works for free slack workspace private
+                            # channels.  Although this should be handled in the
+                            # SLACK_OPTS as slack_account_type: 'free|hosted' and
+                            # default_channel_type = 'private|public', it is going
+                            # to be handled in the code for the time being so as not
+                            # to inconvience users to update their settings.py for
+                            # v.1.2.17 # TODO next release with settings change add
+                            # these.
+                            # try:
+                            #     slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            #     slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                            #     slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                            #     logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                            #         str(slack_group), str(slack_thread_ts)))
+                            # except:
+                            #     logger.info(traceback.format_exc())
+                            #     logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+
+                            slack_group = None
+                            slack_group_trace_groups = None
+                            slack_group_trace_channels = None
                             try:
                                 # @modified 20191106 - Branch #3262: py3
-                                # slack_group = slack_file_upload['file']['channels'][0].encode('utf-8')
-                                slack_group = slack_file_upload['file']['channels'][0]
-                                logger.info('alert_slack - slack group has been set from \'channels\' as %s' % (
+                                # slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                                slack_group = slack_file_upload['file']['groups'][0]
+                                logger.info('alert_slack - slack group has been set from \'groups\' as %s' % (
                                     str(slack_group)))
-                            except:
-                                slack_group_trace_channels = traceback.format_exc()
-                                logger.info('alert_slack - failed to determine slack_group using channels')
-                                logger.error('error :: alert_slack - failed to determine slack_group using groups or channels')
-                                logger.error('error :: alert_slack - traceback from slack_group_trace_groups follows:')
-                                logger.error(str(slack_group_trace_groups))
-                                logger.error('error :: alert_slack - traceback from slack_group_trace_channels follows:')
-                                logger.error(str(slack_group_trace_channels))
-                                logger.error('error :: alert_slack - faied to determine slack_thread_ts')
-                        slack_group_list = None
-                        if slack_group:
-                            slack_group_list_trace_private = None
-                            slack_group_list_trace_public = None
-                            # Try private channel
-                            try:
                                 slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
-                                logger.info('alert_slack - slack_group_list determined from private channel and slack_group %s' % (
-                                    str(slack_group)))
-                            except:
-                                slack_group_list_trace_private = traceback.format_exc()
-                                logger.info('alert_slack - failed to determine slack_group_list using private channel')
-                            if not slack_group_list:
-                                # Try public channel
-                                try:
-                                    slack_group_list = slack_file_upload['file']['shares']['public'][slack_group]
-                                    logger.info('alert_slack - slack_group_list determined from public channel and slack_group %s' % (
-                                        str(slack_group)))
-                                except:
-                                    slack_group_list_trace_public = traceback.format_exc()
-                                    logger.info('alert_slack - failed to determine slack_group_list using public channel')
-                                    logger.info('alert_slack - failed to determine slack_group_list using private or public channel')
-                                    logger.error('error :: alert_slack - traceback from slack_group_list_trace_private follows:')
-                                    logger.error(str(slack_group_list_trace_private))
-                                    logger.error('error :: alert_slack - traceback from slack_group_list_trace_public follows:')
-                                    logger.error(str(slack_group_list_trace_public))
-                                    logger.error('error :: alert_slack - faied to determine slack_thread_ts')
-                        if slack_group_list:
-                            try:
-                                # @modified 20191106 - Branch #3262: py3
-                                # slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
-                                slack_thread_ts = slack_group_list[0]['ts']
+                                slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
                                 logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
                                     str(slack_group), str(slack_thread_ts)))
                             except:
-                                logger.error(traceback.format_exc())
-                                logger.info('alert_slack - failed to determine slack_thread_ts')
-            else:
-                send_text = initial_comment + '  ::  error :: there was no graph image to upload'
-                send_message = sc.api_call(
-                    'chat.postMessage',
-                    channel=channel,
-                    icon_emoji=icon_emoji,
-                    text=send_text)
-                if not send_message['ok']:
-                    logger.error('error :: alert_slack - failed to send slack message')
+                                slack_group_trace_groups = traceback.format_exc()
+                                logger.info('alert_slack - failed to determine slack_group using groups')
+                            if not slack_group:
+                                # Try by channel
+                                try:
+                                    # @modified 20191106 - Branch #3262: py3
+                                    # slack_group = slack_file_upload['file']['channels'][0].encode('utf-8')
+                                    slack_group = slack_file_upload['file']['channels'][0]
+                                    logger.info('alert_slack - slack group has been set from \'channels\' as %s' % (
+                                        str(slack_group)))
+                                except:
+                                    slack_group_trace_channels = traceback.format_exc()
+                                    logger.info('alert_slack - failed to determine slack_group using channels')
+                                    logger.error('error :: alert_slack - failed to determine slack_group using groups or channels')
+                                    logger.error('error :: alert_slack - traceback from slack_group_trace_groups follows:')
+                                    logger.error(str(slack_group_trace_groups))
+                                    logger.error('error :: alert_slack - traceback from slack_group_trace_channels follows:')
+                                    logger.error(str(slack_group_trace_channels))
+                                    logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                            slack_group_list = None
+                            if slack_group:
+                                slack_group_list_trace_private = None
+                                slack_group_list_trace_public = None
+                                # Try private channel
+                                try:
+                                    slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
+                                    logger.info('alert_slack - slack_group_list determined from private channel and slack_group %s' % (
+                                        str(slack_group)))
+                                except:
+                                    slack_group_list_trace_private = traceback.format_exc()
+                                    logger.info('alert_slack - failed to determine slack_group_list using private channel')
+                                if not slack_group_list:
+                                    # Try public channel
+                                    try:
+                                        slack_group_list = slack_file_upload['file']['shares']['public'][slack_group]
+                                        logger.info('alert_slack - slack_group_list determined from public channel and slack_group %s' % (
+                                            str(slack_group)))
+                                    except:
+                                        slack_group_list_trace_public = traceback.format_exc()
+                                        logger.info('alert_slack - failed to determine slack_group_list using public channel')
+                                        logger.info('alert_slack - failed to determine slack_group_list using private or public channel')
+                                        logger.error('error :: alert_slack - traceback from slack_group_list_trace_private follows:')
+                                        logger.error(str(slack_group_list_trace_private))
+                                        logger.error('error :: alert_slack - traceback from slack_group_list_trace_public follows:')
+                                        logger.error(str(slack_group_list_trace_public))
+                                        logger.error('error :: alert_slack - faied to determine slack_thread_ts')
+                            if slack_group_list:
+                                try:
+                                    # @modified 20191106 - Branch #3262: py3
+                                    # slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                                    slack_thread_ts = slack_group_list[0]['ts']
+                                    logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
+                                        str(slack_group), str(slack_thread_ts)))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.info('alert_slack - failed to determine slack_thread_ts')
                 else:
-                    logger.info('alert_slack - sent slack message')
-        except:
-            logger.info(traceback.format_exc())
-            logger.error('error :: alert_slack - could not upload file')
-            return False
+                    send_text = initial_comment + '  ::  error :: there was no graph image to upload'
+                    send_message = sc.api_call(
+                        'chat.postMessage',
+                        channel=channel,
+                        icon_emoji=icon_emoji,
+                        text=send_text)
+                    if not send_message['ok']:
+                        logger.error('error :: alert_slack - failed to send slack message')
+                    else:
+                        logger.info('alert_slack - sent slack message')
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: alert_slack - could not upload file')
+                return False
 
         # No anomaly_id will be known here so Panorama has to surface the
         # anomalies table anomaly_id that matches base_name, metric_timestamp
@@ -2045,6 +2427,19 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
 
     """
     if settings.HTTP_ALERTERS_ENABLED:
+
+        # @added 20230605 - Feature #4932: mute_alerts_on
+        metric_muted = False
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', metric[1])
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+        if metric_muted:
+            logger.info('alert_http - %s is muted, not alerting' % str(metric[1]))
+            return
+
         alerter_name = alert[1]
         alerter_enabled = False
         try:
@@ -2081,6 +2476,16 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
             except:
                 logger.error('alert_http - could not determine full_duration from second_order_resolution_seconds')
         source = context.lower()
+
+        # @added 20221207 - Feature #4734: mirage_vortex
+        #                   Feature #4732: flux vortex
+        # When the context is Vortex set the source to mirage so that the
+        # mirage resend queue is used, there is no vortex queue as vortex uses
+        # mirage to send alerts.
+        use_source = str(source)
+        if context == 'Vortex':
+            source = 'mirage'
+
         metric_alert_dict = {}
         alert_data_dict = {}
         try:
@@ -2183,7 +2588,17 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed to connect to query Redis for aet.smtp_alerter_metrics')
-                if smtp_alerter_metric:
+
+                # @added 20221110 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                # Calculate 3sigma for labelled_metrics
+                labelled_metric = False
+                if metric_name.startswith('labelled_metrics.') or '_tenant_id="' in metric_name:
+                    labelled_metric = True
+
+                # @modified 20221110 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                if smtp_alerter_metric or labelled_metric:
                     training_data_available_for_sigma3 = True
                 else:
                     logger.info('alert_http :: will not calculated 3sigma upper and lower bounds for %s as it is not a smtp_alerter_metric s no training dat to calculate from' % metric_name)
@@ -2264,9 +2679,30 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 yhat_lower = sigma3_lower_bound
                 yhat_real_lower = sigma3_real_lower_bound
 
+            # @added 20220830 - Feature #4652: http_alerter - dotted_representation
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            dotted_representation = None
+            use_base_name = str(metric_name)
+            if use_base_name.startswith('labelled_metrics.'):
+                try:
+                    use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, metric_name)
+                except Exception as err:
+                    logger.error('error :: alert_http :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                        str(metric_name), err))
+                try:
+                    dotted_representation = get_dotted_representation(skyline_app, use_base_name)
+                except Exception as err:
+                    logger.error('error :: alert_http :: get_dotted_representation failed for %s - %s' % (
+                        str(use_base_name), err))
+
             # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
             metric_alert_dict = {
-                "metric": str(metric[1]),
+                # @modified 20220830 - Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                #                      Feature #4652: http_alerter - dotted_representation
+                # "metric": str(metric[1]),
+                "metric": str(use_base_name),
                 # @modified 20220301 - Feature #4482: Test alerts
                 # Use native json types apart from anomaly_id which is converted
                 # into a str for direct use in URLs
@@ -2278,7 +2714,11 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 "value": float(value_str),
                 "full_duration": int(full_duration_str),
                 "expiry": int(expiry_str),
-                "source": str(source),
+                # @modified 20221207 - Feature #4734: mirage_vortex
+                #                   Feature #4732: flux vortex
+                # Add any anomalies discovered by mirage_vortex to be alerted on
+                # "source": str(source),
+                "source": str(use_source),
                 "token": alerter_token,
                 # "id": str(external_alerter_id),
                 "id": external_alerter_id,
@@ -2295,6 +2735,8 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 "yhat_upper": yhat_upper,
                 "yhat_lower": yhat_lower,
                 "yhat_real_lower": yhat_real_lower,
+                # @added 20220830 - Feature #4652: http_alerter - dotted_representation
+                "dotted_representation": dotted_representation,
             }
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
@@ -2330,13 +2772,30 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
 
         in_resend_queue = False
         redis_set = '%s.http_alerter.queue' % str(source)
+
         resend_queue = None
         previous_attempts = 0
         REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
         try:
-            resend_queue = REDIS_HTTP_ALERTER_CONN_DECODED.smembers(redis_set)
+            # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+            #                      Feature #4652: http_alerter - dotted_representation
+            # Change to a hash
+            # resend_queue = REDIS_HTTP_ALERTER_CONN_DECODED.smembers(redis_set)
+            resend_queue = []
         except Exception as e:
             logger.error('error :: alert_http :: could not query Redis for %s - %s' % (redis_set, e))
+
+        # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+        #                   Feature #4652: http_alerter - dotted_representation
+        # Change to a hash
+        redis_alert_queue_hash = '%s.http_alerter.queue.hash' % str(source)
+        resend_queue_dict = {}
+        try:
+            resend_queue_dict = REDIS_HTTP_ALERTER_CONN_DECODED.hgetall(redis_alert_queue_hash)
+        except Exception as err:
+            logger.error('error :: alert_http :: could not query Redis for %s - %s' % (
+                redis_alert_queue_hash, err))
+
         if REDIS_HTTP_ALERTER_CONN_DECODED:
             try:
                 del REDIS_HTTP_ALERTER_CONN_DECODED
@@ -2360,10 +2819,31 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 logger.error(traceback.format_exc())
                 logger.error('error :: alert_http failed iterate to resend_queue')
 
+        # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+        #                   Feature #4652: http_alerter - dotted_representation
+        # Change to a hash
+        in_resend_queue_dict = False
+        if resend_queue_dict:
+            try:
+                for resend_item in list(resend_queue_dict.keys()):
+                    resend_item_list = literal_eval(resend_queue_dict[resend_item])
+                    # resend_alert = resend_item_list[0]
+                    # resend_metric = resend_item_list[1]
+                    resend_metric_alert_dict = resend_item_list[2]
+                    if resend_metric_alert_dict['metric'] == str(use_base_name):
+                        if int(resend_metric_alert_dict['timestamp']) == int(timestamp_str):
+                            previous_attempts = int(resend_metric_alert_dict['attempts'])
+                            in_resend_queue_dict = True
+                            break
+            except Exception as err:
+                logger.error('error :: alert_http failed iterate to resend_queue_dict - %s' % err)
+
         # REDIS_HTTP_ALERTER_CONN = None
         # if in_resend_queue:
         #     REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)
         REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)
+
+        REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
 
         add_to_resend_queue = False
         if alert_data_dict and alerter_endpoint:
@@ -2399,6 +2879,21 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                     logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
                         str(last_resend_item), redis_set))
 
+            # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+            #                   Feature #4652: http_alerter - dotted_representation
+            # Change to a hash
+            if in_resend_queue_dict:
+                hash_key = '%s.%s' % (
+                    str(resend_metric_alert_dict['timestamp']),
+                    str(resend_metric_alert_dict['anomaly_id']))
+                try:
+                    REDIS_HTTP_ALERTER_CONN_DECODED.hdel(redis_alert_queue_hash, hash_key)
+                    logger.info('alert_http :: alert removed from %s' % (
+                        str(redis_alert_queue_hash)))
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to remove %s from Redis hash %s - %s' % (
+                        hash_key, redis_alert_queue_hash, err))
+
             # @added 20200310 - Feature #3396: http_alerter
             # When the response code is 401 the response object appears to be
             # False, although the response.code and response.reason are set
@@ -2421,6 +2916,10 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                             str(redis_set), str(previous_attempts)))
                     try:
                         del REDIS_HTTP_ALERTER_CONN
+                    except:
+                        pass
+                    try:
+                        del REDIS_HTTP_ALERTER_CONN_DECODED
                     except:
                         pass
 
@@ -2456,20 +2955,45 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                     str(number_of_send_attempts), str(metric_alert_dict)))
 
             if add_to_resend_queue:
-                alert_str = str(alert)
-                metric_str = str(metric)
-                data = [alert_str, metric_str, str(metric_alert_dict)]
+                # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                #                      Feature #4652: http_alerter - dotted_representation
+                # Change to a hash
+                # alert_str = str(alert)
+                # metric_str = str(metric)
+                # data = [alert_str, metric_str, str(metric_alert_dict)]
+                # logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
+                #     str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
+                # try:
+                #     # redis_conn.sadd(redis_set, str(metric_alert_dict))
+                #     REDIS_HTTP_ALERTER_CONN.sadd(redis_set, str(data))
+                # except:
+                #     logger.error(traceback.format_exc())
+                #     logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
+                #         str(metric_alert_dict), redis_set))
+
+                # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                #                   Feature #4652: http_alerter - dotted_representation
+                # Change to a hash
+                data = [alert, metric, metric_alert_dict]
                 logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
-                    str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
+                    str(redis_alert_queue_hash), str(number_of_send_attempts),
+                    str(metric_alert_dict)))
+                hash_key = '%s.%s' % (
+                    str(metric_alert_dict['timestamp']),
+                    str(metric_alert_dict['anomaly_id']))
                 try:
-                    # redis_conn.sadd(redis_set, str(metric_alert_dict))
-                    REDIS_HTTP_ALERTER_CONN.sadd(redis_set, str(data))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
-                        str(metric_alert_dict), redis_set))
+                    REDIS_HTTP_ALERTER_CONN_DECODED.hset(redis_alert_queue_hash, hash_key, str(data))
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to add %s to Redis hash %s - %s' % (
+                        str(metric_alert_dict), redis_alert_queue_hash, err))
+
         try:
             del REDIS_HTTP_ALERTER_CONN
+        except:
+            pass
+
+        try:
+            del REDIS_HTTP_ALERTER_CONN_DECODED
         except:
             pass
     else:
@@ -2505,6 +3029,19 @@ def alert_sms(alert, metric, second_order_resolution_seconds, context, triggered
         logger.error(traceback.format_exc())
         logger.error('error :: get_sms_recipients failed checking %s - %s' % (
             base_name, e))
+
+    # @added 20230605 - Feature #4932: mute_alerts_on
+    metric_muted = False
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', metric[1])
+    except Exception as err:
+        logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+            err))
+    if metric_muted:
+        logger.info('alert_sms - %s is muted, not alerting' % str(metric[1]))
+        return
+
     logger.info('sending SMS alert to %s' % str(sms_recipients))
     for sms_number in sms_recipients:
         success = False

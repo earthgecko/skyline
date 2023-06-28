@@ -5,6 +5,7 @@ from sys import version_info
 import traceback
 import csv
 # from ast import literal_eval
+from timeit import default_timer as timer
 
 from sqlalchemy.sql import select
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
@@ -15,6 +16,8 @@ from tsfresh.feature_extraction import (
     # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
     # extract_features, ReasonableFeatureExtractionSettings)
     extract_features, EfficientFCParameters)
+# @added 20221024 - Feature #4702: numba optimisations
+from numba import jit
 
 import settings
 from skyline_functions import get_memcache_metric_object
@@ -23,6 +26,11 @@ from database import (
 # @added 20210425 - Task #4030: refactoring
 #                   Feature #4014: Ionosphere - inference
 from functions.numpy.percent_different import get_percent_different
+
+# @added 20220731 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
@@ -52,12 +60,23 @@ except:
     OTEL_ENABLED = False
 if OTEL_ENABLED and settings.MEMCACHE_ENABLED:
     from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
-    # @modified 20220505 - Task #4514: Integrate opentelemetry
-    # Fail gracefully if opentelemetry breaks it breaks
+
+    # @modified 20221102 - Bug #4714: opentelemetry check is_instrumented_by_opentelemetry
+    instrumented = False
     try:
-        PymemcacheInstrumentor().instrument()
-    except:
-        pass
+        instrumented = PymemcacheInstrumentor().is_instrumented_by_opentelemetry
+    except Exception as err:
+        logger.error('error :: common_functions - PymemcacheInstrumentor().is_instrumented_by_opentelemetry failed - %s' % (
+            err))
+    if not instrumented:
+        logger.info('common_functions - starting PymemcacheInstrumentor')
+
+        # @modified 20220505 - Task #4514: Integrate opentelemetry
+        # Fail gracefully if opentelemetry breaks it breaks
+        try:
+            PymemcacheInstrumentor().instrument()
+        except:
+            pass
 
 if settings.MEMCACHE_ENABLED:
     memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
@@ -98,12 +117,42 @@ def get_metrics_db_object(base_name):
                 logger.error('error :: calling engine.dispose()')
         return
 
+    # @added 20220731 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Handle labelled_metric name
+    labelled_metric_name = None
+    if '{' in base_name and '}' in base_name and '_tenant_id="' in base_name:
+        metric_id = 0
+        try:
+            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+        except Exception as err:
+            logger.error('error :: get_metric_id_from_base_name failed with base_name: %s - %s' % (str(base_name), err))
+        if metric_id:
+            labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+    if base_name.startswith('labelled_metrics.'):
+        labelled_metric_name = str(base_name)
+        try:
+            metric = get_base_name_from_labelled_metrics_name(skyline_app, labelled_metric_name)
+            if metric:
+                labelled_metric_base_name = str(metric)
+                base_name = str(labelled_metric_base_name)
+        except Exception as err:
+            logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                base_name, err))
+
     metrics_db_object = None
     memcache_metrics_db_object = None
-    metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
+    if not labelled_metric_name:
+        metrics_db_object_key = 'metrics_db_object.%s' % str(base_name)
+    else:
+        metrics_db_object_key = 'metrics_db_object.%s' % str(labelled_metric_name)
+
     memcache_metric_dict = None
     if settings.MEMCACHE_ENABLED:
-        memcache_metric_dict = get_memcache_metric_object(skyline_app, base_name)
+        if not labelled_metric_name:
+            memcache_metric_dict = get_memcache_metric_object(skyline_app, base_name)
+        else:
+            memcache_metric_dict = get_memcache_metric_object(skyline_app, labelled_metric_name)
 
     query_metric_table = True
     if memcache_metric_dict:
@@ -270,6 +319,21 @@ def get_calculated_features(calculated_feature_file):
     return calculated_features
 
 
+# @added 20221024 - Feature #4702: numba optimisations
+@jit(nopython=True, cache=True)
+def numba_minmax(x, y):
+    """
+    This a numba minmax function, the normal minmax function for 1000 loops on a
+    timeseries of length 1448 took 6.046057 seconds, the numba_minmax function
+    took 3.808568 seconds.
+    On a single run normal minmax took 0.016309 seconds and numba_minmax took
+    0.006180 seconds.
+    """
+    y_minmax = (y - y.min()) / (y.max() - y.min())
+    np_minmax_array = np.stack((x, y_minmax), axis=-1)
+    return np_minmax_array
+
+
 def minmax_scale_check(
     fp_id_metric_ts, anomalous_timeseries, range_tolerance,
         range_tolerance_percentage, fp_id, base_name, metric_timestamp,
@@ -366,22 +430,44 @@ def minmax_scale_check(
     else:
         logger.info('the ranges of fp_id_metric_ts and anomalous_timeseries differ significantly Min-Max scaling will be skipped')
 
+    # @added 20221024 - Feature #4702: numba optimisations
+    use_numba = False
+
     minmax_fp_ts = []
     # if fp_id_metric_ts:
     if range_similar:
         if LOCAL_DEBUG:
             logger.debug('debug :: creating minmax_fp_ts from minmax scaled fp_id_metric_ts')
-        try:
-            minmax_fp_values = [x[1] for x in fp_id_metric_ts]
-            x_np = np.asarray(minmax_fp_values)
-            # Min-Max scaling
-            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
-            for (ts, v) in zip(fp_id_metric_ts, np_minmax):
-                minmax_fp_ts.append([ts[0], v])
-            logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: could not minmax scale fp id %s time series for %s' % (str(fp_id), str(base_name)))
+
+        # @added 20221024 - Feature #4702: numba optimisations
+        if use_numba:
+            try:
+                minmax_fp_start = timer()
+                fp_timestamps = np.array([x[0] for x in fp_id_metric_ts], dtype=np.float64)
+                fp_values = np.array([x[1] for x in fp_id_metric_ts], dtype=np.float64)
+                numba_minmax_array = numba_minmax(fp_timestamps, fp_values)
+                minmax_fp_ts = numba_minmax_array.tolist()
+                logger.info('minmax_fp_ts list populated with the numba minmax scaled time series with %s data points in %.6f seconds' % (
+                    str(len(minmax_fp_ts)), (timer() - minmax_fp_start)))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not minmax scale fp id %s time series for %s - %s' % (
+                    str(fp_id), str(base_name), err))
+
+        # @modified 20221024 - Feature #4702: numba optimisations
+        if not use_numba or not minmax_fp_ts:
+            try:
+                minmax_fp_values = [x[1] for x in fp_id_metric_ts]
+                x_np = np.asarray(minmax_fp_values)
+                # Min-Max scaling
+                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                    minmax_fp_ts.append([ts[0], v])
+                logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not minmax scale fp id %s time series for %s' % (str(fp_id), str(base_name)))
+
         if not minmax_fp_ts:
             logger.error('error :: minmax_fp_ts list not populated')
 
@@ -391,16 +477,29 @@ def minmax_scale_check(
         # Only process if they are approximately the same length
         minmax_fp_ts_values_count = len(minmax_fp_ts)
         if minmax_fp_ts_values_count - anomalous_ts_values_count in range(-14, 14):
-            try:
-                minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
-                x_np = np.asarray(minmax_anomalous_values)
-                # Min-Max scaling
-                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
-                for (ts, v) in zip(fp_id_metric_ts, np_minmax):
-                    minmax_anomalous_ts.append([ts[0], v])
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: could not minmax scale current time series anomalous_timeseries for %s' % (str(fp_id), str(base_name)))
+
+            # @added 20221024 - Feature #4702: numba optimisations
+            if use_numba:
+                minmax_anomalous_ts_start = timer()
+                anomalous_timestamps = np.array([x[0] for x in anomalous_timeseries], dtype=np.float64)
+                anomalous_values = np.array([x[1] for x in anomalous_timeseries], dtype=np.float64)
+                numba_anomalous_minmax_array = numba_minmax(anomalous_timestamps, anomalous_values)
+                minmax_anomalous_ts = numba_anomalous_minmax_array.tolist()
+                logger.info('minmax_anomalous_ts list populated with the numba minmax scaled anomalous time series with %s data points in %.6f seconds' % (
+                    str(len(minmax_anomalous_ts)), (timer() - minmax_anomalous_ts_start)))
+
+            # @modified 20221024 - Feature #4702: numba optimisations
+            if not use_numba or not minmax_anomalous_ts:
+                try:
+                    minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
+                    x_np = np.asarray(minmax_anomalous_values)
+                    # Min-Max scaling
+                    np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                    for (ts, v) in zip(fp_id_metric_ts, np_minmax):
+                        minmax_anomalous_ts.append([ts[0], v])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not minmax scale current time series anomalous_timeseries for %s' % (str(base_name)))
             if len(minmax_anomalous_ts) > 0:
                 logger.info('minmax_anomalous_ts is populated with %s data points' % str(len(minmax_anomalous_ts)))
             else:

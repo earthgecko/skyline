@@ -15,6 +15,17 @@
   {% include "match_metric.html" %}
 {% endif %}
 
+{% if mute_alerts_on %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></span></li>
+    </div>
+	</ol>
+  {% include "mute_alerts_on.html" %}
+{% endif %}
+
 {% if test_alert %}
 	<ol class="breadcrumb">
   	<div class="breadcrumb">
@@ -48,6 +59,38 @@
   {% include "remove_flux_namespace_quota_metrics.html" %}
 {% endif %}
 
+{% if labelled_metrics_names %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></span></li>
+    </div>
+	</ol>
+  {% include "labelled_metrics_names.html" %}
+{% endif %}
+
+{% if timeseries_graph %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></span></li>
+    </div>
+	</ol>
+  {% include "timeseries_graph.html" %}
+{% endif %}
+
+{% if csv_to_timeseries %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">csv</span> - <span class="re"> to timeseries</span></span></li>
+    </div>
+	</ol>
+  {% include "csv_to_timeseries.html" %}
+{% endif %}
 
 <!-- END /utilities block -->
 {% endblock %}

@@ -27,7 +27,11 @@ python_version = int(version_info[0])
 
 if True:
     from skyline_functions import (
-        send_graphite_metric, filesafe_metricname,
+        # @modified 20220726 - Task #2732: Prometheus to Skyline
+        #                      Branch #4300: prometheus
+        # Moved send_graphite_metric
+        # send_graphite_metric, filesafe_metricname,
+        filesafe_metricname,
         # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         get_redis_conn, get_redis_conn_decoded,
@@ -36,6 +40,9 @@ if True:
         sanitise_graphite_url)
     # @added 20220429 - Feature #4536: Handle Redis failure
     from functions.flux.get_last_metric_data import get_last_metric_data
+    # @added 20220726 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from functions.graphite.send_graphite_metric import send_graphite_metric
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'fetcher'
@@ -298,14 +305,32 @@ class Fetcher(Thread):
                     response = requests.get(url)
                     if response.status_code == 200:
                         success = True
-                except Exception as e:
-                    logger.error(traceback.format_exc())
-                    # @modified 20191115 - Branch #3262: py3
-                    # Do not report last response data
-                    # logger.error('error :: fetcher :: http status code - %s, reason - %s' % (
-                    #     str(response.status_code), str(response.reason)))
-                    logger.error('error :: fetcher :: failed to get data from %s - %s' % (
-                        str(url), e))
+                except Exception as err:
+                    # @modified 2023024 - Task #4824: vista - warn on remote_error
+                    remote_error = False
+                    if 'Failed to establish a new connection' is str(err):
+                        remote_error = True
+                    if 'Errno 111' in str(err):
+                        remote_error = True
+                    if 'Connection refused' in str(err):
+                        remote_error = True
+                    if 'Connection aborted' in str(err):
+                        remote_error = True
+                    if 'RemoteDisconnected' in str(err):
+                        remote_error = True
+                    if 'Remote end closed connection without response' in str(err):
+                        remote_error = True
+                    if remote_error:
+                        logger.warning('warning :: fetcher :: failed to get data from %s - %s' % (
+                            str(url), err))
+                    else:
+                        logger.error(traceback.format_exc())
+                        # @modified 20191115 - Branch #3262: py3
+                        # Do not report last response data
+                        # logger.error('error :: fetcher :: http status code - %s, reason - %s' % (
+                        #     str(response.status_code), str(response.reason)))
+                        logger.error('error :: fetcher :: failed to get data from %s - %s' % (
+                            str(url), err))
             if not success:
                 continue
 
@@ -1384,7 +1409,9 @@ class Fetcher(Thread):
                     # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # metrics_count_for_workers = len(list(self.redis_conn.smembers(redis_set)))
-                    metrics_count_for_workers = len(list(self.redis_conn_decoded.smembers(redis_set)))
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # metrics_count_for_workers = len(list(self.redis_conn_decoded.smembers(redis_set)))
+                    metrics_count_for_workers = self.redis_conn_decoded.scard(redis_set)
                     logger.info('fetcher :: %s of the metrics fetched from this run still need to be processed by a worker' % str(metrics_count_for_workers))
                 except:
                     logger.error(traceback.format_exc())
@@ -1404,7 +1431,7 @@ class Fetcher(Thread):
                 # @modified 20220111 - Feature #4370: Manage vista.fetcher.metrics.json Redis set
                 # fetcher_sent_to_flux_str = str(fetcher_sent_to_flux)
                 fetcher_sent_to_flux_str = str(metrics_sent_to_flux_count)
-                send_graphite_metric(parent_skyline_app, send_metric_name, fetcher_sent_to_flux_str)
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, fetcher_sent_to_flux_str)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
@@ -1416,7 +1443,7 @@ class Fetcher(Thread):
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(process_runtime)))
                 fetcher_time_to_fetch_str = str(process_runtime)
-                send_graphite_metric(parent_skyline_app, send_metric_name, fetcher_time_to_fetch_str)
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, fetcher_time_to_fetch_str)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
@@ -1427,7 +1454,7 @@ class Fetcher(Thread):
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(metrics_to_fetch_count)))
                 fetcher_metrics_to_fetch_count_str = str(metrics_to_fetch_count)
-                send_graphite_metric(parent_skyline_app, send_metric_name, fetcher_metrics_to_fetch_count_str)
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, fetcher_metrics_to_fetch_count_str)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
@@ -1437,7 +1464,7 @@ class Fetcher(Thread):
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(metrics_fetched_count)))
                 fetcher_metrics_fetched_count_str = str(metrics_fetched_count)
-                send_graphite_metric(parent_skyline_app, send_metric_name, fetcher_metrics_fetched_count_str)
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, fetcher_metrics_fetched_count_str)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)

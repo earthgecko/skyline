@@ -32,12 +32,18 @@ from random import shuffle
 
 # @added 20201014 - Feature #3734: waterfall alerts
 from shutil import rmtree
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 from msgpack import Unpacker, packb
 
 import settings
 from skyline_functions import (
-    send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
+    # @added 20220723 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    # Moved send_graphite_metric
+    # send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
+    write_data_to_file, send_anomalous_metric_to, mkdir_p,
     filesafe_metricname,
     # @added 20170602 - Feature #2034: analyse_derivatives
     nonNegativeDerivative, in_list,
@@ -82,6 +88,17 @@ from functions.metrics.non_derivative_metrics_list import non_derivative_metrics
 
 # @added 20220504 - Feature #2580: illuminance
 from functions.illuminance.add_illuminance_entries import add_illuminance_entries
+
+# @added 20220723 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.graphite.send_graphite_metric import send_graphite_metric
+
+# @added 20220805 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
+
+# @added 20220919 - Feature #4676: analyzer - illuminance.all key
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
 try:
     send_algorithm_run_metrics = settings.ENABLE_ALGORITHM_RUN_METRICS
@@ -233,7 +250,9 @@ except:
 
 # @added 20200528 - Feature #3560: External alert config
 try:
-    EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS.copy()
+    EXTERNAL_ALERTS = copy.deepcopy(settings.EXTERNAL_ALERTS)
 except:
     EXTERNAL_ALERTS = {}
 # @added 20200602 - Feature #3560: External alert config
@@ -242,9 +261,24 @@ if EXTERNAL_ALERTS:
 
 # @added 20200603 - Feature #3566: custom_algorithms
 try:
-    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS.copy()
+    CUSTOM_ALGORITHMS = copy.deepcopy(settings.CUSTOM_ALGORITHMS)
 except:
     CUSTOM_ALGORITHMS = None
+# @added 20230616 - Feature #3566: custom_algorithms
+# Filter out only the ones in which analyzer is
+# declared in use_with
+if CUSTOM_ALGORITHMS:
+    ASSIGNED_CUSTOM_ALGORITHMS = {}
+    for custom_algorithm in CUSTOM_ALGORITHMS:
+        try:
+            if 'analyzer' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
+                ASSIGNED_CUSTOM_ALGORITHMS[custom_algorithm] = copy.deepcopy(CUSTOM_ALGORITHMS[custom_algorithm])
+        except:
+            pass
+    CUSTOM_ALGORITHMS = copy.deepcopy(ASSIGNED_CUSTOM_ALGORITHMS)
+
 try:
     DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
 except:
@@ -277,7 +311,9 @@ except:
     # SNAB_ENABLED = False
     SNAB_ENABLED = True
 try:
-    SNAB_CHECKS = settings.SNAB_CHECKS.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # SNAB_CHECKS = settings.SNAB_CHECKS.copy()
+    SNAB_CHECKS = copy.deepcopy(settings.SNAB_CHECKS)
 except:
     SNAB_CHECKS = {}
 
@@ -328,6 +364,8 @@ if ANALYZER_MAD_LOW_PRIORITY_METRICS:
     ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
 low_priority_metrics_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
 metrics_last_timestamp_hash_key = 'analyzer.metrics.last_analyzed_timestamp'
+# @added 20230402 - Feature #4888: analyzer - load_shedding
+metrics_last_analysis_hash_key = 'analyzer.metrics.last_analysis_timestamp'
 
 # @added 20201107 - Feature #3830: metrics_manager
 ANALYZER_USE_METRICS_MANAGER = True
@@ -359,9 +397,18 @@ except:
 # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
 custom_stale_metrics_hash_key = 'analyzer.metrics_manager.custom_stale_periods'
 try:
-    CUSTOM_STALE_PERIOD = settings.CUSTOM_STALE_PERIOD.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # CUSTOM_STALE_PERIOD = settings.CUSTOM_STALE_PERIOD.copy()
+    CUSTOM_STALE_PERIOD = copy.deepcopy(settings.CUSTOM_STALE_PERIOD)
 except:
     CUSTOM_STALE_PERIOD = {}
+
+# @added 20230402 - Feature #4888: analyzer - load_shedding
+LOAD_SHEDDING_ENABLED = True
+try:
+    LOAD_SHEDDING_ENABLED = settings.LOAD_SHEDDING_ENABLED
+except:
+    LOAD_SHEDDING_ENABLED = True
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -542,7 +589,6 @@ class Analyzer(Thread):
                 last_reported_up = 0
             else:
                 last_reported_up = int(float(last_reported_up))
-
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: Analyzer could not update the Redis %s key - %s' % (
@@ -579,9 +625,31 @@ class Analyzer(Thread):
         if global_anomaly_in_progress:
             logger.warning('warning :: a global anomaly event is in progress')
 
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        boring_timings = []
+        run_selected_algorithm_timings = []
+        start_analysis_loop = time()
+        operation_timings = {}
+        analyzer_metrics_last_timeseries_timestamp = {}
+        new_metrics_last_timestamp_dict = {}
+        # @added 20230401 - Feature #4886: analyzer - operation_timings
+        # Only sadd once
+        identified_boring_metrics = []
+        identified_stale_metrics = []
+        identified_tooshort_metrics = []
+        analyzer_not_anomalous_metrics = []
+
         # @added 20220504 - Feature #2580: illuminance
         illuminance_dict = {}
-
+        # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+        illuminance_all_dict = {}
+        errors = []
+        algorithms = {}
+        try:
+            algorithms = self.redis_conn_decoded.hgetall('metrics_manager.algorithms.ids')
+        except Exception as err:
+            logger.error('error :: hgetall metrics_manager.algorithms.ids - %s' % str(err))
+        
         # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
         # The number of metrics to load test Analyzer with, testing is only done
         # after the normal analysis run.
@@ -639,10 +707,29 @@ class Analyzer(Thread):
         assigned_min = (i_process - 1) * keys_per_processor
         assigned_keys = range(assigned_min, assigned_max)
 
+        # @added 20230609
+        # Use start up key and allow numba cache files to be created
+        start_key = '%s.starting' % skyline_app
+        starting = False
+        try:
+            starting = self.redis_conn.exists(start_key)
+            if starting and i_process > 1:
+                logger.info('analyzer is starting so spin_process %s is sleeping to allow spin_process %s to allow numba cache files to be created' % (
+                    str(i_process), str(i_process - 1)))
+                sleep(15.0)
+        except Exception as err:
+            logger.error('error :: exists failed on Redis %s key - %s' % (
+                start_key, err))
+
+        logger.info('assigned_min: %s, assigned_max: %s' % (str(assigned_min), str(assigned_max)))
+
         # Compile assigned metrics
         assigned_metrics = [unique_metrics[index] for index in assigned_keys]
         if LOCAL_DEBUG:
             logger.debug('debug :: Memory usage spin_process after assigned_metrics: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        logger.info('%s assigned_metrics of %s unique_metrics' % (
+            str(len(assigned_metrics)), str(len(unique_metrics))))
 
         # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
         if not ANALYZER_ENABLED:
@@ -656,6 +743,97 @@ class Analyzer(Thread):
         if len(assigned_metrics) == 0:
             logger.info('0 assigned metrics, nothing to do')
             return
+
+        # @added 20230402 - Feature #4888: analyzer - load_shedding
+        analyzer_last_run_time = 0
+        analyzer_last_run_time_timestamp = int(spin_start)
+        load_shedding_active = False
+        if LOAD_SHEDDING_ENABLED:
+            logger.info('load_shedding_active - checking')
+            try:
+                analyzer_last_run_time = float(self.redis_conn_decoded.hget('analyzer.run_time', 'value'))
+                analyzer_last_run_time_timestamp = int(self.redis_conn_decoded.hget('analyzer.run_time', 'timestamp'))
+            except Exception as err:
+                logger.error('error :: load_shedding_active failed to get keys from analyzer.run_time Redis hash - %s' % err)
+                analyzer_last_run_time = 0
+                analyzer_last_run_time_timestamp = int(spin_start)
+            if analyzer_last_run_time >= (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5):
+                load_shedding_active = True
+                logger.info('load_shedding_active set to True because analyzer_last_run_time: %s' % str(analyzer_last_run_time))
+            if analyzer_last_run_time_timestamp <= (int(spin_start) - (settings.MAX_ANALYZER_PROCESS_RUNTIME + 30)):
+                load_shedding_active = True
+                logger.info('load_shedding_active set to True because analyzer_last_run_time_timestamp is older than % seconds' % (
+                    str(analyzer_last_run_time_timestamp)))
+        logger.info('load_shedding_active: %s' % str(load_shedding_active))
+        last_analysed_ordered_metrics = []
+        load_shedding_assigned_metrics = []
+        metrics_last_analysis_dict = {}
+        # If the load_shedding hash exist keep updating it until it expires and
+        # does not exist.  If it exists but load_shedding_active is not True the
+        # hash expiry does not get updated it only gets updated if
+        # load_shedding_active is True.  This is so that if load_shedding becomes
+        # active on 1 run, but is not active on the next run the hash last
+        # analysis times are still updated for another 4 minutes so that if
+        # load_shedding becomes active in the next 4 minutes, it is not starting
+        # from scratch and will have data to do an ordered analysis on.
+        load_shedding_hash_exists = False
+        try:
+            load_shedding_hash_exists = self.redis_conn_decoded.exists(metrics_last_analysis_hash_key)
+        except Exception as err:
+            logger.error('error :: load_shedding_active failed to hgetall %s from Redis hash - %s' % (metrics_last_analysis_hash_key, err))
+        if load_shedding_active or load_shedding_hash_exists:
+            start_load_shedding_get = time()
+            log_str = 'load shedding hash exists'
+            if load_shedding_active:
+                log_str = 'load_shedding_active'
+            try:
+                last_metrics_last_analysis_dict = self.redis_conn_decoded.hgetall(metrics_last_analysis_hash_key)
+                logger.info('%s got %s metrics last analysed timestamps from %s to reorder %s assigned_metrics' % (
+                    log_str, str(len(last_metrics_last_analysis_dict)), metrics_last_analysis_hash_key,
+                    str(len(assigned_metrics))))
+            except Exception as err:
+                logger.error('error :: load_shedding_active failed to hgetall %s from Redis hash - %s' % (metrics_last_analysis_hash_key, err))
+        if load_shedding_active:
+            if last_metrics_last_analysis_dict:
+                if settings.FULL_NAMESPACE:
+                    metrics_last_analyzed_timestamp = [[int(timestamp_str), '%s%s' % (settings.FULL_NAMESPACE, metric)] for metric, timestamp_str in last_metrics_last_analysis_dict.items()]
+                else:
+                    metrics_last_analyzed_timestamp = [[int(timestamp_str), metric] for metric, timestamp_str in last_metrics_last_analysis_dict.items()]
+                metrics_last_analyzed_timestamp_sorted = sorted(metrics_last_analyzed_timestamp, key=lambda x: x[0])
+                del metrics_last_analyzed_timestamp
+                metrics_last_analyzed_timestamp_sorted = [item for item in metrics_last_analyzed_timestamp_sorted if item[1] in assigned_metrics]
+                logger.info('load_shedding_active reordered metrics by last analysed timestamp, first metric in list now: %s' % (
+                    str(metrics_last_analyzed_timestamp_sorted[0])))
+                logger.info('load_shedding_active reordered metrics by last analysed timestamp, last metric in list now: %s' % (
+                    str(metrics_last_analyzed_timestamp_sorted[-1])))
+                last_analysed_ordered_metrics = [metric for ts, metric in metrics_last_analyzed_timestamp_sorted]
+                del metrics_last_analyzed_timestamp_sorted
+            if last_analysed_ordered_metrics:
+                load_shedding_assigned_metrics = [metric for metric in last_analysed_ordered_metrics if metric in assigned_metrics]
+            operation_timings['load_shedding_last_analysed_ordered_metrics'] = [(time() - start_load_shedding_get)]
+        if load_shedding_assigned_metrics:
+            logger.info('load_shedding_active replacing %s assigned_metrics with %s metrics ordered by last analysed timestamp' % (
+                str(len(assigned_metrics)), str(len(load_shedding_assigned_metrics))))
+            try:
+                set_assigned_metrics = set(assigned_metrics)
+                set_load_shedding_assigned_metrics = set(load_shedding_assigned_metrics)
+                not_present_metrics_set = set_assigned_metrics.difference(set_load_shedding_assigned_metrics)
+                not_present_metrics = list(not_present_metrics_set)
+                del set_assigned_metrics
+                del set_load_shedding_assigned_metrics
+                del not_present_metrics_set
+            except Exception as err:
+                logger.error('error :: load_shedding_active failed determine not_present_metrics - %s' % err)
+                not_present_metrics = []
+            if not_present_metrics:
+                logger.info('load_shedding_active appending %s metrics which had no last analysed timestamp' % (
+                    str(len(not_present_metrics))))
+                load_shedding_assigned_metrics = load_shedding_assigned_metrics + not_present_metrics
+                del not_present_metrics
+            assigned_metrics = list(load_shedding_assigned_metrics)
+            logger.info('load_shedding_active now %s assigned_metrics' % (
+                str(len(assigned_metrics))))
+            del load_shedding_assigned_metrics
 
         run_selected_algorithm_count = 0
 
@@ -694,6 +872,10 @@ class Analyzer(Thread):
             determine_low_priority_metrics = True
 
         if determine_low_priority_metrics:
+
+            # @added 20230331 - Feature #4886: analyzer - operation_timings
+            start_determine_low_priority_metrics = time()
+
             try:
                 try:
                     smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.smtp_alerter_metrics'))
@@ -871,6 +1053,10 @@ class Analyzer(Thread):
                     logger.info('reordered assigned_metrics by priority, %s high priority alerting metrics and %s low priority non alerting metrics' % (
                         str(len(high_priority_assigned_metrics)),
                         str(len(low_priority_assigned_metrics))))
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                operation_timings['determine_low_priority_metrics'] = [(time() - start_determine_low_priority_metrics)]
+
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to generate a priority based assigned_metrics list')
@@ -893,6 +1079,9 @@ class Analyzer(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to generate a high priority based assigned_metrics list only')
 
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        start_mget = time()
+
         # Multi get series
         # @modified 20160801 - Adding additional exception handling to Analyzer
         raw_assigned_failed = True
@@ -905,10 +1094,14 @@ class Analyzer(Thread):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get raw_assigned from Redis - %s' % e)
 
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        operation_timings['mget'] = [(time() - start_mget)]
+        start_metrics_management_stuff = time()
+
         # Make process-specific dicts
         exceptions = defaultdict(int)
         anomaly_breakdown = defaultdict(int)
-
+    
         # @added 20160803 - Adding additional exception handling to Analyzer
         if raw_assigned_failed:
             logger.info('No raw_assigned set, returning')
@@ -1114,7 +1307,7 @@ class Analyzer(Thread):
             longterm_non_derivative_metrics = list(longterm_non_derivative_metrics_dict.keys())
             non_derivative_metrics = list(set(non_derivative_metrics + longterm_non_derivative_metrics))
         except Exception as err:
-            logger.error('error :: metrics_manager :: derivative_metric_check :: failed to hgetall metrics_manager.longterm_non_derivative_metrics - %s' % str(err))
+            logger.error('error :: derivative_metric_check :: failed to hgetall metrics_manager.longterm_non_derivative_metrics - %s' % str(err))
 
         # This is here to refresh the sets
         try:
@@ -1179,6 +1372,29 @@ class Analyzer(Thread):
             non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
         except:
             non_derivative_monotonic_metrics = []
+
+        # @added 20230401 - Feature #4886: analyzer - operation_timings
+        # Checking each metric for a z.derivative_metric. was taking from around
+        # 4 seconds to up to 40 seconds when loading per process when
+        # operation_timings were added to monitor and performance tune each op.
+        # Get all z.derivative_metric. once, testing was done with scan_iter
+        # which took up to 4.4 seconds to list keys and keys which took 0.39
+        # seconds.
+        all_z_derivative_keys = []
+        try:
+            all_z_derivative_keys = list(self.redis_conn_decoded.keys('z.derivative_metric.*'))
+        except Exception as err:
+            logger.error('error :: failed to list z.derivative_metric.* keys from Redis - %s' % str(err))
+        all_zz_derivative_keys = []
+        try:
+            all_zz_derivative_keys = list(self.redis_conn_decoded.keys('zz.derivative_metric.*'))
+        except Exception as err:
+            logger.error('error :: failed to list zz.derivative_metric.* keys from Redis - %s' % str(err))
+        aet_metrics_manager_metric_names_with_ids = {}
+        try:
+            aet_metrics_manager_metric_names_with_ids = self.redis_conn_decoded.hgetall('aet.metrics_manager.metric_names_with_ids')
+        except Exception as err:
+            logger.error('error :: failed to hgetall on aet.metrics_manager.metric_names_with_ids from Redis - %s' % str(err))
 
         # @added 20220419 - Feature #4528: metrics_manager - derivative_metric_check
         #                   Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -1408,6 +1624,7 @@ class Analyzer(Thread):
         metrics_without_new_data = []
         metrics_with_new_data = []
         metrics_added_to_last_timestamp_hash_key = []
+
         if ANALYZER_CHECK_LAST_TIMESTAMP:
             try:
                 metrics_last_timestamp_dict = self.redis_conn_decoded.hgetall(metrics_last_timestamp_hash_key)
@@ -1461,18 +1678,91 @@ class Analyzer(Thread):
             logger.error('error :: failed to create metrics_last_timeseries_timestamp_dict from Redis hash key %s - %s' % (
                 metrics_last_timeseries_timestamp_hash_key, e))
 
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        operation_timings['metrics management operations'] = [(time() - start_metrics_management_stuff)]
+
+        boring_timings = []
+        run_selected_algorithm_timings = []
+        start_analysis_loop = time()
+
+        # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+        times_per_metric = {}
+
         logger.info('checking %s assigned_metrics' % str(len(assigned_metrics)))
+
+        # @added 20230402 - Feature #4888: analyzer - load_shedding
+        load_shedding_active_log_stop = False
+        activating_load_shedding = False
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
 
+            # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+            metric_timing_start = time()
+
+            # @added 20230402 - Feature #4888: analyzer - load_shedding
+            # If load shedding is active and the process in approaching the
+            # MAX_ANALYZER_PROCESS_RUNTIME stop
+            right_now = int(time())
+            if not activating_load_shedding:
+                if right_now >= (int(spin_start) + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5)):
+                    metrics_done = len(assigned_metrics) - (i + 1)
+                    metrics_not_done = len(assigned_metrics) - metrics_done
+                    activating_load_shedding = True
+                    logger.info('activating load shedding - approaching MAX_ANALYZER_PROCESS_RUNTIME so stopping, analysed %s metrics of the %s assigned metrics, %s metric not analysed' % (
+                        str(metrics_done), str(len(assigned_metrics)),
+                        str(metrics_not_done)))
+                    if not load_shedding_active_log_stop and load_shedding_active:
+                        logger.info('load_shedding_active - approaching MAX_ANALYZER_PROCESS_RUNTIME so stopping, analysed %s metrics of the %s assigned metrics, %s metric not analysed' % (
+                            str(metrics_done), str(len(assigned_metrics)),
+                            str(metrics_not_done)))
+                        load_shedding_active_log_stop = True
+            if activating_load_shedding:
+                if last_metrics_last_analysis_dict:
+                    try:
+                        last_anlysis_timestamp_str = last_metrics_last_analysis_dict[base_name]
+                        if last_anlysis_timestamp_str:
+                            metrics_last_analysis_dict[base_name] = int(last_anlysis_timestamp_str)
+                    except:
+                        metrics_last_analysis_dict[base_name] = int(right_now) - 60
+                else:
+                    metrics_last_analysis_dict[base_name] = int(right_now) - 60
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
+                continue
+
             # @added 20210513 - Feature #4068: ANALYZER_SKIP
             if ANALYZER_SKIP and not analyzer_skip_metrics:
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                start_analyzer_skip = time()
+
                 pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', metric_name, ANALYZER_SKIP)
                 del metric_matched_by
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['analyzer_skip'].append((time() - start_analyzer_skip))
+                except:
+                    operation_timings['analyzer_skip'] = [(time() - start_analyzer_skip)]
+
                 if pattern_match:
                     analyzer_skip_metrics_skipped += 1
+
+                    # @added 20230402 - Feature #4888: analyzer - load_shedding
+                    metrics_last_analysis_dict[base_name] = int(right_now)
+
+                    # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                    try:
+                        operation_timings['metric_timings'].append((time() - metric_timing_start))
+                    except:
+                        operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                    times_per_metric[base_name] = str((time() - metric_timing_start))
+
                     continue
 
             # @added 20191016 - Branch #3262: py3
@@ -1497,13 +1787,19 @@ class Analyzer(Thread):
             # Added low_priority_metric to the condition
             if low_priority_time_elasped and ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS and low_priority_metric:
                 logger.info('ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS - low_priority_time_elasped has been reached, not analysing any more metrics')
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
+
                 break
 
             # @added 20210520 - Branch #1444: thunder
             # Added to supplement the ran Report app up if analyzer is just running
             # long and over running.
             update_analyzer_up_key = False
-            right_now = int(time())
             if not last_reported_up:
                 update_analyzer_up_key = True
             else:
@@ -1518,9 +1814,9 @@ class Analyzer(Thread):
                 try:
                     self.redis_conn.setex(skyline_app, 120, right_now)
                     last_reported_up = right_now
-                except Exception as e:
+                except Exception as err:
                     logger.error('error :: Analyzer could not update the Redis %s key - %s' % (
-                        skyline_app, e))
+                        skyline_app, err))
 
             # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
             # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
@@ -1533,6 +1829,12 @@ class Analyzer(Thread):
             if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED:
                 if metric_name in analyzer_batch_queued_metrics:
                     skipped_low_priority_metrics_in_analyzer_batch_queue += 1
+                    # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                    try:
+                        operation_timings['metric_timings'].append((time() - metric_timing_start))
+                    except:
+                        operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                    times_per_metric[base_name] = str((time() - metric_timing_start))
                     continue
                 if low_priority_time_elasped:
                     last_metric_timestamp_key = 'last_timestamp.%s' % base_name
@@ -1547,21 +1849,43 @@ class Analyzer(Thread):
                             self.redis_conn.sadd(redis_set, str(data))
                             sent_to_analyzer_batch_proccessing_metrics += 1
                             low_priority_metrics_sent_to_analyzer_batch += 1
+                            # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                            try:
+                                operation_timings['metric_timings'].append((time() - metric_timing_start))
+                            except:
+                                operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                            times_per_metric[base_name] = str((time() - metric_timing_start))
                             continue
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: batch processing - failed to add %s to %s Redis set' % (
                                 str(data), redis_set))
 
+            # @added 20230331 - Feature #4886: analyzer - operation_timings
+            start_unpack = time()
+
             try:
                 raw_series = raw_assigned[i]
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
-            except Exception as e:
-                logger.error('error :: failed to unpack %s timeseries - %s' % (
-                    str(base_name), e))
+            except Exception as err:
+                # @modified 20230202 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+                #                      Feature #4838: functions.metrics.get_namespace_metric.count
+                # Only warn if there is no data, do not error
+                if 'a bytes-like object is required' in str(err) and 'NoneType' in str(err):
+                    logger.warning('warning :: failed to unpack %s timeseries - %s' % (
+                        str(base_name), err))
+                else:
+                    logger.error('error :: failed to unpack %s timeseries - %s' % (
+                        str(base_name), err))
                 timeseries = []
+
+            # @added 20230331 - Feature #4886: analyzer - operation_timings
+            try:
+                operation_timings['timeseries_unpack'].append((time() - start_unpack))
+            except:
+                operation_timings['timeseries_unpack'] = [(time() - start_unpack)]
 
             # @added 20200506 - Feature #3532: Sort all time series
             # To ensure that there are no unordered timestamps in the time
@@ -1569,8 +1893,18 @@ class Analyzer(Thread):
             # all time series by timestamp before analysis.
             original_timeseries = timeseries
             if original_timeseries:
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                start_sort = time()
+
                 timeseries = sort_timeseries(original_timeseries)
                 del original_timeseries
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['sort_timeseries'].append((time() - start_sort))
+                except:
+                    operation_timings['sort_timeseries'] = [(time() - start_sort)]
 
             last_timeseries_timestamp = 0
 
@@ -1621,11 +1955,21 @@ class Analyzer(Thread):
                             update_last_timestamp_hash_key = True
                 # if last_timeseries_timestamp > (int(spin_start) - 260):
                 if update_last_timestamp_hash_key:
+
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
+                    start_update_last_timeseries_timestamp = time()
+                    analyzer_metrics_last_timeseries_timestamp[base_name] = last_timeseries_timestamp
+#                    try:
+#                        self.redis_conn.hset('analyzer.metrics.last_timeseries_timestamp', base_name, last_timeseries_timestamp)
+#                        metrics_updated_in_last_timeseries_timestamp_hash_key_count += 1
+#                    except Exception as e:
+#                        logger.error('error :: failed to update metric timestamp in Redis analyzer.metrics.last_timeseries_timestamp hash key - %s' % e)
+
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
                     try:
-                        self.redis_conn.hset('analyzer.metrics.last_timeseries_timestamp', base_name, last_timeseries_timestamp)
-                        metrics_updated_in_last_timeseries_timestamp_hash_key_count += 1
-                    except Exception as e:
-                        logger.error('error :: failed to update metric timestamp in Redis analyzer.metrics.last_timeseries_timestamp hash key - %s' % e)
+                        operation_timings['update_last_timeseries_timestamp'].append((time() - start_update_last_timeseries_timestamp))
+                    except:
+                        operation_timings['update_last_timeseries_timestamp'] = [(time() - start_update_last_timeseries_timestamp)]
 
             # @added 20170602 - Feature #2034: analyse_derivatives
             # In order to convert monotonic, incrementing metrics to a deriative
@@ -2036,10 +2380,18 @@ class Analyzer(Thread):
                     unpacker = Unpacker(use_list=False)
                     unpacker.feed(raw_series)
                     updated_timeseries = list(unpacker)
-                except Exception as e:
-                    logger.error('error :: failed to unpack timeseries for %s - %s' % (
-                        metric_name, e))
+                except Exception as err:
+                    # @modified 20230202 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+                    #                      Feature #4838: functions.metrics.get_namespace_metric.count
+                    # Only warn if there is no data, do not error
+                    if 'a bytes-like object is required' in str(err) and 'NoneType' in str(err):
+                        logger.warning('warning :: failed to unpack timeseries for %s - %s' % (
+                            metric_name, err))
+                    else:
+                        logger.error('error :: failed to unpack timeseries for %s - %s' % (
+                            metric_name, err))
                     updated_timeseries = []
+
                 if updated_timeseries:
                     logger.info('Using updated Redis time series for %s' % (metric_name))
 
@@ -2053,6 +2405,9 @@ class Analyzer(Thread):
                         del original_updated_timeseries
 
                     timeseries = updated_timeseries
+
+            # @added 20230331 - Feature #4886: analyzer - operation_timings
+            start_derivative_check = time()
 
             # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
             # First check if it has its own Redis z.derivative_metric key
@@ -2069,10 +2424,30 @@ class Analyzer(Thread):
             # batch_processing so this was moved out of the below
             # if unknown_deriv_status block
             last_derivative_metric_key = None
+
+            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+            # Do not check each key individually
+            # try:
+            #     last_derivative_metric_key = self.redis_conn_decoded.get(derivative_metric_key)
+            # except Exception as e:
+            #     logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+
+            # @added 20230401 - Feature #4886: analyzer - operation_timings
+            # Checking each metric for a z.derivative_metric. was taking from around
+            # 4 seconds to up to 40 seconds when loading per process when
+            # operation_timings were added to monitor and performance tune each op.
+            # Get all z.derivative_metric. once, testing was done with scan_iter
+            # which took up to 4.4 seconds to list keys and keys which took 0.39
+            # seconds.
+            if derivative_metric_key in all_z_derivative_keys:
+                last_derivative_metric_key = True
+
+            # @added 20230401 - Feature #4886: analyzer - operation_timings
             try:
-                last_derivative_metric_key = self.redis_conn_decoded.get(derivative_metric_key)
-            except Exception as e:
-                logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+                operation_timings['check_last_derivative_metric_key'].append((time() - start_derivative_check))
+            except:
+                operation_timings['check_last_derivative_metric_key'] = [(time() - start_derivative_check)]
+            start_non_derivative_check = time()
 
             # @added 20220414 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
             #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -2092,6 +2467,12 @@ class Analyzer(Thread):
                     del derivative_metrics[metric_name]
                 except:
                     pass
+
+            # @added 20230401 - Feature #4886: analyzer - operation_timings
+            try:
+                operation_timings['check_in_non_derivative_metrics'].append((time() - start_non_derivative_check))
+            except:
+                operation_timings['check_in_non_derivative_metrics'] = [(time() - start_non_derivative_check)]
 
             if identified_non_derivative_metric and last_derivative_metric_key:
                 logger.info('defined in user_non_derivative_metrics removing last_derivative_metric_key - %s' % derivative_metric_key)
@@ -2115,10 +2496,13 @@ class Analyzer(Thread):
                     logger.error('error :: could not remove metric from Redis set: %s' % e)
             if identified_non_derivative_metric and metric_name not in non_derivative_metrics:
                 non_derivative_metrics.append(metric_name)
-                try:
-                    self.redis_conn_decoded.sadd('non_derivative_metrics', metric_name)
-                except Exception as e:
-                    logger.error('error :: could not add metric to Redis set: %s' % e)
+                # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                # Only sadd once
+                # try:
+                #     self.redis_conn_decoded.sadd('non_derivative_metrics', metric_name)
+                # except Exception as e:
+                #     logger.error('error :: could not add metric to Redis set: %s' % e)
+                metrics_added_to_non_derivative_metrics.append(metric_name)
 
             if last_derivative_metric_key:
                 known_derivative_metric = True
@@ -2141,6 +2525,10 @@ class Analyzer(Thread):
                 known_derivative_metric = False
 
             if unknown_deriv_status:
+  
+                # @added 20230401 - Feature #4886: analyzer - operation_timings
+                start_unknown_deriv_status = time()
+  
                 # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
                 # @modified 20200529 - Feature #3480: batch_processing
                 #                      Bug #2050: analyse_derivatives - change in monotonicity
@@ -2157,7 +2545,16 @@ class Analyzer(Thread):
                 skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
                 is_strictly_increasing_monotonically = False
                 if not skip_derivative:
+                    # @added 20230401 - Feature #4886: analyzer - operation_timings
+                    start_is_strictly_increasing_monotonically = time()
+
                     is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+
+                    # @added 20230401 - Feature #4886: analyzer - operation_timings
+                    try:
+                        operation_timings['is_strictly_increasing_monotonically'].append((time() - start_is_strictly_increasing_monotonically))
+                    except:
+                        operation_timings['is_strictly_increasing_monotonically'] = [(time() - start_is_strictly_increasing_monotonically)]
 
                     # @added 20201111 - Feature #3480: batch_processing
                     #                   Bug #2050: analyse_derivatives - change in monotonicity
@@ -2172,6 +2569,10 @@ class Analyzer(Thread):
                     # be classified multiple times ensures it is not incorrectly
                     # classified as monotonic.
                     if not last_derivative_metric_key:
+
+                        # @added 20230401 - Feature #4886: analyzer - operation_timings
+                        start_zz_derivative = time()
+
                         running_derivative_metric_key = 'zz.derivative_metric.%s' % str(base_name)
 
                         # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
@@ -2186,10 +2587,24 @@ class Analyzer(Thread):
                             # Handle key not existing and exception on last_key_value
                             # if None
                             # last_key_value = self.redis_conn_decoded.get(running_derivative_metric_key)
-                            last_key_value_data = self.redis_conn_decoded.get(running_derivative_metric_key)
-                        except Exception as e:
+                            # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                            # Just check in the key exists
+                            # last_key_value_data = self.redis_conn_decoded.get(running_derivative_metric_key)
+                            if running_derivative_metric_key in all_zz_derivative_keys:
+                                last_key_value_data = True
+                        except Exception as err:
                             logger.error('error :: could not query Redis for running_derivative_metric_key - %s: %s' % (
-                                running_derivative_metric_key, e))
+                                running_derivative_metric_key, err))
+
+                        # @added 20230401 - Feature #4886: analyzer - operation_timings
+                        # Only check if the key exists
+                        if last_key_value_data:
+                            try:
+                                last_key_value_data = self.redis_conn_decoded.get(running_derivative_metric_key)
+                            except Exception as err:
+                                logger.error('error :: could not query Redis for running_derivative_metric_key - %s: %s' % (
+                                    running_derivative_metric_key, err))
+                                last_key_value_data = None
 
                         # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
                         # Handle key not existing and exception on last_key_value
@@ -2266,6 +2681,12 @@ class Analyzer(Thread):
                             # is_strictly_increasing_monotonically = False
                             if base_name not in last_known_batch_metrics:
                                 is_strictly_increasing_monotonically = False
+
+                        # @added 20230401 - Feature #4886: analyzer - operation_timings
+                        try:
+                            operation_timings['zz_derivative'].append((time() - start_zz_derivative))
+                        except:
+                            operation_timings['zz_derivative'] = [(time() - start_zz_derivative)]
                 else:
                     is_strictly_increasing_monotonically = False
 
@@ -2293,7 +2714,9 @@ class Analyzer(Thread):
                 if is_strictly_increasing_monotonically:
                     known_derivative_metric = True
                     try:
-                        self.redis_conn.sadd('derivative_metrics', metric_name)
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # Only sadd once
+                        # self.redis_conn.sadd('derivative_metrics', metric_name)
                         # @added 20201111 - Feature #3480: batch_processing
                         #                   Bug #2050: analyse_derivatives - change in monotonicity
                         metrics_added_to_derivative_metrics.append(metric_name)
@@ -2301,26 +2724,31 @@ class Analyzer(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add metric to Redis derivative_metrics set')
 
-                    # @added 20201111 - Feature #3480: batch_processing
-                    #                   Bug #2050: analyse_derivatives - change in monotonicity
-                    # Always remove the metric from the non_derivative_metrics
-                    # Redis set
-                    try:
-                        self.redis_conn.srem('non_derivative_metrics', metric_name)
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to add metric to Redis derivative_metrics set - %s' % e)
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # Only manage sets once
+                    only_manage_sets_once = True
+                    if not only_manage_sets_once:
+                        # @added 20201111 - Feature #3480: batch_processing
+                        #                   Bug #2050: analyse_derivatives - change in monotonicity
+                        # Always remove the metric from the non_derivative_metrics
+                        # Redis set
+                        try:
+                            self.redis_conn.srem('non_derivative_metrics', metric_name)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add metric to Redis derivative_metrics set - %s' % e)
 
-                    try:
-                        self.redis_conn.sadd('new_derivative_metrics', metric_name)
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to add metric to Redis new_derivative_metrics set - %s' % e)
+                        try:
+                            self.redis_conn.sadd('new_derivative_metrics', metric_name)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add metric to Redis new_derivative_metrics set - %s' % e)
+
                     # @added 20200529 - Feature #3480: batch_processing
                     #                   Bug #2050: analyse_derivatives - change in monotonicity
                     # Alway set the derivative_metric_key
                     # @modified 20201111 - Feature #3480: batch_processing
-                    #                   Bug #2050: analyse_derivatives - change in monotonicity
+                    #                      Bug #2050: analyse_derivatives - change in monotonicity
                     # Only set the key once
                     if not last_derivative_metric_key:
                         try:
@@ -2334,23 +2762,46 @@ class Analyzer(Thread):
                             logger.error('error :: could not set Redis derivative_metric key: %s' % e)
                 else:
                     try:
-                        self.redis_conn.sadd('non_derivative_metrics', metric_name)
+                        # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                        # Only sadd once
+                        # self.redis_conn.sadd('non_derivative_metrics', metric_name)
                         # @added 20201111 - Feature #3480: batch_processing
                         #                   Bug #2050: analyse_derivatives - change in monotonicity
                         metrics_added_to_non_derivative_metrics.append(metric_name)
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add metric to Redis non_derivative_metrics set - %s' % e)
-                    try:
-                        self.redis_conn.sadd('new_non_derivative_metrics', metric_name)
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to add metric to Redis new_non_derivative_metrics set - %s' % e)
+
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # Only manage sets once
+                    only_manage_sets_once = True
+                    if not only_manage_sets_once:
+                        try:
+                            self.redis_conn.sadd('new_non_derivative_metrics', metric_name)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add metric to Redis new_non_derivative_metrics set - %s' % e)
+
+                # @added 20230401 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['unknown_deriv_status'].append((time() - start_unknown_deriv_status))
+                except:
+                    operation_timings['unknown_deriv_status'] = [(time() - start_unknown_deriv_status)]
+
+            # @added 20230331 - Feature #4886: analyzer - operation_timings
+            try:
+                operation_timings['derivative_check'].append((time() - start_derivative_check))
+            except:
+                operation_timings['derivative_check'] = [(time() - start_derivative_check)]
 
             # @added 20200411 - Feature #3480: batch_processing
             batch_metric = False
             check_for_airgaps_only = False
             if BATCH_PROCESSING:
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                start_batch_check = time()
+
                 # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
                 #                      Feature #3480: batch_processing
                 #                      Feature #3486: analyzer_batch
@@ -2483,6 +2934,13 @@ class Analyzer(Thread):
                                     if BATCH_PROCESSING_DEBUG:
                                         logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to process at all skipping, OK' % (
                                             base_name))
+                                    # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                                    try:
+                                        operation_timings['metric_timings'].append((time() - metric_timing_start))
+                                    except:
+                                        operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                                    times_per_metric[base_name] = str((time() - metric_timing_start))
+
                                     continue
                                 else:
                                     if DO_NOT_ALERT_ON_STALE_METRICS:
@@ -2506,6 +2964,16 @@ class Analyzer(Thread):
                                             if BATCH_PROCESSING_DEBUG:
                                                 logger.info('batch processing - %s is a DO_NOT_ALERT_ON_STALE_METRICS namespace and is not set to check for airgaps, no need to process at all as does not need to be identified as stale, skipping normal processing.' % (
                                                     base_name))
+
+                                            # @added 20230402 - Feature #4888: analyzer - load_shedding
+                                            metrics_last_analysis_dict[base_name] = int(right_now)
+                                            # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                                            try:
+                                                operation_timings['metric_timings'].append((time() - metric_timing_start))
+                                            except:
+                                                operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                                            times_per_metric[base_name] = str((time() - metric_timing_start))
+
                                             continue
                                     # @modified 20200430 - Feature #3480: batch_processing
                                     # Tidy up and reduce logging
@@ -2548,6 +3016,16 @@ class Analyzer(Thread):
                                     # Wrapped in if not check_metric_for_airgaps
                                     if not check_metric_for_airgaps:
                                         if enable_analyzer_batch_processing:
+
+                                            # @added 20230402 - Feature #4888: analyzer - load_shedding
+                                            metrics_last_analysis_dict[base_name] = int(right_now)
+                                            # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                                            try:
+                                                operation_timings['metric_timings'].append((time() - metric_timing_start))
+                                            except:
+                                                operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                                            times_per_metric[base_name] = str((time() - metric_timing_start))
+
                                             continue
                                     else:
                                         # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
@@ -2566,6 +3044,13 @@ class Analyzer(Thread):
                                     logger.info('batch processing - the penultimate_timeseries_timestamp is the same as second last timestamp from current Redis time series data for %s, not batch processing, continuing as normal' % (
                                         base_name))
 
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['batch_check'].append((time() - start_batch_check))
+                except:
+                    operation_timings['batch_check'] = [(time() - start_batch_check)]
+
+
             # @added 20220414 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
             #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
             if identified_non_derivative_metric:
@@ -2577,6 +3062,10 @@ class Analyzer(Thread):
             # data points
             # if known_derivative_metric:
             if known_derivative_metric and timeseries:
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                start_nonNegativeDerivative = time()
+
                 if len(timeseries) > 3:
                     try:
                         derivative_timeseries = nonNegativeDerivative(timeseries)
@@ -2587,15 +3076,28 @@ class Analyzer(Thread):
                 else:
                     logger.info('cannot run nonNegativeDerivative on %s timeseries as it has less than 4 data points' % base_name)
 
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['nonNegativeDerivative'].append((time() - start_nonNegativeDerivative))
+                except:
+                    operation_timings['nonNegativeDerivative'] = [(time() - start_nonNegativeDerivative)]
+
             # @added 20220407 - Feature #4518: settings - LAST_KNOWN_VALUE_NAMESPACES
             #                   Feature #4520: settings - ZERO_FILL_NAMESPACES
             if base_name in zero_fill_metrics:
                 if not known_derivative_metric:
+                    start_zero_fill = time()
                     try:
                         timeseries = full_duration_timeseries_fill(self, skyline_app, base_name, timeseries, 'zero')
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: full_duration_timeseries_fill failed - %s' % err)
+
+                    # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                    try:
+                        operation_timings['zero_fill'].append((time() - start_zero_fill))
+                    except:
+                        operation_timings['zero_fill'] = [(time() - start_zero_fill)]
                 else:
                     # Fix the badly defined metric if a metric has been defined
                     # as a zero_fill metric but is a derivative_metric apply
@@ -2604,11 +3106,18 @@ class Analyzer(Thread):
                     # effect
                     last_known_value_metrics.append(base_name)
             if base_name in last_known_value_metrics:
+                start_last_known_value_fill = time()
                 try:
                     timeseries = full_duration_timeseries_fill(self, skyline_app, base_name, timeseries, 'last_known_value')
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: full_duration_timeseries_fill failed - %s' % err)
+
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['last_known_value_fill'].append((time() - start_last_known_value_fill))
+                except:
+                    operation_timings['last_known_value_fill'] = [(time() - start_last_known_value_fill)]
 
             # @added 20180903 - Feature #2580: illuminance
             #                   Feature #1986: flux
@@ -2639,6 +3148,10 @@ class Analyzer(Thread):
             # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
             analyzer_check_last_last_timestamp_new_timestamp = True
             if ANALYZER_CHECK_LAST_TIMESTAMP and metrics_last_timestamp_dict and last_timeseries_timestamp:
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                start_check_last_timestamp = time()
+
                 try:
                     last_analyzed_timestamp = metrics_last_timestamp_dict[base_name]
                 except:
@@ -2659,6 +3172,12 @@ class Analyzer(Thread):
                     except:
                         pass
 
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['check_last_timestamp'].append((time() - start_check_last_timestamp))
+                except:
+                    operation_timings['check_last_timestamp'] = [(time() - start_check_last_timestamp)]
+
             try:
                 # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Determine if any metrcs have negatives values some they can be
@@ -2666,11 +3185,21 @@ class Analyzer(Thread):
                 run_negatives_present = False
                 enabled_check_for_negatives = False
                 if settings.IONOSPHERE_ENABLED and enabled_check_for_negatives:
+
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
+                    start_check_negative_metric = time()
+
                     run_negatives_present = True
                     known_negative_metric, known_negative_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_name, KNOWN_NEGATIVE_METRICS)
                     del known_negative_metric_matched_by
                     if known_negative_metric:
                         run_negatives_present = False
+
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
+                    try:
+                        operation_timings['check_negative_metric'].append((time() - start_check_negative_metric))
+                    except:
+                        operation_timings['check_negative_metric'] = [(time() - start_check_negative_metric)]
 
                 # @modified 20200117 - Feature #3400: Identify air gaps in the metric data
                 # Also pass the airgapped_metrics list so that it is only got
@@ -2725,12 +3254,16 @@ class Analyzer(Thread):
                     if not analyzer_check_last_last_timestamp_new_timestamp:
                         check_for_anomalous = False
 
+                        # @added 20230402 - Feature #4888: analyzer - load_shedding
+                        metrics_last_analysis_dict[base_name] = int(right_now)
+
                 # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
                 if ANALYZER_MAD_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
                     try:
                         # @modified 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
                         # if low_priority_metric:
                         if low_priority_metric and check_for_anomalous:
+                            mad_timing_start = time()
                             mad_data = [item[1] for item in timeseries[-ANALYZER_MAD_LOW_PRIORITY_METRICS:]]
                             # @added 20201020 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
                             # Handle very sparsely populated metrics with only a
@@ -2755,6 +3288,12 @@ class Analyzer(Thread):
 
                                 else:
                                     low_priority_metrics_analysed_due_to_mad_trigger += 1
+
+                            # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                            try:
+                                operation_timings['mad_timings'].append((time() - mad_timing_start))
+                            except:
+                                operation_timings['mad_timings'] = [(time() - mad_timing_start)]
                     except:
                         check_for_anomalous = True
                         if not mad_error_logged:
@@ -2774,10 +3313,18 @@ class Analyzer(Thread):
                 # @modified 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
                 # Added custom_stale_metrics_dict
                 if check_for_anomalous:
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
+                    start_run_selected_algorithm = time()
                     anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only, custom_stale_metrics_dict)
                     run_selected_algorithm_count += 1
                     # @added 20220420 - Feature #4530: namespace.analysed_events
                     analysed_metrics.append(base_name)
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
+                    run_selected_algorithm_timings.append(time() - start_run_selected_algorithm)
+                    try:
+                        operation_timings['run_selected_algorithms'].append((time() - start_run_selected_algorithm))
+                    except:
+                        operation_timings['run_selected_algorithms'] = [(time() - start_run_selected_algorithm)]
                 else:
                     # Low priority metric not analysed
                     anomalous = False
@@ -2807,15 +3354,22 @@ class Analyzer(Thread):
                 if LOCAL_DEBUG:
                     logger.debug('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
 
+                # @added 20230402 - Feature #4888: analyzer - load_shedding
+                metrics_last_analysis_dict[base_name] = int(right_now)
+
                 # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
                 if ANALYZER_CHECK_LAST_TIMESTAMP and check_for_anomalous:
-                    try:
-                        self.redis_conn.hset(
-                            metrics_last_timestamp_hash_key, base_name,
-                            int_metric_timestamp)
-                        metrics_added_to_last_timestamp_hash_key.append(base_name)
-                    except:
-                        pass
+                    # @modified 20230331 - Feature #4886: analyzer - operation_timings
+                    # Only hset once
+                    # try:
+                    #     self.redis_conn.hset(
+                    #         metrics_last_timestamp_hash_key, base_name,
+                    #         int_metric_timestamp)
+                    #     metrics_added_to_last_timestamp_hash_key.append(base_name)
+                    # except:
+                    #     pass
+                    new_metrics_last_timestamp_dict[base_name] = int_metric_timestamp
+                    metrics_added_to_last_timestamp_hash_key.append(base_name)
 
                 # @added 20200608 - Feature #3566: custom_algorithms
                 # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
@@ -2867,6 +3421,48 @@ class Analyzer(Thread):
                     waterfall_panorama_data_added_at
                 ]
 
+                # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+                if ensemble.count(True) > 0:
+                    triggered_algorithms = []
+                    for index, value in enumerate(ensemble):
+                        if value:
+                            algorithm = algorithms_run[index]
+                            try:
+                                algorithm_id = int(algorithms[algorithm])
+                            except:
+                                algorithm_id = 0
+                            triggered_algorithms.append(algorithm_id)
+                    metric_id = 0
+
+                    # @added 20230401 - Feature #4886: analyzer - operation_timings
+                    start_get_metric_id_from_base_name = time()
+                    try:
+                        metric_id = int(aet_metrics_manager_metric_names_with_ids[base_name])
+                    except:
+                        metric_id = 0
+
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # Only use function is not found in aet_metrics_manager_metric_names_with_ids
+                    if not metric_id:
+                        try:
+                            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                        except:
+                            errors.append([base_name, 'get_metric_id_from_base_name failed', str(err)])
+                            metric_id = 0
+                    if metric_id:
+                        try:
+                            illuminance_all_dict[str(metric_id)] = {
+                                't': int_metric_timestamp,
+                                'v': float(datapoint),
+                                'a': triggered_algorithms}
+                        except Exception as err:
+                            errors.append([base_name, 'failed to add illuminance_all_dict', str(err)])
+                    # @added 20230331 - Feature #4886: analyzer - operation_timings
+                    try:
+                        operation_timings['get_metric_id_from_base_name'].append((time() - start_get_metric_id_from_base_name))
+                    except:
+                        operation_timings['get_metric_id_from_base_name'] = [(time() - start_get_metric_id_from_base_name)]
+
                 # @added 20200214 - Bug #3448: Repeated airgapped_metrics
                 #                   Feature #3400: Identify air gaps in the metric data
                 # If the metric Redis key was updated with new data added during
@@ -2877,6 +3473,9 @@ class Analyzer(Thread):
                 if update_new_data and anomalous:
                     logger.info('metric %s - anomalous - %s, however not honoring this result as the sorted, deduplicated key data was appended with new data which may have been unordered' % (str(metric_name), str(anomalous)))
                     anomalous = False
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                start_post_analysis = time()
 
                 # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
                 #                   Branch #3262: py3
@@ -2905,7 +3504,10 @@ class Analyzer(Thread):
                                     base_name = metric_name
 
                                 data = [base_name, int(metric_timestamp)]
-                                self.redis_conn.sadd(redis_set, str(data))
+                                # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                                # Only sadd once
+                                # self.redis_conn.sadd(redis_set, str(data))
+                                analyzer_not_anomalous_metrics.append(str(data))
                             except Exception as e:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: failed to add %s to Redis set %s: %s' % (
@@ -3661,6 +4263,19 @@ class Analyzer(Thread):
                             logger.error('error :: failed to add %s to Redis set %s' % (
                                 str(data), str(redis_set)))
 
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                try:
+                    operation_timings['post_analysis'].append((time() - start_post_analysis))
+                except:
+                    operation_timings['post_analysis'] = [(time() - start_post_analysis)]
+
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
+
             # It could have been deleted by the Roomba
             except TypeError:
                 # @added 20200430 - Feature #3480: batch_processing
@@ -3690,10 +4305,17 @@ class Analyzer(Thread):
             # Added Redis sets for Boring, TooShort and Stale
             except TooShort:
                 exceptions['TooShort'] += 1
-                try:
-                    self.redis_conn.sadd('analyzer.too_short', base_name)
-                except:
-                    redis_set_errors += 1
+                # @added 20230401 - Feature #4886: analyzer - operation_timings
+                # Only sadd once
+                identified_tooshort_metrics.append(base_name)
+                # try:
+                #     self.redis_conn.sadd('analyzer.too_short', base_name)
+                # except:
+                #     redis_set_errors += 1
+
+                # @added 20230402 - Feature #4888: analyzer - load_shedding
+                metrics_last_analysis_dict[base_name] = int(right_now)
+
                 # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
                 #                   Feature #3480: batch_processing
                 #                   Feature #3486: analyzer_batch
@@ -3717,12 +4339,26 @@ class Analyzer(Thread):
                                     last_metric_timestamp_key, str(int_metric_timestamp)))
                         except:
                             logger.error('error :: batch processing - failed to set Redis key %s, even though it is too short' % last_metric_timestamp_key)
+
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
             except Stale:
                 exceptions['Stale'] += 1
-                try:
-                    self.redis_conn.sadd('analyzer.stale', base_name)
-                except:
-                    redis_set_errors += 1
+                # @added 20230401 - Feature #4886: analyzer - operation_timings
+                # Only sadd once
+                identified_stale_metrics.append(base_name)
+                # try:
+                #     self.redis_conn.sadd('analyzer.stale', base_name)
+                # except:
+                #     redis_set_errors += 1
+
+                # @added 20230402 - Feature #4888: analyzer - load_shedding
+                metrics_last_analysis_dict[base_name] = int(right_now)
+
                 # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
                 #                   Feature #3480: batch_processing
                 #                   Feature #3486: analyzer_batch
@@ -3740,12 +4376,28 @@ class Analyzer(Thread):
                                     last_metric_timestamp_key, str(int_metric_timestamp)))
                         except:
                             logger.error('error :: batch processing - failed to set Redis key %s, even though it is stale' % last_metric_timestamp_key)
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
             except Boring:
                 exceptions['Boring'] += 1
-                try:
-                    self.redis_conn.sadd('analyzer.boring', base_name)
-                except:
-                    redis_set_errors += 1
+                # @added 20230401 - Feature #4886: analyzer - operation_timings
+                # Only sadd once
+                identified_boring_metrics.append(base_name)
+                # try:
+                #     self.redis_conn.sadd('analyzer.boring', base_name)
+                # except:
+                #     redis_set_errors += 1
+
+                # @added 20230331 - Feature #4886: analyzer - operation_timings
+                boring_timings.append(time() - start_run_selected_algorithm)
+
+                # @added 20230402 - Feature #4888: analyzer - load_shedding
+                metrics_last_analysis_dict[base_name] = int(right_now)
+
                 # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
                 #                   Feature #3480: batch_processing
                 #                   Feature #3486: analyzer_batch
@@ -3763,9 +4415,21 @@ class Analyzer(Thread):
                                     last_metric_timestamp_key, str(int_metric_timestamp)))
                         except:
                             logger.error('error :: batch processing - failed to set Redis key %s, even though it is boring' % last_metric_timestamp_key)
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
             except:
                 exceptions['Other'] += 1
                 logger.error(traceback.format_exc())
+                # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+                try:
+                    operation_timings['metric_timings'].append((time() - metric_timing_start))
+                except:
+                    operation_timings['metric_timings'] = [(time() - metric_timing_start)]
+                times_per_metric[base_name] = str((time() - metric_timing_start))
 
         # @added 20200430 - Feature #3480: batch_processing
         # Tidy up and reduce logging, consolidate logging with counts
@@ -3842,6 +4506,70 @@ class Analyzer(Thread):
         logger.info('%s metrics run through run_selected_algorithm' % (
             str(run_selected_algorithm_count)))
 
+        # @added 20230401 - Feature #4886: analyzer - operation_timings
+        # Only sadd once for unknown_deriv_metric functions
+        if metrics_added_to_derivative_metrics:
+            try:
+                self.redis_conn.sadd('derivative_metrics', *set(metrics_added_to_derivative_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add metrics_added_to_derivative_metrics to Redis derivative_metrics set - %s' % err)
+            try:
+                self.redis_conn.srem('non_derivative_metrics', *set(metrics_added_to_derivative_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add metrics_added_to_derivative_metrics to Redis derivative_metrics set - %s' % err)
+            try:
+                self.redis_conn.sadd('new_derivative_metrics', *set(metrics_added_to_derivative_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add metrics_added_to_derivative_metrics to Redis new_derivative_metrics set - %s' % err)
+        if metrics_added_to_non_derivative_metrics:
+            try:
+                self.redis_conn.sadd('non_derivative_metrics', *set(metrics_added_to_non_derivative_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add metrics_added_to_non_derivative_metrics to Redis non_derivative_metrics set - %s' % err)
+            try:
+                self.redis_conn.sadd('new_non_derivative_metrics', *set(metrics_added_to_non_derivative_metrics))
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add metrics_added_to_non_derivative_metrics to Redis new_non_derivative_metrics set - %s' % e)
+        if identified_boring_metrics:
+            try:
+                self.redis_conn.sadd('analyzer.boring', *set(identified_boring_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add identified_boring_metrics to analyzer.boring set - %s' % err)
+        if identified_tooshort_metrics:
+            try:
+                self.redis_conn.sadd('analyzer.too_short', *set(identified_tooshort_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add identified_tooshort_metrics to analyzer.too_short set - %s' % err)
+        if identified_stale_metrics:
+            try:
+                self.redis_conn.sadd('analyzer.stale', *set(identified_stale_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add identified_stale_metrics to analyzer.stale set - %s' % err)
+        if analyzer_not_anomalous_metrics:
+            try:
+                self.redis_conn.sadd('analyzer.not_anomalous_metrics', *set(analyzer_not_anomalous_metrics))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add identified_stale_metrics to analyzer.not_anomalous_metrics set - %s' % err)
+
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        logger.info('run_selected_algorithm_timings: %s' % (
+            str(sum(run_selected_algorithm_timings))))
+        logger.info('boring_timings: %s, boring_count: %s' % (
+            str(sum(boring_timings)), str(len(boring_timings))))
+        logger.info('analysis loop took %s seconds' % (
+            str(time() - start_analysis_loop)))
+        operation_timings['analysis_loop'] = [(time() - start_analysis_loop)]
+        start_namespace_analysed_events = time()
+
         # @added 20220420 - Feature #4530: namespace.analysed_events
         namespace_analysed = defaultdict(int)
         for base_name in analysed_metrics:
@@ -3863,6 +4591,12 @@ class Analyzer(Thread):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to set expire %s Redis hash - %s' % (
                 namespace_analysed_events_hash, err))
+
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        try:
+            operation_timings['namespace_analysed_events'].append((time() - start_namespace_analysed_events))
+        except:
+            operation_timings['namespace_analysed_events'] = [(time() - start_namespace_analysed_events)]
 
         # @added 20201111 - Feature #3480: batch_processing
         #                   Bug #2050: analyse_derivatives - change in monotonicity
@@ -3950,6 +4684,19 @@ class Analyzer(Thread):
             logger.info('illuminance Redis hash now has %s entries' % (
                 str(len(current_illuminance_dict))))
 
+        # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+        if len(illuminance_all_dict) > 0:
+            logger.info('calling add_illuminance_entries (all) with %s entries to add' % (
+                str(len(illuminance_all_dict))))
+            current_illuminance_all_dict = {}
+            try:
+                current_illuminance_all_dict = add_illuminance_entries(self, skyline_app, int(spin_start), illuminance_all_dict)
+            except Exception as err:
+                logger.error('error :: add_illuminance_entries (all) failed - %s' % (
+                    err))
+            logger.info('illuminance_all Redis hash now has %s entries' % (
+                str(len(current_illuminance_all_dict))))
+
         # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
         # This is not full analysis as the metrics are not checked if they are
         # mirage metrics, airgaps, flux.filled, etc, etc.  They are simply
@@ -4013,6 +4760,70 @@ class Analyzer(Thread):
                     str(snab_load_test_anomalous), str(snab_load_test_not_anomalous)))
                 logger.info('SNAB_LOAD_TEST_ANALYZER - load testing completed on %s load test metrics in %.2f seconds' % (
                     str(snab_load_tests_done), snab_load_test_runtime))
+
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        # Update once
+        if analyzer_metrics_last_timeseries_timestamp:
+            try:
+                self.redis_conn.hset('analyzer.metrics.last_timeseries_timestamp', mapping=analyzer_metrics_last_timeseries_timestamp)
+            except Exception as err:
+                logger.error('error :: failed to update metric timestamp in Redis analyzer.metrics.last_timeseries_timestamp hash key - %s' % err)
+        if new_metrics_last_timestamp_dict:
+            try:
+                self.redis_conn.hset(metrics_last_timestamp_hash_key, mapping=new_metrics_last_timestamp_dict)
+            except Exception as err:
+                logger.error('error :: failed to update metric timestamp in Redis analyzer.metrics.last_analyzed_timestamp hash key - %s' % err)
+
+        # @added 20230402 - Feature #4888: analyzer - load_shedding
+        if not activating_load_shedding and not load_shedding_active:
+            right_now = int(time())
+            if right_now >= (int(spin_start) + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 10)):
+                activating_load_shedding = True
+                logger.info('load shedding - upper limit of runtime so updating analysis timestamps in Redis analyzer.metrics.last_analysis hash key')
+        if load_shedding_active or activating_load_shedding or load_shedding_hash_exists:
+            if metrics_last_analysis_dict:
+                try:
+                    self.redis_conn.hset(metrics_last_analysis_hash_key, mapping=metrics_last_analysis_dict)
+                    logger.info('load shedding - updated %s analysis timestamps in Redis analyzer.metrics.last_analysis hash key' % (
+                        str(len(metrics_last_analysis_dict))))
+                    if load_shedding_active:
+                        # The load_shedding hash only has the expiry set if load
+                        # shedding is active, not if the hash is only being updated.
+                        self.redis_conn.expire(metrics_last_analysis_hash_key, 300)
+                        logger.info('load_shedding_active - set expire to 300 on Redis analyzer.metrics.last_analysis hash key')
+                except Exception as err:
+                    logger.error('error :: failed to update analysis timestamp in Redis analyzer.metrics.last_analysis hash key - %s' % err)
+                try:
+                    key_ttl = self.redis_conn_decoded.ttl('analyzer.metrics.last_analysis_timestamp')
+                    if key_ttl == -1:
+                        self.redis_conn_decoded.expire('analyzer.metrics.last_analysis_timestamp', 300)
+                        logger.info('set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key to 300')
+                except Exception as err:
+                    logger.error('error :: failed to set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key - %s' % err)
+
+        # @added 20230331 - Feature #4886: analyzer - operation_timings
+        try:
+            operation_timings_sums = {}
+            operation_timings_sums_totals = []
+            for key in list(operation_timings.keys()):
+                sum_time = sum(operation_timings[key])
+                operation_timings_sums_totals.append(sum_time)
+                operation_timings_sums[key] = {'sum': sum_time, 'count': len(operation_timings[key])}
+            operation_timings_sums['total'] = {'sum': sum(operation_timings_sums_totals)}
+            logger.info('operation_timings_sums: %s' % (
+                str(operation_timings_sums)))
+        except Exception as err:
+            logger.error('error :: calculating operation_timings_sums - %s' % err)
+
+        # @added 20230609 - Bug #4940: Inefficient full_duration_timeseries_fill - last_known_value
+        if LOCAL_DEBUG and times_per_metric:
+            try:
+                self.redis_conn.hset('analyzer.analysis_times_per_metric', mapping=times_per_metric)
+                logger.info('analyzer.analysis_times_per_metric updated with %s metric analysis times' % (
+                    str(len(times_per_metric))))
+                self.redis_conn.expire('analyzer.analysis_times_per_metric', 86400)
+            except Exception as err:
+                logger.error('error :: failed to update analyzer.analysis_times_per_metric Redis hash key - %s' % err)
 
         spin_end = time() - spin_start
         logger.info('spin_process took %.2f seconds' % spin_end)
@@ -4155,12 +4966,23 @@ class Analyzer(Thread):
             algorithms_to_time = list(settings.ALGORITHMS)
             # @added 20200603 - Feature #3566: custom_algorithms
             if CUSTOM_ALGORITHMS:
-                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                for custom_algorithm in CUSTOM_ALGORITHMS:
                     algorithms_to_time.append(custom_algorithm)
+
             logger.info('%s :: algorithms_to_time - %s' % (skyline_app, str(algorithms_to_time)))
 
         if LOCAL_DEBUG:
             logger.debug('debug :: Memory usage in run after algorithms_to_time: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+        #                   Feature #4702: numba optimisations
+        # Use start up key and allow numba cache files to be created
+        start_key = '%s.starting' % skyline_app
+        try:
+            self.redis_conn.setex(start_key, 180, int(now))
+        except Exception as err:
+            logger.error('error :: Analyzer could not create Redis %s key - %s' % (
+                start_key, err))
 
         while 1:
             now = time()
@@ -4196,10 +5018,10 @@ class Analyzer(Thread):
                 # @modified 20210524 - Branch #1444: thunder
                 # Report app AND Redis as up
                 # self.redis_conn.setex(skyline_app, 120, now)
-                redis_is_up = self.redis_conn.setex(skyline_app, 120, now)
+                redis_is_up = self.redis_conn.setex(skyline_app, 120, int(now))
                 if redis_is_up:
                     try:
-                        self.redis_conn.setex('redis', 120, now)
+                        self.redis_conn.setex('redis', 120, int(now))
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: could not update the Redis redis key - %s' % (
@@ -4781,6 +5603,66 @@ class Analyzer(Thread):
                 logger.info('ANALYZER_SKIP set shuffling unique_metrics')
                 shuffle(unique_metrics)
 
+            # @added 20221014 - Bug #4696: analyzer - anomalous metrics sets not flushing
+            #                   Task #4614: Support labelled metrics
+            #                   Task #3034: Reduce multiprocessing Manager list usage
+            # Reset anomalous_metrics counters/sets
+            # With the addition of labelled_metrics there are times when analyzer
+            # is not getting through a run and the process is being terminated
+            # due to runtime. Further to this the analyzer Redis key is not
+            # updated and therefore external checks can restart the process. In
+            # these instances the analyzer.anomalous_metrics and
+            # analyzer.all_anomalous_metrics Redis sets are not being reset and
+            # the alerting process runs through these all again and gets into
+            # the state where the process is restarted repetitively and more and
+            # more entires are added to Redis set. Prior to
+            # Task #3034: Reduce multiprocessing Manager list usage, this was
+            # never an issue as the multiprocessing lists would be recreated on
+            # a restart.
+            anomalous_metrics_count = 0
+            try:
+                # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                # anomalous_metrics_count = len(list(self.redis_conn_decoded.smembers('analyzer.anomalous_metrics')))
+                anomalous_metrics_count = self.redis_conn_decoded.scard('analyzer.anomalous_metrics')
+            except:
+                anomalous_metrics_count = 0
+            if anomalous_metrics_count > 0:
+                logger.warning('warning :: resetting analyzer.anomalous_metrics which has %s entries from the last run' % (
+                    str(anomalous_metrics_count)))
+                try:
+                    self.redis_conn.delete('analyzer.anomalous_metrics')
+                except Exception as err:
+                    logger.error('error :: failed to delete analyzer.anomalous_metrics Redis set - %s' % err)
+            all_anomalous_metrics_count = 0
+            try:
+                # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                # all_anomalous_metrics_count = len(list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics')))
+                all_anomalous_metrics_count = self.redis_conn_decoded.scard('analyzer.all_anomalous_metrics')
+            except:
+                all_anomalous_metrics_count = 0
+            if all_anomalous_metrics_count > 0:
+                logger.warning('warning :: resetting analyzer.all_anomalous_metrics which has %s entries from the last run' % (
+                    str(all_anomalous_metrics_count)))
+                try:
+                    self.redis_conn.delete('analyzer.all_anomalous_metrics')
+                except Exception as err:
+                    logger.error('error :: failed to delete analyzer.all_anomalous_metrics Redis set - %s' % err)
+
+            # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+            #                   Feature #4702: numba optimisations
+            # Use start up key and allow numba cache files to be created
+            start_key = '%s.starting' % skyline_app
+            starting = False
+            max_analyzer_process_runtime = settings.MAX_ANALYZER_PROCESS_RUNTIME
+            try:
+                starting = self.redis_conn.exists(start_key)
+                if starting:
+                    logger.info('analyzer is starting max_analyzer_process_runtime set to 180')
+                    max_analyzer_process_runtime = 180
+            except Exception as err:
+                logger.error('error :: exists failed on Redis %s key - %s' % (
+                    start_key, err))
+
             # Spawn processes
             pids = []
             spawned_pids = []
@@ -4808,7 +5690,11 @@ class Analyzer(Thread):
             p_starts = time()
             # TESTING p.join removal
             # while time() - p_starts <= 1:
-            while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
+            # @modified 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+            #                      Feature #4702: numba optimisations
+            # Use start up key and allow numba cache files to be created
+            # while time() - p_starts <= settings.MAX_ANALYZER_PROCESS_RUNTIME:
+            while time() - p_starts <= max_analyzer_process_runtime:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)
@@ -4868,7 +5754,7 @@ class Analyzer(Thread):
 
             # @added 20200603 - Feature #3566: custom_algorithms
             if CUSTOM_ALGORITHMS:
-                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                for custom_algorithm in CUSTOM_ALGORITHMS:
                     # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
                     # Only run DEBUG_CUSTOM_ALGORITHMS if there is a custom
                     # algorithm to be run with analyzer
@@ -4946,7 +5832,7 @@ class Analyzer(Thread):
             # @added 20200603 - Feature #3566: custom_algorithms
             anomaly_breakdown_algorithms = list(settings.ALGORITHMS)
             if CUSTOM_ALGORITHMS:
-                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                for custom_algorithm in CUSTOM_ALGORITHMS:
                     anomaly_breakdown_algorithms.append(custom_algorithm)
 
             # @modified 20200603 - Feature #3566: custom_algorithms
@@ -5187,7 +6073,7 @@ class Analyzer(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add %s to Redis set %s for waterfall alert to alert on' % (
                             str(data), str(redis_set)))
-                    logger.info('waterfall alerting on %s' % base_name)
+                    logger.info('waterfall alerting on %s - %s' % (base_name, str(waterfall_alert)))
                     redis_waterfall_alert_key = 'analyzer.waterfall.alert.%s' % waterfall_alert_check_string
                     try:
                         self.redis_conn.setex(redis_waterfall_alert_key, 300, waterfall_alert_check_timestamp)
@@ -5377,14 +6263,27 @@ class Analyzer(Thread):
 
                             pattern_match = False
 
+                            # @modified 20220805 - Task #2732: Prometheus to Skyline
+                            #                      Branch #4300: prometheus
+                            # Handle labelled_metrics
+                            use_metric = str(metric[1])
+                            if use_metric.startswith('labelled_metrics.'):
+                                try:
+                                    use_metric = get_base_name_from_labelled_metrics_name(skyline_app, metric[1])
+                                except Exception as err:
+                                    logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                                        str(metric[1]), err))
+
                             # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
                             #                      Feature #3512: matched_or_regexed_in_list function
                             # Changed original alert matching pattern to use new
                             # method
                             try:
-                                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric[1], [alert[0]])
+                                # pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric[1], [alert[0]])
+                                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, use_metric, [alert[0]])
                                 if LOCAL_DEBUG and pattern_match:
-                                    logger.debug('debug :: %s matched alert - %s' % (metric[1], alert[0]))
+                                    # logger.debug('debug :: %s matched alert - %s' % (metric[1], alert[0]))
+                                    logger.debug('debug :: %s matched alert - %s' % (use_metric, alert[0]))
                                 # try:
                                 #     del metric_matched_by
                                 # except:
@@ -5395,7 +6294,8 @@ class Analyzer(Thread):
                             if not pattern_match:
                                 if LOCAL_DEBUG:
                                     logger.debug('debug :: metric not pattern matched, continuing - %s' % (
-                                        str(metric[1])))
+                                        # str(metric[1])))
+                                        str(use_metric)))
                                 continue
 
                             mirage_metric = False
@@ -5676,13 +6576,15 @@ class Analyzer(Thread):
                                     # @added 20210801 - Feature #4214: alert.paused
                                     alert_paused = False
                                     try:
-                                        cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                        # cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                        cache_key = 'alert.paused.%s.%s' % (alert[1], use_metric)
                                         alert_paused = self.redis_conn_decoded.get(cache_key)
                                     except Exception as e:
                                         logger.error('error :: alert_paused check failed: %s' % str(e))
                                     if alert_paused:
                                         logger.info('alert_paused for %s %s until %s' % (
-                                            alert[1], base_name, str(alert_paused)))
+                                            # alert[1], base_name, str(alert_paused)))
+                                            alert[1], metric[1], str(alert_paused)))
                                         continue
 
                                     # @modified 20200413 - Feature #3486: analyzer_batch
@@ -5722,6 +6624,9 @@ class Analyzer(Thread):
                             # Bringing Ionosphere online - do alert on Ionosphere
                             # metrics if Ionosphere is up
                             metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                            if metric[1].startswith('labelled_metrics.'):
+                                metric_name = str(metric[1])
+
                             if LOCAL_DEBUG:
                                 logger.debug('debug :: metric_name - %s' % str(metric_name))
 
@@ -5983,7 +6888,7 @@ class Analyzer(Thread):
                                                     anomalyScore = 1.0
                                             except:
                                                 logger.error(traceback.format_exc())
-                                                logger.error('error :: failed to determine anomalyScore for %s' % base_name)
+                                                logger.error('error :: failed to determine anomalyScore for %s' % metric[1])
                                                 anomalyScore = 1.0
                                             new_alert.append(['anomalyScore', anomalyScore])
 
@@ -6334,17 +7239,18 @@ class Analyzer(Thread):
             if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                 logger.debug('debug :: algorithms_to_time from settings.ALGORITHMS - %s' % (str(algorithms_to_time)))
             if CUSTOM_ALGORITHMS:
-                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                for custom_algorithm in CUSTOM_ALGORITHMS:
                     algorithms_to_time.append(custom_algorithm)
                     # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
                     if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
-                        logger.debug('debug :: algorithms_to_time added %s from settings.CUSTOM_ALGORITHMS - %s' % (str(custom_algorithm), str(algorithms_to_time)))
+                        logger.debug('debug :: algorithms_to_time added %s from CUSTOM_ALGORITHMS - %s' % (str(custom_algorithm), str(algorithms_to_time)))
 
             # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
             if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                 logger.debug('debug :: algorithms_to_time - %s' % (str(algorithms_to_time)))
                 logger.debug('debug :: processing algorithms_to_time - %s' % (str(algorithms_to_time)))
 
+            logger.info('checking files for algorithms_to_time: %s' % (str(algorithms_to_time)))
             for algorithm in algorithms_to_time:
                 # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
                 if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
@@ -6422,11 +7328,11 @@ class Analyzer(Thread):
                         median_algorithm_timing))
                 use_namespace = skyline_app_graphite_namespace + '.algorithm_breakdown.' + algorithm
                 send_metric_name = use_namespace + '.timing.times_run'
-                send_graphite_metric(skyline_app, send_metric_name, str(number_of_algorithm_timings))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(number_of_algorithm_timings))
                 send_metric_name = use_namespace + '.timing.total_time'
-                send_graphite_metric(skyline_app, send_metric_name, str(sum_of_algorithm_timings))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(sum_of_algorithm_timings))
                 send_metric_name = use_namespace + '.timing.median_time'
-                send_graphite_metric(skyline_app, send_metric_name, str(median_algorithm_timing))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(median_algorithm_timing))
 
                 # We del all variables that are floats as they become unique objects and
                 # can result in what appears to be a memory leak, but is not, just the
@@ -6582,7 +7488,11 @@ class Analyzer(Thread):
                 try:
                     redis_set = '%s.http_alerter.queue' % source
                     try:
-                        resend_queue = list(self.redis_conn_decoded.smembers(redis_set))
+                        # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                        #                      Feature #4652: http_alerter - dotted_representation
+                        # Change to a hash
+                        # resend_queue = list(self.redis_conn_decoded.smembers(redis_set))
+                        resend_queue = []
                         if resend_queue:
                             logger.info('%s items in the %s Redis set' % (str(len(resend_queue)), redis_set))
                             resend_items = []
@@ -6604,6 +7514,39 @@ class Analyzer(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to get %s.http_alerter.queue from Redis' % source)
                     resend_queue = []
+
+                # @added 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                #                   Feature #4652: http_alerter - dotted_representation
+                # Change to a hash
+                resend_queue_dict = {}
+                try:
+                    redis_alert_queue_hash = '%s.http_alerter.queue.hash' % str(source)
+                    try:
+                        resend_queue_dict = self.redis_conn_decoded.hgetall(redis_alert_queue_hash)
+                        if resend_queue_dict:
+                            logger.info('%s items in the %s Redis hash' % (str(len(resend_queue_dict)), redis_alert_queue_hash))
+                            resend_items = []
+                            for resend_item in list(resend_queue_dict.keys()):
+                                last_resend_item = literal_eval(resend_queue_dict[resend_item])
+                                resend_item_list = list(last_resend_item)
+                                resend_alert = resend_item_list[0]
+                                resend_metric = resend_item_list[1]
+                                resend_metric_alert_dict = resend_item_list[2]
+                                resend_items.append([resend_alert, resend_metric, resend_metric_alert_dict])
+                            resend_queue = resend_items
+                            new_full_resend_queue = full_resend_queue + resend_queue
+                            full_resend_queue = new_full_resend_queue
+                        else:
+                            logger.info('0 items in the %s Redis hash' % redis_alert_queue_hash)
+                    except Exception as err:
+                        logger.error('error :: could not determine http_alerter item from Redis hash %s - %s' % (
+                            redis_alert_queue_hash, err))
+                        resend_queue_dict = {}
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get %s.http_alerter.queue.hash from Redis' % source)
+                    resend_queue_dict = {}
+
             if full_resend_queue:
                 try:
                     http_alerters_down = []
@@ -6690,7 +7633,9 @@ class Analyzer(Thread):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # mirage_periodic_checks = str(len(list(self.redis_conn.smembers('analyzer.mirage_periodic_check_metrics'))))
-                    mirage_periodic_checks = str(len(list(self.redis_conn_decoded.smembers('analyzer.mirage_periodic_check_metrics'))))
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # mirage_periodic_checks = str(len(list(self.redis_conn_decoded.smembers('analyzer.mirage_periodic_check_metrics'))))
+                    mirage_periodic_checks = str(self.redis_conn_decoded.scard('analyzer.mirage_periodic_check_metrics'))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to generate a list from analyzer.mirage_periodic_check_metrics Redis set')
@@ -6703,9 +7648,9 @@ class Analyzer(Thread):
             try:
                 self.redis_conn.hset(cache_key, 'value', float(run_time))
                 self.redis_conn.hset(cache_key, 'timestamp', int(time()))
-            except Exception as e:
+            except Exception as err:
                 logger.error('error :: Analyzer could not update the Redis %s key - %s' % (
-                    cache_key, e))
+                    cache_key, err))
             cache_key = 'analyzer.total_metrics'
             try:
                 self.redis_conn.hset(cache_key, 'value', int(total_metrics))
@@ -6734,25 +7679,25 @@ class Analyzer(Thread):
             # Log to Graphite
             graphite_run_time = '%.2f' % run_time
             send_metric_name = skyline_app_graphite_namespace + '.run_time'
-            send_graphite_metric(skyline_app, send_metric_name, graphite_run_time)
+            send_graphite_metric(self, skyline_app, send_metric_name, graphite_run_time)
 
             send_metric_name = skyline_app_graphite_namespace + '.total_analyzed'
-            send_graphite_metric(skyline_app, send_metric_name, total_analyzed)
+            send_graphite_metric(self, skyline_app, send_metric_name, total_analyzed)
 
             send_metric_name = skyline_app_graphite_namespace + '.total_anomalies'
-            send_graphite_metric(skyline_app, send_metric_name, total_anomalies)
+            send_graphite_metric(self, skyline_app, send_metric_name, total_anomalies)
 
             send_metric_name = skyline_app_graphite_namespace + '.total_metrics'
-            send_graphite_metric(skyline_app, send_metric_name, total_metrics)
+            send_graphite_metric(self, skyline_app, send_metric_name, total_metrics)
 
             # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
 
             for key, value in exceptions.items():
                 send_metric_name = '%s.exceptions.%s' % (skyline_app_graphite_namespace, key)
-                send_graphite_metric(skyline_app, send_metric_name, str(value))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(value))
             for key, value in anomaly_breakdown.items():
                 send_metric_name = '%s.anomaly_breakdown.%s' % (skyline_app_graphite_namespace, key)
-                send_graphite_metric(skyline_app, send_metric_name, str(value))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(value))
 
             # @added 20161119 - Branch #922: ionosphere
             #                   Task #1718: review.tsfresh
@@ -6769,19 +7714,21 @@ class Analyzer(Thread):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # sent_to_mirage = str(len(list(self.redis_conn.smembers('analyzer.sent_to_mirage'))))
-                    sent_to_mirage = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_mirage'))))
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # sent_to_mirage = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_mirage'))))
+                    sent_to_mirage = str(self.redis_conn_decoded.scard('analyzer.sent_to_mirage'))
                 except:
                     sent_to_mirage = '0'
                 logger.info('sent_to_mirage     :: %s' % sent_to_mirage)
                 send_metric_name = '%s.sent_to_mirage' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_mirage)
+                send_graphite_metric(self, skyline_app, send_metric_name, sent_to_mirage)
                 try:
                     mirage_unique_metrics_count_str = str(mirage_unique_metrics_count)
                 except:
                     mirage_unique_metrics_count_str = '0'
                 logger.info('Mirage metrics     :: %s' % mirage_unique_metrics_count_str)
                 send_metric_name = '%s.mirage_metrics' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, mirage_unique_metrics_count_str)
+                send_graphite_metric(self, skyline_app, send_metric_name, mirage_unique_metrics_count_str)
 
                 # @added 20190408 - Feature #2882: Mirage - periodic_check
                 logger.info('mirage_periodic_checks  :: %s' % mirage_periodic_checks)
@@ -6790,7 +7737,7 @@ class Analyzer(Thread):
                 # mirage_periodic_checks = str(len(self.mirage_periodic_check_metrics))
                 # logger.info('mirage_periodic_checks     :: %s' % mirage_periodic_checks)
                 send_metric_name = '%s.mirage_periodic_checks' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, mirage_periodic_checks)
+                send_graphite_metric(self, skyline_app, send_metric_name, mirage_periodic_checks)
 
             sent_to_crucible = 0
             if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
@@ -6800,12 +7747,14 @@ class Analyzer(Thread):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # sent_to_crucible = str(len(list(self.redis_conn.smembers('analyzer.sent_to_crucible'))))
-                    sent_to_crucible = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_crucible'))))
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # sent_to_crucible = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_crucible'))))
+                    sent_to_crucible = str(self.redis_conn_decoded.scard('analyzer.sent_to_crucible'))
                 except:
                     sent_to_crucible = '0'
                 logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
                 send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
+                send_graphite_metric(self, skyline_app, send_metric_name, sent_to_crucible)
 
             sent_to_panorama = 0
             if settings.PANORAMA_ENABLED:
@@ -6815,12 +7764,14 @@ class Analyzer(Thread):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # sent_to_panorama = str(len(list(self.redis_conn.smembers('analyzer.sent_to_panorama'))))
-                    sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_panorama'))))
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_panorama'))))
+                    sent_to_panorama = str(self.redis_conn_decoded.scard('analyzer.sent_to_panorama'))
                 except:
                     sent_to_panorama = '0'
                 logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
                 send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+                send_graphite_metric(self, skyline_app, send_metric_name, sent_to_panorama)
 
             sent_to_ionosphere = 0
             if settings.IONOSPHERE_ENABLED:
@@ -6830,19 +7781,21 @@ class Analyzer(Thread):
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # sent_to_ionosphere = str(len(list(self.redis_conn.smembers('analyzer.sent_to_ionosphere'))))
-                    sent_to_ionosphere = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_ionosphere'))))
+                    # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                    # sent_to_ionosphere = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_ionosphere'))))
+                    sent_to_ionosphere = str(self.redis_conn_decoded.scard('analyzer.sent_to_ionosphere'))
                 except:
                     sent_to_ionosphere = '0'
                 logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
                 send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
+                send_graphite_metric(self, skyline_app, send_metric_name, sent_to_ionosphere)
                 try:
                     ionosphere_unique_metrics_count_str = str(ionosphere_unique_metrics_count)
                 except:
                     ionosphere_unique_metrics_count_str = '0'
                 logger.info('Ionosphere metrics :: %s' % ionosphere_unique_metrics_count_str)
                 send_metric_name = '%s.ionosphere_metrics' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, ionosphere_unique_metrics_count_str)
+                send_graphite_metric(self, skyline_app, send_metric_name, ionosphere_unique_metrics_count_str)
 
             # @added 20200623 - Feature #3588: Metric http_alerter queues
             #                   Feature #3396: http_alerter
@@ -6853,16 +7806,21 @@ class Analyzer(Thread):
                 for source in resend_queues:
                     http_alerter_queue_size = '0'
                     try:
-                        redis_set = '%s.http_alerter.queue' % source
-                        http_alerter_queue_size = str(len(list(self.redis_conn_decoded.smembers(redis_set))))
+                        # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
+                        #                      Feature #4652: http_alerter - dotted_representation
+                        # Change to a hash
+                        # redis_set = '%s.http_alerter.queue' % source
+                        # http_alerter_queue_size = str(len(list(self.redis_conn_decoded.smembers(redis_set))))
+                        redis_set = '%s.http_alerter.queue.hash' % source
+                        http_alerter_queue_size = str(len(self.redis_conn_decoded.hgetall(redis_set)))
                         if resend_queue:
-                            logger.info('%s items in the %s Redis set' % (str(len(resend_queue)), redis_set))
+                            logger.info('%s items in the %s Redis hash' % (str(len(resend_queue)), redis_set))
                             resend_items = []
                     except Exception as e:
-                        logger.error('error :: could not determine http_alerter_queue_size from Redis set %s - %s' % (redis_set, e))
+                        logger.error('error :: could not determine http_alerter_queue_size from Redis hash %s - %s' % (redis_set, e))
                         http_alerter_queue_size = '0'
                     send_metric_name = '%s.http_alerter.queue.%s' % (skyline_app_graphite_namespace, source)
-                    send_graphite_metric(skyline_app, send_metric_name, http_alerter_queue_size)
+                    send_graphite_metric(self, skyline_app, send_metric_name, http_alerter_queue_size)
 
             # Check canary metric
             try:
@@ -6902,10 +7860,10 @@ class Analyzer(Thread):
                         'error :: failed to unpack/calculate canary duration')
 
                 send_metric_name = skyline_app_graphite_namespace + '.duration'
-                send_graphite_metric(skyline_app, send_metric_name, str(time_human))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(time_human))
 
                 send_metric_name = skyline_app_graphite_namespace + '.projected'
-                send_graphite_metric(skyline_app, send_metric_name, str(projected))
+                send_graphite_metric(self, skyline_app, send_metric_name, str(projected))
 
             if LOCAL_DEBUG:
                 logger.debug('debug :: Memory usage before reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -6942,6 +7900,8 @@ class Analyzer(Thread):
                     try:
                         list_data = literal_eval(item)
                         anomalous_metric = str(list_data[0])
+                        if '_tenant_id="' in anomalous_metric:
+                            continue
                         anomaly_timestamp = int(list_data[1])
                         # @added 20200608 - Feature #3306: Record anomaly_end_timestamp
                         # Remove entries from the current.anomalies set if the
@@ -7033,7 +7993,7 @@ class Analyzer(Thread):
                 # after min max scaling wass applied to it.  That way each metric
                 # would have the same weight.  txBytes for instance would not have
                 # a far greater weight than a low range metric.
-                # send_graphite_metric(skyline_app, send_metric_name, illuminance)
+                # send_graphite_metric(self, skyline_app, send_metric_name, illuminance)
 
                 # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 try:
@@ -7095,7 +8055,9 @@ class Analyzer(Thread):
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                      Branch #3262: py3
                 # all_anomalous_metrics_count = len(list(self.redis_conn.smembers('analyzer.all_anomalous_metrics')))
-                all_anomalous_metrics_count = len(list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics')))
+                # @modified 20230401 - Feature #4886: analyzer - operation_timings
+                # all_anomalous_metrics_count = len(list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics')))
+                all_anomalous_metrics_count = self.redis_conn_decoded.scard('analyzer.all_anomalous_metrics')
             except:
                 pass
             if all_anomalous_metrics_count > 0:
@@ -7551,10 +8513,10 @@ class Analyzer(Thread):
                         str(last_dynamic_low_priority_set_count)))
                     logger.info('low_priority_metrics.dynamically_analyzed :: %s' % str(low_priority_metric_count))
                     send_metric_name = '%s.low_priority_metrics.dynamically_analyzed' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, str(low_priority_metric_count))
+                    send_graphite_metric(self, skyline_app, send_metric_name, str(low_priority_metric_count))
                     logger.info('low_priority_metrics.total :: %s' % str(last_dynamic_low_priority_set_count))
                     send_metric_name = '%s.low_priority_metrics.total' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, str(last_dynamic_low_priority_set_count))
+                    send_graphite_metric(self, skyline_app, send_metric_name, str(last_dynamic_low_priority_set_count))
                 # Keep a record of missing low priority metrics for debug purposes
                 # these tend to be sparsely populated metrics
                 missing_unknown_low_priority_metrics_set_count = 0
@@ -7612,7 +8574,7 @@ class Analyzer(Thread):
                         logger.error('error :: metrics_manager :: failed to determine metrics_fully_populated value from Redis key analyzer.metrics_manager.metrics_sparsity.metrics_fully_populated: %s' % e)
                     if last_metrics_fully_populated or last_metrics_fully_populated == 0:
                         try:
-                            send_graphite_metric(skyline_app, send_metric_name, str(last_metrics_fully_populated))
+                            send_graphite_metric(self, skyline_app, send_metric_name, str(last_metrics_fully_populated))
                             logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_metrics_fully_populated)))
                         except Exception as e:
                             logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
@@ -7628,7 +8590,7 @@ class Analyzer(Thread):
                         logger.error('error :: metrics_manager :: failed to determine metrics_sparsity_increasing value from Redis key analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_increasing: %s' % e)
                     if last_metrics_sparsity_increasing or last_metrics_sparsity_increasing == 0:
                         try:
-                            send_graphite_metric(skyline_app, send_metric_name, str(last_metrics_sparsity_increasing))
+                            send_graphite_metric(self, skyline_app, send_metric_name, str(last_metrics_sparsity_increasing))
                             logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_metrics_sparsity_increasing)))
                         except Exception as e:
                             logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
@@ -7644,7 +8606,7 @@ class Analyzer(Thread):
                         logger.error('error :: metrics_manager :: failed to determine metrics_sparsity_decreasing value from Redis key analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_decreasing: %s' % e)
                     if last_metrics_sparsity_decreasing or last_metrics_sparsity_decreasing == 0:
                         try:
-                            send_graphite_metric(skyline_app, send_metric_name, str(last_metrics_sparsity_decreasing))
+                            send_graphite_metric(self, skyline_app, send_metric_name, str(last_metrics_sparsity_decreasing))
                             logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_metrics_sparsity_decreasing)))
                         except Exception as e:
                             logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
@@ -7660,7 +8622,7 @@ class Analyzer(Thread):
                         logger.error('error :: metrics_manager :: failed to determine last_avg_sparsity from Redis key analyzer.metrics_manager.metrics_sparsity.avg_sparsity: %s' % e)
                     if last_avg_sparsity or last_avg_sparsity == 0:
                         try:
-                            send_graphite_metric(skyline_app, send_metric_name, str(last_avg_sparsity))
+                            send_graphite_metric(self, skyline_app, send_metric_name, str(last_avg_sparsity))
                             logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_avg_sparsity)))
                         except Exception as e:
                             logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
@@ -7677,11 +8639,21 @@ class Analyzer(Thread):
                         logger.error('error :: failed to determine run_time from Redis key analyzer.metrics_manager.run_time: %s' % e)
                     if metrics_manager_run_time or metrics_manager_run_time == 0:
                         try:
-                            send_graphite_metric(skyline_app, send_metric_name, str(metrics_manager_run_time))
+                            send_graphite_metric(self, skyline_app, send_metric_name, str(metrics_manager_run_time))
                             logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(metrics_manager_run_time)))
                         except Exception as e:
                             logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
                                 send_metric_name, str(metrics_manager_run_time), e))
+
+            # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
+            #                   Feature #4702: numba optimisations
+            # Use start up key and allow numba cache files to be created
+            if starting:
+                try:
+                    self.redis_conn.delete(start_key)
+                except Exception as err:
+                    logger.error('error :: delete failed on Redis %s key - %s' % (
+                        start_key, err))
 
             # Sleep if it went too fast
             # if time() - now < 5:

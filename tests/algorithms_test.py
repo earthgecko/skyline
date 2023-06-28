@@ -1,8 +1,20 @@
-import unittest2 as unittest
+"""
+algorithm_test.py
+"""
+# @modified 20230110 - Task #4800: Deprecate unittest2
+#                      Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1
+# import unittest2 as unittest
+import unittest
+
 from mock import Mock, patch
 from time import time
 import os.path
 import sys
+
+# @added 2023016 - Feature #4700: algorithms - single series
+#                  Task #4778: v4.0.0 - update dependencies
+import pandas
 
 # from skyline.analyzer import algorithms
 # from skyline import settings
@@ -37,45 +49,63 @@ class TestAlgorithms(unittest.TestCase):
         timeseries[-1][1] = 1000
         timeseries[-2][1] = 1
         timeseries[-3][1] = 1
-        return ts, timeseries
+
+        # @added 2023016 - Feature #4700: algorithms - single series
+        #                  Task #4778: v4.0.0 - update dependencies
+        # This optimisation was added to algorithms to save microseconds on
+        # interpolating the pandas series individually.  The pandas series is
+        # now interpolated once.
+        series = pandas.Series(x[1] for x in timeseries)
+
+        return ts, timeseries, series
 
     def test_tail_avg(self):
-        _, timeseries = self.data(time())
-        self.assertEqual(algorithms.tail_avg(timeseries), 334)
+        _, timeseries, series = self.data(time())
+        # @modified 2023016 - Feature #4700: algorithms - single series
+        #                     Task #4778: v4.0.0 - update dependencies
+        # Added the series parameter to all algorithms calls below.
+        # self.assertEqual(algorithms.tail_avg(timeseries), 334)
+        self.assertEqual(algorithms.tail_avg(timeseries, series), 334)
 
     def test_grubbs(self):
-        _, timeseries = self.data(time())
-        self.assertTrue(algorithms.grubbs(timeseries))
+        _, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.grubbs(timeseries, series))
 
     @patch.object(algorithms, 'time')
     def test_first_hour_average(self, timeMock):
-        timeMock.return_value, timeseries = self.data(time())
-        self.assertTrue(algorithms.first_hour_average(timeseries))
+        timeMock.return_value, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.first_hour_average(timeseries, series))
 
     def test_stddev_from_average(self):
-        _, timeseries = self.data(time())
-        self.assertTrue(algorithms.stddev_from_average(timeseries))
+        _, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.stddev_from_average(timeseries, series))
 
     def test_stddev_from_moving_average(self):
-        _, timeseries = self.data(time())
-        self.assertTrue(algorithms.stddev_from_moving_average(timeseries))
+        _, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.stddev_from_moving_average(timeseries, series))
 
     def test_mean_subtraction_cumulation(self):
-        _, timeseries = self.data(time())
-        self.assertTrue(algorithms.mean_subtraction_cumulation(timeseries))
+        _, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.mean_subtraction_cumulation(timeseries, series))
 
     @patch.object(algorithms, 'time')
     def test_least_squares(self, timeMock):
-        timeMock.return_value, timeseries = self.data(time())
-        self.assertTrue(algorithms.least_squares(timeseries))
+        timeMock.return_value, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.least_squares(timeseries, series))
 
     def test_histogram_bins(self):
-        _, timeseries = self.data(time())
-        self.assertTrue(algorithms.histogram_bins(timeseries))
+        _, timeseries, series = self.data(time())
+        self.assertTrue(algorithms.histogram_bins(timeseries, series))
 
     @patch.object(algorithms, 'time')
     def test_run_selected_algorithm(self, timeMock):
-        timeMock.return_value, timeseries = self.data(time())
+
+        # @modified 2023016 - Feature #4700: algorithms - single series
+        #                     Task #4778: v4.0.0 - update dependencies
+        # Added the series output from data
+        # timeMock.return_value, timeseries = self.data(time())
+        timeMock.return_value, timeseries, series = self.data(time())
+
         # @modified 20200206 - Feature #3400: Identify air gaps in the metric data
         # Added the airgapped_metrics list
         # result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric")
@@ -116,13 +146,13 @@ class TestAlgorithms(unittest.TestCase):
         """
         algorithmsListMock.__iter__.return_value = ['alwaysTrue']
         consensusMock = 1
-        timeMock.return_value, timeseries = self.data(time())
+        timeMock.return_value, timeseries, series = self.data(time())
 
         alwaysTrue = Mock(return_value=True)
         with patch.dict(algorithms.__dict__, {'alwaysTrue': alwaysTrue}):
             result, ensemble, tail_avg = algorithms.run_selected_algorithm(timeseries)
 
-        alwaysTrue.assert_called_with(timeseries)
+        alwaysTrue.assert_called_with(timeseries, series)
         self.assertTrue(result)
         self.assertEqual(ensemble, [True])
         self.assertEqual(tail_avg, 334)

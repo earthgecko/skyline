@@ -1,4 +1,10 @@
-TSFRESH_VERSION = '0.17.9'
+"""
+tsfresh_feature_names.py
+"""
+# @modified 20230120 - Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1
+# TSFRESH_VERSION = '0.17.9'
+TSFRESH_VERSION = '0.19.1'
 """
 :var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
     in terms of feature extraction baselines
@@ -6,7 +12,11 @@ TSFRESH_VERSION = '0.17.9'
 """
 
 # TSFRESH_BASELINE_VERSION = '0.1.2'
-TSFRESH_BASELINE_VERSION = '0.17.9'
+# @modified 20230120 - Task #4778: v4.0.0 - update dependencies
+#                      Branch #4456: v0.19.1
+# TSFRESH_BASELINE_VERSION = '0.17.9'
+TSFRESH_BASELINE_VERSION = '0.19.1'
+
 """
 :var TSFRESH_BASELINE_VERSION: The version of tsfresh that was used to generate
     feature extraction baselines on.

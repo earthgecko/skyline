@@ -1,5 +1,7 @@
 import logging
 import traceback
+# @added 20220722 - Task #4624: Change all dict copy to deepcopy
+import copy
 
 import settings
 from skyline_functions import get_redis_conn_decoded
@@ -70,7 +72,9 @@ def get_boundary_metrics(
         current_logger.error('error :: %s :: failed to get Redis hash key metrics_manager.boundary_metrics - %s' % (function_str, e))
         raise
 
-    boundary_metrics = boundary_metrics_redis_dict.copy()
+    # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+    # boundary_metrics = boundary_metrics_redis_dict.copy()
+    boundary_metrics = copy.deepcopy(boundary_metrics_redis_dict)
 
     remote_boundary_metrics = []
     if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
@@ -145,7 +149,9 @@ def get_boundary_metrics(
             if boundary_metric_dict:
                 filtered_boundary_metrics[base_name] = boundary_metric_dict
         if filtered_boundary_metrics:
-            boundary_metrics = filtered_boundary_metrics.copy()
+            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+            # boundary_metrics = filtered_boundary_metrics.copy()
+            boundary_metrics = copy.deepcopy(filtered_boundary_metrics)
             if log:
                 current_logger.info('%s :: %s :: filtered %s boundary_metrics' % (
                     current_skyline_app, function_str,

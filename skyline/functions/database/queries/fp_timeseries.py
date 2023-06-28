@@ -3,6 +3,10 @@ import logging
 import traceback
 from timeit import default_timer as timer
 
+# @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+#                   Task #4778: v4.0.0 - update dependencies
+from sqlalchemy import select, Table, MetaData
+
 from database import get_engine, engine_disposal
 
 
@@ -32,12 +36,28 @@ def get_db_fp_timeseries(current_skyline_app, metric_id, fp_id):
             raise
         return timeseries
 
+    metric_fp_ts_table = 'z_ts_%s' % str(metric_id)
     try:
         start_db_query = timer()
-        metric_fp_ts_table = 'z_ts_%s' % str(metric_id)
-        stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))
+
+        # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                   Task #4778: v4.0.0 - update dependencies
+        # Use the MetaData autoload rather than string-based query construction
+        try:
+            use_table_meta = MetaData()
+            use_table = Table(metric_fp_ts_table, use_table_meta, autoload=True, autoload_with=engine)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: use_table Table failed on %s table - %s' % (
+                function_str, metric_fp_ts_table, err))
+
+        # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+        #                      Task #4778: v4.0.0 - update dependencies
+        # stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))
+        stmt = select([use_table.c.timestamp, use_table.c.value]).where(use_table.c.fp_id == int(fp_id))
+
         connection = engine.connect()
-        for row in engine.execute(stmt):
+        for row in connection.execute(stmt):
             fp_id_ts_timestamp = int(row['timestamp'])
             fp_id_ts_value = float(row['value'])
             if fp_id_ts_timestamp and fp_id_ts_value:
@@ -52,10 +72,10 @@ def get_db_fp_timeseries(current_skyline_app, metric_id, fp_id):
         current_logger.info('%s :: determined %s values for the fp_id %s time series in %6f seconds' % (
             function_str, str(len(timeseries)), str(fp_id),
             (end_db_query - start_db_query)))
-    except Exception as e:
+    except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not determine timestamps and values from %s - %s' % (
-            function_str, metric_fp_ts_table, e))
+            function_str, metric_fp_ts_table, err))
     if engine:
         engine_disposal(current_skyline_app, engine)
     return timeseries

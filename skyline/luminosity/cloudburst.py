@@ -1,5 +1,5 @@
 import logging
-from time import time, sleep
+from time import time, sleep, strftime, gmtime
 from threading import Thread
 from multiprocessing import Process
 import os
@@ -9,6 +9,7 @@ import traceback
 from timeit import default_timer as timer
 from math import ceil
 from ast import literal_eval
+import copy
 
 from msgpack import Unpacker
 from sqlalchemy.sql import select
@@ -24,6 +25,20 @@ from database import (
     ionosphere_layers_matched_table_meta, ionosphere_table_meta,
     anomalies_table_meta)
 from functions.database.queries.metric_id_from_base_name import metric_id_from_base_name
+# @added 20220913 - Feature #4662: settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS
+#                   Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Allow for skipping of metrics
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
+
+# @added 20220920 - Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+from functions.luminosity.cloudburst_get_metric_ids_to_check import cloudburst_get_metric_ids_to_check
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+from functions.timeseries.downsample import downsample_timeseries
 
 skyline_app = 'luminosity'
 skyline_app_logger = '%sLog' % skyline_app
@@ -71,6 +86,15 @@ except KeyError:
 except:
     run_every = 900
 
+# @added 20220913 - Feature #4662: settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS
+#                   Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Allow for skipping of metrics
+try:
+    LUMINOSITY_CLOUDBURST_SKIP_METRICS = settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS
+except:
+    LUMINOSITY_CLOUDBURST_SKIP_METRICS = []
+
 
 # @added 20210730 - Feature #4164: luminosity - cloudbursts
 class Cloudburst(Thread):
@@ -107,7 +131,7 @@ class Cloudburst(Thread):
         """
         process_number = i
         spin_start = time()
-        logger.info('cloudburst :: find_cloudbursts :: process %s started' % str(i))
+        logger.info('cloudburst :: find_cloudbursts :: process %s started' % str(process_number))
 
         engine = None
 
@@ -157,6 +181,144 @@ class Cloudburst(Thread):
                 full_uniques))
             return
 
+        # @added 20220913 - Feature #4662: settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        # Allow for skipping of metrics
+        ids_with_base_names = {}
+        try:
+            ids_with_base_names = get_metric_ids_and_base_names(skyline_app)
+        except Exception as err:
+            logger.error('error :: cloudburst :: find_cloudbursts :: get_metric_ids_and_base_names failed - %s' % (
+                err))
+        base_names_with_ids = {}
+        for metric_id in list(ids_with_base_names.keys()):
+            base_names_with_ids[ids_with_base_names[metric_id]] = metric_id
+
+        # @added 20230105 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+        # Skip trying to correlate inactive metrics
+        inactive_metric_id_strings = []
+        try:
+            inactive_metric_id_strings = list(self.redis_conn_decoded.smembers('aet.metrics_manager.inactive_metric_ids'))
+        except Exception as err:
+            logger.error('error :: cloudburst :: find_cloudbursts :: smembers failed on aet.metrics_manager.inactive_metric_ids - %s' % (
+                err))
+
+        filtered_metrics = []
+        errors = []
+        if LUMINOSITY_CLOUDBURST_SKIP_METRICS:
+            logger.info('cloudburst :: find_cloudbursts :: checking which of the %s metrics matched LUMINOSITY_CLOUDBURST_SKIP_METRICS' % (
+                str(len(unique_metrics))))
+            for metric in unique_metrics:
+                if metric.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = str(metric)
+                if base_name.startswith('labelled_metrics.'):
+                    try:
+                        metric_id_str = metric.replace('labelled_metrics.', '', 1)
+                        base_name = ids_with_base_names[int(float(metric_id_str))]
+                    # @added 20230105 - Feature #4792: functions.metrics_manager.manage_inactive_metrics
+                    # Skip trying to correlate inactive metrics
+                    except KeyError:
+                        if metric_id_str in inactive_metric_id_strings:
+                            continue
+                    except Exception as err:
+                        errors.append([base_name, 'before pattern match - failed base_name lookup from id', str(err)])
+                pattern_match = False
+                try:
+                    pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, LUMINOSITY_CLOUDBURST_SKIP_METRICS)
+                except Exception as err:
+                    errors.append([base_name, 'matched_or_regexed_in_list failed', str(err)])
+                if pattern_match:
+                    continue
+                filtered_metrics.append(metric)
+            if filtered_metrics:
+                logger.info('cloudburst :: find_cloudbursts :: removing %s metrics which matched LUMINOSITY_CLOUDBURST_SKIP_METRICS' % (
+                    str(len(unique_metrics) - len(filtered_metrics))))
+                unique_metrics = list(filtered_metrics)
+                del filtered_metrics
+                del metric_matched_by
+            if errors:
+                logger.error('error :: cloudburst :: find_cloudbursts :: matched_or_regexed_in_list %s errors encountered, last error: %s' % (
+                    str(len(errors)), str(errors[-1])))
+
+        # @added 20220919 - Feature #4674: cloudburst active events only
+        # Only check metrics that have been active recently in the relevant
+        # analyzer.illuminance.all.YYYY-MM-DD key/s handle day roll overs.
+        unique_metric_ids = []
+        redis_metrics = []
+        redistimeseries_metrics = []
+        unique_metric_ids_with_metric = {}
+        unique_metric_ids_errors = 0
+        for metric in unique_metrics:
+            if metric.startswith(settings.FULL_NAMESPACE):
+                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                redis_metrics.append(metric)
+            else:
+                base_name = str(metric)
+            metric_id = 0
+            if metric.startswith('labelled_metrics.'):
+                redistimeseries_metrics.append(metric)
+                try:
+                    metric_id_str = metric.replace('labelled_metrics.', '', 1)
+                    metric_id = int(float(metric_id_str))
+                    unique_metric_ids.append(metric_id)
+                except Exception as err:
+                    errors.append([metric, 'unique_metric_ids failed base_name lookup from id', str(err)])
+                    unique_metric_ids_errors += 1
+            else:
+                try:
+                    metric_id_str = base_names_with_ids[base_name]
+                    metric_id = int(float(metric_id_str))
+                    unique_metric_ids.append(metric_id)
+                except Exception as err:
+                    errors.append([base_name, 'unique_metric_ids failed id look up from base_name', str(err)])
+                    unique_metric_ids_errors += 1
+            unique_metric_ids_with_metric[metric_id] = metric
+        if unique_metric_ids_errors:
+            logger.error('error :: cloudburst :: find_cloudbursts :: unique_metric_ids_with_metric %s errors encountered, last error: %s' % (
+                str(len(errors)), str(errors[-1])))
+
+        metric_ids_to_check = []
+        try:
+            metric_ids_to_check = cloudburst_get_metric_ids_to_check(skyline_app, unique_metric_ids)
+        except Exception as err:
+            logger.error('error :: cloudburst :: find_cloudbursts :: cloudburst_get_metric_ids_to_check failed - %s' % (
+                err))
+        logger.info('cloudburst :: find_cloudbursts :: cloudburst_get_metric_ids_to_check found %s metrics with recent activity' % (
+            str(len(metric_ids_to_check))))
+
+        metrics_to_check = []
+        metrics_to_check_errors = 0
+        for metric_id in metric_ids_to_check:
+            try:
+                metrics_to_check.append(unique_metric_ids_with_metric[metric_id])
+            except Exception as err:
+                errors.append([metric_id, 'metrics_to_check failed to append id', str(err)])
+                metrics_to_check_errors += 1
+        if metrics_to_check_errors:
+            logger.error('error :: cloudburst :: find_cloudbursts :: metrics_to_check %s errors encountered, last error: %s' % (
+                str(len(errors)), str(errors[-1])))
+
+        luminosity_cloudburst_errors_key = 'luminosity.cloudburst.errors.%s' % str(int(spin_start))
+        if errors:
+            try:
+                self.redis_conn_decoded.hset(luminosity_cloudburst_errors_key, 'determining metrics errors', str(errors))
+                self.redis_conn_decoded.expire(luminosity_cloudburst_errors_key, 3600)
+            except Exception as err:
+                logger.error('error :: cloudburst :: find_cloudbursts :: failed set %s - %s' % (
+                    luminosity_cloudburst_errors_key, err))
+            errors = []
+
+        if not metrics_to_check:
+            logger.info('cloudburst :: find_cloudbursts :: no metrics found with recent activity to check')
+            return
+
+        logger.info('cloudburst :: find_cloudbursts :: %s metrics found with recent activity to check' % (
+            str(len(metrics_to_check))))
+        unique_metrics = list(metrics_to_check)
+
         # Discover assigned metrics
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(LUMINOSITY_CLOUDBURST_PROCESSES)))
         if i == LUMINOSITY_CLOUDBURST_PROCESSES:
@@ -169,6 +331,11 @@ class Cloudburst(Thread):
         # Compile assigned metrics
         assigned_metrics = [unique_metrics[index] for index in assigned_keys]
         use_mget = True
+
+        # @added 20220920 - Feature #4674: cloudburst active events only
+        #                   Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        assigned_redis_metrics = [metric for metric in assigned_metrics if metric.startswith(settings.FULL_NAMESPACE)]
 
         # assigned_metrics = unique_metrics[500:503]
         # use_mget = False
@@ -249,7 +416,11 @@ class Cloudburst(Thread):
         derivative_metrics = []
         if use_mget:
             try:
-                raw_assigned = self.redis_conn.mget(assigned_metrics)
+                # @modified 20220920 - Feature #4674: cloudburst active events only
+                #                      Task #2732: Prometheus to Skyline
+                #                      Branch #4300: prometheus
+                # raw_assigned = self.redis_conn.mget(assigned_metrics)
+                raw_assigned = self.redis_conn.mget(assigned_redis_metrics)
                 logger.info('cloudburst :: find_cloudbursts :: got raw_assigned metric data from Redis for %s metrics' % str(len(assigned_metrics)))
             except Exception as e:
                 logger.error(traceback.format_exc())
@@ -291,6 +462,14 @@ class Cloudburst(Thread):
                 base_name = metric_name
                 metric_name = '%s%s' % (settings.FULL_NAMESPACE, base_name)
 
+            # @added 20220920 - Feature #4674: cloudburst active events only
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            labelled_metric = False
+            if base_name.startswith('labelled_metrics.'):
+                metric_name = str(base_name)
+                labelled_metric = True
+
             try:
                 self.redis_conn.sadd(processed_metrics_key, metric_name)
             except Exception as e:
@@ -298,9 +477,18 @@ class Cloudburst(Thread):
                     metric_name, processed_metrics_key, e))
 
             timeseries = []
-            if raw_assigned:
+            # @modified 20220920 - Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # if raw_assigned:
+            if not labelled_metric and raw_assigned:
                 try:
-                    raw_series = raw_assigned[item_index]
+
+                    # @modified 20220920 - Task #2732: Prometheus to Skyline
+                    #                      Branch #4300: prometheus
+                    # raw_series = raw_assigned[item_index]
+                    raw_series_index = [index for index, metric in enumerate(assigned_redis_metrics) if metric == metric_name][0]
+                    raw_series = raw_assigned[raw_series_index]
+
                     unpacker = Unpacker(use_list=False)
                     unpacker.feed(raw_series)
                     timeseries = list(unpacker)
@@ -308,20 +496,21 @@ class Cloudburst(Thread):
                     logger.error('error :: cloudburst :: find_cloudbursts :: failed to unpack %s timeseries - %s' % (
                         metric_name, e))
                     timeseries = []
-            if timeseries:
-                calculate_derivative = False
-                if metric_name in derivative_metrics:
-                    calculate_derivative = True
-                if metric_name in non_derivative_monotonic_metrics:
+                if timeseries:
                     calculate_derivative = False
-                if calculate_derivative:
-                    try:
-                        derivative_timeseries = nonNegativeDerivative(timeseries)
-                        timeseries = derivative_timeseries
-                    except Exception as e:
-                        logger.error('error :: cloudburst :: find_cloudbursts :: nonNegativeDerivative failed on %s - %s' % (
-                            metric_name, e))
-                        continue
+                    if metric_name in derivative_metrics:
+                        calculate_derivative = True
+                    if metric_name in non_derivative_monotonic_metrics:
+                        calculate_derivative = False
+                    if calculate_derivative:
+                        try:
+                            derivative_timeseries = nonNegativeDerivative(timeseries)
+                            timeseries = derivative_timeseries
+                        except Exception as e:
+                            logger.error('error :: cloudburst :: find_cloudbursts :: nonNegativeDerivative failed on %s - %s' % (
+                                metric_name, e))
+                            continue
+
             if not timeseries:
                 try:
                     timeseries = get_metric_timeseries(skyline_app, base_name, False)
@@ -329,6 +518,40 @@ class Cloudburst(Thread):
                     logger.error('error :: cloudburst :: find_cloudbursts :: get_metric_timeseries failed for %s - %s' % (
                         base_name, e))
                     timeseries = []
+
+                # @added 20220920 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                if labelled_metric:
+                    metric_resolution = 0
+                    try:
+                        metric_resolution = determine_data_frequency(skyline_app, timeseries, False)
+                        resolutions_dict[base_name] = metric_resolution
+                    except Exception as err:
+                        logger.error('error :: cloudburst :: find_cloudbursts :: determine_data_frequency failed on data from %s - %s' % (
+                            metric, err))
+                        metric_resolution = 0
+                    if metric_resolution != 0 and metric_resolution < 60:
+                        resolutions_dict[base_name] = 60
+                        try:
+                            downsampled_timeseries = downsample_timeseries('luminosity', timeseries, metric_resolution, 60, 'mean', 'end')
+                            if downsampled_timeseries:
+                                timeseries = list(downsampled_timeseries)
+                        except Exception as err:
+                            logger.error('error :: cloudburst :: find_cloudbursts :: downsample_timeseries failed on data from %s - %s' % (
+                                metric, err))
+                    is_strictly_increasing_monotonicity = False
+                    try:
+                        is_strictly_increasing_monotonicity = strictly_increasing_monotonicity(timeseries)
+                    except Exception as err:
+                        logger.error('error :: cloudburst :: find_cloudbursts :: is_strictly_increasing_monotonicity failed on data from %s - %s' % (
+                            metric, err))
+                    if is_strictly_increasing_monotonicity:
+                        try:
+                            timeseries = nonNegativeDerivative(timeseries)
+                        except Exception as err:
+                            logger.error('error :: cloudburst :: find_cloudbursts :: nonNegativeDerivative failed on data from %s - %s' % (
+                                metric, err))
+
             if not timeseries:
                 no_data += 1
                 continue
@@ -413,7 +636,33 @@ class Cloudburst(Thread):
                 analysed += 1
             processed += 1
             new_anomalies = []
+
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run,
+            # making cloudburst backwards compatible
+            anomalies_list = []
+            anomalies_dict = {}
             if anomalies:
+                if isinstance(anomalies, list):
+                    anomalies_list = list(anomalies)
+                if isinstance(anomalies, dict):
+                    anomalies_dict = copy.deepcopy(anomalies)
+
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run,
+            # making cloudburst backwards compatible
+            if anomalies_dict:
+                for ts in list(anomalies_dict['anomalies'].keys()):
+                    anomalies_list.append([ts, anomalies_dict['anomalies']['value']])
+
+            # @modified 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run,
+            # making cloudburst backwards compatible
+            # if anomalies:
+            if anomalies_list:
                 anomaly_timestamps = [int(item[0]) for item in anomalies]
                 anomalies_present_in_period = [ts for ts in anomaly_timestamps if int(ts) > (now_timestamp - custom_check_last)]
                 if len(anomalies_present_in_period) == 0:
@@ -436,8 +685,10 @@ class Cloudburst(Thread):
                 m66_candidate_metrics[base_name][custom_algorithm] = {}
                 m66_candidate_metrics[base_name][custom_algorithm]['anomalies'] = new_anomalies
         timer_end = timer()
-        logger.info('cloudburst :: find_cloudbursts :: found %s candidate_metrics with %s algorithm from %s processed metrics in %.6f seconds' % (
-            str(len(m66_candidate_metrics)), custom_algorithm,
+
+        candidate_labelled_metrics_count = len([metric for metric in list(m66_candidate_metrics.keys()) if metric.startswith('labelled_metrics.')])
+        logger.info('cloudburst :: find_cloudbursts :: found %s candidate_metrics (of which %s are labelled_matrics) with %s algorithm from %s processed metrics in %.6f seconds' % (
+            str(len(m66_candidate_metrics)), str(candidate_labelled_metrics_count), custom_algorithm,
             str(processed), (timer_end - timer_start)))
 
         info_data_dict = {
@@ -491,6 +742,7 @@ class Cloudburst(Thread):
             resolution = 60
 
         truncate_last_datapoint = True
+        metrics_timeseries = {}
         metrics_to_do = list(m66_candidate_metrics.keys())
         while len(metrics_to_do) > 0:
             current_base_names = []
@@ -498,7 +750,24 @@ class Cloudburst(Thread):
                 current_base_names.append(metrics_to_do.pop(0))
             metrics_functions = {}
             truncate_last_datapoint = False
+
+            # @added 20220920 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            victoriametrics_to_get = {}
+
             for base_name in current_base_names:
+
+                # @added 20220920 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                if base_name.startswith('labelled_metrics.'):
+                    try:
+                        metric_id_str = base_name.replace('labelled_metrics.', '', 1)
+                        labelled_metric_base_name = ids_with_base_names[int(float(metric_id_str))]
+                        victoriametrics_to_get[base_name] = labelled_metric_base_name
+                    except Exception as err:
+                        errors.append([metric, 'failed base_name lookup from id', str(err)])
+                    continue
+
                 metrics_functions[base_name] = {}
                 if long_period_high_res:
                     metrics_functions[base_name]['functions'] = None
@@ -508,11 +777,47 @@ class Cloudburst(Thread):
                 # If the timeseries is summarized truncate the last datapoint
                 # so it does not fall off a cliff
                 truncate_last_datapoint = True
+            if errors:
+                logger.error('error :: cloudburst :: find_cloudbursts :: metrics_functions %s errors encountered, last error: %s' % (
+                    str(len(errors)), str(errors[-1])))
+                try:
+                    self.redis_conn_decoded.hset(luminosity_cloudburst_errors_key, 'metrics_functions errors', str(errors))
+                    self.redis_conn_decoded.expire(luminosity_cloudburst_errors_key, 3600)
+                except Exception as err:
+                    logger.error('error :: cloudburst :: find_cloudbursts :: failed set %s - %s' % (
+                        luminosity_cloudburst_errors_key, err))
+                errors = []
+
             try:
                 metrics_timeseries = get_metrics_timeseries(skyline_app, metrics_functions, from_timestamp, until_timestamp, log=False)
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: cloudburst :: find_cloudbursts :: get_metrics_timeseries failed - %s' % e)
+
+            # @added 20220920 - Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            if victoriametrics_to_get:
+                for base_name in list(victoriametrics_to_get.keys()):
+                    use_base_name = victoriametrics_to_get[base_name]
+                    timeseries = []
+                    try:
+                        timeseries = get_victoriametrics_metric(
+                            skyline_app, use_base_name, from_timestamp, until_timestamp,
+                            'list', 'object')
+                    except Exception as err:
+                        logger.error('error :: cloudburst :: find_cloudbursts :: get_victoriametrics_metric failed for %s - %s' % (
+                            use_base_name, err))
+                    if timeseries:
+                        try:
+                            metrics_timeseries[base_name] = {}
+                            metrics_timeseries[base_name]['metric'] = use_base_name
+                            metrics_timeseries[base_name]['timeseries'] = timeseries
+                        except Exception as err:
+                            logger.error('error :: cloudburst :: find_cloudbursts :: failed add timeseries to metrics_timeseries for %s - %s' % (
+                                base_name, err))
+                    else:
+                        logger.warning('warning :: cloudburst :: find_cloudbursts :: failed to retrieve timeseries from VictoriaMetrics for %s: %s' % (
+                            base_name, use_base_name))
 
             for base_name in current_base_names:
                 timeseries = []
@@ -521,11 +826,17 @@ class Cloudburst(Thread):
                 except KeyError:
                     timeseries = []
 
+                # @added 20220921 - Task #2732: Prometheus to Skyline
+                #                   Branch #4300: prometheus
+                data_source = 'Graphite'
+                if base_name.startswith('labelled_metrics.'):
+                    data_source = 'VictoriaMetrics'
+
                 if not timeseries:
                     # @modified 20220506 - Feature #4164: luminosity - cloudbursts
                     # Change error to warning
                     # logger.error('error :: cloudburst :: find_cloudbursts :: no timeseries from Graphite for %s' % base_name)
-                    logger.warning('warning :: cloudburst :: find_cloudbursts :: no timeseries from Graphite for %s' % base_name)
+                    logger.warning('warning :: cloudburst :: find_cloudbursts :: no timeseries from %s for %s' % (data_source, base_name))
                     continue
 
                 if truncate_last_datapoint:
@@ -581,7 +892,33 @@ class Cloudburst(Thread):
                     continue
 
                 new_anomalies = []
+
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run,
+                # making cloudburst backwards compatible
+                anomalies_list = []
+                anomalies_dict = {}
                 if anomalies:
+                    if isinstance(anomalies, list):
+                        anomalies_list = list(anomalies)
+                    if isinstance(anomalies, dict):
+                        anomalies_dict = copy.deepcopy(anomalies)
+
+                # @added 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run,
+                # making cloudburst backwards compatible
+                if anomalies_dict:
+                    for ts in list(anomalies_dict['anomalies'].keys()):
+                        anomalies_list.append([ts, anomalies_dict['anomalies']['value']])
+
+                # @modified 20230612 - Feature #4946: vortex - m66
+                # Changed the m66 algorithm to return a results dict
+                # like other custom algorithms that vortex can run,
+                # making cloudburst backwards compatible
+                # if anomalies:
+                if anomalies_list:
                     anomaly_timestamps = [int(item[0]) for item in anomalies]
                     anomalies_present_in_period = [ts for ts in anomaly_timestamps if int(ts) > (now_timestamp - long_period_check_last)]
                     if len(anomalies_present_in_period) == 0:
@@ -1439,6 +1776,19 @@ class Cloudburst(Thread):
                     full_uniques, e))
                 unique_metrics = []
 
+            # @added 20220920 - Feature #4662: settings.LUMINOSITY_CLOUDBURST_SKIP_METRICS
+            #                   Task #2732: Prometheus to Skyline
+            #                   Branch #4300: prometheus
+            unique_labelled_metrics = []
+            try:
+                unique_labelled_metrics = list(self.redis_conn_decoded.smembers('labelled_metrics.unique_labelled_metrics'))
+            except Exception as err:
+                logger.error('error :: cloudburst :: failed get unique_labelled_metrics from labelled_metrics.unique_labelled_metrics Redis key - %s' % (
+                    err))
+                unique_labelled_metrics = []
+            if unique_labelled_metrics:
+                unique_metrics = unique_metrics + unique_labelled_metrics
+
             now_timestamp = int(time())
             key_reference_timestamp = (int(now_timestamp) // run_every * run_every)
             processed_metrics_key = 'luminosity.cloudburst.processed_metrics.%s' % str(key_reference_timestamp)
@@ -1554,38 +1904,53 @@ class Cloudburst(Thread):
             }
             logger.info('cloudburst :: info: %s' % str(info_data_dict))
 
-            try:
-                unique_metrics_set = set(list(unique_metrics))
-                processed_metrics_set = set(list(processed_metrics))
-                if unique_metrics_set == processed_metrics_set:
-                    logger.info('cloudburst :: all %s unique_metrics were processed' % str(len(unique_metrics)))
-                else:
-                    not_processed_metrics_key = 'luminosity.cloudburst.not_processed_metrics.%s' % str(key_reference_timestamp)
-                    not_processed_metrics = []
-                    set_difference = unique_metrics_set.difference(processed_metrics_set)
-                    for metric_name in set_difference:
-                        not_processed_metrics.append(metric_name)
+            # @modified 20220920 - Feature #4674: cloudburst active events only
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Only processing metrics with recent activity
+            process_all = False
+            if process_all:
+                try:
+                    unique_metrics_set = set(list(unique_metrics))
+                    processed_metrics_set = set(list(processed_metrics))
+                    if unique_metrics_set == processed_metrics_set:
+                        logger.info('cloudburst :: all %s unique_metrics were processed' % str(len(unique_metrics)))
+                    else:
+                        not_processed_metrics_key = 'luminosity.cloudburst.not_processed_metrics.%s' % str(key_reference_timestamp)
+                        not_processed_metrics = []
+                        set_difference = unique_metrics_set.difference(processed_metrics_set)
+                        for metric_name in set_difference:
+                            not_processed_metrics.append(metric_name)
+                            try:
+                                self.redis_conn.sadd(not_processed_metrics_key, metric_name)
+                            except Exception as e:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: cloudburst :: failed to add %s to %s Redis set - %s' % (
+                                    metric_name, not_processed_metrics_key, e))
                         try:
-                            self.redis_conn.sadd(not_processed_metrics_key, metric_name)
+                            self.redis_conn.expire(not_processed_metrics_key, 3600)
                         except Exception as e:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: cloudburst :: failed to add %s to %s Redis set - %s' % (
-                                metric_name, not_processed_metrics_key, e))
-                    try:
-                        self.redis_conn.expire(not_processed_metrics_key, 3600)
-                    except Exception as e:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: cloudburst :: failed to set expire on %s Redis set - %s' % (
-                            not_processed_metrics_key, e))
-                    logger.warning('warning :: cloudburst :: there are %s metrics that were not processed of the %s unique_metrics' % (
-                        str(len(not_processed_metrics)),
-                        str(len(unique_metrics))))
-                    del set_difference
-                del unique_metrics_set
-                del processed_metrics_set
-            except Exception as e:
-                logger.error(traceback.format_exc())
-                logger.error('error :: cloudburst :: failed to determine whether the unique_metrics_set and processed_metrics_set are different - %s' % e)
+                            logger.error('error :: cloudburst :: failed to set expire on %s Redis set - %s' % (
+                                not_processed_metrics_key, e))
+                        logger.warning('warning :: cloudburst :: there are %s metrics that were not processed of the %s unique_metrics' % (
+                            str(len(not_processed_metrics)),
+                            str(len(unique_metrics))))
+                        del set_difference
+                    del unique_metrics_set
+                    del processed_metrics_set
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: cloudburst :: failed to determine whether the unique_metrics_set and processed_metrics_set are different - %s' % e)
+            else:
+                processed_metrics_set = set(list(processed_metrics))
+                logger.info('cloudburst :: %s metrics were processed' % str(len(processed_metrics_set)))
+                last_active_metrics_check_key = 'luminosity.cloudburst.last_active_metrics_timestamp_check'
+                try:
+                    self.redis_conn_decoded.set(last_active_metrics_check_key, now)
+                except Exception as err:
+                    logger.error('error :: cloudburst :: fail to set %s - %s' % (
+                        last_active_metrics_check_key, err))
 
             process_runtime = time() - now
             if process_runtime < run_every:

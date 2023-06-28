@@ -14,6 +14,9 @@ not unfounded and thanks to the efforts of the matrixprofile.org team the
 `matrixprofile`_ algorithm is now available in Python and if you want a CUDA
 enabled version there is STUMPY.
 
+UPDATE - Skyline as of v4.0.0 uses `stumpy`_ as `matrixprofile`_ development was
+discontinued.
+
 `matrixprofile`_ uses the `MASS`_ similarity search method to identify motifs (
 shapelets, a short subsequence of a time series) that are discords (not similar
 or least similar to anything else in the time series) and these are anomalies.
@@ -27,7 +30,7 @@ The price in the case of `matrixprofile`_ is a few false negatives.  Where
 three-sigma based algorithms would detect an instance as anomalous and you would
 agree it was, rarely, but occasionally `matrixprofile`_ will identify it as not
 anomalous.  A comparison of three-sigma vs. `matrixprofile`_ after the review of
-662 real production data events are as follows:
+859 real production data events are as follows:
 
 +-------------------+------+------+------+------+
 |  algorithm_group  |  tP  |  fP  |  tN  |  fN  |
@@ -113,6 +116,17 @@ assess the results before jumping in with both feet, it really depends if you
 are wanting to use Skyline as an alerter only or as an informational stream of
 the bad, the good and the unknown, that YOU learn from.
 
+HOWEVER - trigger_history_override
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To overcome matrixprofile perhaps silencing too much, the ``trigger_history_override``
+parameter can be passed on skyline_matrixprofile :mod:`settings.CUSTOM_ALGORITHMS`
+a tradeoff value to use here is 6, meaning that if sigma algorithms have triggered
+6 times in a row and matrixprofile does not trigger and classifies the datapoint
+as NOT anomalous, this result will be overridden and the datapoint will be
+recorded as an anomaly (unless there is Ionosphere training the matches
+further down the analysis pipeline).
+
 Enabling matrixprofile to run in Mirage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -122,3 +136,4 @@ appropriate.
 
 .. _MASS: https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html
 .. _matrixprofile: https://github.com/matrix-profile-foundation/matrixprofile
+.. _stumpy: https://github.com/TDAmeritrade/stumpy

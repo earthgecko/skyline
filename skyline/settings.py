@@ -100,7 +100,7 @@ FULL_DURATION = 86400
     but they can help the algorithms reduce the noise and provide more accurate
     anomaly detection.  However, Mirage handles longer durations so ideally this
     should be 86400.
-:vartype FULL_DURATION: str
+:vartype FULL_DURATION: int
 """
 
 MINI_DURATION = 3600
@@ -108,7 +108,7 @@ MINI_DURATION = 3600
 :var MINI_DURATION: This is the duration of the 'mini' namespace, if you are
     also using the Oculus service. It is also the duration of data that is
     displayed in the Webapp 'mini' view.
-:vartype MINI_DURATION: str
+:vartype MINI_DURATION: int
 """
 
 VERIFY_SSL = True
@@ -330,7 +330,7 @@ DATA_UPLOADS_PATH = '/tmp/skyline/data_uploads'
 
 PANDAS_VERSION = '0.18.1'
 """
-:var PANDAS_VERSION: Pandas version in use
+:var PANDAS_VERSION: Pandas version in use (only applicable to Skyline < v2.0.0)
 :vartype PANDAS_VERSION: str
 
 - Declaring the version of pandas in use reduces a large amount of interpolating
@@ -340,11 +340,15 @@ PANDAS_VERSION = '0.18.1'
 
 ALERTERS_SETTINGS = True
 """
+:var ALERTERS_SETTINGS: just leave this as True
+:vartype ALERTERS_SETTINGS: boolean
+
 .. note:: Alerters can be enabled alerters due to that fact that not everyone
     will necessarily want all 3rd party alerters.  Enable what 3rd alerters you
     require here.   This enables only the alerters that are required to be
     imported and means that not all alerter related modules in
     ``requirements.txt`` have to be installed, only those you require.
+
 """
 
 SYSLOG_ENABLED = True
@@ -503,14 +507,25 @@ ALERT_ON_STALE_PERIOD = 300
 :var ALERT_ON_STALE_PERIOD: This is the duration, in seconds, after which an
     alert will be sent for a metric if it stops sending data.  The digest alert
     will only occur once while in the window between the ALERT_ON_STALE_PERIOD
-    and the STALE_PERIOD.
+    and the STALE_PERIOD (or CUSTOM_STALE_PERIOD).
 :vartype ALERT_ON_STALE_PERIOD: int
 """
 
-MIN_TOLERABLE_LENGTH = 1
+MIN_TOLERABLE_LENGTH = 100
 """
 :var MIN_TOLERABLE_LENGTH: This is the minimum length of a timeseries, in
-    datapoints, for the analyzer to recognize it as a complete series.
+    datapoints, for the analyzer to recognize it as a complete series.  It can
+    be set at 1 but there is little point in analysing a timeseries with a
+    single data point.  It is set to 100 by default, but could be realistically
+    brought down to 60 or 30.  It is difficult for algorithms to work with data
+    with such few samples.  However if you have some very sparsely populated
+    metrics for whatever reason the perhaps 100 is too high and you may miss
+    some analysis on these types of metrics.  Generally your densely populated
+    metrics are the vast majority of your metric population and if not, there
+    are other settings that can be configured to that handle sparsely populated
+    metrics better. See: :mod:`settings.ZERO_FILL_NAMESPACES`,
+    :mod:`settings.FLUX_ZERO_FILL_NAMESPACES` and
+    :mod:`settings.LAST_KNOWN_VALUE_NAMESPACES`,
 :vartype MIN_TOLERABLE_LENGTH: int
 """
 
@@ -558,7 +573,7 @@ MAX_AIRGAP_PERIOD = 21600
 """
 :var MAX_AIRGAP_PERIOD: If IDENTIFY_AIRGAPS is enabled Analyzer will only flag
     metric that have any air gaps in the last MAX_AIRGAP_PERIOD seconds as
-    air gapped.
+    air gapped. [ADVANCED FEATURE]
 :vartype MAX_AIRGAP_PERIOD: int
 """
 
@@ -567,7 +582,7 @@ CHECK_AIRGAPS = []
 :var CHECK_AIRGAPS: If set to [] ALL metrics will be check.  List metrics and
     namespaces that you explicitly want to identify airgaps in, this is only
     applicable if you have IDENTIFY_AIRGAPS enabled.  If metrics and/or
-    namespaces are listed here ONLY these will be checked.
+    namespaces are listed here ONLY these will be checked. [ADVANCED FEATURE]
 :vartype CHECK_AIRGAPS: list
 
 Seeing as IDENTIFY_AIRGAPS can be computationally expensive, this allows you to
@@ -597,6 +612,7 @@ SKIP_AIRGAPS = []
 """
 :var SKIP_AIRGAPS: List metrics that you you do not want to identify airgaps in,
     this is only applicable if you have IDENTIFY_AIRGAPS enabled.
+    [ADVANCED FEATURE]
 :vartype SKIP_AIRGAPS: list
 
 These are metrics that, for whatever reason, you do not want to check to see if
@@ -627,7 +643,7 @@ IDENTIFY_UNORDERED_TIMESERIES = False
 :var IDENTIFY_UNORDERED_TIMESERIES: Identify metrics that are not ordered
     correctly via time stamps for Analyzer to sort and deduplicate and recreate
     the Redis metric data with the correctly sorted time series data, in a
-    manner as to not lose any data.
+    manner as to not lose any data. [ADVANCED FEATURE]
 :vartype IDENTIFY_UNORDERED_TIMESERIES: boolean
 
 - Note that the implementation of this feature has a small computational cost.
@@ -765,6 +781,14 @@ CANARY_METRIC = 'skyline.horizon.%s.worker.metrics_received' % SERVER_METRICS_NA
   in the ``carbon.`` or a Skyline namespace.
   metric like:
   CANARY_METRIC = 'skyline.%s.worker.metrics_received' % SERVER_METRICS_NAME
+- In the cluster context this is an ADVANCED_FEATURE due to the fact that it is
+  more difficult to decide because the metric must be a metric assigned to the
+  cluster node shard, meaning the metric must be available in this cluster
+  node's local Redis, it needs to be the authoritative_node.  You can find one
+  in /rebrow on the cluster node searching for `metrics.skyline.*` to use as the
+  CANARY_METRIC per cluster node.  Further if you are sending the skyline metrics
+  from the cluster nodes to a different skyline for analysis then
+  `metrics.carbon.*` or other.
 """
 
 ALGORITHMS = [
@@ -838,7 +862,13 @@ ANALYZER_SKIP = []
     namespace rather add it to SKIP_LIST.  ANALYZER_SKIP is more suited to allow
     for temporarily disabling analysis on a namespace but the metrics time
     series data still gets submitted to Redis.  Whereas metrics in SKIP_LIST
-    just get dropped.
+    just get dropped.  HOWEVER be aware that adding metrics to ANALYZER_SKIP
+    for a short period means that anomalies will not be detected or recorded
+    and if you have AUTOMATICALLY_LEARN_NORMAL enabled then this may result in
+    automatic learning things that are not normal for the metrics that have
+    been skipped.  Therefore, if you have AUTOMATICALLY_LEARN_NORMAL enabled
+    rather do not use this feature and rather consider adding the metrics via
+    the MUTE_ALERTS_ON feature in the Skyline UI.
 :vartype ANALYZER_SKIP: list
 """
 
@@ -903,18 +933,38 @@ CUSTOM_ALGORITHMS = {}
             'debug_logging': True,
         },
         'skyline_matrixprofile': {
-            'namespaces': ["telegraf",],
+            'namespaces': ['telegraf'],
             'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
             'algorithm_parameters': {'windows': 5, 'k_discords': 20},
             'max_execution_time': 5.0,
             'consensus': 1,
-            'algorithms_allowed_in_consensus': ["skyline_matrixprofile"],
+            'algorithms_allowed_in_consensus': ['skyline_matrixprofile'],
             'run_3sigma_algorithms': True,
             'run_before_3sigma': False,
             'run_only_if_consensus': True,
             'trigger_history_override': 4,
-            'use_with': ["mirage"],
+            'use_with': ['mirage'],
             'debug_logging': False,
+        },
+        'skyline_ARTime': {
+            'namespaces': ['telegraf', 'skyline'],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_ARTime.py',
+            'algorithm_parameters': {
+                'windows': 16, 'probationary_period': 216, 'windows_per_pb': 13,
+                'sstep': 1, 'discretize_chomp': 0.075, 'nlevels': 80,
+                'mask_rho_after_anomaly': 80, 'trend_window': 20,
+                'initial_rho': 0.80, 'learn_all': 'false'
+            },
+            'max_execution_time': 6.0,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['skyline_ARTime'],
+            'run_3sigma_algorithms': True,
+            'run_before_3sigma': False,
+            'run_only_if_consensus': True,
+            'trigger_history_override': 6,
+            'use_with': ['mirage'],
+            'debug_logging': False,
+            'handler': 'flock',
         },
     }
 
@@ -942,7 +992,7 @@ CUSTOM_ALGORITHMS = {}
     algorithms, this is optional and defaults to ``True`` if it is not passed
     in the dictionary.  Read the full documentation referred to above to
     determine the effects of passing this as ``False``.
-: param run_before_3sigma: a boolean stating whether to run the custom algorithm
+:param run_before_3sigma: a boolean stating whether to run the custom algorithm
     before the normal three-sigma algorithms, this defaults to ``True``.  If you
     want your custom algorithm to run after the three-sigma algorithms set this to
     ``False``.  Read the full documentation referred to above to determine the
@@ -962,6 +1012,8 @@ CUSTOM_ALGORITHMS = {}
 :param debug_logging: whether to run debug logging on the custom algorithm,
     normally set this to ``False`` but for development and testing ``True`` is
     useful.
+:param handler: this is an optional parameter and only needs to be set for
+    algorithms that need to be run via flock.
 :type namespaces: list
 :type algorithm_source: str
 :type algorithm_parameters: dict
@@ -1015,7 +1067,8 @@ ENABLE_ALL_ALGORITHMS_RUN_METRICS = False
 :vartype ENABLE_ALL_ALGORITHMS_RUN_METRICS: boolean
 
 .. warning:: If set to ``True``, Analyzer will revert to it's original unoptimized
-    workflow and will run and time all algorithms against all timeseries.
+    workflow and will run and time all algorithms against all timeseries and
+    override RUN_OPTIMIZED_WORKFLOW = True
 """
 
 ENABLE_SECOND_ORDER = False
@@ -1024,7 +1077,7 @@ ENABLE_SECOND_ORDER = False
 :vartype ENABLE_SECOND_ORDER: boolean
 
 .. warning:: EXPERIMENTAL - This is an experimental feature, so it's turned off
-    by default.
+    by default and it does nothing currently.
 """
 
 ENABLE_ALERTS = True
@@ -1063,8 +1116,8 @@ ANALYZER_CRUCIBLE_ENABLED = False
   that :mod:`settings.CRUCIBLE_ENABLED` is also set to ``True`` in the Crucible
   settings block.
 
-.. warning:: Not recommended from production, will make a LOT of data files in
-    the :mod:`settings.CRUCIBLE_DATA_FOLDER`
+.. warning:: Not recommended will make a LOT of data files in
+    the :mod:`settings.CRUCIBLE_DATA_FOLDER` and is for development.
 """
 
 ALERTS = (
@@ -1078,20 +1131,23 @@ ALERTS = (
     # ('carbon', 'http_alerter-otherapp', 60),
 )
 """
-:var ALERTS: This enables analyzer alerting. [USER_DEFINED]
+:var ALERTS: This enables analyzer alerting and defines metrics to analyse with
+    Mirage [USER_DEFINED]
 :vartype ALERTS: tuples
 
 This is the config for which metrics to alert on and which strategy to use for
 each.  Alerts will not fire twice within ``EXPIRATION_TIME``, even if they
-trigger again. NOTE smtp alerts must be declared first, all other alert tuples
-MUST be declared AFTER smtp alert tuples.
+trigger again.  **NOTE** any metrics you want to be analysed by Mirage
+must be covered by a stmp alert and must have a SECOND_ORDER_RESOLUTION_HOURS
+defined in the alert.  **NOTE** smtp alerts must be declared first, all other
+alert tuples MUST be declared AFTER smtp alert tuples.
 
 
 - **Tuple schema example**::
 
     ALERTS = (
         # ('<metric_namespace>', '<alerter>', EXPIRATION_TIME, SECOND_ORDER_RESOLUTION_HOURS),
-        # With SECOND_ORDER_RESOLUTION_HOURS being optional for Mirage
+        # With SECOND_ORDER_RESOLUTION_HOURS being optional for analysing metrics with Mirage
         ('metric1', 'smtp', 1800),
         ('important_metric.total', 'smtp', 600),
         ('important_metric.total', 'pagerduty', 1800),
@@ -1114,13 +1170,14 @@ MUST be declared AFTER smtp alert tuples.
 
 - Alert tuple parameters are:
 
-:param metric: metric name.
+:param metric: metric name or pattern.
 :param alerter: the alerter name e.g. smtp, syslog, slack, pagerduty,
     http_alerter_<name> or sms.
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
 :param SECOND_ORDER_RESOLUTION_HOURS: (optional) The number of hours that Mirage
-    should surface the metric timeseries for
+    should surface the metric timeseries for when being analysed.  Adding this is
+    what enables metrics to be sent to Mirage for analysis of a longer timeframe.
 :type metric: str
 :type alerter: str
 :type EXPIRATION_TIME: int
@@ -1129,8 +1186,8 @@ MUST be declared AFTER smtp alert tuples.
 .. note:: Consider using the default skyline_test.alerters.test for testing
     alerts with.
 
-.. note:: All other alerts must be declared AFTER smtp alerts as other alerts
-    rely on the smtp resources.
+.. note:: All other alerts **must** be declared **AFTER** smtp alerts as other
+    alerts rely on the smtp resources.
 
 """
 
@@ -1142,6 +1199,7 @@ EXTERNAL_ALERTS = {}
 
 See the External alerts documentation for the elements the are required in a
 json alert config and how external alerts are applied.
+https://earthgecko-skyline.readthedocs.io/en/latest/alerts.html#external-alert-configs
 
 - **Example**::
 
@@ -1405,7 +1463,7 @@ SLACK_OPTS = {
 :var SLACK_OPTS: Your slack settings. [USER_DEFINED]
 :vartype SLACK_OPTS: dictionary
 
-slack alerts require slackclient
+slack alerts require the slackclient package
 """
 
 PAGERDUTY_OPTS = {
@@ -1416,28 +1474,30 @@ PAGERDUTY_OPTS = {
     'key': 'your_pagerduty_service_api_key',
 }
 """
-:var PAGERDUTY_OPTS: Your SMTP settings. [USER_DEFINED]
+:var PAGERDUTY_OPTS: Your PagerDuty settings. [USER_DEFINED]
 :vartype PAGERDUTY_OPTS: dictionary
 
-PagerDuty alerts require pygerduty
+PagerDuty alerts require the pygerduty package
 """
 
 SYSLOG_OPTS = {
     'ident': 'skyline',
+    'level': 'warn',
 }
 """
 :var SYSLOG_OPTS: Your syslog settings.
 :vartype SYSLOG_OPTS: dictionary
 
 syslog alerts requires an ident this adds a LOG_WARNING message to the
-LOG_LOCAL4 which will ship to any syslog or rsyslog down the line.  The
-``EXPIRATION_TIME`` for the syslog alert method should be set to 1 to fire
-every anomaly into the syslog.
+LOG_LOCAL4 by default, which will ship to any syslog or rsyslog down the line.
+The ``EXPIRATION_TIME`` for the syslog alert method should be set to 1 to fire
+every anomaly into the syslog.  The level key can be set to warn (4), notice (5)
+or info (6).
 """
 
 HTTP_ALERTERS_OPTS = {}
 """
-:var HTTP_ALERTERS_OPTS: External alert endpoints.
+:var HTTP_ALERTERS_OPTS: External alert endpoints - ADVANCED FEATURE.
 :vartype HTTP_ALERTERS_OPTS: dictionary
 
 - **Dictionary example**::
@@ -1625,7 +1685,7 @@ ROOMBA_OPTIMUM_RUN_DURATION = 60
 :vartype ROOMBA_OPTIMUM_RUN_DURATION: int
 
 This is how often Horizon should run roomba to run and prune the time series
-data in Redis to :mod:`settings.FULL_DURATION`.  Thus allows roomba to be tuned
+data in Redis to :mod:`settings.FULL_DURATION`.  This allows roomba to be tuned
 under heavy iowait conditions.  Under heavy iowait conditions, the default 60
 seconds can results in sustained CPU and IO on Redis and the horizon thread.
 Being able to adjust this to 300 allows for a reduction in IO under these
@@ -1717,9 +1777,9 @@ HORIZON_SHARDS = {}
 
 This setting is only applicable to running Skyline Horizon services on multiple
 servers (and Graphite instances) in a replicated fashion.  This allows for all
-the Skyline servers to receiver all metrics but only analyze those metrics that
+the Skyline servers to receive all metrics but only analyze those metrics that
 are assigned to the specific server (shard).  This enables all Skyline servers
-that are running Horizon to receiver the entire metric population stream from
+that are running Horizon to receive the entire metric population stream from
 mulitple Graphite carbon-relays and drop (not submit to their Redis instance)
 any metrics that do not belong to their shard.  Related settings are
 :mod:`settings.REMOTE_SKYLINE_INSTANCES` and :mod:`settings.SYNC_CLUSTER_FILES`
@@ -1826,12 +1886,16 @@ DO_NOT_SKIP_LIST = [
     'skyline.analyzer.mirage_metrics',
     'skyline.analyzer.total_analyzed',
     'skyline.analyzer.total_anomalies',
+    'skyline.analyzer.anomalous',
     'skyline.analyzer.metrics_sparsity',
     'skyline.exceptions',
     'skyline.mirage.checks',
     'skyline.logged_errors',
     'skyline.mirage.run_time',
     'skyline.ionosphere.features_calculation_time',
+    'skyline.analyzer.labelled_metrics.anomalous',
+    'skyline.analyzer.labelled_metrics.checked',
+    'skyline.horizon.prometheus.flux_received',
 ]
 """
 :var DO_NOT_SKIP_LIST: Metrics to skip
@@ -1930,6 +1994,10 @@ THUNDER_CHECKS = {
     'webapp': {
         'up': {
             'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+        'webapp_features_profile': {
+            'run': True, 'expiry': 300, 'alert_via_smtp': True,
             'alert_via_slack': False, 'alert_via_pagerduty': False,
         },
     },
@@ -2097,22 +2165,25 @@ PANORAMA_CHECK_MAX_AGE = 300
 PANORAMA_CHECK_INTERVAL = 20
 """
 :var PANORAMA_CHECK_INTERVAL: How often (in seconds) Panorama will check for
-    anomalie1s to add to the database.  This allows you to configure Panorama to
+    anomalies to add to the database.  This allows you to configure Panorama to
     insert anomalies into the database every second if you so wish to, however
     in most cases every 20 seconds is sufficient.
     However, NOTE, if SNAB_ENABLE is True this is automatically overridden to
     the value of 1 as snab needs anomaly ids available asap.  This can increase
-    disk I/O until such as time as Panorama changes from check files to Redis.
+    disk I/O until such a time as Panorama changes from check files to Redis.
 :vartype PANORAMA_CHECK_INTERVAL: int
 """
 
-PANORAMA_INSERT_METRICS_IMMEDIATELY = False
+PANORAMA_INSERT_METRICS_IMMEDIATELY = True
 """
 :var PANORAMA_INSERT_METRICS_IMMEDIATELY: Panorama will only insert a metric
     into the metrics database table when an anomaly is registered for the metric
     by default.  To have Panorama insert every metric into the database as soon
     as it appears in unique_metrics, set this to True.  This functionality is
-    for development and testing purposes.
+    for development and testing purposes.  With the addition of labelled_metrics
+    in Skyline v4.0.0, the default for this value has become True.  As of v4.0.0
+    this settings variable is no longer considered in Panorama, it now
+    automatically checks for new metrics every 60 seconds.
 :vartype PANORAMA_CHECK_INTERVAL: boolean
 """
 
@@ -2206,7 +2277,7 @@ This enables Mirage to send Crucible data, if this is set to ``True`` ensure
 that :mod:`settings.CRUCIBLE_ENABLED` is also set to ``True`` in the Crucible
 settings block.
 
-.. warning:: Not recommended from production, will make a LOT of data files in
+.. warning:: Not recommended, it will make a LOT of data files in
     the :mod:`settings.CRUCIBLE_DATA_FOLDER`
 """
 
@@ -2271,6 +2342,135 @@ MIRAGE_AUTOFILL_TOOSHORT = False
 :vartype MIRAGE_AUTOFILL_TOOSHORT: boolean
 """
 
+MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS = 3
+"""
+:var MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS: This is the number of peaks that
+    define how many peaks (in the same daily time window) need to exist for
+    a metric to be deemed to exhibit expected daily peaks.  This defaults
+    to 3 which is the best performing setting in general.  If set to 0
+    this analysis will be disabled.
+    Setting it to 3 means for instance there must be at least 3 peaks that
+    occur around the same time every day, for peaks to be expected around
+    the same time each day.  If there are 3 peaks in a 7 day period then
+    determine if an anomaly is actually a normal peak in an acceptable range
+    that is experienced on a daily basis around the same time or not.  In Mirage
+    it will apply the anomalous_daily_peak custom algorithm ONLY if a metric is
+    is found to be anomalous and will override the anomalous result if the
+    current peak values are within the bounds of other peak values that occur
+    in the same period daily.  This is a very useful method for things that
+    occur on a somewhat regular basis and identifies a large number of false
+    positives on these types of metrics.  This is only run if the metric has
+    more 5.25 days worth of data.
+
+:vartype MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS: int
+"""
+
+MIRAGE_SKIP_IRREGULAR_UNSTABLE = []
+"""
+:var MIRAGE_SKIP_IRREGULAR_UNSTABLE: This is a list of namespaces, metrics or
+    regex patterns of metric names to exclude from being analysed as
+    irregular and unstable timeseries.  Irregular and unstable metrics
+    display a very low variance value.  Metrics which can generally display
+    this type of behaviour are metrics related to errors.  For example HTTP
+    status code 50x metrics may experience a number of errors, once or twice
+    a week and when analysed at 7 days any prominent spikes will probably
+    be deemed as anomalous.
+
+:vartype MIRAGE_SKIP_IRREGULAR_UNSTABLE: list
+"""
+
+MIRAGE_LONG_DURATION_ALGORITHMS = {
+    'algorithms': {
+        'sigma': {
+            'algorithm_parameters': {
+                'anomaly_window': 6,
+                'sigma_value': 6,
+                'consensus': 6,
+                'return_results': True,
+            },
+            'outlier_value': 1,
+        },
+        'spectral_residual': {
+            'outlier_value': 1,
+            'algorithm_parameters': {
+                'anomaly_window': 6,
+                'return_results': True,
+            },
+        },
+        'lof': {
+            'outlier_value': -1,
+            'algorithm_parameters': {
+                'anomaly_window': 6,
+                'n_neighbors': 20,
+                'return_results': True,
+            },
+        },
+        'isolation_forest': {
+            'outlier_value': -1,
+            'algorithm_parameters': {
+                'anomaly_window': 6,
+                'contamination': 0.01,
+                'return_results': True,
+            },
+        },
+        'pca': {
+            'outlier_value': 0.7,
+            'algorithm_parameters': {
+                'anomaly_window': 6,
+                'threshold': 0.7,
+                'return_results': True,
+            },
+        },
+        'one_class_svm': {
+            'outlier_value': -1,
+            'algorithm_parameters': {
+                'anomaly_window': 1,
+                'return_results': True,
+            },
+        },
+        'm66': {
+            'outlier_value': 1,
+            'algorithm_parameters': {
+                'anomaly_window': 1,
+                'nth_median': 6,
+                'sigma': 6,
+                'window': 5,
+                'minimum_sparsity': 70,
+                'return_results': True,
+            },
+        },
+        'adtk_level_shift': {
+            'outlier_value': 1,
+            'algorithm_parameters': {
+                'anomaly_window': 1,
+                'window': 10,
+                'c': 9.9,
+                'realtime_analysis': False,
+                'return_results': True,
+            },
+        },
+    },
+    'consensus': 5,
+}
+"""
+:var MIRAGE_LONG_DURATION_ALGORITHMS: The algorithms for Mirage to run
+    on long duration analysis.
+    Algorithm runtimes on 30 days of data (4320 data points):
+    sigma (6-sigma, last 6 data points): 1.1062438488006592
+    spectral_residual: 0.12788629531860352
+    lof: 0.6984493732452393
+    isolation_forest: 1.3740370273590088
+    pca: 1.5815119743347168
+    one_class_svm: 4.011308908462524
+    m66: 0.18551158905029297
+    adtk_level_shift: 2.2769649028778076
+    adtk_persist: 0.9912087917327881
+    adtk_seasonal: 1.1874268054962158
+    adtk_volatility_shift: 1.0059242248535156
+:vartype MIRAGE_LONG_DURATION_ALGORITHMS: dict
+"""
+
+
 """
 Boundary settings
 """
@@ -2332,19 +2532,20 @@ This enables Boundary to send Crucible data, if this is set to ``True`` ensure
 that :mod:`settings.CRUCIBLE_ENABLED` is also set to ``True`` in the Crucible
 settings block.
 
-.. warning:: Not recommended from production, will make a LOT of data files in
+.. warning:: Not recommended it will make a LOT of data files in
     the :mod:`settings.CRUCIBLE_DATA_FOLDER`
 """
 
 BOUNDARY_METRICS = (
     # ('metric', 'algorithm', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
+    ('skyline.logged_errors', 'greater_than', 3600, 0, 0, 1, 10, 'smtp'),  # LEAVE THIS ONE IN AND SET TO ALERT TO THE CORRECT CHANNEL
     ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp|http_alerter-mock_api_alerter_receiver'),
     ('skyline_test.alerters.test', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|http_alerter-mock_api_alerter_receiver'),
     ('skyline_test.alerters.test', 'less_than', 3600, 0, 0, 15, 2, 'smtp|http_alerter-mock_api_alerter_receiver'),
-    ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'),
-    ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'),
-    ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
-    ('nometric.another', 'greater_than', 3600, 0, 0, 100000, 1, 'http_alerter-external_endpoint'),
+    ('some_metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'),
+    ('some_metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp'),
+    ('some_nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
+    ('some_nometric.another', 'greater_than', 3600, 0, 0, 100000, 1, 'http_alerter-external_endpoint'),
 )
 """
 :var BOUNDARY_METRICS: definitions of metrics for Boundary to analyze
@@ -2368,7 +2569,7 @@ different ranges to pre-filter some noise.
 
 - Metric parameters (all are required):
 
-:param metric: metric name.
+:param metric: metric name or pattern.
 :param algorithm: algorithm name.
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
@@ -2462,7 +2663,7 @@ BOUNDARY_AUTOAGGRERATION_METRICS = (
 - Metric tuple parameters are:
 
 :param metric: metric name.
-:param AGGREGATION_VALUE: alerter name.
+:param AGGREGATION_VALUE: window to aggregate in seconds.
 :type metric: str
 :type AGGREGATION_VALUE: int
 
@@ -2498,7 +2699,7 @@ BOUNDARY_ALERTER_OPTS = {
     Boundary has its own alerting settings, similar to Analyzer.  However due to
     the nature of Boundary and it algorithms it could be VERY noisy and expensive
     if all your metrics dropped off a cliff.  So Boundary introduces alerting
-    the ability to limit overall alerts to an alerter channel.  These limits use
+    with the ability to limit overall alerts to an alerter channel.  These limits use
     the same methodology that the alerts use, but each alerter is keyed too.
 """
 
@@ -2640,16 +2841,18 @@ WEBAPP_SERVER = 'gunicorn'
 :vartype WEBAPP_SERVER: str
 """
 
-WEBAPP_GUNICORN_WORKERS = 4
+WEBAPP_GUNICORN_WORKERS = 2
 """
 :var WEBAPP_GUNICORN_WORKERS: How many gunicorn workers to run for the webapp.
     The normal recommended value for gunicorn is generally be between 2-4
     workers per core, however on a machine with lots of cores this is probably
     over provisioning for the webapp, depending on the load on the server.
+    Since switching to the gevent worker_class there is no requirement for more
+    that 2 workers.
 :vartype WEBAPP_GUNICORN_WORKERS: int
 """
 
-WEBAPP_GUNICORN_BACKLOG = 254
+WEBAPP_GUNICORN_BACKLOG = 2048
 """
 :var WEBAPP_GUNICORN_BACKLOG: The maximum number of pending connections.  This
     refers to the number of clients that can be waiting to be served. Exceeding
@@ -2667,7 +2870,9 @@ WEBAPP_IP = '127.0.0.1'
 
 WEBAPP_PORT = 1500
 """
-:var WEBAPP_PORT: The port for the Webapp to listen on
+:var WEBAPP_PORT: The port for the Webapp to listen on, note that
+    webapp_features_profile will also listen on 127.0.0.1 WEBAPP_PORT + 1, e.g
+    1501.
 :vartype WEBAPP_PORT: int
 """
 
@@ -2874,7 +3079,7 @@ IONOSPHERE_CHECK_MAX_AGE = 300
 :vartype IONOSPHERE_CHECK_MAX_AGE: int
 """
 
-IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 86400
+IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 259200
 """
 :var IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: Ionosphere will keep timeseries
     data files for this long, for the operator to review and train on.
@@ -3359,6 +3564,149 @@ MEMCACHED_SERVER_PORT = 11211
 :vartype MEMCACHE_SERVER_IP: int
 """
 
+IONOSPHERE_LEARN_REPETITIVE_PATTERNS = False
+"""
+:var IONOSPHERE_LEARN_REPETITIVE_PATTERNS: Whether to allow Ionosphere to learn
+    repetetive, seasonal patterns from the existing training data (by default
+    3 days, defined by :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`).
+:vartype IONOSPHERE_LEARN_REPETITIVE_PATTERNS: boolean
+"""
+
+IONOSPHERE_FIND_REPETITIVE_PATTERNS = False
+"""
+:var IONOSPHERE_FIND_REPETITIVE_PATTERNS: Whether to allow Ionosphere to find
+    and learn repetetive patterns in anomalies over the previous 30 days.
+:vartype IONOSPHERE_FIND_REPETITIVE_PATTERNS: boolean
+"""
+
+IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE = 0.0
+"""
+:var IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE: The threshold value on
+    which to implement MinMax scaling on repetitive patterns learning.  Setting
+    this to 0.0 disables MinMax scaling.  A sensible value is 1000.0
+:vartype IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE: float
+"""
+
+IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE = {}
+"""
+:var IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE: This is a convenience setting to
+    allow for only certain metrics to be learnt from repetitive patterns. If
+    defined it is evaluated before
+    :mod:`settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE` to filter only the
+    metrics that match before the exclude is evaluated.  This setting is to
+    allow for testing repetitive learning with limited set of metrics before
+    implementing on the entire metric population.  It has the same data
+    structure as :mod:`settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE`
+    below.
+:vartype IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE: dict
+"""
+
+IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE = {
+    '^skyline\\.': {
+        'skyline': [
+            'logged_errors', 'run_time', 'total_anomalies',
+            'exceptions', '.*_breakdown', 'metrics_sparsity',
+            'http_alerter', 'discarded',
+        ],
+    },
+    '^carbon\\.': {
+        'carbon': ['errors', 'droppedCreates', 'fullQueueDrops']
+    },
+    '_tenant_id="1"': {
+        'http_duration_sum': {
+            'code': ['.*code="2.*', '.*code="3.*'],
+            'job': ['prometheus'],
+            'instance': ['127.0.0.1', '"localhost:9090"'],
+        },
+        'http_requests_total': {
+            'code': ['.*code="4.*', '.*code="5.*'],
+            'job': ['prometheus'],
+            'instance': ['127.0.0.1', '"localhost:9090"'],
+        },
+    },
+    # 'mysql': {'mysql': ['.*aborted.*', '.access_denied.*', 'errors']},
+    # '.*errors_total': {'prometheus_.*': ['prometheus'], 'vm_.*': ['victoriametrics']},
+}
+"""
+:var IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE: A dictionary of metric names,
+    namespace, metric elements, labels or values to match metrics which should
+    be excluded from learning of repetetive patterns.  Metrics most suited to
+    being declared here are metrics that are related to errors, 50x status codes,
+    access_denied, etc, things you do not want learnt.  The dictionary is keyed
+    on some element and then an additional dictionary of filters made up of
+    strings, metric elements, labels or values can be passed which match
+    the metrics to be excluded.  This is a nested dictionary can be made up of
+    a primary match filter and one or more secondary match filters all being
+    dictionary keys and tertiary match filter which holds list values.
+    Additionally there is a special key that can be use, _NOT.  This key can
+    either be a single list or a dict of keys each with a single list.
+:vartype IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE: dict
+
+- **Annotated example** - pay attention the comments regarding using values with labelled metrics::
+
+    IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE = {
+        '^skyline\\.': {  # The primary match filter, must be matched
+            'skyline': [  # The secondary match filter, must be matched
+                'logged_errors', 'run_time'
+                ...,
+            ], # A tertiary match filter list, at least one of these must be matched
+        },
+        '_tenant_id="1"': {  # The primary match filter, must be matched (with
+                             # multiple secondary match filters)
+            'http_requests_total': {  # A secondary match filter, must be matched
+                                    # with multiple tertiary match lists and
+                                    # at least one must match from each list
+                'code': ['.*code="4.*', '.*code="5.*'],
+                'job': ['prometheus'],
+                'instance': ['127.0.0.1:9090', '"localhost:9090"'],
+            },
+            'prometheus_http_request_duration_seconds_sum': {
+                'handler': ['.*handler="/api/v1/status/buildinfo".*', '.*handler="/static/\\*filepath".*'],
+                # NOTE WITH LABELLED METRICS if you declare a value it must be
+                # defined by a valid regex including the label AND value,
+                # enclosed by .* on either side.  If you just use a label and
+                # not the value, then labels are matched without requiring a regex
+                'job': ['prometheus'],
+                'instance': ['127.0.0.1:9090', '"localhost:9090"'],
+            },
+        },
+        'vm_http_request_errors_total': {
+            'cluster': ['.*cluster="victoriametrics-cluster-dev-eu".*'],
+            '_NOT': {  # An example of the _NOT key
+                'component': ['.*component="vmselect".*'],
+                'path': ['.*path="/select/{}/prometheus/api/v1/query_range".*'],
+            }
+        },
+        'prometheus_target_scrape_pool_reloads_total': {
+            'job': ['.*job=".*'],
+            'NOT_': [':*job="loki".*']  # Example of a _NOT list
+        },
+    }
+
+"""
+
+IONOSPHERE_ENFORCE_DOWNSAMPLING = {}
+"""
+:var IONOSPHERE_ENFORCE_DOWNSAMPLING: Declare the period resolutions to enforce
+    for the creation of features profiles.  Features profiles work best on time
+    series which are between 1000 and 5000 data points for two reasons, speed
+    and accuracy.  Although it is possible to use the method on high resolution
+    time series data, it is much slower and more importantly less accurate.
+    Enforcing downsampling is RECOMMENDED for optimium performance.
+:vartype IONOSPHERE_ENFORCE_DOWNSAMPLING: dict
+
+- **Example**::
+
+    IONOSPHERE_ENFORCE_DOWNSAMPLING = {
+        # duration, resolution
+        86400: 60,
+        604800: 600,
+        2592000: 600,
+    }
+
+"""
+
+
 """
 Luminosity settings
 """
@@ -3608,6 +3956,14 @@ LUMINOSITY_CLOUDBURST_RUN_EVERY = 900
     luminosity/cloudbursts to identify significant changepoints in metrics.  To
     disable luminosity/cloudbursts set this to 0.
 :vartype LUMINOSITY_CLOUDBURST_RUN_EVERY: int
+"""
+
+LUMINOSITY_CLOUDBURST_SKIP_METRICS = []
+"""
+:var LUMINOSITY_CLOUDBURST_SKIP_METRICS: A list of metric names, namespaces,
+    metric elements, labels and values of metrics to skip running cloudburst
+    analysis on.
+:vartype LUMINOSITY_CLOUDBURST_SKIP_METRICS: list
 """
 
 LUMINOSITY_RELATED_METRICS = False
@@ -4025,6 +4381,16 @@ FLUX_OTEL_ENABLED = False
 :vartype FLUX_OTEL_ENABLED: boolean
 """
 
+FLUX_DROP_BUCKET_METRICS = True
+"""
+:var FLUX_DROP_BUCKET_METRICS: Whether to drop Prometheus/VictoriaMetrics
+    _bucket{ metrics.  These are histogram metrics and in Skyline currently have
+    little value as they are difficult to group and analyse.  The _count and
+    _sum metrics are sufficient for signals.  _bucket metrics in themselves tend
+    to make noise.
+:vartype FLUX_DROP_BUCKET_METRICS: boolean
+"""
+
 """
 Vista settings
 """
@@ -4343,6 +4709,17 @@ would override the EXTERNAL_SETTINGS values for external-test_external_settings.
 """
 Prometheus settings
 """
+PROMETHEUS_INGESTION = False
+"""
+:var PROMETHEUS_INGESTION: ADVANCED FEATURE.  Whether to enable Skyline to
+    ingest remote writes from Prometheus.  Skyline accepts both native
+    Prometheus remote_write protobuf data and remote_storage_adapter writes with
+    the influxdb format. Please see the Prometheus integration documentation
+    page for full details:
+    https://earthgecko-skyline.readthedocs.io/en/latest/prometheus.html
+:vartype PROMETHEUS_INGESTION: boolean
+"""
+
 PROMETHEUS_SETTINGS = {}
 """
 :var PROMETHEUS_SETTINGS: UNDER DEVELOPMENT (**not functional**) Prometheus can be
@@ -4375,6 +4752,18 @@ PROMETHEUS_SETTINGS = {}
     }
 
 """
+PROMETHEUS_METRIC_OPTS = {
+    'tenant_label': 'x_tenant_id',
+    '_default': {
+        'max_cardinality': 1000,
+    },
+    'test.prometheus': {
+        'max_cardinality': 1000,
+        'metrics': {
+            'test.prometheus.'
+        },
+    }
+}
 
 """
 opentelemetry settings - EXPERIMENTAL and for DEVELOPMENT
@@ -4407,4 +4796,295 @@ WEBAPP_SERVE_JAEGER = False
     nginx configuration, see:
     https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example
 :vartype WEBAPP_SERVE_JAEGER: boolean
+"""
+
+"""
+julialang settings
+"""
+
+JULIA_OPTS = {
+    'analyzer': {
+        'enabled': False,
+    },
+    'analyzer_batch': {
+        'enabled': False,
+    },
+    'mirage': {
+        'enabled': False,
+    },
+}
+"""
+:var JULIA_OPTS: Options for running algorithms with julialang.
+:vartype JULIA_OPTS: dict
+"""
+
+"""
+victoriametrics settings - EXPERIMENTAL and for DEVELOPMENT
+"""
+VICTORIAMETRICS_ENABLED = False
+"""
+:var VICTORIAMETRICS_ENABLED: EXPERIMENTAL FEATURE.  Whether victoriametrics is
+    enabled as a backend store for labelled metrics from Prometheus, influxdb,
+    etc.
+:vartype VICTORIAMETRICS_ENABLED: boolean
+"""
+
+VICTORIAMETRICS_OPTS = {
+    'scheme': 'http',
+    'host': '127.0.0.1',
+    'port': 8428,
+    'username': None,
+    'password': None,
+    'jsonl_insert_path': '/api/v1/import',
+    'select_path': None,
+
+}
+"""
+:var VICTORIAMETRICS_OPTS: EXPERIMENTAL FEATURE.  A dictionary with the
+    details for the victoriametrics backend store.  The jsonl_insert_path and
+    select_path defaults to the standalone VictoriaMetrics paths however for a
+    clustered version of VictoriaMetrics these would be as in the cluster
+    example below.
+:vartype VICTORIAMETRICS_OPTS: dict
+
+- **Example - local**::
+
+    VICTORIAMETRICS_OPTS = {
+        'scheme': 'http',
+        'host': '127.0.0.1',
+        'port': 8428,
+        'username': None,
+        'password': None,
+        'jsonl_insert_path': '/api/v1/import',
+        'select_path': None,
+    }
+
+- **Example - cluster**::
+
+    VICTORIAMETRICS_OPTS = {
+        'scheme': 'https',
+        'host': 'victoriametrics-cluser-1.example.org',
+        'port': 443,
+        'username': None,
+        'password': None,
+        'jsonl_insert_path': '/insert/0/api/v1/import',
+        'select_path': '/select/0',
+    }
+
+"""
+
+"""
+memray profiling - EXPERIMENTAL and for DEVELOPMENT ONLY
+"""
+MEMRAY_ENABLED = False
+"""
+:var MEMRAY_ENABLED: EXPERIMENTAL FEATURE AND DEVELOPMENT ONLY.  Whether memray
+    is enabled.
+:vartype MEMRAY_ENABLED: boolean
+"""
+
+"""
+Prometheus metrics
+"""
+EXPOSE_PROMETHEUS_METRICS = False
+"""
+:var EXPOSE_PROMETHEUS_METRICS: Whether to expose Skyline metrics in a
+    Prometheus exporter sytle for scraping on /metrics.  NOTE that the Prometheus
+    skyline scrape config should have scrape_interval of 60s, any value less
+    than 60s will not surface the desired metrics.  Skyline metrics have a 60s
+    resolution.
+:vartype EXPOSE_PROMETHEUS_METRICS: boolen
+"""
+
+"""
+Vortex
+"""
+VORTEX_ENABLED = True
+"""
+:var VORTEX_ENABLED: Whether to enable Skyline vortex to allow adhoc analysis of
+    metrics.
+:vartype VORTEX_ENABLED: boolean
+"""
+
+VORTEX_TIMESERIES_JSON_TO_DISK = True
+"""
+:var VORTEX_TIMESERIES_JSON_TO_DISK: By default Vortex saves submitted timeseries
+    to disk to prevent Redis from exhausting memory if 1000s of timeseries are
+    submitted at once.
+:vartype VORTEX_TIMESERIES_JSON_TO_DISK: boolean
+"""
+
+VORTEX_FULL_DURATION_RESOLUTIONS = {
+    86400: 60,
+    604800: 600,
+}
+"""
+:var VORTEX_FULL_DURATION_RESOLUTIONS: The downsampling values which are
+    required to ensure speed and that features profiles are effective.
+:vartype VORTEX_FULL_DURATION_RESOLUTIONS: dict
+"""
+
+VORTEX_ALGORITHMS = {
+    'default': {
+        'sigma': {
+            'anomaly_window': 1, 'sigma_value': 3, 'consensus': 6,
+            'return_results': True
+        },
+        'spectral_residual': {
+            'outlier_value': 1,
+            'algorithm_parameters': {'anomaly_window': 1, 'return_results': True},
+        },
+        'consensus': [['sigma', 'spectral_residual']],
+    },
+    'sigma': {
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'sigma_value': 3,
+            'consensus': 6,
+            'return_results': True,
+        },
+        'outlier_value': 1,
+    },
+    'matrixprofile': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'windows': 5,
+            'k_discords': 20,
+            'return_results': True,
+        },
+    },
+    'spectral_residual': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'return_results': True,
+        },
+    },
+    'lof': {
+        'outlier_value': -1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'n_neighbors': 20,
+            'return_results': True,
+        },
+    },
+    'isolation_forest': {
+        'outlier_value': -1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'contamination': 0.01,
+            'return_results': True,
+        },
+    },
+    'dbscan': {
+        'outlier_value': -1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'n_neighbors': 2,
+            'min_samples': 4,
+            'return_results': True,
+        },
+    },
+    'pca': {
+        'outlier_value': 0.7,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'threshold': 0.7,
+            'return_results': True,
+        },
+    },
+    'prophet': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'return_results': True,
+        },
+    },
+    'one_class_svm': {
+        'outlier_value': -1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'return_results': True,
+        },
+    },
+    'm66': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'nth_median': 6,
+            'sigma': 6,
+            'window': 5,
+            'minimum_sparsity': 70,
+            'return_results': True,
+        },
+    },
+    'adtk_level_shift': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'window': 10,
+            'c': 9.9,
+            'realtime_analysis': False,
+            'return_results': True,
+        },
+    },
+    'adtk_persist': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'window': 10,
+            'c': 9.9,
+            'realtime_analysis': False,
+            'return_results': True,
+        },
+    },
+    'adtk_seasonal': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'window': 10,
+            'c': 9.9,
+            'realtime_analysis': False,
+            'return_results': True,
+        },
+    },
+    'adtk_volatility_shift': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'window': 10,
+            'c': 9.9,
+            'realtime_analysis': False,
+            'return_results': True,
+        },
+    },
+    'mstl': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'horizon': 1,
+            'level': 99,
+            'season_hours': 24,
+            'season_days': 7,
+            'return_results': True,
+            'max_execution_time': 180,
+        },
+    },
+}
+"""
+:var VORTEX_ALGORITHMS: The algorithms avaiable to Vortex and their default
+    parameters.
+:vartype VORTEX_ALGORITHMS: dict
+"""
+
+NUMBA_CACHE_DIR = '/opt/skyline/.cache/numba'
+"""
+:var NUMBA_CACHE_DIR: ADVANCED FEATURE. The default cache dir that numba uses to
+    cache compiled jit files.  Under the normal Skyline build on CentOS 8 numba
+    defaults to /opt/skyline/.cache/numba WITHOUT this being set in an
+    environment variable.  Change with caution and only if you have a full
+    understanding of the numba jit caching layout
+    https://numba.readthedocs.io/en/stable/developer/caching.html
+:vartype NUMBA_CACHE_DIR: str
 """

@@ -10,6 +10,9 @@ from sys import version_info
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
+# @added 20221019 - Feature #4700: algorithms - single series
+import pandas as pd
+
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -17,6 +20,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     import settings
     from analyzer import Analyzer
+    # @added 20220702 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    from analyzer_labelled_metrics import AnalyzerLabelledMetrics
     from metrics_manager import Metrics_Manager
     from validate_settings import validate_settings_variables
     # @added 20220328 - Feature #4018: thunder - skyline.errors
@@ -48,6 +54,16 @@ class AnalyzerAgent():
     def run(self):
         logger.info('agent starting skyline %s' % skyline_app)
         Analyzer(getpid()).start()
+
+        # @added 20220702 - Task #2732: Prometheus to Skyline
+        #                   Branch #4300: prometheus
+        try:
+            PROMETHEUS_INGESTION = settings.PROMETHEUS_INGESTION
+        except:
+            PROMETHEUS_INGESTION = False
+        if PROMETHEUS_INGESTION:
+            logger.info('agent starting skyline analyzer_labelled_metrics')
+            AnalyzerLabelledMetrics(getpid()).start()
 
         # @added 20201105 - Feature #3830: metrics_manager
         # Start a metrics_manager process.  This process is responsible for
@@ -123,10 +139,15 @@ def run():
             if isinstance(timeseries, map):
                 timeseries = list(timeseries)
 
+        # @added 20221019 - Feature #4700: algorithms - single series
+        series = pd.Series(x[1] for x in timeseries)
+
         # ensemble = [globals()[algorithm](timeseries) for algorithm in settings.ALGORITHMS]
-        ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
+        # @modified 20221019 - Feature #4700: algorithms - single series
+        # ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
+        ensemble = [getattr(algorithms, algorithm)(timeseries, series) for algorithm in settings.ALGORITHMS]
     except KeyError as e:
-        print('Algorithm %s deprecated or not defined; check settings.ALGORITHMS - %s' % e)
+        print('Algorithm deprecated or not defined; check settings.ALGORITHMS - %s' % e)
         sys.exit(1)
     except Exception as e:
         print('Algorithm test run failed - %s' % e)

@@ -23,6 +23,7 @@ from sys import version_info
 from sys import exit as sys_exit
 # import os.path
 from ast import literal_eval
+import copy
 
 from msgpack import Unpacker
 
@@ -75,6 +76,9 @@ from algorithms_batch import run_selected_batch_algorithm
 
 from algorithm_exceptions import TooShort, Stale, Boring
 
+# @added 20220919 - Feature #4676: analyzer - illuminance.all key
+from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+
 # TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA
 #    from spectrum import push_to_crucible
 
@@ -120,9 +124,22 @@ except:
 
 # @added 20200607 - Feature #3566: custom_algorithms
 try:
-    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS
+    CUSTOM_ALGORITHMS = copy.deepcopy(settings.CUSTOM_ALGORITHMS)
 except:
     CUSTOM_ALGORITHMS = None
+# @added 20230616 - Feature #3566: custom_algorithms
+# Filter out only the ones in which analyzer is
+# declared in use_with
+if CUSTOM_ALGORITHMS:
+    ASSIGNED_CUSTOM_ALGORITHMS = {}
+    for custom_algorithm in CUSTOM_ALGORITHMS:
+        try:
+            if 'analyzer' in CUSTOM_ALGORITHMS[custom_algorithm]['use_with']:
+                ASSIGNED_CUSTOM_ALGORITHMS[custom_algorithm] = copy.deepcopy(CUSTOM_ALGORITHMS[custom_algorithm])
+        except:
+            pass
+    CUSTOM_ALGORITHMS = copy.deepcopy(ASSIGNED_CUSTOM_ALGORITHMS)
+
 try:
     DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
 except:
@@ -357,6 +374,14 @@ class AnalyzerBatch(Thread):
 
         # @added 20220504 - Feature #2580: illuminance
         illuminance_dict = {}
+        # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+        illuminance_all_dict = {}
+        errors = []
+        algorithms = {}
+        try:
+            algorithms = self.redis_conn_decoded.hgetall('metrics_manager.algorithms.ids')
+        except Exception as err:
+            logger.error('error :: hgetall metrics_manager.algorithms.ids - %s' % str(err))
 
         for item in metrics:
             metric_name = item[0]
@@ -1119,6 +1144,32 @@ class AnalyzerBatch(Thread):
                     # @added 20220420 - Feature #4530: namespace.analysed_events
                     analysed_metrics.append(base_name)
 
+                    # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+                    if ensemble.count(True) > 0:
+                        triggered_algorithms = []
+                        for index, value in enumerate(ensemble):
+                            if value:
+                                algorithm = algorithms_run[index]
+                                try:
+                                    algorithm_id = int(algorithms[algorithm])
+                                except:
+                                    algorithm_id = 0
+                                triggered_algorithms.append(algorithm_id)
+                        metric_id = 0
+                        try:
+                            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                        except:
+                            errors.append([base_name, 'get_metric_id_from_base_name failed', str(err)])
+                            metric_id = 0
+                        if metric_id:
+                            try:
+                                illuminance_all_dict[str(metric_id)] = {
+                                    't': batch_timeseries,
+                                    'v': float(datapoint),
+                                    'a': triggered_algorithms}
+                            except Exception as err:
+                                errors.append([base_name, 'failed to add illuminance_all_dict', str(err)])
+
                     if LOCAL_DEBUG:
                         logger.debug('debug :: %s - anomalous: %s, datapoint: %s, timestamp: %s, ensemble: %s, algorithms_run: %s, len(batch_timeseries): %s' % (
                             base_name, str(anomalous), str(datapoint),
@@ -1762,6 +1813,19 @@ class AnalyzerBatch(Thread):
             logger.info('illuminance Redis hash now has %s entries' % (
                 str(len(current_illuminance_dict))))
 
+        # @added 20220919 - Feature #4676: analyzer - illuminance.all key
+        if len(illuminance_all_dict) > 0:
+            logger.info('calling add_illuminance_entries (all) with %s entries to add' % (
+                str(len(illuminance_all_dict))))
+            current_illuminance_all_dict = {}
+            try:
+                current_illuminance_all_dict = add_illuminance_entries(self, skyline_app, int(run_timestamp), illuminance_all_dict)
+            except Exception as err:
+                logger.error('error :: add_illuminance_entries (all) failed - %s' % (
+                    err))
+            logger.info('illuminance_all Redis hash now has %s entries' % (
+                str(len(current_illuminance_all_dict))))
+
         LOCAL_DEBUG = False
 
         spin_end = time() - spin_start
@@ -2121,7 +2185,7 @@ class AnalyzerBatch(Thread):
                 # @added 20200607 - Feature #3566: custom_algorithms
                 anomaly_breakdown_algorithms = list(settings.ALGORITHMS)
                 if CUSTOM_ALGORITHMS:
-                    for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                    for custom_algorithm in CUSTOM_ALGORITHMS:
                         anomaly_breakdown_algorithms.append(custom_algorithm)
 
                 # @modified 20200607 - Feature #3566: custom_algorithms

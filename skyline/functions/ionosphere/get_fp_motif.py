@@ -85,7 +85,37 @@ def get_fp_motif(
         # data point in a period in relation to echo/full_duration data, the
         # method used inference.py does.
         # fp_motif_ts = fp_timeseries[index:(index + size)]
-        fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= best_index < (best_index + size)]
+        # @modified 20220517 - Feature #4014: Ionosphere - inference
+        # However in inference.py the Create current_best_indices as mass2_batch returns
+        # shifts the index to begin at the best_index for mass3...
+        if size < 90:
+            # @modified 20220526 - Bug #4588: Ionosphere - inference - further validate all_in_range
+            # The change to a simplified chained comparison between the operands
+            # did not have the desired result.  The index to end of timeseries
+            # was being selected rather than index to index+size.  This resulted
+            # in the fp_motifs being incorrect and having incorrect areas, etc.
+            # Reverted back to the original method, occassionally pylint is not
+            # useful.
+            # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= best_index and index < (best_index + size)]
+            # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= best_index < (best_index + size)]
+            fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= best_index and index < (best_index + size)]
+        else:
+            # @modified 20220526 - Bug #4588: Ionosphere - inference - further validate all_in_range
+            # The change to a simplified chained comparison between the operands
+            # did not have the desired result.  The index to end of timeseries
+            # was being selected rather than index to index+size.  This resulted
+            # in the fp_motifs being incorrect and having incorrect areas, etc.
+            # Reverted back to the original method, occassionally pylint is not
+            # useful.
+            # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) and index <= best_index]
+            # fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) <= best_index]
+            fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= (best_index - size) and index <= best_index]
+
+        # @added 20220718 - Feature #4014: Ionosphere - inference
+        # Handle the index being 0 and the size greater that 90
+        if best_index == 0:
+            fp_motif_ts = [item for index, item in enumerate(fp_timeseries) if index >= best_index and index < (best_index + size)]
+
         if len(fp_motif_ts) > size:
             fp_motif_ts = fp_motif_ts[-size:]
 

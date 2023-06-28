@@ -19,9 +19,12 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     import settings
     # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
-    from skyline_functions import get_redis_conn_decoded
+    from skyline_functions import get_redis_conn_decoded, mkdir_p
     from logger import set_up_logging
-    from listen import MetricData, MetricDataPost
+    # @added 20221118 - Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    # Added VortexDataPost and VortexResults
+    from listen import MetricData, MetricDataPost, VortexDataPost, VortexResults
     # from listen_post import MetricDataPost
     from worker import Worker
     from populate_metric import PopulateMetric
@@ -37,6 +40,13 @@ if True:
     if flux_process_uploads:
         from uploaded_data_worker import UploadedDataWorker
 
+    # @added 20220622 - Task #2732: Prometheus to Skyline
+    #                   Branch #4300: prometheus
+    try:
+        PROMETHEUS_INGESTION = settings.PROMETHEUS_INGESTION
+    except:
+        PROMETHEUS_INGESTION = False
+
     # @added 20211026 - Branch #4300: prometheus
     prometheus_settings = {}
     try:
@@ -45,8 +55,15 @@ if True:
         prometheus_settings = {}
     except Exception as err:
         prometheus_settings = {}
-    if prometheus_settings:
-        from prometheus import PrometheusMetricDataPost
+    # @modified 20220622 - Task #2732: Prometheus to Skyline
+    #                      Branch #4300: prometheus
+    # if prometheus_settings:
+    if prometheus_settings or PROMETHEUS_INGESTION:
+        try:
+            from prometheus import PrometheusMetricDataPost
+        except Exception as err:
+            print(traceback.format_exc())
+            print('flux :: error from prometheus import PrometheusMetricDataPost - %s' % err)
 
     # @added 20220405 - Feature #4516: flux - opentelemetry traces
     FLUX_OTEL_ENABLED = False
@@ -59,11 +76,23 @@ if True:
     if FLUX_OTEL_ENABLED:
         from listen import OTLPTracePost
 
+    # @added 20220530 - Feature #4596: flux - prometheus_alerts
+    # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+    # Commented out PrometheusAlertPost as WIP not complete
+    # from prometheus_alerts import PrometheusAlertPost
+
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 try:
     FLUX_PERSIST_QUEUE = settings.FLUX_PERSIST_QUEUE
 except:
     FLUX_PERSIST_QUEUE = False
+
+# @added 20221126 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+try:
+    VORTEX_ENABLED = settings.VORTEX_ENABLED
+except:
+    VORTEX_ENABLED = True
 
 logger = set_up_logging(None)
 pid = os.getpid()
@@ -134,10 +163,10 @@ Aggregator(pid).start()
 logger.info('flux :: starting %s gunicorn worker/s, each with 2 threads' % str(settings.FLUX_WORKERS))
 Worker(httpMetricDataQueue, pid).start()
 Worker(httpMetricDataQueue, pid).start()
-if settings.FLUX_WORKERS == 2:
+if settings.FLUX_WORKERS >= 2:
     Worker(httpMetricDataQueue, pid).start()
     Worker(httpMetricDataQueue, pid).start()
-if settings.FLUX_WORKERS == 3:
+if settings.FLUX_WORKERS >= 3:
     Worker(httpMetricDataQueue, pid).start()
     Worker(httpMetricDataQueue, pid).start()
 if settings.FLUX_WORKERS > 3:
@@ -160,7 +189,8 @@ if flux_process_uploads:
     logger.info('flux :: starting uploaded_data_worker')
     UploadedDataWorker(pid).start()
 
-api = application = falcon.API()
+# api = application = falcon.API()
+api = application = falcon.App()
 # api.req_options.auto_parse_form_urlencoded=True
 
 httpMetricData = MetricData()
@@ -168,20 +198,66 @@ populateMetric = PopulateMetric()
 httpMetricDataPost = MetricDataPost()
 
 # @added 20211026 - Branch #4300: prometheus
-if prometheus_settings:
-    prometheusMetricDataPost = PrometheusMetricDataPost()
+prometheusMetricDataPost = None
+# @modified 20220622 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# if prometheus_settings:
+if prometheus_settings or PROMETHEUS_INGESTION:
+    try:
+        logger.info('flux :: starting prometheusMetricDataPost')
+        try:
+            from prometheus import PrometheusMetricDataPost
+            logger.info('flux :: imported prometheusMetricDataPost')
+        except Exception as err:
+            print(traceback.format_exc())
+            print('flux :: error from prometheus import PrometheusMetricDataPost - %s' % err)
+
+        prometheusMetricDataPost = PrometheusMetricDataPost()
+    except Exception as err:
+        logger.debug(traceback.format_exc())
+        logger.debug('flux :: error starting prometheusMetricDataPost - %s' % err)
+
 
 # @added 20220408 - Feature #4516: flux - opentelemetry traces
 if FLUX_OTEL_ENABLED:
     otelTracePost = OTLPTracePost()
 
+# @added 20220530 - Feature #4596: flux - prometheus_alerts
+# @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+# Commented out PrometheusAlertPost as WIP not complete
+# prometheusAlertPost = PrometheusAlertPost()
+
 api.add_route('/metric_data', httpMetricData)
 api.add_route('/populate_metric', populateMetric)
 api.add_route('/metric_data_post', httpMetricDataPost)
 # @added 20211026 - Branch #4300: prometheus
-if prometheus_settings:
-    api.add_route('/prometheus/write', prometheusMetricDataPost)
+# @modified 20220622 - Task #2732: Prometheus to Skyline
+#                      Branch #4300: prometheus
+# if prometheus_settings:
+if prometheus_settings or PROMETHEUS_INGESTION:
+    if prometheusMetricDataPost:
+        api.add_route('/prometheus/write', prometheusMetricDataPost)
 
 # @added 20220408 - Feature #4516: flux - opentelemetry traces
 if FLUX_OTEL_ENABLED:
     api.add_route('/otlp/v1/trace', otelTracePost)
+
+# @added 20220530 - Feature #4596: flux - prometheus_alerts
+# @modified 20230110 - Task #4778: v4.0.0 - update dependencies
+# Commented out PrometheusAlertPost as WIP not complete
+# api.add_route('/prometheus_alerts', prometheusAlertPost)
+
+# @added 20221118 - Feature #4732: flux vortex
+#                   Feature #4734: mirage_vortex
+if VORTEX_ENABLED:
+    vortex_path = '%s/flux/vortex/data' % settings.SKYLINE_DIR
+    if not os.path.exists(vortex_path):
+        try:
+            mkdir_p(vortex_path)
+        except Exception as err:
+            logger.error('error :: flux :: failed to create dir - %s - %s' % (
+                vortex_path, err))
+    vortexResults = VortexResults()
+    api.add_route('/vortex_results', vortexResults)
+    vortexPost = VortexDataPost()
+    api.add_route('/vortex', vortexPost)
