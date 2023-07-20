@@ -963,7 +963,7 @@ slackclient==2.9.4
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #aiohttp==3.8.3
-aiohttp==3.8.4
+aiohttp==3.8.5
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25

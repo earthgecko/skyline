@@ -45,7 +45,7 @@ pymemcache==3.5.2
 PyJWT==2.7.0
 git+https://github.com/earthgecko/luminol@40791e2#egg=luminol
 slackclient==2.9.4
-aiohttp==3.8.4
+aiohttp==3.8.5
 urllib3==1.26.16
 graphyte==1.7.1
 statsd==4.0.1
