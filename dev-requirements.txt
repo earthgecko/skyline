@@ -1174,7 +1174,7 @@ kneed==0.8.3
 
 # @added 20221118 - Feature #4732: flux vortex
 #                   Feature #4734: mirage_vortex
-gevent==22.10.2
+gevent==23.9.1
 
 # @added 20221128 - Feature #4742: custom_algorithms - skyline_prophet
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
