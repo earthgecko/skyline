@@ -476,7 +476,7 @@ prometheus-client==0.17.0
 memray==1.8.0
 numba==0.56.4
 kneed==0.8.3
-gevent==22.10.2
+gevent==23.9.1
 prophet==1.1.4
 # @modified 20230628 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
