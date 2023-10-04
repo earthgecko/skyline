@@ -230,7 +230,7 @@ pyparsing==3.1.0
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #Pillow==9.1.0
-Pillow==9.5.0
+Pillow==10.0.1
 
 # @modified 20220217 - Task #4452: Update dependencies
 #matplotlib==3.3.3
