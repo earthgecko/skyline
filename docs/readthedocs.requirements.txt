@@ -389,7 +389,7 @@ aiohttp==3.8.4
 # @modified 20230625 - Task #4962: Build and test skyline v4.0.0
 #                      Task #4778: v4.0.0 - update dependencies
 #urllib3==1.26.9
-urllib3==1.26.16
+urllib3==1.26.18
 
 # @modified 20211220 - Task #4344: Update dependencies
 #graphyte==1.6.0

@@ -46,7 +46,7 @@ PyJWT==2.7.0
 git+https://github.com/earthgecko/luminol@40791e2#egg=luminol
 slackclient==2.9.4
 aiohttp==3.8.4
-urllib3==1.26.16
+urllib3==1.26.18
 graphyte==1.7.1
 statsd==4.0.1
 falcon==3.1.1
