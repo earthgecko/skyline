@@ -52,29 +52,65 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
     current_logger.info('%s :: metrics: %s' % (
         function_str, str(metrics)))
 
-    metrics_to_set_as_inactive = []
-    for metric_id in metric_ids:
-        base_name = None
-        try:
-            base_name = get_base_name_from_metric_id(current_skyline_app, metric_id)
-        except Exception as err:
-            current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s :: base_name_from_metric_id failed - %s' % (
-                function_str, (err)))
-        if base_name:
-            metrics_to_set_as_inactive.append(base_name)
-
-    if not metrics_to_set_as_inactive and metrics:
-        base_names = []
-        base_names_with_ids = {}
+    # @added 20240111 - Feature #4468: flux - remove_namespace_quota_metrics
+    #                   Task #5178: Build and test skyline v4.1.0
+    # Do this first and use the ids_with_base_names rather than calling
+    # get_base_name_from_metric_id for every metric_id
+    base_names = []
+    base_names_with_ids = {}
+    ids_with_base_names = {}
+    if metric_ids:
         try:
             with_ids = True
             base_names, base_names_with_ids = get_all_db_metric_names(current_skyline_app, with_ids)
             del base_names
         except Exception as err:
             current_logger.error(traceback.format_exc())
-            current_logger.error('error :: metrics_manager :: failed to get_all_active_db_metric_names - %s' % (
-                err))
+            current_logger.error('error :: %s :: failed to get_all_active_db_metric_names - %s' % (
+                function_str, err))
+        for base_name, metric_id in base_names_with_ids.items():
+            ids_with_base_names[metric_id] = base_name
+
+    metrics_to_set_as_inactive = []
+    for metric_id in metric_ids:
+        base_name = None
+
+        # @added 20240111 - Feature #4468: flux - remove_namespace_quota_metrics
+        #                   Task #5178: Build and test skyline v4.1.0
+        try:
+            base_name = ids_with_base_names[metric_id]
+        except:
+            base_name = None
+
+        # @modified 20240111 - Feature #4468: flux - remove_namespace_quota_metrics
+        #                      Task #5178: Build and test skyline v4.1.0
+        # Only call get_base_name_from_metric_id if it was not found in the
+        # ids_with_base_names dict
+        if not base_name:
+            try:
+                base_name = get_base_name_from_metric_id(current_skyline_app, metric_id)
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: base_name_from_metric_id failed - %s' % (
+                    function_str, (err)))
+        if base_name:
+            metrics_to_set_as_inactive.append(base_name)
+
+    if not metrics_to_set_as_inactive and metrics:
+        # @modified 20240111 - Feature #4468: flux - remove_namespace_quota_metrics
+        #                      Task #5178: Build and test skyline v4.1.0
+        # Make the get_all_db_metric_names call above before
+        # base_names = []
+        # base_names_with_ids = {}
+        if not base_names_with_ids:
+            try:
+                with_ids = True
+                base_names, base_names_with_ids = get_all_db_metric_names(current_skyline_app, with_ids)
+                del base_names
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: metrics_manager :: failed to get_all_active_db_metric_names - %s' % (
+                    err))
         for base_name in metrics:
             current_logger.info('%s :: determining id of %s' % (
                 function_str, base_name))

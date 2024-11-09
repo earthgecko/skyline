@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.thunder package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.thunder package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -116,6 +116,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#skyline-thunder-agent-module">skyline.thunder.agent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-thunder.thunder">skyline.thunder.thunder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-thunder.thunder_alert">skyline.thunder.thunder_alert module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-thunder.thunder_alerters">skyline.thunder.thunder_alerters module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-thunder.thunder_rolling">skyline.thunder.thunder_rolling module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-thunder">Module contents</a></li>
@@ -131,6 +132,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -178,18 +180,18 @@
            <div itemprop="articleBody">
              
   <section id="skyline-thunder-package">
-<h1>skyline.thunder package<a class="headerlink" href="#skyline-thunder-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.thunder package<a class="headerlink" href="#skyline-thunder-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="skyline-thunder-agent-module">
-<h2>skyline.thunder.agent module<a class="headerlink" href="#skyline-thunder-agent-module" title="Permalink to this heading"></a></h2>
+<h2>skyline.thunder.agent module<a class="headerlink" href="#skyline-thunder-agent-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-thunder.thunder">
-<span id="skyline-thunder-thunder-module"></span><h2>skyline.thunder.thunder module<a class="headerlink" href="#module-thunder.thunder" title="Permalink to this heading"></a></h2>
+<span id="skyline-thunder-thunder-module"></span><h2>skyline.thunder.thunder module<a class="headerlink" href="#module-thunder.thunder" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="thunder.thunder.Thunder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Thunder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Thunder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The Thunder class which controls the thunder thread and spawned
 processes. Thunder is ONLY for alerting on Skyline operations.
@@ -199,13 +201,13 @@ thunder/rolling carries out internal and external checks and sends any events
 to thunder.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="thunder.thunder.Thunder.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="thunder.thunder.Thunder.spin_thunder_process">
-<span class="sig-name descname"><span class="pre">spin_thunder_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validated_event_details</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redis_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder.spin_thunder_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder.spin_thunder_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spin_thunder_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validated_event_details</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redis_item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder.spin_thunder_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder.spin_thunder_process" title="Link to this definition"></a></dt>
 <dd><p>Roll some thunder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -222,7 +224,59 @@ to thunder.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="thunder.thunder.Thunder.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder.html#Thunder.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder.Thunder.run" title="Link to this definition"></a></dt>
+<dd><ul class="simple">
+<li><p>Called when the process intializes.</p></li>
+<li><p>Determine if Redis is up and discover checks to run.</p></li>
+<li><p>If Redis is down and discover checks to run from the filesystem.</p></li>
+<li><p>Process event.</p></li>
+<li><p>Wait for the processes to finish.</p></li>
+<li><p>Repeat.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-thunder.thunder_alert">
+<span id="skyline-thunder-thunder-alert-module"></span><h2>skyline.thunder.thunder_alert module<a class="headerlink" href="#module-thunder.thunder_alert" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="thunder.thunder_alert.ThunderAlert">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThunderAlert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alert.html#ThunderAlert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alert.ThunderAlert" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<p>The ThunderAlert class which controls the thunder_alert thread and spawned
+processes. ThunderAlert is alerting for analyzer and mirage.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="thunder.thunder_alert.ThunderAlert.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alert.html#ThunderAlert.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alert.ThunderAlert.check_if_parent_is_alive" title="Link to this definition"></a></dt>
+<dd><p>Self explanatory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thunder.thunder_alert.ThunderAlert.remove_thunder_alert_key">
+<span class="sig-name descname"><span class="pre">remove_thunder_alert_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">redis_thunder_alert_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alert.html#ThunderAlert.remove_thunder_alert_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alert.ThunderAlert.remove_thunder_alert_key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thunder.thunder_alert.ThunderAlert.spin_thunder_alert">
+<span class="sig-name descname"><span class="pre">spin_thunder_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redis_thunder_alert_key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alert.html#ThunderAlert.spin_thunder_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alert.ThunderAlert.spin_thunder_alert" title="Link to this definition"></a></dt>
+<dd><p>Send an alert.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>i</strong> – python process id</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>anomalous</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="thunder.thunder_alert.ThunderAlert.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alert.html#ThunderAlert.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alert.ThunderAlert.run" title="Link to this definition"></a></dt>
 <dd><ul class="simple">
 <li><p>Called when the process intializes.</p></li>
 <li><p>Determine if Redis is up and discover checks to run.</p></li>
@@ -237,18 +291,18 @@ to thunder.</p>
 
 </section>
 <section id="module-thunder.thunder_alerters">
-<span id="skyline-thunder-thunder-alerters-module"></span><h2>skyline.thunder.thunder_alerters module<a class="headerlink" href="#module-thunder.thunder_alerters" title="Permalink to this heading"></a></h2>
+<span id="skyline-thunder-thunder-alerters-module"></span><h2>skyline.thunder.thunder_alerters module<a class="headerlink" href="#module-thunder.thunder_alerters" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="thunder.thunder_alerters.thunder_alert">
-<span class="sig-name descname"><span class="pre">thunder_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert_via</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alerters.html#thunder_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alerters.thunder_alert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">thunder_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert_via</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_alerters.html#thunder_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_alerters.thunder_alert" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-thunder.thunder_rolling">
-<span id="skyline-thunder-thunder-rolling-module"></span><h2>skyline.thunder.thunder_rolling module<a class="headerlink" href="#module-thunder.thunder_rolling" title="Permalink to this heading"></a></h2>
+<span id="skyline-thunder-thunder-rolling-module"></span><h2>skyline.thunder.thunder_rolling module<a class="headerlink" href="#module-thunder.thunder_rolling" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="thunder.thunder_rolling.RollingThunder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RollingThunder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RollingThunder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The RollingThunder class which controls the thunder/rolling thread and
 spawned processes. thunder/rolling carries out internal and external checks
@@ -258,19 +312,19 @@ In a distributed Skyline set up, thunder/rolling can alert on other Skyline
 apps in the cluster (TBD)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="thunder.thunder_rolling.RollingThunder.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="thunder.thunder_rolling.RollingThunder.rolling_process">
-<span class="sig-name descname"><span class="pre">rolling_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder.rolling_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder.rolling_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">rolling_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder.rolling_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder.rolling_process" title="Link to this definition"></a></dt>
 <dd><p>Create and manage the required lists and Redis sets</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="thunder.thunder_rolling.RollingThunder.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/thunder/thunder_rolling.html#RollingThunder.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#thunder.thunder_rolling.RollingThunder.run" title="Link to this definition"></a></dt>
 <dd><ul class="simple">
 <li><p>Called when the process intializes.</p></li>
 <li><p>Determine if Redis is up</p></li>
@@ -284,7 +338,7 @@ apps in the cluster (TBD)</p>
 
 </section>
 <section id="module-thunder">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-thunder" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-thunder" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -299,7 +353,7 @@ apps in the cluster (TBD)</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

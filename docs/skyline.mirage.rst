@@ -36,6 +36,14 @@ skyline.mirage.mirage\_algorithms module
    :undoc-members:
    :show-inheritance:
 
+skyline.mirage.mirage\_irregular\_unstable module
+-------------------------------------------------
+
+.. automodule:: mirage.mirage_irregular_unstable
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.mirage.mirage\_labelled\_metrics module
 -----------------------------------------------
 

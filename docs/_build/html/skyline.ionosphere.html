@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.ionosphere package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.ionosphere package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -118,6 +118,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.layers">skyline.ionosphere.layers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.learn">skyline.ionosphere.learn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.learn_repetitive_patterns">skyline.ionosphere.learn_repetitive_patterns module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.motif_annihilation">skyline.ionosphere.motif_annihilation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere">Module contents</a></li>
 </ul>
 </li>
@@ -136,6 +137,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -183,18 +185,18 @@
            <div itemprop="articleBody">
              
   <section id="skyline-ionosphere-package">
-<h1>skyline.ionosphere package<a class="headerlink" href="#skyline-ionosphere-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.ionosphere package<a class="headerlink" href="#skyline-ionosphere-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="skyline-ionosphere-agent-module">
-<h2>skyline.ionosphere.agent module<a class="headerlink" href="#skyline-ionosphere-agent-module" title="Permalink to this heading"></a></h2>
+<h2>skyline.ionosphere.agent module<a class="headerlink" href="#skyline-ionosphere-agent-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-ionosphere.common_functions">
-<span id="skyline-ionosphere-common-functions-module"></span><h2>skyline.ionosphere.common_functions module<a class="headerlink" href="#module-ionosphere.common_functions" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-common-functions-module"></span><h2>skyline.ionosphere.common_functions module<a class="headerlink" href="#module-ionosphere.common_functions" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.common_functions.get_metrics_db_object">
-<span class="sig-name descname"><span class="pre">get_metrics_db_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_metrics_db_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.get_metrics_db_object" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_metrics_db_object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_metrics_db_object"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.get_metrics_db_object" title="Link to this definition"></a></dt>
 <dd><p>Returns the data of a metric from metrics table as an object and populates
 memcached with a dict of the object</p>
 <dl class="field-list simple">
@@ -212,7 +214,7 @@ memcached with a dict of the object</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.common_functions.get_calculated_features">
-<span class="sig-name descname"><span class="pre">get_calculated_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calculated_feature_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_calculated_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.get_calculated_features" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_calculated_features</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calculated_feature_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_calculated_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.get_calculated_features" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spin_process</span></code> to
 create a list of feature_names and their calc_values.</p>
 <dl class="field-list simple">
@@ -231,7 +233,7 @@ features.transposed.csv file</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.common_functions.numba_minmax">
-<span class="sig-name descname"><span class="pre">numba_minmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#numba_minmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.numba_minmax" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">numba_minmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#numba_minmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.numba_minmax" title="Link to this definition"></a></dt>
 <dd><p>This a numba minmax function, the normal minmax function for 1000 loops on a
 timeseries of length 1448 took 6.046057 seconds, the numba_minmax function
 took 3.808568 seconds.
@@ -241,15 +243,15 @@ On a single run normal minmax took 0.016309 seconds and numba_minmax took
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.common_functions.minmax_scale_check">
-<span class="sig-name descname"><span class="pre">minmax_scale_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_id_metric_ts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomalous_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_tolerance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_tolerance_percentage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_percentage_diff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#minmax_scale_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.minmax_scale_check" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">minmax_scale_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_id_metric_ts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomalous_timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_tolerance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_tolerance_percentage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fp_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_percentage_diff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#minmax_scale_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.common_functions.minmax_scale_check" title="Link to this definition"></a></dt>
 <dd><p>Called by nothing yet.  Used to run a minmax scaling check and determine if
 the features_sum of the 2 minmax scaled timeseries match.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fp_id_metric_ts</strong> – </p></li>
-<li><p><strong>anomalous_timeseries</strong> – </p></li>
-<li><p><strong>range_tolerance</strong> – </p></li>
+<li><p><strong>fp_id_metric_ts</strong></p></li>
+<li><p><strong>anomalous_timeseries</strong></p></li>
+<li><p><strong>range_tolerance</strong></p></li>
 </ul>
 </dd>
 </dl>
@@ -265,10 +267,10 @@ the features_sum of the 2 minmax scaled timeseries match.</p>
 
 </section>
 <section id="module-ionosphere.echo">
-<span id="skyline-ionosphere-echo-module"></span><h2>skyline.ionosphere.echo module<a class="headerlink" href="#module-ionosphere.echo" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-echo-module"></span><h2>skyline.ionosphere.echo module<a class="headerlink" href="#module-ionosphere.echo" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.echo.echo_get_metric_from_metrics">
-<span class="sig-name descname"><span class="pre">echo_get_metric_from_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#echo_get_metric_from_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.echo.echo_get_metric_from_metrics" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">echo_get_metric_from_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#echo_get_metric_from_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.echo.echo_get_metric_from_metrics" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">echo()</span></code> and returns the metric id and metric db object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -285,51 +287,47 @@ the features_sum of the 2 minmax scaled timeseries match.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.echo.ionosphere_echo">
-<span class="sig-name descname"><span class="pre">ionosphere_echo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mirage_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#ionosphere_echo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.echo.ionosphere_echo" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ionosphere_echo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mirage_full_duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#ionosphere_echo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.echo.ionosphere_echo" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-ionosphere.find_repetitive_patterns">
-<span id="skyline-ionosphere-find-repetitive-patterns-module"></span><h2>skyline.ionosphere.find_repetitive_patterns module<a class="headerlink" href="#module-ionosphere.find_repetitive_patterns" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-find-repetitive-patterns-module"></span><h2>skyline.ionosphere.find_repetitive_patterns module<a class="headerlink" href="#module-ionosphere.find_repetitive_patterns" title="Link to this heading"></a></h2>
 <p>find_repetitive_patterns.py</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.get_features_profile_sum">
-<span class="sig-name descname"><span class="pre">get_features_profile_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">until_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#get_features_profile_sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.get_features_profile_sum" title="Permalink to this definition"></a></dt>
-<dd><p>Determine the features profile sum for the metric</p>
-</dd></dl>
+<dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.prune_find_repetitive_patterns_dirs">
+<span class="sig-name descname"><span class="pre">prune_find_repetitive_patterns_dirs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#prune_find_repetitive_patterns_dirs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.prune_find_repetitive_patterns_dirs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.get_features_profile_sums">
-<span class="sig-name descname"><span class="pre">get_features_profile_sums</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomalies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphite</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#get_features_profile_sums"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.get_features_profile_sums" title="Permalink to this definition"></a></dt>
-<dd><p>For each anomaly generate the temporary training data and calculate the
-features profile sum for each</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.get_metrics_to_train">
-<span class="sig-name descname"><span class="pre">get_metrics_to_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_to_compare</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#get_metrics_to_train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.get_metrics_to_train" title="Permalink to this definition"></a></dt>
-<dd><p>For each anomaly generate the temporary training data and calculate the
-features profile sum for each</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.get_anomalies_to_evaluate">
-<span class="sig-name descname"><span class="pre">get_anomalies_to_evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_ids_with_base_names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomalies_in_period</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#get_anomalies_to_evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.get_anomalies_to_evaluate" title="Permalink to this definition"></a></dt>
-<dd><p>Return anomalies that are for metrics in include_metrics</p>
-</dd></dl>
+<dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.update_last_processed_anomaly_timestamp">
+<span class="sig-name descname"><span class="pre">update_last_processed_anomaly_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anomaly_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#update_last_processed_anomaly_timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.update_last_processed_anomaly_timestamp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.find_repetitive_patterns">
-<span class="sig-name descname"><span class="pre">find_repetitive_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#find_repetitive_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.find_repetitive_patterns" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_repetitive_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anomaly_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#find_repetitive_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.find_repetitive_patterns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.find_repetitive_patterns.ionosphere_find_repetitive_patterns">
-<span class="sig-name descname"><span class="pre">ionosphere_find_repetitive_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#ionosphere_find_repetitive_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.ionosphere_find_repetitive_patterns" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ionosphere_find_repetitive_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/find_repetitive_patterns.html#ionosphere_find_repetitive_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.find_repetitive_patterns.ionosphere_find_repetitive_patterns" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spawn_learn_process</span></code> to
-re-evaluate anomalies and such, like creating learning features profiles,
-when a human makes a features profile and the automated creation of learnt
-features profiles and learn features profiles.</p>
+re-evaluate anomalies for a metric and determine if the current anomaly or
+previous anomalies in the last month are similar to other anomalies in last
+month, if there are more than 2, LEARNT features profiles are created for
+them.  To ensure that only the minimium number of features profiles are
+learnt a number of conditions are set:
+1. any anomalies that occur in the period of any existing features
+profile are excluded from consideration.
+2. any similar training data sets that are are found that occur less than 12
+hours apart are deduplicated and the latest of those is used only
+3. , the  and any that are
+up to 12 hours older are discarded.  Without these conditionals, there tends
+to be excessive features profile found to learn.</p>
+<p>Although it is possible to iterate over all the anomalies and check them
+all at the same time, here the function is doing one metric per run.
+repetitive learning</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>timestamp</strong> (<em>int</em>) – timestamp at which learn was called</p>
@@ -345,32 +343,32 @@ features profiles and learn features profiles.</p>
 
 </section>
 <section id="module-ionosphere.inference">
-<span id="skyline-ionosphere-inference-module"></span><h2>skyline.ionosphere.inference module<a class="headerlink" href="#module-ionosphere.inference" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-inference-module"></span><h2>skyline.ionosphere.inference module<a class="headerlink" href="#module-ionosphere.inference" title="Link to this heading"></a></h2>
 <p>inference.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.inference.ionosphere_motif_inference">
-<span class="sig-name descname"><span class="pre">ionosphere_motif_inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/inference.html#ionosphere_motif_inference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.inference.ionosphere_motif_inference" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ionosphere_motif_inference</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/inference.html#ionosphere_motif_inference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.inference.ionosphere_motif_inference" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-ionosphere.ionosphere">
-<span id="skyline-ionosphere-ionosphere-module"></span><h2>skyline.ionosphere.ionosphere module<a class="headerlink" href="#module-ionosphere.ionosphere" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-ionosphere-module"></span><h2>skyline.ionosphere.ionosphere module<a class="headerlink" href="#module-ionosphere.ionosphere" title="Link to this heading"></a></h2>
 <p>ionosphere.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ionosphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Ionosphere</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The Ionosphere class which controls the ionosphere thread and spawned
 processes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.mysql_insert">
-<span class="sig-name descname"><span class="pre">mysql_insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">insert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.mysql_insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.mysql_insert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mysql_insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">insert</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.mysql_insert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.mysql_insert" title="Link to this definition"></a></dt>
 <dd><p>Insert data into mysql table</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -408,17 +406,17 @@ processes.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.purge_old_data_dirs">
-<span class="sig-name descname"><span class="pre">purge_old_data_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">older_than</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.purge_old_data_dirs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.purge_old_data_dirs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">purge_old_data_dirs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">older_than</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.purge_old_data_dirs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.purge_old_data_dirs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.remove_metric_check_file">
-<span class="sig-name descname"><span class="pre">remove_metric_check_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_check_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.remove_metric_check_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.remove_metric_check_file" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">remove_metric_check_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_check_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.remove_metric_check_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.remove_metric_check_file" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics">
-<span class="sig-name descname"><span class="pre">manage_ionosphere_unique_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.manage_ionosphere_unique_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">manage_ionosphere_unique_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.manage_ionosphere_unique_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics" title="Link to this definition"></a></dt>
 <dd><ul class="simple">
 <li><p>Create a Redis set of all Ionosphere enabled metrics.</p></li>
 <li><p>Manage the ionosphere.untrainable_metrics set, removing items when
@@ -436,7 +434,7 @@ they ‘expire’</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.new_load_metric_vars">
-<span class="sig-name descname"><span class="pre">new_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.new_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.new_load_metric_vars" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">new_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.new_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.new_load_metric_vars" title="Link to this definition"></a></dt>
 <dd><p>Load the metric variables for a check from a metric check variables file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -453,7 +451,7 @@ they ‘expire’</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.spawn_learn_process">
-<span class="sig-name descname"><span class="pre">spawn_learn_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_job_context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spawn_learn_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spawn_learn_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spawn_learn_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_job_context</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spawn_learn_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spawn_learn_process" title="Link to this definition"></a></dt>
 <dd><p>Spawn a process to learn.</p>
 <p>This is used for Ionosphere to learn if anomalous metrics remain
 anomalous over time, as the resolution decreases.  It follows the
@@ -465,7 +463,7 @@ is terminated this prevents any memory leaks in the parent.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.process_ionosphere_echo">
-<span class="sig-name descname"><span class="pre">process_ionosphere_echo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_check_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.process_ionosphere_echo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">process_ionosphere_echo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_check_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.process_ionosphere_echo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo" title="Link to this definition"></a></dt>
 <dd><p>Spawn a process_ionosphere_echo check to create features profiles at
 settings.FULL_DURATION for Mirage metrics</p>
 <dl class="field-list simple">
@@ -486,7 +484,7 @@ settings.FULL_DURATION for Mirage metrics</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.spin_process">
-<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_check_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_busy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spin_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_check_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_busy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spin_process" title="Link to this definition"></a></dt>
 <dd><p>Assign an anomalous metric to check against features profiles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -508,7 +506,7 @@ between normal Ionosphere and echo analysis</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ionosphere.ionosphere.Ionosphere.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -516,10 +514,10 @@ between normal Ionosphere and echo analysis</p></li>
 
 </section>
 <section id="module-ionosphere.layers">
-<span id="skyline-ionosphere-layers-module"></span><h2>skyline.ionosphere.layers module<a class="headerlink" href="#module-ionosphere.layers" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-layers-module"></span><h2>skyline.ionosphere.layers module<a class="headerlink" href="#module-ionosphere.layers" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.layers.run_layer_algorithms">
-<span class="sig-name descname"><span class="pre">run_layer_algorithms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_checked</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/layers.html#run_layer_algorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.layers.run_layer_algorithms" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_layer_algorithms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers_checked</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/layers.html#run_layer_algorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.layers.run_layer_algorithms" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spin_process</span></code> to
 evaluate anomalies against a custom layers boundary algorithm.</p>
 <dl class="field-list simple">
@@ -543,11 +541,11 @@ evaluate anomalies against a custom layers boundary algorithm.</p>
 
 </section>
 <section id="module-ionosphere.learn">
-<span id="skyline-ionosphere-learn-module"></span><h2>skyline.ionosphere.learn module<a class="headerlink" href="#module-ionosphere.learn" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-learn-module"></span><h2>skyline.ionosphere.learn module<a class="headerlink" href="#module-ionosphere.learn" title="Link to this heading"></a></h2>
 <p>learn.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.learn_load_metric_vars">
-<span class="sig-name descname"><span class="pre">learn_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#learn_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.learn_load_metric_vars" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">learn_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#learn_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.learn_load_metric_vars" title="Link to this definition"></a></dt>
 <dd><p>Load the metric variables for a check from a metric check variables file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -564,14 +562,14 @@ evaluate anomalies against a custom layers boundary algorithm.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.get_learn_json">
-<span class="sig-name descname"><span class="pre">get_learn_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learn_json_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_full_duration_days</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_learn_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_learn_json" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_learn_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learn_json_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_full_duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_full_duration_days</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_learn_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_learn_json" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> to surface a use_full_duration timeseries for the
 metric from Graphite and save as json.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.get_metric_from_metrics">
-<span class="sig-name descname"><span class="pre">get_metric_from_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_metric_from_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_metric_from_metrics" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_metric_from_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_metric_from_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_metric_from_metrics" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the metric id and metric db object</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -588,25 +586,25 @@ metric from Graphite and save as json.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.get_ionosphere_fp_ids">
-<span class="sig-name descname"><span class="pre">get_ionosphere_fp_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_fp_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_fp_ids" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_ionosphere_fp_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_fp_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_fp_ids" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the fp_ids list</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.get_ionosphere_record">
-<span class="sig-name descname"><span class="pre">get_ionosphere_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_record" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_ionosphere_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fp_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_record" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the fp row object</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.remove_work_list_from_redis_set">
-<span class="sig-name descname"><span class="pre">remove_work_list_from_redis_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learn_metric_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#remove_work_list_from_redis_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.remove_work_list_from_redis_set" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">remove_work_list_from_redis_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">learn_metric_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#remove_work_list_from_redis_set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.remove_work_list_from_redis_set" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> to remove a work item from the Redis set</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn.ionosphere_learn">
-<span class="sig-name descname"><span class="pre">ionosphere_learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#ionosphere_learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.ionosphere_learn" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ionosphere_learn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#ionosphere_learn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn.ionosphere_learn" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spawn_learn_process</span></code> to
 re-evaluate anomalies and such, like creating learning features profiles,
 when a human makes a features profile and the automated creation of learnt
@@ -687,11 +685,11 @@ at use_full_duration via learn.
 
 </section>
 <section id="module-ionosphere.learn_repetitive_patterns">
-<span id="skyline-ionosphere-learn-repetitive-patterns-module"></span><h2>skyline.ionosphere.learn_repetitive_patterns module<a class="headerlink" href="#module-ionosphere.learn_repetitive_patterns" title="Permalink to this heading"></a></h2>
+<span id="skyline-ionosphere-learn-repetitive-patterns-module"></span><h2>skyline.ionosphere.learn_repetitive_patterns module<a class="headerlink" href="#module-ionosphere.learn_repetitive_patterns" title="Link to this heading"></a></h2>
 <p>learn_repetitive_patterns.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn_repetitive_patterns.get_training_to_evaluate">
-<span class="sig-name descname"><span class="pre">get_training_to_evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_to_evaluate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_training_to_evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_training_to_evaluate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_training_to_evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_to_evaluate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_training_to_evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_training_to_evaluate" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary of training data to evaluate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -708,7 +706,7 @@ at use_full_duration via learn.
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn_repetitive_patterns.get_metrics_to_evaluate">
-<span class="sig-name descname"><span class="pre">get_metrics_to_evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_evaluation_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_metrics_to_evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_metrics_to_evaluate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_metrics_to_evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_data_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_evaluation_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_metrics_to_evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_metrics_to_evaluate" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary of metrics_to_evaluate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -729,7 +727,7 @@ evaluated</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn_repetitive_patterns.get_features_to_compare">
-<span class="sig-name descname"><span class="pre">get_features_to_compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_to_evaluate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_features_to_compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_features_to_compare" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_features_to_compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">training_to_evaluate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_features_to_compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_features_to_compare" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary offeatures_to_compare.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -746,7 +744,7 @@ evaluated</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn_repetitive_patterns.get_metrics_to_train">
-<span class="sig-name descname"><span class="pre">get_metrics_to_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_to_compare</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_metrics_to_train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_metrics_to_train" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_metrics_to_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_to_compare</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#get_metrics_to_train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.get_metrics_to_train" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary of metrics_to_train.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -763,7 +761,7 @@ evaluated</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ionosphere.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns">
-<span class="sig-name descname"><span class="pre">ionosphere_learn_repetitive_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#ionosphere_learn_repetitive_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ionosphere_learn_repetitive_patterns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn_repetitive_patterns.html#ionosphere_learn_repetitive_patterns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">ionosphere_learn_repetitive_patterns</span></code> to
 re-evaluate anomalies and such, like creating learning features profiles,
 when a human makes a features profile and the automated creation of learnt
@@ -782,8 +780,59 @@ features profiles and learn features profiles.</p>
 </dd></dl>
 
 </section>
+<section id="module-ionosphere.motif_annihilation">
+<span id="skyline-ionosphere-motif-annihilation-module"></span><h2>skyline.ionosphere.motif_annihilation module<a class="headerlink" href="#module-ionosphere.motif_annihilation" title="Link to this heading"></a></h2>
+<p>motif_annihilation.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="ionosphere.motif_annihilation.MotifAnnihilation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MotifAnnihilation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/motif_annihilation.html#MotifAnnihilation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.motif_annihilation.MotifAnnihilation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<p>The MotifAnnihilation class which controls the snab thread and spawned
+threads.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="ionosphere.motif_annihilation.MotifAnnihilation.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/motif_annihilation.html#MotifAnnihilation.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.motif_annihilation.MotifAnnihilation.check_if_parent_is_alive" title="Link to this definition"></a></dt>
+<dd><p>Self explanatory</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionosphere.motif_annihilation.MotifAnnihilation.spin_motif_annihilation">
+<span class="sig-name descname"><span class="pre">spin_motif_annihilation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">work_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/motif_annihilation.html#MotifAnnihilation.spin_motif_annihilation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.motif_annihilation.MotifAnnihilation.spin_motif_annihilation" title="Link to this definition"></a></dt>
+<dd><p>Assign motif annihilation work item to process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<em>object</em>) – the self object</p></li>
+<li><p><strong>work_dict</strong> (<em>dict</em>) – a work dict from the
+ionosphere.find_repetitive_patterns.motif_annihilation.work Redis
+hash</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ionosphere.motif_annihilation.MotifAnnihilation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/motif_annihilation.html#MotifAnnihilation.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ionosphere.motif_annihilation.MotifAnnihilation.run" title="Link to this definition"></a></dt>
+<dd><ul class="simple">
+<li><p>Called when the process intializes.</p></li>
+<li><p>Determine if Redis is up and discover checks to run.</p></li>
+<li><p>Assign check to run.</p></li>
+<li><p>Wait for the processes to finish.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-ionosphere">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ionosphere" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ionosphere" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -798,7 +847,7 @@ features profiles and learn features profiles.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webapp &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Webapp &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -110,6 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -118,7 +118,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -155,7 +155,7 @@
            <div itemprop="articleBody">
              
   <section id="webapp">
-<h1>Webapp<a class="headerlink" href="#webapp" title="Permalink to this heading"></a></h1>
+<h1>Webapp<a class="headerlink" href="#webapp" title="Link to this heading"></a></h1>
 <p>The Webapp service is a simple gunicorn/Flask based frontend that provides a web
 UI to:</p>
 <ul class="simple">
@@ -177,27 +177,27 @@ json that takes the following parameters:</p>
 <a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a></p></li>
 </ul>
 <section id="a-basic-overview-of-the-webapp">
-<h2>A basic overview of the Webapp<a class="headerlink" href="#a-basic-overview-of-the-webapp" title="Permalink to this heading"></a></h2>
+<h2>A basic overview of the Webapp<a class="headerlink" href="#a-basic-overview-of-the-webapp" title="Link to this heading"></a></h2>
 <figure class="align-default">
 <img alt="A basic overview of the Webapp" src="_images/skyline.webapp.basic.overview.png" />
 </figure>
 </section>
 <section id="deploying-the-webapp">
-<h2>Deploying the Webapp<a class="headerlink" href="#deploying-the-webapp" title="Permalink to this heading"></a></h2>
+<h2>Deploying the Webapp<a class="headerlink" href="#deploying-the-webapp" title="Link to this heading"></a></h2>
 <p>Originally the Webapp was deployed behind the simple Flask development server,
 however for numerous reasons, this is less than ideal.  Although the Webapp can
 still be run with Flask only, the recommended way to run the Webapp is via
 gunicorn, which is HTTP proxied by nginx.  The gunicorn Webapp can be exposed
 just like the Flask Webapp, but it is recommended to run it HTTP proxied.</p>
 <section id="using-a-production-grade-http-application">
-<h3>Using a production grade HTTP application<a class="headerlink" href="#using-a-production-grade-http-application" title="Permalink to this heading"></a></h3>
+<h3>Using a production grade HTTP application<a class="headerlink" href="#using-a-production-grade-http-application" title="Link to this heading"></a></h3>
 <p>It must be noted and stated that you <strong>should</strong> consider running the Skyline
 Webapp behind a production grade HTTP application, regardless of the
 implemented basic security measures with nginx serving the Webapp via gunicorn.</p>
 <p>This may seem like overkill, however there are a number of valid reasons for
 this.</p>
 <section id="production-infrastructure">
-<h4>Production infrastructure<a class="headerlink" href="#production-infrastructure" title="Permalink to this heading"></a></h4>
+<h4>Production infrastructure<a class="headerlink" href="#production-infrastructure" title="Link to this heading"></a></h4>
 <p>It is highly probable that Skyline will often be run on cloud based
 infrastructure which is public and should therefore really be considered
 production.</p>
@@ -210,7 +210,7 @@ therefore ensure TRUSTED access only.</p>
 </section>
 </section>
 <section id="nginx-and-gunicorn">
-<h3>nginx and gunicorn<a class="headerlink" href="#nginx-and-gunicorn" title="Permalink to this heading"></a></h3>
+<h3>nginx and gunicorn<a class="headerlink" href="#nginx-and-gunicorn" title="Link to this heading"></a></h3>
 <p>Although there are a number of options to run a production grade wsgi frontend,
 the example here will document serving gunicorn via nginx reverse proxy with
 authentication.</p>
@@ -228,9 +228,9 @@ Authentication is enabled by default in <code class="docutils literal notranslat
 </section>
 </section>
 <section id="securing-the-webapp">
-<h2>Securing the Webapp<a class="headerlink" href="#securing-the-webapp" title="Permalink to this heading"></a></h2>
+<h2>Securing the Webapp<a class="headerlink" href="#securing-the-webapp" title="Link to this heading"></a></h2>
 <section id="firewall-rules">
-<h3>Firewall rules<a class="headerlink" href="#firewall-rules" title="Permalink to this heading"></a></h3>
+<h3>Firewall rules<a class="headerlink" href="#firewall-rules" title="Link to this heading"></a></h3>
 <p>The Webapp <strong>should</strong> be secured with proper firewall rules that restrict access
 to the <a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_IP</span></code></a> and <a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_PORT</span></code></a> (and/or just
 the reverse proxy port for gunicorn if being used) from trusted IP
@@ -245,20 +245,20 @@ your <a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" titl
 127.0.0.1:1500 and 127.0.0.1:1501.</p>
 </section>
 <section id="basic-security">
-<h3>Basic security<a class="headerlink" href="#basic-security" title="Permalink to this heading"></a></h3>
+<h3>Basic security<a class="headerlink" href="#basic-security" title="Link to this heading"></a></h3>
 <p>There are some simple and basic security measures implemented with the Webapp.</p>
 </section>
 <section id="ip-restricted-access">
-<h3>IP restricted access<a class="headerlink" href="#ip-restricted-access" title="Permalink to this heading"></a></h3>
+<h3>IP restricted access<a class="headerlink" href="#ip-restricted-access" title="Link to this heading"></a></h3>
 <p>The default <a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a> only allows from 127.0.0.1, add
 your desired allowed IPs.</p>
 </section>
 <section id="psuedo-basic-http-auth">
-<h3>psuedo basic HTTP auth<a class="headerlink" href="#psuedo-basic-http-auth" title="Permalink to this heading"></a></h3>
+<h3>psuedo basic HTTP auth<a class="headerlink" href="#psuedo-basic-http-auth" title="Link to this heading"></a></h3>
 <p>There is single user that can access the web UI all access must be authenticated.</p>
 </section>
 <section id="restricted-by-default">
-<h3>Restricted by default<a class="headerlink" href="#restricted-by-default" title="Permalink to this heading"></a></h3>
+<h3>Restricted by default<a class="headerlink" href="#restricted-by-default" title="Link to this heading"></a></h3>
 <p>These simple measures are an attempt to ensure that the Skyline web UI is not
 totally open by default, but rather totally restricted by default.  This adds a
 bit of defence in depth and hopefully will mitigate against unauthorized access
@@ -267,7 +267,7 @@ some way, either through error or accident.</p>
 <p>These basic restrictions <strong>DO NOT</strong> replace the need for proper firewall rules
 or a production grade HTTP application.</p>
 <section id="logging">
-<h4>Logging<a class="headerlink" href="#logging" title="Permalink to this heading"></a></h4>
+<h4>Logging<a class="headerlink" href="#logging" title="Link to this heading"></a></h4>
 <p>Flask’s development server is based on werkzeug, whose WSGIRequestHandler is,
 in turn, based in the BaseHTTPServer from the standard lib.  This means that
 WSGIRequestHandler overrides the logging methods, log_request, log_error and
@@ -279,9 +279,9 @@ log, which is not ideal.</p>
 </section>
 </section>
 <section id="panorama-web-ui">
-<h2>Panorama web UI<a class="headerlink" href="#panorama-web-ui" title="Permalink to this heading"></a></h2>
+<h2>Panorama web UI<a class="headerlink" href="#panorama-web-ui" title="Link to this heading"></a></h2>
 <section id="basic-function">
-<h3>Basic function<a class="headerlink" href="#basic-function" title="Permalink to this heading"></a></h3>
+<h3>Basic function<a class="headerlink" href="#basic-function" title="Link to this heading"></a></h3>
 <p>The Panorama web UI allows you to search the anomalies recorded by Panorama in
 the database.  It currently allows you to search through the anomaly records by
 various filters, which are converted into MySQL <code class="docutils literal notranslate"><span class="pre">SELECT</span></code> queries which
@@ -292,7 +292,7 @@ metric time series from Graphite and the api returns the time series json to the
 browser to graph the time series.</p>
 </section>
 <section id="closest-approximations">
-<h3>Closest approximations<a class="headerlink" href="#closest-approximations" title="Permalink to this heading"></a></h3>
+<h3>Closest approximations<a class="headerlink" href="#closest-approximations" title="Link to this heading"></a></h3>
 <p>The Panorama anomaly records only hold the details regarding the anomaly, not
 the data.  The Panorama UI takes the returned anomalies from a search and
 retrieves the time series for the time period relevant to the anomaly from
@@ -308,7 +308,7 @@ line.</p>
 <img alt="_images/panorama.closest.approximation.aggregrated.png" src="_images/panorama.closest.approximation.aggregrated.png" />
 </section>
 <section id="time-zones">
-<h3>Time zones<a class="headerlink" href="#time-zones" title="Permalink to this heading"></a></h3>
+<h3>Time zones<a class="headerlink" href="#time-zones" title="Link to this heading"></a></h3>
 <p>It must be noted that the Panorama view graphs can be rendered differently
 depending on the browser and server time zone.  The original dygraph renders
 used the javascript <code class="docutils literal notranslate"><span class="pre">Date</span></code> function to generate the datetime ticker, etc.  If
@@ -323,7 +323,7 @@ UI, you can use <a class="reference internal" href="skyline.html#settings.WEBAPP
 </section>
 </section>
 <section id="rebrow">
-<h2><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Permalink to this heading"></a></h2>
+<h2><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Link to this heading"></a></h2>
 <p>Skyline uses a modified port of Marian Steinbach’s excellent
 <span class="red">re</span><span class="brow">brow</span> Flask Redis browser - <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a>.  A modified port was used
 for a number of reasons:</p>
@@ -355,7 +355,7 @@ key creation and providing a view of <code class="docutils literal notranslate">
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

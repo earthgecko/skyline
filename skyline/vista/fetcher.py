@@ -1,4 +1,5 @@
 from __future__ import division
+import copy
 import logging
 from time import time, sleep
 from datetime import datetime, timedelta
@@ -10,6 +11,7 @@ import os
 from os import kill
 import traceback
 import re
+import sys
 from sys import version_info
 import os.path
 from ast import literal_eval
@@ -21,6 +23,9 @@ except:
 # @modified 20191115 - Branch #3262: py3
 # from redis import StrictRedis
 import requests
+
+# @added 20240516 - Feature #5352: vista - bigquery
+from contextlib import nullcontext
 
 import settings
 python_version = int(version_info[0])
@@ -43,6 +48,10 @@ if True:
     # @added 20220726 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
     from functions.graphite.send_graphite_metric import send_graphite_metric
+    # @added 20240516 - Feature #5352: vista - bigquery
+    from functions.settings.get_bq_accounts_settings import get_bq_accounts_settings
+    # @added 20240521 - Feature #5352: vista - bigquery
+    from functions.thunder.send_event import thunder_send_event
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'fetcher'
@@ -77,6 +86,28 @@ try:
     VERBOSE_LOGGING = settings.VISTA_VERBOSE_LOGGING
 except:
     VERBOSE_LOGGING = False
+
+# @added 20240516 - Feature #5352: vista - bigquery
+try:
+    VISTA_BQ_VIRTUALENV_PATH = settings.VISTA_BQ_VIRTUALENV_PATH
+except:
+    VISTA_BQ_VIRTUALENV_PATH = None
+if VISTA_BQ_VIRTUALENV_PATH:
+    sys.path.insert(0, VISTA_BQ_VIRTUALENV_PATH)
+    from bq_backfill import bq_backfill
+    # @added 20240621 - Feature #5372: vista - bq_update
+    #                   Feature #5352: vista - bigquery
+    from bq_update import bq_update
+else:
+    bq_backfill = nullcontext()
+    bq_update = nullcontext()
+try:
+    HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
+except:
+    HORIZON_SHARDS = {}
+HORIZON_SHARD = 0
+if HORIZON_SHARDS:
+    HORIZON_SHARD = HORIZON_SHARDS[this_host]
 
 USE_FLUX = False
 LOCAL_DEBUG = False
@@ -117,6 +148,129 @@ class Fetcher(Thread):
             # Log warning
             logger.warning('warning :: parent process is dead')
             exit(0)
+
+    # @added 20240516 - Feature #5352: vista - bigquery
+    def spawn_bq_backfill(self, bq_backfill_job_id):
+        job_data = None
+        try:
+            job_data_str = self.redis_conn_decoded.hget('vista.bq_backfill.work', bq_backfill_job_id)
+            if job_data_str:
+                job_data = literal_eval(job_data_str)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: fetcher :: spawn_bq_backfill :: failed get job_data for job_id: %s, err: %s' % (
+                bq_backfill_job_id, err))
+        try:
+            logger.info('fetcher :: spawn_bq_backfill :: process spawned, running bq_backfill for job_id: %s' % bq_backfill_job_id)
+            bq_backfill(bq_backfill_job_id)
+            logger.info('fetcher :: spawn_bq_backfill :: bq_backfill complete')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: fetcher :: spawn_bq_backfill :: bq_backfill failed for job_id: %s, err: %s' % (
+                bq_backfill_job_id, err))
+            # @added 20240521 - Feature #5352: vista - bigquery
+            # Try remove job and send thinder alert
+            try:
+                self.redis_conn_decoded.hdel('vista.bq_backfill.work', bq_backfill_job_id)
+            except Exception as err:
+                logger.error('error :: fetcher :: spawn_bq_backfill :: failed to hdel failed job_id: %s, err: %s' % (
+                    bq_backfill_job_id, err))
+            # Send thunder alert
+            level = 'alert'
+            event_type = 'bq_backfill_failed'
+            message = '%s - Vista bq_backfill failed' % level
+            status = 'job_id: %s failed' % bq_backfill_job_id
+            thunder_event = {
+                'level': level,
+                'event_type': event_type,
+                'message': message,
+                'app': skyline_app,
+                'metric': None,
+                'source': skyline_app,
+                'timestamp': time(),
+                'expiry': 600,
+                'data': {
+                    'job_id': bq_backfill_job_id,
+                    'job': job_data,
+                    'status': status,
+                },
+            }
+            submitted = False
+            try:
+                submitted = thunder_send_event(skyline_app, thunder_event, log=True)
+            except Exception as err:
+                logger.error('error :: fetcher :: spawn_bq_backfill :: error encountered with thunder_send_event, err: %s' % (
+                    err))
+            if submitted:
+                logger.info('fetcher :: spawn_bq_backfill :: send thunder event for failed job_id: %s' % (
+                    bq_backfill_job_id))
+            try:
+                self.redis_conn_decoded.delete('vista.bq_backfill.running')
+            except Exception as err:
+                logger.error('error :: fetcher :: spawn_bq_backfill :: failed to delete vista.bq_backfill.running, err: %s' % (
+                    err))
+
+    # @added 20240621 - Feature #5372: vista - bq_update
+    #                   Feature #5352: vista - bigquery
+    def spawn_bq_update(self, bq_update_job_id):
+        job_data = None
+        try:
+            job_data_str = self.redis_conn_decoded.hget('vista.bq_update.work', bq_update_job_id)
+            if job_data_str:
+                job_data = literal_eval(job_data_str)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: fetcher :: spawn_bq_update :: failed get job_data for job_id: %s, err: %s' % (
+                bq_update_job_id, err))
+        try:
+            logger.info('fetcher :: spawn_bq_update :: process spawned, running bq_update for job_id: %s' % bq_update_job_id)
+            bq_update(bq_update_job_id)
+            logger.info('fetcher :: spawn_bq_update :: bq_update complete')
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: fetcher :: spawn_bq_update :: bq_update failed for job_id: %s, err: %s' % (
+                bq_update_job_id, err))
+            # Try remove job and send thunder alert
+            try:
+                self.redis_conn_decoded.hdel('vista.bq_update.work', bq_update_job_id)
+            except Exception as err:
+                logger.error('error :: fetcher :: spawn_bq_update :: failed to hdel failed job_id: %s, err: %s' % (
+                    bq_update_job_id, err))
+            # Send thunder alert
+            level = 'alert'
+            event_type = 'bq_update_failed'
+            message = '%s - Vista bq_update failed' % level
+            status = 'job_id: %s failed' % bq_update_job_id
+            thunder_event = {
+                'level': level,
+                'event_type': event_type,
+                'message': message,
+                'app': skyline_app,
+                'metric': None,
+                'source': skyline_app,
+                'timestamp': time(),
+                'expiry': 600,
+                'data': {
+                    'job_id': bq_update_job_id,
+                    'job': job_data,
+                    'status': status,
+                },
+            }
+            submitted = False
+            try:
+                submitted = thunder_send_event(skyline_app, thunder_event, log=True)
+            except Exception as err:
+                logger.error('error :: fetcher :: spawn_bq_update :: error encountered with thunder_send_event, err: %s' % (
+                    err))
+            if submitted:
+                logger.info('fetcher :: spawn_bq_update :: send thunder event for failed job_id: %s' % (
+                    bq_update_job_id))
+            try:
+                self.redis_conn_decoded.delete('vista.bq_update.running')
+            except Exception as err:
+                logger.error('error :: fetcher :: spawn_bq_update :: failed to delete vista.bq_update.running, err: %s' % (
+                    err))
+
 
     def fetch_process(self, i, metrics_to_fetch):
 
@@ -250,7 +404,14 @@ class Fetcher(Thread):
             sanitised, url = sanitise_graphite_url(skyline_app, url)
 
             try:
-                batch_response = requests.get(url)
+                # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                # Add timeout for bandit B113
+                #batch_response = requests.get(url)
+                connect_timeout = 5
+                read_timeout = 45
+                use_timeout = (int(connect_timeout), int(read_timeout))
+                batch_response = requests.get(url, timeout=use_timeout)
+
                 batch_js = batch_response.json()
                 batch_responses.append(batch_js)
             except Exception as e:
@@ -302,13 +463,20 @@ class Fetcher(Thread):
                     # @modified 20191011 - Task #3258: Reduce vista logging
                     if LOCAL_DEBUG:
                         logger.info('fetcher :: getting data from %s' % str(url))
-                    response = requests.get(url)
+                    # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                    # Add timeout for bandit B113
+                    #response = requests.get(url)
+                    connect_timeout = 5
+                    read_timeout = 45
+                    use_timeout = (int(connect_timeout), int(read_timeout))
+                    response = requests.get(url, timeout=use_timeout)
+
                     if response.status_code == 200:
                         success = True
                 except Exception as err:
                     # @modified 2023024 - Task #4824: vista - warn on remote_error
                     remote_error = False
-                    if 'Failed to establish a new connection' is str(err):
+                    if 'Failed to establish a new connection' in str(err):
                         remote_error = True
                     if 'Errno 111' in str(err):
                         remote_error = True
@@ -729,6 +897,87 @@ class Fetcher(Thread):
             except:
                 logger.error('error :: fetcher :: could not update the Redis %s key' % skyline_app)
                 logger.error(traceback.format_exc())
+
+            # @added 20240516 - Feature #5352: vista - bigquery
+            vista_bq_worker = True
+            # Only execute on a single node in the cluster
+            if HORIZON_SHARDS:
+                if HORIZON_SHARD != 0:
+                    vista_bq_worker = False
+            vista_bq_backfill_work = {}
+            vista_bq_accounts = {}
+            if vista_bq_worker:
+                try:
+                    vista_bq_accounts = get_bq_accounts_settings(skyline_app)
+                except Exception as err:
+                    logger.error('error :: fetcher :: get_bq_accounts_settings failed, err: %s' % err)
+            if len(vista_bq_accounts) > 0:
+                try:
+                    vista_bq_backfill_work = self.redis_conn_decoded.hgetall('vista.bq_backfill.work')
+                except Exception as err:
+                    logger.error('error :: fetcher :: failed to hgetall on vista.bq_backfill.work, err: %s' % err)
+                    vista_bq_backfill_work = {}
+                bq_backfill_running = False
+                do_spawn_bq_backfill = False
+                bq_backfill_job_id = None
+                if len(vista_bq_backfill_work) > 0:
+                    logger.info('fetcher :: there are %s jobs in vista.bq_backfill.work' % str(len(vista_bq_backfill_work)))
+                    for job_id in list(vista_bq_backfill_work.keys()):
+                        bq_backfill_job_id = str(job_id)
+                        break
+                    try:
+                        bq_backfill_running = self.redis_conn_decoded.get('vista.bq_backfill.running')
+                    except Exception as err:
+                        logger.error('error :: fetcher :: failed to get on vista.bq_backfill.running from Redis, err: %s' % err)
+                    if not bq_backfill_running:
+                        do_spawn_bq_backfill = True
+                    else:
+                        logger.info('fetcher :: not spawning a bq_backfill process as one is running')
+                else:
+                    logger.info('fetcher :: there are 0 jobs in vista.bq_backfill.work')
+                if do_spawn_bq_backfill:
+                    try:
+                        logger.info('fetcher :: spawning a bq_backfill process')
+                        p = Process(target=self.spawn_bq_backfill, args=(bq_backfill_job_id,))
+                        p.start()
+                        logger.info('fetcher :: spawned a bq_backfill process, continuing')
+                    except Exception as err:
+                        logger.error('error :: fetcher :: failed to spawn spawn_bq_backfill, err: %s' % err)
+
+                # @added 20240621 - Feature #5372: vista - bq_update
+                #                   Feature #5352: vista - bigquery
+                try:
+                    vista_bq_update_work = self.redis_conn_decoded.hgetall('vista.bq_update.work')
+                except Exception as err:
+                    logger.error('error :: fetcher :: failed to hgetall on vista.bq_update.work, err: %s' % err)
+                    vista_bq_backfill_work = {}
+                bq_update_running = False
+                do_spawn_bq_update = False
+                bq_update_job_id = None
+                if len(vista_bq_update_work) > 0:
+                    logger.info('fetcher :: there are %s jobs in vista.bq_update.work' % str(len(vista_bq_update_work)))
+                    for job_id in list(vista_bq_update_work.keys()):
+                        bq_update_job_id = str(job_id)
+                        break
+                    try:
+                        bq_update_running = self.redis_conn_decoded.get('vista.bq_update.running')
+                    except Exception as err:
+                        logger.error('error :: fetcher :: failed to get on vista.bq_backfill.running from Redis, err: %s' % err)
+                    if not bq_update_running:
+                        do_spawn_bq_update = True
+                    else:
+                        logger.info('fetcher :: not spawning a bq_update process as one is running')
+                else:
+                    logger.info('fetcher :: there are 0 jobs in vista.bq_update.work')
+                if do_spawn_bq_update:
+                    try:
+                        logger.info('fetcher :: spawning a bq_update process')
+                        p = Process(target=self.spawn_bq_update, args=(bq_update_job_id,))
+                        p.start()
+                        logger.info('fetcher :: spawned a bq_update process, continuing')
+                    except Exception as err:
+                        logger.error('error :: fetcher :: failed to spawn spawn_bq_update, err: %s' % err)
+
 
             # Known fetcher metrics that are known to have already been fetched,
             # metrics in this set are named as follows namespace_prefix.metric
@@ -1218,7 +1467,14 @@ class Fetcher(Thread):
                         if LOCAL_DEBUG:
                             logger.info('fetcher :: calling %s with payload - %s' % (
                                 flux_url, str(payload)))
-                        response = requests.post(flux_url, json=payload)
+                        # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                        # Add timeout for bandit B113
+                        #response = requests.post(flux_url, json=payload)
+                        connect_timeout = 5
+                        read_timeout = 45
+                        use_timeout = (int(connect_timeout), int(read_timeout))
+                        response = requests.post(flux_url, json=payload, timeout=use_timeout)
+
                         # @modified 20191011 - Task #3258: Reduce vista logging
                         if LOCAL_DEBUG:
                             logger.info('fetcher :: flux /populate_metric response code - %s' % (
@@ -1338,7 +1594,12 @@ class Fetcher(Thread):
                 for p in pids:
                     if p.is_alive():
                         logger.info('fetcher :: stopping fetch_process - %s' % (str(p.is_alive())))
-                        p.join()
+                        # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                        # p.join()
+                        killing_pid = p.pid
+                        logger.info('fetcher :: kill fetch_process with pid: %s' % (str(killing_pid)))
+                        p.terminate()
+                        logger.info('fetcher :: killed fetch_process process with pid: %s' % (str(killing_pid)))
 
             # Sleep if it went too fast
             process_runtime = int(time()) - begin_fetcher_run

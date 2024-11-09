@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>vista.fetcher &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>vista.fetcher &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -124,6 +124,7 @@
              
   <h1>Source code for vista.fetcher</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
@@ -135,6 +136,7 @@
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
@@ -146,6 +148,9 @@
 <span class="c1"># @modified 20191115 - Branch #3262: py3</span>
 <span class="c1"># from redis import StrictRedis</span>
 <span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="c1"># @added 20240516 - Feature #5352: vista - bigquery</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">nullcontext</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -168,6 +173,10 @@
     <span class="c1"># @added 20220726 - Task #2732: Prometheus to Skyline</span>
     <span class="c1">#                   Branch #4300: prometheus</span>
     <span class="kn">from</span> <span class="nn">functions.graphite.send_graphite_metric</span> <span class="kn">import</span> <span class="n">send_graphite_metric</span>
+    <span class="c1"># @added 20240516 - Feature #5352: vista - bigquery</span>
+    <span class="kn">from</span> <span class="nn">functions.settings.get_bq_accounts_settings</span> <span class="kn">import</span> <span class="n">get_bq_accounts_settings</span>
+    <span class="c1"># @added 20240521 - Feature #5352: vista - bigquery</span>
+    <span class="kn">from</span> <span class="nn">functions.thunder.send_event</span> <span class="kn">import</span> <span class="n">thunder_send_event</span>
 
 <span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;vista&#39;</span>
 <span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;fetcher&#39;</span>
@@ -203,11 +212,35 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">VERBOSE_LOGGING</span> <span class="o">=</span> <span class="kc">False</span>
 
+<span class="c1"># @added 20240516 - Feature #5352: vista - bigquery</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_VIRTUALENV_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VISTA_BQ_VIRTUALENV_PATH</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_VIRTUALENV_PATH</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">VISTA_BQ_VIRTUALENV_PATH</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">VISTA_BQ_VIRTUALENV_PATH</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">bq_backfill</span> <span class="kn">import</span> <span class="n">bq_backfill</span>
+    <span class="c1"># @added 20240621 - Feature #5372: vista - bq_update</span>
+    <span class="c1">#                   Feature #5352: vista - bigquery</span>
+    <span class="kn">from</span> <span class="nn">bq_update</span> <span class="kn">import</span> <span class="n">bq_update</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">bq_backfill</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+    <span class="n">bq_update</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">HORIZON_SHARDS</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARDS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">HORIZON_SHARD</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARD</span> <span class="o">=</span> <span class="n">HORIZON_SHARDS</span><span class="p">[</span><span class="n">this_host</span><span class="p">]</span>
+
 <span class="n">USE_FLUX</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="Fetcher"><a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher">[docs]</a><span class="k">class</span> <span class="nc">Fetcher</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="Fetcher">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher">[docs]</a>
+<span class="k">class</span> <span class="nc">Fetcher</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The fetcher thread asynchronisly retrieves the latest data points for</span>
 <span class="sd">    metrics from multiple endpoints using asyncio and aiohttp and submits the</span>
@@ -231,7 +264,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Fetcher.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Fetcher.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -243,7 +278,139 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Fetcher.fetch_process"><a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.fetch_process">[docs]</a>    <span class="k">def</span> <span class="nf">fetch_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metrics_to_fetch</span><span class="p">):</span>
+
+    <span class="c1"># @added 20240516 - Feature #5352: vista - bigquery</span>
+<div class="viewcode-block" id="Fetcher.spawn_bq_backfill">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.spawn_bq_backfill">[docs]</a>
+    <span class="k">def</span> <span class="nf">spawn_bq_backfill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bq_backfill_job_id</span><span class="p">):</span>
+        <span class="n">job_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">job_data_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;vista.bq_backfill.work&#39;</span><span class="p">,</span> <span class="n">bq_backfill_job_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">job_data_str</span><span class="p">:</span>
+                <span class="n">job_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">job_data_str</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_backfill :: failed get job_data for job_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">bq_backfill_job_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawn_bq_backfill :: process spawned, running bq_backfill for job_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">bq_backfill_job_id</span><span class="p">)</span>
+            <span class="n">bq_backfill</span><span class="p">(</span><span class="n">bq_backfill_job_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawn_bq_backfill :: bq_backfill complete&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_backfill :: bq_backfill failed for job_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">bq_backfill_job_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="c1"># @added 20240521 - Feature #5352: vista - bigquery</span>
+            <span class="c1"># Try remove job and send thinder alert</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hdel</span><span class="p">(</span><span class="s1">&#39;vista.bq_backfill.work&#39;</span><span class="p">,</span> <span class="n">bq_backfill_job_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_backfill :: failed to hdel failed job_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">bq_backfill_job_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="c1"># Send thunder alert</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;alert&#39;</span>
+            <span class="n">event_type</span> <span class="o">=</span> <span class="s1">&#39;bq_backfill_failed&#39;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - Vista bq_backfill failed&#39;</span> <span class="o">%</span> <span class="n">level</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;job_id: </span><span class="si">%s</span><span class="s1"> failed&#39;</span> <span class="o">%</span> <span class="n">bq_backfill_job_id</span>
+            <span class="n">thunder_event</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span>
+                <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span>
+                <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="n">skyline_app</span><span class="p">,</span>
+                <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="n">skyline_app</span><span class="p">,</span>
+                <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">(),</span>
+                <span class="s1">&#39;expiry&#39;</span><span class="p">:</span> <span class="mi">600</span><span class="p">,</span>
+                <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;job_id&#39;</span><span class="p">:</span> <span class="n">bq_backfill_job_id</span><span class="p">,</span>
+                    <span class="s1">&#39;job&#39;</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
+                    <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+            <span class="n">submitted</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">submitted</span> <span class="o">=</span> <span class="n">thunder_send_event</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">thunder_event</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_backfill :: error encountered with thunder_send_event, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">submitted</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawn_bq_backfill :: send thunder event for failed job_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">bq_backfill_job_id</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;vista.bq_backfill.running&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_backfill :: failed to delete vista.bq_backfill.running, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span></div>
+
+
+    <span class="c1"># @added 20240621 - Feature #5372: vista - bq_update</span>
+    <span class="c1">#                   Feature #5352: vista - bigquery</span>
+<div class="viewcode-block" id="Fetcher.spawn_bq_update">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.spawn_bq_update">[docs]</a>
+    <span class="k">def</span> <span class="nf">spawn_bq_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bq_update_job_id</span><span class="p">):</span>
+        <span class="n">job_data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">job_data_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s1">&#39;vista.bq_update.work&#39;</span><span class="p">,</span> <span class="n">bq_update_job_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">job_data_str</span><span class="p">:</span>
+                <span class="n">job_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">job_data_str</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_update :: failed get job_data for job_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">bq_update_job_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawn_bq_update :: process spawned, running bq_update for job_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">bq_update_job_id</span><span class="p">)</span>
+            <span class="n">bq_update</span><span class="p">(</span><span class="n">bq_update_job_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawn_bq_update :: bq_update complete&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_update :: bq_update failed for job_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">bq_update_job_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="c1"># Try remove job and send thunder alert</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hdel</span><span class="p">(</span><span class="s1">&#39;vista.bq_update.work&#39;</span><span class="p">,</span> <span class="n">bq_update_job_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_update :: failed to hdel failed job_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">bq_update_job_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+            <span class="c1"># Send thunder alert</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;alert&#39;</span>
+            <span class="n">event_type</span> <span class="o">=</span> <span class="s1">&#39;bq_update_failed&#39;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - Vista bq_update failed&#39;</span> <span class="o">%</span> <span class="n">level</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;job_id: </span><span class="si">%s</span><span class="s1"> failed&#39;</span> <span class="o">%</span> <span class="n">bq_update_job_id</span>
+            <span class="n">thunder_event</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="n">level</span><span class="p">,</span>
+                <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="n">event_type</span><span class="p">,</span>
+                <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span>
+                <span class="s1">&#39;app&#39;</span><span class="p">:</span> <span class="n">skyline_app</span><span class="p">,</span>
+                <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;source&#39;</span><span class="p">:</span> <span class="n">skyline_app</span><span class="p">,</span>
+                <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">time</span><span class="p">(),</span>
+                <span class="s1">&#39;expiry&#39;</span><span class="p">:</span> <span class="mi">600</span><span class="p">,</span>
+                <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;job_id&#39;</span><span class="p">:</span> <span class="n">bq_update_job_id</span><span class="p">,</span>
+                    <span class="s1">&#39;job&#39;</span><span class="p">:</span> <span class="n">job_data</span><span class="p">,</span>
+                    <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+            <span class="n">submitted</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">submitted</span> <span class="o">=</span> <span class="n">thunder_send_event</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">thunder_event</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_update :: error encountered with thunder_send_event, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">submitted</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawn_bq_update :: send thunder event for failed job_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">bq_update_job_id</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;vista.bq_update.running&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: spawn_bq_update :: failed to delete vista.bq_update.running, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">err</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="Fetcher.fetch_process">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.fetch_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">fetch_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metrics_to_fetch</span><span class="p">):</span>
 
         <span class="n">fetch_process_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: fetch_process started&#39;</span><span class="p">)</span>
@@ -375,7 +542,14 @@
             <span class="n">sanitised</span><span class="p">,</span> <span class="n">url</span> <span class="o">=</span> <span class="n">sanitise_graphite_url</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
 
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">batch_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                <span class="c1"># Add timeout for bandit B113</span>
+                <span class="c1">#batch_response = requests.get(url)</span>
+                <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">45</span>
+                <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                <span class="n">batch_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
                 <span class="n">batch_js</span> <span class="o">=</span> <span class="n">batch_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
                 <span class="n">batch_responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_js</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -427,13 +601,20 @@
                     <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
                     <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: getting data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-                    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                    <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                    <span class="c1"># Add timeout for bandit B113</span>
+                    <span class="c1">#response = requests.get(url)</span>
+                    <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+                    <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">45</span>
+                    <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
                     <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                         <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="c1"># @modified 2023024 - Task #4824: vista - warn on remote_error</span>
                     <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="k">if</span> <span class="s1">&#39;Failed to establish a new connection&#39;</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="s1">&#39;Failed to establish a new connection&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
                         <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="s1">&#39;Errno 111&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
                         <span class="n">remote_error</span> <span class="o">=</span> <span class="kc">True</span>
@@ -757,7 +938,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: metrics fetched in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetch_time</span><span class="p">))</span>
         <span class="k">return</span></div>
 
-<div class="viewcode-block" id="Fetcher.run"><a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Fetcher.run">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        - Called when the process intializes.</span>
 
@@ -854,6 +1038,87 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not update the Redis </span><span class="si">%s</span><span class="s1"> key&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+            <span class="c1"># @added 20240516 - Feature #5352: vista - bigquery</span>
+            <span class="n">vista_bq_worker</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># Only execute on a single node in the cluster</span>
+            <span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">HORIZON_SHARD</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">vista_bq_worker</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">vista_bq_backfill_work</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">vista_bq_accounts</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">vista_bq_worker</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">vista_bq_accounts</span> <span class="o">=</span> <span class="n">get_bq_accounts_settings</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: get_bq_accounts_settings failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vista_bq_accounts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">vista_bq_backfill_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;vista.bq_backfill.work&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to hgetall on vista.bq_backfill.work, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="n">vista_bq_backfill_work</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">bq_backfill_running</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">do_spawn_bq_backfill</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">bq_backfill_job_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vista_bq_backfill_work</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: there are </span><span class="si">%s</span><span class="s1"> jobs in vista.bq_backfill.work&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vista_bq_backfill_work</span><span class="p">)))</span>
+                    <span class="k">for</span> <span class="n">job_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">vista_bq_backfill_work</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="n">bq_backfill_job_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+                        <span class="k">break</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">bq_backfill_running</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vista.bq_backfill.running&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to get on vista.bq_backfill.running from Redis, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">bq_backfill_running</span><span class="p">:</span>
+                        <span class="n">do_spawn_bq_backfill</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: not spawning a bq_backfill process as one is running&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: there are 0 jobs in vista.bq_backfill.work&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">do_spawn_bq_backfill</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawning a bq_backfill process&#39;</span><span class="p">)</span>
+                        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spawn_bq_backfill</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">bq_backfill_job_id</span><span class="p">,))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawned a bq_backfill process, continuing&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to spawn spawn_bq_backfill, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+
+                <span class="c1"># @added 20240621 - Feature #5372: vista - bq_update</span>
+                <span class="c1">#                   Feature #5352: vista - bigquery</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">vista_bq_update_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="s1">&#39;vista.bq_update.work&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to hgetall on vista.bq_update.work, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="n">vista_bq_backfill_work</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">bq_update_running</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">do_spawn_bq_update</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">bq_update_job_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vista_bq_update_work</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: there are </span><span class="si">%s</span><span class="s1"> jobs in vista.bq_update.work&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vista_bq_update_work</span><span class="p">)))</span>
+                    <span class="k">for</span> <span class="n">job_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">vista_bq_update_work</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="n">bq_update_job_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+                        <span class="k">break</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">bq_update_running</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;vista.bq_update.running&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to get on vista.bq_backfill.running from Redis, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">bq_update_running</span><span class="p">:</span>
+                        <span class="n">do_spawn_bq_update</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: not spawning a bq_update process as one is running&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: there are 0 jobs in vista.bq_update.work&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">do_spawn_bq_update</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawning a bq_update process&#39;</span><span class="p">)</span>
+                        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spawn_bq_update</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">bq_update_job_id</span><span class="p">,))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: spawned a bq_update process, continuing&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to spawn spawn_bq_update, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+
 
             <span class="c1"># Known fetcher metrics that are known to have already been fetched,</span>
             <span class="c1"># metrics in this set are named as follows namespace_prefix.metric</span>
@@ -1343,7 +1608,14 @@
                         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: calling </span><span class="si">%s</span><span class="s1"> with payload - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">flux_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
-                        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">flux_url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+                        <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                        <span class="c1"># Add timeout for bandit B113</span>
+                        <span class="c1">#response = requests.post(flux_url, json=payload)</span>
+                        <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+                        <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">45</span>
+                        <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">flux_url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
                         <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
                         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: flux /populate_metric response code - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -1463,7 +1735,12 @@
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: stopping fetch_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
-                        <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                        <span class="c1"># @modified 20240202 - Task #5178: Build and test skyline v4.1.0</span>
+                        <span class="c1"># p.join()</span>
+                        <span class="n">killing_pid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pid</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: kill fetch_process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: killed fetch_process process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
 
             <span class="c1"># Sleep if it went too fast</span>
             <span class="n">process_runtime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">begin_fetcher_run</span>
@@ -1597,7 +1874,9 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">process_runtime</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to del process_runtime&#39;</span><span class="p">)</span></div></div>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to del process_runtime&#39;</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1607,7 +1886,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

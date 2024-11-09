@@ -1,6 +1,20 @@
 {% block features_profiles_block %}
 <!-- BEGIN /ionosphere/fp_veiw=true block -->
 {% if list_by %}
+
+  {% if version == dev_ver %}
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+      <a class="nav-link" href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a>
+      </li>
+    </ul>
+  </div>
+  <br>
+  {% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -13,12 +27,13 @@
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
+  {% endif %}
 {% endif %}
-
 
 {% if list_by %}
 	<br>
 <!--  <h4><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></h4>-->
+  {% if version == dev_ver %}
   <div class="navbar-header" role="navigation">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
       <span class="sr-only">Toggle navigation</span>
@@ -28,6 +43,7 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+  {% endif %}
 {% endif %}
 
 {% if print_debug == 'True' %}
@@ -84,6 +100,54 @@
 {% endif %}
 
 {% if unique_metrics or metric_td_dirs %}
+
+  {% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a>
+    </li>
+  </ul>
+</div>
+<br>
+
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Search</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC"><span class="logo"><span class="sky">Matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC"><span class="logo"><span class="sky">Motif</span> <span class="re">matches</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_validate=true&metric=all"><span class="logo"><span class="re">Validate</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?validate_motif_annihilations=true&limit=10"><span class="logo"><span class="sky">Validate</span> <span class="re"></span>motif_annihilations</span></span></a>
+    </li>
+<!--
+    <li class="nav-item">
+    <a class="nav-link" href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">List</span> <span class="re">by metrics</span></span></a>
+    </li>
+-->
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?performance=true"><span class="logo"><span class="sky">Performance</span></span></a>
+    </li>
+<!--
+    <li class="nav-item">
+      <a class="nav-link" href="/ionosphere?fp_view=true&a_dated_list=true"><span class="logo"><span class="sky">List</span> <span class="re">by date</span></span></a>
+    </li>
+-->
+  </ul>
+<!--</div>-->
+<br>
+  {% else %}
 		<div class="col-md-9 col-md-pull-3">
 			<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
   {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
@@ -115,6 +179,7 @@
   {% endif %}
 
 			</ul>
+  {% endif %}
 			<div class="tab-content">
 {% endif %}
 
@@ -279,6 +344,7 @@ Also note:
     {% else %}
     <h4><span class="logo"><span class="sky">Features</span> <span class="re">profile: </span>{{ use_for_metric }} - {{ human_date }}</h4>
     {% endif %}
+
     {% if labelled_metric_base_name %}
 	  <table class="table table-hover">
 	    <thead>
@@ -331,6 +397,14 @@ you need to try and be quicker next time.
       <center><h3><span class="logo"><span class="re">THIS FEATURES PROFILE HAS BEEN DISABLED</span></span></h3></center>
   {% endif %}
 
+  {% if alias_fp_id >= 1 %}
+    <center><h3><span class="logo"><span class="sky">ALIAS</span> <span class="re"> features profile</span></h4></center>
+An alias features profile is a features profile that has been copied from one metric to another.  The below images are from the original metric features profile but the files have been renamed<br>
+    <h4><span class="logo"><span class="sky">Original ::</span> <span class="re">metric ::</span></span> {{ alias_fp_original_metric }} with id {{ alias_fp_original_metric_id }}</h4>
+    <h4><span class="logo"><span class="sky">Original ::</span> <span class="re">fp_id ::</span></span> {{ alias_fp_original_fp_id }}</h4>
+    <h4><span class="logo"><span class="sky">Original ::</span> <span class="re">features profile ::</span></span> <a href="?fp_view=true&fp_id={{ alias_fp_original_fp_id }}&metric={{ alias_fp_original_metric }}" target="_blank"><b>Original features profile page</b></a></h4>
+  {% endif %}
+
 <!-- # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
   {#% if parent_id == 0 %#}
 -->
@@ -350,6 +424,9 @@ you need to try and be quicker next time.
       {% if fp_label == 'LEARNT - repetitive pattern' %}
       <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile learnt from </span></span>
       <b>repetitive patterns</b></h4></center>
+      {% elif fp_label == 'LEARNT - motif_annihilation' %}
+      <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile learnt from </span></span>
+      <b>motif_annihilation</b></h4></center>
       {% else %}
       <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile based on </span></span>
       <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ use_for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a></h4></center>
@@ -418,6 +495,57 @@ you need to try and be quicker next time.
   {% else %}
   		<pre>None</pre>
   {% endif %}
+
+  {% if comments %}
+  <h4><b><span class="logo"><span class="sky">Comments ::</span> <span class="re"> found</span></span></b> {{ comments|length }}</h4>
+  {% else %}
+  <h4><b><span class="logo"><span class="sky">Comments ::</span> <span class="re"> <code>None</code></span></span></b></h4>
+  {% endif %}
+
+  {% if comments %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+      {% for key in comments_keys %}
+          <th>{{ key }}</th>
+      {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for comment_id in comments %}
+        <tr>
+        {% for key in comments_keys %}
+          <td>{{ comments[comment_id][key] }}</td>
+        {% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#save_comment">Add features profile comment</button>
+  <div id="save_comment" class="collapse">
+    <form action="ionosphere?fp_view=true&timestamp={{ timestamp }}&metric={{ use_for_metric }}&save_comment=True" method=post enctype=multipart/form-data>
+      <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+      <input type="hidden" name="metric" value="{{ use_for_metric }}" />
+    {% if requested_timestamp %}
+      <input type="hidden" name="requested_timestamp" value="{{ requested_timestamp }}" />
+    {% endif %}
+    {% if features_profile_id %}
+      <input type="hidden" name="fp_id" value="{{ features_profile_id }}" />
+    {% endif %}
+      <input type="hidden" name="user_id" value="{{ user_id }}" />
+      <textarea name="comment" rows="3" cols="80"></textarea>
+      <br>
+      <input type="submit" value="Submit features profile comment">
+    </form>
+  </div>
+
+{% if comment_added %}
+<div class="alert alert-success">
+Comment was added
+</div>
+{% endif %}
 
 <!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
   {% if validated %}
@@ -639,11 +767,11 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
     {% endif %}
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
-    <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    <img src="ionosphere_images?image={{ matched_graph_image_file }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
     {% if matched_fp_plot %}
     <br>
-    <img src="ionosphere_images?image={{ matched_fp_plot }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    <img src="ionosphere_images?image={{ matched_fp_plot }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
     <br>
 
@@ -678,7 +806,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
     <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_layers_matched id ::</span></span> {{ matched_layer_id }}</h4>
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
-    <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    <img src="ionosphere_images?image={{ matched_graph_image_file }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
 
 <!-- # @added 20190601 - Feature #3084: Ionosphere - validated matches -->
@@ -716,10 +844,10 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
     <center><h3><span class="logo"><span class="sky">motif ::</span> <span class="re">period ::</span></span> {{ matched_details_object['motif_period_minutes'] }} minutes  |  {{ matched_details_object['motif_period_seconds'] }} seconds</h3></center>
-    <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    <img src="ionosphere_images?image={{ matched_graph_image_file }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
     {% endif %}
     {% if graphite_matched_images %}
-        <img src="ionosphere_images?image={{ graphite_matched_images[0] }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /"><br>
+        <img src="ionosphere_images?image={{ graphite_matched_images[0] }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /"><br>
     {% endif %}
     <br>
 
@@ -748,6 +876,28 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
       <button type="button">Validate match</button></a>
 	   </div>
     {% endif %}
+
+    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#save_motif_match_comment">Add match comment</button>
+    <div id="save_motif_match_comment" class="collapse">
+      <form action="ionosphere?fp_view=true&metric={{ use_for_metric }}&timestamp={{ timestamp }}&matched_motif_id={{ matched_motif_id }}&ionosphere_matched_id={{ ionosphere_matched_id }}&save_comment=True" method=post enctype=multipart/form-data>
+        <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+        <input type="hidden" name="metric" value="{{ use_for_metric }}" />
+      {% if requested_timestamp %}
+        <input type="hidden" name="requested_timestamp" value="{{ requested_timestamp }}" />
+      {% endif %}
+      {% if ionosphere_matched_id %}
+        <input type="hidden" name="match_id" value="{{ ionosphere_matched_id }}" />
+      {% endif %}
+      {% if matched_motif_id %}
+        <input type="hidden" name="motif_match_id" value="{{ matched_motif_id }}" />
+        <input type="hidden" name="motif_match_url" value="{{ self_url }}/ionosphere?fp_view=true&metric={{ use_for_metric }}&timestamp={{ timestamp }}&matched_motif_id={{ matched_motif_id }}&ionosphere_matched_id={{ ionosphere_matched_id }}" />
+      {% endif %}
+        <input type="hidden" name="user_id" value="{{ user_id }}" />
+        <textarea name="comment" rows="3" cols="80"></textarea>
+        <br>
+        <input type="submit" value="Submit motif match comment">
+      </form>
+    </div>
   {% endif %}
 
   {% if validated_match_successful %}
@@ -799,9 +949,13 @@ the top right of this page.  Here is hoping that this day just gets better.
     {% else %}
 	  <div class="alert alert-success">
 	    <strong>OK :: </strong> no Panorama anomaly id is expected for
-      an <b><span class="logo"><span class="re">automatically learnt and generated</span> <span class="sky">ionosphere_learn</span></span></b> features profile
+      an <b><span class="logo"><span class="re">automatically learnt and generated</span> <span class="sky">ionosphere_learn</span></span></b> or alias features profile
 	  </div>
     {% endif %}
+  {% endif %}
+
+  {% if alias_fp_id >= 1 %}
+    <center><h3><span class="logo"><span class="sky">ALIAS</span> <span class="re"> features profile</span> original metric images</h4></center>
   {% endif %}
 
 <!-- # @modified 20190331 - Feature #2484: FULL_DURATION feature profiles
@@ -810,9 +964,9 @@ the top right of this page.  Here is hoping that this day just gets better.
   {% if echo_fp == 1 %}
       <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">not_anomalous ::</span></span> graph that this <span class="logo"><span class="sky">ionosphere_echo</span></span> features profile is based on</h4>
     {% for image in metric_images %}
-      {% if (('.redis.plot' in image) or ('.mirage.vortex.plot' in image)) %}
+      {% if (('.redis.plot' in image) or ('.mirage.vortex.plot' in image) and ( not 'custom_algorithms.' in image )) %}
       <center><div class="overlay-graph">
-       <img class="image" src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
+       <img class="image" src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
        <div class="text"><span class="logo"><span class="re">Matched this 24 hour time series from</span></span> {{ echo_human_date }}</div>
       </div></center><br>
       {% endif %}
@@ -822,7 +976,7 @@ the top right of this page.  Here is hoping that this day just gets better.
       {% for image in metric_images %}
         {% if '.matplotlib' in image %}
       <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">time series ::</span></span> database data plot</h4>
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} features profile timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
         {% endif %}
       {% endfor %}
@@ -833,7 +987,7 @@ Image file: {{ image }}<br><br>
   {% else %}
     {% for image in metric_images %}
 <!-- # @modified 20210323 - Feature #3642: Anomaly type classification -->
-      {% if ((not '.redis.plot' in image) and (not '.vortex.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image) and (not 'match_compare' in image) and ( not 'vortex.' in image )) %}
+      {% if ((not '.redis.plot' in image) and (not '.vortex.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image) and (not 'match_compare' in image) and ( not 'vortex.' in image ) and ( not 'custom_algorithms.' in image ) and ( not 'snab.' in image ) and ( not 'motif_annihilation.' in image )) %}
         {% if metric_second_order_resolution_hours != False %}
           {% if parent_id == 0 %}
       <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
@@ -847,28 +1001,57 @@ Image file: {{ image }}<br><br>
 If you wish to see the <a target='_blank' href="{{ graphite_url }}">current
 {{ datastore }} graph</a> for {{ use_for_metric }} (opens in new tab)
         {% endif %}
-<!--      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+<!--      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 -->
         {% if matched_fp_id %}
       <center><div class="overlay-graph">
-       <img class="image" src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
+       <img class="image" src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
        <div class="text"><span class="logo"><span class="re">Matched this time series from</span></span> <strong>{{ echo_human_date }}</strong></div>
       </div></center><br>
         {% else %}
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
         {% endif %}
 Image file: {{ image }}<br><br>
       {% endif %}
       {% if 'vortex.undownsampled' in image %}
       <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">anomaly ::</span></span>original undownsampled graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
       {% endif %}
       {% if 'vortex.analysed' in image %}
       <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">anomaly ::</span></span> analysed data graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
       {% endif %}
     {% endfor %}
+
+    {% if fp_label == 'LEARNT - motif_annihilation' %}
+      {% for image in metric_images %}
+        {% if 'motif_annihilation.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_annihilated time series</span> :: anomaly time series and derived time series from the best matched common motifs from the previous 4 week</span></h4>
+This is the <strong>derived</strong> best matches time series overlaid on the the anomaly timeseries.<br>
+  <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile derived best matches time series graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+        {% if 'motif_annihilation.derived.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_annihilation</span> :: derived time series from the best matched common motifs from the previous 4 weeks</span></h4>
+This is the <strong>derived</strong> best matches time series.<br>
+  <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile derived best matches time series graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+        {% if 'motif_annihilation.pw5_timeseries.png' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">motif_annihilation</span> :: 5 weeks, previous 4 weeks from which the best matched common motifs were derived and the anomaly time series</span></h4>
+This is the previous 4 weeks of the metric from which the best matches common motifs were derived and the annihilated anomaly time series.<br>
+The last green part of the time series is the potential anomaly and the past 7 days, the dotted blue part of the time series is the 4 weeks prior to
+the anomaly.  There is nothing unusual in the green part that is not fairly common in the dotted blue part.
+  <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} previous 4 weeks of the metric from which the best matches common motifs were derived and the annihilated anomaly time series" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    {% if alias_fp_id >= 1 %}
+    <center><h3><span class="logo"><span class="sky">ALIAS</span> <span class="re"> features profile</span> original metric image</h4></center>
+    {% endif %}
 
     {% if matched_fp_id %}
       {% for image in metric_images %}
@@ -880,7 +1063,7 @@ the {{ datastore }} graph above due the image <strong>render summarization based
 available pixels</strong> (e.g. width).<br>
 Please also refer to <strong>this data</strong> for validation as the {{ datastore }}
 graph may flatten the data.
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} features profile time series graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile time series graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
         {% endif %}
       {% endfor %}
@@ -894,12 +1077,16 @@ the {{ datastore }} graph above due the image <strong>render summarization based
 available pixels</strong> (e.g. width).<br>
 Please also refer to <strong>this data</strong> for validation as the {{ datastore }}
 graph may flatten the data.
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} features profile time series graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} features profile time series graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
         {% endif %}
       {% endfor %}
     {% endif %}
 
+  {% endif %}
+
+  {% if alias_fp_id >= 1 %}
+    <center><h3><span class="logo"><span class="sky">ALIAS</span> <span class="re"> features profile</span> original metric images</h4></center>
   {% endif %}
 
   {% if parent_id == 0 %}
@@ -932,7 +1119,7 @@ Image file: {{ image }}<br><br>
 <!-- @added 20170116 - Feature #1854: Ionosphere learn - generations
                        Feature #1842: Ionosphere - Graphite now graphs -->
   {% for gimage in graphite_now_images %}
-<!--      <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" />
+<!--      <img src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" />
 # Align 4 images - tried all of http://stackoverflow.com/questions/9382970/how-to-center-a-div-with-bootstrap2
 # end up using https://owlcation.com/stem/how-to-align-images-side-by-side thanks
 # Ellen Brundige
@@ -942,28 +1129,28 @@ Image file: {{ image }}<br><br>
 -->
     {% if echo_fp == 1 %}
       {% if '.24h.png' in gimage %}
-        <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red">
+        <img src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red">
       {% else %}
-        <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
       {% endif %}
     {% else %}
         {% if metric_full_duration_in_hours_image_str in gimage %}
         <div class="overlay-mirage">
-<!--          <img class="image" src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red" /> -->
-          <img class="overlay-mirage-image" src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
-<!--         <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red" />
+<!--          <img class="image" src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red" /> -->
+          <img class="overlay-mirage-image" src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
+<!--         <img src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red" />
           <div class="overlay-mirage-matched_text">Matched</div> -->
         </div>
-<!--        <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red"> -->
+<!--        <img src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em; border:5px solid red"> -->
         {% else %}
-        <img src="ionosphere_images?image={{ gimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ gimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
         {% endif %}
     {% endif %}
   {% endfor %}
   {% if vortex_training %}
     {% for image in metric_images %}
       {% if 'vortex.algorithm.' in image %}
-        <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
       {% endif %}
     {% endfor %}
   {% endif %}
@@ -972,6 +1159,45 @@ Image file: {{ image }}<br><br>
   {% if vortex_results_dict %}
   <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">results</span></span></h4>
   <code>{{ vortex_results_dict }}</code>
+  {% endif %}
+
+  {% if custom_algorithms_results %}
+  <h4><span class="logo"><span class="sky">custom_algorithms ::</span> <span class="re">results</span></span></h4>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Custom algorithm</th>
+        <th>Anomalous</th>
+        <th>runtime</th>
+        <th>total_anomalies</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for algorithm in custom_algorithms_results['algorithms'] %}
+      <tr>
+        <td>{{ algorithm }}</td>
+  {% if custom_algorithms_results['algorithms'][algorithm]['anomalous'] == True %}
+        <td><span class="logo"><span class="re">{{ custom_algorithms_results['algorithms'][algorithm]['anomalous'] }}</span></span></td>
+  {% else %}
+        <td><span class="logo"><span class="sky">{{ custom_algorithms_results['algorithms'][algorithm]['anomalous'] }}</span></span></td>
+  {% endif %}
+        <td>{{ custom_algorithms_results['algorithms'][algorithm]['analysis_runtime'] }}</td>
+        <td>{{ custom_algorithms_results['algorithms'][algorithm]['anomalies']|length }}</td>
+      </tr>
+{% endfor %}
+    </tbody>
+  </table>
+
+  {% endif %}
+
+  {% if custom_algorithms_graphs %}
+  <h4><span class="logo"><span class="sky">custom_algorithms ::</span> <span class="re">plots</span></span></h4>
+    {% for image in metric_images %}
+    {% if '/custom_algorithms.' in image %}
+<img src="ionosphere_images?image={{ image }}" loading="lazy" alt="custom_algorithm {{ for_metric }} results" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+    {% endif %}
+    {% endfor %}
+<p style="clear: both;">
   {% endif %}
 
 <!-- # @added 20170908 - Feature #2056: ionosphere - disabled_features_profiles -->
@@ -1023,21 +1249,21 @@ Image file: {{ image }}<br><br>
       <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">layers MATCHED ::</span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
       Only one graph is displayed per 10 minute period, a layer could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_layers_matched_images %}
-        <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ gmimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
     {% endfor %}
         <p style="clear: both;">
 
       <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">profile MATCHED ::</span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
       Only one graph is displayed per 10 minute period, a profile could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_matched_images %}
-        <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ gmimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
     {% endfor %}
         <p style="clear: both;">
   {% else %}
       <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">profile MATCHED ::</span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
       Only one graph is displayed per 10 minute period, a profile could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_matched_images %}
-        <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ gmimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
     {% endfor %}
         <p style="clear: both;">
 
@@ -1046,18 +1272,43 @@ Image file: {{ image }}<br><br>
       <h4><span class="logo"><span class="sky">{{ datastore }} ::</span> <span class="re">layers MATCHED ::</span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
       Only one graph is displayed per 10 minute period, a layer could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_layers_matched_images %}
-        <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ gmimage }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
     {% endfor %}
         <p style="clear: both;">
   {% endif %}
 
   {% for image in metric_images %}
     {% if '.redis.plot' in image %}
+      {% if alias_fp_id >= 1 %}
+      <center><h3><span class="logo"><span class="sky">ALIAS</span> <span class="re"> features profile</span> original metric image</h4></center>
+      {% endif %}
       <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
     {% endif %}
   {% endfor %}
+
+  {% set snab_namespace = namespace(snab_image_found=0) %}
+  {% if metric_images|length > 0 %}
+    {% for image in metric_images %}
+      {% if '/snab.' in image %}
+        {% set snab_namespace.snab_image_found = 1 %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  {% set snab = snab_namespace.snab_image_found %}
+  {% if snab == 1 %}
+    {% if alias_fp_id >= 1 %}
+    <center><h3><span class="logo"><span class="sky">ALIAS</span> <span class="re"> features profile</span> original snab images</h4></center>
+    {% endif %}
+    <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">results</span></span> graphs</h4>
+    {% for image in metric_images %}
+      {% if '/snab.' in image %}
+    <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="SNAB {{ for_metric }} results" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+      {% endif %}
+    {% endfor %}
+    <p style="clear: both;">
+  {% endif %}
 
 <!-- # @added 20180414 - Branch #2270: luminosity -->
   {% if panorama_anomaly_id %}
@@ -1073,7 +1324,7 @@ Image file: {{ image }}<br><br>
     {% endif %}
     {% for image in metric_images %}
       {% if 'luminosity.classify_anomaly' in image %}
-      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+      <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
       {% endif %}
     {% endfor %}
@@ -1132,8 +1383,8 @@ based features profile -->
   {% endif %}
   </div>
   <div class="known_bugs">
+    <h5><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></h5>
     <table>
-        <caption><b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b></caption>
         <tr>
 <!-- @modified 20170106 - Feature #1830: Ionosphere alerts
 #                         Bug #1460: panorama check file fails

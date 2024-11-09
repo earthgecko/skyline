@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mirage &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Mirage &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -101,6 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -109,7 +109,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -146,7 +146,7 @@
            <div itemprop="articleBody">
              
   <section id="mirage">
-<h1>Mirage<a class="headerlink" href="#mirage" title="Permalink to this heading"></a></h1>
+<h1>Mirage<a class="headerlink" href="#mirage" title="Link to this heading"></a></h1>
 <p>The Mirage service is responsible for analyzing selected time series at custom
 time ranges when a time series seasonality does not fit within
 <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>.  Mirage allows for testing of real time data
@@ -155,7 +155,7 @@ Crucible and the desire to extend the temporal data pools available to Skyline
 in an attempt to handle seasonality better, reduce noise and increase signal,
 specifically on seasonal metrics.</p>
 <section id="an-overview-of-mirage">
-<h2>An overview of Mirage<a class="headerlink" href="#an-overview-of-mirage" title="Permalink to this heading"></a></h2>
+<h2>An overview of Mirage<a class="headerlink" href="#an-overview-of-mirage" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Mirage is fed specific user defined metrics by Analyzer when Analyzer triggers
 them as anomalous over a 24 hour period.</p></li>
@@ -174,7 +174,7 @@ trained.</p></li>
 </figure>
 <p><a class="reference external" href="_images/skyline.mirage.overview.png">Fullsize overview image</a> for a clearer picture.</p>
 <section id="why-mirage">
-<h3>Why Mirage?<a class="headerlink" href="#why-mirage" title="Permalink to this heading"></a></h3>
+<h3>Why Mirage?<a class="headerlink" href="#why-mirage" title="Link to this heading"></a></h3>
 <p>Analyzer’s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> somewhat limits Analyzer’s usefulness
 for metrics that have a seasonality / periodicity that is greater than
 <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>.  This means Analyzer is not great in terms of
@@ -187,7 +187,7 @@ longer Analyzer will take to run.</p>
 </section>
 </section>
 <section id="what-mirage-can-and-cannot-do">
-<h2>What Mirage can and cannot do<a class="headerlink" href="#what-mirage-can-and-cannot-do" title="Permalink to this heading"></a></h2>
+<h2>What Mirage can and cannot do<a class="headerlink" href="#what-mirage-can-and-cannot-do" title="Link to this heading"></a></h2>
 <p>It is important to know that Mirage is not necessarily suited to making highly
 variable metrics less noisy e.g. spikey metrics.</p>
 <p>Mirage is more useful on fairly constant rate metrics which contain known
@@ -207,7 +207,7 @@ consumption in an office building is a good example of a multi-seasonal data set
 </ul>
 <p>For now let us just consider the daily and weekly seasonality.</p>
 <section id="the-difference-between-the-analyzer-and-mirage-views-of-a-time-series">
-<h3>The difference between the Analyzer and Mirage views of a time series<a class="headerlink" href="#the-difference-between-the-analyzer-and-mirage-views-of-a-time-series" title="Permalink to this heading"></a></h3>
+<h3>The difference between the Analyzer and Mirage views of a time series<a class="headerlink" href="#the-difference-between-the-analyzer-and-mirage-views-of-a-time-series" title="Link to this heading"></a></h3>
 <figure class="align-default">
 <img alt="Mirage" src="_images/mirage-1.png" />
 </figure>
@@ -224,7 +224,7 @@ image is plotted as if the Mirage</em> <code class="docutils literal notranslate
 172 hours just so that the trailing edges can be seen.</em></p>
 </section>
 <section id="a-real-world-example-with-tenfold-com">
-<h3>A real world example with tenfold.com<a class="headerlink" href="#a-real-world-example-with-tenfold-com" title="Permalink to this heading"></a></h3>
+<h3>A real world example with tenfold.com<a class="headerlink" href="#a-real-world-example-with-tenfold-com" title="Link to this heading"></a></h3>
 <dl class="field-list simple">
 <dt class="field-odd">blak3r2<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Our app logs phone calls for businesses and I want to be able to
@@ -245,7 +245,7 @@ resolution, even at the weekends.</p>
 </dl>
 </section>
 <section id="mirage-smooths">
-<h3>Mirage “smooths”<a class="headerlink" href="#mirage-smooths" title="Permalink to this heading"></a></h3>
+<h3>Mirage “smooths”<a class="headerlink" href="#mirage-smooths" title="Link to this heading"></a></h3>
 <p>Mirage is a “tuning” tool for seasonal metrics and it is important to understand
 that Mirage is probably using aggregated/downsampled data (unless your Graphite
 is not using multiple retentions and aggregating) and due to this Mirage can
@@ -265,7 +265,7 @@ noise, more signal.</p>
 </section>
 </section>
 <section id="setting-up-and-enabling-mirage">
-<h2>Setting up and enabling Mirage<a class="headerlink" href="#setting-up-and-enabling-mirage" title="Permalink to this heading"></a></h2>
+<h2>Setting up and enabling Mirage<a class="headerlink" href="#setting-up-and-enabling-mirage" title="Link to this heading"></a></h2>
 <p>By default Mirage is disabled, various Mirage options can be configured in the
 <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> file and Analyzer and Mirage can be configured as appropriate
 for your environment.</p>
@@ -297,7 +297,7 @@ of time series data from Graphite:</p>
 </pre></div>
 </div>
 <section id="order-matters">
-<h3>Order Matters<a class="headerlink" href="#order-matters" title="Permalink to this heading"></a></h3>
+<h3>Order Matters<a class="headerlink" href="#order-matters" title="Link to this heading"></a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>It is important to note that Mirage enabled metric namespaces must
@@ -332,7 +332,7 @@ alert tuple would route ALL to alerter and seasonal_pub1 and seasonal_pub_freddy
 would never get sent to Mirage to be analyzed.</p>
 </section>
 <section id="enabling">
-<h3>Enabling<a class="headerlink" href="#enabling" title="Permalink to this heading"></a></h3>
+<h3>Enabling<a class="headerlink" href="#enabling" title="Link to this heading"></a></h3>
 <p>And ensure that <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> has Mirage options enabled, specifically the
 basic ones:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ENABLE_MIRAGE</span> <span class="o">=</span> <span class="kc">True</span>
@@ -348,7 +348,7 @@ basic ones:</p>
 </div>
 </section>
 <section id="rate-limited">
-<h3>Rate limited<a class="headerlink" href="#rate-limited" title="Permalink to this heading"></a></h3>
+<h3>Rate limited<a class="headerlink" href="#rate-limited" title="Link to this heading"></a></h3>
 <p>Mirage is rate limited to analyze 30 metrics per minute, this is by design and
 desired. Surfacing data from Graphite and analyzing ~1000 data points in a
 time series takes less than 1 second and is much less CPU intensive than
@@ -359,7 +359,7 @@ signals would still be sent.</p>
 </section>
 </section>
 <section id="periodic-checks">
-<h2>Periodic Checks<a class="headerlink" href="#periodic-checks" title="Permalink to this heading"></a></h2>
+<h2>Periodic Checks<a class="headerlink" href="#periodic-checks" title="Link to this heading"></a></h2>
 <p>Due to the fact that Analyzer feeds Mirage metrics to check when Analyzer finds
 a Mirage metric anomalous, there are situations where a metric may change fairly
 substantially over a period greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>, for
@@ -398,7 +398,7 @@ periodic checks and periodic checks will be queued to ensure real time analysis
 is not affected by periodic checks.</p>
 </section>
 <section id="what-mirage-does">
-<h2>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Permalink to this heading"></a></h2>
+<h2>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>If Analyzer finds a metric to be anomalous at <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
 and the metric alert tuple has <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> and
@@ -435,7 +435,7 @@ as anomalous having not matched any known features profile or layers.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

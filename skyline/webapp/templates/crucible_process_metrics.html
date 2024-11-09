@@ -30,6 +30,22 @@ function validate_to_process_submission()
     return true;
 }</script>
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+    <a class="nav-link" href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link active" aria-current="page" href="?process_metrics=true" data-bs-toggle="tooltip" title="Process metrics adhoc with selected algorithms"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></a>
+    </li>
+    <li class="nav-item">
+    <a class="nav-link" href="?crucible_job=true" data-bs-toggle="tooltip" title="Explore Crucible job results"><span class="logo"><span class="sky">Crucible</span><span class="re"> jobs</span></span></a>
+    </li>
+  </ul>
+<!--</div>-->
+<br>
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -52,6 +68,7 @@ function validate_to_process_submission()
       <span class="icon-bar"></span>
     </button>
   </div>
+{% endif %}
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->

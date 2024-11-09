@@ -5,14 +5,19 @@ import copy
 
 import settings
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+# @added 20240520 - Feature #5352: vista - bigquery
+from functions.settings.get_bq_accounts_settings import get_bq_accounts_settings
 
 LOCAL_DEBUG = False
 
 
 # @added 20210518 - Feature #4076: CUSTOM_STALE_PERIOD
 #                   Branch #1444: thunder
+# @modified 20240520 - Feature #5352: vista - bigquery
+# Added bq_accounts_settings
 def custom_stale_period(
-        current_skyline_app, base_name, external_settings={}, log=False):
+        current_skyline_app, base_name, external_settings={},
+        bq_accounts_settings={}, log=False):
     """
     Determine if a metric has a custom stale period defined in
     :mod:`settings.CUSTOM_STALE_PERIOD`.
@@ -20,10 +25,12 @@ def custom_stale_period(
     :param current_skyline_app: the app calling the function
     :param base_name: the metric base_name
     :param external_settings: the external_settings dict
+    :param bq_accounts_settings: the bq_accounts_settings
     :param log: whether to log or not, optional, defaults to False
     :type current_skyline_app: str
     :type base_name: str
     :type external_settings: dict
+    :type bq_accounts_settings: dict
     :type log: boolean
     :return: stale_period
     :rtype: int
@@ -69,6 +76,26 @@ def custom_stale_period(
             function_str, e))
         stale_period = 500
         custom_stale_period_dict = {}
+
+    # @added 20240520 - Feature #5352: vista - bigquery
+    if not bq_accounts_settings:
+        # If None is explicitly passed do not try as there are None
+        if isinstance(bq_accounts_settings, dict):
+            try:
+                bq_accounts_settings = get_bq_accounts_settings(current_skyline_app)
+            except Exception as err:
+                current_logger.error('error :: get_bq_accounts_settings failed, err: %s' % err)
+            for bq_account, bq_account_settings in bq_accounts_settings.items():
+                batch_processing_namespace = None
+                namespace_stale_period = None
+                try:
+                    batch_processing_namespace = bq_account_settings['batch_processing_namespace']
+                    namespace_stale_period = int(bq_account_settings['stale_period'])
+                except Exception as err:
+                    batch_processing_namespace = None
+                    namespace_stale_period = None
+                if batch_processing_namespace and namespace_stale_period:
+                    custom_stale_period_dict[batch_processing_namespace] = namespace_stale_period
 
     # @added 20210602 - Feature #4000: EXTERNAL_SETTINGS
     # Add any custom stale periods for any namespaces declared in external

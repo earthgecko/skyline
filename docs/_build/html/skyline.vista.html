@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.vista package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.vista package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -117,6 +117,9 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.vista package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-vista.agent">skyline.vista.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-vista.bq_backfill">skyline.vista.bq_backfill module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-vista.bq_fetcher">skyline.vista.bq_fetcher module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-vista.bq_update">skyline.vista.bq_update module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-vista.fetcher">skyline.vista.fetcher module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-vista.worker">skyline.vista.worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-vista">Module contents</a></li>
@@ -130,6 +133,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -177,55 +181,130 @@
            <div itemprop="articleBody">
              
   <section id="skyline-vista-package">
-<h1>skyline.vista package<a class="headerlink" href="#skyline-vista-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.vista package<a class="headerlink" href="#skyline-vista-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="module-vista.agent">
-<span id="skyline-vista-agent-module"></span><h2>skyline.vista.agent module<a class="headerlink" href="#module-vista.agent" title="Permalink to this heading"></a></h2>
+<span id="skyline-vista-agent-module"></span><h2>skyline.vista.agent module<a class="headerlink" href="#module-vista.agent" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="vista.agent.Vista">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Vista</span></span><a class="reference internal" href="_modules/vista/agent.html#Vista"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.agent.Vista" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Vista</span></span><a class="reference internal" href="_modules/vista/agent.html#Vista"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.agent.Vista" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Initializes Vista</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="vista.agent.Vista.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/agent.html#Vista.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.agent.Vista.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/agent.html#Vista.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.agent.Vista.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="vista.agent.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/agent.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.agent.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/agent.html#run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.agent.run" title="Link to this definition"></a></dt>
 <dd><p>Start the Vista.</p>
 <p>Start the logger.</p>
 </dd></dl>
 
 </section>
+<section id="module-vista.bq_backfill">
+<span id="skyline-vista-bq-backfill-module"></span><h2>skyline.vista.bq_backfill module<a class="headerlink" href="#module-vista.bq_backfill" title="Link to this heading"></a></h2>
+<p>bq_backfill.py</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="vista.bq_backfill.bq_backfill">
+<span class="sig-name descname"><span class="pre">bq_backfill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bq_backfill_job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/bq_backfill.html#bq_backfill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.bq_backfill.bq_backfill" title="Link to this definition"></a></dt>
+<dd><p>This function is used to get data from BigQuery, convert it to metrics and
+submit it to flux and Redis (if it would be dropped by Horizon due to
+<a class="reference internal" href="skyline.html#settings.MAX_RESOLUTION" title="settings.MAX_RESOLUTION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MAX_RESOLUTION</span></code></a>)</p>
+</dd></dl>
+
+</section>
+<section id="module-vista.bq_fetcher">
+<span id="skyline-vista-bq-fetcher-module"></span><h2>skyline.vista.bq_fetcher module<a class="headerlink" href="#module-vista.bq_fetcher" title="Link to this heading"></a></h2>
+<p>bq_fetcher.py</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="vista.bq_fetcher.Bq_Fetcher">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Bq_Fetcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/bq_fetcher.html#Bq_Fetcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.bq_fetcher.Bq_Fetcher" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<p>The BQFetcher thread checks the BQ accounts schedule and update_schedule and
+submits a bq_backfill or bq_update job as appropriate.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="vista.bq_fetcher.Bq_Fetcher.check_if_parent_is_alive">
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/bq_fetcher.html#Bq_Fetcher.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.bq_fetcher.Bq_Fetcher.check_if_parent_is_alive" title="Link to this definition"></a></dt>
+<dd><p>Self explanatory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vista.bq_fetcher.Bq_Fetcher.bq_fetch">
+<span class="sig-name descname"><span class="pre">bq_fetch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/bq_fetcher.html#Bq_Fetcher.bq_fetch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.bq_fetcher.Bq_Fetcher.bq_fetch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vista.bq_fetcher.Bq_Fetcher.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/bq_fetcher.html#Bq_Fetcher.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.bq_fetcher.Bq_Fetcher.run" title="Link to this definition"></a></dt>
+<dd><ul class="simple">
+<li><p>Called when the process intializes.</p></li>
+<li><p>Check job schedules</p></li>
+<li><p>Wait for the processes to finish.</p></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-vista.bq_update">
+<span id="skyline-vista-bq-update-module"></span><h2>skyline.vista.bq_update module<a class="headerlink" href="#module-vista.bq_update" title="Link to this heading"></a></h2>
+<p>bq_update.py</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="vista.bq_update.bq_update">
+<span class="sig-name descname"><span class="pre">bq_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bq_update_job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/bq_update.html#bq_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.bq_update.bq_update" title="Link to this definition"></a></dt>
+<dd><p>This function is used to get data from BigQuery and compare it to the last
+data fetched from BigQuery for the period (if an archive is available, if
+not an archive is created using data from Redis and/or Graphite).  The
+archive/current values are compared to the values for the timestamp from the
+latest BigQuery data for the period and if the BigQuery value has changed,
+the values are updated Graphite and Redis.  The metrics that have changed
+are then reprocessed up to the timestamp of the changed data and if no
+anomaly is detected for the updated timestamp and previously an anomaly WAS
+detected for the timestamp the existing anomaly is updated with the new
+value and the previous value and new value for the anomaly is recorded in
+the database anomalies_updated table.</p>
+</dd></dl>
+
+</section>
 <section id="module-vista.fetcher">
-<span id="skyline-vista-fetcher-module"></span><h2>skyline.vista.fetcher module<a class="headerlink" href="#module-vista.fetcher" title="Permalink to this heading"></a></h2>
+<span id="skyline-vista-fetcher-module"></span><h2>skyline.vista.fetcher module<a class="headerlink" href="#module-vista.fetcher" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="vista.fetcher.Fetcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Fetcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Fetcher</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The fetcher thread asynchronisly retrieves the latest data points for
 metrics from multiple endpoints using asyncio and aiohttp and submits the
 data to the Redis set, vista.fetcher.metrics.json for the worker to process.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="vista.fetcher.Fetcher.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="vista.fetcher.Fetcher.spawn_bq_backfill">
+<span class="sig-name descname"><span class="pre">spawn_bq_backfill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bq_backfill_job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.spawn_bq_backfill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.spawn_bq_backfill" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="vista.fetcher.Fetcher.spawn_bq_update">
+<span class="sig-name descname"><span class="pre">spawn_bq_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bq_update_job_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.spawn_bq_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.spawn_bq_update" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="vista.fetcher.Fetcher.fetch_process">
-<span class="sig-name descname"><span class="pre">fetch_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_to_fetch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.fetch_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.fetch_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fetch_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_to_fetch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.fetch_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.fetch_process" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="vista.fetcher.Fetcher.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/fetcher.html#Fetcher.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.fetcher.Fetcher.run" title="Link to this definition"></a></dt>
 <dd><ul class="simple">
 <li><p>Called when the process intializes.</p></li>
 <li><p>Determine if Redis is up and discover the number of <cite>unique metrics</cite>.</p></li>
@@ -238,10 +317,10 @@ data to the Redis set, vista.fetcher.metrics.json for the worker to process.</p>
 
 </section>
 <section id="module-vista.worker">
-<span id="skyline-vista-worker-module"></span><h2>skyline.vista.worker module<a class="headerlink" href="#module-vista.worker" title="Permalink to this heading"></a></h2>
+<span id="skyline-vista-worker-module"></span><h2>skyline.vista.worker module<a class="headerlink" href="#module-vista.worker" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="vista.worker.Worker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/worker.html#Worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.worker.Worker" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/worker.html#Worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.worker.Worker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The worker process retrieves time series published to the Vista Fetcher
 Redis set, vista.fetcher.metrics.json (and in future the
@@ -249,13 +328,13 @@ vista.fetcher.metrics.csv Redis set) and validates the latest data points
 for each metric and submits it to Skyline Flux or directly to Graphite.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="vista.worker.Worker.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.worker.Worker.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="vista.worker.Worker.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/worker.html#Worker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.worker.Worker.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vista/worker.html#Worker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#vista.worker.Worker.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -263,7 +342,7 @@ for each metric and submits it to Skyline Flux or directly to Graphite.</p>
 
 </section>
 <section id="module-vista">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-vista" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-vista" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -278,7 +357,7 @@ for each metric and submits it to Skyline Flux or directly to Graphite.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

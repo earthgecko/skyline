@@ -87,6 +87,27 @@ def ionosphere_features_profile():
         data_dict['data']['fail_msg'] = 'bad parameters'
         return jsonify(data_dict), 400
 
+    # @added 20240122 - Task #5056: webapp ionosphere - minimise work on api calls
+    api_train_request = False
+    try:
+        api_train_request = request.form['api_train_request']
+        if api_train_request == 'true':
+             api_train_request = True
+    except KeyError:
+        api_train_request = False
+    except Exception as err:
+        logger.error('error :: webapp_features_profile :: bad parameter api_train_request, err: %s' % (
+            err))
+    response_format = 'html'
+    try:
+        response_format = request.form['format']
+    except KeyError:
+        response_format = 'html'
+    except Exception as err:
+        logger.error('error :: webapp_features_profile :: bad parameter format, err: %s' % (
+            err))
+    insufficient_data = False
+
     logger.info('webapp_features_profile :: calculate_features_profile for %s, requested_timestamp: %s, context: %s' % (
         str(base_name), str(requested_timestamp), str(context)))
     try:
@@ -109,8 +130,16 @@ def ionosphere_features_profile():
     # @added 20230626
     if fail_msg:
         if 'insufficient data to create profile' in fail_msg:
-            return_code = 200
+            logger.info('webapp_features_profile :: insufficient data to create profile')
+            # @modified 20240122 - Task #5056: webapp ionosphere - minimise work on api calls
+            # These are not producing the desired results
+            # return_code = 200
+            # successful = True
+
+            fp_csv = None
             data_dict['data']['fail_msg'] = fail_msg
+            # @added 20240122 - Task #5056: webapp ionosphere - minimise work on api calls
+            insufficient_data = True
 
     if successful:
         logger.info('webapp_features_profile :: features extracted OK')
@@ -126,6 +155,11 @@ def ionosphere_features_profile():
                 "f_calc": f_calc,
             }
         }
+
+    # @added 20240122 - Task #5056: webapp ionosphere - minimise work on api calls
+    if api_train_request and response_format == 'json' and insufficient_data:
+        data_dict['status']['created'] = False
+
     logger.info('webapp_features_profile :: completed - took: %s seconds' % (str(took)))
     return jsonify(data_dict), return_code
 

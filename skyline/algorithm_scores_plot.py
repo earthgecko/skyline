@@ -4,9 +4,20 @@ algorithm_scores_plot.py
 import logging
 import traceback
 from os import path
+from time import time
 import numpy as np
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+
+# @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+
+matplotlib.use('Agg')
+mplstyle.use('fast')
 
 
 def get_algorithm_scores_plot(
@@ -48,20 +59,86 @@ def get_algorithm_scores_plot(
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     if path.isfile(output_file):
-        current_logger.info('get_algorithm_scores_plot - graph image already exists - %s' % output_file)
+        current_logger.info('get_algorithm_scores_plot - %s - graph image already exists - %s' % (
+            algorithm, output_file))
         return output_file
 
+    start = time()
+
+    # @added 20230713 - Task #4996: Improve matplotlib performance
+    # Improve matplotlib render performance
+    matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
+    # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+    # Align scores because if these are custom_algorithm results rather than snab results
+    # the results could be for downsampled data
+    aligned_scores = []
+    if len(timeseries) > len(scores):
+        current_logger.info('get_algorithm_scores_plot - aligning scores because scores appear to be from downsampled data number of scores: %s, len(timeseries): %s' % (
+            str(len(scores)), str(len(timeseries))))
+
+        try:
+            resolution = determine_data_frequency(current_skyline_app, timeseries, True)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_algorithm_scores_plot :: determine_data_frequency failed, err: %s' % err)
+
+        try:
+            for item in timeseries:
+                try:
+                    ts = int(item[0])
+                except:
+                    continue
+                aligned_ts = int(ts // resolution * resolution)
+                score = None
+                try:
+                    if ts in anomalies:
+                        score = float(anomalies[ts]['score'])
+                    if aligned_ts in anomalies:
+                        score = float(anomalies[aligned_ts]['score'])
+                except:
+                    pass
+                if score is None:
+                    # Try a string as it is coerced by JSON
+                    try:
+                        ts_str = str(ts)
+                        if ts_str in anomalies:
+                            score = float(anomalies[ts_str]['score'])
+                        aligned_ts_str = str(aligned_ts)
+                        if aligned_ts_str in anomalies:
+                            score = float(anomalies[aligned_ts_str]['score'])
+                    except:
+                        pass
+                if score is None:
+                    score = 0
+                aligned_scores.append(score)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_algorithm_scores_plot :: failed to align scores, err: %s' % err)
+    if aligned_scores:
+        scores = list(aligned_scores)
+        current_logger.info('get_algorithm_scores_plot - after alignment len(scores): %s' % (
+            str(len(scores))))
+
     try:
-        current_logger.info('get_algorithm_scores_plot - creating graph image - %s' % output_file)
+        current_logger.info('get_algorithm_scores_plot - %s - creating graph image - %s' % (
+            algorithm, output_file))
 
         params = {
             'axes.labelsize': 10,
             'axes.titlesize': 10,
             'xtick.labelsize': 10,
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            'path.simplify_threshold': 1.0,
         }
         plt.rcParams.update(params)
         plt.rcParams['xtick.labelsize'] = 8
         plt.rcParams['ytick.labelsize'] = 8
+
+        # @added 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        plt.style.use('fast')
 
         anomalies_indices = []
         data = []
@@ -129,13 +206,18 @@ def get_algorithm_scores_plot(
         ax1b.set_ylabel(ylabel, fontsize='small')
         ax1.set_xlabel('Date', fontsize='small')
         ax1.xaxis.set_tick_params(labelsize='small')
-        plt.legend([plot1a, plot1b, plot1c], df.columns, loc='best')
+        # @modified 20230713 - Task #4996: Improve matplotlib performance
+        # Improve matplotlib render performance
+        # plt.legend([plot1a, plot1b, plot1c], df.columns, loc='best')
+        plt.legend([plot1a, plot1b, plot1c], df.columns, loc='upper left')
+
         # defining display layout
         plt.tight_layout()
         plt.savefig(output_file, format='png')
         fig.clf()
         plt.close(fig)
-        current_logger.info('get_algorithm_scores_plot - created graph image - %s' % output_file)
+        current_logger.info('get_algorithm_scores_plot - %s - took %s seconds to create graph image - %s' % (
+            algorithm, str((time() - start)), output_file))
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_algorithm_scores_plot :: failed to create %s - %s' % (output_file, err))

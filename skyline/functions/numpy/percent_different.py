@@ -19,9 +19,13 @@ def get_percent_different(base_value, compare_value, always_return_as_positive=T
 
     """
     percent_different = None
-    sums_array = np_array([base_value, compare_value], dtype=float)
-    calc_percent_different = np_diff(sums_array) / sums_array[:-1] * 100.
-    percent_different = calc_percent_different[0]
+    try:
+        sums_array = np_array([base_value, compare_value], dtype=float)
+        calc_percent_different = np_diff(sums_array) / sums_array[:-1] * 100.
+        percent_different = calc_percent_different[0]
+    except:
+        # This is to simply filter division by zero
+        percent_different = None
     if percent_different < 0:
         new_pdiff = percent_different * -1
         percent_different = new_pdiff

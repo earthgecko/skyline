@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analyzer Optimizations &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Analyzer Optimizations &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -97,6 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -105,7 +105,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -142,7 +142,7 @@
            <div itemprop="articleBody">
              
   <section id="analyzer-optimizations">
-<h1>Analyzer Optimizations<a class="headerlink" href="#analyzer-optimizations" title="Permalink to this heading"></a></h1>
+<h1>Analyzer Optimizations<a class="headerlink" href="#analyzer-optimizations" title="Link to this heading"></a></h1>
 <p>The original implementation of Skyline has worked for years, almost
 flawlessly it must be said. However the original implementation of
 Skyline was patterned and somewhat even hard coded to run in a very
@@ -166,7 +166,7 @@ spawning again and again, etc.</p>
 </pre></div>
 </div>
 <section id="number-of-analyzer-processors">
-<h2>Number of Analyzer processors<a class="headerlink" href="#number-of-analyzer-processors" title="Permalink to this heading"></a></h2>
+<h2>Number of Analyzer processors<a class="headerlink" href="#number-of-analyzer-processors" title="Link to this heading"></a></h2>
 <p>A number of optimizations have changed the required number of processors
 to assign to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>, quite dramatically in some
 cases.  Specifically in cases where the number of metrics being analyzed is not
@@ -217,13 +217,13 @@ will find that:</p>
 <p>See <a class="reference internal" href="#optimizations-results">Optimizations results</a> at the end of this page.</p>
 </section>
 <section id="analyzer-work-rate">
-<h2>Analyzer work rate<a class="headerlink" href="#analyzer-work-rate" title="Permalink to this heading"></a></h2>
-<p>The original Analyzer analyzed all timeseries against all algorithms
+<h2>Analyzer work rate<a class="headerlink" href="#analyzer-work-rate" title="Link to this heading"></a></h2>
+<p>The original Analyzer analyzed all time series against all algorithms
 which is the maximum possible work. In terms of the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>
 based model, this is not the most efficient work rate.</p>
 </section>
 <section id="performance-tuning">
-<h2>Performance tuning<a class="headerlink" href="#performance-tuning" title="Permalink to this heading"></a></h2>
+<h2>Performance tuning<a class="headerlink" href="#performance-tuning" title="Link to this heading"></a></h2>
 <p>A special thanks to <a class="reference external" href="https://jiffyclub.github.io/snakeviz/">Snakeviz</a>
 for a very useful Python profiling tool which enabled some minimal
 changes in the code and substantial improvements in the performance,
@@ -231,11 +231,11 @@ along with <a class="reference external" href="https://github.com/ymichael/cprof
 <a class="reference external" href="https://github.com/vmprof/vmprof-python">vmprof</a>.</p>
 </section>
 <section id="using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow">
-<h2>Using anomaly_breakdown metrics graphs to tune the Analyzer workflow<a class="headerlink" href="#using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow" title="Permalink to this heading"></a></h2>
+<h2>Using anomaly_breakdown metrics graphs to tune the Analyzer workflow<a class="headerlink" href="#using-anomaly-breakdown-metrics-graphs-to-tune-the-analyzer-workflow" title="Link to this heading"></a></h2>
 <p>anomaly_breakdown metrics were added to Skyline on 10 Jun 2014, yet
 never merged into the main Etsy fork. However, in terms of performance
 tuning and profiling Skyline they are quite useful. They provide us with
-the ability to optimize the analysis of timeseries data based on 2
+the ability to optimize the analysis of time series data based on 2
 simple criteria:</p>
 <ol class="arabic simple">
 <li><p>Determine the algorithms that are triggered most frequently</p></li>
@@ -247,7 +247,7 @@ skyline.analyzer.  <code class="docutils literal notranslate"><span class="pre">
 <p>We can use these data to determine the <em>efficiency</em> of the algorithms
 and when this is applied to the Analyzer <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> model we can
 optimize <code class="docutils literal notranslate"><span class="pre">algorithms.py</span></code> to run in the most efficient manner possible.</p>
-<p>Originally algorithms.py simply analyzed every timeseries against every
+<p>Originally algorithms.py simply analyzed every time series against every
 <code class="docutils literal notranslate"><span class="pre">algorithm</span> <span class="pre">in</span> <span class="pre">ALGORITHMS</span></code> and only checked the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>
 threshold at the end. However a very small but effective optimization is to use
 the above data to run the following optimizations.</p>
@@ -258,7 +258,7 @@ Currently there are 9 algorithms that Analyzer uses. However the same
 optimization is valid if more algorithms were added.</p></li>
 <li><p>If our <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> was 6 and Analyzer has not been able to
 trigger any of the most frequently and least expensive 5 algorithms, then
-there is no need to analyze the timeseries against the remaining
+there is no need to analyze the time series against the remaining
 algorithms. This surprisingly reduces the work of Analyzer by ~xx% on average
 (a lot).</p></li>
 <li><p>The cost of this optimization is that we lose the original
@@ -266,7 +266,7 @@ algorithms. This surprisingly reduces the work of Analyzer by ~xx% on average
 against. However two additional factors somewhat mitigate this but it is
 definitely still skewed. The mitigations being that:</p>
 <ul>
-<li><p>When a timeseries is anomalous more than one algorithm triggers
+<li><p>When a time series is anomalous more than one algorithm triggers
 anyway.</p></li>
 <li><p>When an algorithm is triggered, more algorithms are run. Seeing as we
 have optimized to have the least frequently triggered algorithms be
@@ -283,16 +283,16 @@ that they can be benchmarked again should any further algorithms ever be
 added to Analyzer or any existing algorithms modified in any way.</p>
 </section>
 <section id="algorithm-benchmarks">
-<h2>algorithm benchmarks<a class="headerlink" href="#algorithm-benchmarks" title="Permalink to this heading"></a></h2>
+<h2>algorithm benchmarks<a class="headerlink" href="#algorithm-benchmarks" title="Link to this heading"></a></h2>
 <p>analyzer_dev can be/was used as a benchmarking module to determine the
 execution times of algorithms.</p>
 <section id="considerations-approximation-of-timings">
-<h3>Considerations - approximation of timings<a class="headerlink" href="#considerations-approximation-of-timings" title="Permalink to this heading"></a></h3>
+<h3>Considerations - approximation of timings<a class="headerlink" href="#considerations-approximation-of-timings" title="Link to this heading"></a></h3>
 <p>The algorithm benchmark timings are simply approximations of the real
 times that the algorithm execution is undertaken in (float).</p>
 </section>
 <section id="tmpfs-vs-multiprocessing-value">
-<h3>tmpfs vs multiprocessing Value<a class="headerlink" href="#tmpfs-vs-multiprocessing-value" title="Permalink to this heading"></a></h3>
+<h3>tmpfs vs multiprocessing Value<a class="headerlink" href="#tmpfs-vs-multiprocessing-value" title="Link to this heading"></a></h3>
 <p>Recording the algorithm counts and timings without using multiprocessing Value
 and associated overhead of locks, etc, etc. /tmp was opted for instead and the
 variable <a class="reference internal" href="skyline.html#settings.SKYLINE_TMP_DIR" title="settings.SKYLINE_TMP_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_TMP_DIR</span></code></a> was added. In most cases /tmp is tmpfs
@@ -302,7 +302,7 @@ in Python. A simple yet effective win. Same same but different. There may be
 some valid reasons for the use multiprocessing Value or Manager().list()</p>
 </section>
 <section id="algorithms-ranked-by-triggered-count">
-<h3>Algorithms ranked by triggered count<a class="headerlink" href="#algorithms-ranked-by-triggered-count" title="Permalink to this heading"></a></h3>
+<h3>Algorithms ranked by triggered count<a class="headerlink" href="#algorithms-ranked-by-triggered-count" title="Link to this heading"></a></h3>
 <p>Using the <code class="docutils literal notranslate"><span class="pre">anomaly_breakdown</span></code> metrics data it shows that on a plethora of
 machine and application related metrics, we can determine the most
 triggered algorithms by rank:</p>
@@ -319,7 +319,7 @@ triggered algorithms by rank:</p>
 </ol>
 </section>
 <section id="algorithms-ranked-by-execution-time">
-<h3>Algorithms ranked by execution time<a class="headerlink" href="#algorithms-ranked-by-execution-time" title="Permalink to this heading"></a></h3>
+<h3>Algorithms ranked by execution time<a class="headerlink" href="#algorithms-ranked-by-execution-time" title="Link to this heading"></a></h3>
 <p>Using the <code class="docutils literal notranslate"><span class="pre">algorithm_breakdown</span></code> metrics data we can determine the most
 “expensive” algorithms by total time to run:</p>
 <ol class="arabic simple">
@@ -335,8 +335,8 @@ triggered algorithms by rank:</p>
 </ol>
 </section>
 <section id="performance-weighting">
-<h3>Performance weighting<a class="headerlink" href="#performance-weighting" title="Permalink to this heading"></a></h3>
-<p>If we change the order in which the timeseries are run through the
+<h3>Performance weighting<a class="headerlink" href="#performance-weighting" title="Link to this heading"></a></h3>
+<p>If we change the order in which the time series are run through the
 algorithms in Analyzer, we can improve the overall performance by
 running the most expensive computational algorithms later in the
 analysis.</p>
@@ -366,14 +366,14 @@ analysis.</p>
 </section>
 </section>
 <section id="settings-run-optimized-workflow">
-<h2><a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a><a class="headerlink" href="#settings-run-optimized-workflow" title="Permalink to this heading"></a></h2>
-<p>The original version of Analyzer ran all timeseries through all
+<h2><a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a><a class="headerlink" href="#settings-run-optimized-workflow" title="Link to this heading"></a></h2>
+<p>The original version of Analyzer ran all time series through all
 <code class="docutils literal notranslate"><span class="pre">ALGORITHMS</span></code> like so:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>After running all the algorithms, it then determined whether the last
-datapoint for timeseries was anomalous.</p>
+datapoint for time series was anomalous.</p>
 <p>The optimized workflow uses the above triggered / execution time ranking
 matrix to run as efficiently as possible and achieve the same results
 (see caveat below) but up to ~50% quicker and less CPU cycles. This is
@@ -423,7 +423,7 @@ performance weighing matrix is:</p>
 </div>
 </section>
 <section id="optimizations-results">
-<h2>Optimizations results<a class="headerlink" href="#optimizations-results" title="Permalink to this heading"></a></h2>
+<h2>Optimizations results<a class="headerlink" href="#optimizations-results" title="Link to this heading"></a></h2>
 <p>These server graphs show the pre and post crucible update metrics related to CPU
 and loadavg for a dedicated Skyline server running on a 4 vCPU, 4GB RAM, SSD
 cloud server.  The server is handling ~3000 metrics and is solely dedicated to
@@ -468,7 +468,7 @@ and the algorithms logic pre update were identical to Etsy master.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -25,25 +25,45 @@ updates are required, such as the compilation of the tsfresh_features.py
 
 For now...
 
+Local copy of :skyblue:`Sky`:red:`line`
+=======================================
+
+Whatever version you are building you must have that deployed locally in the
+normal Skyline path of ``/opt/skyline/github/skyline``.  This is because
+sphinx-apidoc determines this from the settings.py and reads references for all
+functions from that path.
+
 Install docs-requirements.txt
 =============================
 
 In your Python virtualenv first pip install the required modules in
 docs-requirements.txt (as per documented `Running in Python virtualenv
-<running-in-python-virtualenv.html>`__)
+<running-in-python-virtualenv.html>`__).  Ideally you want the virtualenv to
+have all the latest requirements installed for the branch you are building.
 
 .. code-block:: bash
 
-    PYTHON_MAJOR_VERSION="3.8"
-    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3817"
+  PYTHON_MAJOR_VERSION="3.10"
+  PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+  PROJECT="skyline-py31015"
+  CURRENT_BRANCH="SNAB"
+  # The PATH to your local branch, e.g.
+  #LOCAL_BRANCH_PATH="/home/gary/sandbox/of/github/earthgecko/skyline/$CURRENT_BRANCH/skyline"
+  LOCAL_BRANCH_PATH="<YOUR_LOCAL_BRANCH_PATH>"
+  # Update your local version to the branch you want to build
+  rsync -az "${LOCAL_BRANCH_PATH}"/ /opt/skyline/github/skyline/
 
-    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
-    source bin/activate
+  cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+  source bin/activate
 
-    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/docs-requirements.txt
+  # Ideally you want all the required Skyline requirements installed for the
+  # branch you are building docs for
+  bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
 
-    deactivate
+  # Install docs requirements
+  bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/docs-requirements.txt
+
+  deactivate
 
 
 Your Python interpretor
@@ -83,10 +103,16 @@ Build
 
 .. code-block:: bash
 
-  PYTHON_MAJOR_VERSION="3.8"
+  PYTHON_MAJOR_VERSION="3.10"
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py3817"
+  PROJECT="skyline-py31015"
   CURRENT_BRANCH="SNAB"
+  # The PATH to your local branch, e.g.
+  #LOCAL_BRANCH_PATH="/home/gary/sandbox/of/github/earthgecko/skyline/$CURRENT_BRANCH/skyline"
+  LOCAL_BRANCH_PATH="<YOUR_LOCAL_BRANCH_PATH>"
+
+  # Update your local version to the branch you want to build
+  rsync -az "${LOCAL_BRANCH_PATH}"/ /opt/skyline/github/skyline/
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
@@ -177,7 +203,8 @@ Build
 
   # Usage: build_docs <app_dir>
   # e.g.
-  # cd /opt/python_virtualenv/projects/skyline-py3816/
+  # cd /opt/python_virtualenv/projects/skyline-py31015/
+  # source bin/activate
   # build_docs /home/gary/sandbox/of/github/earthgecko/skyline/$CURRENT_BRANCH/skyline
 
 

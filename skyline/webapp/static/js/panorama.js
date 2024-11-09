@@ -479,6 +479,7 @@ var resize_window = function() {
 }
 
 // Handle keyboard navigation
+/*
 Mousetrap.bind(['up', 'down'], function(ev) {
     switch(ev.keyIdentifier) {
         case 'Up':
@@ -497,3 +498,4 @@ Mousetrap.bind(['up', 'down'], function(ev) {
 
     return false;
 }, 'keydown');
+*/

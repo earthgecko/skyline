@@ -41,11 +41,41 @@ def namespace_analysed_events(self):
         update_dates = [yesterday_date_string, today_date_string]
 
     namespace_analysed_events_keys = []
+
+    # @modified 20230926 - Task #5000: Replace alert key scans with sets
+    # Switch to efficient method and not using scan_iter.
+    # try:
+    #     for key in self.redis_conn_decoded.scan_iter('namespace.analysed_events.*'):
+    #         namespace_analysed_events_keys.append(key)
+    # except Exception as err:
+    #     logger.error('error :: metrics_manager :: namespace_analysed_events :: failed to scan_iter namespace.analysed_events.* - %s' % str(err))
+
+    # @added 20230926 - Task #5000: Replace alert key scans with sets
+    # Instead of using expiring keys with have a compute cost with
+    # using scan_iter(match='[PATTERN]') switch to determining the entries that
+    # can possibly exist and do an exists check to create a list of those that
+    # are present.
+    namespace_analysed_events_apps = ['analyzer_batch', 'mirage', 'analyzer', 'boundary']
+    dates = []
+    dates_added = 0
+    dates = []
+    # The hashes themselves are set to expire after 15 days.
+    while dates_added < 16:
+        dates.append(datetime.datetime.fromtimestamp( (int(time()) - (86400 * dates_added) ) ).strftime('%Y-%m-%d'))
+        dates_added += 1
     try:
-        for key in self.redis_conn_decoded.scan_iter('namespace.analysed_events.*'):
-            namespace_analysed_events_keys.append(key)
+        for app in namespace_analysed_events_apps:
+            for date_str in dates:
+                key = 'namespace.analysed_events.%s.%s' % (app, date_str)
+                key_exists = False
+                try:
+                    key_exists = self.redis_conn_decoded.exists(key)
+                except:
+                    key_exists = False
+                if key_exists:
+                    namespace_analysed_events_keys.append(key)
     except Exception as err:
-        logger.error('error :: metrics_manager :: namespace_analysed_events :: failed to scan_iter namespace.analysed_events.* - %s' % str(err))
+        logger.error('error :: metrics_manager :: namespace_analysed_events :: failed to create namespace_analysed_events_keys - %s' % str(err))
 
     for date_string in update_dates:
         redis_keys = []

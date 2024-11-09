@@ -13,6 +13,11 @@ import logging
 # import traceback
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
+# @added 20231210 - Task #5168: v4.1.0 - update dependencies
+#                   Task #5176: Migrate to sqlalchemy v2 API
+import os
+os.environ['SQLALCHEMY_WARN_20'] = '1'
+
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -120,7 +125,7 @@ logger.addHandler(memory_handler)
 
 # @added 20220328 - Feature #4018: thunder - skyline.errors
 # For every error logged set a count in the app Redis key which is consumed
-# by thunder and creates the sskyline.<hostname>.<skyline_app>.logged_errors
+# by thunder and creates the skyline.<hostname>.<skyline_app>.logged_errors
 # metric
 redis_error_log_handler = RedisErrorLogHandler(skyline_app)
 redis_error_log_handler.setLevel(logging.ERROR)

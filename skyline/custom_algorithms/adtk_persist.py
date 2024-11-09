@@ -40,7 +40,7 @@ from settings import FULL_DURATION
 
 def adtk_persist(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     """
-    A timeseries is anomalous if a level shift occurs in a 5 window period bound
+    A timeseries is anomalous if a persist occurs in a 5 window period bound
     by a factor of 9 of the normal range based on historical interquartile range.
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
@@ -74,8 +74,8 @@ def adtk_persist(current_skyline_app, parent_pid, timeseries, algorithm_paramete
     computational complexity, along with execution time and CPU usage. The
     adtk persistAD algortihm is not O(n) and it is not fast either, not when
     compared to the normal three-sigma triggered algorithms.  However it is
-    useful if you care about detecting all level shifts.  The normal three-sigma
-    triggered algorithms do not always detect a level shift, especially if the
+    useful if you care about detecting persists.  The normal three-sigma
+    triggered algorithms do not always detect a persist, especially if the
     level shift does not breach the three-sigma limits.  Therefore you may find
     over time that you encounter alerts that contain level shifts that you
     thought should have been detected.  On these types of metrics and events,
@@ -83,6 +83,12 @@ def adtk_persist(current_skyline_app, parent_pid, timeseries, algorithm_paramete
     these.  It is not recommended to run on all your metrics as it would
     immediately triple the analyzer runtime every if only run every 5 windows/
     minutes.
+
+    ####
+    UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
+    is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
+    is!
+    ####
 
     Due to the computational complexity and long run time of the adtk
     PersistAD algorithm on the size of timeseries data used by Skyline.

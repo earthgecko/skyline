@@ -1,5 +1,7 @@
 # CHANGES.md
 
+MOVED TO Releases in documentation - https://earthgecko-skyline.readthedocs.io/en/latest/releases.html
+
 ## Ionosphere - v1.1.4-beta-ionosphere - Jun 19, 2017
 
 - Some debug choices for daylight savings countdown issue

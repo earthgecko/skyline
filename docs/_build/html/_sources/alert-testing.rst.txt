@@ -22,22 +22,22 @@ and working, do the following.
   correctly with your strings/tokens/etc in settings.py
 - Ensure the relevant ``skyline_test.alerters.test`` instances in settings.py
   are configured to your desired outputs
-- Once again using the Python-3.8.13 virtualenv and documentation PATHs as an
+- Once again using the Python-3.10.15 virtualenv and documentation PATHs as an
   example:
 
 .. code-block:: bash
 
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py3813"
+  PROJECT="skyline-py31015"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
   # To test email alert
-  bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric 'skyline_test.alerters.test'
+  bin/python3.10 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric 'skyline_test.alerters.test'
   # To test slack alert
-  bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric 'skyline_test.alerters.test'
+  bin/python3.10 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric 'skyline_test.alerters.test'
   # To test pagerduty alert
-  bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger pagerduty --metric 'skyline_test.alerters.test'
+  bin/python3.10 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger pagerduty --metric 'skyline_test.alerters.test'
   deactivate
 
 .. note:: You should get an alert on each alerter that you have enabled and
@@ -55,7 +55,7 @@ the alerts still get sent.
 
 .. code-block:: bash
 
-  (skyline-py383) [skyline@skyline skyline-py383] bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric 'skyline_test.alerters.test'
+  (skyline-py31015) [skyline@skyline skyline-py31015] bin/python3.10 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric 'skyline_test.alerters.test'
   Verifying alerts for: "skyline_test.alerters.test"
   Testing Analyzer alerting on skyline_test.alerters.test
       Testing Analyzer alerting - against "skyline_test.alerters.test" to send via smtp...triggered
@@ -68,7 +68,7 @@ the alerts still get sent.
       Testing Mirage alerting - against "skyline_test.alerters.test" to send via syslog ...triggered
   Testing Boundary alerting on skyline_test.alerters.test
       Testing Boundary alerting against "skyline_test.alerters.test" to send for smtp|slack via smtp
-  (skyline-py383) [skyline@skyline skyline-py383] bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric 'skyline_test.alerters.test'
+  (skyline-py31015) [skyline@skyline skyline-py31015] bin/python3.10 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric 'skyline_test.alerters.test'
   Verifying alerts for: "skyline_test.alerters.test"
   Testing Analyzer alerting on skyline_test.alerters.test
       Testing Analyzer alerting - against "skyline_test.alerters.test" to send via slack...triggered
@@ -78,4 +78,4 @@ the alerts still get sent.
       Testing Mirage alerting - against "skyline_test.alerters.test" to send via syslog ...triggered
   Testing Boundary alerting on skyline_test.alerters.test
       Testing Boundary alerting against "skyline_test.alerters.test" to send for smtp|slack via slack
-  (skyline-py383) [skyline@skyline skyline-py383]
+  (skyline-py31015) [skyline@skyline skyline-py31015]

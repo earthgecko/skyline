@@ -21,6 +21,9 @@ from ionosphere_functions import create_features_profile
 from functions.ionosphere.get_repetitive_patterns_metrics_list_to_evaluate import get_repetitive_patterns_metrics_list_to_evaluate
 from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
 
+# @added 20240307 - Feature #4658: ionosphere.learn_repetitive_patterns
+from functions.database.queries.get_fps_for_metric import get_fps_for_metric
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -156,7 +159,8 @@ def get_metrics_to_evaluate(training_data_dict, last_evaluation_timestamp):
     for metric in metrics:
         ids_with_base_names[base_names_with_ids[metric]] = metric
 
-    include_metrics = exclude_metrics = []
+    include_metrics = []
+    exclude_metrics = []
     try:
         include_metrics, exclude_metrics = get_repetitive_patterns_metrics_list_to_evaluate(skyline_app, metrics)
     except Exception as err:
@@ -504,8 +508,8 @@ def ionosphere_learn_repetitive_patterns(timestamp):
                         function_str, metric, str(ts)))
             except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: %s :: failed to create a features profile for %s, %s' % (
-                    function_str, metric, str(timestamp)))
+                logger.error('error :: %s :: failed to create a features profile for %s, %s, err: %s' % (
+                    function_str, metric, str(timestamp), err))
             if fp_in_successful is False:
                 logger.error(traceback_format_exc)
                 logger.error(fail_msg)

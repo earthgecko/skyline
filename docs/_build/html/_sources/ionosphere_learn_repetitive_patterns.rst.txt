@@ -51,8 +51,9 @@ comparisons are made between all the calculated features profiles and if 3 are
 found to be similar then these patterns are learnt as being normal behaviour.
 
 The two methods, namely ``learn_repetitive_patterns`` and
-``find_repetitive_patterns`` are described here, both are similar but each
-searches for a different kind of pattern.
+``find_repetitive_patterns`` are described here, both are somewhat similar but
+each searches for a different kind of pattern and ``find_repetitive_patterns``
+implements an additional method.
 
 learn_repetitive_patterns
 -------------------------
@@ -118,3 +119,65 @@ is desirable that they do match as similar.
 
 :mod:`settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE` can be set
 to 0 to disable MinMax scaling comparisons.
+
+motif_annihilation
+------------------
+
+When ``find_repetitive_patterns`` is enabled it also makes use of an additional
+method of learning normal based on the annihilation of commonly occurring
+motifs.
+
+The motif_annihilation method is inspired by the concept of data smashing.
+
+While reviewing the initial performance of the original
+``find_repetitive_patterns`` method it showed that the performance is not bad
+given zero knowledge discovery.  This lead back to October 2021 when reviewing
+the now removed timesmash (https://github.com/zeroknowledgediscovery/timesmash
+and pypi timesmash-0.2.23) which was published from
+http://zed.uchicago.edu/data_smashing.html
+
+.. 
+  Universal similarity amongst arbitrary data streams without a priori knowledge, features, or training.
+  Can be used to solve time series clustering and classification problems.
+
+In reviewing the idea of data smashing it was clear that perhaps motifs could
+be used to do data smashing.
+
+- Take the anomalous_timeseries in its 7 day context.
+- Surface -35d of data, the previous 5 weeks (pw5_timeseries) before the anomaly
+  e.g. ``from=(metric_timestamp - ((86400 * 7) * 5)), until=(metric_timestamp + 3600)``
+- MinMax scale the pw5_timeseries
+- Extract the pw4_timeseries from the MinMax scaled pw5_timeseries, e.g.
+  ``pw4_timeseries = [item for item in pw5_timeseries if item[0] >= (metric_timestamp - ((86400 * 7) * 5)) and item[0] <= (metric_timestamp - (86400 * 7))]``
+- Break up the pw4_timeseries into motifs of each of batch_size 6 and for each
+  see how many times each motif occurs in the pw4_timeseries per hour (meaning
+  only allow for a motif to be counted if it does not occur within 1h of the
+  previous occurrence).
+- Record every motif that occurs more than 3 times in the pw4_timeseries, these
+  are considered normal behaviour, they occurred at least 3 times so they are
+  common patterns.
+- Extract the 7d anomaly_timeseries from the MinMax scaled pw5_timeseries, e.g.
+  ``anomaly_timeseries = [item for item in minmax_timeseries if item[0] >= (metric_timestamp - (86400 * 7)) and item[0] <= metric_timestamp]``
+- Take each recorded motif and if a motif is found in the anomaly_timeseries,
+  those data points in the anomalous time series can be removed (data smashed,
+  annihilated).
+- Record all indices for the periods that a match is found for.
+- Create a set of the indices and remove those indices from the
+  anomaly_timeseries. What is left?
+- In addition to the use of 6 data point motifs, a method of using micro motifs
+  has been added that is applied to any remaining data points that are part of
+  motif which are < 6 data points in length which have not been annihilated.
+  These remaining motifs in the anomaly_timeseries that are < batch_size in size
+  are then considered per data point then attempt to annihilate each index based
+  on the value occurring >= 4 times in the pw5_timeseries AND the delta of the
+  index value from the previous value occurring at least 4 times as well.  This
+  delta check ensures that the check is similar to a micro motif, not just value
+  but range too.
+
+If the time series can be annihilated by common motifs and micro motifs, the
+time series is not anomalous and can be classified as normal and can be learnt.
+
+Novel idea maybe...
+
+Yes it was and it works **extremely** well at unsupervised, autonomous learning
+and is highly accurate and reliable.

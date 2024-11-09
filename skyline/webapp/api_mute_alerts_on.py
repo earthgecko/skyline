@@ -12,7 +12,9 @@ from flask import request, jsonify
 from backend import get_cluster_data
 from functions.metrics.get_base_names_and_metric_ids import get_base_names_and_metric_ids
 from matched_or_regexed_in_list import matched_or_regexed_in_list
-from settings import FLUX_SELF_API_KEY, REMOTE_SKYLINE_INSTANCES, SERVER_PYTZ_TIMEZONE 
+from settings import (
+    FLUX_SELF_API_KEY, REMOTE_SKYLINE_INSTANCES, SERVER_PYTZ_TIMEZONE,
+    FULL_NAMESPACE)
 from skyline_functions import get_redis_conn_decoded
 from slack_functions import slack_post_message
 
@@ -61,6 +63,11 @@ def api_mute_alerts_on(current_skyline_app, cluster_data, namespace, metric_patt
         for metric in list(muted_metrics.keys()):
             if metric.startswith('labelled_metrics.'):
                 continue
+            if metric.startswith(FULL_NAMESPACE):
+                base_name = metric.replace(FULL_NAMESPACE, '', 1)
+            else:
+                base_name = metric
+
             if namespace:
                 try:
                     pattern_match, metric_matched_by = matched_or_regexed_in_list(current_skyline_app, metric, [namespace])
@@ -186,7 +193,7 @@ def api_mute_alerts_on(current_skyline_app, cluster_data, namespace, metric_patt
         try:
             remote_muted_metrics = get_cluster_data('mute_alerts_on', 'metrics', only_host='all', endpoint_params=endpoint_params)
         except Exception as err:
-            current_logger.error('error :: api_mute_alerts_on :: could not get mute_alerts_on from the remote Skyline instances - %s')
+            current_logger.error('error :: api_mute_alerts_on :: could not get mute_alerts_on from the remote Skyline instances, err: %s' % err)
         if remote_muted_metrics:
             current_logger.info('api_mute_alerts_on :: got %s lists of muted_metrics from the other cluster nodes' % str(len(remote_muted_metrics)))
             for item in remote_muted_metrics:

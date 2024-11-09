@@ -429,6 +429,12 @@ def minmax_scale_check(
         range_similar = True
     else:
         logger.info('the ranges of fp_id_metric_ts and anomalous_timeseries differ significantly Min-Max scaling will be skipped')
+        # @added 20240318 - Feature #5304: ionosphere.find_repetitive_patterns
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Added missing range_similar override which appears to
+        # have had an effect on very large range metrics that
+        # operate in the 100s of millions
+        range_similar = False
 
     # @added 20221024 - Feature #4702: numba optimisations
     use_numba = False

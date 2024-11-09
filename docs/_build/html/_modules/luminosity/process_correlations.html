@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>luminosity.process_correlations &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>luminosity.process_correlations &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -286,7 +286,9 @@
 
 <span class="c1"># @added 20201203 - Feature #3860: luminosity - handle low frequency data</span>
 <span class="c1"># Handle varying metric resolutions</span>
-<div class="viewcode-block" id="determine_resolution"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.determine_resolution">[docs]</a><span class="k">def</span> <span class="nf">determine_resolution</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+<div class="viewcode-block" id="determine_resolution">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.determine_resolution">[docs]</a>
+<span class="k">def</span> <span class="nf">determine_resolution</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determine the resolution of the timeseries data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -306,7 +308,10 @@
     <span class="k">return</span> <span class="n">resolution</span></div>
 
 
-<div class="viewcode-block" id="get_anomaly"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anomaly">[docs]</a><span class="k">def</span> <span class="nf">get_anomaly</span><span class="p">(</span><span class="n">request_type</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_anomaly">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anomaly">[docs]</a>
+<span class="k">def</span> <span class="nf">get_anomaly</span><span class="p">(</span><span class="n">request_type</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query the database for the anomaly details</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -415,7 +420,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_anomalous_ts"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anomalous_ts">[docs]</a><span class="k">def</span> <span class="nf">get_anomalous_ts</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_anomalous_ts">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anomalous_ts">[docs]</a>
+<span class="k">def</span> <span class="nf">get_anomalous_ts</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">):</span>
 
     <span class="c1"># logger = logging.getLogger(skyline_app_logger)</span>
 
@@ -630,6 +638,12 @@
     <span class="c1"># resolution = determine_resolution(timeseries)</span>
     <span class="n">resolution</span> <span class="o">=</span> <span class="n">determine_data_frequency</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
+    <span class="c1"># @added 20230812 - Bug #5050: luminosity - process_correlations resolution handle NoneType</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: resolution could not be determined for </span><span class="si">%s</span><span class="s1">, resolution: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">resolution</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="p">[],</span> <span class="n">resolution</span>
+
     <span class="c1"># Sample the time series</span>
     <span class="c1"># @modified 20180720 - Feature #2464: luminosity_remote_data</span>
     <span class="c1"># Added note here - if you modify the value of 600 here, it must be</span>
@@ -664,7 +678,10 @@
     <span class="k">return</span> <span class="n">anomaly_ts</span><span class="p">,</span> <span class="n">resolution</span> </div>
 
 
-<div class="viewcode-block" id="get_anoms"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anoms">[docs]</a><span class="k">def</span> <span class="nf">get_anoms</span><span class="p">(</span><span class="n">anomalous_ts</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_anoms">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anoms">[docs]</a>
+<span class="k">def</span> <span class="nf">get_anoms</span><span class="p">(</span><span class="n">anomalous_ts</span><span class="p">):</span>
 
     <span class="c1"># logger = logging.getLogger(skyline_app_logger)</span>
 
@@ -683,12 +700,15 @@
     <span class="k">return</span> <span class="n">anomalies</span></div>
 
 
+
 <span class="c1"># @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
 <span class="c1"># def get_assigned_metrics(i,):</span>
 <span class="c1"># @modified 20230316 - Task #4872: Optimise luminosity for labelled_metrics</span>
 <span class="c1"># Added anomaly_timestamp and resolution to filter out only metrics that are in the</span>
 <span class="c1"># illuminance.all keys</span>
-<div class="viewcode-block" id="get_assigned_metrics"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_assigned_metrics">[docs]</a><span class="k">def</span> <span class="nf">get_assigned_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">):</span>
+<div class="viewcode-block" id="get_assigned_metrics">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_assigned_metrics">[docs]</a>
+<span class="k">def</span> <span class="nf">get_assigned_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
         <span class="c1">#                      Branch #3262: py3</span>
@@ -1043,6 +1063,7 @@
     <span class="k">return</span> <span class="n">assigned_metrics</span></div>
 
 
+
 <span class="c1"># @added 20180720 - Feature #2464: luminosity_remote_data</span>
 <span class="c1"># @modified 20201203 - Feature #3860: luminosity - handle low frequency data</span>
 <span class="c1"># Added the metric resolution</span>
@@ -1050,7 +1071,9 @@
 <span class="c1"># @modified 20230409 - Task #4872: Optimise luminosity for labelled_metrics</span>
 <span class="c1"># Added namespace</span>
 <span class="c1"># def get_remote_assigned(anomaly_timestamp, resolution):</span>
-<div class="viewcode-block" id="get_remote_assigned"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_remote_assigned">[docs]</a><span class="k">def</span> <span class="nf">get_remote_assigned</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_remote_assigned">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_remote_assigned">[docs]</a>
+<span class="k">def</span> <span class="nf">get_remote_assigned</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">remote_assigned</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># @modified 20201215 - Feature #3890: metrics_manager - sync_cluster_files</span>
     <span class="c1"># for remote_url, remote_user, remote_password in settings.REMOTE_SKYLINE_INSTANCES:</span>
@@ -1165,10 +1188,13 @@
     <span class="k">return</span> <span class="n">remote_assigned</span></div>
 
 
+
 <span class="c1"># @modified 20180720 - Feature #2464: luminosity_remote_data</span>
 <span class="c1"># def get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metrics, raw_assigned, anomalies):</span>
 <span class="c1"># @modified 20230315 - Task #4872: Optimise luminosity for labelled_metrics</span>
-<div class="viewcode-block" id="get_correlations"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_correlations">[docs]</a><span class="k">def</span> <span class="nf">get_correlations</span><span class="p">(</span>
+<div class="viewcode-block" id="get_correlations">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_correlations">[docs]</a>
+<span class="k">def</span> <span class="nf">get_correlations</span><span class="p">(</span>
     <span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalous_ts</span><span class="p">,</span> <span class="n">assigned_metrics</span><span class="p">,</span> <span class="n">raw_assigned</span><span class="p">,</span>
 <span class="c1"># @modified 20230315 - Task #4872: Optimise luminosity for labelled_metrics</span>
 <span class="c1"># Added processing_time</span>
@@ -1605,7 +1631,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">metrics_checked_for_correlation</span><span class="p">,</span> <span class="n">runtime</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="process_correlations"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.process_correlations">[docs]</a><span class="k">def</span> <span class="nf">process_correlations</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">):</span>
+
+<div class="viewcode-block" id="process_correlations">
+<a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.process_correlations">[docs]</a>
+<span class="k">def</span> <span class="nf">process_correlations</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">):</span>
 
     <span class="c1"># logger = logging.getLogger(skyline_app_logger)</span>
 
@@ -1650,6 +1679,12 @@
     <span class="c1"># @modified 20230316 - Task #4872: Optimise luminosity for labelled_metrics</span>
     <span class="c1"># Added resolution to the return</span>
     <span class="n">anomalous_ts</span><span class="p">,</span> <span class="n">resolution</span> <span class="o">=</span> <span class="n">get_anomalous_ts</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">)</span>
+
+    <span class="c1"># @added 20230812 - Bug #5050: luminosity - process_correlations resolution handle NoneType</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: get_anomalous_ts failed to return resolution for </span><span class="si">%s</span><span class="s1">, resolution: </span><span class="si">%s</span><span class="s1">, nothing to do, returning&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">resolution</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">,</span> <span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">sorted_correlations</span><span class="p">,</span> <span class="n">metrics_checked_for_correlation</span><span class="p">,</span> <span class="n">runtime</span><span class="p">,</span> <span class="n">motifs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous_ts</span><span class="p">:</span>
         <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1736,6 +1771,7 @@
     <span class="c1"># @modified 20210124 - Feature #3956: luminosity - motifs</span>
     <span class="c1"># Added motifs</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">,</span> <span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">sorted_correlations</span><span class="p">,</span> <span class="n">metrics_checked_for_correlation</span><span class="p">,</span> <span class="n">runtime</span><span class="p">,</span> <span class="n">motifs</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -1745,7 +1781,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

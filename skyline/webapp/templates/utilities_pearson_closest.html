@@ -1,0 +1,164 @@
+{% block utilities_pearson_closest_block %}
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities utilities_pearson_closest_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+		  <li><a href="/utilities?skip_analysis_on"><span class="logo"><span class="sky">Skip</span> <span class="re">analysis</span></a></li>
+      <li><a href="/utilities?mute_alerts_on"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></a></li>
+      <li class="active"><a href="/utilities?pearson_closest"><span class="logo"><span class="sky">Pearson</span> <span class="re">closest</span></a></li>
+      <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
+      <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+      <li><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
+      <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+      <li><a href="/utilities?labelled_metrics_names"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></a></li>
+      <li><a href="/utilities?timeseries_graph"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></a></li>
+      <li><a href="/utilities?csv_to_timeseries"><span class="logo"><span class="sky">csv</span> - <span class="re">to timeseries</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Pearson ::</span> <span class="re">closest</span></h4>
+
+    You can analyse a metric against other metrics to determine the metrics that correlate closest to the metric over a time period.<br>
+    <br>
+
+  {% if pearson_closest and pearson_correlations %}
+	  <div class="alert alert-success">
+	    <strong>Pearson closest</strong> :: determined {{ pearson_correlations|length }} metrics that correlated above abs_threshold of <code>{{ pearson_closest_threshold }}</code><br>
+	  </div>
+    <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#filter_options">Show filter options</button>
+    <div id="filter_options" class="collapse">
+  {% endif %}
+        <form action="utilities">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Pearson closest</td>
+  		        <td><select name="pearson_closest">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+              <td>Metric</td>
+              <td><input type="text" name="metric" value="" /> the metric to correlate</td>
+            </tr>
+  		      <tr>
+  		        <td>Namespaces</td>
+  		        <td><input type="text" name="namespaces" value="" /> a comma separated list of metric/namespace patterns you want to correlate the metric with</td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+  		        <td><input type="text" name="from_timestamp" value="{{ pearson_from }}"> (unix timestamp or %Y-%m-%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="{{ pearson_until }}"> (unix timestamp or %Y-%m-%d %H:%M)</td>
+  		      </tr>
+    
+            <tr>
+  		        <td>abs_threshold</td>
+  		        <td><input type="text" name="abs_threshold" value="0.5" /> the absolute correlation threshold to use, any correlations under this value will not be returned a float between 0.0 and 1.0</td>
+  		      </tr>
+            <tr>
+  		        <td>max_results</td>
+  		        <td><input type="number" name="max_results" value="0" /> the maximum number of results to return, 0 returns all</td>
+  		      </tr>
+            <tr>
+  		        <td>plot_graphs</td>
+  		        <td><select name="plot_graphs">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select></td>
+  		      </tr>
+
+            <tr>
+              <td>Output format</td>
+              <td><select name="format">
+                <option value="html">html</option>
+                <option value="json">json</option>
+                </select> default output is to the Utilities page, if you want a json response set this to json.
+              </td>
+    			  </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Get Pearson closest">
+      </form>
+      {% if pearson_closest and pearson_correlations %}
+      <!-- collapse button div -->
+      </div>
+        {% endif %}
+  </div>
+
+  {% if not pearson_correlations %}
+	  <h3><span class="logo"><span class="sky">Pearson ::</span> <span class="re">closest</span> - <code>None</code></h3>
+  {% endif %}
+
+  {% if pearson_correlations %}
+	  <h3><span class="logo"><span class="sky">Pearson ::</span> <span class="re">closest</span></span> - {{ pearson_correlations|length }} metrics correlated with {{ metric }}</h3>
+    <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Metric</th>
+  		        <th>pearson_cc</th>
+  		        <th>abs_pearson_cc</th>
+  		        <th>graph</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+	  {% for i_metric in pearson_correlations %}
+  		      <tr>
+              <td>{{ i_metric }}</td>
+              <td>{{ pearson_correlations[i_metric]['pearson_cc'] }}</td>
+              <td>{{ pearson_correlations[i_metric]['abs_pearson_cc'] }}</td>
+      {% if pearson_correlations[i_metric]['graph_url'] %}
+              <td>
+                <img src="{{ pearson_correlations[i_metric]['graph_url'] }}" loading="lazy" alt="{{ i_metric }} timeseries graph" style="float: left; width: 100%; margin-right: 1%; margin-bottom: 0.5em;">
+              </td>
+      {% else %}
+        {% if metric == i_metric %}
+              <td>No graph plotted for self correlation</td>
+        {% else %}
+              <td>No graph plotted, abs_pearson_cc below abs_threshold of <code>{{ pearson_closest_threshold }}</code></td>
+        {% endif %}
+      {% endif %}
+            </tr>
+    {% endfor %}
+  		    </tbody>
+  		  </table>
+  {% endif %}
+
+	</div>
+	</div>
+	</div>
+{% endblock %}

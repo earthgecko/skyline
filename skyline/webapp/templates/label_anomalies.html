@@ -9,6 +9,7 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+<!--
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -17,6 +18,7 @@
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
 		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a></li>
 		  <li class="active"><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li ><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
 		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a></li>
@@ -32,6 +34,28 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+-->
+
+		<div class="container-fluid">
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+				<a class="nav-link" href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a>
+				</li>
+				<li class="nav-item">
+				<a class="nav-link" href="/panorama?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a>
+				</li>
+				<li class="nav-item">
+				<a class="nav-link active" aria-current="page" href="/panorama?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a>
+				</li>
+				<li class="nav-item">
+				<a class="nav-link" href="/panorama?not_anomalous=true"><span class="logo"><span class="re">Not</span> <span class="sky">anomalous</span></span></a>
+				</li>
+				<li class="nav-item">
+				<a class="nav-link" href="/panorama?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a>
+				</li>
+			</ul>
+		</div>
+		<br>
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
@@ -52,7 +76,7 @@
         <form action="ionosphere">
 -->
         <form action="panorama">
-  		  <table class="table table-hover">
+  		  <table class="table table-hover table-striped">
   		    <thead>
   		      <tr>
   		        <th>Option</th>

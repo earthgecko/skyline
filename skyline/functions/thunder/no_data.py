@@ -11,6 +11,8 @@ from skyline_functions import get_redis_conn_decoded
 from functions.settings.get_custom_stale_period import custom_stale_period
 from functions.settings.get_external_settings import get_external_settings
 from functions.thunder.send_event import thunder_send_event
+# @added 20240520 - Feature #5352: vista - bigquery
+from functions.settings.get_bq_accounts_settings import get_bq_accounts_settings
 
 
 # @added 20210603 - Branch #1444: thunder
@@ -299,6 +301,13 @@ def thunder_no_data(current_skyline_app, log=True):
 
     parent_namespaces = list(set(parent_namespaces))
 
+    # @added 20240522 - Feature #5352: vista - bigquery
+    try:
+        bq_accounts_settings = get_bq_accounts_settings(current_skyline_app)
+    except Exception as err:
+        current_logger.error('error :: %s :: get_bq_accounts_settings failed, err: %s' % (
+            function_str, err))
+
     # @added 20210620 - Branch #1444: thunder
     #                   Feature #4076: CUSTOM_STALE_PERIOD
     # Handle multi level namespaces
@@ -342,7 +351,9 @@ def thunder_no_data(current_skyline_app, log=True):
             # @modified 20230503 - Task #4872: Optimise luminosity for labelled_metrics
             # custom_stale_period was modified to add a trailing dot to none labelled_metrics
             # namespace_stale_period = custom_stale_period(current_skyline_app, parent_namespace, external_settings, log=True)
-            namespace_stale_period = custom_stale_period(current_skyline_app, check_parent_namespace, external_settings, log=True)
+            # @added 20240522 - Feature #5352: vista - bigquery
+            # Added bq_accounts_settings
+            namespace_stale_period = custom_stale_period(current_skyline_app, check_parent_namespace, external_settings=external_settings, bq_accounts_settings=bq_accounts_settings, log=True)
             if namespace_stale_period:
                 if namespace_stale_period != stale_period:
                     if log:
@@ -468,7 +479,9 @@ def thunder_no_data(current_skyline_app, log=True):
                     # @modified 20230503 - Task #4872: Optimise luminosity for labelled_metrics
                     # custom_stale_period was modified to add a trailing dot to none labelled_metrics
                     # namespace_stale_period = custom_stale_period(current_skyline_app, parent_namespace, external_settings, log=True)
-                    namespace_stale_period = custom_stale_period(current_skyline_app, check_parent_namespace, external_settings, log=True)
+                    # @added 20240522 - Feature #5352: vista - bigquery
+                    # Added bq_accounts_settings
+                    namespace_stale_period = custom_stale_period(current_skyline_app, check_parent_namespace, external_settings=external_settings, bq_accounts_settings=bq_accounts_settings, log=True)
                     if namespace_stale_period:
                         if namespace_stale_period != stale_period:
                             if log:
@@ -482,7 +495,7 @@ def thunder_no_data(current_skyline_app, log=True):
                         current_logger = logging.getLogger(current_skyline_app_logger)
                     current_logger.error(traceback.format_exc())
                     current_logger.error('error :: %s :: custom_stale_period failed for %s - %s' % (
-                        function_str, parent_namespace, e))
+                        function_str, parent_namespace, err))
 
             if parent_namespace_metrics_timestamps:
                 parent_namespace_metrics_timestamps.sort()

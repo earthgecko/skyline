@@ -4,18 +4,45 @@ import time
 import datetime
 import traceback
 
+# @added 20230724 - Feature #5010: snab - save training_data
+from ast import literal_eval
+
 import settings
 import skyline_version
 
-from sqlalchemy.sql import select
+# @modified 20230724 - Feature #5010: snab - save training_data
+# Added Table and MetaData
+from sqlalchemy import select, Table, MetaData
 
 from database import get_engine, snab_table_meta, anomalies_table_meta
 from matched_or_regexed_in_list import matched_or_regexed_in_list
-from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
+# @modified 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+#                      Feature #5008: webapp - snab report page
+# Swap to use the database get_all_db_metric_names method rather than the Redis
+# based get_metric_ids_and_base_names method which only deals active metric ids
+#from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
 from functions.plots.plot_anomalies import plot_anomalies
 
-from skyline_functions import get_graphite_metric
+# @modified 20230724 - Feature #5010: snab - save training_data
+# Added get_redis_conn_decoded
+from skyline_functions import get_graphite_metric, get_redis_conn_decoded
+
 from create_matplotlib_graph import create_matplotlib_graph
+
+# @added 20230713 - Feature #4994: custom_algorithm - mirages
+#                   Feature #4988: Allow snab to return and save results
+#                   Task #2732: Prometheus to Skyline
+#                   Branch #4300: prometheus
+# Handle labelled_metrics
+from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
+
+# @added 20230724 - Feature #5010: snab - save training_data
+from functions.database.queries.get_algorithms import get_algorithms
+from functions.database.queries.get_algorithm_groups import get_algorithm_groups
+
+# @added 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+#                   Feature #5008: webapp - snab report page
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
@@ -169,7 +196,7 @@ def get_snab_results(filter_on):
                 pass
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
-    logger.info('get_snab_results :: ending with anomaly_id: %s' % str(start_anomaly_id))
+    logger.info('get_snab_results :: ending with anomaly_id: %s' % str(end_anomaly_id))
 
     try:
         snab_table, log_msg, trace = snab_table_meta(skyline_app, engine)
@@ -224,13 +251,33 @@ def get_snab_results(filter_on):
     logger.info('get_snab_results :: determined %s SNAB results before filtering' % (
         str(len(all_results))))
 
+    # @added 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+    #                   Feature #5008: webapp - snab report page
+    # Map ALL metric ids
+    metric_names_with_ids = {}
+
     metric_ids_and_base_names = {}
     try:
-        metric_ids_and_base_names = get_metric_ids_and_base_names(skyline_app)
+        # @modified 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+        #                      Feature #5008: webapp - snab report page
+        # The get_metric_ids_and_base_names method gets the current active
+        # metrics from the Redis hash, if metrics have been removed there will
+        # be KeyError errors for their ids, use the get_all_db_metric_names
+        # method to ensure ALL metric ids can be determined
+        # metric_ids_and_base_names = get_metric_ids_and_base_names(skyline_app)
+        with_ids = True
+        metric_names, metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
     except Exception as err:
         logger.error(traceback.format_exc())
         logger.error('error :: get_snab_results :: failed to get Redis key %s - %s' % str(err))
         metric_ids_and_base_names = {}
+
+    # @added 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+    #                   Feature #5008: webapp - snab report page
+    # Map ALL metric ids
+    metric_ids_and_base_names = {}
+    for i_base_name, mid in metric_names_with_ids.items():
+        metric_ids_and_base_names[mid] = i_base_name
 
     # Filter by result
     results_by_result = {}
@@ -306,9 +353,14 @@ def get_snab_results(filter_on):
                 snab_engine_disposal(engine)
             raise  # to webapp to return in the UI
         for metric_id in check_metric_ids:
-            base_name = metric_ids_and_base_names[metric_id]
-            filtered_metrics[metric_id] = base_name
-
+            # @modified 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+            # Added try except
+            try:
+                base_name = metric_ids_and_base_names[metric_id]
+                if base_name:
+                    filtered_metrics[metric_id] = base_name
+            except KeyError:
+                continue
     # Now determine what anomaly ids exist for the filtered metrics in the
     # all results
     metric_ids = list(filtered_metrics.keys())
@@ -341,20 +393,182 @@ def get_snab_results(filter_on):
     if results_by_namespaces:
         all_results = dict(results_by_namespaces)
 
+    all_results_errors = []
     if all_results:
         for snab_id in list(all_results.keys()):
             try:
                 anomaly_id = all_results[snab_id]['anomaly_id']
                 metric_id = anomalies[anomaly_id]['metric_id']
+
+                # @added 20241026 - Task #5521: webapp - update to bootstrap-5.3.3
+                if metric_id not in metric_ids_and_base_names.keys():
+                    all_results_errors.append({'base_name not found for metric_id': metric_id, 'snab_id': snab_id, 'anomaly_id': anomaly_id})
+                    continue
+
                 all_results[snab_id]['metric'] = metric_ids_and_base_names[metric_id]
+                
+                # @added 20230724 - add training_data page link
+                labelled_metric_name = None
+                if '_tenant_id="' in metric_ids_and_base_names[metric_id]:
+                    labelled_metric_name = 'labelled_metrics.%s' % str(metric_id)
+                all_results[snab_id]['labelled_metric'] = labelled_metric_name
+
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: get_snab_results :: failed to determine base_name - %s' % str(err))
+                all_results_errors.append({'err': err, 'snab_id': snab_id})
 
         results_data = dict(all_results)
         del all_results
 
+    if len(all_results_errors) > 0:
+        logger.error('error :: get_snab_results :: %s errors reported with all_results data, all_results_errors[\'0\']: %s' % (
+            str(len(all_results_errors)), str(all_results_errors[0])))
+
     logger.info('get_snab_results :: determined %s SNAB results' % str(len(results_data)))
+
+    # @added 20230724 - Feature #5010: snab - save training_data
+    # Added training_data page link to SNAB results table
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_snab_results :: get_redis_conn_decoded failed - %s' % (
+            err))
+    training_data_raw = []
+    try:
+        training_data_raw = list(redis_conn_decoded.smembers('ionosphere.training_data'))
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_snab_results :: smembers failed on ionosphere.training_data - %s' % (
+            err))
+    ionosphere_training_data_dict = {}
+    for training_data_str in training_data_raw:
+        try:
+            training_data_item = literal_eval(training_data_str)
+            metric = training_data_item[0]
+            try:
+                ionosphere_training_data_dict[metric].append(training_data_item[1])
+            except:
+                ionosphere_training_data_dict[metric] = []
+                ionosphere_training_data_dict[metric].append(training_data_item[1])
+        except Exception as err:
+            logger.error('error :: get_snab_results :: failed to interpolate - %s - %s' % (
+                str(training_data_str), err))
+    metrics_with_training_data = list(ionosphere_training_data_dict.keys())
+    algorithms = {}
+    all_algorithms_by_id = {}
+    try:
+        algorithms, all_algorithms_by_id = get_algorithms(skyline_app, return_all_algorithms_by_id=True)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_snab_results :: failed to get algorithms - %s' % str(err))
+    algorithm_groups = {}
+    all_algorithm_groups_by_id = {}
+    try:
+        algorithm_groups, all_algorithm_groups_by_id = get_algorithm_groups(skyline_app, return_all_algorithm_groups_by_id=True)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_snab_results :: failed to get algorithm_groups - %s' % str(err))
+    try:
+        use_table_meta = MetaData()
+        apps_table = Table('apps', use_table_meta, autoload=True, autoload_with=engine)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_snab_results :: use_table Table failed on apps table - %s' % (
+            err))
+    apps = {}
+    try:
+        connection = engine.connect()
+        stmt = select(apps_table)
+        result = connection.execute(stmt)
+        for row in result:
+            app_id = row['id']
+            apps[app_id] = row['app']
+        connection.close()
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_snab_results :: failed to build apps - %s' % str(err))
+
+    results_errors = []
+    for snab_id in list(results_data.keys()):
+        training_data_uri = None
+
+        try:
+            anomaly_timestamp = anomalies[anomaly_id]['anomaly_timestamp']
+        except KeyError as err:
+            results_errors.append({'anomalies error': err, 'anomaly_id': anomaly_id})
+            continue
+        try:
+            metric = results_data[snab_id]['metric']
+            anomaly_id = results_data[snab_id]['anomaly_id']
+            labelled_metric_name = results_data[snab_id]['labelled_metric']
+        except KeyError as err:
+            results_errors.append({'results_data error': err, 'snab_id': snab_id})
+            continue
+
+        use_metric = None
+        if metric in metrics_with_training_data:
+            use_metric = metric
+        if labelled_metric_name in metrics_with_training_data:
+            use_metric = labelled_metric_name
+        if use_metric:
+            if anomaly_timestamp in ionosphere_training_data_dict[use_metric]:
+                metric_timeseries_dir = use_metric.replace('.', '/')
+                metric_training_data_dir = '%s/%s/%s' % (
+                    settings.IONOSPHERE_DATA_FOLDER, str(anomaly_timestamp),
+                    metric_timeseries_dir)
+                if os.path.exists(metric_training_data_dir):
+                    training_data_found = True
+                    training_data_uri = '/ionosphere?timestamp=%s&metric=%s&requested_timestamp=%s' % (
+                        str(anomaly_timestamp), use_metric, str(anomaly_timestamp))
+                if not training_data_found:
+                    metric_training_data_dir = '%s_saved/%s/%s' % (
+                        settings.IONOSPHERE_DATA_FOLDER, str(anomaly_timestamp),
+                        metric_timeseries_dir)
+                    if os.path.exists(metric_training_data_dir):
+                        training_data_uri = '/ionosphere?saved_training_data=true&timestamp=%s&metric=%s&requested_timestamp=%s' % (
+                            str(anomaly_timestamp), use_metric, str(anomaly_timestamp))
+        results_data[snab_id]['training_data_uri'] = training_data_uri
+        try:
+            algorithm_id = int(results_data[snab_id]['algorithm_id'])
+        except:
+            algorithm_id = None
+        algorithm_name = None
+        if algorithm_id:
+            try:
+                algorithm_name = str(all_algorithms_by_id[algorithm_id])
+            except Exception as err:
+                logger.warning('warning :: get_snab_results :: failed find algorithm in all_algorithms_by_id for algorithm_id: %s - %s' % (
+                    str(algorithm_id), str(err)))
+        # Change algorithm_id key to algorithm and maintain order 
+        results_data[snab_id] = {'algorithm' if k == 'algorithm_id' else k:v for k, v in results_data[snab_id].items()}
+        results_data[snab_id]['algorithm'] = algorithm_name
+        app_id = None
+        try:
+            app_id = int(apps[results_data[snab_id]['app_id']])
+        except:
+            app_id = None
+        app = None
+        try:
+            app = str(apps[results_data[snab_id]['app_id']])
+        except Exception as err:
+            logger.warning('warning :: get_snab_results :: failed find app in apps for app_id: %s - %s' % (
+                str(algorithm_id), str(err)))
+        # Change app_id key to app and maintain order 
+        results_data[snab_id] = {'app' if k == 'app_id' else k:v for k, v in results_data[snab_id].items()}
+        results_data[snab_id]['app'] = app
+        results_data[snab_id]['algorithm_id'] = algorithm_id
+        try:
+            algorithm_group_id = str(results_data[snab_id]['algorithm_group_id'])
+            del results_data[snab_id]['algorithm_group_id']
+            results_data[snab_id]['algorithm_group_id'] = algorithm_group_id
+        except:
+            algorithm_group_id = None
+
+    if len(results_errors) > 0:
+        logger.error('error :: get_snab_results :: %s errors reported with results_data, results_errors[\'0\']: %s' % (
+            str(len(results_errors)), str(results_errors[0])))
 
     for snab_id in list(results_data.keys()):
         results_data[snab_id]['plot'] = None
@@ -366,7 +580,8 @@ def get_snab_results(filter_on):
             metric = results_data[snab_id]['metric']
         except Exception as err:
             logger.error(traceback.format_exc())
-            logger.error('error :: get_snab_results :: failed to determine anomaly_id and/or metric - %s' % str(err))
+            logger.error('error :: get_snab_results :: failed to determine anomaly_id and/or metric for snab_id: %s, err: %s' % (
+                str(snab_id), str(err)))
             continue
 
         graph_file = '%s/snab.%s.%s.%s.png' % (
@@ -387,7 +602,18 @@ def get_snab_results(filter_on):
             full_duration = anomalies[anomaly_id]['full_duration']
             graphite_from_timestamp = anomaly_timestamp - full_duration
             graphite_until_timestamp = anomaly_timestamp + 14400
-            timeseries = get_graphite_metric(skyline_app, metric, graphite_from_timestamp, graphite_until_timestamp, 'list', 'object')
+
+            # @modified 20230713 - Feature #4994: custom_algorithm - mirages
+            #                      Feature #4988: Allow snab to return and save results
+            #                      Task #2732: Prometheus to Skyline
+            #                      Branch #4300: prometheus
+            # Handle labelled_metrics
+            # timeseries = get_graphite_metric(skyline_app, metric, graphite_from_timestamp, graphite_until_timestamp, 'list', 'object')
+            if metric.startswith('labelled_metrics.') or '_tenant_id="' in metric:
+                timeseries = get_victoriametrics_metric(skyline_app, metric, from_timestamp, until_timestamp, 'list', 'object')
+            else:
+                timeseries = get_graphite_metric(skyline_app, metric, graphite_from_timestamp, graphite_until_timestamp, 'list', 'object')
+
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: get_snab_results :: get_graphite_metric failed to get timeseries - %s' % str(err))

@@ -84,7 +84,7 @@ def check_thunder_failover_key(self, check_key):
                     logger.error('error :: %s ::  failed to remove %s, continuing - %s' % (
                         function_str, thunder_key_file, e))
         except Exception as e:
-            logger.warn('warning :: %s :: failed to set_alert_cache_key in Redis, probably still down - %s - %s' % (
+            logger.warning('warning :: %s :: failed to set_alert_cache_key in Redis, probably still down - %s - %s' % (
                 function_str, check_key, e))
 
     return expiry

@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>boundary.boundary_algorithms &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>boundary.boundary_algorithms &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -131,6 +131,8 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
 <span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># @added 20231026 - Feature #5108: boundary - functions</span>
+<span class="kn">import</span> <span class="nn">bottleneck</span> <span class="k">as</span> <span class="nn">bn</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
@@ -167,7 +169,9 @@
     <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="boundary_no_mans_land"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.boundary_no_mans_land">[docs]</a><span class="k">def</span> <span class="nf">boundary_no_mans_land</span><span class="p">():</span>
+<div class="viewcode-block" id="boundary_no_mans_land">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.boundary_no_mans_land">[docs]</a>
+<span class="k">def</span> <span class="nf">boundary_no_mans_land</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is no man&#39;s land. Do anything you want in here, as long as you return a</span>
 <span class="sd">    boolean that determines whether the input timeseries is anomalous or not.</span>
@@ -178,7 +182,10 @@
     <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="autoaggregate_ts"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.autoaggregate_ts">[docs]</a><span class="k">def</span> <span class="nf">autoaggregate_ts</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="autoaggregate_ts">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.autoaggregate_ts">[docs]</a>
+<span class="k">def</span> <span class="nf">autoaggregate_ts</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a utility function used to autoaggregate a timeseries.  If a</span>
 <span class="sd">    timeseries data set has 6 datapoints per minute but only one data value</span>
@@ -239,7 +246,10 @@
         <span class="k">return</span> <span class="n">aggregated_timeseries</span></div>
 
 
-<div class="viewcode-block" id="less_than"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.less_than">[docs]</a><span class="k">def</span> <span class="nf">less_than</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
+
+<div class="viewcode-block" id="less_than">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.less_than">[docs]</a>
+<span class="k">def</span> <span class="nf">less_than</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
     <span class="c1"># timeseries, metric_name, metric_expiration_time, metric_min_average,</span>
     <span class="c1"># metric_min_average_seconds, metric_trigger, autoaggregate,</span>
     <span class="c1"># autoaggregate_value):</span>
@@ -261,7 +271,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="greater_than"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.greater_than">[docs]</a><span class="k">def</span> <span class="nf">greater_than</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
+
+<div class="viewcode-block" id="greater_than">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.greater_than">[docs]</a>
+<span class="k">def</span> <span class="nf">greater_than</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the datapoint is greater than metric_trigger</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -280,7 +293,10 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="detect_drop_off_cliff"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff">[docs]</a><span class="k">def</span> <span class="nf">detect_drop_off_cliff</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
+
+<div class="viewcode-block" id="detect_drop_off_cliff">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.detect_drop_off_cliff">[docs]</a>
+<span class="k">def</span> <span class="nf">detect_drop_off_cliff</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A timeseries is anomalous if the average of the last 10 datapoints is</span>
 <span class="sd">    &lt;trigger&gt; times greater than the last data point AND if has not experienced</span>
@@ -436,10 +452,65 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span>
+<span class="c1"># @added 20231026 - Feature #5108: boundary - functions</span>
+<div class="viewcode-block" id="get_resolution">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.get_resolution">[docs]</a>
+<span class="k">def</span> <span class="nf">get_resolution</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="n">np_timestamps_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+    <span class="n">ts_diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_timestamps_array</span><span class="p">)</span>
+    <span class="n">resolution_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ts_diffs</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_counts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">resolution_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">resolution</span></div>
+
+
+
+<span class="c1"># @added 20231026 - Feature #5108: boundary - functions</span>
+<div class="viewcode-block" id="moving_timeseries">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.moving_timeseries">[docs]</a>
+<span class="k">def</span> <span class="nf">moving_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">boundary_function</span><span class="p">,</span> <span class="n">boundary_function_seconds</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the moving mean or median timeseries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">timeseries</span>
+    <span class="n">rolling_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">get_resolution</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">boundary_function_seconds</span> <span class="o">&lt;</span> <span class="n">resolution</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">timeseries</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">boundary_function_seconds</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="n">x_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">boundary_function</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
+            <span class="n">rolling_values</span> <span class="o">=</span> <span class="n">bn</span><span class="o">.</span><span class="n">move_mean</span><span class="p">(</span><span class="n">x_np</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">boundary_function</span> <span class="o">==</span> <span class="s1">&#39;median&#39;</span><span class="p">:</span>
+            <span class="n">rolling_values</span> <span class="o">=</span> <span class="n">bn</span><span class="o">.</span><span class="n">move_median</span><span class="p">(</span><span class="n">x_np</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
+        <span class="n">rolling_list</span> <span class="o">=</span> <span class="n">rolling_values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">rolling_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">rolling_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rolling_list</span><span class="p">[</span><span class="n">index</span><span class="p">]])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">rolling_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;preprocessed timeseries using window of </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">window</span><span class="p">),</span> <span class="n">boundary_function</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">timeseries</span>
+    <span class="k">return</span> <span class="n">rolling_timeseries</span></div>
+
+
+
+<div class="viewcode-block" id="run_selected_algorithm">
+<a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary_algorithms.run_selected_algorithm">[docs]</a>
+<span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span>
         <span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span>
         <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span>
-        <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">autoaggregate</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">):</span>
+        <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">autoaggregate</span><span class="p">,</span> <span class="n">autoaggregate_value</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span>
+        <span class="c1"># @added 20231026 - Feature #5108: boundary - functions</span>
+        <span class="n">boundary_function</span><span class="p">,</span> <span class="n">boundary_function_seconds</span><span class="p">,</span>
+        <span class="c1"># @added 20240720 - Feature #5352: vista - bigquery</span>
+        <span class="c1"># Added external_settings and bq_accounts_settings</span>
+        <span class="n">external_settings</span><span class="o">=</span><span class="p">{},</span> <span class="n">bq_accounts_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter timeseries and run selected algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -463,10 +534,13 @@
     <span class="c1"># In Boundary the direct settings CUSTOM_STALE_PERIOD dict is checked for</span>
     <span class="c1"># a custom stale period.  In Analyzer the metrics_manager Redis hask key is</span>
     <span class="c1"># used</span>
+
     <span class="n">stale_period</span> <span class="o">=</span> <span class="n">STALE_PERIOD</span>
     <span class="k">if</span> <span class="n">CUSTOM_STALE_PERIOD</span> <span class="ow">or</span> <span class="n">EXTERNAL_SETTINGS</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">stale_period</span> <span class="o">=</span> <span class="n">custom_stale_period</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># @modified 20240720 - Feature #5352: vista - bigquery</span>
+            <span class="c1"># Added external_settings and bq_accounts_settings</span>
+            <span class="n">stale_period</span> <span class="o">=</span> <span class="n">custom_stale_period</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">external_settings</span><span class="o">=</span><span class="n">external_settings</span><span class="p">,</span> <span class="n">bq_accounts_settings</span><span class="o">=</span><span class="n">bq_accounts_settings</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">stale_period</span> <span class="o">!=</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: CUSTOM_STALE_PERIOD found - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -522,8 +596,27 @@
                     <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
         <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
 
+    <span class="c1"># @added 20231026 - Feature #5108: boundary - functions</span>
+    <span class="n">use_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+    <span class="n">function_value</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">boundary_function</span> <span class="ow">and</span> <span class="n">boundary_function_seconds</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">boundary_function</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;median&#39;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;preprocessing </span><span class="si">%s</span><span class="s1"> timeseries to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">boundary_function</span><span class="p">))</span>
+                <span class="n">use_timeseries</span> <span class="o">=</span> <span class="n">moving_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">boundary_function</span><span class="p">,</span> <span class="n">boundary_function_seconds</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">use_timeseries</span><span class="p">:</span>
+                    <span class="n">function_value</span> <span class="o">=</span> <span class="n">use_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: moving_timeseries failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                <span class="n">use_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">)]</span>
+        <span class="c1"># @modified 20231026 - Feature #5108: boundary - functions</span>
+        <span class="c1"># ensemble = [globals()[algorithm](timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger)]</span>
+        <span class="c1"># @modified 20231115 - Feature #5104: boundary - external_settings</span>
+        <span class="c1"># Cast variables as type because they can be str from the external_settings</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">use_timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">metric_min_average</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_min_average_seconds</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">))]</span>
         <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
@@ -540,7 +633,9 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">metric_alerters</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
                 <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span>
+            <span class="c1"># @modified 20231026 - Feature #5108: boundary - functions</span>
+            <span class="c1"># Added function_value</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">function_value</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
@@ -557,10 +652,16 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">metric_alerters</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
                 <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span>
+            <span class="c1"># @modified 20231026 - Feature #5108: boundary - functions</span>
+            <span class="c1"># Added function_value</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">function_value</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span></div>
+        <span class="c1"># @modified 20231026 - Feature #5108: boundary - functions</span>
+        <span class="c1"># Added function_value</span>
+        <span class="n">function_value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">function_value</span></div>
+
 </pre></div>
 
            </div>
@@ -570,7 +671,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

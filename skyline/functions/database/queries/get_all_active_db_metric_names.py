@@ -46,6 +46,9 @@ def get_all_active_db_metric_names(current_skyline_app, with_ids=False):
             raise
         return False, fail_msg, trace
 
+    # @added 20241026 - Bug #5522: Handle duplicate metric names
+    duplicate_metrics = {}
+
     try:
         connection = engine.connect()
         if with_ids:
@@ -55,6 +58,12 @@ def get_all_active_db_metric_names(current_skyline_app, with_ids=False):
         result = connection.execute(stmt)
         for row in result:
             base_name = row['metric']
+
+            # @added 20241026 - Bug #5522: Handle duplicate metric names
+            if base_name in metric_names:
+                duplicate_metrics[row['id']] = base_name
+                continue
+
             metric_names.append(base_name)
             if with_ids:
                 metric_names_with_ids[base_name] = row['id']
@@ -75,6 +84,11 @@ def get_all_active_db_metric_names(current_skyline_app, with_ids=False):
         return False, fail_msg, trace
     if engine:
         engine_disposal(current_skyline_app, engine)
+
+    # @added 20241026 - Bug #5522: Handle duplicate metric names
+    if len(duplicate_metrics) > 0:
+        current_logger.info('%s :: there are %s duplicate_metrics found' % (
+            function_str, str(len(duplicate_metrics))))
 
     if not metric_names:
         current_logger.error('error :: %s :: no metric names returned from the DB' % (

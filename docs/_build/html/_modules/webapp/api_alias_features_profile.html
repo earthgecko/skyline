@@ -1,0 +1,677 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.api_alias_features_profile &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.api_alias_features_profile</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.api_alias_features_profile</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">api_alias_features_profile.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="kn">from</span> <span class="nn">functions.database.queries.create_alias_fps_for_metrics</span> <span class="kn">import</span> <span class="n">create_alias_fps_for_metrics</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_alias_fps_for_metrics</span> <span class="kn">import</span> <span class="n">get_alias_fps_for_metrics</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_all_db_metric_names</span> <span class="kn">import</span> <span class="n">get_all_db_metric_names</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_fps_for_metrics</span> <span class="kn">import</span> <span class="n">get_fps_for_metrics</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
+
+
+<span class="c1"># @added 20241006 - Feature #5479: ionosphere.alias_features_profile</span>
+<div class="viewcode-block" id="api_alias_features_profile">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.api_alias_features_profile.api_alias_features_profile">[docs]</a>
+<span class="k">def</span> <span class="nf">api_alias_features_profile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dict with the aliased fps for a metric pattern.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :return: alias_features_profile_response_dict</span>
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">function_str</span> <span class="o">=</span> <span class="s1">&#39;api_alias_features_profile&#39;</span>
+    <span class="n">alias_features_profile_response_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;form_data&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;response_format&#39;</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span><span class="p">}</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;get_candidate_alias_metrics&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;exclude_candidate_metrics&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;create_alias_fps&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;created&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">get_target_metrics</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">metric_names_with_ids</span><span class="p">):</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">target_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span> <span class="ow">in</span> <span class="n">metric_names_with_ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pattern_match</span><span class="p">,</span> <span class="n">matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">pattern</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                    <span class="n">target_metrics</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">target_metrics</span>
+
+    <span class="k">def</span> <span class="nf">get_candidate_metrics</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">,</span> <span class="n">exclude_patterns</span><span class="p">,</span> <span class="n">metric_names_with_ids</span><span class="p">):</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile - get_candidate_metrics running with exclude_patterns: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">exclude_patterns</span><span class="p">))</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">all_candidate_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span> <span class="ow">in</span> <span class="n">metric_names_with_ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">pattern_match</span><span class="p">,</span> <span class="n">matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">metric_pattern</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">exclude_patterns</span><span class="p">:</span>
+                        <span class="n">exclude_pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">exclude_pattern_match</span><span class="p">,</span> <span class="n">matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">exclude_patterns</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">exclude_pattern_match</span><span class="p">:</span>
+                                <span class="k">continue</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+                    <span class="n">all_candidate_metrics</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">base_name</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+        <span class="n">all_candidate_metric_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_candidate_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">metric_ids_fps_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_ids_fps_dict</span> <span class="o">=</span> <span class="n">get_fps_for_metrics</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">all_candidate_metric_ids</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">fps_dict</span> <span class="ow">in</span> <span class="n">metric_ids_fps_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">candidate_metrics</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps_dict</span>
+        <span class="k">return</span> <span class="n">candidate_metrics</span>
+
+    <span class="c1"># Test whether form or json POST</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_pattern</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;metric_pattern&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">metric_pattern</span><span class="p">:</span>
+            <span class="n">form_data</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;form_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, form POST&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile - metric_pattern passed: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no form data trying json&#39;</span><span class="p">)</span>
+
+    <span class="n">post_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">form_data</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">post_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - no POST data, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, return 400 no POST data&#39;</span><span class="p">)</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no post data&#39;</span>
+            <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_pattern</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;metric_pattern&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">metric_pattern</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile - metric_pattern passed: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">metric_pattern</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">metric_pattern</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">metric_pattern</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_pattern</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, return 400 no metric_pattern determined&#39;</span><span class="p">)</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no metric_pattern argument&#39;</span>
+        <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;metric_pattern&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_pattern</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">replace_pattern</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">alias_metrics</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">response_format</span> <span class="o">=</span> <span class="s1">&#39;html&#39;</span>
+    <span class="n">dry_run</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">form_data</span><span class="p">:</span>
+        <span class="n">all_form_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span>
+        <span class="n">form_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">all_form_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">form_data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, form_data_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">form_data_dict</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no step, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">replace_pattern</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;replace_pattern&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">replace_pattern</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no replace_pattern, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;candidate_metrics&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no candidate_metrics, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;candidate_metrics_list&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no candidate_metrics, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exclude_patterns_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;exclude_patterns&#39;</span><span class="p">]</span>
+            <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_patterns_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">exclude_patterns_str</span><span class="p">:</span>
+                    <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="n">exclude_patterns_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">exclude_patterns_str</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_patterns_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">exclude_patterns_str</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no exclude_patterns, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">create_aliases</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;create_aliases&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no create_aliases, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">create_aliases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">create_aliases</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+                <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">create_aliases</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no label, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">passed_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">passed_user</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">passed_user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">passed_user</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no user, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">passed_user_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">passed_user_id</span><span class="p">:</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">passed_user_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">passed_user_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no user_id, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response_format</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;response_format&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">response_format</span> <span class="o">=</span> <span class="s1">&#39;html&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile no response_format, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">form_data</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, post_data_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">post_data</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;step&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">step</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">replace_pattern</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;replace_pattern&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">replace_pattern</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">replace_pattern</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;candidate_metrics&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">candidate_metrics</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;candidate_metrics_list&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">candidate_metrics</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;exclude_patterns&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">exclude_patterns</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">create_aliases</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;create_aliases&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">create_aliases</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">create_aliases</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+                    <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">create_aliases</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">create_aliases</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">create_aliases</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">label</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">passed_user</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;user&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">passed_user</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">passed_user</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">passed_user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">passed_user</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">user</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">passed_user_id</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;user_id&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">passed_user_id</span><span class="p">:</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">passed_user_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">passed_user_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">user_id</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">response_format</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;response_format&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">response_format</span> <span class="o">=</span> <span class="s1">&#39;html&#39;</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">response_format</span><span class="se">\&#39;</span><span class="s1">] failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">create_aliases</span><span class="p">:</span>
+        <span class="n">dry_run</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;dry_run&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dry_run</span>
+
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;response_format&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">response_format</span>
+
+    <span class="c1"># @added 20241018 - Feature #5481: ionosphere.copy_features_profile</span>
+    <span class="n">fps_copied</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;fps_copied&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps_copied</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">step</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, return 400 no step determined&#39;</span><span class="p">)</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no step argument&#39;</span>
+        <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">replace_pattern</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile, return 400 no replace_pattern determined&#39;</span><span class="p">)</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no replace_pattern argument&#39;</span>
+        <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+    <span class="k">if</span> <span class="n">replace_pattern</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile - replace_pattern passed: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">replace_pattern</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exclude_patterns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exclude_patterns</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exclude_patterns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">exclude_patterns</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">exclude_patterns</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;create_aliases&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_aliases</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;replace_pattern&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_pattern</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;candidate_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_metrics</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;exclude_patterns&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exclude_patterns</span>
+<span class="c1">#    if form_data and exclude_patterns:</span>
+<span class="c1">#        alias_features_profile_response_dict[&#39;exclude_patterns&#39;] = exclude_patterns_str</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;user_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">user_id</span>
+    <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;all_alias_fps_preexist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: api_alias_features_profile :: pre-populated alias_features_profile_response_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">alias_features_profile_response_dict</span><span class="p">)))</span>
+
+    <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">with_ids</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metric_names</span><span class="p">,</span> <span class="n">metric_names_with_ids</span> <span class="o">=</span> <span class="n">get_all_db_metric_names</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">with_ids</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile :: get_all_db_metric_names failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+    <span class="n">metric_ids_with_names</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_id</span> <span class="ow">in</span> <span class="n">metric_names_with_ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">metric_ids_with_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_name</span>
+
+    <span class="c1"># The last step first</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="s1">&#39;create_alias_fps&#39;</span><span class="p">:</span>
+        <span class="c1"># Need:</span>
+        <span class="c1"># alias_metrics</span>
+        <span class="c1"># exclude_patterns</span>
+        <span class="c1"># replace_pattern</span>
+        <span class="c1"># Returns metric_ids_alias_fps_dict</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile - step: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">step</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="n">get_candidate_metrics</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">,</span> <span class="n">exclude_patterns</span><span class="p">,</span> <span class="n">metric_names_with_ids</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile :: get_candidate_metrics failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;get_candidate_metrics failed&#39;</span>
+            <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+        <span class="n">candidate_metric_names_and_ids</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">candidate_metric_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">metric_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">candidate_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">candidate_metric_name</span> <span class="o">=</span> <span class="n">metric_ids_with_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span>
+                <span class="n">candidate_metric_names_and_ids</span><span class="p">[</span><span class="n">candidate_metric_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_id</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">candidate_metric_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">candidate_metric_names_and_ids</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span>
+
+        <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">candidate_metric_names_and_ids</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile - len(candidate_metrics_list): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidate_metrics_list</span><span class="p">))))</span>
+
+        <span class="n">target_metric_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">candidate_metric</span> <span class="ow">in</span> <span class="n">candidate_metrics_list</span><span class="p">:</span>
+            <span class="n">alias_metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">target_metric</span> <span class="o">=</span> <span class="n">candidate_metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">,</span> <span class="n">replace_pattern</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">target_metric</span> <span class="ow">in</span> <span class="n">metric_names_with_ids</span><span class="p">:</span>
+                <span class="n">alias_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_metric</span><span class="p">)</span>
+                <span class="n">alias_metric_id</span> <span class="o">=</span> <span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">alias_metric</span><span class="p">]</span>
+                <span class="n">target_metric_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alias_metric_id</span><span class="p">)</span>
+
+        <span class="n">alias_fps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># TODO</span>
+        <span class="c1"># Determine existing alias fps for idempotent operations</span>
+        <span class="n">metric_ids_alias_fps_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate_metric_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_ids_alias_fps_dict</span> <span class="o">=</span> <span class="n">get_alias_fps_for_metrics</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">target_metric_ids</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile :: get_alias_fps_for_metrics failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;get_alias_fps_for_metrics failed&#39;</span>
+                <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile :: </span><span class="si">%s</span><span class="s1"> alias features profiles determined for target_metric_ids&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_ids_alias_fps_dict</span><span class="p">))))</span>
+
+        <span class="n">orphaned_fps</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">existing_alias_fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">candidate_metric</span> <span class="ow">in</span> <span class="n">candidate_metrics_list</span><span class="p">:</span>
+            <span class="n">alias_metric</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">alias_metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">target_metric</span> <span class="o">=</span> <span class="n">candidate_metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">,</span> <span class="n">replace_pattern</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">target_metric</span> <span class="ow">in</span> <span class="n">metric_names_with_ids</span><span class="p">:</span>
+                <span class="n">alias_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_metric</span><span class="p">)</span>
+                <span class="n">alias_metric_id</span> <span class="o">=</span> <span class="n">metric_names_with_ids</span><span class="p">[</span><span class="n">alias_metric</span><span class="p">]</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_alias_features_profile :: candidate_metric: </span><span class="si">%s</span><span class="s1">, target_metric: </span><span class="si">%s</span><span class="s1">, alias_metric: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">candidate_metric</span><span class="p">,</span> <span class="n">target_metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">alias_metric</span><span class="p">)))</span>
+            <span class="n">candidate_metric_id</span> <span class="o">=</span> <span class="n">candidate_metric_names_and_ids</span><span class="p">[</span><span class="n">candidate_metric</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">candidate_metrics</span><span class="p">[</span><span class="n">candidate_metric_id</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">alias_exists</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">alias_metric_id</span> <span class="ow">in</span> <span class="n">metric_ids_alias_fps_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">metric_ids_alias_fps_dict</span><span class="p">[</span><span class="n">alias_metric_id</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">alias_exists</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">existing_alias_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">alias_metric</span> <span class="ow">and</span> <span class="n">alias_metric_id</span><span class="p">:</span>
+                    <span class="n">alias_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;fp_id&#39;</span><span class="p">:</span> <span class="n">fp_id</span><span class="p">,</span>
+                        <span class="s1">&#39;metric_id&#39;</span><span class="p">:</span> <span class="n">alias_metric_id</span><span class="p">,</span>
+                        <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">alias_metric</span><span class="p">,</span>
+                        <span class="s1">&#39;original_metric_id&#39;</span><span class="p">:</span> <span class="n">candidate_metric_id</span><span class="p">,</span>
+                        <span class="s1">&#39;original_metric&#39;</span><span class="p">:</span> <span class="n">candidate_metric</span><span class="p">,</span>
+                        <span class="s1">&#39;exists&#39;</span><span class="p">:</span> <span class="n">alias_exists</span><span class="p">,</span>
+                        <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">label</span><span class="p">,</span>
+                        <span class="s1">&#39;user_id&#39;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">orphaned_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;fp_id&#39;</span><span class="p">:</span> <span class="n">fp_id</span><span class="p">,</span>
+                        <span class="s1">&#39;metric_id&#39;</span><span class="p">:</span> <span class="n">candidate_metric_id</span><span class="p">,</span>
+                        <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">candidate_metric</span><span class="p">,</span>
+                    <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alias_fps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">existing_alias_fp_ids</span><span class="p">):</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;all_alias_fps_preexist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">create_aliases</span><span class="p">:</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;candidate_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_metrics</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;candidate_metrics_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_metrics_list</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;orphaned_fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">orphaned_fps</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;target_alias_fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias_fps</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: api_alias_features_profile :: alias_features_profile_response_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">alias_features_profile_response_dict</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+        <span class="n">alias_fps_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">alias_fps</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">alias_fps_to_create</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">alias_fps_ids</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_alias_fp_ids</span><span class="p">:</span>
+                <span class="n">alias_fps_to_create</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">alias_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">])</span>
+        <span class="n">alias_fps_to_created</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alias_fps_to_create</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @modified 20241018 - Feature #5481: ionosphere.copy_features_profile</span>
+                <span class="c1"># Added fps_copied</span>
+                <span class="n">alias_fps_to_created</span><span class="p">,</span> <span class="n">fps_copied</span> <span class="o">=</span> <span class="n">create_alias_fps_for_metrics</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">alias_fps_to_create</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile :: create_alias_fps_for_metrics failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;create_alias_fps_for_metrics failed&#39;</span>
+                <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+            <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">alias_fps_to_created</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">alias_fps</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">alias_fps_to_created</span><span class="p">[</span><span class="n">fp_id</span><span class="p">])</span>
+            
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alias_fps_to_created</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;aliased_fps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alias_fps_to_created</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alias_fps</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">existing_alias_fp_ids</span><span class="p">):</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;all_alias_fps_preexist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20241018 - Feature #5481: ionosphere.copy_features_profile</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;fps_copied&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps_copied</span>
+
+        <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+    <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="s1">&#39;get_candidate_alias_metrics&#39;</span><span class="p">:</span>
+        <span class="c1"># Need:</span>
+        <span class="c1"># metric_pattern</span>
+        <span class="c1"># Returns candidate_fp_metrics</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">candidate_metrics</span> <span class="o">=</span> <span class="n">get_candidate_metrics</span><span class="p">(</span><span class="n">metric_pattern</span><span class="p">,</span> <span class="n">exclude_patterns</span><span class="p">,</span> <span class="n">metric_names_with_ids</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_alias_features_profile :: get_candidate_metrics failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+            <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;get_candidate_metrics failed&#39;</span>
+            <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;candidate_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate_metrics</span>
+        <span class="n">candidate_metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">metric_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">candidate_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_name</span> <span class="o">=</span> <span class="n">metric_ids_with_names</span><span class="p">[</span><span class="n">metric_id</span><span class="p">]</span>
+                <span class="n">candidate_metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="n">alias_features_profile_response_dict</span><span class="p">[</span><span class="s1">&#39;candidate_metrics_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">candidate_metrics_list</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> alias_features_profile returned&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alias_features_profile_response_dict</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="n">alias_features_profile_response_dict</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

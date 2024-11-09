@@ -122,13 +122,23 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
                 if isinstance(remote_analysed_events_dict[key], int):
                     value = remote_analysed_events_dict[key]
                     try:
-                        has_value = analysed_events_dict[key]
+                        has_value = str(analysed_events_dict[key])
                         del has_value
                     except:
                         analysed_events_dict[key] = 0
-                    analysed_events_dict[key] += value
+                    # @modified 20230802 - Feature #4530: namespace.analysed_events
+                    # Do not add when the key is a timestamp related key
+                    # analysed_events_dict[key] += value
+                    if key not in ['estimated_from_timestamp', 'from', 'until']:
+                        analysed_events_dict[key] += value
                 if isinstance(remote_analysed_events_dict[key], dict):
                     for i_key in list(remote_analysed_events_dict[key].keys()):
+                        # @added 20230802 - Feature #4530: namespace.analysed_events
+                        # Do not add when the key is a timestamp related key
+                        # analysed_events_dict[key] += value
+                        if i_key in ['estimated_from_timestamp', 'from', 'until']:
+                            continue
+
                         if isinstance(remote_analysed_events_dict[key][i_key], int):
                             value = remote_analysed_events_dict[key][i_key]
                             try:

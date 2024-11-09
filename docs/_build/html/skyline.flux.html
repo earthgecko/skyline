@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.flux package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.flux package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -115,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-flux.populate_metric">skyline.flux.populate_metric module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-flux.populate_metric_worker">skyline.flux.populate_metric_worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-flux.prometheus">skyline.flux.prometheus module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.tornado">skyline.flux.tornado module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-flux.uploaded_data_worker">skyline.flux.uploaded_data_worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-flux.worker">skyline.flux.worker module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-flux">Module contents</a></li>
@@ -137,6 +138,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -184,61 +186,61 @@
            <div itemprop="articleBody">
              
   <section id="skyline-flux-package">
-<h1>skyline.flux package<a class="headerlink" href="#skyline-flux-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.flux package<a class="headerlink" href="#skyline-flux-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="skyline-flux-aggregator-module">
-<h2>skyline.flux.aggregator module<a class="headerlink" href="#skyline-flux-aggregator-module" title="Permalink to this heading"></a></h2>
+<h2>skyline.flux.aggregator module<a class="headerlink" href="#skyline-flux-aggregator-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-flux.flux">
-<span id="skyline-flux-flux-module"></span><h2>skyline.flux.flux module<a class="headerlink" href="#module-flux.flux" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-flux-module"></span><h2>skyline.flux.flux module<a class="headerlink" href="#module-flux.flux" title="Link to this heading"></a></h2>
 <p>flux.py</p>
 </section>
 <section id="module-flux.gunicorn">
-<span id="skyline-flux-gunicorn-module"></span><h2>skyline.flux.gunicorn module<a class="headerlink" href="#module-flux.gunicorn" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-gunicorn-module"></span><h2>skyline.flux.gunicorn module<a class="headerlink" href="#module-flux.gunicorn" title="Link to this heading"></a></h2>
 <p>gunicorn.py</p>
 </section>
 <section id="module-flux.listen">
-<span id="skyline-flux-listen-module"></span><h2>skyline.flux.listen module<a class="headerlink" href="#module-flux.listen" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-listen-module"></span><h2>skyline.flux.listen module<a class="headerlink" href="#module-flux.listen" title="Link to this heading"></a></h2>
 <p>listen.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.listen.check_validate_key_update">
-<span class="sig-name descname"><span class="pre">check_validate_key_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#check_validate_key_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.check_validate_key_update" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_validate_key_update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#check_validate_key_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.check_validate_key_update" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.listen.validate_key">
-<span class="sig-name descname"><span class="pre">validate_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apikey</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.validate_key" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">validate_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apikey</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.validate_key" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.listen.validate_timestamp">
-<span class="sig-name descname"><span class="pre">validate_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.validate_timestamp" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">validate_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.validate_timestamp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.listen.validate_metric_name">
-<span class="sig-name descname"><span class="pre">validate_metric_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_metric_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.validate_metric_name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">validate_metric_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">caller</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_metric_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.validate_metric_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.listen.add_to_aggregate_metric_queue">
-<span class="sig-name descname"><span class="pre">add_to_aggregate_metric_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_metrics_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_namespaces_lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#add_to_aggregate_metric_queue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.add_to_aggregate_metric_queue" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_to_aggregate_metric_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_metrics_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate_namespaces_lst</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#add_to_aggregate_metric_queue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.add_to_aggregate_metric_queue" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.listen.get_namespace_quota">
-<span class="sig-name descname"><span class="pre">get_namespace_quota</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_namespace_prefix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#get_namespace_quota"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.get_namespace_quota" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_namespace_quota</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_namespace_prefix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#get_namespace_quota"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.get_namespace_quota" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.listen.MetricData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricData</span></span><a class="reference internal" href="_modules/flux/listen.html#MetricData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricData" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricData</span></span><a class="reference internal" href="_modules/flux/listen.html#MetricData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.listen.MetricData.on_get">
-<span class="sig-name descname"><span class="pre">on_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricData.on_get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricData.on_get" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricData.on_get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricData.on_get" title="Link to this definition"></a></dt>
 <dd><p>The /flux/metric_data endpoint is called via a GET with the URI
 parameters as defined below, with the optional fill parameter to allow
 flux to backfill airgap data for a metric:
@@ -252,11 +254,11 @@ For example:
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.listen.MetricDataPost">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricDataPost</span></span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricDataPost" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricDataPost</span></span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricDataPost" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.listen.MetricDataPost.on_post">
-<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricDataPost.on_post" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.MetricDataPost.on_post" title="Link to this definition"></a></dt>
 <dd><p>The /flux/metric_data_post endpoint is called via a POST with a json
 object as defined below, with the optional fill parameter to allow
 flux to backfill airgap data for a metric:</p>
@@ -293,11 +295,11 @@ flux to backfill airgap data for a metric:</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.listen.OTLPTracePost">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OTLPTracePost</span></span><a class="reference internal" href="_modules/flux/listen.html#OTLPTracePost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.OTLPTracePost" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OTLPTracePost</span></span><a class="reference internal" href="_modules/flux/listen.html#OTLPTracePost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.OTLPTracePost" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.listen.OTLPTracePost.on_post">
-<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#OTLPTracePost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.OTLPTracePost.on_post" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#OTLPTracePost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.OTLPTracePost.on_post" title="Link to this definition"></a></dt>
 <dd><p>The /flux/otlp/v1/trace endpoint is called via a POST with a content
 type of application/x-protobuf</p>
 </dd></dl>
@@ -306,11 +308,11 @@ type of application/x-protobuf</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.listen.VortexDataPost">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VortexDataPost</span></span><a class="reference internal" href="_modules/flux/listen.html#VortexDataPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexDataPost" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VortexDataPost</span></span><a class="reference internal" href="_modules/flux/listen.html#VortexDataPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexDataPost" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.listen.VortexDataPost.on_post">
-<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#VortexDataPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexDataPost.on_post" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#VortexDataPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexDataPost.on_post" title="Link to this definition"></a></dt>
 <dd><p>The /flux/vortex endpoint is called via a POST with a json
 object as defined below, with the optional fill parameter to allow
 flux to backfill airgap data for a metric:</p>
@@ -327,11 +329,14 @@ flux to backfill airgap data for a metric:</p>
         <span class="s2">&quot;spectral_residual&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;dbscan&quot;</span><span class="p">:</span> <span class="p">{},</span>
         <span class="s2">&quot;lof&quot;</span><span class="p">:</span> <span class="p">{},</span>
-    <span class="p">},</span>                                          <span class="c1"># optional</span>
+    <span class="p">},</span>                                             <span class="c1"># optional</span>
     <span class="s2">&quot;consensus&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="s2">&quot;sr&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="s2">&quot;matrixprofile&quot;</span><span class="p">]],</span>
-    <span class="s2">&quot;consensus_count&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                       <span class="c1"># optional</span>
+    <span class="s2">&quot;consensus_count&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>                           <span class="c1"># optional</span>
     <span class="s2">&quot;check_all_consensuses&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
-    <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="s2">&quot;a reference id for you|str&quot;</span>   <span class="c1"># optional</span>
+    <span class="s2">&quot;reference&quot;</span><span class="p">:</span> <span class="s2">&quot;a reference id for you|str&quot;</span><span class="p">,</span>      <span class="c1"># optional</span>
+    <span class="s2">&quot;csv_upload&quot;</span><span class="p">:</span> <span class="n">boolean</span><span class="p">,</span>                          <span class="c1"># optional</span>
+    <span class="s2">&quot;callback_url&quot;</span><span class="p">:</span> <span class="s2">&quot;a url to post the results to&quot;</span><span class="p">,</span>  <span class="c1"># optional</span>
+    <span class="s2">&quot;progress_url&quot;</span><span class="p">:</span> <span class="s2">&quot;a url to post the progress updates to&quot;</span><span class="p">,</span>  <span class="c1"># optional</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -351,11 +356,11 @@ flux to backfill airgap data for a metric:</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.listen.VortexResults">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VortexResults</span></span><a class="reference internal" href="_modules/flux/listen.html#VortexResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexResults" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">VortexResults</span></span><a class="reference internal" href="_modules/flux/listen.html#VortexResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexResults" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.listen.VortexResults.on_get">
-<span class="sig-name descname"><span class="pre">on_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#VortexResults.on_get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexResults.on_get" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#VortexResults.on_get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.listen.VortexResults.on_get" title="Link to this definition"></a></dt>
 <dd><p>The /flux/vortex_results endpoint is called via a GET with headers and a
 URI parameter of retries.</p>
 </dd></dl>
@@ -364,22 +369,22 @@ URI parameter of retries.</p>
 
 </section>
 <section id="module-flux.logger">
-<span id="skyline-flux-logger-module"></span><h2>skyline.flux.logger module<a class="headerlink" href="#module-flux.logger" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-logger-module"></span><h2>skyline.flux.logger module<a class="headerlink" href="#module-flux.logger" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.logger.set_up_logging">
-<span class="sig-name descname"><span class="pre">set_up_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/logger.html#set_up_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.logger.set_up_logging" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_up_logging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/logger.html#set_up_logging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.logger.set_up_logging" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-flux.populate_metric">
-<span id="skyline-flux-populate-metric-module"></span><h2>skyline.flux.populate_metric module<a class="headerlink" href="#module-flux.populate_metric" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-populate-metric-module"></span><h2>skyline.flux.populate_metric module<a class="headerlink" href="#module-flux.populate_metric" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.populate_metric.PopulateMetric">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateMetric</span></span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateMetric</span></span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.populate_metric.PopulateMetric.on_post">
-<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric.on_post" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric.on_post" title="Link to this definition"></a></dt>
 <dd><p>The endpoint is called via a POST with a json payload as defined in the
 payload variable in skyline/vista/fetcher.py</p>
 </dd></dl>
@@ -388,22 +393,22 @@ payload variable in skyline/vista/fetcher.py</p>
 
 </section>
 <section id="module-flux.populate_metric_worker">
-<span id="skyline-flux-populate-metric-worker-module"></span><h2>skyline.flux.populate_metric_worker module<a class="headerlink" href="#module-flux.populate_metric_worker" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-populate-metric-worker-module"></span><h2>skyline.flux.populate_metric_worker module<a class="headerlink" href="#module-flux.populate_metric_worker" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.populate_metric_worker.PopulateMetricWorker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateMetricWorker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateMetricWorker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The worker grabs metrics from the queue, surfaces the data from the remote
 Graphite and sends them to the Skyline Graphite.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.populate_metric_worker.PopulateMetricWorker.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -411,30 +416,30 @@ Graphite and sends them to the Skyline Graphite.</p>
 
 </section>
 <section id="module-flux.prometheus">
-<span id="skyline-flux-prometheus-module"></span><h2>skyline.flux.prometheus module<a class="headerlink" href="#module-flux.prometheus" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-prometheus-module"></span><h2>skyline.flux.prometheus module<a class="headerlink" href="#module-flux.prometheus" title="Link to this heading"></a></h2>
 <p>prometheus.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.prometheus.create_namespace_cardinality_count">
-<span class="sig-name descname"><span class="pre">create_namespace_cardinality_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#create_namespace_cardinality_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.create_namespace_cardinality_count" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_namespace_cardinality_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#create_namespace_cardinality_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.create_namespace_cardinality_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.prometheus.get_namespace_cardinality_count">
-<span class="sig-name descname"><span class="pre">get_namespace_cardinality_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#get_namespace_cardinality_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.get_namespace_cardinality_count" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_namespace_cardinality_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#get_namespace_cardinality_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.get_namespace_cardinality_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="flux.prometheus.update_namespace_cardinality_count">
-<span class="sig-name descname"><span class="pre">update_namespace_cardinality_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#update_namespace_cardinality_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.update_namespace_cardinality_count" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_namespace_cardinality_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#update_namespace_cardinality_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.update_namespace_cardinality_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.prometheus.PrometheusMetricDataPost">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PrometheusMetricDataPost</span></span><a class="reference internal" href="_modules/flux/prometheus.html#PrometheusMetricDataPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.PrometheusMetricDataPost" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PrometheusMetricDataPost</span></span><a class="reference internal" href="_modules/flux/prometheus.html#PrometheusMetricDataPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.PrometheusMetricDataPost" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.prometheus.PrometheusMetricDataPost.on_post">
-<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#PrometheusMetricDataPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.PrometheusMetricDataPost.on_post" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/prometheus.html#PrometheusMetricDataPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.prometheus.PrometheusMetricDataPost.on_post" title="Link to this definition"></a></dt>
 <dd><p>The /flux/prometheus/write endpoint is called via a POST with the
 Prometheus metric data.</p>
 </dd></dl>
@@ -442,23 +447,52 @@ Prometheus metric data.</p>
 </dd></dl>
 
 </section>
+<section id="module-flux.tornado">
+<span id="skyline-flux-tornado-module"></span><h2>skyline.flux.tornado module<a class="headerlink" href="#module-flux.tornado" title="Link to this heading"></a></h2>
+<p>tornado.py</p>
+<p>flux/tornado provides pre-loaded njit algorithms such as stump.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="flux.tornado.TornadoPost">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TornadoPost</span></span><a class="reference internal" href="_modules/flux/tornado.html#TornadoPost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.tornado.TornadoPost" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="flux.tornado.TornadoPost.on_post">
+<span class="sig-name descname"><span class="pre">on_post</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">req</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/tornado.html#TornadoPost.on_post"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.tornado.TornadoPost.on_post" title="Link to this definition"></a></dt>
+<dd><p>The /flux/tornado?algorithm=[algorithm] endpoint is called via a POST
+with a json object as shown below in the example.</p>
+<dl>
+<dt>For example::</dt><dd><dl class="simple">
+<dt>{</dt><dd><p>“key”: FLUX_SELF_API_KEY,
+“algorithm”: “stump”,
+“ts”: [timeseries_values_list],
+“m”: [windows],</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-flux.uploaded_data_worker">
-<span id="skyline-flux-uploaded-data-worker-module"></span><h2>skyline.flux.uploaded_data_worker module<a class="headerlink" href="#module-flux.uploaded_data_worker" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-uploaded-data-worker-module"></span><h2>skyline.flux.uploaded_data_worker module<a class="headerlink" href="#module-flux.uploaded_data_worker" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.uploaded_data_worker.UploadedDataWorker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UploadedDataWorker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UploadedDataWorker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The worker grabs data files from the <a class="reference internal" href="skyline.html#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a> and
 processes the data files and sends to data to Graphite.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.uploaded_data_worker.UploadedDataWorker.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -466,22 +500,22 @@ processes the data files and sends to data to Graphite.</p>
 
 </section>
 <section id="module-flux.worker">
-<span id="skyline-flux-worker-module"></span><h2>skyline.flux.worker module<a class="headerlink" href="#module-flux.worker" title="Permalink to this heading"></a></h2>
+<span id="skyline-flux-worker-module"></span><h2>skyline.flux.worker module<a class="headerlink" href="#module-flux.worker" title="Link to this heading"></a></h2>
 <p>worker.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="flux.worker.Worker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.worker.Worker" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.worker.Worker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The worker processes metric from the queue and sends them to Graphite.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.worker.Worker.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.worker.Worker.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="flux.worker.Worker.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.worker.Worker.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flux.worker.Worker.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -489,7 +523,7 @@ processes the data files and sends to data to Graphite.</p>
 
 </section>
 <section id="module-flux">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flux" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flux" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -504,7 +538,7 @@ processes the data files and sends to data to Graphite.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

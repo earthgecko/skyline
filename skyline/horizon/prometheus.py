@@ -40,6 +40,10 @@ from functions.graphite.send_graphite_metric import send_graphite_metric
 #                   Branch #4300: prometheus
 from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 
+# @added 20231223 - Task #5188: Optimise redis renames
+#                   Task #5178: Build and test skyline v4.1.0
+from functions.redis.redis_rename_key import redis_rename_key
+
 parent_skyline_app = 'horizon'
 child_skyline_app = 'prometheus'
 skyline_app_logger = '%sLog' % parent_skyline_app
@@ -309,6 +313,10 @@ class PrometheusMetrics(Process):
         # Probable insecure usage of temp file/directory (CWE-377)
         vm_send_data_jsonl_file = '%s/horizon.vm_send_data.jsonl' % settings.SKYLINE_TMP_DIR
 
+        # @added 20240315 - Task #5306: Implement pipelining with Redis
+        # Pipeline redis
+        pipe = None
+
         running = True
         while running:
 
@@ -360,13 +368,27 @@ class PrometheusMetrics(Process):
                     logger.info('horizon.prometheus :: checking for prometheus metrics submitted to flux')
                     new_key = 'flux.prometheus_metrics.%s' % str(current_run_ts)
                     try:
-                        self.redis_conn_decoded.rename('flux.prometheus_metrics', new_key)
+                        # @modified 20231223 - Task #5188: Optimise redis renames
+                        #                      Task #5178: Build and test skyline v4.1.0
+                        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                        # self.redis_conn_decoded.rename('flux.prometheus_metrics', new_key)
+                        redis_key_renamed = False
+                        try:
+                            redis_key_renamed = redis_rename_key(skyline_app, 'flux.prometheus_metrics', new_key, log=True)
+                        except Exception as err:
+                            logger.error('error :: redis_rename_key failed renaming flux.prometheus_metrics to %s, err: %s' % (str(new_key), err))
                     except Exception as err:
                         if str(err) == 'no such key':
                             logger.info('horizon.prometheus :: flux.prometheus_metrics set does not exist')
                         else:
                             logger.error('error :: horizon.prometheus :: failed to rename Redis set flux.prometheus_metrics to %s - %s' % (
                                 new_key, str(err)))
+                    # @added 20240104 - Task #5178: Build and test skyline v4.1.0
+                    #                   Feature #5192: skyline_graphite_metrics_single_submit
+                    try:
+                        self.redis_conn_decoded.set('flux.prometheus_metrics.last_key', new_key)
+                    except Exception as err:
+                        logger.error('error :: failed to set flux.prometheus_metrics.last_key to %s, err: %s' % (str(new_key), err))
 
                     # Manage global skip dicts
                     # global skip dict variables are created and updated when necessary
@@ -955,6 +977,11 @@ class PrometheusMetrics(Process):
                                     error_logged = True
                     vm_metrics_key = 'horizon.prometheus_metrics.to.victoriametrics.%s' % str(current_run_ts)
                     if victoriametrics_data_list:
+
+                        # @added 20240315 - Task #5306: Implement pipelining with Redis
+                        # Add run times
+                        start_send_to_vm = time()
+
                         try:
                             self.redis_conn_decoded.sadd(vm_metrics_key, str(victoriametrics_data_list))
                             self.redis_conn_decoded.expire(vm_metrics_key, 120)
@@ -986,22 +1013,55 @@ class PrometheusMetrics(Process):
                                 # @modified 20230107 - Task #4778: v4.0.0 - update dependencies
                                 # Address bandit B108:hardcoded_tmp_directory
                                 # r = requests.post(url, data=open('/tmp/skyline/horizon.vm_send_data.jsonl', 'rb'), headers=headers)
-                                r = requests.post(url, data=open(vm_send_data_jsonl_file, 'rb'), headers=headers)
+                                # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                                # Add timeout for bandit B113
+                                #r = requests.post(url, data=open(vm_send_data_jsonl_file, 'rb'), headers=headers)
+                                connect_timeout = 5
+                                read_timeout = 45
+                                use_timeout = (int(connect_timeout), int(read_timeout))
+                                r = requests.post(
+                                        url, data=open(vm_send_data_jsonl_file, 'rb'),
+                                        headers=headers, timeout=use_timeout)
+
                                 logger.info('horizon.prometheus :: sent %s metrics to victoriametrics with response code: %s' % (str(len(victoriametrics_data)), str(r.status_code)))
+
+                                # @added 20240101 - Task #5178: Build and test skyline v4.1.0
+                                # Add the missing submissions count
+                                metrics_submitted += len(victoriametrics_data)
+
                             except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: horizon.prometheus :: failed to send data to victoriametrics - %s' % (
                                     str(err)))
                         del victoriametrics_submissions
+
+                        # @added 20240315 - Task #5306: Implement pipelining with Redis
+                        # Add run time metrics
+                        sent_to_vm_runtime_metric_name = '%s.send_to_vm_runtime' % skyline_app_graphite_namespace
+                        sent_to_vm_runtime = (time() - start_send_to_vm)
+                        send_graphite_metric(self, skyline_app, sent_to_vm_runtime_metric_name, sent_to_vm_runtime)
+                        logger.info('horizon.prometheus :: %s: %s seconds' % (
+                            sent_to_vm_runtime_metric_name, str(sent_to_vm_runtime)))
+
                     logger.info('horizon.prometheus :: %s prometheus/victoriametrics in prom_to_vm_metrics_dict' % str(len(prom_to_vm_metrics_dict)))
+
 
                     del victoriametrics_data
                     del victoriametrics_data_list
+
+                    # @added 20240101 - Task #5178: Build and test skyline v4.1.0
+                    # Add sent_to_shard count
+                    sent_to_shard_count = 0
 
                     logger.info('horizon.prometheus :: %s metrics in shard_metrics_dict' % str(len(shard_metrics_dict)))
                     other_shard_submissions = []
                     # if other_shard_metrics and DEVELOPMENT:
                     if other_shard_metrics:
+
+                        # @added 20240315 - Task #5306: Implement pipelining with Redis
+                        # Add run time metrics
+                        start_send_to_shards = time()
+
                         # What would you do here, how to send to other shards
                         # send to other flux on flux/prometheus/write as json with
                         # horizon-shard header
@@ -1060,17 +1120,36 @@ class PrometheusMetrics(Process):
                                         }
                                         # Compress payload
                                         # r = requests.post(url, data=json.dumps(flux_horizon_dict), headers=headers)
-                                        r = requests.post(url, data=payload, headers=headers)
+                                        # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                                        # Add timeout for bandit B113
+                                        #r = requests.post(url, data=payload, headers=headers)
+                                        connect_timeout = 5
+                                        read_timeout = 45
+                                        use_timeout = (int(connect_timeout), int(read_timeout))
+                                        r = requests.post(url, data=payload, headers=headers, timeout=use_timeout)
+
                                         logger.info('horizon.prometheus :: sent %s metrics to %s for shard %s with response code: %s' % (
                                             str(len(other_shard_submission)),
                                             url, str(shard_number),
                                             str(r.status_code)))
+
+                                        # @added 20240101 - Task #5178: Build and test skyline v4.1.0
+                                        # Add sent_to_shard count
+                                        sent_to_shard_count += len(other_shard_submission)
+
                                     except Exception as err:
                                         logger.error('error :: horizon.prometheus :: failed to send data to %s - %s' % (
                                             url, str(err)))
                                 logger.info('horizon.prometheus :: sent %s metrics shard %s' % (
                                     str(len(other_shard_metrics[shard_number])),
                                     str(shard_number)))
+                        # @added 20240315 - Task #5306: Implement pipelining with Redis
+                        # Add run time metrics
+                        sent_to_shards_runtime_metric_name = '%s.send_to_shards_runtime' % skyline_app_graphite_namespace
+                        sent_to_shards_runtime = (time() - start_send_to_shards)
+                        send_graphite_metric(self, skyline_app, sent_to_shards_runtime_metric_name, sent_to_shards_runtime)
+                        logger.info('horizon.prometheus :: %s: %s seconds' % (
+                            sent_to_shards_runtime_metric_name, str(sent_to_shards_runtime)))
 
                     del other_shard_metrics
                     del other_shard_submissions
@@ -1133,6 +1212,26 @@ class PrometheusMetrics(Process):
                     metrics_with_unknown_id = []
                     metrics_with_id_found_in_db = {}
                     updated_global_metrics_with_id_dict_count = 0
+
+                    # @added 20240315 - Task #5306: Implement pipelining with Redis
+                    # Add run time metrics
+                    start_send_to_redis = time()
+                    piped_metrics = []
+                    # Pipeline redis
+                    while not pipe:
+                        try:
+                            pipe = self.redis_conn_decoded.pipeline()
+                        except Exception as err:
+                            logger.error('error :: horizon.prometheus :: pipeline failed, err: %s' % err)
+                            sleep(1)
+                            # Do not stay in this loop if the processing period
+                            # is coming to an end just continue which will allow
+                            # for the slow method to work or fail and allow for
+                            # the next batch of metrics to be processed in terms
+                            # of at least sending to VM and shards
+                            if (time() + 20) > next_run_ts:
+                                logger.error('error :: horizon.prometheus :: pipeline not available, continuing')
+                                break
 
                     for item in aggregated_metrics_data_list:
                         try:
@@ -1219,29 +1318,50 @@ class PrometheusMetrics(Process):
                                 # @added 20230626 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
                                 #                   Task #4962: Build and test skyline v4.0.0
                                 # https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478
-                                warn_on_labels = False
+                                # @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+                                # warn_on_labels = False
 
                                 for key in list(labels_.keys()):
                                     # @added 20230626 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
                                     #                   Task #4962: Build and test skyline v4.0.0
                                     # https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478
-                                    if key == 'tags':
-                                        if ',' in labels_[key]:
-                                            value_str = labels_[key]
-                                            new_value_str = value_str.replace(',', ' ')
-                                            logger.warning('warning :: horizon.prometheus :: changing tags key value from %s to %s on %s' % (
-                                                str(value_str), new_value_str, str(labels)))
-                                            labels_[key] = new_value_str
-                                            warn_on_labels = True
+                                    # @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+                                    # As per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478#issuecomment-1619986873
+                                    # label values with commas need to be in parenthesis
+                                    #if key == 'tags':
+                                    value_str = labels_[key]
+                                    if ',' in value_str:
+                                        # @modified 20230705 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+                                        # Now as per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478#issuecomment-1621234187
+                                        # label values with commas need to be replaced
+                                        # if not value_str.startswith('(') and not value_str.endswith(')'):
+                                        #     value_str = '(%s)' % value_str
+                                        value_str = value_str.replace(',', '_')
+                                        # warn_on_labels = True
+                                    # labels[key] = labels_[key]
 
-                                    labels[key] = labels_[key]
+                                    # @added 20231221 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+                                    #                   Task #5186: analyzer_labelled_metrics - handle high frequency
+                                    #                   Task #5178: Build and test skyline v4.1.0
+                                    # Again as per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478
+                                    # no parentheses and no cause="encoding" labels...
+                                    if '(' in value_str:
+                                        value_str = value_str.replace('(', '[')
+                                    if ')' in value_str:
+                                        value_str = value_str.replace(')', ']')
+                                    if key == 'cause':
+                                        if 'encoding' in value_str:
+                                            value_str = value_str.replace('encoding', '_encoding')
+
+                                    labels[key] = value_str
 
                                 # @added 20230626 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
                                 #                   Task #4962: Build and test skyline v4.0.0
                                 # https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478
-                                if warn_on_labels:
-                                    logger.warning('warning :: horizon.prometheus :: changing tags on %s' % (
-                                        str(labels_)))
+                                # @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+                                # if warn_on_labels:
+                                #     logger.warning('warning :: horizon.prometheus :: changing tags on %s' % (
+                                #        str(labels_)))
 
                             except Exception as err:
                                 err_str = 'labels err - %s' % str(err)
@@ -1260,7 +1380,13 @@ class PrometheusMetrics(Process):
                                 timestamp_ms = int(timestamp) * 1000
                                 inserted = 0
                                 try:
-                                    inserted = self.redis_conn_decoded.ts().add(redis_ts_key, timestamp_ms, value, retention_msecs=retention_msecs, labels=labels, chunk_size=128, duplicate_policy='first')
+                                    # @modified 20240315 - Task #5306: Implement pipelining with Redis
+                                    # Pipeline redis
+                                    if not pipe:
+                                        inserted = self.redis_conn_decoded.ts().add(redis_ts_key, timestamp_ms, value, retention_msecs=retention_msecs, labels=labels, chunk_size=128, duplicate_policy='first')
+                                    else:
+                                        inserted = pipe.ts().add(redis_ts_key, timestamp_ms, value, retention_msecs=retention_msecs, labels=labels, chunk_size=128, duplicate_policy='first')
+                                        piped_metrics.append(metric)
                                     labelled_metrics.append(redis_ts_key)
                                 except Exception as err:
                                     if "TSDB: Couldn't parse LABELS" in str(err):
@@ -1274,6 +1400,58 @@ class PrometheusMetrics(Process):
                                     inserted_count += 1
                         except Exception as err:
                             redis_timeseries_errors.append(['process error', item, err])
+
+                    # @modified 20240315 - Task #5306: Implement pipelining with Redis
+                    # Pipeline redis
+                    if pipe:
+                        pipe_results = []
+                        try:
+                            # Use raise_on_error=False otherwise any error will
+                            # result in a ResponseError returning for only the
+                            # first error and the pipe_results will only have
+                            # a single entry.  When raise_on_error=False is set
+                            # the error is added to the pipe return array rather
+                            # along with a timestamp for each success, e.g.
+                            # [1710503179000,
+                            #  1710503180000,
+                            #  1710503181000,
+                            #  redis.exceptions.ResponseError("TSDB: Couldn't parse LABELS"),
+                            #  1710503182000]
+                            pipe_results = pipe.execute(raise_on_error=False)
+                            logger.info('horizon.prometheus :: executed pipe and recieved %s results' % str(len(pipe_results)))
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: horizon.prometheus :: pipe.execute failed, err: %s' % (
+                                str(err)))
+                        if pipe_results:
+                            # Check for errors
+                            unsuccessful_pipe_results = [value for value in pipe_results if not isinstance(value, int)]
+                            errors_dict = {}
+                            if len(unsuccessful_pipe_results) > 0:
+                                logger.error('error :: horizon.prometheus :: %s errors reported in pipe_results, adding to Redis' % (
+                                    str(len(unsuccessful_pipe_results))))
+                                for index, value in enumerate(pipe_results):
+                                    if not isinstance(value, int):
+                                        labelled_metric = 'none'
+                                        metric = None
+                                        try:
+                                            labelled_metric = labelled_metrics[index]
+                                            metric = piped_metrics[index]
+                                        except:
+                                            pass
+                                        err_data = {'metric': metric, 'err': value}
+                                        errors_dict[labelled_metric] = str(err_data)
+                            if len(errors_dict) > 0:
+                                redis_errors_key = 'horizon.prometheus.pipe_errors.%s' % str(now_ts)
+                                try:
+                                    self.redis_conn_decoded.hset(redis_errors_key, mapping=errors_dict)
+                                    self.redis_conn_decoded.expire(redis_errors_key, 300)
+                                except Exception as err:
+                                    logger.error('error :: horizon.prometheus :: hset failed on %s, err: %s' % (
+                                        redis_errors_key, str(err)))
+                                logger.info('horizon.prometheus :: added %s errors Redis hash %s with 300 seconds expiry' % (
+                                    str(len(errors_dict)), redis_errors_key))
+
                     end_insert = timer()
                     logger.info('horizon.prometheus :: inserted %s entries into redistimeseries with %s errors, %s warnings in %.6f seconds' % (
                         str(inserted_count), str(len(redis_timeseries_errors)),
@@ -1282,6 +1460,14 @@ class PrometheusMetrics(Process):
                     if redis_timeseries_errors:
                         logger.error('error :: horizon.prometheus :: last 3 redistimeseries errors: %s' % (
                             str(redis_timeseries_errors[-3:])))
+
+                    # @added 20240315 - Task #5306: Implement pipelining with Redis
+                    # Add run time metrics
+                    sent_to_redis_runtime_metric_name = '%s.sent_to_redis_runtime' % skyline_app_graphite_namespace
+                    sent_to_redis_runtime = (time() - start_send_to_redis)
+                    send_graphite_metric(self, skyline_app, sent_to_redis_runtime_metric_name, sent_to_redis_runtime)
+                    logger.info('horizon.prometheus :: %s: %s seconds' % (
+                        sent_to_redis_runtime_metric_name, str(sent_to_redis_runtime)))
 
                     logger.info('horizon.prometheus :: dropped %s timeseries due to no metric id known' % (
                         str(no_id_keys)))
@@ -1370,6 +1556,21 @@ class PrometheusMetrics(Process):
                     send_graphite_metric(self, skyline_app, flux_prometheus_received_metric_name, flux_prometheus_received)
 
                     logger.info('horizon.prometheus :: flux received %s prometheus entries' % str(flux_prometheus_received))
+
+                    # @added 20240101 - Task #5178: Build and test skyline v4.1.0
+                    # Add sent_to_shard count
+                    if number_of_horizon_shards:
+                        sent_to_shard_metric_name = '%s.sent_to_shards' % skyline_app_graphite_namespace
+                        send_graphite_metric(self, skyline_app, sent_to_shard_metric_name, sent_to_shard_count)
+                        logger.info('horizon.prometheus :: %s metrics sent_to_shards' % str(sent_to_shard_count))
+
+                    # @added 20240315 - Task #5306: Implement pipelining with Redis
+                    # Add run time metrics
+                    runtime_metric_name = '%s.runtime' % skyline_app_graphite_namespace
+                    runtime = (time() - now_ts)
+                    send_graphite_metric(self, skyline_app, runtime_metric_name, runtime)
+                    logger.info('horizon.prometheus :: %s: %s seconds' % (
+                        runtime_metric_name, str(runtime)))
 
                     logger.info('horizon.prometheus :: took %.6f seconds to process flux.prometheus_metrics' % (
                         (time() - now_ts)))

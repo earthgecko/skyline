@@ -69,7 +69,7 @@ the end of this page.
 What the components do
 ----------------------
 
-- Graphite - is a timeseries database (TSDB) that receives metrics for machines
+- Graphite - is a time series database (TSDB) that receives metrics for machines
   and applications, stores the metric data and sends the metric data to the
   Skyline Horizon app via a pickle (Python object serialization).  Graphite is a
   separate application that will probably be running on another server in a
@@ -125,21 +125,23 @@ the ``settings.py``.
 Ouickstart - Dawn
 -----------------
 
-- `utils/dawn/skyline.dawn.sh` is a set up script to deploy a standalone Skyline
-  and Graphite instance, it is for testing purposes and if used to deploy a
-  permanent instance the recommendations regarding security and configuration
-  should be followed, see `Dawn <development/dawn.html>`__ section.
-- Or if you just wish to review the build steps, component builds and installs
-  described below, the steps of the build script steps are described in
-  `Dawn <development/dawn.html>`__ section.
+`utils/dawn/skyline.dawn.sh` is a set up script to deploy a standalone Skyline
+and Graphite instance (and Prometheus and VictoriaMetrics, telegraf and
+node_exporter if you elect to install them), it is for testing purposes and
+if used to deploy a permanent instance the recommendations regarding security
+and configuration should be followed.  If you want to use the quickstart script
+go to the `Dawn <development/dawn.html>`__ section.
 
 Manual Installation
 -------------------
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-3.8.17 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-3.10.15 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
+  Although the below manually steps should cover everything all builds done now
+  use the `utils/dawn/skyline.dawn.sh` script so if there is anything missing
+  below it will be in the script. If you have any issues look there.
 
 Considering Skyline is composed on a number of common open source applications
 the manual installation described here does not cover installing these
@@ -156,7 +158,7 @@ Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
 - The first part of the installation is to build Python and create a
-  Python-3.8.17 virtualenv for Skyline to run in.  For this first step in the
+  Python-3.10.15 virtualenv for Skyline to run in.  For this first step in the
   installation process see and follow the steps laid out in
   `Running Skyline in a Python virtualenv <running-in-python-virtualenv.html>`__
 
@@ -197,6 +199,12 @@ Redis
 - Install Redis - see `Redis.io <https://redis.io/>`__ or Redis Stack Server (see
   `Redis.io Redis Stack Server <https://redis.io/docs/stack/get-started/>`__) if
   you want to handle labelled metrics, like InfluxDB or Prometheus metrics.
+- As of Skyline v4.1.0 with the move to CentOS Stream 9 only Redis Stack Server
+  is being supported moving forward.  Skyline v4.0.0 allows for the use of
+  redis-stack-server.6.2.6 but Skyline v4.1.0 and CentOS Stream 9 must run
+  redis-stack-server.7.2.0 due to redis.io not providing binary packages of
+  redis-stack-server.6.2.6 for rhel9, only redis-stack-server.7.2.0 packages are
+  available for rhel9.
 - Note Redis is a primary component of Skyline and if you choose to install Redis
   via yum/dnf or apt using the Redis packages.redis.io repos these can often
   provide release candidate (RC) packages.  It is advisable to use a stable
@@ -246,6 +254,7 @@ Skyline directories
     mkdir -p /opt/skyline/crucible/data
     mkdir -p /opt/skyline/ionosphere/check
     mkdir -p /opt/skyline/flux/processed_uploads
+    mkdir -p /opt/skyline/vista
     mkdir /etc/skyline
     mkdir /tmp/skyline
 
@@ -263,6 +272,7 @@ Skyline directories
     chown -R skyline:skyline /opt/skyline/crucible
     chown -R skyline:skyline /opt/skyline/ionosphere
     chown -R skyline:skyline /opt/skyline/flux
+    chown -R skyline:skyline /opt/skyline/vista
     chown skyline:skyline /tmp/skyline
 
 Skyline and dependencies install
@@ -285,7 +295,7 @@ Skyline and dependencies install
     chown skyline:skyline -R /opt/skyline/github/skyline/skyline/webapp/static/dump
 
 
-- Once again using the Python-3.8.17 virtualenv,  install the requirements using
+- Once again using the Python-3.10.15 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -302,7 +312,7 @@ Skyline and dependencies install
 
     PYTHON_MAJOR_VERSION="3"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3817"
+    PROJECT="skyline-py31015"
 
     # Ensure a symlink exists to the virtualenv
     ln -sf "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" "${PYTHON_VIRTUALENV_DIR}/projects/skyline"
@@ -317,9 +327,9 @@ Skyline and dependencies install
     # to fix it https://pagure.io/python-daemon/pull-requests), however will not be
     # as runner is to be deprecated, so in the future an alternative solution will be
     # implemented
-    cp "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py.bak"
+    cp "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.10/site-packages/daemon/runner.py" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py.bak"
     # Show minor change related to unbuffered bytes I/O - w+t to wb+
-    diff "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py.bak" /opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py
+    diff "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.10/site-packages/daemon/runner.py.bak" /opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py
     # Deploy patched version to fix
     cat /opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py > "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py"
 
@@ -536,6 +546,12 @@ Starting and testing the Skyline installation
 
     # For any services you start remember to issue
     # systemctl enable <SERVICE>
+
+
+.. note:: Ensure you have crons that run a few minutes after midnight to restart
+    the following services which have multiprocessing workers that do not change
+    the log file pointer when TimedRotatingFileHandler rolls the log files at
+    midnight.  webapp, flux, horizon and vista.
 
 
 - Check the log files to ensure things started OK and are running and there are

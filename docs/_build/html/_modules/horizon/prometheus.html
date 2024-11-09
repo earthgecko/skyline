@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>horizon.prometheus &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>horizon.prometheus &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -164,6 +164,10 @@
 <span class="c1"># @added 20230123 - Task #2732: Prometheus to Skyline</span>
 <span class="c1">#                   Branch #4300: prometheus</span>
 <span class="kn">from</span> <span class="nn">functions.database.queries.get_all_db_metric_names</span> <span class="kn">import</span> <span class="n">get_all_db_metric_names</span>
+
+<span class="c1"># @added 20231223 - Task #5188: Optimise redis renames</span>
+<span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+<span class="kn">from</span> <span class="nn">functions.redis.redis_rename_key</span> <span class="kn">import</span> <span class="n">redis_rename_key</span>
 
 <span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;horizon&#39;</span>
 <span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;prometheus&#39;</span>
@@ -255,117 +259,173 @@
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="create_global_reload_skip_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_reload_skip_dict">[docs]</a><span class="k">def</span> <span class="nf">create_global_reload_skip_dict</span><span class="p">():</span>
+<div class="viewcode-block" id="create_global_reload_skip_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_reload_skip_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">create_global_reload_skip_dict</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; skip_dict in shared memory &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">global_reload_skip_dict</span>
     <span class="n">global_reload_skip_dict</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
-<div class="viewcode-block" id="get_global_reload_skip_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_reload_skip_dict">[docs]</a><span class="k">def</span> <span class="nf">get_global_reload_skip_dict</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_global_reload_skip_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_reload_skip_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_reload_skip_dict</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Reload shared memory skip_dict &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">global_reload_skip_dict</span></div>
 
 
-<div class="viewcode-block" id="update_global_reload_skip_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_reload_skip_dict">[docs]</a><span class="k">def</span> <span class="nf">update_global_reload_skip_dict</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_global_reload_skip_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_reload_skip_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">update_global_reload_skip_dict</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Update shared memory skip_dict &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">global_reload_skip_dict</span>
     <span class="n">global_reload_skip_dict</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">return</span> <span class="n">global_reload_skip_dict</span></div>
 
 
+
 <span class="n">create_global_reload_skip_dict</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="create_global_skip_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_skip_dict">[docs]</a><span class="k">def</span> <span class="nf">create_global_skip_dict</span><span class="p">():</span>
+<div class="viewcode-block" id="create_global_skip_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_skip_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">create_global_skip_dict</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">global_skip_dict</span>
     <span class="n">global_skip_dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
-<div class="viewcode-block" id="get_global_skip_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_skip_dict">[docs]</a><span class="k">def</span> <span class="nf">get_global_skip_dict</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_global_skip_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_skip_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_skip_dict</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">global_skip_dict</span></div>
 
 
-<div class="viewcode-block" id="update_global_skip_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_skip_dict">[docs]</a><span class="k">def</span> <span class="nf">update_global_skip_dict</span><span class="p">(</span><span class="n">skip_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_global_skip_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_skip_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">update_global_skip_dict</span><span class="p">(</span><span class="n">skip_dict</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">global_skip_dict</span>
     <span class="n">global_skip_dict</span> <span class="o">=</span> <span class="n">skip_dict</span>
     <span class="k">return</span> <span class="n">global_skip_dict</span></div>
 
 
+
 <span class="n">create_global_skip_dict</span><span class="p">()</span>
 
-<div class="viewcode-block" id="create_global_prom_to_vm_metrics_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_prom_to_vm_metrics_dict">[docs]</a><span class="k">def</span> <span class="nf">create_global_prom_to_vm_metrics_dict</span><span class="p">():</span>
+<div class="viewcode-block" id="create_global_prom_to_vm_metrics_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_prom_to_vm_metrics_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">create_global_prom_to_vm_metrics_dict</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">global_prom_to_vm_metrics_dict</span>
     <span class="n">global_prom_to_vm_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
-<div class="viewcode-block" id="get_global_prom_to_vm_metrics_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_prom_to_vm_metrics_dict">[docs]</a><span class="k">def</span> <span class="nf">get_global_prom_to_vm_metrics_dict</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_global_prom_to_vm_metrics_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_prom_to_vm_metrics_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_prom_to_vm_metrics_dict</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">global_prom_to_vm_metrics_dict</span></div>
 
 
-<div class="viewcode-block" id="update_global_prom_to_vm_metrics_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_prom_to_vm_metrics_dict">[docs]</a><span class="k">def</span> <span class="nf">update_global_prom_to_vm_metrics_dict</span><span class="p">(</span><span class="n">prom_to_vm_metrics_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_global_prom_to_vm_metrics_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_prom_to_vm_metrics_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">update_global_prom_to_vm_metrics_dict</span><span class="p">(</span><span class="n">prom_to_vm_metrics_dict</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">global_prom_to_vm_metrics_dict</span>
     <span class="n">global_prom_to_vm_metrics_dict</span> <span class="o">=</span> <span class="n">prom_to_vm_metrics_dict</span>
     <span class="k">return</span> <span class="n">global_prom_to_vm_metrics_dict</span></div>
 
 
+
 <span class="n">create_global_prom_to_vm_metrics_dict</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="create_global_shard_metrics_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_shard_metrics_dict">[docs]</a><span class="k">def</span> <span class="nf">create_global_shard_metrics_dict</span><span class="p">():</span>
+<div class="viewcode-block" id="create_global_shard_metrics_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_shard_metrics_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">create_global_shard_metrics_dict</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">global_shard_metrics_dict</span>
     <span class="n">global_shard_metrics_dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
-<div class="viewcode-block" id="get_global_shard_metrics_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_shard_metrics_dict">[docs]</a><span class="k">def</span> <span class="nf">get_global_shard_metrics_dict</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_global_shard_metrics_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_shard_metrics_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_shard_metrics_dict</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">global_shard_metrics_dict</span></div>
 
 
-<div class="viewcode-block" id="update_global_shard_metrics_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_shard_metrics_dict">[docs]</a><span class="k">def</span> <span class="nf">update_global_shard_metrics_dict</span><span class="p">(</span><span class="n">prom_to_vm_metrics_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_global_shard_metrics_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_shard_metrics_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">update_global_shard_metrics_dict</span><span class="p">(</span><span class="n">prom_to_vm_metrics_dict</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">global_shard_metrics_dict</span>
     <span class="n">global_shard_metrics_dict</span> <span class="o">=</span> <span class="n">prom_to_vm_metrics_dict</span>
     <span class="k">return</span> <span class="n">global_shard_metrics_dict</span></div>
 
 
+
 <span class="n">create_global_shard_metrics_dict</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="create_global_metrics_type_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_metrics_type_dict">[docs]</a><span class="k">def</span> <span class="nf">create_global_metrics_type_dict</span><span class="p">():</span>
+<div class="viewcode-block" id="create_global_metrics_type_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_metrics_type_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">create_global_metrics_type_dict</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">global_metrics_type_dict</span>
     <span class="n">global_metrics_type_dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
-<div class="viewcode-block" id="get_global_metrics_type_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_metrics_type_dict">[docs]</a><span class="k">def</span> <span class="nf">get_global_metrics_type_dict</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_global_metrics_type_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_metrics_type_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_metrics_type_dict</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">global_metrics_type_dict</span></div>
 
 
-<div class="viewcode-block" id="update_global_metrics_type_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_metrics_type_dict">[docs]</a><span class="k">def</span> <span class="nf">update_global_metrics_type_dict</span><span class="p">(</span><span class="n">metrics_type_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_global_metrics_type_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_metrics_type_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">update_global_metrics_type_dict</span><span class="p">(</span><span class="n">metrics_type_dict</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">global_metrics_type_dict</span>
     <span class="n">global_metrics_type_dict</span> <span class="o">=</span> <span class="n">metrics_type_dict</span>
     <span class="k">return</span> <span class="n">global_metrics_type_dict</span></div>
 
 
+
 <span class="n">create_global_metrics_type_dict</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="create_global_metrics_with_id_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_metrics_with_id_dict">[docs]</a><span class="k">def</span> <span class="nf">create_global_metrics_with_id_dict</span><span class="p">():</span>
+<div class="viewcode-block" id="create_global_metrics_with_id_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.create_global_metrics_with_id_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">create_global_metrics_with_id_dict</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">global_metrics_with_id_dict</span>
     <span class="n">global_metrics_with_id_dict</span> <span class="o">=</span> <span class="p">{}</span></div>
 
 
-<div class="viewcode-block" id="get_global_metrics_with_id_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_metrics_with_id_dict">[docs]</a><span class="k">def</span> <span class="nf">get_global_metrics_with_id_dict</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_global_metrics_with_id_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.get_global_metrics_with_id_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">get_global_metrics_with_id_dict</span><span class="p">():</span>
     <span class="k">return</span> <span class="n">global_metrics_with_id_dict</span></div>
 
 
-<div class="viewcode-block" id="update_global_metrics_with_id_dict"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_metrics_with_id_dict">[docs]</a><span class="k">def</span> <span class="nf">update_global_metrics_with_id_dict</span><span class="p">(</span><span class="n">metrics_with_id_dict</span><span class="p">):</span>
+
+<div class="viewcode-block" id="update_global_metrics_with_id_dict">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.update_global_metrics_with_id_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">update_global_metrics_with_id_dict</span><span class="p">(</span><span class="n">metrics_with_id_dict</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">global_metrics_with_id_dict</span>
     <span class="n">global_metrics_with_id_dict</span> <span class="o">=</span> <span class="n">metrics_with_id_dict</span>
     <span class="k">return</span> <span class="n">global_metrics_with_id_dict</span></div>
 
 
+
 <span class="n">create_global_metrics_with_id_dict</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="PrometheusMetrics"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics">[docs]</a><span class="k">class</span> <span class="nc">PrometheusMetrics</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+<div class="viewcode-block" id="PrometheusMetrics">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics">[docs]</a>
+<span class="k">class</span> <span class="nc">PrometheusMetrics</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The PrometheusMetrics process is responsible for getting metrics submitted</span>
 <span class="sd">    to flux from the flux.prometheus_metrics Redis hash set and adding them to</span>
@@ -379,7 +439,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PrometheusMetrics.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PrometheusMetrics.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -391,7 +453,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent or current process dead&#39;</span><span class="p">)</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="PrometheusMetrics.metric_in_shard"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.metric_in_shard">[docs]</a>    <span class="k">def</span> <span class="nf">metric_in_shard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PrometheusMetrics.metric_in_shard">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.metric_in_shard">[docs]</a>
+    <span class="k">def</span> <span class="nf">metric_in_shard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if the metric belongs to the Horizon instance shard.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -406,7 +471,10 @@
             <span class="k">if</span> <span class="n">modulo_result</span> <span class="o">==</span> <span class="n">shard_number</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">shard_number</span></div>
 
-<div class="viewcode-block" id="PrometheusMetrics.submit_PrometheusMetrics"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.submit_PrometheusMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">submit_PrometheusMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PrometheusMetrics.submit_PrometheusMetrics">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.submit_PrometheusMetrics">[docs]</a>
+    <span class="k">def</span> <span class="nf">submit_PrometheusMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get Prometheus metrics from the Redis flux.prometheus_metrics set every</span>
 <span class="sd">        60 seconds, aggregated them to 60 seconds and submit them to Redis.</span>
@@ -433,6 +501,10 @@
         <span class="c1"># Address bandit B108:hardcoded_tmp_directory, do not hardcoded tmp</span>
         <span class="c1"># Probable insecure usage of temp file/directory (CWE-377)</span>
         <span class="n">vm_send_data_jsonl_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/horizon.vm_send_data.jsonl&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span>
+
+        <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+        <span class="c1"># Pipeline redis</span>
+        <span class="n">pipe</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">while</span> <span class="n">running</span><span class="p">:</span>
@@ -485,13 +557,27 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: checking for prometheus metrics submitted to flux&#39;</span><span class="p">)</span>
                     <span class="n">new_key</span> <span class="o">=</span> <span class="s1">&#39;flux.prometheus_metrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_run_ts</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;flux.prometheus_metrics&#39;</span><span class="p">,</span> <span class="n">new_key</span><span class="p">)</span>
+                        <span class="c1"># @modified 20231223 - Task #5188: Optimise redis renames</span>
+                        <span class="c1">#                      Task #5178: Build and test skyline v4.1.0</span>
+                        <span class="c1"># Use rename_key function to mitigate cmd_stat.rename failed_calls</span>
+                        <span class="c1"># self.redis_conn_decoded.rename(&#39;flux.prometheus_metrics&#39;, new_key)</span>
+                        <span class="n">redis_key_renamed</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">redis_key_renamed</span> <span class="o">=</span> <span class="n">redis_rename_key</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="s1">&#39;flux.prometheus_metrics&#39;</span><span class="p">,</span> <span class="n">new_key</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: redis_rename_key failed renaming flux.prometheus_metrics to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_key</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no such key&#39;</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: flux.prometheus_metrics set does not exist&#39;</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: failed to rename Redis set flux.prometheus_metrics to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">new_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                    <span class="c1"># @added 20240104 - Task #5178: Build and test skyline v4.1.0</span>
+                    <span class="c1">#                   Feature #5192: skyline_graphite_metrics_single_submit</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;flux.prometheus_metrics.last_key&#39;</span><span class="p">,</span> <span class="n">new_key</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set flux.prometheus_metrics.last_key to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_key</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
 
                     <span class="c1"># Manage global skip dicts</span>
                     <span class="c1"># global skip dict variables are created and updated when necessary</span>
@@ -1080,6 +1166,11 @@
                                     <span class="n">error_logged</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">vm_metrics_key</span> <span class="o">=</span> <span class="s1">&#39;horizon.prometheus_metrics.to.victoriametrics.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_run_ts</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">victoriametrics_data_list</span><span class="p">:</span>
+
+                        <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                        <span class="c1"># Add run times</span>
+                        <span class="n">start_send_to_vm</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
                         <span class="k">try</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">vm_metrics_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">victoriametrics_data_list</span><span class="p">))</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">vm_metrics_key</span><span class="p">,</span> <span class="mi">120</span><span class="p">)</span>
@@ -1111,22 +1202,55 @@
                                 <span class="c1"># @modified 20230107 - Task #4778: v4.0.0 - update dependencies</span>
                                 <span class="c1"># Address bandit B108:hardcoded_tmp_directory</span>
                                 <span class="c1"># r = requests.post(url, data=open(&#39;/tmp/skyline/horizon.vm_send_data.jsonl&#39;, &#39;rb&#39;), headers=headers)</span>
-                                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">vm_send_data_jsonl_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">),</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+                                <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                <span class="c1"># Add timeout for bandit B113</span>
+                                <span class="c1">#r = requests.post(url, data=open(vm_send_data_jsonl_file, &#39;rb&#39;), headers=headers)</span>
+                                <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+                                <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">45</span>
+                                <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                                        <span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">vm_send_data_jsonl_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">),</span>
+                                        <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: sent </span><span class="si">%s</span><span class="s1"> metrics to victoriametrics with response code: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">victoriametrics_data</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+
+                                <span class="c1"># @added 20240101 - Task #5178: Build and test skyline v4.1.0</span>
+                                <span class="c1"># Add the missing submissions count</span>
+                                <span class="n">metrics_submitted</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">victoriametrics_data</span><span class="p">)</span>
+
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: failed to send data to victoriametrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
                         <span class="k">del</span> <span class="n">victoriametrics_submissions</span>
+
+                        <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                        <span class="c1"># Add run time metrics</span>
+                        <span class="n">sent_to_vm_runtime_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.send_to_vm_runtime&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                        <span class="n">sent_to_vm_runtime</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_send_to_vm</span><span class="p">)</span>
+                        <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">sent_to_vm_runtime_metric_name</span><span class="p">,</span> <span class="n">sent_to_vm_runtime</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">sent_to_vm_runtime_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_vm_runtime</span><span class="p">)))</span>
+
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1"> prometheus/victoriametrics in prom_to_vm_metrics_dict&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prom_to_vm_metrics_dict</span><span class="p">)))</span>
+
 
                     <span class="k">del</span> <span class="n">victoriametrics_data</span>
                     <span class="k">del</span> <span class="n">victoriametrics_data_list</span>
+
+                    <span class="c1"># @added 20240101 - Task #5178: Build and test skyline v4.1.0</span>
+                    <span class="c1"># Add sent_to_shard count</span>
+                    <span class="n">sent_to_shard_count</span> <span class="o">=</span> <span class="mi">0</span>
 
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1"> metrics in shard_metrics_dict&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shard_metrics_dict</span><span class="p">)))</span>
                     <span class="n">other_shard_submissions</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="c1"># if other_shard_metrics and DEVELOPMENT:</span>
                     <span class="k">if</span> <span class="n">other_shard_metrics</span><span class="p">:</span>
+
+                        <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                        <span class="c1"># Add run time metrics</span>
+                        <span class="n">start_send_to_shards</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
                         <span class="c1"># What would you do here, how to send to other shards</span>
                         <span class="c1"># send to other flux on flux/prometheus/write as json with</span>
                         <span class="c1"># horizon-shard header</span>
@@ -1185,17 +1309,36 @@
                                         <span class="p">}</span>
                                         <span class="c1"># Compress payload</span>
                                         <span class="c1"># r = requests.post(url, data=json.dumps(flux_horizon_dict), headers=headers)</span>
-                                        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+                                        <span class="c1"># @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                        <span class="c1"># Add timeout for bandit B113</span>
+                                        <span class="c1">#r = requests.post(url, data=payload, headers=headers)</span>
+                                        <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+                                        <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">45</span>
+                                        <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+                                        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+
                                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: sent </span><span class="si">%s</span><span class="s1"> metrics to </span><span class="si">%s</span><span class="s1"> for shard </span><span class="si">%s</span><span class="s1"> with response code: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                             <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">other_shard_submission</span><span class="p">)),</span>
                                             <span class="n">url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">shard_number</span><span class="p">),</span>
                                             <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+
+                                        <span class="c1"># @added 20240101 - Task #5178: Build and test skyline v4.1.0</span>
+                                        <span class="c1"># Add sent_to_shard count</span>
+                                        <span class="n">sent_to_shard_count</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other_shard_submission</span><span class="p">)</span>
+
                                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: failed to send data to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                             <span class="n">url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: sent </span><span class="si">%s</span><span class="s1"> metrics shard </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">other_shard_metrics</span><span class="p">[</span><span class="n">shard_number</span><span class="p">])),</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">shard_number</span><span class="p">)))</span>
+                        <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                        <span class="c1"># Add run time metrics</span>
+                        <span class="n">sent_to_shards_runtime_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.send_to_shards_runtime&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                        <span class="n">sent_to_shards_runtime</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_send_to_shards</span><span class="p">)</span>
+                        <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">sent_to_shards_runtime_metric_name</span><span class="p">,</span> <span class="n">sent_to_shards_runtime</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">sent_to_shards_runtime_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_shards_runtime</span><span class="p">)))</span>
 
                     <span class="k">del</span> <span class="n">other_shard_metrics</span>
                     <span class="k">del</span> <span class="n">other_shard_submissions</span>
@@ -1258,6 +1401,26 @@
                     <span class="n">metrics_with_unknown_id</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">metrics_with_id_found_in_db</span> <span class="o">=</span> <span class="p">{}</span>
                     <span class="n">updated_global_metrics_with_id_dict_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                    <span class="c1"># Add run time metrics</span>
+                    <span class="n">start_send_to_redis</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="n">piped_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># Pipeline redis</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="n">pipe</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: pipeline failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="c1"># Do not stay in this loop if the processing period</span>
+                            <span class="c1"># is coming to an end just continue which will allow</span>
+                            <span class="c1"># for the slow method to work or fail and allow for</span>
+                            <span class="c1"># the next batch of metrics to be processed in terms</span>
+                            <span class="c1"># of at least sending to VM and shards</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="mi">20</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">next_run_ts</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: pipeline not available, continuing&#39;</span><span class="p">)</span>
+                                <span class="k">break</span>
 
                     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">aggregated_metrics_data_list</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
@@ -1344,29 +1507,50 @@
                                 <span class="c1"># @added 20230626 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
                                 <span class="c1">#                   Task #4962: Build and test skyline v4.0.0</span>
                                 <span class="c1"># https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478</span>
-                                <span class="n">warn_on_labels</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="c1"># @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
+                                <span class="c1"># warn_on_labels = False</span>
 
                                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">labels_</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
                                     <span class="c1"># @added 20230626 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
                                     <span class="c1">#                   Task #4962: Build and test skyline v4.0.0</span>
                                     <span class="c1"># https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478</span>
-                                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;tags&#39;</span><span class="p">:</span>
-                                        <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">labels_</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
-                                            <span class="n">value_str</span> <span class="o">=</span> <span class="n">labels_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                                            <span class="n">new_value_str</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
-                                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: horizon.prometheus :: changing tags key value from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                                <span class="nb">str</span><span class="p">(</span><span class="n">value_str</span><span class="p">),</span> <span class="n">new_value_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">labels</span><span class="p">)))</span>
-                                            <span class="n">labels_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value_str</span>
-                                            <span class="n">warn_on_labels</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="c1"># @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
+                                    <span class="c1"># As per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478#issuecomment-1619986873</span>
+                                    <span class="c1"># label values with commas need to be in parenthesis</span>
+                                    <span class="c1">#if key == &#39;tags&#39;:</span>
+                                    <span class="n">value_str</span> <span class="o">=</span> <span class="n">labels_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                                    <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">value_str</span><span class="p">:</span>
+                                        <span class="c1"># @modified 20230705 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
+                                        <span class="c1"># Now as per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478#issuecomment-1621234187</span>
+                                        <span class="c1"># label values with commas need to be replaced</span>
+                                        <span class="c1"># if not value_str.startswith(&#39;(&#39;) and not value_str.endswith(&#39;)&#39;):</span>
+                                        <span class="c1">#     value_str = &#39;(%s)&#39; % value_str</span>
+                                        <span class="n">value_str</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+                                        <span class="c1"># warn_on_labels = True</span>
+                                    <span class="c1"># labels[key] = labels_[key]</span>
 
-                                    <span class="n">labels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">labels_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                                    <span class="c1"># @added 20231221 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
+                                    <span class="c1">#                   Task #5186: analyzer_labelled_metrics - handle high frequency</span>
+                                    <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+                                    <span class="c1"># Again as per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478</span>
+                                    <span class="c1"># no parentheses and no cause=&quot;encoding&quot; labels...</span>
+                                    <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">value_str</span><span class="p">:</span>
+                                        <span class="n">value_str</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="s1">&#39;)&#39;</span> <span class="ow">in</span> <span class="n">value_str</span><span class="p">:</span>
+                                        <span class="n">value_str</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;cause&#39;</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="s1">&#39;encoding&#39;</span> <span class="ow">in</span> <span class="n">value_str</span><span class="p">:</span>
+                                            <span class="n">value_str</span> <span class="o">=</span> <span class="n">value_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="s1">&#39;_encoding&#39;</span><span class="p">)</span>
+
+                                    <span class="n">labels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_str</span>
 
                                 <span class="c1"># @added 20230626 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
                                 <span class="c1">#                   Task #4962: Build and test skyline v4.0.0</span>
                                 <span class="c1"># https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478</span>
-                                <span class="k">if</span> <span class="n">warn_on_labels</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: horizon.prometheus :: changing tags on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                        <span class="nb">str</span><span class="p">(</span><span class="n">labels_</span><span class="p">)))</span>
+                                <span class="c1"># @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS</span>
+                                <span class="c1"># if warn_on_labels:</span>
+                                <span class="c1">#     logger.warning(&#39;warning :: horizon.prometheus :: changing tags on %s&#39; % (</span>
+                                <span class="c1">#        str(labels_)))</span>
 
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">err_str</span> <span class="o">=</span> <span class="s1">&#39;labels err - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
@@ -1385,7 +1569,13 @@
                                 <span class="n">timestamp_ms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
                                 <span class="n">inserted</span> <span class="o">=</span> <span class="mi">0</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="n">inserted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">ts</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">redis_ts_key</span><span class="p">,</span> <span class="n">timestamp_ms</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">retention_msecs</span><span class="o">=</span><span class="n">retention_msecs</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">duplicate_policy</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+                                    <span class="c1"># @modified 20240315 - Task #5306: Implement pipelining with Redis</span>
+                                    <span class="c1"># Pipeline redis</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="n">pipe</span><span class="p">:</span>
+                                        <span class="n">inserted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">ts</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">redis_ts_key</span><span class="p">,</span> <span class="n">timestamp_ms</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">retention_msecs</span><span class="o">=</span><span class="n">retention_msecs</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">duplicate_policy</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">inserted</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">ts</span><span class="p">()</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">redis_ts_key</span><span class="p">,</span> <span class="n">timestamp_ms</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">retention_msecs</span><span class="o">=</span><span class="n">retention_msecs</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">duplicate_policy</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+                                        <span class="n">piped_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
                                     <span class="n">labelled_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">redis_ts_key</span><span class="p">)</span>
                                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="s2">&quot;TSDB: Couldn&#39;t parse LABELS&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">):</span>
@@ -1399,6 +1589,58 @@
                                     <span class="n">inserted_count</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                             <span class="n">redis_timeseries_errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;process error&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+
+                    <span class="c1"># @modified 20240315 - Task #5306: Implement pipelining with Redis</span>
+                    <span class="c1"># Pipeline redis</span>
+                    <span class="k">if</span> <span class="n">pipe</span><span class="p">:</span>
+                        <span class="n">pipe_results</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Use raise_on_error=False otherwise any error will</span>
+                            <span class="c1"># result in a ResponseError returning for only the</span>
+                            <span class="c1"># first error and the pipe_results will only have</span>
+                            <span class="c1"># a single entry.  When raise_on_error=False is set</span>
+                            <span class="c1"># the error is added to the pipe return array rather</span>
+                            <span class="c1"># along with a timestamp for each success, e.g.</span>
+                            <span class="c1"># [1710503179000,</span>
+                            <span class="c1">#  1710503180000,</span>
+                            <span class="c1">#  1710503181000,</span>
+                            <span class="c1">#  redis.exceptions.ResponseError(&quot;TSDB: Couldn&#39;t parse LABELS&quot;),</span>
+                            <span class="c1">#  1710503182000]</span>
+                            <span class="n">pipe_results</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">raise_on_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: executed pipe and recieved </span><span class="si">%s</span><span class="s1"> results&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pipe_results</span><span class="p">)))</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: pipe.execute failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="n">pipe_results</span><span class="p">:</span>
+                            <span class="c1"># Check for errors</span>
+                            <span class="n">unsuccessful_pipe_results</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pipe_results</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)]</span>
+                            <span class="n">errors_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unsuccessful_pipe_results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: </span><span class="si">%s</span><span class="s1"> errors reported in pipe_results, adding to Redis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unsuccessful_pipe_results</span><span class="p">))))</span>
+                                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pipe_results</span><span class="p">):</span>
+                                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                                        <span class="n">labelled_metric</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+                                        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">labelled_metric</span> <span class="o">=</span> <span class="n">labelled_metrics</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                                            <span class="n">metric</span> <span class="o">=</span> <span class="n">piped_metrics</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                        <span class="n">err_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">metric</span><span class="p">,</span> <span class="s1">&#39;err&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+                                        <span class="n">errors_dict</span><span class="p">[</span><span class="n">labelled_metric</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">err_data</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors_dict</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">redis_errors_key</span> <span class="o">=</span> <span class="s1">&#39;horizon.prometheus.pipe_errors.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">now_ts</span><span class="p">)</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">hset</span><span class="p">(</span><span class="n">redis_errors_key</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">errors_dict</span><span class="p">)</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="n">redis_errors_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: hset failed on </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">redis_errors_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: added </span><span class="si">%s</span><span class="s1"> errors Redis hash </span><span class="si">%s</span><span class="s1"> with 300 seconds expiry&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">errors_dict</span><span class="p">)),</span> <span class="n">redis_errors_key</span><span class="p">))</span>
+
                     <span class="n">end_insert</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: inserted </span><span class="si">%s</span><span class="s1"> entries into redistimeseries with </span><span class="si">%s</span><span class="s1"> errors, </span><span class="si">%s</span><span class="s1"> warnings in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">inserted_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">redis_timeseries_errors</span><span class="p">)),</span>
@@ -1407,6 +1649,14 @@
                     <span class="k">if</span> <span class="n">redis_timeseries_errors</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: last 3 redistimeseries errors: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">redis_timeseries_errors</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])))</span>
+
+                    <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                    <span class="c1"># Add run time metrics</span>
+                    <span class="n">sent_to_redis_runtime_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_redis_runtime&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                    <span class="n">sent_to_redis_runtime</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_send_to_redis</span><span class="p">)</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">sent_to_redis_runtime_metric_name</span><span class="p">,</span> <span class="n">sent_to_redis_runtime</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">sent_to_redis_runtime_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_redis_runtime</span><span class="p">)))</span>
 
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: dropped </span><span class="si">%s</span><span class="s1"> timeseries due to no metric id known&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">no_id_keys</span><span class="p">)))</span>
@@ -1496,6 +1746,21 @@
 
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: flux received </span><span class="si">%s</span><span class="s1"> prometheus entries&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">flux_prometheus_received</span><span class="p">))</span>
 
+                    <span class="c1"># @added 20240101 - Task #5178: Build and test skyline v4.1.0</span>
+                    <span class="c1"># Add sent_to_shard count</span>
+                    <span class="k">if</span> <span class="n">number_of_horizon_shards</span><span class="p">:</span>
+                        <span class="n">sent_to_shard_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_shards&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                        <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">sent_to_shard_metric_name</span><span class="p">,</span> <span class="n">sent_to_shard_count</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1"> metrics sent_to_shards&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sent_to_shard_count</span><span class="p">))</span>
+
+                    <span class="c1"># @added 20240315 - Task #5306: Implement pipelining with Redis</span>
+                    <span class="c1"># Add run time metrics</span>
+                    <span class="n">runtime_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.runtime&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+                    <span class="n">runtime</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now_ts</span><span class="p">)</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">runtime_metric_name</span><span class="p">,</span> <span class="n">runtime</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">runtime_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">runtime</span><span class="p">)))</span>
+
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;horizon.prometheus :: took </span><span class="si">%.6f</span><span class="s1"> seconds to process flux.prometheus_metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now_ts</span><span class="p">)))</span>
 
@@ -1505,7 +1770,10 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: horizon.prometheus :: error in memray tracker block - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="PrometheusMetrics.run"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PrometheusMetrics.run">
+<a class="viewcode-back" href="../../skyline.horizon.html#horizon.prometheus.PrometheusMetrics.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1542,7 +1810,9 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: starting submit_PrometheusMetrics but no victoriametrics store to write to is known&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: starting submit_PrometheusMetrics&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">submit_PrometheusMetrics</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">submit_PrometheusMetrics</span><span class="p">()</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -1552,7 +1822,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

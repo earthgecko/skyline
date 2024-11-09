@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>custom_algorithms.spectral_entropy &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>custom_algorithms.spectral_entropy &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -153,7 +153,9 @@
 
 <span class="c1"># @added 20230614 - Feature #4950: custom_algorithm - spectral_entropy</span>
 <span class="c1"># https://gist.githubusercontent.com/ningja1/4cce99b29657bb19079faf3b2a550639/raw/c8b0b77c154d48328c94fd449d015950c53aefa4/spectral_entropy.py</span>
-<div class="viewcode-block" id="spectral_entropy"><a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.spectral_entropy.spectral_entropy">[docs]</a><span class="k">def</span> <span class="nf">spectral_entropy</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<div class="viewcode-block" id="spectral_entropy">
+<a class="viewcode-back" href="../../skyline.custom_algorithms.html#custom_algorithms.spectral_entropy.spectral_entropy">[docs]</a>
+<span class="k">def</span> <span class="nf">spectral_entropy</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Outlier detection for time-series data using Spectral Entropy.  EXPERIMENTAL</span>
@@ -171,20 +173,57 @@
 <span class="sd">    :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],</span>
 <span class="sd">        [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``</span>
 <span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
-<span class="sd">        custom_algorithm and algorithm itself.  Example:</span>
-<span class="sd">        &quot;algorithm_parameters&quot;: {</span>
-<span class="sd">            &quot;anomaly_window&quot;: 1,</span>
-<span class="sd">            &quot;window&quot;: 60,</span>
-<span class="sd">            &quot;frequency&quot;: 100,</span>
-<span class="sd">            &quot;max_low_entropy&quot;: 0.6,</span>
-<span class="sd">            &quot;return_results&quot;: True,</span>
-<span class="sd">        }</span>
+<span class="sd">        custom_algorithm and algorithm itself.  For the spectral_entropy</span>
+<span class="sd">        custom algorithm no specific algorithm_parameters are required apart</span>
+<span class="sd">        from an empty dict but the spectral_entropy algorithm_parameters</span>
+<span class="sd">        that can be passed are:</span>
+
+<span class="sd">        - ``&#39;anomaly_window&#39;`` (int): The anomaly_window value.</span>
+<span class="sd">            This specifies how many of the last data points should be considered</span>
+<span class="sd">            when determining if the metric is anomalous. Only the last</span>
+<span class="sd">            ``anomaly_window`` data points in the time series will be used to</span>
+<span class="sd">            determine if the metric is anomalous.  Default is ``1``.</span>
+<span class="sd">        - ``&#39;frequency&#39;`` (int): The sampling frequency of the x time series.</span>
+<span class="sd">            Default is ``100``.</span>
+<span class="sd">        - ``&#39;window&#39;`` (int): The rolling window.</span>
+<span class="sd">            How many data points in the rolling window.  Default is ``60``.</span>
+<span class="sd">        - ``&#39;max_low_entropy&#39;`` (float): The maximum low entropy value.</span>
+<span class="sd">            What is the maximum value that can be considered as low entropy?  If</span>
+<span class="sd">            the spectral_entropy value is not close to 0 then it is not</span>
+<span class="sd">            anomalous, but the range which could be considered low varies</span>
+<span class="sd">            somewhat.  Through experimentation and testing a general value of</span>
+<span class="sd">            0.6 has been determined to represent not anomalous behaviour in most</span>
+<span class="sd">            cases.  In fact it does very well at limiting the number of</span>
+<span class="sd">            anomalies that can be reported.  Default is ``0.6``.</span>
+<span class="sd">        - ``&#39;determine_frequency&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True`` the frequency is determined automatically from the time</span>
+<span class="sd">            series data. Default is ``False``.</span>
+<span class="sd">        - ``&#39;return_results&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, returns the results dict in addition to anomalous and</span>
+<span class="sd">            anomalyScore.  Default is ``False``.</span>
+<span class="sd">        - ``&#39;debug_logging&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, enables debug logging.</span>
+<span class="sd">        - ``&#39;debug_print&#39;`` (bool): Optional.</span>
+<span class="sd">            If ``True``, enables debug printing  (for Jupyter testing). Default</span>
+<span class="sd">            is ``False``.</span>
+
+<span class="sd">        Example usage:</span>
+<span class="sd">        </span>
+<span class="sd">            algorithm_parameters={</span>
+<span class="sd">                &#39;anomaly_window&#39;: 1,</span>
+<span class="sd">                &#39;window&#39;: 60,</span>
+<span class="sd">                &#39;determine_frequency&#39;: True,</span>
+<span class="sd">                &#39;max_low_entropy&#39;: 0.6,</span>
+<span class="sd">                &#39;debug_logging&#39;: True,</span>
+<span class="sd">                &#39;return_results&#39;: True,</span>
+<span class="sd">            }</span>
+
 <span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type parent_pid: int</span>
 <span class="sd">    :type timeseries: list</span>
 <span class="sd">    :type algorithm_parameters: dict</span>
 <span class="sd">    :return: anomalous, anomalyScore, results</span>
-<span class="sd">    :rtype: tuple(boolean, float, dict)</span>
+<span class="sd">    :rtype: tuple(bool, float, dict)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -196,8 +235,20 @@
     <span class="c1"># determines the data point is not anomalous.  The same is true for the</span>
     <span class="c1"># anomalyScore.</span>
     <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># A dict to add results to</span>
     <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># A list of binary results for each data point, either 1 == anomalous or</span>
+    <span class="c1"># 0 == not_anomalous.  This is not the algorithm score, just whether the</span>
+    <span class="c1"># algorithm determined the data point as anomalous or not.</span>
+    <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># A dict for anomalies</span>
+    <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># @added 20230707 - custom_algorithms - handle unreliable results</span>
+    <span class="c1"># To test the reliability of the result</span>
+    <span class="n">unreliable</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># A reason if unreliabile</span>
+    <span class="n">unreliable_reason</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
 
     <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -208,6 +259,13 @@
         <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">current_logger</span>
 
+    <span class="c1"># @added 20230717 - Feature #4950: custom_algorithm - spectral_entropy</span>
+    <span class="k">def</span> <span class="nf">get_resolution</span><span class="p">(</span><span class="n">np_timestamps_array</span><span class="p">):</span>
+        <span class="n">ts_diffs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np_timestamps_array</span><span class="p">)</span>
+        <span class="n">resolution_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ts_diffs</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="n">resolution_counts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">resolution_counts</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">return</span> <span class="n">resolution</span>
+
     <span class="c1"># https://gist.githubusercontent.com/ningja1/4cce99b29657bb19079faf3b2a550639/raw/c8b0b77c154d48328c94fd449d015950c53aefa4/spectral_entropy.py</span>
     <span class="c1"># https://towardsdatascience.com/anomaly-detection-in-univariate-stochastic-time-series-with-spectral-entropy-834b63ec9343</span>
     <span class="c1"># In favour of the antropy spectral_residual implementation</span>
@@ -215,7 +273,7 @@
     <span class="c1"># similar (probably the same) values.</span>
     <span class="k">def</span> <span class="nf">get_spectral_entropy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   
         <span class="n">_</span><span class="p">,</span> <span class="n">psd</span> <span class="o">=</span> <span class="n">periodogram</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="n">nfft</span><span class="p">)</span>   
-        <span class="c1"># calculate shannon entropy of normalized psd</span>
+        <span class="c1"># calculate shannon entropy of normalized power spectrum density</span>
         <span class="n">psd_norm</span> <span class="o">=</span> <span class="n">psd</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">psd</span><span class="p">)</span>
         <span class="n">entropy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">psd_norm</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">psd_norm</span><span class="p">))</span>
         <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">entropy</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">psd_norm</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
@@ -278,7 +336,10 @@
         <span class="n">anomaly_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="c1"># The sampling frequency of the x time series. Defaults to 100.</span>
+    <span class="c1"># The sampling frequency of the x time series. Defaults to 100.  Which in</span>
+    <span class="c1"># terms of the fs argument in scipy.signal.periodogram a time series with</span>
+    <span class="c1"># 1 data point per 60 seconds should be 1/60 (0.016666666666666666) and</span>
+    <span class="c1"># 1/600 (0.0016666666666666668) for 10 minutely data.</span>
     <span class="n">frequency</span> <span class="o">=</span> <span class="mi">100</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">frequency</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">])</span>
@@ -290,7 +351,6 @@
         <span class="n">window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;window&#39;</span><span class="p">])</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">window</span> <span class="o">=</span> <span class="mi">60</span>
-
     <span class="c1"># What is the maximum value that can be considered as</span>
     <span class="c1"># low entropy?  If the spectral_entropy value is not</span>
     <span class="c1"># close to 0 then it is not anomalous, but the range</span>
@@ -306,6 +366,13 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">max_low_entropy</span> <span class="o">=</span> <span class="mf">0.6</span>
 
+    <span class="c1"># @added 20230717 - Feature #4950: custom_algorithm - spectral_entropy</span>
+    <span class="n">determine_frequency</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">determine_frequency</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;determine_frequency&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">determine_frequency</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;running spectral_entropy with frequency: </span><span class="si">%s</span><span class="s1">, window: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">frequency</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">window</span><span class="p">)))</span>
@@ -317,6 +384,26 @@
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;running spectral_entropy on timeseries with </span><span class="si">%s</span><span class="s1"> datapoints&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)))</span>
     <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: running spectral_entropy on timeseries with </span><span class="si">%s</span><span class="s1"> datapoints&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)))</span>
+
+    <span class="n">algorithm_parameters_used</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;anomaly_window&#39;</span><span class="p">:</span> <span class="n">anomaly_window</span><span class="p">,</span> <span class="s1">&#39;frequency&#39;</span><span class="p">:</span> <span class="n">frequency</span><span class="p">,</span>
+        <span class="s1">&#39;window&#39;</span><span class="p">:</span> <span class="n">window</span><span class="p">,</span> <span class="s1">&#39;max_low_entropy&#39;</span><span class="p">:</span> <span class="n">max_low_entropy</span>
+    <span class="p">}</span>
+
+    <span class="c1"># @added 20230717 - Feature #4950: custom_algorithm - spectral_entropy</span>
+    <span class="n">passed_frequency</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">determine_frequency</span><span class="p">:</span>
+        <span class="n">resolution</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">np_timestamps_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+            <span class="n">resolution</span> <span class="o">=</span> <span class="n">get_resolution</span><span class="p">(</span><span class="n">np_timestamps_array</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resolution</span><span class="p">:</span>
+                <span class="n">frequency</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">resolution</span>
+                <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: spectral_entropy - determined frequency: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">frequency</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;error :: get_resolution failed in spectral_entropy, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">series</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
@@ -338,7 +425,8 @@
             <span class="c1"># rolls :)</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">se_value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;nan&#39;</span><span class="p">:</span>
                 <span class="n">se_value</span> <span class="o">=</span> <span class="mf">1.0</span>
-            <span class="n">se_values</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">se_value</span><span class="p">])</span>
+            <span class="c1"># Coerce np.int64 to a float</span>
+            <span class="n">se_values</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">se_value</span><span class="p">)])</span>
         <span class="c1"># Sort the values, lowest to highest</span>
         <span class="n">sorted_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">se_values</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sorted_values</span><span class="p">]</span>
@@ -367,7 +455,7 @@
         <span class="c1"># Estimate the low entropy value based on the difference</span>
         <span class="c1"># between the bins and then some.  This gives a low</span>
         <span class="c1"># value to use as </span>
-        <span class="n">low_entropy_value</span> <span class="o">=</span> <span class="n">lowest_value_bin</span> <span class="o">+</span> <span class="p">(</span><span class="n">second_lowest_value_bin</span> <span class="o">-</span> <span class="n">lowest_value_bin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>  <span class="c1"># e.g. 0.41075609107379757</span>
+        <span class="n">low_entropy_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lowest_value_bin</span> <span class="o">+</span> <span class="p">(</span><span class="n">second_lowest_value_bin</span> <span class="o">-</span> <span class="n">lowest_value_bin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># e.g. 0.41075609107379757</span>
         <span class="c1"># Given the above example distribution this would</span>
         <span class="c1"># result in the most 39 &quot;outliers&quot; in the 10072</span>
         <span class="c1"># datapoints, so 0.387212073% would be flagged as</span>
@@ -385,13 +473,27 @@
             <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: spectral_entropy low_entropy_value set to max_low_entropy: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_low_entropy</span><span class="p">))</span>
 
-        <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># @added 20230707 - debug</span>
+        <span class="c1"># Add histogram to the results in JSON friendly format</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Coerce to ints and floats for JSON results</span>
+        <span class="c1">#histogram_bins_counts = list(h[0])</span>
+        <span class="c1">#histogram_bins_values = list(h[1])</span>
+        <span class="n">histogram_bins_counts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">histogram_bins_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">h</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">][</span><span class="s1">&#39;counts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">histogram_bins_counts</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">histogram_bins_values</span>
+
         <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">se_value</span> <span class="o">=</span> <span class="n">se_values</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">se_value</span> <span class="o">&lt;=</span> <span class="n">low_entropy_value</span><span class="p">:</span>
+                <span class="c1"># @modified 20230717</span>
+                <span class="c1"># Handle 0s - ignore 0s</span>
+                <span class="c1"># https://stats.stackexchange.com/questions/57069/alternative-to-shannons-entropy-when-probability-equal-to-zero</span>
+                <span class="c1"># if se_value &lt;= low_entropy_value:</span>
+                <span class="k">if</span> <span class="n">se_value</span> <span class="o">&lt;=</span> <span class="n">low_entropy_value</span> <span class="ow">and</span> <span class="n">se_value</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">:</span>
                     <span class="n">ts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">se_value</span><span class="p">}</span>
                     <span class="n">anomalyScore_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -411,13 +513,32 @@
             <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;anomalous&#39;</span><span class="p">:</span> <span class="n">anomalous</span><span class="p">,</span>
-            <span class="s1">&#39;anomalies&#39;</span><span class="p">:</span> <span class="n">anomalies</span><span class="p">,</span>
-            <span class="s1">&#39;low_entropy_value&#39;</span><span class="p">:</span> <span class="n">low_entropy_value</span><span class="p">,</span>
-            <span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">:</span> <span class="n">anomalyScore_list</span><span class="p">,</span>
-            <span class="s1">&#39;scores&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">se_values</span><span class="p">],</span>
-        <span class="p">}</span>
+
+        <span class="c1"># @added 20230707 - custom_algorithms - handle unreliable results</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">total_anomaly_sum</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anomalyScore_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_anomaly_sum</span> <span class="o">&gt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">/</span> <span class="mi">5</span><span class="p">):</span>
+            <span class="c1"># None is not json friendly</span>
+            <span class="c1"># anomalous = None</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">unreliable</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">unreliable_reason</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> triggered </span><span class="si">%s</span><span class="s1"> data points of the total </span><span class="si">%s</span><span class="s1"> data points as anomalous, discarding as this algorithm does not suit this data.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">algorithm_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_anomaly_sum</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>            <span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;low_entropy_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">low_entropy_value</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalyScore_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalyScore_list</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;scores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">se_values</span><span class="p">]</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;unreliable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unreliable</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;unreliable_reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unreliable_reason</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">success</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm_parameters</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;algorithm_parameters_used&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">algorithm_parameters_used</span>
+        <span class="c1"># @added 20230717 - Feature #4950: custom_algorithm - spectral_entropy</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;passed_frequency&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">passed_frequency</span>
+
         <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ran spectral_entropy OK in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
@@ -438,6 +559,11 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;error - no results&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">debug_logging</span><span class="p">:</span>
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: error - no results&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 20230707 - custom_algorithms - handle unreliable results</span>
+        <span class="k">if</span> <span class="n">unreliable</span><span class="p">:</span>
+            <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="mf">0.0</span>
 
     <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">debug_print</span><span class="p">:</span>
@@ -472,6 +598,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -481,7 +608,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

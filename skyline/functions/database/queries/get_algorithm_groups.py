@@ -12,7 +12,9 @@ from database import get_engine, engine_disposal
 
 
 # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
-def get_algorithm_groups(current_skyline_app):
+# @modified 20230722 - Feature #5008: webapp - snab report page
+# Added return_all_algorithm_groups_by_id
+def get_algorithm_groups(current_skyline_app, return_all_algorithm_groups_by_id=False):
     """
     Returns a dict of algorithm_groups and their ids.
     """
@@ -20,6 +22,11 @@ def get_algorithm_groups(current_skyline_app):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     algorithm_groups = {}
+
+    # @added 20230722 - Feature #5008: webapp - snab report page
+    # Added all_algorithm_groups_by_id
+    all_algorithm_groups_by_id = {}
+
     try:
         engine, fail_msg, trace = get_engine(current_skyline_app)
         if fail_msg != 'got MySQL engine':
@@ -64,10 +71,22 @@ def get_algorithm_groups(current_skyline_app):
                 # stmt = 'SELECT id FROM algorithm_groups WHERE algorithm_group=\'%s\'' % algorithm_group
                 stmt = select(use_table.c.id).where(use_table.c.algorithm_group == algorithm_group)
 
+                # @added 20230722 - Feature #5008: webapp - snab report page
+                # Added all_algorithm_groups_by_id
+                first_id = None
+
                 result = connection.execute(stmt)
                 for row in result:
-                    algorithm_groups[algorithm_group] = row['id']
-                    break
+                    # @modified 20230722 - Feature #5008: webapp - snab report page
+                    # Added all_algorithm_groups_by_id
+                    # algorithm_groups[algorithm_group] = row['id']
+                    # break
+                    c_id = row['id']
+                    if not first_id:
+                        algorithm_groups[algorithm_group] = int(c_id)
+                        first_id = int(c_id)
+                    all_algorithm_groups_by_id[c_id] = algorithm_group
+
             connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
@@ -75,5 +94,10 @@ def get_algorithm_groups(current_skyline_app):
 
     if engine:
         engine_disposal(current_skyline_app, engine)
+
+    # @added 20230722 - Feature #5008: webapp - snab report page
+    # Added all_algorithm_groups_by_id
+    if return_all_algorithm_groups_by_id:
+        return algorithm_groups, all_algorithm_groups_by_id
 
     return algorithm_groups

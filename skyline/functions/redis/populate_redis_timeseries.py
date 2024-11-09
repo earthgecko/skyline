@@ -50,6 +50,22 @@ def populate_redis_timeseries(current_skyline_app, metric, log=True):
         current_logger.error('error :: %s :: failed to determine labels for %s - %s' % (
             function_str, metric, err))
 
+    # @added 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+    # As per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478#issuecomment-1619986873
+    # label values with commas need to be in parenthesis
+    use_labels = {}
+    for key in list(labels.keys()):
+        value_str = labels[key]
+        if ',' in value_str:
+            # @modified 20230705 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
+            # Now as per https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478#issuecomment-1621234187
+            # label values with commas need to be replaced
+            # if not value_str.startswith('(') and not value_str.endswith(')'):
+            #     value_str = '(%s)' % value_str
+            value_str = value_str.replace(',', '_')
+        use_labels[key] = value_str
+    labels = use_labels.copy()
+
     try:
         redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
     except Exception as err:

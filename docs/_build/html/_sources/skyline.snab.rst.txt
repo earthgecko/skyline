@@ -44,6 +44,14 @@ skyline.snab.snab\_flux\_load\_test\_agent module
    :undoc-members:
    :show-inheritance:
 
+skyline.snab.snab\_results\_algorithms module
+---------------------------------------------
+
+.. automodule:: snab.snab_results_algorithms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

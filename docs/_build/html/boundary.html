@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Boundary &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Boundary &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -89,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -97,7 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -134,7 +134,7 @@
            <div itemprop="articleBody">
              
   <section id="boundary">
-<h1>Boundary<a class="headerlink" href="#boundary" title="Permalink to this heading"></a></h1>
+<h1>Boundary<a class="headerlink" href="#boundary" title="Link to this heading"></a></h1>
 <p>Boundary is an extension of Skyline that enables very specific analysis
 of specified metrics with specified algorithms, with specified alerts.</p>
 <p>Boundary was added to allow for threshold-like monitoring to the Skyline
@@ -151,8 +151,8 @@ too.</p>
 because where Analyzer is almost all to one configuration, Boundary is
 more one configuration to one or many. Where Analyzer is all metrics
 through all algorithms, Boundary is each metric through one algorithm.
-Analyzer uses a large range of the timeseries data, Boundary uses the
-most recent (the now) portion of the timeseries data.</p>
+Analyzer uses a large range of the time series data, Boundary uses the
+most recent (the now) portion of the time series data.</p>
 <p>Boundary currently has 3 defined algorithms:</p>
 <ul class="simple">
 <li><p>detect_drop_off_cliff</p></li>
@@ -179,7 +179,7 @@ channel, as it is not beyond the realms of possibility that at some
 point all your key metrics may drop off a cliff, but maybe 15 pagerduty
 alerts every 30 minutes is sufficient, so alert rates are configurable.</p>
 <section id="configuration-and-running-boundary">
-<h2>Configuration and running Boundary<a class="headerlink" href="#configuration-and-running-boundary" title="Permalink to this heading"></a></h2>
+<h2>Configuration and running Boundary<a class="headerlink" href="#configuration-and-running-boundary" title="Link to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">settings.py</span></code> has an independent setting blocks and has detailed information
 on each setting and the parameter in its docstring, the main difference from
 Analyzer being in terms of number of variables that have to be declared in the
@@ -200,7 +200,7 @@ Boundary:</p>
 </div>
 </section>
 <section id="an-example">
-<h2>An example<a class="headerlink" href="#an-example" title="Permalink to this heading"></a></h2>
+<h2>An example<a class="headerlink" href="#an-example" title="Link to this heading"></a></h2>
 <p>Here is an example of what you can use Boundary for.  If you look at the graph
 below, you can see that the minimum value is around 1000.  Let us say that this
 metric is a fairly reliable and important global metric, like the number of page
@@ -225,30 +225,30 @@ instances where <code class="docutils literal notranslate"><span class="pre">les
 would.</p>
 </section>
 <section id="detect-drop-off-cliff-algorithm">
-<h2>detect_drop_off_cliff algorithm<a class="headerlink" href="#detect-drop-off-cliff-algorithm" title="Permalink to this heading"></a></h2>
+<h2>detect_drop_off_cliff algorithm<a class="headerlink" href="#detect-drop-off-cliff-algorithm" title="Link to this heading"></a></h2>
 <p>The detect_drop_off_cliff algorithm provides a method for analysing a
-timeseries to determine is the timeseries “dropped off a cliff”. The
+time series to determine is the time series “dropped off a cliff”. The
 standard Skyline Analyzer algorithms do not detect the drop off cliff
 pattern very well at all, testing with Crucible has proven. Further to
 this, the <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> methodology used to determine whether a
-timeseries deemed anomalous or not, means that even if one or two
-algorithms did detect a drop off cliff type event in a timeseries, it
+time series deemed anomalous or not, means that even if one or two
+algorithms did detect a drop off cliff type event in a time series, it
 would not be flagged as anomalous if the <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> threshold was not
 breached.</p>
 <p>The detect_drop_off_cliff algorithm - does just what it says on the
 tin. Although this may seem like setting and matching a threshold, it is
 more effective than a threshold as it is dynamically set depending on
 the data range.</p>
-<p>Some things to note about analyzing a timeseries with the algorithm are:</p>
+<p>Some things to note about analyzing a time series with the algorithm are:</p>
 <ul class="simple">
-<li><p>This algorithm is most suited (accurate) with timeseries where there is a
-large range in the timeseries most datapoints are &gt; 100 (e.g high rate).
+<li><p>This algorithm is most suited (accurate) with time series where there is a
+large range in the time series most datapoints are &gt; 100 (e.g high rate).
 Arbitrary <code class="docutils literal notranslate"><span class="pre">trigger</span></code> values in the algorithm do filter peaky low rate
-timeseries, but they can become more noisy with lower value data points, as
+time series, but they can become more noisy with lower value data points, as
 significant cliff drops are from a lower height, however it still generally
 matches drops off cliffs on low range metrics.</p></li>
-<li><p>The trigger tuning based on the timeseries sample range is fairly arbitrary,
-but has been tested and does filter peaky noise in low range timeseries, which
+<li><p>The trigger tuning based on the time series sample range is fairly arbitrary,
+but has been tested and does filter peaky noise in low range time series, which
 filters most/lots of noise.</p></li>
 <li><p>The alogrithm is more suited to data sets which come from multiple sources,
 e.g. an aggregation of a count from all servers, rather than from individual
@@ -257,8 +257,8 @@ false positive cliff drops, whereas the individual is more likely to
 experience true cliff drops.</p></li>
 <li><p><strong>ONLY WORKS WITH</strong>:</p>
 <ul>
-<li><p>Positive, whole number timeseries data</p></li>
-<li><p>Does <strong>not</strong> currently work with negative integers in the timeseries values
+<li><p>Positive, whole number time series data</p></li>
+<li><p>Does <strong>not</strong> currently work with negative integers in the time series values
 (although it will not break, will just skip if a negative integer is encountered)</p></li>
 </ul>
 </li>
@@ -266,7 +266,7 @@ experience true cliff drops.</p></li>
 <p>For more info see:
 <a class="reference external" href="https://github.com/earthgecko/crucible/tree/master/examples/detect_drop_off_cliff">detect_drop_off_cliff</a></p>
 <section id="what-boundary-does">
-<h3>What <strong>Boundary</strong> does<a class="headerlink" href="#what-boundary-does" title="Permalink to this heading"></a></h3>
+<h3>What <strong>Boundary</strong> does<a class="headerlink" href="#what-boundary-does" title="Link to this heading"></a></h3>
 <p>Boundary is very similar in work flow to Analyzer in terms of how it
 surfaces and analyzes metrics.</p>
 <ul class="simple">
@@ -275,9 +275,9 @@ surfaces and analyzes metrics.</p>
 <code class="docutils literal notranslate"><span class="pre">BOUNDARY_METRICS</span></code> tuple in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>, matching the defined
 namespaces to all the unique_metrics list from Redis.</p></li>
 <li><p>These are divided between the <code class="docutils literal notranslate"><span class="pre">BOUNDARY_PROCESSES</span></code> to be analyzed.</p></li>
-<li><p>Boundary’s spawned processes pull the all timeseries for the metrics
+<li><p>Boundary’s spawned processes pull the all time series for the metrics
 they are assigned from Redis and iterate through each metric and
-analyses it’s timeseries against the algorithm declared for the
+analyses it’s time series against the algorithm declared for the
 metric in the matching <code class="docutils literal notranslate"><span class="pre">BOUNDARY_METRICS</span></code> tuple/s in
 <code class="docutils literal notranslate"><span class="pre">settings.py</span></code></p></li>
 <li><p>The Boundary process will add any metric that it finds anomalous to a
@@ -311,7 +311,7 @@ anomalous metrics details will be inserted into the database.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -266,12 +266,23 @@ class TestTsfreshBaseline(unittest.TestCase):
         # feature_names = []
         tsfresh_features = []
         count_id = 0
-        for index, line in df_t.iterrows():
-            if str(line[0]) != '' and str(line[0]) != 'nan':
-                if ',' in str(line[0]):
-                    feature_name = '"%s"' % str(line[0])
+# @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+# pandas FutureWarning: Series.__getitem__ treating keys as positions is deprecated.
+# In a future version, integer keys will always be treated as labels (consistent
+# with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+#        for index, line in df_t.iterrows():
+#            if str(line[0]) != '' and str(line[0]) != 'nan':
+#                if ',' in str(line[0]):
+#                    feature_name = '"%s"' % str(line[0])
+#                else:
+#                    feature_name = str(line[0])
+        for _, line in df_t.iterrows():
+            if str(line.iloc[0]) != '' and str(line.iloc[0]) != 'nan':
+                if ',' in str(line.iloc[0]):
+                    feature_name = '"%s"' % str(line.iloc[0])
                 else:
-                    feature_name = str(line[0])
+                    feature_name = str(line.iloc[0])
+
                 count_id += 1
                 # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
                 # feature_names.append([count_id, feature_name])
@@ -390,16 +401,29 @@ python skyline/tsfresh_features/generate_tsfresh_features.py'''
             t_fname_out, delimiter=',', header=None,
             names=['feature_name', 'value'])
         df_t_features = []
-        for index, line in df_t.iterrows():
-            df_t_features.append([str(line[0]), str(line[1])])
+# @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+# pandas FutureWarning: Series.__getitem__ treating keys as positions is deprecated.
+# In a future version, integer keys will always be treated as labels (consistent
+# with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+#        for index, line in df_t.iterrows():
+#            df_t_features.append([str(line[0]), str(line[1])])
+        for _, line in df_t.iterrows():
+            df_t_features.append([str(line.iloc[0]), str(line.iloc[1])])
+
         calculated_features = sorted(df_t_features, key=lambda row: row[0], reverse=True)
 
         df_baseline = pd.read_csv(
             baseline_ts_json_baseline, delimiter=',', header=None,
             names=['feature_name', 'value'])
         df_baseline_features = []
-        for index, line in df_baseline.iterrows():
-            df_baseline_features.append([str(line[0]), str(line[1])])
+# @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+# pandas FutureWarning: Series.__getitem__ treating keys as positions is deprecated.
+# In a future version, integer keys will always be treated as labels (consistent
+# with DataFrame behavior). To access a value by position, use `ser.iloc[pos]`
+#        for index, line in df_baseline.iterrows():
+#            df_baseline_features.append([str(line[0]), str(line[1])])
+        for _, line in df_baseline.iterrows():
+            df_baseline_features.append([str(line.iloc[0]), str(line.iloc[1])])
         baseline_features = sorted(df_baseline_features, key=lambda row: row[0], reverse=True)
 
         dataframes_equal = df_t.equals(df_baseline)

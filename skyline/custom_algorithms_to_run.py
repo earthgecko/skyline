@@ -4,7 +4,9 @@ from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 
 # @added 20200603 - Feature #3566: custom_algorithms
-def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorithms, debug):
+# @modified 20240717 - Feature #5390: custom_algorithms - condition
+# Added timeseries
+def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorithms, debug, timeseries=[]):
     """
     Return a dictionary of custom algoritms to run on a metric determined from
     the :mod:`settings.CUSTOM_ALGORITHMS` dictionary.
@@ -140,6 +142,54 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                 current_logger.debug('debug :: get_custom_algorithms_to_run :: %s - custom_algorithm - %s, max_execution_time - %s' % (
                     base_name, str(custom_algorithm), str(max_execution_time)))
 
+            # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+            return_results = False
+            return_anomalies = False
+            try:
+                return_results = custom_algorithms[custom_algorithm]['return_results']
+            except:
+                return_results = False
+            try:
+                return_anomalies = custom_algorithms[custom_algorithm]['return_anomalies']
+                if return_anomalies:
+                    return_results = True
+            except:
+                return_anomalies = False
+
+            # @added 20240717 - Feature #5390: custom_algorithms - condition
+            condition = {}
+            try:
+                condition = custom_algorithms[custom_algorithm]['condition']
+            except:
+                condition = {}
+            condition_function = None
+            condition_target_value = None
+            if len(condition) > 0:
+                try:
+                    condition_function = condition['function']
+                except:
+                    condition_function = None
+                try:
+                    condition_target_value = condition['target_value']
+                except:
+                    condition_target_value = None
+            if condition_function and condition_target_value:
+                if condition_function == 'current_value_below':
+                    from custom_algorithms_to_run_conditions import current_value_below
+                    try:
+                        run_custom_algorithm = current_value_below(current_skyline_app, condition_target_value, timeseries)
+                        if run_custom_algorithm and debug:
+                            current_logger.debug('debug :: get_custom_algorithms_to_run :: current_value_below condition met for %s on %s' % (
+                                str(custom_algorithm), base_name))
+                    except:
+                        run_custom_algorithm = True
+                if condition_function == 'current_value_below':
+                    from custom_algorithms_to_run_conditions import current_value_below
+                    try:
+                        run_custom_algorithm = current_value_below(current_skyline_app, condition_target_value, timeseries)
+                    except:
+                        run_custom_algorithm = True
+
         # @modified 20201119 - Feature #3566: custom_algorithms
         #                      Task #3744: POC matrixprofile
         # Added missing run_3sigma_algorithms and use_with parameters
@@ -171,6 +221,10 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                     # @added 20220301 - Bug #4308: matrixprofile - fN on big drops
                     'trigger_history_override': trigger_history_override,
                     'use_with': use_with,
+                    # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+                    'return_results': return_results,
+                    'return_anomalies': return_anomalies,
+                    'base_name': base_name,
                 }
                 if debug:
                     current_logger.debug('debug :: get_custom_algorithms_to_run :: %s - custom_algorithms_to_run - %s' % (

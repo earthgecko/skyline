@@ -33,7 +33,7 @@ def get_matches(current_skyline_app, metric_id, from_timestamp, until_timestamp)
     try:
         fps_dict = get_fps_for_metric(current_skyline_app, metric_id)
     except Exception as err:
-        current_logger.error('error :: %s :: could not get a MySQL engine - %s' % (
+        current_logger.error('error :: %s :: get_fps_for_metric failed, err: %s' % (
             function_str, str(err)))
 
     if fps_dict:

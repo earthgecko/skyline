@@ -29,3 +29,5 @@ data/*
 
 # pycharn
 .idea/*
+
+.pylintrc

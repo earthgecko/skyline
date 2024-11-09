@@ -30,11 +30,8 @@ logger.setLevel(logging.CRITICAL)
 
 # @added 20221127 - Feature #4742: custom_algorithms - skyline_prophet
 def skyline_prophet(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
-
     """
-    Outlier detector for time-series data using the spectral residual algorithm.
-    Based on the alibi-detect implementation of "Time-Series Anomaly Detection
-    Service at Microsoft" (Ren et al., 2019) https://arxiv.org/abs/1906.03821
+    Prophet
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -48,16 +45,68 @@ def skyline_prophet(current_skyline_app, parent_pid, timeseries, algorithm_param
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  For the anomalous_daily_peak
-        custom algorithm no specific algorithm_parameters are required apart
-        from an empty dict, example:
-        ``algorithm_parameters={'return_instance_score': True}``
+        custom_algorithm and algorithm itself.  For the prophet custom algorithm
+        no specific algorithm_parameters are required apart from an empty dict
+        but the prophet algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'interval_width'`` (float): The width of the uncertainty interval.
+                The width of the uncertainty interval to produce in the forecast
+                on, representing the probability that the  actual value will
+                fall within the interval. For example, ``interval_width=0.99``
+                produces a 99% confidence interval.  Default is ``0.99``.
+        - ``'changepoint_range'`` (float): The default changepoints.
+            By default changepoints are only inferred for the first 80% of the
+            time series in order to have plenty of runway for projecting the
+            trend forward and to avoid overfitting fluctuations at the end of
+            the time series. This default works in many situations but not all,
+            and can be changed using the changepoint_range argument
+            ``changepoint_range=0.9`` limits changepoints to the first 90% of
+            the data. Default is ``0.8``.
+        - ``'daily_seasonality'`` (bool): Whether to enable daily seasonality. 
+                Hourly fluctuations in daily data. Default is ``False``.
+        - ``'weekly_seasonality'`` (bool): Whether to enable weekly seasonality. 
+                Daily fluctuations in weekly data). Default is ``False``.
+        - ``'yearly_seasonality'`` (bool): Whether to enable yearly seasonality. 
+                Seasonal patterns in yearly data. Default is ``False``.
+        - ``'seasonality_mode'`` (str): The type of seasonal to apply 
+                Can be either ``'multiplicative'`` or ``'additive'``.  Use
+                ``'multiplicative'`` if seasonal effects are proportional to 
+                the level of the time series, or ``'additive'`` if the effects 
+                are independent of the level. Default is ``'multiplicative'``.
+        - ``'return_results'`` (bool): Optional.
+                If ``True`` returns the results dict in addition to anomalous
+                and anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+                If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+                If ``True``, enables debug printing  (for Jupyter testing).
+                Default is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'interval_width': 0.99,
+                'changepoint_range': 0.8,
+                'daily_seasonality': False,
+                'weekly_seasonality': False,
+                'yearly_seasonality': False,
+                'seasonality_mode': 'multiplicative',
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore, instance_scores
-    :rtype: tuple(boolean, float, instance_scores)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 

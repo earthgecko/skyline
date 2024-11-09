@@ -37,9 +37,15 @@ def get_base_names_and_metric_ids(current_skyline_app):
         base_names_with_ids = redis_conn_decoded.hgetall(redis_key)
         if base_names_with_ids:
             # Format cast the id str as an int
-            for base_name in list(base_names_with_ids.keys()):
-                metric_id = int(str(base_names_with_ids[base_name]))
-                base_names_with_ids[base_name] = metric_id
+# @modified 20240131 - Task #5248: Optimise ionosphere_functions.get_related
+# Yak shaving. Using items() rather than a for loop is 0.0004088878631591797
+# seconds faster.  loop took 0.019259214401245117 seconds, items() took
+# 0.018850326538085938 seconds
+#            for base_name in list(base_names_with_ids.keys()):
+#                metric_id = int(str(base_names_with_ids[base_name]))
+#                base_names_with_ids[base_name] = metric_id
+            for base_name, metric_id in base_names_with_ids.items():
+                base_names_with_ids[base_name] = int(metric_id)
     except Exception as err:
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)

@@ -141,7 +141,7 @@ class PopulateMetricWorker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.warning('warning :: parent process is dead')
             exit(0)
 
     def run(self):
@@ -396,7 +396,14 @@ class PopulateMetricWorker(Process):
                         logger.info('populate_metric_worker :: using Graphite URL - %s' % (
                             url))
 
-                        r = requests.get(url)
+                        # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                        # Add timeout for bandit B113
+                        #r = requests.get(url)
+                        connect_timeout = 5
+                        read_timeout = 10
+                        use_timeout = (int(connect_timeout), int(read_timeout))
+                        r = requests.get(url, timeout=use_timeout)
+
                         if r.status_code == 200:
                             js = []
                             try:
@@ -528,7 +535,14 @@ class PopulateMetricWorker(Process):
                 success = False
                 try:
                     logger.info('populate_metric_worker :: getting data from %s' % str(fetch_url))
-                    response = requests.get(fetch_url)
+                    # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                    # Add timeout for bandit B113
+                    #response = requests.get(fetch_url)
+                    connect_timeout = 5
+                    read_timeout = 10
+                    use_timeout = (int(connect_timeout), int(read_timeout))
+                    response = requests.get(fetch_url, timeout=use_timeout)
+
                     if response.status_code == 200:
                         success = True
                         logger.info('populate_metric_worker :: got responses from %s' % str(fetch_url))

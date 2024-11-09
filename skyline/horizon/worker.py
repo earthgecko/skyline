@@ -45,6 +45,10 @@ from functions.graphite.send_graphite_metric import send_graphite_metric
 # @added 20230512 - Feature #4904: Handle send_graphite_metric failure
 from functions.horizon.process_graphite_fail_queue import process_graphite_fail_queue
 
+# @added 20231223 - Task #5188: Optimise redis renames
+#                   Task #5178: Build and test skyline v4.1.0
+from functions.redis.redis_rename_key import redis_rename_key
+
 parent_skyline_app = 'horizon'
 child_skyline_app = 'worker'
 skyline_app_logger = '%sLog' % parent_skyline_app
@@ -289,6 +293,22 @@ class Worker(Process):
         # @added 20201120 - Feature #3820: HORIZON_SHARDS
         metrics_received = []
 
+        # @added 20240220 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+        try:
+            skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.skip_metrics')
+            logger.info('%s :: got %s metrics from horizon.skip_metrics from Redis hash' % (
+                skyline_app, str(len(skip_metrics_dict))))
+        except Exception as err:
+            logger.error('%s :: error on hgetall horizon.skip_metrics: %s' % (skyline_app, str(err)))
+
+        # @added 20240315 - Feature #5272: analyzer - load_shedding - SKYLINE_FEEDBACK_NAMESPACES
+        try:
+            do_not_skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.do_not_skip_metrics')
+            logger.info('%s :: got %s metrics from horizon.do_not_skip_metrics from Redis hash as was not set' % (
+                skyline_app, str(len(do_not_skip_metrics_dict))))
+        except Exception as err:
+            logger.error('%s :: error on hgetall horizon.do_not_skip_metrics: %s' % (skyline_app, str(err)))
+
         # python-2.x and python3.x handle while 1 and while True differently
         # while 1:
         running = True
@@ -316,14 +336,14 @@ class Worker(Process):
             if not skip_metrics_dict:
                 try:
                     skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.skip_metrics')
-                    logger.info('%s :: got %s metrics from horizon.skip_metrics from Redis hash as not set' % (
+                    logger.info('%s :: got %s metrics from horizon.skip_metrics from Redis hash as was not set' % (
                         skyline_app, str(len(skip_metrics_dict))))
                 except Exception as err:
                     logger.error('%s :: error on hgetall horizon.skip_metrics: %s' % (skyline_app, str(err)))
             if not do_not_skip_metrics_dict:
                 try:
                     do_not_skip_metrics_dict = self.redis_conn_decoded.hgetall('horizon.do_not_skip_metrics')
-                    logger.info('%s :: got %s metrics from horizon.do_not_skip_metrics from Redis hash as not set' % (
+                    logger.info('%s :: got %s metrics from horizon.do_not_skip_metrics from Redis hash as was not set' % (
                         skyline_app, str(len(do_not_skip_metrics_dict))))
                 except Exception as err:
                     logger.error('%s :: error on hgetall horizon.do_not_skip_metrics: %s' % (skyline_app, str(err)))
@@ -487,7 +507,11 @@ class Worker(Process):
                     # self.send_graphite_metric('skyline.horizon.' + SERVER_METRIC_PATH + 'queue_size', self.q.qsize())
                     # self.send_graphite_metric('queue_size', average_queue_size)
                     send_metric_name = '%s.queue_size' % skyline_app_graphite_namespace
-                    send_graphite_metric(self, skyline_app, send_metric_name, average_queue_size)
+                    # @modified 20240102 - Feature #5192: skyline_graphite_metrics_single_submit
+                    # Use the parent_skyline_app for logging purposes
+                    # send_graphite_metric(self, skyline_app, send_metric_name, average_queue_size)
+                    send_graphite_metric(self, parent_skyline_app, send_metric_name, average_queue_size)
+
                     # @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric
                     for size_value in queue_sizes:
                         queue_sizes_60_seconds.append(size_value)
@@ -511,7 +535,10 @@ class Worker(Process):
                         logger.info('%s :: total queue values known for the last 60 seconds - %s' % (skyline_app, str(number_queue_sizes)))
                         logger.info('%s :: average queue size for the last 60 seconds - %s' % (skyline_app, str(average_queue_size)))
                         send_metric_name = '%s.queue_size_60s_avg' % skyline_app_graphite_namespace
-                        send_graphite_metric(self, skyline_app, send_metric_name, average_queue_size)
+                        # @modified 20240102 - Feature #5192: skyline_graphite_metrics_single_submit
+                        # Use the parent_skyline_app for logging purposes
+                        # send_graphite_metric(self, skyline_app, send_metric_name, average_queue_size)
+                        send_graphite_metric(self, parent_skyline_app, send_metric_name, average_queue_size)
                         # reset queue_sizes_60_seconds and last_sent_graphite
                         queue_sizes_60_seconds = []
                         last_send_to_graphite = time()
@@ -561,7 +588,10 @@ class Worker(Process):
                 else:
                     send_metric_name = '%s.datapoints_sent_to_redis_%s' % (
                         skyline_app_graphite_namespace, str(self.worker_number))
-                send_graphite_metric(self, skyline_app, send_metric_name, datapoints_sent_to_redis)
+                # @modified 20240102 - Feature #5192: skyline_graphite_metrics_single_submit
+                # Use the parent_skyline_app for logging purposes
+                # send_graphite_metric(self, skyline_app, send_metric_name, datapoints_sent_to_redis)
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, datapoints_sent_to_redis)
                 datapoints_sent_to_redis = 0
                 last_datapoints_to_redis = int(time())
 
@@ -604,7 +634,15 @@ class Worker(Process):
                     if self.canary:
                         try:
                             logger.info('%s :: renaming key horizon.metrics_received to aet.horizon.metrics_received' % skyline_app)
+                            # @modified 20231223 - Task #5188: Optimise redis renames
+                            #                      Task #5178: Build and test skyline v4.1.0
+                            # Use rename_key function to mitigate cmd_stat.rename failed_calls
                             self.redis_conn.rename('horizon.metrics_received', 'aet.horizon.metrics_received')
+                            redis_key_renamed = False
+                            try:
+                                redis_key_renamed = redis_rename_key(skyline_app, 'horizon.metrics_received', 'aet.horizon.metrics_received', log=True)
+                            except Exception as err:
+                                logger.error('error :: worker :: redis_rename_key failed renaming horizon.metrics_received to aet.horizon.metrics_received, err: %s' % err)
                         except Exception as e:
                             logger.info(traceback.format_exc())
                             logger.error('error :: %s failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received - %s' % (
@@ -626,7 +664,10 @@ class Worker(Process):
                                 cache_key, e))
                         send_metric_name = '%s.metrics_received' % (
                             skyline_app_graphite_namespace)
-                        send_graphite_metric(self, skyline_app, send_metric_name, metrics_received_count)
+                        # @modified 20240102 - Feature #5192: skyline_graphite_metrics_single_submit
+                        # Use the parent_skyline_app for logging purposes
+                        # send_graphite_metric(self, skyline_app, send_metric_name, metrics_received_count)
+                        send_graphite_metric(self, parent_skyline_app, send_metric_name, metrics_received_count)
 
                     # @added 20210520 - Branch #1444: thunder
                     # Added Redis hash keys for thunder to monitor the horizon

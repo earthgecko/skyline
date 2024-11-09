@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>webapp.backend &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>webapp.backend &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -250,7 +250,9 @@
     <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="panorama_request"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.panorama_request">[docs]</a><span class="k">def</span> <span class="nf">panorama_request</span><span class="p">():</span>
+<div class="viewcode-block" id="panorama_request">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.panorama_request">[docs]</a>
+<span class="k">def</span> <span class="nf">panorama_request</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets the details of anomalies from the database, using the URL arguments</span>
 <span class="sd">    that are passed in by the :obj:`request.args` to build the MySQL select</span>
@@ -857,6 +859,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">search_query</span><span class="p">,</span> <span class="n">anomalies</span></div>
 
+
 <span class="c1"># @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
 <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
 <span class="c1"># Use sqlalchemy rather than string-based query construction</span>
@@ -926,7 +929,9 @@
 <span class="c1"># @modified 20230409 - Task #4872: Optimise luminosity for labelled_metrics</span>
 <span class="c1"># Added namespace parameter</span>
 <span class="c1"># def luminosity_remote_data(anomaly_timestamp, resolution):</span>
-<div class="viewcode-block" id="luminosity_remote_data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.luminosity_remote_data">[docs]</a><span class="k">def</span> <span class="nf">luminosity_remote_data</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="luminosity_remote_data">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.luminosity_remote_data">[docs]</a>
+<span class="k">def</span> <span class="nf">luminosity_remote_data</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets all the unique_metrics from Redis and then mgets Redis data for all</span>
 <span class="sd">    metrics.  The data is then preprocessed for the remote Skyline luminosity</span>
@@ -1182,13 +1187,21 @@
     <span class="k">return</span> <span class="n">luminosity_data</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">message</span></div>
 
 
+
 <span class="c1"># @added 20200908 - Feature #3740: webapp - anomaly API endpoint</span>
-<div class="viewcode-block" id="panorama_anomaly_details"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.panorama_anomaly_details">[docs]</a><span class="k">def</span> <span class="nf">panorama_anomaly_details</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">):</span>
+<div class="viewcode-block" id="panorama_anomaly_details">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.panorama_anomaly_details">[docs]</a>
+<span class="k">def</span> <span class="nf">panorama_anomaly_details</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets the details for an anomaly from the database.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;panorama_anomaly_details - getting details for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+
+    <span class="c1"># @added 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches</span>
+    <span class="c1">#                   Task #5248: Optimise ionosphere_functions.get_related</span>
+    <span class="c1"># Ensure that anomaly_data is a list and not a boolean</span>
+    <span class="n">anomaly_data</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -1256,7 +1269,11 @@
             <span class="c1"># logger.error(&#39;error :: panorama_anomaly_details - failed to get metric from db&#39;)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: panorama_anomaly_details :: get_base_name_from_metric_id falied for metric_id: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
-            <span class="k">return</span> <span class="kc">False</span>
+            <span class="c1"># @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches</span>
+            <span class="c1">#                      Task #5248: Optimise ionosphere_functions.get_related</span>
+            <span class="c1"># Ensure that anomaly_data is a list and not a boolean</span>
+            <span class="c1"># return False</span>
+            <span class="k">return</span> <span class="n">anomaly_data</span>
 
     <span class="c1"># @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
     <span class="c1">#                      Task #4778: v4.0.0 - update dependencies</span>
@@ -1269,7 +1286,12 @@
     <span class="c1">#     logger.error(traceback.format_exc())</span>
     <span class="c1">#     logger.error(&#39;error :: panorama_anomaly_details - failed to get anomaly details from db&#39;)</span>
     <span class="c1">#     return False</span>
-    <span class="n">anomaly_data</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches</span>
+    <span class="c1">#                      Task #5248: Optimise ionosphere_functions.get_related</span>
+    <span class="c1"># Ensure that anomaly_data is a list and not a boolean</span>
+    <span class="c1"># anomaly_data = None</span>
+
     <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomalous_datapoint</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">full_duration</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">created_timestamp</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_end_timestamp</span><span class="p">])</span><span class="o">.</span>\
@@ -1290,7 +1312,11 @@
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: panorama_anomaly_details :: failed to get anomaly from the db - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches</span>
+        <span class="c1">#                      Task #5248: Optimise ionosphere_functions.get_related</span>
+        <span class="c1"># Ensure that anomaly_data is a list and not a boolean</span>
+        <span class="c1"># return False</span>
+        <span class="k">return</span> <span class="n">anomaly_data</span>
 
     <span class="c1"># @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
     <span class="c1">#                   Task #4778: v4.0.0 - update dependencies</span>
@@ -1300,7 +1326,12 @@
     <span class="k">if</span> <span class="n">anomaly_data</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">anomaly_data</span>
 
-    <span class="n">anomaly_data</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># @modified 20240201 - Task #5250: Optimise ionosphere_backend.get_fp_matches</span>
+    <span class="c1">#                      Task #5248: Optimise ionosphere_functions.get_related</span>
+    <span class="c1"># Ensure that anomaly_data is a list and not a boolean</span>
+    <span class="c1"># anomaly_data = None</span>
+    <span class="n">anomaly_data</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
         <span class="n">anomalous_datapoint</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
         <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
@@ -1315,12 +1346,15 @@
     <span class="k">return</span> <span class="n">anomaly_data</span></div>
 
 
+
 <span class="c1"># @added 20201103 - Feature #3824: get_cluster_data</span>
 <span class="c1"># @modified 20201127 - Feature #3824: get_cluster_data</span>
 <span class="c1">#                      Feature #3820: HORIZON_SHARDS</span>
 <span class="c1"># Allow to query only a single host in the cluster so that just the response</span>
 <span class="c1"># can from a single host in the cluster can be evaluated</span>
-<div class="viewcode-block" id="get_cluster_data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_cluster_data">[docs]</a><span class="k">def</span> <span class="nf">get_cluster_data</span><span class="p">(</span><span class="n">api_endpoint</span><span class="p">,</span> <span class="n">data_required</span><span class="p">,</span> <span class="n">only_host</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">endpoint_params</span><span class="o">=</span><span class="p">{}):</span>
+<div class="viewcode-block" id="get_cluster_data">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_cluster_data">[docs]</a>
+<span class="k">def</span> <span class="nf">get_cluster_data</span><span class="p">(</span><span class="n">api_endpoint</span><span class="p">,</span> <span class="n">data_required</span><span class="p">,</span> <span class="n">only_host</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">endpoint_params</span><span class="o">=</span><span class="p">{}):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets data from the /api of REMOTE_SKYLINE_INSTANCES.  This allows the user</span>
 <span class="sd">    to query a single Skyline webapp node in a cluster and the Skyline instance</span>
@@ -1534,10 +1568,13 @@
     <span class="k">return</span> <span class="n">data</span></div>
 
 
+
 <span class="c1"># @added 20221019 - Feature #4702: numba optimisations</span>
 <span class="c1"># A numba function to calculate the 3sigma which reduces the time taken from</span>
 <span class="c1"># ~4 seconds to 0.068135 seconds</span>
-<div class="viewcode-block" id="numba_sigma3_array"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.numba_sigma3_array">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="numba_sigma3_array">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.numba_sigma3_array">[docs]</a>
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">numba_sigma3_array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">first_index_with_value</span><span class="p">,</span> <span class="n">first_value</span><span class="p">):</span>
     <span class="n">last_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1574,10 +1611,13 @@
     <span class="k">return</span> <span class="n">sigma3_array_dict</span></div>
 
 
+
 <span class="c1"># @added 20221019 - Feature #4702: numba optimisations</span>
 <span class="c1"># A NO numba DEBUG function to calculate the yhat_dict which reduces the time taken from</span>
 <span class="c1"># ~12 seconds to 0.068135 seconds</span>
-<div class="viewcode-block" id="no_numba_yhat_dict"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.no_numba_yhat_dict">[docs]</a><span class="k">def</span> <span class="nf">no_numba_yhat_dict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">lowers</span><span class="p">,</span> <span class="n">uppers</span><span class="p">,</span> <span class="n">anomaly_timestamps_indices</span><span class="p">,</span> <span class="n">include_yhat_real_lower</span><span class="p">):</span>
+<div class="viewcode-block" id="no_numba_yhat_dict">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.no_numba_yhat_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">no_numba_yhat_dict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">lowers</span><span class="p">,</span> <span class="n">uppers</span><span class="p">,</span> <span class="n">anomaly_timestamps_indices</span><span class="p">,</span> <span class="n">include_yhat_real_lower</span><span class="p">):</span>
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">lower_yhat_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
@@ -1718,10 +1758,13 @@
     <span class="k">return</span> <span class="n">yhat_array_dict</span></div>
 
 
+
 <span class="c1"># @added 20221019 - Feature #4702: numba optimisations</span>
 <span class="c1"># A numba function to calculate the yhat_dict which reduces the time taken from</span>
 <span class="c1"># ~12 seconds to 0.068135 seconds</span>
-<div class="viewcode-block" id="numba_yhat_dict"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.numba_yhat_dict">[docs]</a><span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="numba_yhat_dict">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.numba_yhat_dict">[docs]</a>
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">numba_yhat_dict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">lowers</span><span class="p">,</span> <span class="n">uppers</span><span class="p">,</span> <span class="n">anomaly_timestamps_indices</span><span class="p">,</span> <span class="n">include_yhat_real_lower</span><span class="p">):</span>
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1855,8 +1898,11 @@
     <span class="k">return</span> <span class="n">yhat_array_dict</span></div>
 
 
+
 <span class="c1"># @added 20201125 - Feature #3850: webapp - yhat_values API endoint</span>
-<div class="viewcode-block" id="get_yhat_values"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_yhat_values">[docs]</a><span class="k">def</span> <span class="nf">get_yhat_values</span><span class="p">(</span>
+<div class="viewcode-block" id="get_yhat_values">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_yhat_values">[docs]</a>
+<span class="k">def</span> <span class="nf">get_yhat_values</span><span class="p">(</span>
         <span class="n">metric</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">include_value</span><span class="p">,</span> <span class="n">include_mean</span><span class="p">,</span>
         <span class="n">include_yhat_real_lower</span><span class="p">,</span> <span class="n">include_anomalous_periods</span><span class="p">):</span>
 
@@ -1981,6 +2027,7 @@
                 <span class="c1">#     except:</span>
                 <span class="c1">#         a_end_timestamp = 0</span>
                 <span class="c1">#     anomalies_at.append([a_timestamp, a_value, a_end_timestamp])</span>
+
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomalous_datapoint</span><span class="p">,</span> <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_end_timestamp</span><span class="p">])</span><span class="o">.</span>\
                     <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span><span class="o">.</span>\
                     <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">from_timestamp</span><span class="p">)</span><span class="o">.</span>\
@@ -2006,11 +2053,16 @@
             <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="n">engine_disposal</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
 
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_yhat_values :: got </span><span class="si">%s</span><span class="s1"> anomalies&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies_at</span><span class="p">)))</span>
+
         <span class="n">timeseries_ranges</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
-                <span class="n">t_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                <span class="c1"># @modified 20240605 - Feature #3850: webapp - yhat_values API endoint</span>
+                <span class="c1"># Optimise this operation from taking 19 seconds to less than 1</span>
+                <span class="c1"># t_range = list(range(last_timestamp, int(item[0])))</span>
+                <span class="n">t_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">last_timestamp</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
                 <span class="n">timeseries_ranges</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">t_range</span><span class="p">,</span> <span class="n">item</span><span class="p">])</span>
             <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -2022,12 +2074,19 @@
             <span class="n">last_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
             <span class="n">last_item</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-        <span class="n">t_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">last_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="c1"># @modified 20240605 - Feature #3850: webapp - yhat_values API endoint</span>
+        <span class="c1"># Optimise this operation from taking 19 seconds to less than 1</span>
+        <span class="c1"># t_range = list(range(last_timestamp, (int(last_item[0]) + 1)))</span>
+        <span class="n">t_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">last_timestamp</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">last_item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
         <span class="n">timeseries_ranges</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">last_index</span><span class="p">,</span> <span class="n">t_range</span><span class="p">,</span> <span class="n">last_item</span><span class="p">])</span>
         <span class="n">anomalies_index</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">time_range</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries_ranges</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">a_timestamp</span><span class="p">,</span> <span class="n">a_value</span><span class="p">,</span> <span class="n">a_end_timestamp</span> <span class="ow">in</span> <span class="n">anomalies_at</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">a_timestamp</span> <span class="ow">in</span> <span class="n">time_range</span><span class="p">:</span>
+                <span class="c1"># @modified 20240605 - Feature #3850: webapp - yhat_values API endoint</span>
+                <span class="c1"># Optimise this operation from taking 19 seconds to less than 1</span>
+                <span class="c1"># if a_timestamp in time_range:</span>
+                <span class="k">if</span> <span class="n">a_timestamp</span> <span class="o">&gt;=</span> <span class="n">time_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">a_timestamp</span> <span class="o">&lt;</span> <span class="n">time_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
                     <span class="n">anomalies_index</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">item</span><span class="p">])</span>
         <span class="n">anomalous_period_indices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">anomalies_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">anomalies_index</span><span class="p">]</span>
@@ -2042,6 +2101,8 @@
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">anomalies_index</span><span class="p">:</span>
             <span class="n">anomaly_timestamps_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_yhat_values :: calculated anomaly_timestamps_indices&#39;</span><span class="p">)</span>
 
     <span class="n">top</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">bottom</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2344,8 +2405,11 @@
     <span class="k">return</span> <span class="n">yhat_dict</span><span class="p">,</span> <span class="n">anomalous_periods_dict</span></div>
 
 
+
 <span class="c1"># @added 20210326 - Feature #3994: Panorama - mirage not anomalous</span>
-<div class="viewcode-block" id="get_mirage_not_anomalous_metrics"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_mirage_not_anomalous_metrics">[docs]</a><span class="k">def</span> <span class="nf">get_mirage_not_anomalous_metrics</span><span class="p">(</span>
+<div class="viewcode-block" id="get_mirage_not_anomalous_metrics">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.get_mirage_not_anomalous_metrics">[docs]</a>
+<span class="k">def</span> <span class="nf">get_mirage_not_anomalous_metrics</span><span class="p">(</span>
         <span class="n">metric</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">anomalies</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2865,8 +2929,11 @@
     <span class="k">return</span> <span class="n">not_anomalous_dict</span><span class="p">,</span> <span class="n">anomalies_dict</span></div>
 
 
+
 <span class="c1"># @added 20210328 - Feature #3994: Panorama - mirage not anomalous</span>
-<div class="viewcode-block" id="plot_not_anomalous_metric"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.plot_not_anomalous_metric">[docs]</a><span class="k">def</span> <span class="nf">plot_not_anomalous_metric</span><span class="p">(</span><span class="n">not_anomalous_dict</span><span class="p">,</span> <span class="n">anomalies_dict</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
+<div class="viewcode-block" id="plot_not_anomalous_metric">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.plot_not_anomalous_metric">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_not_anomalous_metric</span><span class="p">(</span><span class="n">not_anomalous_dict</span><span class="p">,</span> <span class="n">anomalies_dict</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the metric not anomalous or anomalies graph and return the file path</span>
 
@@ -2975,7 +3042,7 @@
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
         <span class="n">plot_timestamps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;timestamps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;plot_not_anomalous_metric :: building not </span><span class="si">%s</span><span class="s1"> timeseries&#39;</span> <span class="o">%</span> <span class="n">plot_type</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;plot_not_anomalous_metric :: building </span><span class="si">%s</span><span class="s1"> timeseries&#39;</span> <span class="o">%</span> <span class="n">plot_type</span><span class="p">)</span>
     <span class="n">plot_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">a_timestamps_done</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2996,7 +3063,7 @@
                 <span class="n">anomaly</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="n">a_timestamps_done</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a_timestamp</span><span class="p">)</span>
         <span class="n">plot_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">anomaly</span><span class="p">])</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;plot_not_anomalous_metric :: created </span><span class="si">%s</span><span class="s1"> timeseries&#39;</span> <span class="o">%</span> <span class="n">plot_type</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;plot_not_anomalous_metric :: created </span><span class="si">%s</span><span class="s1"> timeseries of length: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plot_timeseries</span><span class="p">))))</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;plot_not_anomalous_metric :: creating timeseries dataframe&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -3092,10 +3159,13 @@
     <span class="k">return</span> <span class="n">save_to_file</span></div>
 
 
+
 <span class="c1"># @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint</span>
 <span class="c1">#                   Feature #4076: CUSTOM_STALE_PERIOD</span>
 <span class="c1">#                   Branch #1444: thunder</span>
-<div class="viewcode-block" id="namespace_stale_metrics"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.namespace_stale_metrics">[docs]</a><span class="k">def</span> <span class="nf">namespace_stale_metrics</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">cluster_data</span><span class="p">,</span> <span class="n">exclude_sparsely_populated</span><span class="p">):</span>
+<div class="viewcode-block" id="namespace_stale_metrics">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.namespace_stale_metrics">[docs]</a>
+<span class="k">def</span> <span class="nf">namespace_stale_metrics</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">cluster_data</span><span class="p">,</span> <span class="n">exclude_sparsely_populated</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot the metric not anomalous or anomalies graph and return the file path</span>
 
@@ -3226,6 +3296,7 @@
         <span class="n">namespaces_namespace_stale_metrics_dict</span><span class="p">[</span><span class="s1">&#39;stale_metrics&#39;</span><span class="p">][</span><span class="s1">&#39;stale_metrics_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stale_metrics_count</span>
 
     <span class="k">return</span> <span class="n">namespaces_namespace_stale_metrics_dict</span></div>
+
 </pre></div>
 
            </div>
@@ -3235,7 +3306,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

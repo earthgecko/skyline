@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alerts &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Alerts &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Alerts</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#required-smtp-alerter-for-analyzer-and-mirage-metrics">Required smtp alerter for Analyzer and Mirage metrics</a></li>
@@ -92,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -100,7 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -137,7 +137,7 @@
            <div itemprop="articleBody">
              
   <section id="alerts">
-<h1>Alerts<a class="headerlink" href="#alerts" title="Permalink to this heading"></a></h1>
+<h1>Alerts<a class="headerlink" href="#alerts" title="Link to this heading"></a></h1>
 <p>Alerts in Skyline are configured via multiple sets of settings.  There are the
 Analyzer (Mirage and Ionosphere) related settings and the Boundary related
 alert settings.  This is due to the two classes of alerts being different,
@@ -146,7 +146,7 @@ Boundary alerts being related to breaches of the static and dynamic thresholds
 defined for Boundary metrics.  Further to this there are alert related settings
 for each alert output route, namely smtp, slack, pagerduty, http and sms.</p>
 <section id="required-smtp-alerter-for-analyzer-and-mirage-metrics">
-<h2>Required smtp alerter for Analyzer and Mirage metrics<a class="headerlink" href="#required-smtp-alerter-for-analyzer-and-mirage-metrics" title="Permalink to this heading"></a></h2>
+<h2>Required smtp alerter for Analyzer and Mirage metrics<a class="headerlink" href="#required-smtp-alerter-for-analyzer-and-mirage-metrics" title="Link to this heading"></a></h2>
 <p>Skyline was initially driven by SMTP alerts and as such the analysis pipeline is
 tightly coupled to SMTP alerts.  Many of the resources required for further
 analysis and for other alerters are created during the SMTP alert process.
@@ -210,7 +210,7 @@ defined before other alerts, e.g. slack.</p>
 </div>
 </section>
 <section id="smart-alerting">
-<h2>Smart alerting<a class="headerlink" href="#smart-alerting" title="Permalink to this heading"></a></h2>
+<h2>Smart alerting<a class="headerlink" href="#smart-alerting" title="Link to this heading"></a></h2>
 <p>Due to the nature of analysing lots of time series, there are times when LOTS
 of events do happen, something changes and causes lots of change, things like
 cloud provider failures or reboots or a bad deployment, these things happen.
@@ -226,7 +226,7 @@ This way alerts are not missed, although under these conditions, there will be
 some false positives.</p>
 </section>
 <section id="alert-settings">
-<h2>Alert settings<a class="headerlink" href="#alert-settings" title="Permalink to this heading"></a></h2>
+<h2>Alert settings<a class="headerlink" href="#alert-settings" title="Link to this heading"></a></h2>
 <p>For each 3rd party alert service e.g. Slack, PagerDuty, http_alerters, there is
 a setting to enable the specific alerter which must be set to <code class="docutils literal notranslate"><span class="pre">True</span></code> to enable
 the alerter:</p>
@@ -289,13 +289,13 @@ alerts.</p></li>
 </ul>
 </section>
 <section id="sms-alerts">
-<h2>SMS alerts<a class="headerlink" href="#sms-alerts" title="Permalink to this heading"></a></h2>
+<h2>SMS alerts<a class="headerlink" href="#sms-alerts" title="Link to this heading"></a></h2>
 <p>Skyline can send SMS via AWS SNS.  The set up of AWS SNS is beyond the scope of
 this documentation, see AWS SNS documentation (
 <a class="reference external" href="https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html">https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html</a>).</p>
 </section>
 <section id="http-alerter-alerts">
-<h2>http_alerter alerts<a class="headerlink" href="#http-alerter-alerts" title="Permalink to this heading"></a></h2>
+<h2>http_alerter alerts<a class="headerlink" href="#http-alerter-alerts" title="Link to this heading"></a></h2>
 <p>The http_alerter alert type, enables Skyline to send alerts to a HTTP endpoint.
 http_alerters are configured under the following settings.</p>
 <p>In <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> you defined the
@@ -363,7 +363,7 @@ an example of the alert json POST data:</p>
 alert was related to a metric that was part of a <a class="reference internal" href="skyline.html#settings.EXTERNAL_ALERTS" title="settings.EXTERNAL_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_ALERTS</span></code></a>
 alert group.</p>
 <section id="failures">
-<h3>Failures<a class="headerlink" href="#failures" title="Permalink to this heading"></a></h3>
+<h3>Failures<a class="headerlink" href="#failures" title="Link to this heading"></a></h3>
 <p>If the HTTP endpoint does not respond with a 200, the alert item will be added
 to the Redis set (queue) for that alert to be resent.  Each relevant app has a
 Redis set (queue):
@@ -384,7 +384,7 @@ http_alerter endpoint that is down.</p>
 </section>
 </section>
 <section id="external-alert-configs">
-<h2>External alert configs<a class="headerlink" href="#external-alert-configs" title="Permalink to this heading"></a></h2>
+<h2>External alert configs<a class="headerlink" href="#external-alert-configs" title="Link to this heading"></a></h2>
 <p>Skyline can fetch alert configs from external sources</p>
 <ul class="simple">
 <li><p><strong>Example</strong></p></li>
@@ -445,7 +445,7 @@ which contains named alert items with the following keys and values:</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -18,6 +18,9 @@ import zlib
 import gzip
 import shutil
 
+# @added 20230706 - Feature #4952: vortex - consensus_count
+from itertools import combinations
+
 import settings
 from skyline_functions import (
     write_data_to_file, send_anomalous_metric_to, mkdir_p, filesafe_metricname,
@@ -38,6 +41,12 @@ from functions.graphite.send_graphite_metric import send_graphite_metric
 from custom_algorithms import run_custom_algorithm_on_timeseries
 
 # from custom_algorithm_sources.sigma.sigma import run_sigma_algorithms
+
+# @added 20240913 - Feature #5468: callback
+from functions.skyline.callback import callback
+
+# @added 20241107 - Feature #5536: deduplicate_timeseries
+from functions.timeseries.deduplicate_timeseries import deduplicate_timeseries
 
 skyline_app = 'mirage_vortex'
 # skyline_app_logger = '%sLog' % skyline_app
@@ -434,22 +443,35 @@ class MirageVortex(Thread):
                 logger.error('error :: mirage_vortex :: failed to hset key for %s in mirage.vortex_saved - %s' % (
                     request_id, err))
 
+        jsonfile = None
         if VORTEX_TIMESERIES_JSON_TO_DISK:
-            jsonfile = None
             try:
                 jsonfile = metric_data['timeseries']
             except Exception as err:
-                logger.error('error :: mirage_vortex :: no timeseries in metric_data for %s' % (
-                    request_id))
+                logger.error('error :: mirage_vortex :: no timeseries in metric_data for %s, err: %s' % (
+                    request_id, err))
             if os.path.isfile(jsonfile):
                 try:
                     os.remove(jsonfile)
                 except OSError:
                     logger.error('error :: mirage_vortex - failed to remove file - %s' % jsonfile)
-        try:
-            del metric_data['timeseries']
-        except:
-            pass
+        # @added 20240917 - Feature #5468: callback
+        del_timeseries = True
+        if 'return_timeseries' in metric_data.keys():
+            if metric_data['return_timeseries']:
+                del_timeseries = False
+                if 'use_timeseries' in metric_data.keys():
+                    metric_data['timeseries'] = list(metric_data['use_timeseries'])
+                    del metric_data['use_timeseries']
+
+        # @modified 20240917 - Feature #5468: callback
+        # Only delete timeseries if return_timeseries is not set
+        if del_timeseries:
+            try:
+                del metric_data['timeseries']
+            except:
+                pass
+
         analysis_runtime = time() - analysis_start_time
         metric_data['results']['total_analysis_runtime'] = analysis_runtime
 
@@ -663,7 +685,7 @@ class MirageVortex(Thread):
                     analysis_start_time = metric_data['begin_analysis']
                     added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 except Exception as err:
-                    logger.error('error :: mirage_vortex :: add_results failed for request_id: %s - %s' % (
+                    logger.error('error :: mirage_vortex :: add_results failed for request_id: %s, err: %s' % (
                         request_id, err))
 
             if added_results:
@@ -754,7 +776,7 @@ class MirageVortex(Thread):
                 analysis_start_time = metric_data['begin_analysis']
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
             except Exception as err:
-                logger.error('error :: mirage_vortex :: add_results failed for request_id: %s - %s' % (
+                logger.error('error :: mirage_vortex :: add_results failed for request_id: %s, err: %s' % (
                     request_id, err))
             if added_results:
                 logger.info('mirage_vortex :: results added with anomalous: %s, matched: None' % (
@@ -1004,6 +1026,31 @@ class MirageVortex(Thread):
 
             logger.info('mirage_vortex :: processing request_id: %s' % str(request_id))
 
+            # @added 20240913 - Feature #5468: callback
+            callback_url = None
+            callback_data = {}
+            try:
+                callback_url = metric_data['callback_url']
+            except KeyError:
+                pass
+            try:
+                callback_data = metric_data['callback_data']
+            except KeyError:
+                pass
+            # @added 20240917 - Feature #5468: callback
+            return_timeseries = False
+            try:
+                return_timeseries = metric_data['return_timeseries']
+            except:
+                return_timeseries = False
+
+            # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+            csv_upload = False
+            try:
+                csv_upload = metric_data['csv_upload']
+            except:
+                csv_upload = False
+
             consensus = list(MIRAGE_VORTEX_DEFAULT_CONSENSUS)
             algorithms = {'default': {}}
             try:
@@ -1033,6 +1080,18 @@ class MirageVortex(Thread):
                     added_results = self.add_results(request_id, metric_data, analysis_start_time)
                     if added_results:
                         logger.info('mirage_vortex :: processed test_anomaly request_id: %s' % str(request_id))
+                    # @added 20240913 - Feature #5468: callback
+                    if callback_url:
+                        try:
+                            response_code = callback(skyline_app, callback_url, callback_data)
+                            if response_code == 200:
+                                logger.info('mirage_vortex :: callback successful to %s' % metric_data)
+                            else:
+                                logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                    str(response_code), check_item, callback_url))
+                        except Exception as err:
+                            logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                                check_item, callback_url, err))
                     continue
 
             try:
@@ -1049,6 +1108,22 @@ class MirageVortex(Thread):
                 consensus_count = int(metric_data['consensus_count'])
             except:
                 consensus_count = 0
+
+            # @added 20230706 - Feature #4952: vortex - consensus_count
+            # Create all possible unique combinations of possible consensuses
+            try:
+                check_all_consensuses = metric_data['check_all_consensuses']
+            except:
+                check_all_consensuses = False
+            if consensus_count and check_all_consensuses:
+                all_possible_consensuses = list(combinations(algorithms_to_be_run, consensus_count))
+                consensuses = []
+                for i in all_possible_consensuses:
+                    # x unique elements
+                    if len(list(set(list(i)))) != consensus_count:
+                        continue
+                    consensuses.append(list(i))
+                consensus = list(consensuses)
 
             triggered_algorithms = []
 
@@ -1100,6 +1175,19 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             # Check that the algorithms_to_be_run are in consensus
@@ -1126,13 +1214,26 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             try:
                 metric = metric_data['metric']
             except Exception as err:
-                logger.error('error :: mirage_vortex :: no metric in metric_data for %s' % (
-                    check_item))
+                logger.error('error :: mirage_vortex :: no metric in metric_data for %s, err: %s' % (
+                    check_item, err))
                 metric_data['anomalous'] = False
                 additional_info = 'no metric name passed'
                 results = {
@@ -1150,6 +1251,19 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             timeseries = []
@@ -1158,8 +1272,8 @@ class MirageVortex(Thread):
                 try:
                     jsonfile = metric_data['timeseries']
                 except Exception as err:
-                    logger.error('error :: mirage_vortex :: no timeseries in metric_data for %s' % (
-                        check_item))
+                    logger.error('error :: mirage_vortex :: no timeseries in metric_data for %s, err: %s' % (
+                        check_item, err))
                 file_metric_data = {}
                 try:
                     with open(jsonfile) as fh:
@@ -1177,8 +1291,8 @@ class MirageVortex(Thread):
                 try:
                     timeseries = metric_data['timeseries']
                 except Exception as err:
-                    logger.error('error :: mirage_vortex :: no timeseries in metric_data for %s' % (
-                        check_item))
+                    logger.error('error :: mirage_vortex :: no timeseries in metric_data for %s, err: %s' % (
+                        check_item, err))
 
             if isinstance(timeseries, dict):
                 new_timeseries = []
@@ -1216,7 +1330,37 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
+
+            # @added 20241107 - Feature #5536: deduplicate_timeseries
+            # Vortex has introduced the ability for data to be submitted with None
+            # or nan values and duplicate items. Many unsupervised algorithms do
+            # not tolerate Nan or duplicate items.
+            original_timeseries = list(timeseries)
+            timestamps = [t for t, _ in timeseries]
+            try:
+                timeseries = deduplicate_timeseries(timeseries, skipna=True)
+                if len(timestamps) > len(timeseries):
+                    logger.info('mirage_vortex :: deduplicate_timeseries ran to deduplicate the time series and remove nans, from %s data points to %s data points' % (
+                        str(len(timestamps)), str(len(timeseries))))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: mirage_vortex :: deduplicate_timeseries failed, err: %s' % (
+                    str(err)))
+                timeseries = list(original_timeseries)
 
             shard_test = False
             try:
@@ -1247,8 +1391,8 @@ class MirageVortex(Thread):
             try:
                 metric_timestamp = int(timeseries[-1][0])
             except Exception as err:
-                logger.error('error :: mirage_vortex :: failed to determine last timestamp for %s' % (
-                    request_id))
+                logger.error('error :: mirage_vortex :: failed to determine last timestamp for %s, err: %s' % (
+                    request_id, err))
 
             if not metric_timestamp:
                 logger.error('error :: mirage_vortex :: failed no metric_timestamp for %s' % request_id)
@@ -1269,6 +1413,19 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             is_unix_timestamp = False
@@ -1295,6 +1452,19 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             self.check_if_parent_is_alive()
@@ -1305,7 +1475,12 @@ class MirageVortex(Thread):
             coerce_errors = []
             for index, item in enumerate(timeseries):
                 try:
-                    use_timeseries.append([int(item[0]), float(item[1])])
+                    # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
+                    # Handle nan
+                    # use_timeseries.append([int(item[0]), float(item[1])])
+                    value = item[1]
+                    if str(value) not in ['nan', 'NaN', 'NAN', 'None', 'np.nan', 'none', 'null']:
+                        use_timeseries.append([int(item[0]), float(item[1])])
                 except Exception as err:
                     coerce_errors.append([index, err])
             if coerce_errors:
@@ -1330,6 +1505,19 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             try:
@@ -1348,6 +1536,7 @@ class MirageVortex(Thread):
                 algorithms_test_only = False
 
             full_duration = int(use_timeseries[-1][0] - use_timeseries[0][0])
+            logger.info('mirage_vortex :: full_duration: %s' % str(full_duration))
             metric_data['full_duration'] = full_duration
             hours_to_resolve = int(full_duration / 3600)
             nearest_full_duration = 86400 * round(full_duration / 86400)
@@ -1453,6 +1642,24 @@ class MirageVortex(Thread):
                 # Coerce timestamps to ints
                 downsampled_timeseries = [[int(t), v] for t, v in downsampled_timeseries]
                 downsampled = True
+
+                # @added 20241107 - Task #5526: Build v5.0.0 and upgrade deps
+                # Handle nan
+                use_downsampled_timeseries = []
+                coerce_errors = []
+                for index, item in enumerate(downsampled_timeseries):
+                    try:
+                        value = item[1]
+                        if str(value) not in ['nan', 'NaN', 'None', 'np.nan']:
+                            use_downsampled_timeseries.append([int(item[0]), float(item[1])])
+                    except Exception as err:
+                        coerce_errors.append([index, err])
+                if coerce_errors:
+                    logger.info('mirage_vortex :: request_id: %s encountered %s coerce_errors for use_downsampled_timeseries, last err: %s' % (
+                        str(request_id), str(len(coerce_errors)), str(coerce_errors[-1])))
+                if use_downsampled_timeseries:
+                    downsampled_timeseries = list(use_downsampled_timeseries)
+
                 metric_data['downsampled_resolution'] = downsample_resolution
                 metric_data['downsampled_length'] = len(downsampled_timeseries)
                 use_timeseries = downsampled_timeseries
@@ -1462,6 +1669,9 @@ class MirageVortex(Thread):
             expected_timeseries_length = (86400 * 7) / 600
             if analysis_period == 86400:
                 expected_timeseries_length = 86400 / 60
+            
+            if override_7_day_limit:
+                expected_timeseries_length = int(int(analysis_period / resolution) * 0.9)
 
             use_timeseries_length = len(use_timeseries)
             metric_data['use_timeseries_length'] = use_timeseries_length
@@ -1504,6 +1714,19 @@ class MirageVortex(Thread):
                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                 if added_results:
                     logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
+                # @added 20240913 - Feature #5468: callback
+                if callback_url:
+                    try:
+                        response_code = callback(skyline_app, callback_url, metric_data)
+                        if response_code == 200:
+                            logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                        else:
+                            logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                str(response_code), check_item, callback_url))
+                    except Exception as err:
+                        logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                            check_item, callback_url, err))
+
                 continue
 
             # Determine if there are any negatives values
@@ -1534,8 +1757,22 @@ class MirageVortex(Thread):
                 try:
                     if added_results or sent_to_ionosphere:
                         break
-
                     custom_algorithm = algorithm
+
+                    algorithm_parameters = {}
+                    try:
+                        algorithm_parameters = VORTEX_ALGORITHMS[algorithm]['algorithm_parameters']
+                    except:
+                        algorithm_parameters = {}
+
+                    if algorithm in metric_data['algorithms'].keys():
+                        for algo_param in metric_data['algorithms'][algorithm]:
+                            algorithm_parameters[algo_param] = metric_data['algorithms'][algorithm][algo_param]
+                    try:
+                        anomaly_window = algorithm_parameters['anomaly_window']
+                    except:
+                        anomaly_window = 1
+
                     if algorithm == 'prophet':
                         custom_algorithm = 'skyline_prophet'
 
@@ -1544,11 +1781,6 @@ class MirageVortex(Thread):
 
                     if algorithm == 'sigma':
                         logger.info('mirage_vortex :: running sigma for request_id: %s' % str(request_id))
-                        algorithm_parameters = {}
-                        try:
-                            algorithm_parameters = VORTEX_ALGORITHMS[algorithm]['algorithm_parameters']
-                        except:
-                            algorithm_parameters = {}
                         return_results = False
                         anomalous = None
                         anomalyScore = None
@@ -1628,7 +1860,7 @@ class MirageVortex(Thread):
                             consensus_count_results['algorithms']['sigma'] = {}
                             consensus_count_results['algorithms']['sigma']['anomalies'] = anomalies
                             anomalyScore_list = []
-                            anomalies_timestamps = [int(ts) for ts in list(anomalies.keys())]
+                            anomalies_timestamps = [int(float(ts)) for ts in list(anomalies['anomalies'].keys())]
                             for ts, v in timeseries:
                                 score = 0
                                 if int(ts) in anomalies_timestamps:
@@ -1651,7 +1883,10 @@ class MirageVortex(Thread):
                                 algorithm_parameters = VORTEX_ALGORITHMS[algorithm]['algorithm_parameters']
                             except:
                                 algorithm_parameters = {}
-                            outlier_value = VORTEX_ALGORITHMS[algorithm]['outlier_value']
+                            try:
+                                outlier_value = VORTEX_ALGORITHMS[algorithm]['outlier_value']
+                            except KeyError:
+                                outlier_value = 1
                             return_results = False
                             anomalous = None
                             anomalyScore = None
@@ -1678,7 +1913,7 @@ class MirageVortex(Thread):
                             except:
                                 return_anomalies_only = False
                             try:
-                                anomaly_window = algorithm_parameters['anomaly_window']
+                                anomaly_window = int(algorithm_parameters['anomaly_window'])
                             except:
                                 anomaly_window = 1
 
@@ -1686,7 +1921,10 @@ class MirageVortex(Thread):
                                 try:
                                     outlier_value = algorithm_parameters['threshold']
                                 except:
-                                    outlier_value = VORTEX_ALGORITHMS[algorithm]['outlier_value']
+                                    try:
+                                        outlier_value = VORTEX_ALGORITHMS[algorithm]['outlier_value']
+                                    except:
+                                        outlier_value = 1
 
                             algorithm_parameters['anomaly_window'] = anomaly_window
                             algorithm_parameters['base_name'] = metric
@@ -1721,6 +1959,12 @@ class MirageVortex(Thread):
                             anomalyScore_list = []
                             try:
                                 use_debug_logging = False
+                                try:
+                                    if algorithm_parameters['debug_logging']:
+                                        use_debug_logging = True
+                                        custom_algorithms_to_run[custom_algorithm]['debug_logging'] = True
+                                except:
+                                    pass
                                 anomalous, anomalyScore, results = run_custom_algorithm_on_timeseries('mirage', os.getpid(), metric, use_timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
                             except Exception as err:
                                 logger.error(traceback.format_exc())
@@ -1767,8 +2011,16 @@ class MirageVortex(Thread):
                                 'unreliable': unreliable,
                             }
                             if return_results and not return_anomalies_only:
-                                metric_data['results']['algorithms'][algorithm]['anomalies'] = results['anomalies']
-                                metric_data['results']['algorithms'][algorithm]['scores'] = results['scores']
+                                try:
+                                    metric_data['results']['algorithms'][algorithm]['anomalies'] = results['anomalies']
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_vortex :: %s failed to determine anomalies from results, err: %s' % (custom_algorithm, err))
+                                try:
+                                    metric_data['results']['algorithms'][algorithm]['scores'] = results['scores']
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_vortex :: %s failed to determine scores from results, err: %s' % (custom_algorithm, err))
                             if return_anomalies_only:
                                 anomalies = {}
                                 for index, item in enumerate(timeseries):
@@ -1849,15 +2101,34 @@ class MirageVortex(Thread):
                             anomalies = {}
                             algorithms_with_results = list(metric_data['results']['algorithms'].keys())
                             try:
-                                for index, item in enumerate(timeseries):
+                                #for index, item in enumerate(timeseries):
+                                for index, item in enumerate(use_timeseries):
                                     ts = int(item[0])
                                     value = item[1]
+                                    # @added 20241025 - Bug #5518: custom_algorithms_results - invalid JSON
+                                    # Coerce NaN to None or float
+                                    value = item[1]
+                                    if str(value) == 'NaN':
+                                        value = None
+                                    else:
+                                        try:
+                                            value = float(item[1])
+                                        except:
+                                            value = None
+
+                                    ts_str = str(ts)
+
                                     score = 0
                                     consensus_anomalies[ts] = {'value': value, 'triggered': [], 'score': 0}
                                     for i_algorithm in algorithms_with_results:
                                         algo_anomaly = None
                                         try:
                                             algo_anomaly = metric_data['results']['algorithms'][i_algorithm]['anomalies'][ts]
+                                        except KeyError:
+                                            try:
+                                                algo_anomaly = metric_data['results']['algorithms'][i_algorithm]['anomalies'][ts_str]
+                                            except:
+                                                pass
                                         except:
                                             pass
                                         if algo_anomaly:
@@ -1871,7 +2142,7 @@ class MirageVortex(Thread):
                                         if i_consensus_reached:
                                             score = len(i_consensus_reached)
                                             consensus_anomalies[ts]['score'] = score
-                                            anomalies[str(ts)] = {'value': value, 'index': index, 'score': score, 'triggered': list(consensus_anomalies[ts]['triggered'])}
+                                            anomalies[ts_str] = {'value': value, 'index': index, 'score': score, 'triggered': list(consensus_anomalies[ts]['triggered'])}
                                     consensus_scores.append(score)
                             except Exception as err:
                                 logger.error('error :: mirage_vortex :: failed building consensus_anomalies for request_id: %s - %s' % (
@@ -2033,6 +2304,7 @@ class MirageVortex(Thread):
                         if return_image_urls:
                             image_urls = []
                             full_duration_in_hours = int(metric_data['nearest_full_duration'] / 3600)
+
                             use_base_name = str(metric_data['labelled_metric_name'])
                             timeseries_dir = use_base_name.replace('.', '/')
                             metric_data_dir = '%s/%s/%s' % (
@@ -2040,17 +2312,28 @@ class MirageVortex(Thread):
                                 timeseries_dir)
                             for i_algorithm in metric_data['results']['algorithms_run']:
                                 image_file = '%s/vortex.algorithm.%s.%s.%sh.png' % (metric_data_dir, i_algorithm, metric_data['labelled_metric_name'], str(full_duration_in_hours))
+                                # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                                if csv_upload:
+                                    image_file = '%s/vortex.algorithm.%s.%s.%sh.png' % (metric_data_dir, i_algorithm, metric, str(full_duration_in_hours))
+                        
                                 image_url = '%s/ionosphere_images?image=%s' % (settings.SKYLINE_URL, image_file)
                                 image_urls.append(image_url)
 
                             if consensus_anomalies:
                                 image_file = '%s/vortex.algorithm.consensus.%s.%sh.png' % (metric_data_dir, metric_data['labelled_metric_name'], str(full_duration_in_hours))
+                                # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                                if csv_upload:
+                                    image_file = '%s/vortex.algorithm.consensus.%s.%sh.png' % (metric_data_dir, metric, str(full_duration_in_hours))
+
                                 image_url = '%s/ionosphere_images?image=%s' % (settings.SKYLINE_URL, image_file)
                                 image_urls.append(image_url)
 
                             # @added 20230616 - Feature #4952: vortex - consensus_count
                             if consensus_count:
                                 image_file = '%s/vortex.algorithm.consensus_count.%s.%sh.png' % (metric_data_dir, metric_data['labelled_metric_name'], str(full_duration_in_hours))
+                                # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                                if csv_upload:
+                                    image_file = '%s/vortex.algorithm.consensus_count.%s.%sh.png' % (metric_data_dir, metric, str(full_duration_in_hours))
                                 image_url = '%s/ionosphere_images?image=%s' % (settings.SKYLINE_URL, image_file)
                                 image_urls.append(image_url)
 
@@ -2061,7 +2344,13 @@ class MirageVortex(Thread):
                             if metric_data['resolution'] <= 60 and metric_data['full_duration'] >= 86400:
                                 if metric_data['analysis_period'] > 86400:
                                     create_echo_data = True
+
+                                # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                                if csv_upload:
+                                    create_echo_data = False
+
                             if create_echo_data:
+                                created_echo_data = None
                                 try:
                                     created_echo_data = self.create_echo_timeseries(metric_data, timeseries)
                                 except Exception as err:
@@ -2093,16 +2382,38 @@ class MirageVortex(Thread):
                                 full_duration_in_hours = int(metric_data['nearest_full_duration'] / 3600)
                                 for i_algorithm in metric_data['results']['algorithms_run']:
                                     image_file = '%s/vortex.algorithm.%s.%s.%sh.png' % (saved_training_data, i_algorithm, metric_data['labelled_metric_name'], str(full_duration_in_hours))
+                                    # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                                    if csv_upload:
+                                        image_file = '%s/vortex.algorithm.%s.%s.%sh.png' % (saved_training_data, i_algorithm, metric, str(full_duration_in_hours))
+                    
                                     image_url = '%s/ionosphere_images?image=%s' % (settings.SKYLINE_URL, image_file)
                                     image_urls.append(image_url)
 
                                 if consensus_anomalies:
                                     image_file = '%s/vortex.algorithm.consensus.%s.%sh.png' % (saved_training_data, metric_data['labelled_metric_name'], str(full_duration_in_hours))
+                                    # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+                                    if csv_upload:
+                                        image_file = '%s/vortex.algorithm.consensus.%s.%sh.png' % (saved_training_data, metric, str(full_duration_in_hours))
+                    
                                     image_url = '%s/ionosphere_images?image=%s' % (settings.SKYLINE_URL, image_file)
                                     image_urls.append(image_url)
 
                                 metric_data['results']['image_urls'] = image_urls
                         metric_data['training_data'] = saved_training_data
+
+                        if saved_training_data:
+                            use_base_name = metric_data['internal_metric_name']
+                            labelled_metric_name = metric_data['labelled_metric_name']
+                            if labelled_metric_name:
+                                use_base_name = str(labelled_metric_name)
+                            metric_timestamp = metric_data['metric_timestamp']
+                            training_data_url = '%s/ionosphere?timestamp=%s&metric=%s&vortex_results=true&requested_timestamp=%s' % (
+                                settings.SKYLINE_URL, str(metric_timestamp),
+                                use_base_name, str(metric_timestamp))
+                            metric_data['training_data_url'] = training_data_url
+                            logger.info('mirage_vortex :: request_id: %s, training_data_url: %s' % (
+                                str(request_id), training_data_url))
+
                         metric_data['results']['trainable'] = False
                         add_results = True
 
@@ -2156,12 +2467,29 @@ class MirageVortex(Thread):
                             continue
 
                         if add_results:
+                            # @added 20240917 - Feature #5468: callback
+                            if return_timeseries:
+                                metric_data['use_timeseries'] = list(use_timeseries)
+
                             try:
                                 added_results = self.add_results(request_id, metric_data, analysis_start_time)
                             except Exception as err:
-                                logger.error('error :: mirage_vortex :: add_results failed for request_id: %s - %s' % (
+                                logger.error('error :: mirage_vortex :: add_results failed for request_id: %s, err: %s' % (
                                     request_id, err))
                                 break
+                            # @added 20240913 - Feature #5468: callback
+                            if callback_url:
+                                try:
+                                    response_code = callback(skyline_app, callback_url, metric_data)
+                                    if response_code == 200:
+                                        logger.info('mirage_vortex :: callback successful to %s' % callback_url)
+                                    else:
+                                        logger.error('error :: mirage_vortex :: callback responded with %s for %s to %s' % (
+                                            str(response_code), check_item, callback_url))
+                                except Exception as err:
+                                    logger.error('error :: mirage_vortex :: callback failed for %s to %s, err: %s' % (
+                                        check_item, callback_url, err))
+
                         if added_results:
                             logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
                             if anomalous:
@@ -2465,7 +2793,12 @@ class MirageVortex(Thread):
                 for p in pids:
                     if p.is_alive():
                         logger.info('mirage_vortex :: %s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
-                        p.join()
+                        # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                        # p.join()
+                        killing_pid = p.pid
+                        logger.info('mirage_vortex :: %s :: kill spin_process with pid: %s' % (skyline_app, str(killing_pid)))
+                        p.terminate()
+                        logger.info('mirage_vortex :: %s :: killed spin_process process with pid: %s' % (skyline_app, str(killing_pid)))
 
                 # @added 20200607 - Feature #3508: ionosphere.untrainable_metrics
                 # Check to non 3sigma algorithm errors too

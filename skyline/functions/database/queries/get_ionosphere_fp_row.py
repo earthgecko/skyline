@@ -40,7 +40,9 @@ def get_ionosphere_fp_db_row(current_skyline_app, fp_id):
         current_logger.error('error :: %s :: failed to get ionosphere_table meta for fp id %s - %s' % (
             function_str, str(fp_id), e))
         if engine:
-            engine_disposal(engine)
+            # @modified 20241002 - Task #4030: refactoring
+            # engine_disposal(engine)
+            engine_disposal(current_skyline_app, engine)
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
@@ -51,28 +53,35 @@ def get_ionosphere_fp_db_row(current_skyline_app, fp_id):
         stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
         result = connection.execute(stmt)
         row = result.fetchone()
-        try:
-            fp_id_row = dict(row)
-        except Exception as e:
-            trace = traceback.format_exc()
-            connection.close()
-            current_logger.error(trace)
-            fail_msg = 'error :: %s :: could not convert db ionosphere row to dict for fp id %s - %s' % (
-                function_str, str(fp_id), e)
-            current_logger.error('%s' % fail_msg)
-            if engine:
-                engine_disposal(engine)
-            if current_skyline_app == 'webapp':
-                # Raise to webapp
-                raise
-            return fp_id_row
+        # @modified 20241002 - Task #4030: refactoring
+        # only if row
+        if row:
+            try:
+                fp_id_row = dict(row)
+            except Exception as e:
+                trace = traceback.format_exc()
+                connection.close()
+                current_logger.error(trace)
+                fail_msg = 'error :: %s :: could not convert db ionosphere row to dict for fp id %s - %s' % (
+                    function_str, str(fp_id), e)
+                current_logger.error('%s' % fail_msg)
+                if engine:
+                    # @modified 20241002 - Task #4030: refactoring
+                    # engine_disposal(engine)
+                    engine_disposal(current_skyline_app, engine)
+                if current_skyline_app == 'webapp':
+                    # Raise to webapp
+                    raise
+                return fp_id_row
         connection.close()
     except Exception as e:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not get ionosphere row for fp id %s - %s' % (
             function_str, str(fp_id), e))
         if engine:
-            engine_disposal(engine)
+            # @modified 20241002 - Task #4030: refactoring
+            # engine_disposal(engine)
+            engine_disposal(current_skyline_app, engine)
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise

@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>webapp.crucible_backend &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>webapp.crucible_backend &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -156,7 +156,9 @@
 <span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="get_an_engine"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_an_engine">[docs]</a><span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
+<div class="viewcode-block" id="get_an_engine">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_an_engine">[docs]</a>
+<span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
@@ -169,7 +171,10 @@
         <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span></div>
 
 
-<div class="viewcode-block" id="engine_disposal"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.engine_disposal">[docs]</a><span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+
+<div class="viewcode-block" id="engine_disposal">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.engine_disposal">[docs]</a>
+<span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
@@ -177,6 +182,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: calling engine.dispose()&#39;</span><span class="p">)</span>
     <span class="k">return</span></div>
+
 
 
 <span class="c1"># @added 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
@@ -195,7 +201,9 @@
 <span class="c1"># Added run_algorithms</span>
 <span class="c1"># @added 20220610 - Feature #3500: webapp - crucible_process_metrics</span>
 <span class="c1"># Added summarise option</span>
-<div class="viewcode-block" id="submit_crucible_job"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.submit_crucible_job">[docs]</a><span class="k">def</span> <span class="nf">submit_crucible_job</span><span class="p">(</span>
+<div class="viewcode-block" id="submit_crucible_job">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.submit_crucible_job">[docs]</a>
+<span class="k">def</span> <span class="nf">submit_crucible_job</span><span class="p">(</span>
         <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">metrics_list</span><span class="p">,</span> <span class="n">namespaces_list</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
         <span class="n">alert_interval</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">pad_timeseries</span><span class="p">,</span>
         <span class="n">training_data_json</span><span class="p">,</span> <span class="n">run_algorithms</span><span class="p">,</span> <span class="n">summarise</span><span class="p">):</span>
@@ -468,7 +476,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metrics_submitted_to_process</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_crucible_jobs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_crucible_jobs">[docs]</a><span class="k">def</span> <span class="nf">get_crucible_jobs</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_crucible_jobs">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_crucible_jobs">[docs]</a>
+<span class="k">def</span> <span class="nf">get_crucible_jobs</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get a list of all the metrics passed and generate Crucible check files for</span>
 <span class="sd">    each</span>
@@ -597,7 +608,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">crucible_jobs</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_crucible_job"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_crucible_job">[docs]</a><span class="k">def</span> <span class="nf">get_crucible_job</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_crucible_job">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_crucible_job">[docs]</a>
+<span class="k">def</span> <span class="nf">get_crucible_job</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the crucible data for a Crucible analysis</span>
 
@@ -755,7 +769,10 @@
     <span class="k">return</span> <span class="p">(</span><span class="n">crucible_job_details</span><span class="p">,</span> <span class="n">completed_job</span><span class="p">,</span> <span class="n">has_anomalies</span><span class="p">,</span> <span class="n">skyline_anomalies</span><span class="p">,</span> <span class="n">skyline_consensus_anomalies</span><span class="p">,</span> <span class="n">panorama_done</span><span class="p">,</span> <span class="n">panorama_done_timestamp</span><span class="p">,</span> <span class="n">panorama_done_user_id</span><span class="p">,</span> <span class="n">image_files</span><span class="p">,</span> <span class="n">image_file_names</span><span class="p">,</span> <span class="n">graph_image_file</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="send_crucible_job_metric_to_panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.send_crucible_job_metric_to_panorama">[docs]</a><span class="k">def</span> <span class="nf">send_crucible_job_metric_to_panorama</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">skyline_consensus_anomalies</span><span class="p">):</span>
+
+<div class="viewcode-block" id="send_crucible_job_metric_to_panorama">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.send_crucible_job_metric_to_panorama">[docs]</a>
+<span class="k">def</span> <span class="nf">send_crucible_job_metric_to_panorama</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">skyline_consensus_anomalies</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Send the Crucible Skyline CONSENSUS anomalies for a crucible_job and metric</span>
 <span class="sd">    to Panorama to insert into the anomalies database.</span>
@@ -876,6 +893,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: send_crucible_job_metric_to_panorama - failed to add panorama crucible job file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_job_sent_to_panorama_file</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skyline_consensus_anomalies</span><span class="p">),</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>
@@ -885,7 +903,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

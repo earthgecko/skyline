@@ -188,7 +188,7 @@ def thunder_check_horizon_metrics_received(self):
         if anomalous:
             send_alert = True
             success = False
-            logger.warn('warning :: thunder/rolling :: %s :: %s.%s is anomalous latest value is %s %% different from median of windows in period' % (
+            logger.warning('warning :: thunder/rolling :: %s :: %s.%s is anomalous latest value is %s %% different from median of windows in period' % (
                 function_str, check_app, event_type, str(anomalyScore)))
         else:
             logger.info('thunder/rolling :: %s :: %s.%s not anomalous latest value only %s %% different from median of windows in period' % (

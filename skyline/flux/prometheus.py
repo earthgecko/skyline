@@ -46,6 +46,11 @@ if True:
     from functions.flux.prometheus_horizon_request import prometheus_horizon_request
     from matched_or_regexed_in_list import matched_or_regexed_in_list
 
+    # @added 20240319 - Feature #5312: thunder - 207 alert
+    # This was declared below in if namespaces_with_quotas block but declaring
+    # overall now
+    from functions.thunder.send_event import thunder_send_event
+
 # Wrap per metric logging in if FLUX_VERBOSE_LOGGING
 try:
     FLUX_VERBOSE_LOGGING = settings.FLUX_VERBOSE_LOGGING
@@ -57,6 +62,12 @@ try:
     FLUX_PERSIST_QUEUE = settings.FLUX_PERSIST_QUEUE
 except:
     FLUX_PERSIST_QUEUE = False
+
+# @added 20240216 - Feature #: flux - prometheus - prevent thundering herd
+try:
+    FLUX_PROMETHEUS_MAX_AGE = int(settings.FLUX_PROMETHEUS_MAX_AGE)
+except:
+    FLUX_PROMETHEUS_MAX_AGE = 300
 
 # Consolidate flux logging
 logger = set_up_logging(None)
@@ -256,11 +267,13 @@ except Exception as outer_err:
 namespaces_with_quotas = []
 for quota_namespace in list(namespace_quotas_dict.keys()):
     namespaces_with_quotas.append(quota_namespace)
-if namespaces_with_quotas:
-    from functions.thunder.send_event import thunder_send_event
-else:
-    thunder_send_event = None
 
+# @modified 20240319 - Feature #5312: thunder - 207 alert
+# Now declared overall as required for 207 thunder alerts
+# if namespaces_with_quotas:
+#     from functions.thunder.send_event import thunder_send_event
+# else:
+#     thunder_send_event = None
 
 def create_namespace_cardinality_count():
     global namespace_cardinality_count
@@ -368,6 +381,25 @@ class PrometheusMetricDataPost(object):
                 logger.error(traceback.format_exc())
                 logger.error('error :: prometheus :: gzip.decompress(data) failed - %s' % err)
 
+        # @added 20240318 - Feature #5310: flux - prometheus - handle json
+        content_type = None
+        try:
+            content_type = req.get_header('content-type')
+        except Exception as err:
+            logger.error('prometheus :: get_header(\'content-type\'), err: %s' % str(err))
+        if content_type == 'application/json':
+            test_only = False
+            try:
+                test_only_str = req.get_header('x-test-only')
+                if test_only_str:
+                    test_only = True
+            except Exception as err:
+                logger.error('prometheus :: get_header(\'x-test-only\') error - %s' % str(err))
+            if test_only:
+                logger.info('prometheus :: %s :: test_only request' % str(now))
+                logger.debug('debug :: prometheus :: %s request' % str(content_type))
+                request_type = 'json_payload'
+
         # Shard request
         shard_request_node = None
         horizonPostData = None
@@ -421,6 +453,11 @@ class PrometheusMetricDataPost(object):
             logger.error('prometheus :: get_header(\'x-test-only\') error - %s' % str(err))
         if test_only:
             logger.info('prometheus :: %s :: test_only request' % str(now))
+
+        # @added 20240319 - Feature #5312: thunder - 207 alert
+        test_invalid_data_alert = False
+        if test_only:
+            test_invalid_data_alert = True
 
         # Require the tenant_id, server_id and server_url headers to map metrics
         # and metadata to the correct servers.
@@ -681,6 +718,51 @@ class PrometheusMetricDataPost(object):
                 logger.error('error :: prometheus :: could not add prometheus_data to %s - %s' % (debug_key, str(err)))
         #     logger.debug('debug :: prometheus :: WriteRequest prometheus_data: %s' % str(prometheus_data))
 
+        # @added 20240318 - Feature #5310: flux - prometheus - handle json
+        jsonPostData = None
+        if request_type == 'json_payload':
+            try:
+                jsonPostData = json.loads(data)
+            # except json.decoder.JSONDecodeError:
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: prometheus :: decode json failed, data: %s, err: %s' % (str(data), str(err)))
+                message = 'invalid json data'
+                body = {"code": 400, "message": message, 'data': str(data)}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, returning 400' % message)
+                resp.status = falcon.HTTP_400
+                return
+            if not jsonPostData:
+                message = 'invalid json data, failed to decode'
+                body = {"code": 400, "message": message, 'data': str(data)}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, returning 400' % message)
+                resp.status = falcon.HTTP_400
+                return
+            key = None
+            invalid_key = False
+            try:
+                key = str(jsonPostData['key'])
+            except KeyError:
+                message = 'no key passed'
+                invalid_key = True
+                key = None
+            if not key:
+                message = "no key header"
+                body = {"code": 401, "message": "no key header"}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, returning 401' % message)
+                resp.status = falcon.HTTP_401
+                return
+            if key not in valid_keys:
+                message = "invalid_key - %s" % str(key)
+                body = {"code": 403, "message": "invalid key"}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, returning 401' % message)
+                resp.status = falcon.HTTP_403
+                return
+
         prefix_metric = False
         influxdb_db = False
 
@@ -724,13 +806,13 @@ class PrometheusMetricDataPost(object):
             if not key:
                 body = {"code": 401, "message": "no key header"}
                 resp.text = json.dumps(body)
-                logger.info('prometheus :: %s, returning 401' % message)
+                logger.info('prometheus :: %s, returning 401' % str(body))
                 resp.status = falcon.HTTP_401
                 return
             if key not in valid_keys:
                 body = {"code": 403, "message": "invalid key"}
                 resp.text = json.dumps(body)
-                logger.info('prometheus :: %s, returning 401' % message)
+                logger.info('prometheus :: %s, returning 401' % str(body))
                 resp.status = falcon.HTTP_403
                 return
         key_prefix = None
@@ -811,6 +893,32 @@ class PrometheusMetricDataPost(object):
                         error_logged = True
             logger.info('prometheus :: %s :: processed metric namespaces from prometheus_horizon_request' % str(now))
 
+        # @added 20240216 - Feature #: flux - prometheus - prevent thundering herd
+        # If there is an issue with flux ingestion or on the server itself or a
+        # long network partition, any delay or failure will result in Prometheus
+        # retrying everything, very fast.  Due to the fact that the operator
+        # may not have access to Prometheus to stop remote_write or even define
+        # the Prometheus remote_write min_backoff or max_backoff or any access
+        # to configure Prometheus, Skyline must be opinionated in this matter to
+        # prevent lots of thundering retry requests.  Prometheus defaults make
+        # retry go FAST, 50 retries of all queued batches over 5s.  This results
+        # in flux being swamped with retry connections and most batches will
+        # timeout.  Prometheus will just then try again and again and there is
+        # no way to move forward as it insistently wants to retry everything,
+        # every time.  End result, flux can never catch up because it is being
+        # sent 10s of 1000s of samples every retry, which most fail entering
+        # into a retry death spiral.
+        # There is no backfill with Prometheus, thereafter Skyline is ONLY
+        # expecting real time data.  If data is not current return a 400 and
+        # Prometheus will not retry.
+        # As of Prometheus v2.50.0 the sample_age_limit will be allowed in the
+        # remote_write config to allow for disabling retries on samples older
+        # than sample_age_limit, but default is disabled.
+        # Cortex suffers from thundering herd retry issues as well.
+        # https://github.com/prometheus/prometheus/issues/11089
+        # https://github.com/opstrace/opstrace/issues/1409
+        old_data_return_400 = False
+
         timeseries_data = False
         prometheus_data_keys = []
         if prometheus_data:
@@ -860,67 +968,72 @@ class PrometheusMetricDataPost(object):
                             metric = None
                             break
 
-                    for item in prometheus_data['timeseries'][index]['labels']:
-                        if not metric:
-                            break
-                        try:
-                            name = item['name']
-                            if name == 'monitor' and item['value'] == 'master':
-                                labels_dropped += 1
-                                continue
-                            value = item['value']
-                            if name == '__name__':
-                                # @modified 20220819
-                                # The __name__ label is not always passed first
-                                # sometimes some determine metric name first and
-                                # then iterate the labels
-                                # metric_namespace = value
-                                # metric = metric_namespace + '{'
-                                # metric = '%s{_tenant_id="%s",_server_id="%s",' % (metric_namespace, str(tenant_id), str(server_id))
-                                continue
-                            else:
-                                drop_label = False
-                                if dropLabels:
-                                    labels_checked_to_drop += 1
-                                    for dropLabel in dropLabels:
-                                        if name == dropLabel[0]:
-                                            if dropLabel[1] in ['*', '.*']:
-                                                # labels_dropped.append(value)
-                                                labels_dropped += 1
-                                                drop_label = True
-                                                break
-                                            pattern_match = False
-                                            try:
-                                                pattern_match, metric_matched_by = matched_or_regexed_in_list('flux', value, [dropLabel[1]])
-                                                del metric_matched_by
-                                            except Exception as err:
-                                                if not error_logged:
-                                                    logger.error(traceback.format_exc())
-                                                    logger.error('error :: prometheus :: %s :: dropLabels - matched_or_regexed_in_list failed checking %s in %s - %s' % (
-                                                        str(now), str(item), str(dropLabel[1]), err))
-                                                    error_logged = True
-                                            if pattern_match:
-                                                # labels_dropped.append(value)
-                                                labels_dropped += 1
-                                                drop_label = True
-                                                break
-                                if drop_label:
+                    # @modified 20240111 - Task #5214: flux - prometheus - handle no samples
+                    #                      Task #5178: Build and test skyline v4.1.0
+                    # Prometheus can send metrics that have no samples key so
+                    # also validated the labels key exists
+                    if 'labels' in prometheus_data['timeseries'][index]:
+                        for item in prometheus_data['timeseries'][index]['labels']:
+                            if not metric:
+                                break
+                            try:
+                                name = item['name']
+                                if name == 'monitor' and item['value'] == 'master':
+                                    labels_dropped += 1
                                     continue
-                                if not first_element_done:
-                                    metric = metric + item['name'] + '="' + item['value'] + '"'
+                                value = item['value']
+                                if name == '__name__':
+                                    # @modified 20220819
+                                    # The __name__ label is not always passed first
+                                    # sometimes some determine metric name first and
+                                    # then iterate the labels
+                                    # metric_namespace = value
+                                    # metric = metric_namespace + '{'
+                                    # metric = '%s{_tenant_id="%s",_server_id="%s",' % (metric_namespace, str(tenant_id), str(server_id))
+                                    continue
                                 else:
-                                    metric = metric + ',' + item['name'] + '="' + item['value'] + '"'
-                                if not first_element_done:
-                                    first_element_done = True
-                        except Exception as err:
-                            if not error_logged:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: prometheus :: could not decode interpolate WriteRequest metric name %s, prometheus_item_data: %s - %s' % (
-                                    str(prometheus_data['timeseries'][index]),
-                                    str(prometheus_item_data), str(err)))
-                                error_logged = True
-                            metric = None
-                            break
+                                    drop_label = False
+                                    if dropLabels:
+                                        labels_checked_to_drop += 1
+                                        for dropLabel in dropLabels:
+                                            if name == dropLabel[0]:
+                                                if dropLabel[1] in ['*', '.*']:
+                                                    # labels_dropped.append(value)
+                                                    labels_dropped += 1
+                                                    drop_label = True
+                                                    break
+                                                pattern_match = False
+                                                try:
+                                                    pattern_match, metric_matched_by = matched_or_regexed_in_list('flux', value, [dropLabel[1]])
+                                                    del metric_matched_by
+                                                except Exception as err:
+                                                    if not error_logged:
+                                                        logger.error(traceback.format_exc())
+                                                        logger.error('error :: prometheus :: %s :: dropLabels - matched_or_regexed_in_list failed checking %s in %s - %s' % (
+                                                            str(now), str(item), str(dropLabel[1]), err))
+                                                        error_logged = True
+                                                if pattern_match:
+                                                    # labels_dropped.append(value)
+                                                    labels_dropped += 1
+                                                    drop_label = True
+                                                    break
+                                    if drop_label:
+                                        continue
+                                    if not first_element_done:
+                                        metric = metric + item['name'] + '="' + item['value'] + '"'
+                                    else:
+                                        metric = metric + ',' + item['name'] + '="' + item['value'] + '"'
+                                    if not first_element_done:
+                                        first_element_done = True
+                            except Exception as err:
+                                if not error_logged:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: prometheus :: could not decode interpolate WriteRequest metric name %s, prometheus_item_data: %s - %s' % (
+                                        str(prometheus_data['timeseries'][index]),
+                                        str(prometheus_item_data), str(err)))
+                                    error_logged = True
+                                metric = None
+                                break
                     if not metric:
                         continue
                     metric = metric + '}'
@@ -945,56 +1058,194 @@ class PrometheusMetricDataPost(object):
                             metric_namespaces_dict[metric_namespace] = [metric]
                             cardinality_metric_namespaces_dict[cardinality_metric_namespace] = [metric]
 
-                    for item in prometheus_data['timeseries'][index]['samples']:
-                        value_present = False
-                        try:
-                            value_str = item['value']
-                            value_present = True
-                            # if value_str:
-                            #     value = float(value_str)
-                        except KeyError:
-                            # @modified 20230224 - Bug #4856: flux - prometheus - no 0s
-                            # The python protocol buffer does not deserialise a
-                            # value key if it is 0. Prometheus does send a value
-                            # key when the datapoint is 0, but after deserialising
-                            # there is only a timestamp key, so ...
-                            # if test_only:
-                            #     test_metrics_with_no_values.append(metric)
-                            # continue
-                            value_str = '0.0'
-                            value_present = True
-                        except:
-                            continue
-
-                        value = None
-                        if value_present:
+                    # @modified 20240111 - Task #5214: flux - prometheus - handle no samples
+                    #                      Task #5178: Build and test skyline v4.1.0
+                    # Prometheus can send metrics that have no samples key
+                    if 'samples' in prometheus_data['timeseries'][index]:
+                        for item in prometheus_data['timeseries'][index]['samples']:
+                            value_present = False
                             try:
-                                value = float(value_str)
+                                value_str = item['value']
+                                value_present = True
+                                # if value_str:
+                                #     value = float(value_str)
+                            except KeyError:
+                                # @modified 20230224 - Bug #4856: flux - prometheus - no 0s
+                                # The python protocol buffer does not deserialise a
+                                # value key if it is 0. Prometheus does send a value
+                                # key when the datapoint is 0, but after deserialising
+                                # there is only a timestamp key, so ...
+                                # if test_only:
+                                #     test_metrics_with_no_values.append(metric)
+                                # continue
+                                value_str = '0.0'
+                                value_present = True
                             except:
-                                if test_only:
-                                    test_metrics_with_no_values.append(metric)
                                 continue
 
-                        if str(value) == 'nan':
-                            continue
-                        try:
-                            timestamp = int(item['timestamp'])
-                        except:
-                            continue
-                        metric_list_data = '%s %s %s %s %s' % (
-                            str(tenant_id), str(server_id), str(timestamp),
-                            str(value), metric)
-                        prometheus_metrics_list.append(metric_list_data)
+                            value = None
+                            if value_present:
+                                try:
+                                    value = float(value_str)
+                                except:
+                                    if test_only:
+                                        test_metrics_with_no_values.append(metric)
+                                    continue
 
-                        # @added 20230202 - Feature #4840: flux - prometheus - x-test-only header
-                        if test_only:
-                            test_only_metrics_submitted.append(metric)
+                            if str(value) == 'nan':
+                                continue
+                            try:
+                                timestamp = int(item['timestamp'])
+                            except:
+                                continue
+
+                            # @added 20240216 - Feature #: flux - prometheus - prevent thundering herd
+                            if timestamp < (current_ts - FLUX_PROMETHEUS_MAX_AGE):
+                                old_data_return_400 = True
+                                age = current_ts - timestamp
+                                logger.info('prometheus :: %s :: data too old, age: %s for tenant_id: %s, returning 400' % (
+                                    str(now), str(age), str(tenant_id)))
+                                break
+
+                            metric_list_data = '%s %s %s %s %s' % (
+                                str(tenant_id), str(server_id), str(timestamp),
+                                str(value), metric)
+                            prometheus_metrics_list.append(metric_list_data)
+
+                            # @added 20230202 - Feature #4840: flux - prometheus - x-test-only header
+                            if test_only:
+                                test_only_metrics_submitted.append(metric)
 
                 logger.info('prometheus :: %s :: got %s metrics in %s request' % (
                     str(now), str(len(prometheus_metrics_list)), request_type))
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: prometheus :: could not parse prometheus_data dict - %s' % str(err))
+
+        # @added 20240216 - Feature #: flux - prometheus - prevent thundering herd
+        # Return 400 for old data so that Prometheus does not retry it
+        if old_data_return_400:
+            message = 'data older than %s seconds' % str(FLUX_PROMETHEUS_MAX_AGE)
+            body = {"code": 400, "message": message}
+            resp.text = json.dumps(body)
+            logger.info('prometheus :: %s, %s, for tenant_id: %s, returning 400' % (
+                str(now), str(message), str(tenant_id)))
+            resp.status = falcon.HTTP_400
+            return
+
+        # @added 20240318 - Feature #5310: flux - prometheus - handle json
+        invalid_metrics = []
+        valid_metrics = []
+        json_item_errors = []
+        if request_type == 'json_payload' and jsonPostData:
+            no_metrics_data = False
+            if 'metrics' not in jsonPostData:
+                no_metrics_data = True
+            else:
+                if len(jsonPostData['metrics']) == 0:
+                    no_metrics_data = True
+                else:
+                    logger.info('prometheus :: %s, %s metrics submitted for tenant_id: %s, returning 400' % (
+                        str(now), str(len(jsonPostData['metrics'])), str(tenant_id)))
+
+            if no_metrics_data:
+                message = 'no metrics data sent'
+                body = {"code": 400, "message": message}
+                resp.text = json.dumps(body)
+                logger.info('prometheus :: %s, %s, for tenant_id: %s, returning 400' % (
+                    str(now), str(message), str(tenant_id)))
+                resp.status = falcon.HTTP_400
+                return
+            for item in jsonPostData['metrics']:
+                prometheus_metric_name = None
+                metric_timestamp = None
+                metric_value = None
+                try:
+                    metric = item['metric']
+                    metric_timestamp = int(item['timestamp'])
+                    metric_value = float(item['value'])
+                    metric_namespace = metric.split('{')[0]
+                    metric_kvs = metric.split('{')[1]
+                    total_metric = '%s{_tenant_id="%s",_server_id="%s",%s' % (
+                        metric_namespace, str(tenant_id), str(server_id), metric_kvs
+                    )
+                    metric_kvs = metric_kvs.replace('}', '')
+                    metric_kvs_list = metric_kvs.split(',')
+
+                    metric_str = '%s{_tenant_id="%s",_server_id="%s"' % (
+                        metric_namespace, str(tenant_id), str(server_id))
+                    for item in metric_kvs_list:
+                        label = item.split('=')[0]
+                        if dropLabels:
+                            labels_checked_to_drop += 1
+                            for dropLabel in dropLabels:
+                                if label == dropLabel[0]:
+                                    if dropLabel[1] in ['*', '.*']:
+                                        # labels_dropped.append(value)
+                                        labels_dropped += 1
+                                        drop_label = True
+                                        break
+                                    pattern_match = False
+                                    try:
+                                        pattern_match, metric_matched_by = matched_or_regexed_in_list('flux', value, [dropLabel[1]])
+                                        del metric_matched_by
+                                    except Exception as err:
+                                        if not error_logged:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: prometheus :: %s :: dropLabels - matched_or_regexed_in_list failed checking %s in %s - %s' % (
+                                                str(now), str(item), str(dropLabel[1]), err))
+                                            error_logged = True
+                                    if pattern_match:
+                                        # labels_dropped.append(value)
+                                        labels_dropped += 1
+                                        drop_label = True
+                                        break
+                            if drop_label:
+                                continue
+                        value = item.split('=')[1]
+                        metric_str = '%s,%s="%s"' % (metric_str, label, value) 
+                    prometheus_metric_name = '%s}' % metric_str
+                    prometheus_metric_name = prometheus_metric_name.replace('""', '"')
+                    valid_metrics.append([prometheus_metric_name, 200])
+                except Exception as err:
+                    json_item_errors.append([item, 'failed to determine prometheus_metric_name or label to drop', err])
+                    prometheus_metric_name = None
+                    invalid_metrics.append([item, 400])
+                if not prometheus_metric_name:
+                    continue
+                try:
+                    if len(prometheus_metric_name) > 4096:
+                        dropped_too_long.append(metric)
+                        json_item_errors.append([item, prometheus_metric_name, 'metric name too long > 4096 chars'])
+                        invalid_metrics.append([item, 400])
+                        valid_metrics.remove([prometheus_metric_name, 200])
+                        continue
+                    # Only process cardinality if not test_only
+                    if not test_only:
+                        metric_namespaces.append(metric_namespace)
+                        cardinality_metric_namespace = '%s.%s' % (str(tenant_id), metric_namespace)
+                        cardinality_metric_namespaces.append(cardinality_metric_namespace)
+                        try:
+                            metric_namespaces_dict[metric_namespace].append(prometheus_metric_name)
+                            cardinality_metric_namespaces_dict[cardinality_metric_namespace].append(prometheus_metric_name)
+                        except KeyError:
+                            metric_namespaces_dict[metric_namespace] = [prometheus_metric_name]
+                            cardinality_metric_namespaces_dict[cardinality_metric_namespace] = [prometheus_metric_name]
+                    metric_list_data = '%s %s %s %s %s' % (
+                        str(tenant_id), str(server_id), str(metric_timestamp), str(metric_value),
+                        prometheus_metric_name)
+                    prometheus_metrics_list.append(metric_list_data)
+                    if test_only:
+                        test_only_metrics_submitted.append(prometheus_metric_name)
+
+                except Exception as err:
+                    logger.error('error :: prometheus :: failed to add jsonPostData item to prometheus_metrics_list, item: %s, err: %s' % (
+                        str(item), str(err)))
+                    valid_metrics.remove([prometheus_metric_name, 200])
+                    invalid_metrics.append([item, 400])
+        if json_item_errors:
+            logger.error('error :: prometheus :: skipped %s items because failed to determine name and whether to drop label from an item, sample json_item_errors[0-3]: %s' % (
+                str(len(json_item_errors)), str(json_item_errors[0:3])))
 
         remote_storage_adapter_data = []
         if request_type == 'remote_storage_adapter':
@@ -1783,6 +2034,18 @@ class PrometheusMetricDataPost(object):
                     logger.error('error :: prometheus :: %s :: failed to add metrics to %s Redis set  - %s' % (
                         str(now), redis_key, str(err)))
 
+            # @added 20240112 - Bug #5220: flux prometheus - reset the prometheus_metrics_list if no prometheus_metrics_list_in_quota
+            #                   Task #5178: Build and test skyline v4.1.0
+            # Above if there is a quota and there are namespace_metrics and all
+            # the metrics are removed because they are not in the namespace_metrics
+            # the prometheus_metrics_list is not reset because
+            # prometheus_metrics_list_in_quota is empty.
+            if not prometheus_metrics_list_in_quota:
+                if len(prometheus_metrics_list_removed_over_quota) == len(prometheus_metrics_list):
+                    logger.info('prometheus :: %s :: no metrics present that are in the namespace_metrics quota for %s, emptying prometheus_metrics_list' % (
+                        str(now), str(tenant_id)))
+                    prometheus_metrics_list = []
+
         if update_namespace_quota_metrics:
             try:
                 redis_conn_decoded.sadd(quota_namespace_metrics_redis_key, *set(namespace_metrics))
@@ -1884,13 +2147,16 @@ class PrometheusMetricDataPost(object):
                 logger.error(traceback.format_exc())
                 logger.error('error :: prometheus :: %s :: failed to hset %s Redis hash - %s' % (
                     str(now), test_only_redis_key, err))
-            end = timer()
-            logger.info('prometheus :: %s :: test_only request completed in %.6f seconds' % (str(now), (end - start)))
-            resp.text = json.dumps(test_only_data)
-            resp.status = falcon.HTTP_200
-            return
+            if len(invalid_metrics) == 0:
+                end = timer()
+                logger.info('prometheus :: %s :: test_only request completed in %.6f seconds' % (str(now), (end - start)))
+                resp.text = json.dumps(test_only_data)
+                resp.status = falcon.HTTP_200
+                return
 
-        if prometheus_metrics_list:
+        # @modified 20240319 - Feature #5310: flux - prometheus - handle json
+        #                      Feature #4840: flux - prometheus - x-test-only header
+        if prometheus_metrics_list and not test_only:
             try:
                 # Use a Redis set
                 # redis_conn.hset('test.flux.prometheus_metrics', mapping=prometheus_metrics)
@@ -1910,6 +2176,76 @@ class PrometheusMetricDataPost(object):
             except Exception as err:
                 logger.error('error :: prometheus :: %s :: failed to server_url flux.prometheus_metrics.servers Redis hash - %s' % (
                     str(now), str(err)))
+
+        # @added 20240318 - Feature #5310: flux - prometheus - handle json
+        if request_type == 'json_payload' and len(invalid_metrics) > 0:
+            if len(valid_metrics) > 0:
+                data = []
+                for item in list(invalid_metrics + valid_metrics):
+                    data.append({'metric_data': item[0], 'status': item[1]})
+                message = 'partial injestion - %s metrics were ingested and the data for %s metrics was invalid and was not ingested' % (
+                    str(len(valid_metrics)), str(len(invalid_metrics)))
+                notice_msg = '%s metrics were processed and %s metric data were rejected' % (
+                    str(len(valid_metrics)), str(len(invalid_metrics)))
+                if test_invalid_data_alert:
+                    message = 'TEST ONLY - %s' % message
+                    notice_msg = 'TEST ONLY - %s' % notice_msg
+                return_code = 207
+                body = {
+                    'code': return_code,
+                    'data': data,
+                    'error': message,
+                    'message': notice_msg,
+                }
+                # @added 20240319 - Feature #5312: thunder - 207 alert
+                if settings.THUNDER_ENABLED:
+                    # Note expiry is hardcoded here but thunder will override it
+                    # if there is an expiry declared in an external_settings
+                    # context
+                    expiry = 3600
+                    level = 'alert'
+                    event_type = 'invalid_data'
+                    message = '%s - %s metrics submitted to prometheus/write via JSON were rejected due to invalid names or data, %s valid metrics were processed' % (
+                        tenant_id, str(len(invalid_metrics)),
+                        str(len(valid_metrics)))
+                    status = 'invalid data'
+                    if test_invalid_data_alert:
+                        message = 'TESTING - %s' % message
+                        status = 'TEST - invalid data'
+                    thunder_event = {
+                        'level': level,
+                        'event_type': event_type,
+                        'message': message,
+                        'app': 'flux',
+                        'metric': None,
+                        'source': 'flux',
+                        'timestamp': time(),
+                        'expiry': expiry,
+                        'data': {
+                            'namespace': tenant_id,
+                            'server_id': server_id,
+                            'invalid_metrics_count': len(invalid_metrics),
+                            'processed_metrics_count': len(valid_metrics),
+                            'invalid_metrics': invalid_metrics,
+                            'status': status,
+                        },
+                    }
+                    submitted = False
+                    try:
+                        # Do not log overly verbose
+                        submitted = thunder_send_event('flux', thunder_event, log=False)
+                    except Exception as err:
+                        logger.error('error :: prometheus :: error encounterd with thunder_send_event, err: %s' % (
+                            err))
+                    if submitted:
+                        logger.info('prometheus :: send thunder event invalid_data for %s metrics on namespace %s' % (
+                            str(len(invalid_metrics)), tenant_id))
+                logger.info('prometheus :: %s :: %s, returning 207' % (str(now), message))
+                end = timer()
+                logger.info('prometheus :: %s :: request completed in %.6f seconds' % (str(now), (end - start)))
+                resp.text = json.dumps(body)
+                resp.status = falcon.HTTP_207
+                return
 
         logger.info('prometheus :: %s :: handled request with mem_usage of %s kb' % (
             str(now), str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)))

@@ -1,0 +1,402 @@
+{% block alias_features_profile_block %}
+
+<!-- BEGIN /utilities alias_features_profile block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities alias_features_profile</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+		  <li><a href="/utilities?skip_analysis_on"><span class="logo"><span class="sky">Skip</span> <span class="re">analysis</span></a></li>
+		  <li><a href="/utilities?mute_alerts_on"><span class="logo"><span class="sky">Mute</span> <span class="re">alerts</span></a></li>
+		  <li><a href="/utilities?test_alert"><span class="logo"><span class="sky">Test</span> <span class="re">alert</span></a></li>
+      <li><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+			<li class="active"><a href="/utilities?alias_features_profile"><span class="logo"><span class="sky">Alias</span> <span class="re">features profiles</span></a></li>
+		  <li><a href="/utilities?remove_flux_namespace_quota_metrics"><span class="logo"><span class="sky">Flux</span> <span class="re">remove namespace quota metrics</span></a></li>
+		  <li><a href="/utilities?remove_and_set_inactive"><span class="logo"><span class="sky">Remove</span> <span class="re">metrics</span></a></li>
+		  <li><a href="/utilities?labelled_metrics_names"><span class="logo"><span class="sky">Labelled metrics</span> - <span class="re">names</span></a></li>
+		  <li><a href="/utilities?timeseries_graph"><span class="logo"><span class="sky">Graph</span> - <span class="re">timeseries</span></a></li>
+		  <li><a href="/utilities?csv_to_timeseries"><span class="logo"><span class="sky">csv</span> - <span class="re">to timeseries</span></a></li>
+			<li><a href="/utilities?bq_backfill"><span class="logo"><span class="sky">BigQuery</span> <span class="re">backfill</span></a></li>
+		  <li><a href="/utilities?bq_update"><span class="logo"><span class="sky">BigQuery</span> <span class="re">update</span></a></li>
+		  <li><a href="/utilities?reprocess_batch_metrics"><span class="logo"><span class="sky">Reprocess</span> <span class="re">batch metrics</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+{% if 'metric_pattern' in alias_features_profile_dict %}
+	{% set metric_pattern = alias_features_profile_dict['metric_pattern'] %}
+{% else %}
+	{% set metric_pattern = '' %}
+{% endif %}
+{% if 'replace_pattern' in alias_features_profile_dict %}
+	{% set replace_pattern = alias_features_profile_dict['replace_pattern'] %}
+{% else %}
+	{% set replace_pattern = '' %}
+{% endif %}
+{% if 'exclude_patterns' in alias_features_profile_dict %}
+	{% set exclude_patterns = alias_features_profile_dict['exclude_patterns'] %}
+{% else %}
+	{% set exclude_patterns = [] %}
+{% endif %}
+{% if 'candidate_metrics' in alias_features_profile_dict %}
+	{% set candidate_metrics = alias_features_profile_dict['candidate_metrics'] %}
+{% else %}
+	{% set candidate_metrics = [] %}
+{% endif %}
+{% if 'candidate_metrics_list' in alias_features_profile_dict %}
+	{% set candidate_metrics_list = alias_features_profile_dict['candidate_metrics_list'] %}
+{% else %}
+	{% set candidate_metrics_list = [] %}
+{% endif %}
+{% if 'target_alias_fps' in alias_features_profile_dict %}
+	{% set target_alias_fps = alias_features_profile_dict['target_alias_fps'] %}
+{% else %}
+	{% set target_alias_fps = {} %}
+{% endif %}
+{% if 'create_aliases' in alias_features_profile_dict %}
+	{% set create_aliases = alias_features_profile_dict['create_aliases'] %}
+{% else %}
+	{% set create_aliases = False %}
+{% endif %}
+{% if 'dry_run' in alias_features_profile_dict %}
+	{% set dry_run = alias_features_profile_dict['dry_run'] %}
+{% else %}
+	{% set dry_run = False %}
+{% endif %}
+{% if 'label' in alias_features_profile_dict %}
+	{% set label = alias_features_profile_dict['label'] %}
+{% else %}
+	{% set label = False %}
+{% endif %}
+{% if 'user' in alias_features_profile_dict %}
+	{% set user = alias_features_profile_dict['user'] %}
+{% else %}
+	{% set user = None %}
+{% endif %}
+{% if 'user_id' in alias_features_profile_dict %}
+	{% set user_id = alias_features_profile_dict['user_id'] %}
+{% else %}
+	{% set user_id = 0 %}
+{% endif %}
+{% if 'aliased_fps' in alias_features_profile_dict %}
+	{% set aliased_fps = alias_features_profile_dict['aliased_fps'] %}
+{% else %}
+	{% set aliased_fps = {} %}
+{% endif %}
+{% if 'orphaned_fps' in alias_features_profile_dict %}
+	{% set orphaned_fps = alias_features_profile_dict['orphaned_fps'] %}
+{% else %}
+	{% set orphaned_fps = {} %}
+{% endif %}
+{% if 'all_alias_fps_preexist' in alias_features_profile_dict %}
+	{% set all_alias_fps_preexist = alias_features_profile_dict['all_alias_fps_preexist'] %}
+{% else %}
+	{% set all_alias_fps_preexist = False %}
+{% endif %}
+{% if 'fps_copied' in alias_features_profile_dict %}
+	{% set fps_copied = alias_features_profile_dict['fps_copied'] %}
+{% else %}
+	{% set fps_copied = {} %}
+{% endif %}
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Alias ::</span> <span class="re">features profiles</span></h4>
+
+    You can alias existing features profiles to other metrics.  This allows you to assign features profiles
+    for a certain namespace to a new namespace.  For example say you deploy a new bigger server to move
+    some service/s or role/s too, the server metrics themselves may be different but the application or
+    service metrics may be expected to be the same or similar when the service/role is migrated onto the
+    new server.  Before aliasing features profiles from one namespace to another the metrics to be aliased
+    must exist first.<br>
+
+{% if aliased_fps|length < 1 %}
+
+  {% if candidate_metrics|length < 1 %}
+  <h4><span class="logo"><span class="sky">STEP ::</span> <span class="re">1 of 2</span></span> Determine candidate metrics for the <code>metric_pattern</code> with features profiles</h4>
+  {% else %}
+  <h4><span class="logo"><span class="sky">STEP ::</span> <span class="re">2 of 2</span></span> Add any excluded patterns and submit</h4>
+  {% endif %}
+  {% if all_alias_fps_preexist|string == 'True' %}
+  <h2><span class="logo"><span class="sky">ALL alias fps exist nothing to do</span></span></h2>
+  {% endif %}
+
+    <form action="api?alias_features_profile" method=post enctype=multipart/form-data>
+      <input type="hidden" name="alias_features_profile" value="true">
+		  <input type="hidden" name="added_by" value="webapp">
+		  <input type="hidden" name="user" value="{{ user }}">
+		  <input type="hidden" name="user_id" value="{{ user_id }}">
+  {% if candidate_metrics|length < 1 %}
+		  <input type="hidden" name="step" value="get_candidate_alias_metrics">
+  {% else %}
+      <input type="hidden" name="step" value="create_alias_fps">
+		  <input type="hidden" name="candidate_metrics" value="">
+  {% endif %}
+  		<table class="table table-hover">
+  		  <thead>
+  		    <tr>
+  		      <th>Option</th>
+  		      <th>value</th>
+  		    </tr>
+  		  </thead>
+  		  <tbody>
+    		  <tr>
+  		      <td>metric_pattern</td>
+  {% if candidate_metrics|length > 0 %}
+            <td>
+              <select name="metric_pattern">
+              <option value="{{ metric_pattern }}">{{ metric_pattern }}</option>
+              </select> The metric pattern
+            </td>
+  {% else %}
+  		      <td><input type="text" name="metric_pattern" value="{{ metric_pattern }}" /> The metric pattern for the features profiles you want to alias to another namespace, this is the src pattern  e.g. skyline-server-1</td>
+  {% endif %}
+  		    </tr>
+  		    <tr>
+      			<td>replace_pattern</td>
+  {% if candidate_metrics|length > 0 %}
+            <td>
+              <select name="replace_pattern">
+              <option value="{{ replace_pattern }}">{{ replace_pattern }}</option>
+              </select> The replace pattern</td>
+  {% else %}
+            <td><input type="text" name="replace_pattern" value="{{ replace_pattern }}" /> The replacement/alias pattern to alias features profiles to, this is the destination pattern e.g. skyline-server-2</td>
+  		    </tr>
+  {% endif %}
+  {% if candidate_metrics|length > 0 %}
+  		    <tr>
+				    <td>candidate_metrics</td>
+            <td>
+              <ul>
+                {% for metric in candidate_metrics_list %}
+                    <li>{{ metric }}</li>
+                {% endfor %}
+            </ul>
+            </td>
+			    </tr>
+	{% endif %}
+	{% if orphaned_fps|length > 0 %}
+  		    <tr>
+				    <td><span class="logo"><span class="re">orphaned_fps</span></span> (no alias metrics exist for these)</td>
+            <td>
+              <ul>
+              {% for fp_id in orphaned_fps %}
+                  <li><code>{{ fp_id }}: {{ orphaned_fps[fp_id] }}</code></li>
+              {% endfor %}
+              </ul>
+            </td>
+			    </tr>
+	{% endif %}
+	{% if target_alias_fps|length > 0 %}
+  		    <tr>
+				    <td>target_alias_fps</td>
+            <td>
+              <ul>
+              {% for fp_id in target_alias_fps %}
+                  <li>{{ fp_id }}: {{ target_alias_fps[fp_id] }}</li>
+              {% endfor %}
+              </ul>
+            </td>
+			    </tr>
+	{% endif %}
+  {% if candidate_metrics|length > 0 %}
+			    <tr>
+				    <td>exclude_patterns</td>
+    {% if exclude_patterns|length > 0 %}
+            <td>
+              <select name="exclude_patterns">
+              <option value="{{ exclude_patterns }}">{{ exclude_patterns }}</option>
+              </select> The exclude_patterns
+            </td>
+    {% else %}
+            <td><input type="text" name="exclude_patterns" value="" /> A comma separated list of patterns to EXCLUDE from creating alias on e.g. telegraf,_tenant_id</td>
+    {% endif %}
+			    </tr>
+			    <tr>
+				    <td>label</td>
+    {% if not label %}
+				    <td><input type="text" name="label" value="" /> A label to assign the aliases</td>
+    {% else %}
+            <td>
+              <select name="label">
+              <option value="{{ label }}">{{ label }}</option>
+              </select> The label
+            </td>
+    {% endif %}
+			    </tr>
+          <tr>
+  		      <td>create_aliases</td>
+  		      <td><select name="create_aliases">
+              <option value="false">false</option>
+              <option value="true">true</option>
+              </select> NOTE this by default is set to false and will return a response with any changes due to added exclude_patterns, it will continue to just respond until this is set to true
+            </td>
+  		    </tr>
+  {% endif %}
+          <tr>
+            <td>response_format</td>
+            <td><select name="response_format">
+              <option value="html">html</option>
+              <option value="json">json</option>
+              </select>
+            </td>
+          </tr>
+		    </tbody>
+  		</table>
+      <br>
+  {% if candidate_metrics|length > 0 %}
+      <input type="submit" value="STEP 2 - Alias features profiles">
+  {% else %}
+      <input type="submit" value="STEP 1 - Determine candidate metrics with features profiles">
+  {% endif %}
+
+    </form>
+      </div>
+  </div>
+{% endif %}
+
+{% if all_alias_fps_preexist|string == 'True' %}
+  <h2><span class="logo"><span class="sky">ALL alias fps exist nothing to do</span></span></h2>
+{% endif %}
+
+{% if orphaned_fps|length > 0 %}
+  {% if dry_run %}
+  <h2><span class="logo"><span class="re">DRY RUN</span></span></h2>
+  {% endif %}
+  <h3><span class="logo"><span class="re">ORPHANED ::</span> <span class="sky">features profiles</span></span> - {{ orphaned_fps|length }} features profiles that cannot be aliased as no alias metrics exists</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>fp_id</th>
+        <th>Metric</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fp_id in orphaned_fps %}
+      <tr>
+        <td><code>{{ fp_id }}</code></td>
+        <td><code>{{ orphaned_fps[fp_id]['metric'] }}</code></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{% if fps_copied|length > 0 %}
+  <h3><span class="logo"><span class="sky">Copied ::</span> <span class="re">features profiles</span></span> {{ fps_copied|length }} new copied features profiles</h3>
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>fp_id</th>
+        <th>metric_id</th>
+        <th>alias_id</th>
+        <th>created</th>        
+      </tr>
+    </thead>
+    <tbody>
+  {% for fp_id in fps_copied %}
+      <tr>
+        <td><a href="?fp_view=true&fp_id={{ fp_id }}&metric_id={{ fps_copied[fp_id]['metric_id'] }}" target="_blank"></a>{{ fp_id }}</a></td>
+        <td>{{ fps_copied[fp_id]['metric_id'] }}</td>
+        <td>{{ fps_copied[fp_id]['alias_id'] }}</td>
+        <td>{{ fps_copied[fp_id]['created_timestamp'] }}</td>
+      </tr>
+  {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+
+{% if target_alias_fps|length > 0 %}
+  {% if dry_run %}
+  <h2><span class="logo"><span class="re">DRY RUN</span></span></h2>
+  {% endif %}
+  {% if not create_aliases %}
+  <h3><span class="logo"><span class="sky">Alias ::</span> <span class="re">features profiles</span></span> - DRY RUN {{ target_alias_fps|length }} features profiles would be aliased</h3>
+  <div class="alert alert-warning">
+    <strong>create_aliases was set to false so these are what WOULD be created when submitted with create_aliases set to True</strong>
+  </div>
+
+  <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>fp_id</th>
+          <th>Metric</th>
+          <th>Original metric</th>
+          <th>pre existing</th>
+        </tr>
+      </thead>
+      <tbody>
+    {% for fp_id in target_alias_fps %}
+        <tr>
+          <td>{{ fp_id }}</td>
+          <td>{{ target_alias_fps[fp_id]['metric'] }}</td>
+          <td>{{ target_alias_fps[fp_id]['original_metric'] }}</td>
+        {% if target_alias_fps[fp_id]['exists']|string == 'True' %}
+          <td><span class="logo"><span class="sky">{{ target_alias_fps[fp_id]['exists'] }}</span></span></td>
+        {% else %}
+          <td><span class="logo"><span class="re">{{ target_alias_fps[fp_id]['exists'] }}</span></span></td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endif %}
+
+{% if aliased_fps|length > 0 %}
+  <h3><span class="logo"><span class="sky">Alias ::</span> <span class="re">features profiles</span></span> - {{ aliased_fps|length }} features profiles have been aliased</h3>
+  <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>fp_id</th>
+          <th>Metric</th>
+          <th>Original metric</th>
+          <th>pre existing</th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for fp_id in aliased_fps %}
+        <tr>
+          <td>{{ aliased_fps[fp_id]['alias_id'] }}</td>
+          <td>{{ fp_id }}</td>
+          <td>{{ aliased_fps[fp_id]['metric'] }}</td>
+          <td>{{ aliased_fps[fp_id]['original_metric'] }}</td>
+    {% if aliased_fps[fp_id]['exists']|string == 'True' %}
+          <td><span class="logo"><span class="sky">{{ aliased_fps[fp_id]['exists'] }}</span></span></td>
+    {% else %}
+          <td><span class="logo"><span class="re">{{ aliased_fps[fp_id]['exists'] }}</span></span></td>
+    {% endif %}
+        </tr>
+  {% endfor %}
+      </tbody>
+    </table>
+{% endif %}
+
+	</div>
+	</div>
+	</div>
+
+<!-- END alias_features_profile_block -->
+{% endblock %}

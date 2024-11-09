@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.horizon package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.horizon package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -132,6 +132,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -179,28 +180,28 @@
            <div itemprop="articleBody">
              
   <section id="skyline-horizon-package">
-<h1>skyline.horizon package<a class="headerlink" href="#skyline-horizon-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.horizon package<a class="headerlink" href="#skyline-horizon-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="skyline-horizon-agent-module">
-<h2>skyline.horizon.agent module<a class="headerlink" href="#skyline-horizon-agent-module" title="Permalink to this heading"></a></h2>
+<h2>skyline.horizon.agent module<a class="headerlink" href="#skyline-horizon-agent-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-horizon.listen">
-<span id="skyline-horizon-listen-module"></span><h2>skyline.horizon.listen module<a class="headerlink" href="#module-horizon.listen" title="Permalink to this heading"></a></h2>
+<span id="skyline-horizon-listen-module"></span><h2>skyline.horizon.listen module<a class="headerlink" href="#module-horizon.listen" title="Link to this heading"></a></h2>
 <p>listen.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="horizon.listen.SafeUnpickler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SafeUnpickler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_imports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ASCII'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SafeUnpickler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_imports</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ASCII'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Unpickler</span></code></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="horizon.listen.SafeUnpickler.PICKLE_SAFE">
-<span class="sig-name descname"><span class="pre">PICKLE_SAFE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'__builtin__':</span> <span class="pre">{'object'},</span> <span class="pre">'copy_reg':</span> <span class="pre">{'_reconstructor'}}</span></em><a class="headerlink" href="#horizon.listen.SafeUnpickler.PICKLE_SAFE" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">PICKLE_SAFE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'__builtin__':</span> <span class="pre">{'object'},</span> <span class="pre">'copy_reg':</span> <span class="pre">{'_reconstructor'}}</span></em><a class="headerlink" href="#horizon.listen.SafeUnpickler.PICKLE_SAFE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.SafeUnpickler.find_class">
-<span class="sig-name descname"><span class="pre">find_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.find_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.find_class" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.find_class"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.find_class" title="Link to this definition"></a></dt>
 <dd><p>Return an object from a specified module.</p>
 <p>If necessary, the module will be imported. Subclasses may override
 this method (e.g. to restrict unpickling of arbitrary classes and
@@ -211,49 +212,49 @@ needed.  Both arguments passed are str objects.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.SafeUnpickler.loads">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickle_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.loads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.loads" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickle_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.loads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.loads" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="horizon.listen.Listen">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Listen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Listen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pickle'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The listener is responsible for listening on a port.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.Listen.gen_unpickle">
-<span class="sig-name descname"><span class="pre">gen_unpickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.gen_unpickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.gen_unpickle" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gen_unpickle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.gen_unpickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.gen_unpickle" title="Link to this definition"></a></dt>
 <dd><p>Generate a pickle from a stream</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.Listen.read_all">
-<span class="sig-name descname"><span class="pre">read_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.read_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.read_all" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.read_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.read_all" title="Link to this definition"></a></dt>
 <dd><p>Read n bytes from a stream</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.Listen.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.Listen.listen_pickle">
-<span class="sig-name descname"><span class="pre">listen_pickle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.listen_pickle" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">listen_pickle</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_pickle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.listen_pickle" title="Link to this definition"></a></dt>
 <dd><p>Listen for pickles over tcp</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.Listen.listen_udp">
-<span class="sig-name descname"><span class="pre">listen_udp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_udp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.listen_udp" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">listen_udp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_udp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.listen_udp" title="Link to this definition"></a></dt>
 <dd><p>Listen over udp for MessagePack strings</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.listen.Listen.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.listen.Listen.run" title="Link to this definition"></a></dt>
 <dd><p>Called when process intializes.</p>
 </dd></dl>
 
@@ -261,130 +262,130 @@ needed.  Both arguments passed are str objects.</p>
 
 </section>
 <section id="module-horizon.prometheus">
-<span id="skyline-horizon-prometheus-module"></span><h2>skyline.horizon.prometheus module<a class="headerlink" href="#module-horizon.prometheus" title="Permalink to this heading"></a></h2>
+<span id="skyline-horizon-prometheus-module"></span><h2>skyline.horizon.prometheus module<a class="headerlink" href="#module-horizon.prometheus" title="Link to this heading"></a></h2>
 <p>prometheus.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.create_global_reload_skip_dict">
-<span class="sig-name descname"><span class="pre">create_global_reload_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_reload_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_reload_skip_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_global_reload_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_reload_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_reload_skip_dict" title="Link to this definition"></a></dt>
 <dd><p>skip_dict in shared memory</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.get_global_reload_skip_dict">
-<span class="sig-name descname"><span class="pre">get_global_reload_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_reload_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_reload_skip_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_global_reload_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_reload_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_reload_skip_dict" title="Link to this definition"></a></dt>
 <dd><p>Reload shared memory skip_dict</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.update_global_reload_skip_dict">
-<span class="sig-name descname"><span class="pre">update_global_reload_skip_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_reload_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_reload_skip_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_global_reload_skip_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_reload_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_reload_skip_dict" title="Link to this definition"></a></dt>
 <dd><p>Update shared memory skip_dict</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.create_global_skip_dict">
-<span class="sig-name descname"><span class="pre">create_global_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_skip_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_global_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_skip_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.get_global_skip_dict">
-<span class="sig-name descname"><span class="pre">get_global_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_skip_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_global_skip_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_skip_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.update_global_skip_dict">
-<span class="sig-name descname"><span class="pre">update_global_skip_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_skip_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_global_skip_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skip_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_skip_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_skip_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.create_global_prom_to_vm_metrics_dict">
-<span class="sig-name descname"><span class="pre">create_global_prom_to_vm_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_prom_to_vm_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_prom_to_vm_metrics_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_global_prom_to_vm_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_prom_to_vm_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_prom_to_vm_metrics_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.get_global_prom_to_vm_metrics_dict">
-<span class="sig-name descname"><span class="pre">get_global_prom_to_vm_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_prom_to_vm_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_prom_to_vm_metrics_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_global_prom_to_vm_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_prom_to_vm_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_prom_to_vm_metrics_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.update_global_prom_to_vm_metrics_dict">
-<span class="sig-name descname"><span class="pre">update_global_prom_to_vm_metrics_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prom_to_vm_metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_prom_to_vm_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_prom_to_vm_metrics_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_global_prom_to_vm_metrics_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prom_to_vm_metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_prom_to_vm_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_prom_to_vm_metrics_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.create_global_shard_metrics_dict">
-<span class="sig-name descname"><span class="pre">create_global_shard_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_shard_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_shard_metrics_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_global_shard_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_shard_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_shard_metrics_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.get_global_shard_metrics_dict">
-<span class="sig-name descname"><span class="pre">get_global_shard_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_shard_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_shard_metrics_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_global_shard_metrics_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_shard_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_shard_metrics_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.update_global_shard_metrics_dict">
-<span class="sig-name descname"><span class="pre">update_global_shard_metrics_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prom_to_vm_metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_shard_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_shard_metrics_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_global_shard_metrics_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prom_to_vm_metrics_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_shard_metrics_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_shard_metrics_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.create_global_metrics_type_dict">
-<span class="sig-name descname"><span class="pre">create_global_metrics_type_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_metrics_type_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_metrics_type_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_global_metrics_type_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_metrics_type_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_metrics_type_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.get_global_metrics_type_dict">
-<span class="sig-name descname"><span class="pre">get_global_metrics_type_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_metrics_type_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_metrics_type_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_global_metrics_type_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_metrics_type_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_metrics_type_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.update_global_metrics_type_dict">
-<span class="sig-name descname"><span class="pre">update_global_metrics_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_type_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_metrics_type_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_metrics_type_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_global_metrics_type_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_type_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_metrics_type_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_metrics_type_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.create_global_metrics_with_id_dict">
-<span class="sig-name descname"><span class="pre">create_global_metrics_with_id_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_metrics_with_id_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_metrics_with_id_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_global_metrics_with_id_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#create_global_metrics_with_id_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.create_global_metrics_with_id_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.get_global_metrics_with_id_dict">
-<span class="sig-name descname"><span class="pre">get_global_metrics_with_id_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_metrics_with_id_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_metrics_with_id_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_global_metrics_with_id_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#get_global_metrics_with_id_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.get_global_metrics_with_id_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="horizon.prometheus.update_global_metrics_with_id_dict">
-<span class="sig-name descname"><span class="pre">update_global_metrics_with_id_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_with_id_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_metrics_with_id_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_metrics_with_id_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_global_metrics_with_id_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metrics_with_id_dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#update_global_metrics_with_id_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.update_global_metrics_with_id_dict" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="horizon.prometheus.PrometheusMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PrometheusMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PrometheusMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The PrometheusMetrics process is responsible for getting metrics submitted
 to flux from the flux.prometheus_metrics Redis hash set and adding them to
 the Horizon worker queue to be submitted to Redis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.prometheus.PrometheusMetrics.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.prometheus.PrometheusMetrics.metric_in_shard">
-<span class="sig-name descname"><span class="pre">metric_in_shard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.metric_in_shard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.metric_in_shard" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">metric_in_shard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.metric_in_shard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.metric_in_shard" title="Link to this definition"></a></dt>
 <dd><p>Check if the metric belongs to the Horizon instance shard.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.prometheus.PrometheusMetrics.submit_PrometheusMetrics">
-<span class="sig-name descname"><span class="pre">submit_PrometheusMetrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.submit_PrometheusMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.submit_PrometheusMetrics" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">submit_PrometheusMetrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.submit_PrometheusMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.submit_PrometheusMetrics" title="Link to this definition"></a></dt>
 <dd><p>Get Prometheus metrics from the Redis flux.prometheus_metrics set every
 60 seconds, aggregated them to 60 seconds and submit them to Redis.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.prometheus.PrometheusMetrics.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/prometheus.html#PrometheusMetrics.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.prometheus.PrometheusMetrics.run" title="Link to this definition"></a></dt>
 <dd><p>Called when process intializes.</p>
 </dd></dl>
 
@@ -392,28 +393,28 @@ the Horizon worker queue to be submitted to Redis.</p>
 
 </section>
 <section id="module-horizon.roomba">
-<span id="skyline-horizon-roomba-module"></span><h2>skyline.horizon.roomba module<a class="headerlink" href="#module-horizon.roomba" title="Permalink to this heading"></a></h2>
+<span id="skyline-horizon-roomba-module"></span><h2>skyline.horizon.roomba module<a class="headerlink" href="#module-horizon.roomba" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="horizon.roomba.Roomba">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Roomba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_mini</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Roomba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_mini</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The Roomba is responsible for deleting keys older than DURATION.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.roomba.Roomba.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.roomba.Roomba.vacuum">
-<span class="sig-name descname"><span class="pre">vacuum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.vacuum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba.vacuum" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">vacuum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.vacuum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba.vacuum" title="Link to this definition"></a></dt>
 <dd><p>Trim metrics that are older than settings.FULL_DURATION and purge old
 metrics.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.roomba.Roomba.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.roomba.Roomba.run" title="Link to this definition"></a></dt>
 <dd><p>Called when process initializes.</p>
 </dd></dl>
 
@@ -421,23 +422,23 @@ metrics.</p>
 
 </section>
 <section id="module-horizon.worker">
-<span id="skyline-horizon-worker-module"></span><h2>skyline.horizon.worker module<a class="headerlink" href="#module-horizon.worker" title="Permalink to this heading"></a></h2>
+<span id="skyline-horizon-worker-module"></span><h2>skyline.horizon.worker module<a class="headerlink" href="#module-horizon.worker" title="Link to this heading"></a></h2>
 <p>worker.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="horizon.worker.Worker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_mini</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_mini</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Process</span></code></p>
 <p>The worker processes chunks from the queue and appends
 the latest datapoints to their respective timesteps in Redis.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.worker.Worker.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.worker.Worker.in_skip_list">
-<span class="sig-name descname"><span class="pre">in_skip_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.in_skip_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.in_skip_list" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">in_skip_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.in_skip_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.in_skip_list" title="Link to this definition"></a></dt>
 <dd><p>Check if the metric is in SKIP_LIST.</p>
 <p># &#64;added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
 The SKIP_LIST allows for a string match or a match on dotted elements
@@ -446,13 +447,13 @@ within the metric namespace.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.worker.Worker.in_shard">
-<span class="sig-name descname"><span class="pre">in_shard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.in_shard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.in_shard" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">in_shard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.in_shard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.in_shard" title="Link to this definition"></a></dt>
 <dd><p>Check if the metric belongs to the Horizon instance shard.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="horizon.worker.Worker.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#horizon.worker.Worker.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -460,7 +461,7 @@ within the metric namespace.</p>
 
 </section>
 <section id="module-horizon">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-horizon" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-horizon" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -475,7 +476,7 @@ within the metric namespace.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

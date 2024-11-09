@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>docker &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>docker &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -146,10 +146,10 @@
            <div itemprop="articleBody">
              
   <section id="docker">
-<h1>docker<a class="headerlink" href="#docker" title="Permalink to this heading"></a></h1>
+<h1>docker<a class="headerlink" href="#docker" title="Link to this heading"></a></h1>
 <p><em>EXPERIMENTAL AND NOT SUITABLE FOR PRODUCTION</em></p>
 <section id="no-longer-maintained">
-<h2>No longer maintained<a class="headerlink" href="#no-longer-maintained" title="Permalink to this heading"></a></h2>
+<h2>No longer maintained<a class="headerlink" href="#no-longer-maintained" title="Link to this heading"></a></h2>
 <p>Running Skyline on docker is possible but it is no longer maintained.  It is a
 very complex pattern that is not realistic to maintain with every release,
 building, testing and updating deps, building new dockerrr layers every time a
@@ -159,7 +159,7 @@ anomaly detection.  Therefore dealing with docker, docker-composer, podman,
 buildah, skopeo, runc, k8s and all the other container facets is no longer
 being maintained.</p>
 <section id="why-docker-was-added">
-<h3>Why docker was added<a class="headerlink" href="#why-docker-was-added" title="Permalink to this heading"></a></h3>
+<h3>Why docker was added<a class="headerlink" href="#why-docker-was-added" title="Link to this heading"></a></h3>
 <p>Because the team at wix-playground forked Skyline and dockerized in its simplest
 context.</p>
 <p>Merging the wix-playground’s changes Skyline had to be tested running on docker
@@ -174,14 +174,14 @@ developer or test machine until you are familiar with the docker application and
 can modify it to fit with docker practices and standards for your environment.</p>
 </section>
 <section id="not-suitable-for-production">
-<h3>Not suitable for production<a class="headerlink" href="#not-suitable-for-production" title="Permalink to this heading"></a></h3>
+<h3>Not suitable for production<a class="headerlink" href="#not-suitable-for-production" title="Link to this heading"></a></h3>
 <p>Although important directories are persisted to local directories using volumes
 one of the containers <em>WILL</em> lose data!!!!  If OOMkiller kicks in on the host
 and the mysql container is killed the data <em>CAN BE LOST</em> as the new mysql image
 initialises the mounted volume and goes back to default.  You have been warned.</p>
 </section>
 <section id="docker-application">
-<h3>Docker application<a class="headerlink" href="#docker-application" title="Permalink to this heading"></a></h3>
+<h3>Docker application<a class="headerlink" href="#docker-application" title="Link to this heading"></a></h3>
 <p>Seeing as it is possible to ran anything on docker and your localhost, the entire
 Skyline stack can be composed with docker with every dependencies provided for
 by a container, constructing a docker-compose multi-container Docker application
@@ -208,7 +208,7 @@ image <a class="reference external" href="https://hub.docker.com/r/graphiteapp/g
 with data.</p>
 </section>
 <section id="requirements">
-<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h3>
+<h3>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>git</p></li>
 <li><p>rsync</p></li>
@@ -217,7 +217,7 @@ with data.</p>
 </ul>
 </section>
 <section id="notable-docker-aspects">
-<h3>Notable docker aspects<a class="headerlink" href="#notable-docker-aspects" title="Permalink to this heading"></a></h3>
+<h3>Notable docker aspects<a class="headerlink" href="#notable-docker-aspects" title="Link to this heading"></a></h3>
 <p>Feel free to skip to start of the Installation section if you are not interested
 in the docker internals.</p>
 <p>The docker Skyline container currently runs on the debian:stretch docker image,
@@ -233,7 +233,7 @@ subnet 172.118.0.0/16 called skylinenetwork.  For all the container static IPs
 see the docker-compose.yml file.</p>
 </section>
 <section id="installation-quick-start">
-<h3>Installation - quick start<a class="headerlink" href="#installation-quick-start" title="Permalink to this heading"></a></h3>
+<h3>Installation - quick start<a class="headerlink" href="#installation-quick-start" title="Link to this heading"></a></h3>
 <p>The data for the Skyline, Graphite, Redis and MySQL containers are persisted in
 the below patterns.</p>
 <p>There is a convenience build script for testing purposes only in
@@ -297,7 +297,7 @@ docker-compose<span class="w"> </span>up<span class="w"> </span>-d
 </div>
 </section>
 <section id="working-with-the-docker-stack-on-localhost">
-<h3>Working with the Docker stack on localhost<a class="headerlink" href="#working-with-the-docker-stack-on-localhost" title="Permalink to this heading"></a></h3>
+<h3>Working with the Docker stack on localhost<a class="headerlink" href="#working-with-the-docker-stack-on-localhost" title="Link to this heading"></a></h3>
 <p>To access the Skyline and Graphite applications on your localhost you need to
 add the following entries to your <cite>/etc/hosts</cite> file (or the equivalent)</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;172.118.0.7 skyline-docker-skyline-1&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>/etc/hosts
@@ -366,7 +366,7 @@ the relevant local app volume directories as well, e.g.</p>
 </ul>
 </section>
 <section id="skyline-optimisations-for-containerisation">
-<h3>Skyline optimisations for containerisation<a class="headerlink" href="#skyline-optimisations-for-containerisation" title="Permalink to this heading"></a></h3>
+<h3>Skyline optimisations for containerisation<a class="headerlink" href="#skyline-optimisations-for-containerisation" title="Link to this heading"></a></h3>
 <p>Changes were made to Skyline from using Python multiprocessing Manager().list()
 to using Redis sets to reduce the overall footprint greatly especially in terms
 of process count and resident segment sizes.</p>
@@ -385,7 +385,7 @@ of process count and resident segment sizes.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -224,6 +224,8 @@ class RollingThunder(Thread):
         # skyline.<hostname>.<skyline_app>.logged_errors metrics
         if 'thunder' not in check_apps_up:
             check_apps.append('thunder')
+            # @added 20240314 - Feature #4018: thunder - skyline.errors
+            check_apps_up.append('thunder')
         flux_done = False
         vista_done = False
         for check_app in check_apps_up:

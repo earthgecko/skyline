@@ -149,8 +149,8 @@ def thunder_check_webapp_features_profile(self):
     # If hup issued send an alert
     if not webapp_features_profile_status and hup_issued and not thunder_alert:
         level = 'alert'
-        message = '%s - webapp_features_profile was issued HUP because no status returned' % level
-        status = 'webapp_features_profile was issued HUP because no status returned'
+        message = '%s - webapp_features_profile was issued HUP because no status returned (%s)' % (level, this_host)
+        status = 'webapp_features_profile was issued HUP because no status returned - %s' % this_host
         try:
             expiry = int(settings.THUNDER_CHECKS[check_app][event_type]['expiry'])
         except Exception as err:

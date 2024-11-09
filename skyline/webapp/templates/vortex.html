@@ -1,13 +1,30 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
-	<ol class="breadcrumb">
-  	<div class="breadcrumb">
-  		<li><a href="/">Home</a></li>
-  		<li><a href="/vortex">Vortex</a></li>
-  		<li class="active"><span class="logo"><span class="sky">Analysis</span> <span class="re">data</span></li>
-    </div>
-	</ol>
 
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/vortex">Vortex</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">Analysis</span> <span class="re">data</span></span></li>
+      </div>
+    </ol>
+  </nav>
+{% else %}
+  <ol class="breadcrumb">
+    <div class="breadcrumb">
+      <li><a href="/">Home</a></li>
+      <li><a href="/vortex">Vortex</a></li>
+      <li class="active"><span class="logo"><span class="sky">Analysis</span> <span class="re">data</span></li>
+    </div>
+  </ol>
+{% endif %}
+  
 {% if results %}
   <h4><span class="logo"><span class="sky">Vortex ::</span> <span class="re">analysis ::</span></span> results</h4>
 {% else %}
@@ -106,13 +123,37 @@
         {% elif parameter == 'feature' and algorithm == 'macd' %}
 	      {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="macd">macd</option>
           <option value="macd_signal">macd_signal</option><option value="macd_histogram">macd_histogram</option></select>
-        {% else %}
+        {% elif parameter == 'sigma_parameters' or parameter == 'negative_sigma_parameters' or parameter == 'm66_parameters' %}
+          {% for i_parameter in vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
+            {% set i_value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter][i_parameter] %}
+            {{ parameter }} {{ i_parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}_{{ i_parameter }}" value="{{ i_value }}" step="any" size="5" />
+          {% endfor %}
+        {% elif parameter == 'negative_value_keys' %}
+          {{ parameter }}: <input type="text" name="negative_value_keys" value="" /> a list of comma separated namespace elements
+        {% elif parameter == 'determine_frequency' %}
+          {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="true">true</option>
+            <option value="false">false</option></select> 
+        {% elif parameter == 'macd_parameters' %}
+        {% for i_parameter in vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
+          {% set i_value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter][i_parameter] %}
+          {% if i_parameter == 'feature' %}
+            {{ parameter }} {{ i_parameter }}: <select name="{{ algorithm }}_{{ parameter }}"><option value="macd">macd</option>
+              <option value="macd_signal">macd_signal</option><option value="macd_histogram">macd_histogram</option></select> 
+          {% else %}
+            {% set i_value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter][i_parameter] %}
+            {{ parameter }} {{ i_parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}_{{ i_parameter }}" value="{{ i_value }}" step="any" size="5" />
+          {% endif %}
+          {{ parameter }} {{ i_parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}_{{ i_parameter }}" value="{{ i_value }}" step="any" size="5" />
+        {% endfor %}
+
+        {% elif parameter == 'gamma' and algorithm == 'one_class_svm' %}
+        {{ parameter }}: <select name="{{ algorithm }}_{{ parameter }}">
+                        <option value="scale">scale</option>
+                        <option value="auto">auto</option>    
+          {% else %}
         {{ parameter }}: <input type="number" name="{{ algorithm }}_{{ parameter }}" value="{{ value }}" step="any" size="5" />
       {% endif %}
     {% endfor %}
-    {% if algorithm == 'mstl' %}
-    <strong>the mstl algorithm is very long running and not suited for realtime analysis</strong>
-    {% endif %}
 
             <br>
   {% endfor %}
@@ -240,7 +281,7 @@
   {% if results['results']['image_files'] %}
     {% for image in results['results']['image_files'] %}
       {% if 'vortex.algorithm.' in image %}
-        <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
+        <img src="ionosphere_images?image={{ image }}" loading="lazy" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
       {% endif %}
     {% endfor %}
   {% endif %}

@@ -112,3 +112,23 @@ Although ``zlib.alder32`` is not a cryptographic hash it is **fast** and
 computes the same value across all Python version and platforms so it does the
 job.  Further the distribution of metrics is not an exact equal division of the
 metrics, but it is good enough.
+
+Tetsing it will shard 200000 metric name from Prometheus metrics for kubernetes,
+loki, cortex, kubectl, thanos, mimir, cilium node, etc in 0.9s
+200000 metrics took: 0.916738748550415 seconds, 80349 shard metrics, 0 errors
+These are long metric names and the following dict demonstrates the lengths
+of the metrics names (bins are rounded up to the nearest hundred)
+{700: 59232,
+400: 76705,
+800: 25142,
+100: 15038,
+200: 1095,
+500: 14420,
+600: 3577,
+300: 2306,
+900: 1316,
+1100: 403,
+1000: 506,
+1200: 259,
+1300: 1}
+The method is fit for purpose.

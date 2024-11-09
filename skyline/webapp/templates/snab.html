@@ -1,6 +1,21 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 <!-- BEGIN /SNAB block -->
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/snab">SNAB</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">SNAB</span></span></li>
+      </div>
+    </ol>
+  </nav>
+{% else %}
 <!--
 # @added 20211102 - Branch #3068: SNAB
  -->
@@ -11,12 +26,27 @@
   		<li class="active"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></li>
     </div>
 	</ol>
+{% endif %}
 
 {% if display_message %}
 <code> ERROR </code></br>
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+{% if version == dev_ver %}
+<div class="container-fluid">
+  <ul class="nav nav-tabs" id="view" role="tablist">
+	<li class="nav-item">
+	  <a class="nav-link active" data-bs-toggle="tab" href="/snab" role="tab" aria-controls="view" aria-selected="true"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a>
+	</li>
+	<li class="nav-item">
+	  <a class="nav-link" data-bs-toggle="tab" href="/snab?report=true" role="tab" aria-controls="results" aria-selected="false"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a>
+	</li>
+  </ul>
+</div>
+<br>
+
+{% else %}
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -24,7 +54,8 @@
     <span class="icon-bar"></span>
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li class="active"><a href="/SNAB"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a></li>
+		  <li class="active"><a href="/snab"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a></li>
+		  <li><a href="/snab?report=true"><span class="logo"><span class="sky">SNAB</span> <span class="re">report</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -37,12 +68,18 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+{% endif %}
 
 	<div class="col-md-12">
 	  <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">results</span></span></h4>
 {% if results_data %}
+  {% if version == dev_ver %}
+    <button type="button" class="btn btn-info" data-bs-toggle="collapse" data-bs-target="#get_results">Show options</button>
+    <div id="get_results" class="collapse">
+  {% else %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#get_results">Show options</button>
         <div id="get_results" class="collapse">
+  {% endif %}
 {% endif %}
         <form action="snab">
   		  <table class="table table-hover">
@@ -105,7 +142,7 @@
   		        <td><select name="plot">
                 <option value="false">false</option>
                 <option value="true">true</option>
-              </select><br>
+              </select> Ensure that this is well filtered as it will call Graphite/VictoriaMetrics for every result returned</td><br>
   		      </tr>
   		    </tbody>
   		  </table>
@@ -119,35 +156,67 @@
 {% endif %}
 
   {% if results_data %}
-	  <div class="tab-pane active" id="results">
+
+	  {% if version == dev_ver %}
+  	<div class="tab-content">
+	  <div class="tab-pane fade show active" id="results" role="tabpanel" aria-labelledby="results-tab">
+    {% else %}
+    <div class="tab-pane active" id="results">
+    {% endif %}
       <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">results :: </span></span>{{ results_data|length }} found</h4>
 			<code>flitered_on: {{ filter_on }}</code><br>
 
 		<table class="table table-hover">
 			<thead>
 				<tr>
-{% if plot %}
+	  {% if plot %}
             <th>plot (anomaly + 1 hour)</th>
-{% endif %}
-{% for key in results_data_keys %}
+	  {% endif %}
+	  {% for key in results_data_keys %}
             <th>{{ key }}</th>
-{% endfor %}
+	  {% endfor %}
 				</tr>
 			</thead>
 			<tbody>
-{% for snab_id in results_data %}
+	  {% set red_keys = ['fP', 'fN'] %}
+	  {% set green_keys = ['tP', 'tN'] %}
+	  {% for snab_id in results_data %}
           <tr>
-	{% if plot %}
-            <td><img src="snab_images?image={{ results_data[snab_id]['plot'] }}" alt="{{ metric }}" /></td>
-	{% endif %}
-  {% for key in results_data_keys %}
-    {% set value = results_data[snab_id][key] %}
-            <td>
-              {{ value }}
-            </td>
-  {% endfor %}
+		  {% if plot %}
+            <td><img src="snab_images?image={{ results_data[snab_id]['plot'] }}" loading="lazy" alt="{{ metric }}" /></td>
+		  {% endif %}
+      {% for key in results_data_keys %}
+        {% set value = results_data[snab_id][key] %}
+	      {% if key == 'training_data_uri' %}
+		      {% if value|string == 'None' %}
+		<td>{{ value }}</td>
+		      {% else %}
+		<td><a target='_blank' href="{{ value }}">training data link</a></td>
+		      {% endif %}
+	      {% elif key == 'metric' %}
+          {% if value|length > 100 %}
+              <td style="word-break:break-all;"><smallcode>{{ value }}</smallcode></td>
+          {% else %}
+              <td style="word-break:break-all;"><code>{{ value }}</code></td>
+          {% endif %}
+	      {% elif key in ['fP', 'tP', 'fN', 'tN', 'unsure'] %}
+          {% if value|string == '1' %}
+            {% if key in red_keys %}
+            <td><font color="#dd3023"><strong>True</strong></font></td>
+            {% elif key in green_keys %}
+              <td><font color="#6698FF"><strong>True</strong></font></td>
+            {% else %}
+              <td><code>True</code></td>
+            {% endif %}
+          {% else %}
+              <td>{{ value }}</td>
+          {% endif %}
+	      {% else %}
+            <td>{{ value }}</td>
+	      {% endif %}
+      {% endfor %}
           </tr>
-{% endfor %}
+    {% endfor %}
 			</tbody>
 		</table>
 		</div>

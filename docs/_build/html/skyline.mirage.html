@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>skyline.mirage package &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>skyline.mirage package &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -115,6 +115,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage">skyline.mirage.mirage module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage_alerters">skyline.mirage.mirage_alerters module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage_algorithms">skyline.mirage.mirage_algorithms module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage_irregular_unstable">skyline.mirage.mirage_irregular_unstable module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage_labelled_metrics">skyline.mirage.mirage_labelled_metrics module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage_vortex">skyline.mirage.mirage_vortex module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-mirage.mirage_vortex_algorithms">skyline.mirage.mirage_vortex_algorithms module</a></li>
@@ -135,6 +136,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_scores_plot">skyline.algorithm_scores_plot module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run_conditions">skyline.custom_algorithms_to_run_conditions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
@@ -182,30 +184,30 @@
            <div itemprop="articleBody">
              
   <section id="skyline-mirage-package">
-<h1>skyline.mirage package<a class="headerlink" href="#skyline-mirage-package" title="Permalink to this heading"></a></h1>
+<h1>skyline.mirage package<a class="headerlink" href="#skyline-mirage-package" title="Link to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
 <section id="skyline-mirage-agent-module">
-<h2>skyline.mirage.agent module<a class="headerlink" href="#skyline-mirage-agent-module" title="Permalink to this heading"></a></h2>
+<h2>skyline.mirage.agent module<a class="headerlink" href="#skyline-mirage-agent-module" title="Link to this heading"></a></h2>
 </section>
 <section id="module-mirage.mirage">
-<span id="skyline-mirage-mirage-module"></span><h2>skyline.mirage.mirage module<a class="headerlink" href="#module-mirage.mirage" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-mirage-module"></span><h2>skyline.mirage.mirage module<a class="headerlink" href="#module-mirage.mirage" title="Link to this heading"></a></h2>
 <p>mirage.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mirage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Mirage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The Mirage thread</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.spawn_alerter_process">
-<span class="sig-name descname"><span class="pre">spawn_alerter_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spawn_alerter_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.spawn_alerter_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spawn_alerter_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spawn_alerter_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.spawn_alerter_process" title="Link to this definition"></a></dt>
 <dd><p>Spawn a process to trigger an alert.  This is used by smtp alerters so
 that matplotlib objects are cleared down and the alerter cannot create
 a memory leak in this manner and plt.savefig keeps the object in memory
@@ -219,12 +221,12 @@ and handling prevents any memory leaks in the parent.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.surface_graphite_metric_data">
-<span class="sig-name descname"><span class="pre">surface_graphite_metric_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphite_from</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphite_until</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.surface_graphite_metric_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.surface_graphite_metric_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">surface_graphite_metric_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphite_from</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graphite_until</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.surface_graphite_metric_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.surface_graphite_metric_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.mirage_load_metric_vars">
-<span class="sig-name descname"><span class="pre">mirage_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.mirage_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.mirage_load_metric_vars" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mirage_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.mirage_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.mirage_load_metric_vars" title="Link to this definition"></a></dt>
 <dd><p>Load the metric variables for a check from a metric check variables file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -241,7 +243,7 @@ and handling prevents any memory leaks in the parent.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.dump_garbage">
-<span class="sig-name descname"><span class="pre">dump_garbage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.dump_garbage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.dump_garbage" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dump_garbage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.dump_garbage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.dump_garbage" title="Link to this definition"></a></dt>
 <dd><p>DEVELOPMENT ONLY</p>
 <p># &#64;added 20160806 - Bug #1558: Memory leak in Analyzer
 # Debug with garbage collection - <a class="reference external" href="http://code.activestate.com/recipes/65333/">http://code.activestate.com/recipes/65333/</a></p>
@@ -250,19 +252,19 @@ and handling prevents any memory leaks in the parent.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.populate_redis">
-<span class="sig-name descname"><span class="pre">populate_redis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.populate_redis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.populate_redis" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">populate_redis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.populate_redis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.populate_redis" title="Link to this definition"></a></dt>
 <dd><p>Get FULL_DURATION data from Graphite for a metric and populate Redis</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.spin_process">
-<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processing_check_files</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.spin_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processing_check_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.spin_process" title="Link to this definition"></a></dt>
 <dd><p>Assign a metric for a process to analyze.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage.Mirage.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage.Mirage.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -270,10 +272,10 @@ and handling prevents any memory leaks in the parent.
 
 </section>
 <section id="module-mirage.mirage_alerters">
-<span id="skyline-mirage-mirage-alerters-module"></span><h2>skyline.mirage.mirage_alerters module<a class="headerlink" href="#module-mirage.mirage_alerters" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-mirage-alerters-module"></span><h2>skyline.mirage.mirage_alerters module<a class="headerlink" href="#module-mirage.mirage_alerters" title="Link to this heading"></a></h2>
 <dl class="py data">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.LOCAL_DEBUG">
-<span class="sig-name descname"><span class="pre">LOCAL_DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#mirage.mirage_alerters.LOCAL_DEBUG" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">LOCAL_DEBUG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#mirage.mirage_alerters.LOCAL_DEBUG" title="Link to this definition"></a></dt>
 <dd><p>Create any alerter you want here. The function will be invoked from trigger_alert.
 Four arguments will be passed, two of them tuples: alert and metric.</p>
 <p>alert: the tuple specified in your settings:</p>
@@ -295,50 +297,50 @@ context: app name</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_smtp">
-<span class="sig-name descname"><span class="pre">alert_smtp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_smtp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_smtp" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_smtp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_smtp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_smtp" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends an alert via smtp to the
 recipients that are configured for the metric.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_pagerduty">
-<span class="sig-name descname"><span class="pre">alert_pagerduty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_pagerduty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_pagerduty" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_pagerduty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_pagerduty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_pagerduty" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends an alert via PagerDuty</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_hipchat">
-<span class="sig-name descname"><span class="pre">alert_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_hipchat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_hipchat" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends an alert the hipchat room that is
 configured in settings.py.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_syslog">
-<span class="sig-name descname"><span class="pre">alert_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_syslog" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_syslog" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and logs anomalies to syslog.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_slack">
-<span class="sig-name descname"><span class="pre">alert_slack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_slack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_slack" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_slack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_slack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_slack" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_http">
-<span class="sig-name descname"><span class="pre">alert_http</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_http"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_http" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_http</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_http"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_http" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends anomalies to a http endpoint.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.alert_sms">
-<span class="sig-name descname"><span class="pre">alert_sms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_sms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_sms" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">alert_sms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#alert_sms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.alert_sms" title="Link to this definition"></a></dt>
 <dd><p>Called by <a class="reference internal" href="#mirage.mirage_alerters.trigger_alert" title="mirage.mirage_alerters.trigger_alert"><code class="xref py py-func docutils literal notranslate"><span class="pre">trigger_alert()</span></code></a> and sends anomalies to a SMS endpoint.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_alerters.trigger_alert">
-<span class="sig-name descname"><span class="pre">trigger_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#trigger_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.trigger_alert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">trigger_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_alerters.html#trigger_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_alerters.trigger_alert" title="Link to this definition"></a></dt>
 <dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">run</span></code> to trigger an alert,
 Mirage passes two arguments, both of them tuples.  The alerting strategy
 is determined and the approriate alert def is then called and passed the
@@ -373,11 +375,11 @@ tuples.</p>
 
 </section>
 <section id="module-mirage.mirage_algorithms">
-<span id="skyline-mirage-mirage-algorithms-module"></span><h2>skyline.mirage.mirage_algorithms module<a class="headerlink" href="#module-mirage.mirage_algorithms" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-mirage-algorithms-module"></span><h2>skyline.mirage.mirage_algorithms module<a class="headerlink" href="#module-mirage.mirage_algorithms" title="Link to this heading"></a></h2>
 <p>mirage_algorithms.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.tail_avg">
-<span class="sig-name descname"><span class="pre">tail_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#tail_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.tail_avg" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">tail_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#tail_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.tail_avg" title="Link to this definition"></a></dt>
 <dd><p>This is a utility function used to calculate the average of the last three
 datapoints in the series as a measure, instead of just the last datapoint.
 It reduces noise, but it also reduces sensitivity and increases the delay
@@ -386,20 +388,20 @@ to detection.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.median_absolute_deviation">
-<span class="sig-name descname"><span class="pre">median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.median_absolute_deviation" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.median_absolute_deviation" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the deviation of its latest datapoint with
 respect to the median is X times larger than the median of deviations.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.grubbs">
-<span class="sig-name descname"><span class="pre">grubbs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#grubbs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.grubbs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">grubbs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#grubbs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.grubbs" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the Z score is greater than the Grubb’s score.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.first_hour_average">
-<span class="sig-name descname"><span class="pre">first_hour_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#first_hour_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.first_hour_average" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">first_hour_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#first_hour_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.first_hour_average" title="Link to this definition"></a></dt>
 <dd><p>Calcuate the simple average over one hour, second order resolution seconds ago.
 A timeseries is anomalous if the average of the last three datapoints
 are outside of three standard deviations of this value.</p>
@@ -407,7 +409,7 @@ are outside of three standard deviations of this value.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.stddev_from_average">
-<span class="sig-name descname"><span class="pre">stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.stddev_from_average" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.stddev_from_average" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the average. This does not exponentially weight the MA and so
@@ -416,7 +418,7 @@ is better for detecting anomalies with respect to the entire series.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.stddev_from_moving_average">
-<span class="sig-name descname"><span class="pre">stddev_from_moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#stddev_from_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.stddev_from_moving_average" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stddev_from_moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#stddev_from_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.stddev_from_moving_average" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the moving average. This is better for finding anomalies with
@@ -425,7 +427,7 @@ respect to the short term trends.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.mean_subtraction_cumulation">
-<span class="sig-name descname"><span class="pre">mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.mean_subtraction_cumulation" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.mean_subtraction_cumulation" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the value of the next datapoint in the
 series is farther than three standard deviations out in cumulative terms
 after subtracting the mean from each data point.</p>
@@ -433,14 +435,14 @@ after subtracting the mean from each data point.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.least_squares">
-<span class="sig-name descname"><span class="pre">least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#least_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.least_squares" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#least_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.least_squares" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints
 on a projected least squares model is greater than three sigma.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.histogram_bins">
-<span class="sig-name descname"><span class="pre">histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.histogram_bins" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.histogram_bins" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints falls
 into a histogram bin with less than 20 other datapoints (you’ll need to
 tweak that number depending on your data)</p>
@@ -450,7 +452,7 @@ means more anomalous.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.ks_test">
-<span class="sig-name descname"><span class="pre">ks_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#ks_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.ks_test" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ks_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#ks_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.ks_test" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
 that data distribution for last 10 minutes is different from last hour.
 It produces false positives on non-stationary series so Augmented
@@ -459,14 +461,14 @@ Dickey-Fuller test applied to check for stationarity.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.get_function_name">
-<span class="sig-name descname"><span class="pre">get_function_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#get_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.get_function_name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_function_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#get_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.get_function_name" title="Link to this definition"></a></dt>
 <dd><p>This is a utility function is used to determine what algorithm is reporting
 an algorithm error when the record_algorithm_error is used.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.record_algorithm_error">
-<span class="sig-name descname"><span class="pre">record_algorithm_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback_format_exc_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#record_algorithm_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.record_algorithm_error" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">record_algorithm_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback_format_exc_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#record_algorithm_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.record_algorithm_error" title="Link to this definition"></a></dt>
 <dd><p>This utility function is used to facilitate the traceback from any algorithm
 errors.  The algorithm functions themselves we want to run super fast and
 without fail in terms of stopping the function returning and not reporting
@@ -506,47 +508,74 @@ tons of errors into the log.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.determine_median">
-<span class="sig-name descname"><span class="pre">determine_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#determine_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.determine_median" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">determine_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#determine_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.determine_median" title="Link to this definition"></a></dt>
 <dd><p>Determine the median of the values in the timeseries</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.negatives_present">
-<span class="sig-name descname"><span class="pre">negatives_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#negatives_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.negatives_present" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">negatives_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#negatives_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.negatives_present" title="Link to this definition"></a></dt>
 <dd><p>Determine if there are negative number present in a time series</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.is_anomalously_anomalous">
-<span class="sig-name descname"><span class="pre">is_anomalously_anomalous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#is_anomalously_anomalous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.is_anomalously_anomalous" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_anomalously_anomalous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ensemble</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datapoint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#is_anomalously_anomalous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.is_anomalously_anomalous" title="Link to this definition"></a></dt>
 <dd><p>This method runs a meta-analysis on the metric to determine whether the
 metric has a past history of triggering. TODO: weight intervals based on datapoint</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_algorithms.run_selected_algorithm">
-<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_negatives_present</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.run_selected_algorithm" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_negatives_present</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">current_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mirage_busy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_algorithms.run_selected_algorithm" title="Link to this definition"></a></dt>
 <dd><p>Run selected algorithms</p>
 </dd></dl>
 
 </section>
+<section id="module-mirage.mirage_irregular_unstable">
+<span id="skyline-mirage-mirage-irregular-unstable-module"></span><h2>skyline.mirage.mirage_irregular_unstable module<a class="headerlink" href="#module-mirage.mirage_irregular_unstable" title="Link to this heading"></a></h2>
+<p>mirage_irregular_unstable.py</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="mirage.mirage_irregular_unstable.mirage_irregular_unstable">
+<span class="sig-name descname"><span class="pre">mirage_irregular_unstable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_irregular_unstable.html#mirage_irregular_unstable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_irregular_unstable.mirage_irregular_unstable" title="Link to this definition"></a></dt>
+<dd><p>Determine if a timeseries is irregular and unstable and if it is, determine
+if it is also irregular and unstable at 30 days, if it is return the
+timeseries_30d</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_name</strong> (<em>str</em>) – the metric base_name.</p></li>
+<li><p><strong>timeseries</strong> (<em>list</em>) – the time series as a list e.g. <code class="docutils literal notranslate"><span class="pre">[[1667608854,</span> <span class="pre">1269121024.0],</span>
+<span class="pre">[1667609454,</span> <span class="pre">1269174272.0],</span> <span class="pre">[1667610054,</span> <span class="pre">1269174272.0]]</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>timeseries_30d</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(boolean, float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="module-mirage.mirage_labelled_metrics">
-<span id="skyline-mirage-mirage-labelled-metrics-module"></span><h2>skyline.mirage.mirage_labelled_metrics module<a class="headerlink" href="#module-mirage.mirage_labelled_metrics" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-mirage-labelled-metrics-module"></span><h2>skyline.mirage.mirage_labelled_metrics module<a class="headerlink" href="#module-mirage.mirage_labelled_metrics" title="Link to this heading"></a></h2>
 <p>mirage_labelled_metrics.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MirageLabelledMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MirageLabelledMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The MirageLabelledMetrics thread</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics.mirage_load_metric_vars">
-<span class="sig-name descname"><span class="pre">mirage_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.mirage_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.mirage_load_metric_vars" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mirage_load_metric_vars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_vars_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.mirage_load_metric_vars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.mirage_load_metric_vars" title="Link to this definition"></a></dt>
 <dd><p>Load the metric variables for a check from a metric check variables file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -563,25 +592,25 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics.create_check_file_from_hash_key">
-<span class="sig-name descname"><span class="pre">create_check_file_from_hash_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.create_check_file_from_hash_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.create_check_file_from_hash_key" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_check_file_from_hash_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check_item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.create_check_file_from_hash_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.create_check_file_from_hash_key" title="Link to this definition"></a></dt>
 <dd><p>Create a check file from an analyzer_labelled_metrics.mirage_check key</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics.clear_trigger_history">
-<span class="sig-name descname"><span class="pre">clear_trigger_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.clear_trigger_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.clear_trigger_history" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">clear_trigger_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.clear_trigger_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.clear_trigger_history" title="Link to this definition"></a></dt>
 <dd><p>Clear last item from the trigger history</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics.spin_process">
-<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned_checks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.spin_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned_checks</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.spin_process" title="Link to this definition"></a></dt>
 <dd><p>Assign a metrics for a process to analyze.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_labelled_metrics.MirageLabelledMetrics.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_labelled_metrics.html#MirageLabelledMetrics.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_labelled_metrics.MirageLabelledMetrics.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -589,113 +618,113 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
 
 </section>
 <section id="module-mirage.mirage_vortex">
-<span id="skyline-mirage-mirage-vortex-module"></span><h2>skyline.mirage.mirage_vortex module<a class="headerlink" href="#module-mirage.mirage_vortex" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-mirage-vortex-module"></span><h2>skyline.mirage.mirage_vortex module<a class="headerlink" href="#module-mirage.mirage_vortex" title="Link to this heading"></a></h2>
 <p>mirage_vortex.py</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MirageVortex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MirageVortex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
 <p>The MirageVortex thread</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.check_if_parent_is_alive">
-<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.check_if_parent_is_alive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_if_parent_is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.check_if_parent_is_alive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.check_if_parent_is_alive" title="Link to this definition"></a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.check_valid_algorithms">
-<span class="sig-name descname"><span class="pre">check_valid_algorithms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consensus</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.check_valid_algorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.check_valid_algorithms" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_valid_algorithms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consensus</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.check_valid_algorithms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.check_valid_algorithms" title="Link to this definition"></a></dt>
 <dd><p>Verify that the algortihms are valid.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.check_consensus">
-<span class="sig-name descname"><span class="pre">check_consensus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consensus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms_run</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.check_consensus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.check_consensus" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">check_consensus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">consensus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms_run</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.check_consensus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.check_consensus" title="Link to this definition"></a></dt>
 <dd><p>Check is consensus is achieved and still possible</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.create_echo_timeseries">
-<span class="sig-name descname"><span class="pre">create_echo_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vortex_metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.create_echo_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.create_echo_timeseries" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">create_echo_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vortex_metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.create_echo_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.create_echo_timeseries" title="Link to this definition"></a></dt>
 <dd><p>Add timeseries for echo</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.add_training_data">
-<span class="sig-name descname"><span class="pre">add_training_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vortex_metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_enabled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_training_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_training_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_training_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vortex_metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_enabled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_training_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_training_data" title="Link to this definition"></a></dt>
 <dd><p>Add training_data</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.add_results">
-<span class="sig-name descname"><span class="pre">add_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_start_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_results" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_start_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_results" title="Link to this definition"></a></dt>
 <dd><p>Add result to the mirage.vortex Redis hash</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.return_shard_test">
-<span class="sig-name descname"><span class="pre">return_shard_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_start_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.return_shard_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.return_shard_test" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_shard_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_start_time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.return_shard_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.return_shard_test" title="Link to this definition"></a></dt>
 <dd><p>Return a shard test.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.shard_host">
-<span class="sig-name descname"><span class="pre">shard_host</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_horizon_shards</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.shard_host"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.shard_host" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">shard_host</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_horizon_shards</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.shard_host"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.shard_host" title="Link to this definition"></a></dt>
 <dd><p>Return the shard host to which a metric belongs.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.is_labelled_metric">
-<span class="sig-name descname"><span class="pre">is_labelled_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.is_labelled_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.is_labelled_metric" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_labelled_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.is_labelled_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.is_labelled_metric" title="Link to this definition"></a></dt>
 <dd><p>Check whether a metric is a labelled_metric</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.generate_labelled_metric_name">
-<span class="sig-name descname"><span class="pre">generate_labelled_metric_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_namespace_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.generate_labelled_metric_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.generate_labelled_metric_name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">generate_labelled_metric_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_namespace_prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">server_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.generate_labelled_metric_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.generate_labelled_metric_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.get_metric_data_from_archive">
-<span class="sig-name descname"><span class="pre">get_metric_data_from_archive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.get_metric_data_from_archive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.get_metric_data_from_archive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_metric_data_from_archive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.get_metric_data_from_archive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.get_metric_data_from_archive" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.process_ionosphere_results">
-<span class="sig-name descname"><span class="pre">process_ionosphere_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.process_ionosphere_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.process_ionosphere_results" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">process_ionosphere_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.process_ionosphere_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.process_ionosphere_results" title="Link to this definition"></a></dt>
 <dd><p>Process results from Ionosphere.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.return_request_results">
-<span class="sig-name descname"><span class="pre">return_request_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_results_for</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.return_request_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.return_request_results" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">return_request_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_results_for</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.return_request_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.return_request_results" title="Link to this definition"></a></dt>
 <dd><p>Assign a metrics for a process to analyze.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.add_to_mirage_vortex_anomalous_metrics">
-<span class="sig-name descname"><span class="pre">add_to_mirage_vortex_anomalous_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_to_mirage_vortex_anomalous_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_to_mirage_vortex_anomalous_metrics" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_to_mirage_vortex_anomalous_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_to_mirage_vortex_anomalous_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_to_mirage_vortex_anomalous_metrics" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.add_to_illuminance">
-<span class="sig-name descname"><span class="pre">add_to_illuminance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelled_metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_to_illuminance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_to_illuminance" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_to_illuminance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labelled_metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.add_to_illuminance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.add_to_illuminance" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.send_anomaly_to_panorama">
-<span class="sig-name descname"><span class="pre">send_anomaly_to_panorama</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelled_metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms_run</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.send_anomaly_to_panorama"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.send_anomaly_to_panorama" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">send_anomaly_to_panorama</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labelled_metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithms_run</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.send_anomaly_to_panorama"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.send_anomaly_to_panorama" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.spin_process">
-<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned_checks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_results_for</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.spin_process" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">spin_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned_checks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ionosphere_results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_results_for</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.spin_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.spin_process" title="Link to this definition"></a></dt>
 <dd><p>Assign a metrics or results to process.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mirage.mirage_vortex.MirageVortex.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.run" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex.html#MirageVortex.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex.MirageVortex.run" title="Link to this definition"></a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -703,11 +732,11 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
 
 </section>
 <section id="module-mirage.mirage_vortex_algorithms">
-<span id="skyline-mirage-mirage-vortex-algorithms-module"></span><h2>skyline.mirage.mirage_vortex_algorithms module<a class="headerlink" href="#module-mirage.mirage_vortex_algorithms" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-mirage-vortex-algorithms-module"></span><h2>skyline.mirage.mirage_vortex_algorithms module<a class="headerlink" href="#module-mirage.mirage_vortex_algorithms" title="Link to this heading"></a></h2>
 <p>mirage_vortex_algorithms.py</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.tail_avg">
-<span class="sig-name descname"><span class="pre">tail_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#tail_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.tail_avg" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">tail_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#tail_avg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.tail_avg" title="Link to this definition"></a></dt>
 <dd><p>This is a utility function used to calculate the average of the last three
 datapoints in the series as a measure, instead of just the last datapoint.
 It reduces noise, but it also reduces sensitivity and increases the delay
@@ -716,20 +745,20 @@ to detection.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.median_absolute_deviation">
-<span class="sig-name descname"><span class="pre">median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.median_absolute_deviation" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">median_absolute_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#median_absolute_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.median_absolute_deviation" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the deviation of its latest datapoint with
 respect to the median is X times larger than the median of deviations.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.grubbs">
-<span class="sig-name descname"><span class="pre">grubbs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#grubbs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.grubbs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">grubbs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#grubbs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.grubbs" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the Z score is greater than the Grubb’s score.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.first_hour_average">
-<span class="sig-name descname"><span class="pre">first_hour_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#first_hour_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.first_hour_average" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">first_hour_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#first_hour_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.first_hour_average" title="Link to this definition"></a></dt>
 <dd><p>Calcuate the simple average over one hour, second order resolution seconds ago.
 A timeseries is anomalous if the average of the last three datapoints
 are outside of three standard deviations of this value.</p>
@@ -737,7 +766,7 @@ are outside of three standard deviations of this value.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.stddev_from_average">
-<span class="sig-name descname"><span class="pre">stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.stddev_from_average" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stddev_from_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#stddev_from_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.stddev_from_average" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the average. This does not exponentially weight the MA and so
@@ -746,7 +775,7 @@ is better for detecting anomalies with respect to the entire series.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.stddev_from_moving_average">
-<span class="sig-name descname"><span class="pre">stddev_from_moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#stddev_from_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.stddev_from_moving_average" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">stddev_from_moving_average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#stddev_from_moving_average"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.stddev_from_moving_average" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the absolute value of the average of the latest
 three datapoint minus the moving average is greater than three standard
 deviations of the moving average. This is better for finding anomalies with
@@ -755,7 +784,7 @@ respect to the short term trends.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.mean_subtraction_cumulation">
-<span class="sig-name descname"><span class="pre">mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.mean_subtraction_cumulation" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mean_subtraction_cumulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#mean_subtraction_cumulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.mean_subtraction_cumulation" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the value of the next datapoint in the
 series is farther than three standard deviations out in cumulative terms
 after subtracting the mean from each data point.</p>
@@ -763,14 +792,14 @@ after subtracting the mean from each data point.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.least_squares">
-<span class="sig-name descname"><span class="pre">least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#least_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.least_squares" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#least_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.least_squares" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints
 on a projected least squares model is greater than three sigma.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.histogram_bins">
-<span class="sig-name descname"><span class="pre">histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.histogram_bins" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">histogram_bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#histogram_bins"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.histogram_bins" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if the average of the last three datapoints falls
 into a histogram bin with less than 20 other datapoints (you’ll need to
 tweak that number depending on your data)</p>
@@ -780,7 +809,7 @@ means more anomalous.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.ks_test">
-<span class="sig-name descname"><span class="pre">ks_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#ks_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.ks_test" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ks_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#ks_test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.ks_test" title="Link to this definition"></a></dt>
 <dd><p>A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
 that data distribution for last 10 minutes is different from last hour.
 It produces false positives on non-stationary series so Augmented
@@ -789,14 +818,14 @@ Dickey-Fuller test applied to check for stationarity.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.get_function_name">
-<span class="sig-name descname"><span class="pre">get_function_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#get_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.get_function_name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_function_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#get_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.get_function_name" title="Link to this definition"></a></dt>
 <dd><p>This is a utility function is used to determine what algorithm is reporting
 an algorithm error when the record_algorithm_error is used.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.record_algorithm_error">
-<span class="sig-name descname"><span class="pre">record_algorithm_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback_format_exc_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#record_algorithm_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.record_algorithm_error" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">record_algorithm_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback_format_exc_string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#record_algorithm_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.record_algorithm_error" title="Link to this definition"></a></dt>
 <dd><p>This utility function is used to facilitate the traceback from any algorithm
 errors.  The algorithm functions themselves we want to run super fast and
 without fail in terms of stopping the function returning and not reporting
@@ -836,48 +865,48 @@ tons of errors into the log.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.determine_median">
-<span class="sig-name descname"><span class="pre">determine_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#determine_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.determine_median" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">determine_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#determine_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.determine_median" title="Link to this definition"></a></dt>
 <dd><p>Determine the median of the values in the timeseries</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.negatives_present">
-<span class="sig-name descname"><span class="pre">negatives_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#negatives_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.negatives_present" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">negatives_present</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#negatives_present"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.negatives_present" title="Link to this definition"></a></dt>
 <dd><p>Determine if there are negative number present in a time series</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.mirage_vortex_algorithms.run_selected_algorithm">
-<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_negatives_present</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.run_selected_algorithm" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run_selected_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_negatives_present</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_algorithms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage_vortex_algorithms.html#run_selected_algorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.mirage_vortex_algorithms.run_selected_algorithm" title="Link to this definition"></a></dt>
 <dd><p>Run selected algorithms</p>
 </dd></dl>
 
 </section>
 <section id="module-mirage.negaters">
-<span id="skyline-mirage-negaters-module"></span><h2>skyline.mirage.negaters module<a class="headerlink" href="#module-mirage.negaters" title="Permalink to this heading"></a></h2>
+<span id="skyline-mirage-negaters-module"></span><h2>skyline.mirage.negaters module<a class="headerlink" href="#module-mirage.negaters" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.negaters.negate_analyzer_alert">
-<span class="sig-name descname"><span class="pre">negate_analyzer_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#negate_analyzer_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.negate_analyzer_alert" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">negate_analyzer_alert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#negate_analyzer_alert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.negate_analyzer_alert" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.negaters.negate_hipchat">
-<span class="sig-name descname"><span class="pre">negate_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#negate_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.negate_hipchat" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">negate_hipchat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#negate_hipchat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.negate_hipchat" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.negaters.negate_syslog">
-<span class="sig-name descname"><span class="pre">negate_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#negate_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.negate_syslog" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">negate_syslog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#negate_syslog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.negate_syslog" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mirage.negaters.trigger_negater">
-<span class="sig-name descname"><span class="pre">trigger_negater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#trigger_negater"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.trigger_negater" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">trigger_negater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alert</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_order_resolution_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/negaters.html#trigger_negater"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mirage.negaters.trigger_negater" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>
 <section id="module-mirage">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mirage" title="Permalink to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-mirage" title="Link to this heading"></a></h2>
 </section>
 </section>
 
@@ -892,7 +921,7 @@ tons of errors into the log.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

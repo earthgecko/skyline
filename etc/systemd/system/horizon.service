@@ -3,8 +3,8 @@ Description=horizon instance (Skyline)
 After=network.target
 
 [Service]
-Environment=PATH=/opt/python_virtualenv/projects/skyline-py3817/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin
-Environment=VIRTUAL_ENV=/opt/python_virtualenv/projects/skyline-py3817
+Environment=PATH=/opt/python_virtualenv/projects/skyline/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/bin
+Environment=VIRTUAL_ENV=/opt/python_virtualenv/projects/skyline
 Type=forking
 User=skyline
 Group=skyline
@@ -16,7 +16,8 @@ RuntimeDirectoryPreserve=yes
 ExecStart=/opt/skyline/github/skyline/bin/horizon.d start
 ExecStop=/opt/skyline/github/skyline/bin/horizon.d stop
 PIDFile=/var/run/skyline/horizon.pid
-TimeoutStartSec=180
+#TimeoutStartSec=180
+TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target

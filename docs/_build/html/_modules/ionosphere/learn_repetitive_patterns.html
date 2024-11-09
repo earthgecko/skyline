@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ionosphere.learn_repetitive_patterns &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>ionosphere.learn_repetitive_patterns &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -146,6 +146,9 @@
 <span class="kn">from</span> <span class="nn">functions.ionosphere.get_repetitive_patterns_metrics_list_to_evaluate</span> <span class="kn">import</span> <span class="n">get_repetitive_patterns_metrics_list_to_evaluate</span>
 <span class="kn">from</span> <span class="nn">functions.metrics.get_base_names_and_metric_ids</span> <span class="kn">import</span> <span class="n">get_base_names_and_metric_ids</span>
 
+<span class="c1"># @added 20240307 - Feature #4658: ionosphere.learn_repetitive_patterns</span>
+<span class="kn">from</span> <span class="nn">functions.database.queries.get_fps_for_metric</span> <span class="kn">import</span> <span class="n">get_fps_for_metric</span>
+
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
@@ -199,7 +202,9 @@
 <span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_training_to_evaluate"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_training_to_evaluate">[docs]</a><span class="k">def</span> <span class="nf">get_training_to_evaluate</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">):</span>
+<div class="viewcode-block" id="get_training_to_evaluate">
+<a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_training_to_evaluate">[docs]</a>
+<span class="k">def</span> <span class="nf">get_training_to_evaluate</span><span class="p">(</span><span class="n">metrics_to_evaluate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a dictionary of training data to evaluate.</span>
 
@@ -250,7 +255,10 @@
     <span class="k">return</span> <span class="n">training_to_evaluate</span></div>
 
 
-<div class="viewcode-block" id="get_metrics_to_evaluate"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_metrics_to_evaluate">[docs]</a><span class="k">def</span> <span class="nf">get_metrics_to_evaluate</span><span class="p">(</span><span class="n">training_data_dict</span><span class="p">,</span> <span class="n">last_evaluation_timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_metrics_to_evaluate">
+<a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_metrics_to_evaluate">[docs]</a>
+<span class="k">def</span> <span class="nf">get_metrics_to_evaluate</span><span class="p">(</span><span class="n">training_data_dict</span><span class="p">,</span> <span class="n">last_evaluation_timestamp</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a dictionary of metrics_to_evaluate.</span>
 
@@ -281,7 +289,8 @@
     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
         <span class="n">ids_with_base_names</span><span class="p">[</span><span class="n">base_names_with_ids</span><span class="p">[</span><span class="n">metric</span><span class="p">]]</span> <span class="o">=</span> <span class="n">metric</span>
 
-    <span class="n">include_metrics</span> <span class="o">=</span> <span class="n">exclude_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">include_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">exclude_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">include_metrics</span><span class="p">,</span> <span class="n">exclude_metrics</span> <span class="o">=</span> <span class="n">get_repetitive_patterns_metrics_list_to_evaluate</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -328,7 +337,10 @@
     <span class="k">return</span> <span class="n">metrics_to_evaluate</span></div>
 
 
-<div class="viewcode-block" id="get_features_to_compare"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_features_to_compare">[docs]</a><span class="k">def</span> <span class="nf">get_features_to_compare</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_features_to_compare">
+<a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_features_to_compare">[docs]</a>
+<span class="k">def</span> <span class="nf">get_features_to_compare</span><span class="p">(</span><span class="n">training_to_evaluate</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a dictionary offeatures_to_compare.</span>
 
@@ -383,7 +395,10 @@
     <span class="k">return</span> <span class="n">features_to_compare</span></div>
 
 
-<div class="viewcode-block" id="get_metrics_to_train"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_metrics_to_train">[docs]</a><span class="k">def</span> <span class="nf">get_metrics_to_train</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_metrics_to_train">
+<a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.get_metrics_to_train">[docs]</a>
+<span class="k">def</span> <span class="nf">get_metrics_to_train</span><span class="p">(</span><span class="n">features_to_compare</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a dictionary of metrics_to_train.</span>
 
@@ -458,7 +473,10 @@
     <span class="k">return</span> <span class="n">metrics_to_train</span></div>
 
 
-<div class="viewcode-block" id="ionosphere_learn_repetitive_patterns"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_learn_repetitive_patterns</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ionosphere_learn_repetitive_patterns">
+<a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns">[docs]</a>
+<span class="k">def</span> <span class="nf">ionosphere_learn_repetitive_patterns</span><span class="p">(</span><span class="n">timestamp</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Called by :class:`~skyline.skyline.learn_repetitive_patterns.ionosphere_learn_repetitive_patterns` to</span>
@@ -629,8 +647,8 @@
                         <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">)))</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create a features profile for </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to create a features profile for </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">fp_in_successful</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback_format_exc</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
@@ -645,6 +663,7 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: created </span><span class="si">%s</span><span class="s1"> features profiles: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">created_fp_ids</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">created_fp_ids</span><span class="p">)))</span>
     <span class="k">return</span></div>
+
 </pre></div>
 
            </div>
@@ -654,7 +673,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="/static/images/favicon.ico" rel="icon" type="image/x-icon" />
+
+<!--
+    <script src="/static/js/mousetrap.min.js"></script>
+-->
+<!-- @added 20160703 - Feature #1464: Webapp rebrow
+Updated bootstrap, dygraph and jquery (only to 2.2.4 as bootstrap needs < 3.0)
+bootstrap was update for the rebrow (https://github.com/marians/rebrow) layout
+elements.
+jquery was just updated - live() deprecated, changed to move
+dygraph was just updated.
+The strftime js (https://github.com/samsonjs/strftime/tree/v0.9.2) was added as
+dygraph-1.1.1 no longer includes the strftime library.
+fontawesome updated - https://github.com/FortAwesome/Font-Awesome/releases/tag/v4.6.3
+-->
+    <script src="/static/jquery-2.2.4/dist/jquery.min.js"></script>
+    <script src="/static/strftime-0.9.2/strftime-min.js"></script>
+<!--
+    <script src="/static/dygraph-1.1.1/dygraph-combined.js"></script>
+-->
+    <script src="/static/dygraphs-2.2.1/dygraph.min.js"></script>
+
+<!--
+        <script src="/static/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+-->
+
+    <script src="/static/bootstrap-5.3.2-dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    </script>
+
+<!-- @added 20170122 - Feature #1876: Ionosphere - training_data learn countdown
+Using https://github.com/rendro/countdown
+
+<             var endDate = "{{ countdown }}";
+---
+>             var oldendDate = "{{ countdown }}";
+>             var newendDate = "{{ countdown }} UTC";
+>             var endDate = date.toString();
+
+-->
+    {% if countdown %}
+    <script type="text/javascript" src="/static/countdown-2.2.0/dest/jquery.countdown.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        var endDate = "{{ countdown }}";
+
+        $('.countdown.styled').countdown({
+          date: endDate,
+          render: function(data) {
+            $(this.el).html("<div>" + this.leadingZeros(data.hours, 2) + " <span>hrs</span></div><div>" + this.leadingZeros(data.min, 2) + " <span>min</span></div><div>" + this.leadingZeros(data.sec, 2) + " <span>sec</span></div>");
+          }
+        });
+      });
+    </script>
+    {% endif %}
+
+<!--
+        <link rel="stylesheet" href="/static/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/bootstrap-3.3.6-dist/css/bootstrap-theme.min.css">
+-->
+    <link rel="stylesheet" href="/static/bootstrap-5.3.2-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/bootstrap-5.3.2-dist/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="/static/bootstrap-5.3.2-dist/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="/static/bootstrap-5.3.2-dist/css/bootstrap-utilities.min.css">
+<!--
+    <link rel="stylesheet" href="/static/fontawesome-4.6.3/css/font-awesome.min.css">
+-->
+    <link rel="stylesheet" href="/static/fontawesome-free-6.5.1-web/css/fontawesome.min.css">
+    <link rel="stylesheet" href="/static/css/skyline.styles.css">
+
+<!--
+    <style>
+      smallcode {
+        font-family: Consolas,"courier new";
+        color: crimson;
+        background-color: #f1f1f1;
+        padding: 2px;
+        font-size: 70%;
+      }
+    </style>
+-->
+
+  </head>
+  <body>
+    <title>Skyline</title>
+
+    <nav class="navbar navbar-expand-xl fixed-top bg-body">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/now"><span class="sky">Sky</span><span class="re">line</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/now">now</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/then">then</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Panorama
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
+                <li><a class="dropdown-item" href="/panorama?smoke"><span class="logo"><span class="re">Smoke</span> <span class="sky">latest</span></span></a></li>
+                <li><a class="dropdown-item" href="/panorama?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
+                <li><a class="dropdown-item" href="/panorama?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
+                <li><a class="dropdown-item" href="/panorama?plot_metric_anomalies=true"><span class="logo"><span class="re">Plot</span> <span class="sky">anomalies and events</span></span></a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Ionosphere
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
+                <li><a class="dropdown-item" href="/ionosphere"><span class="logo"><span class="re">Training</span>  <span class="sky">data</span></span></a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Luminosity
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="/luminosity?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+                <li><a class="dropdown-item" href="/luminosity?cloudbursts=true"><span class="logo"><span class="re">Cloudbursts</span></span></a></li>
+                <li><a class="dropdown-item" href="/luminosity?related_to_metrics=true"><span class="logo"><span class="sky">Related</span> <span class="re">metrics</span></span></a></li>
+                <li><a class="dropdown-item" href="/luminosity?pearson_closest=true"><span class="logo"><span class="sky">Pearson</span> <span class="re">closest</span></span></a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/crucible">Crucible</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/flux_frontend">Flux</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/vortex">Vortex</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/snab">SNAB</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/utilities">Utilities</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/tsdbs">TSDBs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/docs">docs</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/api">api</a>
+            </li>
+            {% if serve_jaeger %}
+            <li class="nav-item">
+              <a class="nav-link" href="/jaeger"><img src="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAu9Xm/4qEYP/ZynL/28tz/+TZqP/k2qj/5Nqn/+Laqf/j2qj/3c51/93Nc//dzXT/m5Re/7TP4/9fX1//AAAAALvV4//j0Wr/3c10/9zNc//ezXT/3M11/93Ndf/ezXT/3sx0/93NdP/dzHT/3c10/628t/+70+X/AAAAAAAAAACds8T/2Mt6/93NdP/dzXT/389v//7+/P/BsnD/3c10/9/NdP/dzXT/3c10/7vGtv+51uX/qcDR/wAAAAAAAAAAAAAAAN/NdP/dznP/vsiw/73V5/+61OX/udPn/5irtP/dzXT/3c10/93NdP/ZzHj/j5Fx/wAAAAAAAAAAAAAAANXOo//fznH/5uHJ/8i9g/87QDz/Kycn/7jP4P+6uYf/3c10/93NdP/dzXT/2sx4/5mQXf8AAAAAAAAAAAAAAADazHb//Pz8/xsdHf/9/v//0sd+/9fKev/Yynr//fz///f3///czXX/3c10/9vLeP+Vjlv/AAAAAAAAAAAAAAAA381x//Lv3v///v///v///6WbZf/dzXT////9/xcXF///////39/b/93Mdf/SxHT/oJxx/wAAAAAAAAAAAAAAANrKc//dzHT/9PLo/9zb0v/ay3r/2ct3//z89P///////////9LT0//dzHX/pJpW/+Xjzf8AAAAAAAAAAAAAAAAAAAAA0L5t/46DXP9nhHH/dZ6M/26TgP8lNCv/urGS/9jSsf/dzXT/2811/52UXP8AAAAAAAAAAAAAAAAAAAAAd6CK/3Gdiv92n43/dZ+O/3eejv9woY3/cKCO/1RsYv9pd1T/sKNe/6eaV/+elFz/AAAAAAAAAAAAAAAAAAAAANzOc//Fum//RXZf/0p7Z/9Kf2r/TYZu/zxxW/9AeGH/a5WF/22ajf9lclP/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHKfjv9yn47/cp+O/3Kfjv9yn47/c6CO/1uJdv/ay3b/xL51/2WJeP9ZfGz/AAAAAAAAAAAAAAAAAAAAAAAAAABxnoz/cp+O/3Kfjv9yn47/cp+O/3Kfjv9vkYf/pKqE/7qsXf8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGmUhP9yn47/caCO/3Gejf9tjYL/gJmi/7LEy/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAd52O/3Ggjv+uw7v/AAAAAAAAAAAAAAAA0uDj/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==">JAEGER</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      {% for category, message in get_flashed_messages(with_categories=True) %}
+        {% if category == "info" %}
+        <div class="alert alert-success alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          {{ message }}
+        </div>
+        {% elif category == "error" %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          {{ message }}
+        </div>
+        {% else %}
+        <div class="alert alert-warning alert-dismissible" role="alert">
+          <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          {{ message }}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      {% block body %}{% endblock %}
+    </div>
+
+    <div class="container-fluid">
+      <div class="footer">
+      <div class="row">
+<!--
+        <div class="col-6 col-md-4">
+-->
+          <div class="col-6 col-md-4">
+      		  <span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> is free software under the terms of the MIT license. Contribute :: <a href="https://github.com/earthgecko/skyline/" target="_blank">GitHub</a>.
+          </div>
+          <div class="col-6 col-md-4">
+{% if duration %}
+      		  <p class="text-right">Page render took :: {{ "%.3f"|format(duration*1000) }} milliseconds</p>
+{% else %}
+      		  <p class="text-right">Page render took :: unknown</p>
+{% endif %}
+      	  </div>
+          <div class="col-6 col-md-4">
+{% if version %}
+      		  <a href='/version' href='/version'><p class="text-right">version :: {{ version }}</a></p>
+{% else %}
+      		  <a href='/version' href='/version'><p class="text-right">version :: unkwown</a></p>
+{% endif %}
+      	  </div>
+        </div>
+{% if url_for("rebrow") in request.path %}
+    	<div class="row">
+        <div class="col-md-9">
+      		<span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> uses a modified port of Marian Steinbach's excellent <span class="logo"><span class="re">re</span>brow</span> Redis browser :: <a href="https://github.com/marians/rebrow/" target="_blank">GitHub - https://github.com/marians/rebrow</a>.
+        </div>
+        <div class="col-md-3">
+      		<p class="text-right"></p>
+      	</div>
+      </div>
+{% endif %}
+
+<!--
+# @added 20170119 - Branch #922: ionosphere
+#                   Task #1718: review.tsfresh
+-->
+{% if url_for("ionosphere") in request.path %}
+        <div class="row">
+          <div class="col-md-9">
+            <span class="logo"><span class="sky">Sky</span><span class="re">line</span></span> Ionosphere was made possible by the very featureful tsfresh package <a href="https://github.com/blue-yonder/tsfresh" target="_blank">GitHub - https://github.com/blue-yonder/tsfresh</a>.
+          </div>
+          <div class="col-md-3">
+            <p class="text-right"></p>
+          </div>
+        </div>
+{% endif %}
+
+      </div>
+    </div>
+  </body>
+</html>

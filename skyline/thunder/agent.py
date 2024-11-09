@@ -15,6 +15,10 @@ if True:
     import settings
     from thunder import Thunder
     from thunder_rolling import RollingThunder
+    # @added 20240304 - Feature #5302: thunder.thunder_alert
+    #                   Task #5300: Decouple alerting from analysis
+#    from thunder_alert import ThunderAlert
+
     from validate_settings import validate_settings_variables
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
@@ -47,6 +51,11 @@ class ThunderAgent():
 
         logger.info('agent starting thunder rolling')
         RollingThunder(getpid()).start()
+
+        # @added 20240304 - Feature #5302: thunder.thunder_alert
+        #                   Task #5300: Decouple alerting from analysis
+#        logger.info('agent starting thunder_alert')
+#        ThunderAlert(getpid()).start()
 
         while 1:
             sleep(100)

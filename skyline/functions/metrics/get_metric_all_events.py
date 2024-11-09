@@ -311,8 +311,28 @@ def get_metric_all_events(
     second_str = "}, '%s': {" % str(metric_id)
 
     start = timer()
+    iter_count = 0
     analyzer_all_illuminance_events_added = 0
     for analyzer_all_events_timestamp_str in analyzer_all_events_timestamp_strs:
+
+        if iter_count == 10:
+            current_logger.info('%s :: %s :: processed %s analyzer_all_events_timestamp_strs' % (
+                current_skyline_app, function_str, str(iter_count)))
+        if iter_count == 100:
+            current_logger.info('%s :: %s :: processed %s analyzer_all_events_timestamp_strs' % (
+                current_skyline_app, function_str, str(iter_count)))
+        if not iter_count % 1000:
+            current_logger.info('%s :: %s :: processed %s analyzer_all_events_timestamp_strs' % (
+                current_skyline_app, function_str, str(iter_count)))
+
+        iter_count += 1
+        time_taken = timer() - start
+        if time_taken > 30:
+            current_logger.info('%s :: %s :: processed %s of the %s analyzer_all_events_timestamp_strs, not processing more due to time' % (
+                current_skyline_app, function_str, str(iter_count),
+                str(len(analyzer_all_events_timestamp_strs))))
+            break
+
         try:
             aligned_analyzer_all_events_timestamp = int((int(float(analyzer_all_events_timestamp_str)) // resolution * resolution))
         except Exception as err:
@@ -342,8 +362,9 @@ def get_metric_all_events(
                 # to 4.664127588039264 (10 times faster then the first
                 # improvement made!) OVERALL 26 times faster!
                 get_data = False
-                if first_str in events_str or second_str in events_str:
-                    get_data = True
+                if events_str:
+                    if first_str in events_str or second_str in events_str:
+                        get_data = True
                 if not get_data:
                     events_str = None
 
@@ -442,3 +463,4 @@ def get_metric_all_events(
         str(timer() - start_start), base_name))
 
     return all_events_dict
+

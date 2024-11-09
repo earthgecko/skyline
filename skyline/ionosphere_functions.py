@@ -61,6 +61,17 @@ from create_matplotlib_graph import create_matplotlib_graph
 from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
+# @added 20240103 - Feature #4672: ionosphere_downsampled
+#                   Task #5178: Build and test skyline v4.1.0
+# @modified 20240208 - Feature #4672: ionosphere_downsampled
+#                      Task #5178: Build and test skyline v4.1.0
+# DISABLE for now still in developmenet
+#from functions.timeseries.determine_data_frequency import determine_data_frequency
+#from functions.database.queries.update_ionosphere_fp_resolution import update_ionosphere_fp_resolution
+
+# @added 20240131 - Task #5248: Optimise ionosphere_functions.get_related
+from functions.metrics.get_metric_ids_and_base_names import get_metric_ids_and_base_names
+
 LOCAL_DEBUG = False
 skyline_version = skyline_version.__absolute_version__
 
@@ -135,7 +146,9 @@ def fp_create_engine_disposal(current_skyline_app, engine):
 # settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG values.  These will later be
 # overridden by any database values determined for the specific metric if
 # they exist.
-def get_ionosphere_learn_details(current_skyline_app, base_name):
+# @modified 20240119 - Task #5228: panorama - optimise insertions
+# Added log defaulting to True so that panorama can send log=False on bulk inserts 
+def get_ionosphere_learn_details(current_skyline_app, base_name, log=True):
     """
     Determines what the default ``IONOSPHERE_LEARN_DEFAULT_`` values and what the
     specific override values are if the metric matches a pattern defined in
@@ -144,8 +157,10 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
 
     :param current_skyline_app: the Skyline app name calling the function
     :param base_name: thee base_name of the metric
+    :param log: whether to log
     :type current_skyline_app: str
     :type base_name: str
+    :type log: bool
     :return: tuple
     :return: (use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin)
     :rtype: (int, int, int, int, float)
@@ -170,13 +185,17 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
     labelled_metrics_name = None
     if base_name.startswith('labelled_metrics.'):
         labelled_metrics_name = str(base_name)
-        current_logger.info('get_ionosphere_learn_details:: looking up base_name for %s' % (labelled_metrics_name))
+        # @modified 20240119 - Task #5228: panorama - optimise insertions
+        if log:
+            current_logger.info('get_ionosphere_learn_details:: looking up base_name for %s' % (labelled_metrics_name))
         try:
             base_name = get_base_name_from_labelled_metrics_name(current_skyline_app, labelled_metrics_name)
         except Exception as err:
             current_logger.error('error :: get_ionosphere_learn_details :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
                 base_name, err))
-        current_logger.info('get_ionosphere_learn_details :: looked up base_name as %s' % (str(base_name)))
+        # @modified 20240119 - Task #5228: panorama - optimise insertions
+        if log:
+            current_logger.info('get_ionosphere_learn_details :: looked up base_name as %s' % (str(base_name)))
 
     IONOSPHERE_LEARN_NAMESPACE_CONFIG = list(settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG)
     external_settings = {}
@@ -236,7 +255,9 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
                         valid_learning_duration = int(namespace_config[2])
                         max_generations = int(namespace_config[3])
                         max_percent_diff_from_origin = float(namespace_config[4])
-                        current_logger.info('get_ionosphere_learn_details :: %s matches %s' % (base_name, str(namespace_config)))
+                        # @modified 20240119 - Task #5228: panorama - optimise insertions
+                        if log:
+                            current_logger.info('get_ionosphere_learn_details :: %s matches %s' % (base_name, str(namespace_config)))
                         break
                     except:
                         pattern_match = False
@@ -251,23 +272,31 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
                         valid_learning_duration = int(namespace_config[2])
                         max_generations = int(namespace_config[3])
                         max_percent_diff_from_origin = float(namespace_config[4])
-                        current_logger.info('get_ionosphere_learn_details :: %s matches %s' % (base_name, str(namespace_config)))
+                        # @modified 20240119 - Task #5228: panorama - optimise insertions
+                        if log:
+                            current_logger.info('get_ionosphere_learn_details :: %s matches %s' % (base_name, str(namespace_config)))
                         break
                     except:
                         pattern_match = False
             if not pattern_match:
-                current_logger.info('get_ionosphere_learn_details :: no specific namespace matches found, using default settings')
+                # @modified 20240119 - Task #5228: panorama - optimise insertions
+                if log:
+                    current_logger.info('get_ionosphere_learn_details :: no specific namespace matches found, using default settings')
             else:
-                current_logger.info('get_ionosphere_learn_details :: found namespace config match settings')
+                # @modified 20240119 - Task #5228: panorama - optimise insertions
+                if log:
+                    current_logger.info('get_ionosphere_learn_details :: found namespace config match settings')
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_ionosphere_learn_details :: failed to check namespace config settings matches')
 
-    current_logger.info('get_ionosphere_learn_details :: use_full_duration_days       :: %s days' % (str(use_full_duration_days)))
-    current_logger.info('get_ionosphere_learn_details :: use_full_duration            :: %s seconds' % (str(use_full_duration)))
-    current_logger.info('get_ionosphere_learn_details :: valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
-    current_logger.info('get_ionosphere_learn_details :: max_generations              :: %s' % (str(max_generations)))
-    current_logger.info('get_ionosphere_learn_details :: max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
+    # @modified 20240119 - Task #5228: panorama - optimise insertions
+    if log:
+        current_logger.info('get_ionosphere_learn_details :: use_full_duration_days       :: %s days' % (str(use_full_duration_days)))
+        current_logger.info('get_ionosphere_learn_details :: use_full_duration            :: %s seconds' % (str(use_full_duration)))
+        current_logger.info('get_ionosphere_learn_details :: valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
+        current_logger.info('get_ionosphere_learn_details :: max_generations              :: %s' % (str(max_generations)))
+        current_logger.info('get_ionosphere_learn_details :: max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
 
     return use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin
 
@@ -435,8 +464,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :param context: The context of the caller
     :param ionosphere_job: The ionosphere_job name related to creation request
         valid jobs are ``learn_fp_human``, ``learn_fp_generation``,
-        ``learn_fp_learnt``, ``learn_fp_automatic`` and
-        ``learn_repetitive_patterns``.
+        ``learn_fp_learnt``, ``learn_fp_automatic``,
+        ``learn_repetitive_patterns`` and ``find_repetitive_patterns``.
     :param fp_parent_id: The id of the parent features profile that this was
         learnt from, 0 being an original human generated features profile
     :param fp_generation: The number of generations away for the original
@@ -568,11 +597,27 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if ionosphere_job == 'learn_repetitive_patterns':
         learn_repetitive_patterns = True
 
+    # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+    find_repetitive_patterns = False
+    if ionosphere_job == 'find_repetitive_patterns':
+        find_repetitive_patterns = True
+
+    # @added 20240405 - Feature #5318: motif_annihilation
+    motif_annihilation = False
+    if ionosphere_job == 'motif_annihilation':
+        motif_annihilation = True
+
     if context == 'training_data':
         ionosphere_job = 'learn_fp_human'
         # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
         if learn_repetitive_patterns:
             ionosphere_job = 'learn_repetitive_patterns'
+        # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+        if find_repetitive_patterns:
+            ionosphere_job = 'find_repetitive_patterns'
+        # @added 20240405 - Feature #5318: motif_annihilation
+        if motif_annihilation:
+            ionosphere_job = 'motif_annihilation'
 
     current_logger.info('create_features_profile :: %s :: requested for %s at %s by user id %s' % (
         context, str(base_name), str(requested_timestamp), str(user_id)))
@@ -620,6 +665,18 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             metric_training_data_dir = '%s/%s/%s' % (
                 settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
                 metric_timeseries_dir)
+
+    # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+    if find_repetitive_patterns:
+        metric_training_data_dir = '%s/%s/%s' % (
+            settings.SKYLINE_TMP_DIR, str(requested_timestamp),
+            metric_timeseries_dir)
+
+    # @added 20240405 - Feature #5318: motif_annihilation
+    if motif_annihilation:
+        metric_training_data_dir = '%s/%s/%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
+            metric_timeseries_dir)
 
     features_file = '%s/%s.tsfresh.input.csv.features.transposed.csv' % (
         metric_training_data_dir, use_base_name)
@@ -967,10 +1024,15 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         fp_validated = 1
 
     # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
-    if learn_repetitive_patterns:
+    # @modified 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+    # if learn_repetitive_patterns:
+    if learn_repetitive_patterns or find_repetitive_patterns:
         fp_validated = 0
         if fp_generation < 2:
             fp_generation = 2
+    # @added 20240405 - Feature #5318: motif_annihilation
+    if motif_annihilation:
+        fp_generation = 2
 
     # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
     # Added ionosphere_echo
@@ -979,6 +1041,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         echo_fp_value = 1
     else:
         echo_fp_value = 0
+
+    # @added 20240425 - Feature #5318: motif_annihilation
+    # Add echo fp creation
+    if ionosphere_job == 'echo_motif_annihilation':
+        fp_validated = 1
 
     new_fp_id = False
     try:
@@ -1267,6 +1334,36 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             raise
         current_logger.info('create_features_profile :: %s - automated so the table should exist continuing' % context)
 
+    # @added 20240103 - Feature #4672: ionosphere_downsampled
+    #                   Task #5178: Build and test skyline v4.1.0
+    # Add resolution to ionosphere table
+    # @modified 20240208 - Feature #4672: ionosphere_downsampled
+    #                      Task #5178: Build and test skyline v4.1.0
+    # DISABLE for now still in developmenet
+#    resolution = 0
+#    try:
+#        resolution = determine_data_frequency(current_skyline_app, validated_timeseries, True)
+#    except Exception as err:
+#        trace = traceback.format_exc()
+#        current_logger.error('%s' % trace)
+#        fail_msg = 'error :: create_features_profile :: determine_data_frequency failed, err: %s' % err
+#        current_logger.error('%s' % fail_msg)
+#        if context in ['training', 'features_profile']:
+#            if engine:
+#                fp_create_engine_disposal(current_skyline_app, engine)
+#            raise
+#    if resolution:
+#        current_logger.info('create_features_profile :: updating resolution in ionosphere table, fp id: %s, resolution: %s' % (
+#            str(new_fp_id), str(resolution)))
+#        try:
+#            updated_resolution = update_ionosphere_fp_resolution(current_skyline_app, new_fp_id, resolution)
+#            if updated_resolution:
+#                current_logger.info('create_features_profile :: updated resolution in the database')
+#        except Exception as err:
+#            current_logger.error(traceback.format_exc())
+#            current_logger.error('error :: create_features_profile :: update_ionosphere_fp_resolution failed, err: %s' % (
+#                err))
+    
     # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
     #                   Feature #2404: Ionosphere - fluid approximation
     # Due to the loss of resolution in the Grpahite graph images due
@@ -1456,8 +1553,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     current_skyline_app, ionosphere_link)
 
         # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
-        if learn_repetitive_patterns:
+        # @modified 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+        # if learn_repetitive_patterns:
+        if learn_repetitive_patterns or find_repetitive_patterns:
             message = '*LEARNT - not anomalous repetitive pattern* - features profile id %s was created for %s via %s - %s' % (
+                str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
+        # @added 20240405 - Feature #5318: motif_annihilation
+        if motif_annihilation:
+            message = '*LEARNT - not anomalous repetitive pattern motif annihilation* - features profile id %s was created for %s via %s - %s' % (
                 str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link)
 
         channel = None
@@ -1632,7 +1735,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
             # @modified 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
             # if context == 'ionosphere_learn':
-            if context == 'ionosphere_learn' or learn_repetitive_patterns:
+            # @modified 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+            # if context == 'ionosphere_learn' or learn_repetitive_patterns:
+            # @modified 20240405 - Feature #5318: motif_annihilation
+            if context == 'ionosphere_learn' or learn_repetitive_patterns or find_repetitive_patterns or motif_annihilation:
                 try:
                     validate_link = '%s/ionosphere?fp_validate=true&metric=%s&validated_equals=false&limit=0&order=DESC' % (
                         settings.SKYLINE_URL, use_base_name)
@@ -1644,8 +1750,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 message = '*Skyline Ionosphere LEARNT* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
                     str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
                 # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
-                if learn_repetitive_patterns:
+                # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+                # if learn_repetitive_patterns:
+                if learn_repetitive_patterns or find_repetitive_patterns:
                     message = '*Skyline Ionosphere LEARNT - repetitive pattern * - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
+                        str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
+                # @added 20240405 - Feature #5318: motif_annihilation
+                if motif_annihilation:
+                    message = '*Skyline Ionosphere LEARNT - repetitive pattern (motif annihilation)* - features profile id %s for %s was learnt by %s - %s - *Please validate this* at %s' % (
                         str(new_fp_id), slack_base_name, current_skyline_app, ionosphere_link, validate_link)
 
                 if slack_ionosphere_job != 'learn_fp_human':
@@ -1709,7 +1821,12 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 create_redis_work_item = False
 
         # @added 20220909 - Feature #4658: ionosphere.learn_repetitive_patterns
-        if learn_repetitive_patterns:
+        # @modified 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+        # if learn_repetitive_patterns:
+        if learn_repetitive_patterns or find_repetitive_patterns:
+            create_redis_work_item = False
+        # @added 20240405 - Feature #5318: motif_annihilation
+        if motif_annihilation:
             create_redis_work_item = False
 
         if create_redis_work_item:
@@ -1762,7 +1879,14 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if settings.IONOSPHERE_ECHO_ENABLED and new_fp_id and learn_repetitive_patterns:
         if int(ts_full_duration) > int(settings.FULL_DURATION):
             current_logger.info(
-                'an echo fp will be automatically added for this learn_repetitive_patterns fp %s will it is human validated' % (
+                'an echo fp will be automatically added for this learn_repetitive_patterns fp %s when it is human validated' % (
+                    str(new_fp_id)))
+
+    # @added 20240307 - Feature #5304: ionosphere.find_repetitive_patterns
+    if settings.IONOSPHERE_ECHO_ENABLED and new_fp_id and find_repetitive_patterns:
+        if int(ts_full_duration) > int(settings.FULL_DURATION):
+            current_logger.info(
+                'an echo fp will be automatically added for this find_repetitive_patterns fp %s when it is human validated' % (
                     str(new_fp_id)))
 
     # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
@@ -1808,16 +1932,6 @@ def get_correlations(current_skyline_app, anomaly_id):
         # return False, False, fail_msg, trace, False
         raise  # to webapp to return in the UI
 
-    metrics_table = None
-    try:
-        metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
-        current_logger.info(fail_msg)
-    except:
-        trace = traceback.format_exc()
-        current_logger.error('%s' % trace)
-        fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
-        current_logger.error('%s' % fail_msg)
-
     luminosity_table = None
     try:
         luminosity_table, fail_msg, trace = luminosity_table_meta(current_skyline_app, engine)
@@ -1828,22 +1942,52 @@ def get_correlations(current_skyline_app, anomaly_id):
         fail_msg = 'error :: %s :: failed to get luminosity_table_meta' % func_name
         current_logger.error('%s' % fail_msg)
 
+    # @added 20240131 - Task #5248: Optimise ionosphere_functions.get_related
+    # Get the metric list from Redis rather than the DB, this takes
+    # DB - 0.8861560821533203 seconds to get 26697 metric names (inactive and active)
+    # get_metric_ids_and_base_names - 0.11952877044677734 seconds to get 10441 (active)
     metrics_list = []
+    metric_ids_with_base_names = None
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.id > 0)
-        results = connection.execute(stmt)
-        for row in results:
-            metric_id = row['id']
-            metric_name = row['metric']
-            metrics_list.append([int(metric_id), str(metric_name)])
-        connection.close()
-    except:
+        metric_ids_with_base_names = get_metric_ids_and_base_names(current_skyline_app)
+    except Exception as err:
         current_logger.error(traceback.format_exc())
-        current_logger.error('error :: could not determine metrics from MySQL')
-        if engine:
-            fp_create_engine_disposal(current_skyline_app, engine)
-        raise
+        current_logger.error('error :: get_correlations :: get_metric_ids_and_base_names failed, err: %s' % err)
+    try:
+        for metric_id, base_name in metric_ids_with_base_names.items():
+            metrics_list.append([int(metric_id), str(base_name)])
+    except Exception as err:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: get_correlations :: failed to create metrics_list from metric_ids_with_base_names, err: %s' % err)
+
+    # @modified 20240131 - Task #5248: Optimise ionosphere_functions.get_related
+    # Only get the metric_list from the DB if it was not obtained from Redis
+    # metrics_list = []
+    if not metrics_list:
+        metrics_table = None
+        try:
+            metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
+            current_logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error('%s' % trace)
+            fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
+            current_logger.error('%s' % fail_msg)
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+            results = connection.execute(stmt)
+            for row in results:
+                metric_id = row['id']
+                metric_name = row['metric']
+                metrics_list.append([int(metric_id), str(metric_name)])
+            connection.close()
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_correlations :: could not determine metrics from MySQL')
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
+            raise
 
     try:
         connection = engine.connect()
@@ -1860,6 +2004,13 @@ def get_correlations(current_skyline_app, anomaly_id):
                 # graphs via webapp.py and correlations.html template.
                 # metric_name = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
                 metric_name_list = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+
+                # @added 20240206 - Task #5248: Optimise ionosphere_functions.get_related
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Skip if no metric_name_list
+                if not metric_name_list:
+                    continue
+
                 metric_name = str(metric_name_list[0])
             coefficient = row['coefficient']
             shifted = row['shifted']
@@ -1938,20 +2089,10 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
     except:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        fail_msg = 'error :: could not get a MySQL engine'
+        fail_msg = 'error :: get_related :: could not get a MySQL engine'
         current_logger.error('%s' % fail_msg)
         # return False, False, fail_msg, trace, False
         raise  # to webapp to return in the UI
-
-    metrics_table = None
-    try:
-        metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
-        current_logger.info(fail_msg)
-    except:
-        trace = traceback.format_exc()
-        current_logger.error('%s' % trace)
-        fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
-        current_logger.error('%s' % fail_msg)
 
     anomalies_table = None
     try:
@@ -1963,22 +2104,77 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
         fail_msg = 'error :: %s :: failed to get anomalies_table_meta' % func_name
         current_logger.error('%s' % fail_msg)
 
+    # @added 20240201 - Task #5248: Optimise ionosphere_functions.get_related
+    # Get the all metric list from Redis rather than the DB, this takes
+    # DB - 1.0753862857818604 seconds to get 26702 metric names (inactive and active)
+    # all_db_metric_id_str_with_names - 0.38702940940856934 seconds to get 26702 metric names (inactive and active)
     metrics_list = []
+    redis_conn_decoded = None
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.id > 0)
-        results = connection.execute(stmt)
-        for row in results:
-            metric_id = row['id']
-            metric_name = row['metric']
-            metrics_list.append([int(metric_id), str(metric_name)])
-        connection.close()
-    except:
-        current_logger.error(traceback.format_exc())
-        current_logger.error('error :: could not determine metrics from MySQL')
-        if engine:
-            fp_create_engine_disposal(current_skyline_app, engine)
-        raise
+        redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+    except Exception as err:
+        current_logger.error('error :: get_related :: get_redis_conn_decoded failed, err: %s' % err)
+    all_db_metric_id_str_with_names = {}
+    try:
+        all_db_metric_id_str_with_names = redis_conn_decoded.hgetall('metrics_manager.all_db_metric_ids_with_names')
+    except Exception as err:
+        current_logger.error('error :: get_related :: failed to hgetall metrics_manager.all_db_metric_ids_with_names, err: %s' % err)
+    if all_db_metric_id_str_with_names:
+        try:
+            for metric_id_str, base_name in all_db_metric_id_str_with_names.items():
+                metrics_list.append([int(metric_id_str), str(base_name)])
+            del all_db_metric_id_str_with_names
+        except Exception as err:
+            current_logger.error('error :: get_related :: failed to create metrics_list from all_db_metric_id_str_with_names, err: %s' % err)
+
+    # @added 20240131 - Task #5248: Optimise ionosphere_functions.get_related
+    # Get the metric list from Redis rather than the DB, this takes
+    # DB - 0.8861560821533203 seconds to get 26697 metric names (inactive and active)
+    # get_metric_ids_and_base_names - 0.11952877044677734 seconds to get 10441 (active)
+    #metrics_list = []
+    metric_ids_with_base_names = None
+    if not metrics_list:
+        try:
+            metric_ids_with_base_names = get_metric_ids_and_base_names(current_skyline_app)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_related :: get_metric_ids_and_base_names failed, err: %s' % err)
+        try:
+            for metric_id, base_name in metric_ids_with_base_names.items():
+                metrics_list.append([int(metric_id), str(base_name)])
+            del metric_ids_with_base_names
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_related :: failed to create metrics_list from metric_ids_with_base_names, err: %s' % err)
+
+    # @modified 20240131 - Task #5248: Optimise ionosphere_functions.get_related
+    # Only get the metric_list from the DB if it was not obtained from Redis
+    # metrics_list = []
+    if not metrics_list:
+        metrics_table = None
+        try:
+            metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
+            current_logger.info('get_related :: %s' % fail_msg)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error('%s' % trace)
+            fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
+            current_logger.error('%s' % fail_msg)
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+            results = connection.execute(stmt)
+            for row in results:
+                metric_id = row['id']
+                metric_name = row['metric']
+                metrics_list.append([int(metric_id), str(metric_name)])
+            connection.close()
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_related :: could not determine metrics from MySQL')
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
+            raise
 
     try:
         connection = engine.connect()
@@ -1993,6 +2189,13 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             metric_name = None
             if metric_id:
                 metric_name_list = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+
+                # @added 20240206 - Task #5248: Optimise ionosphere_functions.get_related
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Skip if no metric_name_list
+                if not metric_name_list:
+                    continue
+
                 metric_name = str(metric_name_list[0])
             related_anomaly_timestamp = row['anomaly_timestamp']
             related_full_duration = row['full_duration']
@@ -2000,7 +2203,7 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
         connection.close()
     except:
         current_logger.error(traceback.format_exc())
-        current_logger.error('error :: could not determine related anomalies from DB for anomaly id -  %s' % str(anomaly_id))
+        current_logger.error('error :: get_related :: could not determine related anomalies from DB for anomaly id -  %s' % str(anomaly_id))
         if engine:
             fp_create_engine_disposal(current_skyline_app, engine)
         # del metrics_list
@@ -2018,6 +2221,13 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
             metric_name = None
             if metric_id:
                 metric_name_list = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+
+                # @added 20240206 - Task #5248: Optimise ionosphere_functions.get_related
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Skip if no metric_name_list
+                if not metric_name_list:
+                    continue
+
                 metric_name = str(metric_name_list[0])
             full_duration = row['full_duration']
             anomaly_details = [int(anomaly_id), int(metric_id), str(metric_name), int(full_duration)]

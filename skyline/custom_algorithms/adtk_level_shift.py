@@ -92,6 +92,10 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     metrics is probably not desirable, even if it is possible to do, it is very
     noisy.
 
+    UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
+    is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
+    is!
+
     2021-03-06 10:46:38 :: 1582754 :: algorithm run count - histogram_bins run 567 times
     2021-03-06 10:46:38 :: 1582754 :: algorithm timings count - histogram_bins has 567 timings
     2021-03-06 10:46:38 :: 1582754 :: algorithm timing - histogram_bins - total: 1.051136 - median: 0.001430
@@ -164,7 +168,7 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     For metrics with a different resolution/frequency may require different
     values appropriate for metric resolution.
 
-    Example CUSTOM_ALGORITHMS configuration:
+    Example CUSTOM_ALGORITHMS configuration::
 
     'adtk_level_shift': {
         'namespaces': [

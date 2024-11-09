@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ionosphere learning from repetitive patterns &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Ionosphere learning from repetitive patterns &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -77,6 +76,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#learn-repetitive-patterns">learn_repetitive_patterns</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#find-repetitive-patterns">find_repetitive_patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motif-annihilation">motif_annihilation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
@@ -87,6 +87,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -95,7 +96,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -132,11 +133,11 @@
            <div itemprop="articleBody">
              
   <section id="ionosphere-learning-from-repetitive-patterns">
-<h1>Ionosphere learning from repetitive patterns<a class="headerlink" href="#ionosphere-learning-from-repetitive-patterns" title="Permalink to this heading"></a></h1>
+<h1>Ionosphere learning from repetitive patterns<a class="headerlink" href="#ionosphere-learning-from-repetitive-patterns" title="Link to this heading"></a></h1>
 <p>By default learning from repetitive patterns is not enabled because you should
 define the metrics to exclude from this learning <strong>before</strong> enabling it.</p>
 <section id="exclude-and-include">
-<h2>Exclude and include<a class="headerlink" href="#exclude-and-include" title="Permalink to this heading"></a></h2>
+<h2>Exclude and include<a class="headerlink" href="#exclude-and-include" title="Link to this heading"></a></h2>
 <p>You need to decide what metrics you want to exclude from learning from
 repetitive patterns.  You do not want Skyline learning from repetitive patterns
 on <code class="docutils literal notranslate"><span class="pre">bad</span></code> metrics, like metrics that are related to errors, 50x status codes,
@@ -154,7 +155,7 @@ the annotated example under <a class="reference internal" href="skyline.html#set
 in settings.py</p>
 </section>
 <section id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading"></a></h2>
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h2>
 <p>Two methods of learning from repetitive patterns can be implemented in
 Ionosphere.  Each method has slight differences and running both achieves the
 best results.</p>
@@ -172,11 +173,12 @@ on metrics and calculate the features profile for each of these, then
 comparisons are made between all the calculated features profiles and if 3 are
 found to be similar then these patterns are learnt as being normal behaviour.</p>
 <p>The two methods, namely <code class="docutils literal notranslate"><span class="pre">learn_repetitive_patterns</span></code> and
-<code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code> are described here, both are similar but each
-searches for a different kind of pattern.</p>
+<code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code> are described here, both are somewhat similar but
+each searches for a different kind of pattern and <code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code>
+implements an additional method.</p>
 </section>
 <section id="learn-repetitive-patterns">
-<h2>learn_repetitive_patterns<a class="headerlink" href="#learn-repetitive-patterns" title="Permalink to this heading"></a></h2>
+<h2>learn_repetitive_patterns<a class="headerlink" href="#learn-repetitive-patterns" title="Link to this heading"></a></h2>
 <p>This method learns daily periodic patterns.  In new metrics these patterns can
 be found and learnt after 10 days.  Thereafter if the pattern changes the method
 can learn the new daily periodic pattern after 7 days.</p>
@@ -192,7 +194,7 @@ data sets are found to be significantly similar, these are classified as
 normal and they are automatically trained on.</p>
 </section>
 <section id="find-repetitive-patterns">
-<h2>find_repetitive_patterns<a class="headerlink" href="#find-repetitive-patterns" title="Permalink to this heading"></a></h2>
+<h2>find_repetitive_patterns<a class="headerlink" href="#find-repetitive-patterns" title="Link to this heading"></a></h2>
 <p>This method can learn patterns in metrics after 7 days.</p>
 <p>This method is run periodically against all anomalies.  Unlike
 <code class="docutils literal notranslate"><span class="pre">learn_repetitive_patterns</span></code> this method does not use training data or
@@ -234,6 +236,58 @@ is desirable that they do match as similar.</p>
 <p><a class="reference internal" href="skyline.html#settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE" title="settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_REPETITIVE_PATTERNS_MINMAX_AVG_VALUE</span></code></a> can be set
 to 0 to disable MinMax scaling comparisons.</p>
 </section>
+<section id="motif-annihilation">
+<h2>motif_annihilation<a class="headerlink" href="#motif-annihilation" title="Link to this heading"></a></h2>
+<p>When <code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code> is enabled it also makes use of an additional
+method of learning normal based on the annihilation of commonly occurring
+motifs.</p>
+<p>The motif_annihilation method is inspired by the concept of data smashing.</p>
+<p>While reviewing the initial performance of the original
+<code class="docutils literal notranslate"><span class="pre">find_repetitive_patterns</span></code> method it showed that the performance is not bad
+given zero knowledge discovery.  This lead back to October 2021 when reviewing
+the now removed timesmash (<a class="reference external" href="https://github.com/zeroknowledgediscovery/timesmash">https://github.com/zeroknowledgediscovery/timesmash</a>
+and pypi timesmash-0.2.23) which was published from
+<a class="reference external" href="http://zed.uchicago.edu/data_smashing.html">http://zed.uchicago.edu/data_smashing.html</a></p>
+<p>In reviewing the idea of data smashing it was clear that perhaps motifs could
+be used to do data smashing.</p>
+<ul class="simple">
+<li><p>Take the anomalous_timeseries in its 7 day context.</p></li>
+<li><p>Surface -35d of data, the previous 5 weeks (pw5_timeseries) before the anomaly
+e.g. <code class="docutils literal notranslate"><span class="pre">from=(metric_timestamp</span> <span class="pre">-</span> <span class="pre">((86400</span> <span class="pre">*</span> <span class="pre">7)</span> <span class="pre">*</span> <span class="pre">5)),</span> <span class="pre">until=(metric_timestamp</span> <span class="pre">+</span> <span class="pre">3600)</span></code></p></li>
+<li><p>MinMax scale the pw5_timeseries</p></li>
+<li><p>Extract the pw4_timeseries from the MinMax scaled pw5_timeseries, e.g.
+<code class="docutils literal notranslate"><span class="pre">pw4_timeseries</span> <span class="pre">=</span> <span class="pre">[item</span> <span class="pre">for</span> <span class="pre">item</span> <span class="pre">in</span> <span class="pre">pw5_timeseries</span> <span class="pre">if</span> <span class="pre">item[0]</span> <span class="pre">&gt;=</span> <span class="pre">(metric_timestamp</span> <span class="pre">-</span> <span class="pre">((86400</span> <span class="pre">*</span> <span class="pre">7)</span> <span class="pre">*</span> <span class="pre">5))</span> <span class="pre">and</span> <span class="pre">item[0]</span> <span class="pre">&lt;=</span> <span class="pre">(metric_timestamp</span> <span class="pre">-</span> <span class="pre">(86400</span> <span class="pre">*</span> <span class="pre">7))]</span></code></p></li>
+<li><p>Break up the pw4_timeseries into motifs of each of batch_size 6 and for each
+see how many times each motif occurs in the pw4_timeseries per hour (meaning
+only allow for a motif to be counted if it does not occur within 1h of the
+previous occurrence).</p></li>
+<li><p>Record every motif that occurs more than 3 times in the pw4_timeseries, these
+are considered normal behaviour, they occurred at least 3 times so they are
+common patterns.</p></li>
+<li><p>Extract the 7d anomaly_timeseries from the MinMax scaled pw5_timeseries, e.g.
+<code class="docutils literal notranslate"><span class="pre">anomaly_timeseries</span> <span class="pre">=</span> <span class="pre">[item</span> <span class="pre">for</span> <span class="pre">item</span> <span class="pre">in</span> <span class="pre">minmax_timeseries</span> <span class="pre">if</span> <span class="pre">item[0]</span> <span class="pre">&gt;=</span> <span class="pre">(metric_timestamp</span> <span class="pre">-</span> <span class="pre">(86400</span> <span class="pre">*</span> <span class="pre">7))</span> <span class="pre">and</span> <span class="pre">item[0]</span> <span class="pre">&lt;=</span> <span class="pre">metric_timestamp]</span></code></p></li>
+<li><p>Take each recorded motif and if a motif is found in the anomaly_timeseries,
+those data points in the anomalous time series can be removed (data smashed,
+annihilated).</p></li>
+<li><p>Record all indices for the periods that a match is found for.</p></li>
+<li><p>Create a set of the indices and remove those indices from the
+anomaly_timeseries. What is left?</p></li>
+<li><p>In addition to the use of 6 data point motifs, a method of using micro motifs
+has been added that is applied to any remaining data points that are part of
+motif which are &lt; 6 data points in length which have not been annihilated.
+These remaining motifs in the anomaly_timeseries that are &lt; batch_size in size
+are then considered per data point then attempt to annihilate each index based
+on the value occurring &gt;= 4 times in the pw5_timeseries AND the delta of the
+index value from the previous value occurring at least 4 times as well.  This
+delta check ensures that the check is similar to a micro motif, not just value
+but range too.</p></li>
+</ul>
+<p>If the time series can be annihilated by common motifs and micro motifs, the
+time series is not anomalous and can be classified as normal and can be learnt.</p>
+<p>Novel idea maybe…</p>
+<p>Yes it was and it works <strong>extremely</strong> well at unsupervised, autonomous learning
+and is highly accurate and reliable.</p>
+</section>
 </section>
 
 
@@ -247,7 +301,7 @@ to 0 to disable MinMax scaling comparisons.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

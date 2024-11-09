@@ -15,6 +15,18 @@ logger = logging.getLogger(skyline_app_logger)
 
 MAX_SAMPLE_AGE = FULL_DURATION
 
+# @added 20240111 - Feature #5216: redistimeseries_roomba - RATE_LIMIT
+#                   Task #5178: Build and test skyline v4.1.0
+# Rate limit the number of metrics that redistimeseries_roomba can
+# operate on.  If 100s and 1000s of metrics become interactive at the
+# same time, this can become a process that does not complete before
+# the metrics_manager process is terminated due to reaching maximum
+# run time.  It can also be exacerbated if a get_base_name_from_metric_id
+# has to be made for lots of metrics, which results in a DB connection
+# and query for each metric.  This rate limiting achieves eventual
+# consistency.
+RATE_LIMIT = 499
+
 
 # @added 20220627 - Task #2732: Prometheus to Skyline
 #                   Branch #4300: prometheus
@@ -81,6 +93,21 @@ def check_last_timestamp(self, metrics_to_check, metrics_to_remove):
     metrics_by_hour = {}
 
     for metric in metrics_to_check:
+
+        # @added 20240111 - Feature #5216: redistimeseries_roomba - RATE_LIMIT
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Rate limit the number of metrics that redistimeseries_roomba can
+        # operate on.  If 100s and 1000s of metrics become interactive at the
+        # same time, this can become a process that does not complete before
+        # the metrics_manager process is terminated due to reaching maximum
+        # run time.  It can also be exacerbated if a get_base_name_from_metric_id
+        # has to be made for lots of metrics, which results in a DB connection
+        # and query for each metric.  This rate limiting achieves eventual
+        # consistency.
+        if len(metrics_to_remove) > RATE_LIMIT:
+            logger.info('metrics_manager :: redistimeseries_roomba :: RATE_LIMIT - check_last_timestamp has %s metrics_to_remove, stopping added any more' % str(len(metrics_to_remove)))
+            break
+
         try:
             last_sample = self.redis_conn_decoded.ts().get(metric)
             last_timestamp = int(last_sample[0] / 1000)
@@ -415,12 +442,44 @@ def redistimeseries_roomba(self, active_labelled_ids_with_metrics, ids_with_labe
     # apps
     metrics_to_remove = get_metrics_to_remove(self)
 
+    # @added 20240111 - Feature #5216: redistimeseries_roomba - RATE_LIMIT
+    #                   Task #5178: Build and test skyline v4.1.0
+    # Rate limit the number of metrics that redistimeseries_roomba can
+    # operate on.  If 100s and 1000s of metrics become interactive at the
+    # same time, this can become a process that does not complete before
+    # the metrics_manager process is terminated due to reaching maximum
+    # run time.  It can also be exacerbated if a get_base_name_from_metric_id
+    # has to be made for lots of metrics, which results in a DB connection
+    # and query for each metric.  This rate limiting achieves eventual
+    # consistency.
+    if len(metrics_to_remove) > RATE_LIMIT:
+        logger.info('metrics_manager :: redistimeseries_roomba :: RATE_LIMIT - %s metrics_to_remove, decreasing to %s' % (
+            str(len(metrics_to_remove)), str(RATE_LIMIT)))
+        metrics_to_remove = list(metrics_to_remove[0:RATE_LIMIT])
+        logger.info('metrics_manager :: redistimeseries_roomba :: RATE_LIMIT - %s metrics_to_remove,' % str(len(metrics_to_remove)))
+
     # The labelled_metrics by id e.g. labelled_metrics.1234
     labelled_metrics = get_labelled_metrics(self)
 
     # Remove the already known metrics to be removed from the list of metrics to
     # check
     metrics_to_check = get_metrics_to_check(metrics_to_remove, labelled_metrics)
+
+    # @added 20240111 - Feature #5216: redistimeseries_roomba - RATE_LIMIT
+    #                   Task #5178: Build and test skyline v4.1.0
+    # Rate limit the number of metrics that redistimeseries_roomba can
+    # operate on.  If 100s and 1000s of metrics become interactive at the
+    # same time, this can become a process that does not complete before
+    # the metrics_manager process is terminated due to reaching maximum
+    # run time.  It can also be exacerbated if a get_base_name_from_metric_id
+    # has to be made for lots of metrics, which results in a DB connection
+    # and query for each metric.  This rate limiting achieves eventual
+    # consistency.
+    if len(metrics_to_remove) > RATE_LIMIT:
+        logger.info('metrics_manager :: redistimeseries_roomba :: RATE_LIMIT - %s metrics_to_remove after get_metrics_to_check, decreasing to %s' % (
+            str(len(metrics_to_remove))), str(RATE_LIMIT))
+        metrics_to_remove = metrics_to_remove[0:RATE_LIMIT]
+        logger.info('metrics_manager :: redistimeseries_roomba :: RATE_LIMIT - %s metrics_to_remove after get_metrics_to_check' % str(len(metrics_to_remove)))
 
     # Check the last timestamp of the metrics deemed to check
     metrics_to_remove = check_last_timestamp(self, metrics_to_check, metrics_to_remove)
@@ -442,7 +501,7 @@ def redistimeseries_roomba(self, active_labelled_ids_with_metrics, ids_with_labe
 
     if metrics_to_remove:
         removed_metrics = remove_redistimeseries_keys(self, metrics_to_remove)
-        logger.info('metrics_manager :: redistimeseries_roomba :: removed %s redistimeseries metric keys' % str(len(removed_metrics)))
+        logger.info('metrics_manager :: redistimeseries_roomba :: sent %s redistimeseries metric keys to remove' % str(len(removed_metrics)))
         deleted_item_count = remove_from_labelled_metrics(self, metrics_to_remove)
         logger.info('metrics_manager :: redistimeseries_roomba :: removed %s metrics from labelled_metrics.unique_labelled_metrics' % str(deleted_item_count))
 

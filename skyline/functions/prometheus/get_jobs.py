@@ -73,7 +73,13 @@ def get_jobs(current_skyline_app, prometheus_host_dict, log=True):
 
     response = None
     try:
-        response = requests.get(url)
+        # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+        # Add timeout for bandit B113
+        #response = requests.get(url)
+        connect_timeout = 5
+        read_timeout = 20
+        use_timeout = (int(connect_timeout), int(read_timeout))
+        response = requests.get(url, timeout=use_timeout)
     except Exception as err:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'

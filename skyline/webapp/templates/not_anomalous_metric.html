@@ -20,6 +20,7 @@
   {% set use_base_name = metric %}
 {% endif %}
 
+<!--
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -44,6 +45,28 @@
       <span class="icon-bar"></span>
     </button>
   </div>
+-->
+
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama?smoke=true"><span class="logo"><span class="sky">Smoke</span> <span class="re">latest</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link active" aria-current="page" href="/panorama?not_anomalous=true"><span class="logo"><span class="re">Not</span> <span class="sky">anomalous</span></span></a>
+      </li>
+      <li class="nav-item">
+      <a class="nav-link" href="/panorama?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">anomalies and events</span></span></a>
+      </li>
+    </ul>
+  </div>
+  <br>
 
   <h4><span class="logo"><span class="sky">Not ::</span> <span class="re">anomalous ::</span></span> {{ metric }}</h4>
   {% if labelled_metric_base_name %}
@@ -61,13 +84,13 @@
   </table>
   {% endif %}
 
-      <img src="panorama_images?image={{ not_anomalous_plot }}" alt="{{ metric }} - not anomalous timeseries graph" class="img-responsive center-block" /><br>
+      <img src="panorama_images?image={{ not_anomalous_plot }}" loading="lazy" alt="{{ metric }} - not anomalous timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ not_anomalous_plot }}<br><br>
 
   {% if anomalies_plot %}
   <h4><span class="logo"><span class="sky">Detected ::</span> <span class="re">anomalies ::</span></span> {{ metric }}</h4>
 
-      <img src="panorama_images?image={{ anomalies_plot }}" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
+      <img src="panorama_images?image={{ anomalies_plot }}" loading="lazy" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ anomalies_plot }}<br><br>
   {% endif %}
 

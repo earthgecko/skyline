@@ -483,3 +483,49 @@ and services running:
 For specific details about the data formats and methods for uploading and
 processing data files see the `upload_data to Flux <upload-data-to-flux.html>`__
 page.
+
+tornado
+-------
+
+Flux tornado is an ADVANCED FEATURE endpoint for custom_algorithms that exposes
+expensive to load numba jit algorithm functions.  The initial loading of some
+numba jit compiled algorithms is time and CPU intensive and when an algorithm
+such as this is used in a custom algorithm and is called by a process during the
+analysis stage the load time can be a performance killer each time.  To mitigate
+this, flux can be configured to expose a tornado endpoint, which pre-loads the
+algorithm in question and serves it for other apps.
+
+This is a break in the methodolgy of each app being isolated and independent of
+the other apps, but in this case it is worth the deviation from the normal for
+the improvement in analysis performance.  This can be mitigated by ensuring that
+when tornado is used, if there is no result or a timeout, then the function or
+algorithm calling the tornado endpoint should fail over to loading the real
+algorithm itself and using that.
+
+There are a few factors to consider when running and using Flux tornado.
+First a decision must be made whether to have the apps access flux/tornado via
+the HTTPS endpoint e.g. https://skyline.example.org/flux/tornado?algorithm=stump
+or directly e.g. http://127.0.0.1:8000/tornado?algorithm=stump
+Ideally for the sake of performance the apps would use the direct route outside
+the perview of nginx.  On average direct access is 0.2 seconds per request
+faster than via https and nginx which add a SSL termination overhead and logging.
+This is important because you may be wanting to monitor the request times via
+nginx and going direct bypasses the observability aspect for the added
+performance.  Your choice.
+
+Another factor is that any use of a tornado served algorithm must ensure that
+process can handle json coerced data in the response, no ``nan``, etc.  Also the
+tornado version of the algorithm must coerce the algorithm result into a format
+suitable for JSON serialization.
+
+To ensure that the algorithm work is logged to the sender app, flux/tornado logs
+only details about the request in the flux.log but logs any algorithm log output
+to the sender app log.
+
+If you are using flux to ingest Prometheus remote writes and or have lots of
+metrics being submitted to flux via HTTP json, just be aware that the 
+flux/tornado requests will be sharing the same gevent work pool as the normal
+flux ingestion.  If you are ingesting a lot of Prometheus metrics, some
+flux/tornado requests will timeout before they are served, falling back to the
+sender app to load and analyse the data itself ocassionally, so there may be
+some performance loss at times.

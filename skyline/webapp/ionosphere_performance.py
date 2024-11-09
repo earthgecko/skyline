@@ -1,4 +1,5 @@
 from __future__ import division
+import datetime
 import logging
 from os import path
 import time
@@ -12,6 +13,17 @@ import re
 from flask import request
 from sqlalchemy.sql import select
 from sqlalchemy.sql import text
+
+import pytz
+import pandas as pd
+import numpy as np
+
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
 
 import settings
 import skyline_version
@@ -58,9 +70,6 @@ def get_ionosphere_performance(
     :rtype:  dict
 
     """
-    import datetime
-    import pytz
-    import pandas as pd
 
     dev_null = None
     ionosphere_performance_debug = False
@@ -373,12 +382,18 @@ def get_ionosphere_performance(
         start_timestamp_date = None
         # If the from_timestamp is 0 or all
         if determine_start_timestamp:
+            logger.info('get_ionosphere_performance - determining start_timestamp_str')
             created_dates = []
             try:
                 connection = engine.connect()
                 # stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids)).limit(1)
-                stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
+                # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                #                      Feature #3934: ionosphere_performance
+                #stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
+                min_metric_id = min(metric_ids)
+                stmt = select([metrics_table.c.created_timestamp]).where(metrics_table.c.id == min_metric_id)
                 result = connection.execute(stmt)
+
                 for row in result:
                     # start_timestamp_date = row['created_timestamp']
                     created_dates.append(row['created_timestamp'])
@@ -582,11 +597,17 @@ def get_ionosphere_performance(
             report_anomalies = True
     anomalies = []
     anomalies_ts = []
+
+    # @added 20240216 - Task #5088: Change membership of the list checks to sets
+    #                   Feature #3934: ionosphere_performance
+    # Quicker to test membership of the set
+    metric_ids_set = set(metric_ids)
+
     if report_anomalies:
         try:
             anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
             logger.info(log_msg)
-            logger.info('anomalies_table OK')
+            logger.info('get_ionosphere_performance - anomalies_table OK')
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get anomalies_table meta')
@@ -600,12 +621,24 @@ def get_ionosphere_performance(
             # Allow for a minimum full_duration to differential between analyzer and
             # mirage anomalies. Added min_full_duration
             if metric_ids:
+                # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                #                      Feature #3934: ionosphere_performance
+                # Faster query and less iteration of results
                 # stmt = select([anomalies_table.c.id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
-                stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
                     where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
                     where(anomalies_table.c.anomaly_timestamp <= end_timestamp).\
                     where(anomalies_table.c.full_duration >= min_full_duration)
+                logger.info('get_ionosphere_performance - stmt: %s' % str(stmt))
+                start_stmt = time.time()
                 result = connection.execute(stmt)
+
+                # @added 20240216 - Task #5088: Change membership of the list checks to sets
+                #                   Feature #3934: ionosphere_performance
+                rows = result.all()
+                result = rows
+                logger.info('get_ionosphere_performance - stmt completed with %s results in %s seconds' % (
+                    str(len(result)),str(time.time() - start_stmt)))
             elif metric_id:
                 stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
                     where(anomalies_table.c.metric_id == int(metric_id)).\
@@ -625,7 +658,9 @@ def get_ionosphere_performance(
                 if r_metric_id == metric_id:
                     append_result = True
                 if not append_result:
-                    if r_metric_id in metric_ids:
+                    # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                    # if r_metric_id in metric_ids:
+                    if r_metric_id in metric_ids_set:
                         append_result = True
                 if append_result:
                     anomaly_id = row['id']
@@ -641,6 +676,55 @@ def get_ionosphere_performance(
                 engine_disposal(skyline_app, engine)
             raise
         logger.info('get_ionosphere_performance - anomalies_ts length - %s' % str(len(anomalies_ts)))
+
+        # @added 20231004 - Feature #3934: ionosphere_performance
+        # If there are no anomalies at min_full_duration at all then chances are
+        # these are new metrics so report on anomalies < min_full_duration 
+        if len(anomalies_ts) == 0:
+            logger.info('get_ionosphere_performance - no anomalies found trying without min_full_duration')
+            try:
+                connection = engine.connect()
+                if metric_ids:
+                    # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                    #                      Feature #3934: ionosphere_performance
+                    # Faster query and less iteration of results
+                    # stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp], anomalies_table.c.metric_id.in_(metric_ids)).\
+                        where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
+                        where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+                    result = connection.execute(stmt)
+                elif metric_id:
+                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                        where(anomalies_table.c.metric_id == int(metric_id)).\
+                        where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
+                        where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+                    result = connection.execute(stmt)
+                else:
+                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp]).\
+                        where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
+                        where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+                    result = connection.execute(stmt)
+                for row in result:
+                    r_metric_id = row['metric_id']
+                    append_result = False
+                    if r_metric_id == metric_id:
+                        append_result = True
+                    if not append_result:
+                        if r_metric_id in metric_ids_set:
+                            append_result = True
+                    if append_result:
+                        anomaly_id = row['id']
+                        anomaly_timestamp = row['anomaly_timestamp']
+                        anomalies.append(int(anomaly_timestamp))
+                        anomalies_ts.append([int(anomaly_timestamp), int(anomaly_id)])
+                connection.close()
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not determine anomaly ids - %s' % err)
+                if engine:
+                    engine_disposal(skyline_app, engine)
+                raise
+            logger.info('get_ionosphere_performance - anomalies_ts length with no min_full_duration - %s' % str(len(anomalies_ts)))
 
     fp_type = 'all'
     if 'fp_type' in request.args:
@@ -723,7 +807,11 @@ def get_ionosphere_performance(
                         where(ionosphere_table.c.generation >= 2)
                 else:
                     # stmt = select([ionosphere_table.c.id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
-                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                    #                      Feature #3934: ionosphere_performance
+                    # Faster query and less iteration of results
+                    # stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp]).\
+                    stmt = select([ionosphere_table.c.id, ionosphere_table.c.metric_id, ionosphere_table.c.anomaly_timestamp], ionosphere_table.c.metric_id.in_(metric_ids)).\
                         where(ionosphere_table.c.enabled == 1).\
                         where(ionosphere_table.c.anomaly_timestamp <= end_timestamp)
                 logger.info('get_ionosphere_performance - determining fp ids of type %s for metric_ids' % fp_type)
@@ -828,22 +916,50 @@ def get_ionosphere_performance(
         if engine:
             engine_disposal(skyline_app, engine)
         raise  # to webapp to return in the UI
+
+    # @added 20240216 - Task #5088: Change membership of the list checks to sets
+    #                   Feature #3934: ionosphere_performance
+    fp_ids_set = set(fp_ids)
+
     fps_matched_ts = []
     if fp_ids:
+
+        # @added 20240216 - Task #5088: Change membership of the list checks to sets
+        #                   Feature #3934: ionosphere_performance
+        logger.info('get_ionosphere_performance - determining fps_matched_ts')
+        start_matched = time.time()
+
         try:
             connection = engine.connect()
             # stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
-            stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+            # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+            #                      Feature #3934: ionosphere_performance
+            # Faster query and less iteration of results
+            # stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+            stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
                 where(ionosphere_matched_table.c.metric_timestamp >= start_timestamp).\
                 where(ionosphere_matched_table.c.metric_timestamp <= end_timestamp)
+            # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+            #                      Feature #3934: ionosphere_performance
+            # result = connection.execute(stmt)
+            logger.info('get_ionosphere_performance - stmt: %s' % str(stmt))
+            start_stmt = time.time()
             result = connection.execute(stmt)
+            rows = result.all()
+            result = rows
+            logger.info('get_ionosphere_performance - stmt completed with %s results in %s seconds' % (
+                str(len(result)),str(time.time() - start_stmt)))
+
             for row in result:
                 append_result = False
                 if metric == 'all' and metric_like == 'all':
                     append_result = True
                 if not append_result:
                     fp_id = row['fp_id']
-                    if fp_id in fp_ids:
+                    # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                    #                      Feature #3934: ionosphere_performance
+                    # if fp_id in fp_ids:
+                    if fp_id in fp_ids_set:
                         append_result = True
                 if append_result:
                     matched_id = row['id']
@@ -857,6 +973,13 @@ def get_ionosphere_performance(
             if engine:
                 engine_disposal(skyline_app, engine)
             raise
+
+        # @added 20240216 - Task #5088: Change membership of the list checks to sets
+        #                   Feature #3934: ionosphere_performance
+        logger.info('get_ionosphere_performance - determining fps_matched_ts took %s seconds' % (
+            str(time.time() - start_matched)            
+        ))
+
     logger.info('get_ionosphere_performance - fps_matched_ts - %s' % str(len(fps_matched_ts)))
 
     # Get layers matches
@@ -876,7 +999,11 @@ def get_ionosphere_performance(
         try:
             connection = engine.connect()
             # stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
-            stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+            # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+            #                      Feature #3934: ionosphere_performance
+            # Faster query and less iteration of results
+            # stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+            stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.anomaly_timestamp], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
                 where(ionosphere_layers_matched_table.c.anomaly_timestamp >= start_timestamp).\
                 where(ionosphere_layers_matched_table.c.anomaly_timestamp <= end_timestamp)
             result = connection.execute(stmt)
@@ -886,7 +1013,10 @@ def get_ionosphere_performance(
                     append_result = True
                 if not append_result:
                     fp_id = row['fp_id']
-                    if fp_id in fp_ids:
+                    # @modified 20240216 - Task #5088: Change membership of the list checks to sets
+                    #                      Feature #3934: ionosphere_performance
+                    # if fp_id in fp_ids:
+                    if fp_id in fp_ids_set:
                         append_result = True
                 if append_result:
                     matched_layers_id = row['id']
@@ -1084,8 +1214,29 @@ def get_ionosphere_performance(
         performance_df.sort_values('date')
         performance_df['fps_total_count'].fillna(method='ffill', inplace=True)
         logger.info('get_ionosphere_performance - second step of creating performance_df complete, dataframe length - %s' % str(len(performance_df)))
+
     if len(fps_total_df) == 0 and report_total_fps:
         performance_df['fps_total_count'] = 0
+
+    # @added 20240322 -
+    if report_total_fps:
+        replace_total_fps = False
+        yesterday_fps_total_count = 0
+        if yesterday_data:    
+            try:
+                yesterday_fps_total_count = yesterday_data[yesterday_end_date]['fps_total_count']
+            except Exception as err:
+                logger.warning('get_ionosphere_performance - could not determine fps_total_count from yesterday_data, err: %s' % err)
+        performance_fps_total_count = performance_df['fps_total_count'][-1]
+        if yesterday_fps_total_count:
+            if performance_fps_total_count == 0:
+                replace_total_fps = True
+            if np.isnan(performance_fps_total_count):
+                replace_total_fps = True
+        if replace_total_fps:
+            logger.info('get_ionosphere_performance - replacing fps_total_count of %s in performance_df with %s from yesterday_data' % (
+                str(performance_fps_total_count), str(yesterday_fps_total_count)))
+            performance_df['fps_total_count'][0] = yesterday_fps_total_count
 
     # Report fps_matched_count per day
     report_fps_matched_count = False
@@ -1159,7 +1310,9 @@ def get_ionosphere_performance(
 
         ydf['date'] = ydf['day']
         ydf['date'] = pd.to_datetime(ydf['date'], format='%Y-%m-%d')
-        ydf['date'] = ydf['date'].astype('datetime64')
+        # @modified 20240603 - Feature #5352: vista - bigquery
+        # ydf['date'] = ydf['date'].astype('datetime64')
+        ydf['date'] = ydf['date'].astype('datetime64[ns]')
         # @added 20210202 - Feature #3934: ionosphere_performance
         # Handle user timezone
         if timezone_str != 'UTC':
@@ -1200,7 +1353,11 @@ def get_ionosphere_performance(
         # the last x days of the period being 0 because the cumsum of new_fps_count
         # is 0.  Recalculate the fps_total_count on the cumsum of new_fps_count
         # of the merged df
-        performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
+        # @modified 20240322
+        # Only use cumsum if fps_total_count is 0
+        # performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
+        if performance_df['fps_total_count'][-1] == 0:
+            performance_df['fps_total_count'] = performance_df['new_fps_count'].cumsum()
 
     plot_png = None
     if output_format != 'json':
@@ -1252,6 +1409,10 @@ def get_ionosphere_performance(
         plot_done = False
         if 'fps_total_count' in performance_df.columns and report_total_fps:
             import matplotlib.pyplot as plt
+
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            matplotlib.rcParams['path.simplify_threshold'] = 1.0
 
             # @added 20210203 - Feature #3934: ionosphere_performance
             # Correct axes labels

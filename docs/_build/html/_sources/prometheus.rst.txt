@@ -38,14 +38,22 @@ Ingestion
 
 Skyline Flux accepts metrics from Prometheus and appends them to a Redis set.
 Every 60 seconds Skyline Horizon processes the Redis set and does a number of
-things depending on the Skyline set up.
+things depending on the Skyline set up.  The values of the headers section of
+the remote_write add the following labels to incoming metrics:
 
 - x-tenant-id
 - x-server-id
 - x-server-url
 
-Each x-tenant-id can have multiple x-server-ids and x-server-urls, one for
-each sending server.
+The x-tenant-id header value identifies the entity, an organisation, a customer,
+a site, etc.  Each x-tenant-id can have multiple x-server-ids and x-server-urls,
+one for each sending servers.  Each Prometheus or VictoriaMetrics server that
+sends data will have a unique ID and an associated URL.
+
+Note that Redis time series does not accept commas in label values and therefore
+on ingestion of any metrics with label values that include commas, Skyline replaces
+commas with underscores, e.g. ``'tags': 'netgo,builtinassets,stringlabels'`` will
+become ``'tags': 'netgo_builtinassets_stringlabels'``.
 
 If a target is sending any noisy metrics that you don't want sent, you can
 either specify that Prometheus should drop that data in the remote_write config
@@ -83,7 +91,10 @@ remote_write seciton such as ``write_relabel_configs`` as well.
   remote_write:
   - url: https://<YOUR_SKYLINE_FQDN>/flux/prometheus/write
     queue_config:
-      max_samples_per_send: 8000
+      max_samples_per_send: 1000
+      batch_send_deadline: 30s
+      min_backoff: 10s
+      max_backoff: 30s
     write_relabel_configs:
     - source_labels: [alias]
       regex: "(Loki|Prometheus|Grafana|Telegraf)"
@@ -105,6 +116,71 @@ remote_write seciton such as ``write_relabel_configs`` as well.
       send: true
       send_interval: 1m
       max_samples_per_send: 1000
+
+Prometheus retry
+~~~~~~~~~~~~~~~~
+
+By default the Prometheus remote_write retry related settings result in
+Prometheus trying to process the retry queue VERY fast.  The defaults are:
+
+.. code-block:: yaml
+
+  [ max_samples_per_send: <int> | default = 500]
+  # Maximum time a sample will wait in buffer.
+  [ batch_send_deadline: <duration> | default = 5s ]
+  # Initial retry delay. Gets doubled for every retry.
+  [ min_backoff: <duration> | default = 30ms ]
+  # Maximum retry delay.
+  [ max_backoff: <duration> | default = 5s ]
+
+If there is an issue with flux ingestion or on the server itself or a
+long network partition, any delay or failure will result in Prometheus
+retrying everything, very fast.  Due to the fact that the operator
+may not have access to Prometheus to stop remote_write or even define
+the Prometheus remote_write min_backoff or max_backoff or any access
+to configure Prometheus, Skyline must be opinionated in this matter to
+prevent lots of thundering retry requests.  The Prometheus defaults make
+retry go FAST, 50 retries of all queued batches over 5s.  This results
+in flux being swamped with retry connections and many batches will
+timeout.  Prometheus will just then try again and again and there is
+no way to move forward as it insistently wants to retry everything,
+every time.  The end result is that flux can never catch up because it is being
+sent 10s of 1000s of samples every retry, which most fail entering
+into a retry death spiral.
+There is no backfill with Prometheus, thereafter Skyline is ONLY
+expecting real time data.  If data is not current return a 400 and
+Prometheus will not retry.
+As of Prometheus v2.50.0 you will be able to set the sample_age_limit which will
+be allowed in the remote_write config to allow for disabling retries on samples
+older than sample_age_limit, by default is disabled.
+
+Therefore Skyline itself by default is set to return 400 for any submissions
+that are older than :mod:`settings.FLUX_PROMETHEUS_MAX_AGE` (300 seconds by
+default).  Prometheus receiving a 400 constitutes a non-recoverable error which
+is not retried and Prometheus moves on to the next batch.  Although this may
+result in some gaps in the Skyline :mod:`settings.FULL_DURATION` Redis data,
+it means that any lengthy issue or network partition will not result in a retry
+spiral of death.
+
+The example settings on this page show more reasonable values for Prometheus
+remote_write queue settings which at least allow flux to process all the retries
+if an issue does develop and are much less likely to result in a retry spiral of
+death.  When loaded and pushed with a lot of data, flux can be expected to take
+> 5s to process a request so batch_send_deadline is set to 30s, a more
+reasonable value and the request will 499 if flux is running behind nginx just
+before 30s and Prometheus will receive that response and not retry.  After an
+issue, flux will rarely respond in < 5s when thundered with retries. min_backoff
+and max_backoff are also set to more realistic values in terms of flux.
+
+.. code-block:: yaml
+
+  remote_write:
+  - url: https://<YOUR_SKYLINE_FQDN>/flux/prometheus/write
+    queue_config:
+      max_samples_per_send: 1000
+      batch_send_deadline: 30s
+      min_backoff: 10s
+      max_backoff: 30s
 
 
 Format
@@ -156,14 +232,14 @@ cannot be trusted.
 Skyline is not storing the data for longer than :mod:`settings.FULL_DURATION`
 and it is storing preprocessed data.  Consider Skyline analysis as a broad
 overview of your Prometheus metrics, it is not about fine granular data it is a
-set of tradeoffs.  It gives you real time monitoring your metrics in broad
+set of tradeoffs.  It gives you real time monitoring of your metrics in broad
 strokes, but it has cardinality and resolution limitations.
 
 Skyline requires the following additional information per request to be passed
 along with the metric data.
 
 - source: the Prometheus URL at which the metrics being submitted are available at.
-- key: the FLUX_API_KEYS key
+- key: the FLUX_API_KEY key
 - prefix: a string to prefix the metrics with internally in Skyline
 
 Although the Prometheus metric name may be something along the lines of:
@@ -176,8 +252,52 @@ from multiple Prometheus instances and whereas each metric and labels may
 be unique on one Prometheus server the same metric and labels may exist on
 another Prometheus server, so Skyline adds labels to every Prometheus metric.
 
-Pass this additional information using the remote_write method is easy, passing
-it using the remote_storage_adapter is a bit more obfuscate.
+Pass this additional information using the remote_write and JSON methods is easy
+as it just just passed as headers (as shown in the remote_write example above),
+passing it using the remote_storage_adapter is a bit more obfuscate.
+
+
+Ingesting JSON
+~~~~~~~~~~~~~~
+
+It is possible to post key value style metrics via JSON as well.  This allows
+for custom key/value metrics that perhaps are not collected in Prometheus or
+VictoriaMetrics to be sent directly to Skyline as "prometheus metrics" with the
+metric|str, timestamp|int and value|float
+
+.. code-block:: bash
+
+  SAMPLE_TIMESTAMP=$(date +%s)
+  curl -v -d '{
+    "key":"<FLUX_SELF_API_KEY or a FLUX_API_KEYS>",
+    "metrics":[
+      {"metric":"cpu_user{instance=\"server1\"}","timestamp":'$SAMPLE_TIMESTAMP',"value":1.0},
+      {"metric":"cpu_system{instance=\"server1\"}","timestamp":'$SAMPLE_TIMESTAMP',"value":2.2}]}' \
+      -H "Content-Type: application/json" \
+      -H "x-test-only: true" \
+      -H "x-tenant-id: org_1" \
+      -H "x-server-id: 1" \
+      -H "x-server-url: http://localhost:9090" \
+      -X POST https://skyline.example.org/flux/prometheus/write
+
+The dropLabels and dropMetrics headers referenced above in the remote_write
+config section can also be used here.  Limit payloads to 1024K and if you have
+a large number of metrics being submitted consider using a gzip encoded request.
+
+Note for the JSON format requests if any one metric or part of the metric data
+is invalid it will be rejected.  A response code of 207 is returned for any
+requests that POST a mixture of valid data and invalid data.  Along with the 207
+response is a JSON response reporting the invalid metric data and the valid
+metric data along with the response for each item, either a 200 for valid data
+and a 400 for invalid data.  If all the data in the submission is valid a
+response of 204 is used and if no data is valid a response of 400 is returned.
+
+If you have thunder enabled then thunder will send out an invalid_metrics alert
+every hour if invalid metrics are submitted and a 207 response is returned with
+a link to the metric data which was invalid which is available for 2 hours.  Do
+note that only one thunder alert will be sent for a namespace per hour no matter
+how many requests are submitted with invalid data.
+
 
 remote_storage_adapter
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -200,8 +320,11 @@ Skyline uses the
     - url: "https://skyline.example.org/flux/prometheus/write"
       queue_config:
         max_samples_per_send: 1000
+        batch_send_deadline: 30s
+        min_backoff: 10s
+        max_backoff: 30s
       headers:
-        key: 1234hbfq89iUGGDn9qiUHuads7we1234
+        key: 123456abcdefghijklmnopqrstuvwxyz
         x-tenant-id: 123
         x-server-id: 2
         x-server-url: http://minikube.mc12

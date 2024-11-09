@@ -37,7 +37,7 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     A time series data points are anomalous if the 6th median is 6 standard
     deviations (six-sigma) from the time series 6th median standard deviation
     and persists for x_windows, where `x_windows = int(window / 2)`.
-    This algorithm finds SIGNIFICANT cahngepoints in a time series, similar to
+    This algorithm finds SIGNIFICANT changepoints in a time series, similar to
     PELT and Bayesian Online Changepoint Detection, however it is more robust to
     instaneous outliers and more conditionally selective of changepoints.
 
@@ -53,19 +53,49 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :param timeseries: the time series as a list e.g. ``[[1578916800.0, 29.0],
         [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself for example:
-        ``algorithm_parameters={
-            'nth_median': 6,
-            'sigma': 6,
-            'window': 5,
-            'return_anomalies' = True,
-        }``
+        custom_algorithm and algorithm itself.  For the m66 custom algorithm no
+        specific algorithm_parameters are required apart from an empty dict but
+        the algorithm_parameters that can be passed are as follows, however
+        there are more internal performance related and other parameters that
+        can be passed (see in code not in docstrings):
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'nth_median'`` (int): The number of medians to use.
+            Default is ``6``.
+        - ``'sigma'`` (int): The sigma value to use.
+            Default is ``6``.
+        - ``'window'`` (int): The number of data points in a window.
+            Default is ``5``.
+         - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'nth_median': 6,
+                'sigma': 6,
+                'window': 5,
+                'debug_logging': True,
+                'return_results': True,
+            }
+        
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: True, False or Non
-    :rtype: boolean
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     Example CUSTOM_ALGORITHMS configuration:
 
@@ -790,49 +820,53 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             if not anomalies:
                 anomalous = False
 
+            anomalies_data = []
+            anomaly_timestamps = []
             if anomalies:
                 anomalous = True
-                anomalies_data = []
                 anomaly_timestamps = [int(item[0]) for item in anomalies]
-                for index, item in enumerate(timeseries):
-                    score = 0
-                    if int(item[0]) in anomaly_timestamps:
-                        anomalies_data.append(1)
-                        # @added 20230612 - Feature #4946: vortex - m66
-                        # Changed the m66 algorithm to return a results dict
-                        # like other custom algorithms that vortex can run
-                        results_anomalies[int(item[0])] = {'value': item[1], 'index': index, 'score': 1}
-                    else:
-                        anomalies_data.append(0)
-                # @added 20230612 - Feature #4946: vortex - m66
-                # Changed the m66 algorithm to return a results dict
-                # like other custom algorithms that vortex can run
-                anomalyScore_list = list(anomalies_data)
-                m66_scores = list(anomalies_data)
 
-                if not use_bottleneck:
-                    df['anomalies'] = anomalies_data
-                anomalies_list = []
+            for index, item in enumerate(timeseries):
+                score = 0
+                if int(item[0]) in anomaly_timestamps:
+                    score = 1
+                    anomalies_data.append(score)
+                    # @added 20230612 - Feature #4946: vortex - m66
+                    # Changed the m66 algorithm to return a results dict
+                    # like other custom algorithms that vortex can run
+                    results_anomalies[int(item[0])] = {'value': item[1], 'index': index, 'score': score}
+                else:
+                    anomalies_data.append(score)
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run
+            anomalyScore_list = list(anomalies_data)
+            m66_scores = list(anomalies_data)
+
+            if not use_bottleneck:
+                df['anomalies'] = anomalies_data
+            anomalies_list = []
+            if anomalies:
                 for ts, value in timeseries:
                     if int(ts) in anomaly_timestamps:
                         anomalies_list.append([int(ts), value])
                         anomalies_dict['anomalies'][int(ts)] = value
 
-                # @added 20230612 - Feature #4946: vortex - m66
-                # Changed the m66 algorithm to return a results dict
-                # like other custom algorithms that vortex can run
-                if return_results:
-                    anomaly_sum = sum(anomalyScore_list[-anomaly_window:])
-                    if anomaly_sum > 0:
-                        anomalous = True
-                    else:
-                        anomalous = False
-                    results = {
-                        'anomalous': anomalous,
-                        'anomalies': results_anomalies,
-                        'anomalyScore_list': anomalyScore_list,
-                        'scores': m66_scores,
-                    }
+            # @added 20230612 - Feature #4946: vortex - m66
+            # Changed the m66 algorithm to return a results dict
+            # like other custom algorithms that vortex can run
+            if return_results:
+                anomaly_sum = sum(anomalyScore_list[-anomaly_window:])
+                if anomaly_sum > 0:
+                    anomalous = True
+                else:
+                    anomalous = False
+                results = {
+                    'anomalous': anomalous,
+                    'anomalies': results_anomalies,
+                    'anomalyScore_list': anomalyScore_list,
+                    'scores': m66_scores,
+                }
 
             if anomalies and save_plots_to:
                 try:

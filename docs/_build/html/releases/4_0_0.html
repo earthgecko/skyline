@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>4.0.0 &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>4.0.0 &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -36,9 +36,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -89,7 +89,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -107,7 +107,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#prometheus-victoriametrics-metrics">Prometheus/VictoriaMetrics metrics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#changes">Changes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#upgrade-notes">Upgrade notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v3-0-4">How to update from v3.0.4</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-update-from-v3-0-4">How to update from v3.0.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Changes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="3_0_4.html">3.0.4</a></li>
@@ -190,12 +193,12 @@
            <div itemprop="articleBody">
              
   <section id="id1">
-<h1>4.0.0<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h1>
+<h1>4.0.0<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
 <p>v4.0.0 - 28 June 2023</p>
 <p>This is a <strong>MAJOR</strong> release with changes and enhancements across the board,
 including changes and additions to backend components.</p>
 <section id="notable-new-features-and-functionality">
-<h2>Notable new features and functionality<a class="headerlink" href="#notable-new-features-and-functionality" title="Permalink to this heading"></a></h2>
+<h2>Notable new features and functionality<a class="headerlink" href="#notable-new-features-and-functionality" title="Link to this heading"></a></h2>
 <p>There are a plethera of changes and additions in v4.0.0</p>
 <p>Added support for Prometheus/VictoriaMetrics - ingesting, storing and analysing
 labelled metrics or tagged metrics from Prometheus, VictoriaMetrics and via
@@ -248,11 +251,11 @@ where appropriate.</p>
 both apps have changed to using gevent for the unicorn <code class="docutils literal notranslate"><span class="pre">worker_class</span></code>.</p>
 <p>There are also a number of new dependencies and dependency updates as well.</p>
 <section id="noteable-backend-changes">
-<h3>Noteable Backend changes<a class="headerlink" href="#noteable-backend-changes" title="Permalink to this heading"></a></h3>
+<h3>Noteable Backend changes<a class="headerlink" href="#noteable-backend-changes" title="Link to this heading"></a></h3>
 </section>
 </section>
 <section id="flux-and-webapp-changed-to-gevent">
-<h2>Flux and Webapp changed to gevent<a class="headerlink" href="#flux-and-webapp-changed-to-gevent" title="Permalink to this heading"></a></h2>
+<h2>Flux and Webapp changed to gevent<a class="headerlink" href="#flux-and-webapp-changed-to-gevent" title="Link to this heading"></a></h2>
 <p>There are significant changes to how both webapp and flux are run by gunicorn,
 both apps have changed to using gevent for the unicorn <code class="docutils literal notranslate"><span class="pre">worker_class</span></code>.  This
 is a significant operational change.  Further there is also <strong>one</strong> remaining
@@ -268,7 +271,7 @@ opposed to determining a convoluted method for flask, gunicorn, gevent and
 tsfresh to work together and maintaining that.</p>
 </section>
 <section id="numba-optimisations">
-<h2>numba optimisations<a class="headerlink" href="#numba-optimisations" title="Permalink to this heading"></a></h2>
+<h2>numba optimisations<a class="headerlink" href="#numba-optimisations" title="Link to this heading"></a></h2>
 <p>The starting of apps is a little slower in some cases and the first analysis run
 on some apps can take longer than normal.  This is because gaining performance
 on every analysis thereafter has the tradeoff in that all the numba algorithms
@@ -276,7 +279,7 @@ and numba data processing functions must be compiled on their initialisation.
 Thereafter the performance improvements are gained on every function call.</p>
 </section>
 <section id="redistimeseries">
-<h2>RedisTimeseries<a class="headerlink" href="#redistimeseries" title="Permalink to this heading"></a></h2>
+<h2>RedisTimeseries<a class="headerlink" href="#redistimeseries" title="Link to this heading"></a></h2>
 <p>There are 2 available of methods to deploy and use RedisTimeseries, one being use
 the normal OSS Redis and compile RedisTimeseries and load the module via the include
 or use redis-stack-server.  Upgrading Redis or changing to redis-stack-server is
@@ -291,25 +294,25 @@ packages at times and in terms of Skyline Redis needs to be stable, using the
 download binaries for your OS is a more stable method.</p>
 </section>
 <section id="matrixprofile-replaced-by-stumpy">
-<h2>matrixprofile replaced by stumpy<a class="headerlink" href="#matrixprofile-replaced-by-stumpy" title="Permalink to this heading"></a></h2>
+<h2>matrixprofile replaced by stumpy<a class="headerlink" href="#matrixprofile-replaced-by-stumpy" title="Link to this heading"></a></h2>
 <p>The matrix-profile-foundation/matrixprofile library is no longer maintained and
 this has been replaced with the stumpy matrixprofile implementation.  This
 affects the matrixprofile custom_algorithm which will automatically use the
 stumpy version if available.  matrixprofile has been removed as a dependency.</p>
 </section>
 <section id="prometheus-victoriametrics-metrics">
-<h2>Prometheus/VictoriaMetrics metrics<a class="headerlink" href="#prometheus-victoriametrics-metrics" title="Permalink to this heading"></a></h2>
+<h2>Prometheus/VictoriaMetrics metrics<a class="headerlink" href="#prometheus-victoriametrics-metrics" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Accept labelled metrics data from Prometheus, InfluxDB (telegraf) and VictoriaMetrics.</p></li>
 <li><p>Use VictoriaMetrics as Skyline’s longer term TSDB for labelled metrics.</p></li>
 </ul>
 </section>
 <section id="changes">
-<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this heading"></a></h2>
+<h2>Changes<a class="headerlink" href="#changes" title="Link to this heading"></a></h2>
 <p>The changes list is LONG, so listed at the end of this page.</p>
 </section>
 <section id="upgrade-notes">
-<h2>Upgrade notes<a class="headerlink" href="#upgrade-notes" title="Permalink to this heading"></a></h2>
+<h2>Upgrade notes<a class="headerlink" href="#upgrade-notes" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>These update instructions apply to upgrading from v3.0.4</p></li>
 <li><p>There are are changes to the DB in v4.0.0</p></li>
@@ -319,7 +322,7 @@ stumpy version if available.  matrixprofile has been removed as a dependency.</p
 </ul>
 </section>
 <section id="how-to-update-from-v3-0-4">
-<h2>How to update from v3.0.4<a class="headerlink" href="#how-to-update-from-v3-0-4" title="Permalink to this heading"></a></h2>
+<h2>How to update from v3.0.4<a class="headerlink" href="#how-to-update-from-v3-0-4" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Build a new Python version and virtualenv, due to this being a major version
 release we use a new virtualenv which all the required libraries and do not
@@ -580,6 +583,8 @@ find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span c
 </div>
 <p>Congratulations, you are now running the best OSS anomaly detection stack in the
 world (probably).</p>
+<section id="id2">
+<h3>Changes<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <p>New slack messaging does not handle public channel (111)
 thunder (1444)
 panorama check file fails (1460)
@@ -882,6 +887,7 @@ Ionosphere (922)
 flux (956)</p>
 </section>
 </section>
+</section>
 
 
            </div>
@@ -894,7 +900,7 @@ flux (956)</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

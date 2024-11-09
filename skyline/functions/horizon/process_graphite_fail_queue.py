@@ -15,6 +15,9 @@ import settings
 
 from skyline_functions import get_redis_conn_decoded
 from functions.graphite.send_graphite_metric import send_graphite_metric
+# @added 20231223 - Task #5188: Optimise redis renames
+#                   Task #5178: Build and test skyline v4.1.0
+from functions.redis.redis_rename_key import redis_rename_key
 
 try:
     from settings import CARBON_HOST
@@ -34,6 +37,20 @@ try:
     skyline_metrics_carbon_port = SKYLINE_METRICS_CARBON_PORT
 except:
     skyline_metrics_carbon_port = CARBON_PORT
+
+# @added 20240101 - Feature #5192: skyline_graphite_metrics_single_submit
+CARBON_PICKLE_PORT = 0
+try:
+    from settings import CARBON_PICKLE_PORT
+    skyline_metrics_carbon_pickle_port = CARBON_PICKLE_PORT
+except:
+    skyline_metrics_carbon_pickle_port = CARBON_PORT
+try:
+    from settings import SKYLINE_METRICS_CARBON_PICKLE_PORT
+    skyline_metrics_carbon_pickle_port = SKYLINE_METRICS_CARBON_PICKLE_PORT
+except:
+    skyline_metrics_carbon_pickle_port = int(skyline_metrics_carbon_pickle_port)
+
 
 skyline_app = 'horizon'
 skyline_app_logger = '%sLog' % skyline_app
@@ -66,7 +83,9 @@ def process_graphite_fail_queue(self):
         if message:
             try:
                 sock = socket.socket()
-                sock.connect((skyline_metrics_carbon_host, skyline_metrics_carbon_port))
+                # @modified 20240101 - Feature #5192: skyline_graphite_metrics_single_submit
+                # sock.connect((skyline_metrics_carbon_host, skyline_metrics_carbon_port))
+                sock.connect((skyline_metrics_carbon_host, skyline_metrics_carbon_pickle_port))
                 sock.sendall(message)
                 sock.close()
             except:
@@ -152,7 +171,15 @@ def process_graphite_fail_queue(self):
     process_set = 'skyline.graphite_fail_queue.horizon.%s' % str(time_now)
     # Rename the set so it can be processed in isolation
     try:
-        self.redis_conn_decoded.rename('skyline.graphite_fail_queue', process_set)
+        # @modified 20231223 - Task #5188: Optimise redis renames
+        #                      Task #5178: Build and test skyline v4.1.0
+        # Use rename_key function to mitigate cmd_stat.rename failed_calls
+        # self.redis_conn_decoded.rename('skyline.graphite_fail_queue', process_set)
+        redis_key_renamed = False
+        try:
+            redis_key_renamed = redis_rename_key(skyline_app, 'skyline.graphite_fail_queue', process_set, log=True)
+        except Exception as err:
+            logger.error('error :: redis_rename_key failed renaming skyline.graphite_fail_queue to %s, err: %s' % (str(process_set), err))
     except Exception as err:
         logger.error('error :: horizon.worker :: process_graphite_fail_queue :: failed to rename Redis set skyline.graphite_fail_queue to %s - %s' % (
             process_set, err))
@@ -232,7 +259,7 @@ def process_graphite_fail_queue(self):
             added = self.redis_conn_decoded.sadd('skyline.graphite_fail_queue', *set(items_to_readd))
         except Exception as err:
             logger.error('error :: horizon.worker :: failed to add %s to Redis set skyline.graphite_fail_queue - %s' % (
-                str(item), process_set, err))
+                str(len(items_to_readd)), err))
             added = 0
         logger.info('horizon.worker :: process_graphite_fail_queue :: readded %s metrics to the skyline.graphite_fail_queue Redis set' % (
             str(added)))

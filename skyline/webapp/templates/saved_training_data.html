@@ -101,8 +101,8 @@
             <td>{{ saved_training_data_dict[item[0]][item[1]]['saved_date'] }}</td>
             <td>{{ saved_training_data_dict[item[0]][item[1]]['metric_id'] }}</td>
             <td>
-      {% if saved_training_data_dict[item[0]][item[1]]['labelled_metric_base_name'] == 'None' %}
-              <a href="{{ saved_training_data_dict[item[0]][item[1]]['url'] }}">{{ item[0] }}</a>
+      {% if saved_training_data_dict[item[0]][item[1]]['labelled_metric_base_name']|string == 'None' %}
+              <a href="{{ saved_training_data_dict[item[0]][item[1]]['url'] }}">{{ saved_training_data_dict[item[0]][item[1]]['metric'] }}</a>
       {% else %}
               <a href="{{ saved_training_data_dict[item[0]][item[1]]['url'] }}">{{ saved_training_data_dict[item[0]][item[1]]['labelled_metric_base_name'] }}</a>
       {% endif %}

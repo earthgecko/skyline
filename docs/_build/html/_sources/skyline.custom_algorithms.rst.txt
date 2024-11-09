@@ -52,10 +52,26 @@ skyline.custom\_algorithms.anomalous\_daily\_peak module
    :undoc-members:
    :show-inheritance:
 
+skyline.custom\_algorithms.azure\_ai\_anomalydetector module
+------------------------------------------------------------
+
+.. automodule:: custom_algorithms.azure_ai_anomalydetector
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.custom\_algorithms.dbscan module
 ----------------------------------------
 
 .. automodule:: custom_algorithms.dbscan
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skyline.custom\_algorithms.grafana\_promql\_anomaly\_detection module
+---------------------------------------------------------------------
+
+.. automodule:: custom_algorithms.grafana_promql_anomaly_detection
    :members:
    :undoc-members:
    :show-inheritance:
@@ -76,6 +92,14 @@ skyline.custom\_algorithms.isolation\_forest module
    :undoc-members:
    :show-inheritance:
 
+skyline.custom\_algorithms.lad module
+-------------------------------------
+
+.. automodule:: custom_algorithms.lad
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.custom\_algorithms.last\_same\_hours module
 ---------------------------------------------------
 
@@ -92,10 +116,10 @@ skyline.custom\_algorithms.lof module
    :undoc-members:
    :show-inheritance:
 
-skyline.custom\_algorithms.longest\_zero\_streak module
--------------------------------------------------------
+skyline.custom\_algorithms.low\_variance\_anomalous\_peak\_trough module
+------------------------------------------------------------------------
 
-.. automodule:: custom_algorithms.longest_zero_streak
+.. automodule:: custom_algorithms.low_variance_anomalous_peak_trough
    :members:
    :undoc-members:
    :show-inheritance:
@@ -124,34 +148,10 @@ skyline.custom\_algorithms.median\_absolute\_deviation module
    :undoc-members:
    :show-inheritance:
 
-skyline.custom\_algorithms.moving\_sum\_and\_value\_decrease module
--------------------------------------------------------------------
-
-.. automodule:: custom_algorithms.moving_sum_and_value_decrease
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.custom\_algorithms.moving\_sum\_decrease module
--------------------------------------------------------
-
-.. automodule:: custom_algorithms.moving_sum_decrease
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 skyline.custom\_algorithms.mstl module
 --------------------------------------
 
 .. automodule:: custom_algorithms.mstl
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.custom\_algorithms.numba\_spectral\_residual module
------------------------------------------------------------
-
-.. automodule:: custom_algorithms.numba_spectral_residual
    :members:
    :undoc-members:
    :show-inheritance:
@@ -172,6 +172,14 @@ skyline.custom\_algorithms.pca module
    :undoc-members:
    :show-inheritance:
 
+skyline.custom\_algorithms.probabilistic\_forecasts\_generalized\_pareto\_distribution\_ets module
+--------------------------------------------------------------------------------------------------
+
+.. automodule:: custom_algorithms.probabilistic_forecasts_generalized_pareto_distribution_ets
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 skyline.custom\_algorithms.sigma module
 ---------------------------------------
 
@@ -188,10 +196,10 @@ skyline.custom\_algorithms.significant\_change\_window\_percent\_sustained modul
    :undoc-members:
    :show-inheritance:
 
-skyline.custom\_algorithms.skyline\_fbprophet module
-----------------------------------------------------
+skyline.custom\_algorithms.single\_value\_anomaly module
+--------------------------------------------------------
 
-.. automodule:: custom_algorithms.skyline_fbprophet
+.. automodule:: custom_algorithms.single_value_anomaly
    :members:
    :undoc-members:
    :show-inheritance:
@@ -200,14 +208,6 @@ skyline.custom\_algorithms.skyline\_matrixprofile module
 --------------------------------------------------------
 
 .. automodule:: custom_algorithms.skyline_matrixprofile
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-skyline.custom\_algorithms.skyline\_ppscore module
---------------------------------------------------
-
-.. automodule:: custom_algorithms.skyline_ppscore
    :members:
    :undoc-members:
    :show-inheritance:

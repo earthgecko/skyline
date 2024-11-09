@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>custom_algorithms_to_run &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>custom_algorithms_to_run &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
@@ -129,7 +129,11 @@
 
 
 <span class="c1"># @added 20200603 - Feature #3566: custom_algorithms</span>
-<div class="viewcode-block" id="get_custom_algorithms_to_run"><a class="viewcode-back" href="../skyline.html#custom_algorithms_to_run.get_custom_algorithms_to_run">[docs]</a><span class="k">def</span> <span class="nf">get_custom_algorithms_to_run</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">custom_algorithms</span><span class="p">,</span> <span class="n">debug</span><span class="p">):</span>
+<span class="c1"># @modified 20240717 - Feature #5390: custom_algorithms - condition</span>
+<span class="c1"># Added timeseries</span>
+<div class="viewcode-block" id="get_custom_algorithms_to_run">
+<a class="viewcode-back" href="../skyline.html#custom_algorithms_to_run.get_custom_algorithms_to_run">[docs]</a>
+<span class="k">def</span> <span class="nf">get_custom_algorithms_to_run</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">custom_algorithms</span><span class="p">,</span> <span class="n">debug</span><span class="p">,</span> <span class="n">timeseries</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return a dictionary of custom algoritms to run on a metric determined from</span>
 <span class="sd">    the :mod:`settings.CUSTOM_ALGORITHMS` dictionary.</span>
@@ -265,6 +269,54 @@
                 <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1"> - custom_algorithm - </span><span class="si">%s</span><span class="s1">, max_execution_time - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">)))</span>
 
+            <span class="c1"># @added 20240523 - Feature #5360: custom_algorithms - sigma_macd</span>
+            <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">return_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">return_results</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;return_results&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">return_anomalies</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;return_anomalies&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">return_anomalies</span><span class="p">:</span>
+                    <span class="n">return_results</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">return_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># @added 20240717 - Feature #5390: custom_algorithms - condition</span>
+            <span class="n">condition</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">condition</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;condition&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">condition</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">condition_function</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">condition_target_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">condition_function</span> <span class="o">=</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">condition_function</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">condition_target_value</span> <span class="o">=</span> <span class="n">condition</span><span class="p">[</span><span class="s1">&#39;target_value&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">condition_target_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">condition_function</span> <span class="ow">and</span> <span class="n">condition_target_value</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">condition_function</span> <span class="o">==</span> <span class="s1">&#39;current_value_below&#39;</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">custom_algorithms_to_run_conditions</span> <span class="kn">import</span> <span class="n">current_value_below</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">run_custom_algorithm</span> <span class="o">=</span> <span class="n">current_value_below</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">condition_target_value</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">run_custom_algorithm</span> <span class="ow">and</span> <span class="n">debug</span><span class="p">:</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: get_custom_algorithms_to_run :: current_value_below condition met for </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">run_custom_algorithm</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">condition_function</span> <span class="o">==</span> <span class="s1">&#39;current_value_below&#39;</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">custom_algorithms_to_run_conditions</span> <span class="kn">import</span> <span class="n">current_value_below</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">run_custom_algorithm</span> <span class="o">=</span> <span class="n">current_value_below</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">condition_target_value</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">run_custom_algorithm</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="c1"># @modified 20201119 - Feature #3566: custom_algorithms</span>
         <span class="c1">#                      Task #3744: POC matrixprofile</span>
         <span class="c1"># Added missing run_3sigma_algorithms and use_with parameters</span>
@@ -296,6 +348,10 @@
                     <span class="c1"># @added 20220301 - Bug #4308: matrixprofile - fN on big drops</span>
                     <span class="s1">&#39;trigger_history_override&#39;</span><span class="p">:</span> <span class="n">trigger_history_override</span><span class="p">,</span>
                     <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="n">use_with</span><span class="p">,</span>
+                    <span class="c1"># @added 20240523 - Feature #5360: custom_algorithms - sigma_macd</span>
+                    <span class="s1">&#39;return_results&#39;</span><span class="p">:</span> <span class="n">return_results</span><span class="p">,</span>
+                    <span class="s1">&#39;return_anomalies&#39;</span><span class="p">:</span> <span class="n">return_anomalies</span><span class="p">,</span>
+                    <span class="s1">&#39;base_name&#39;</span><span class="p">:</span> <span class="n">base_name</span><span class="p">,</span>
                 <span class="p">}</span>
                 <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1"> - custom_algorithms_to_run - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -308,6 +364,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">pass</span>
     <span class="k">return</span> <span class="n">custom_algorithms_to_run</span></div>
+
 </pre></div>
 
            </div>
@@ -317,7 +374,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

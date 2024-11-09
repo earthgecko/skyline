@@ -1,8 +1,8 @@
 .. role:: skyblue
 .. role:: red
 
-Anomify - cutting edge Skyline
-==============================
+Anomify - cutting edge :skyblue:`Sky`:red:`line`
+================================================
 
 Anomify is a fully managed Skyline application and more.   Anomify are offering
 free access to Skyline users who sign up now (future integrations will be

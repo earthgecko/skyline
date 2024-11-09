@@ -9,6 +9,13 @@ from sqlalchemy.dialects.mysql import DOUBLE, FLOAT, TINYINT, VARCHAR, SMALLINT
 
 import settings
 
+# @added 20231210 - Task #5168: v4.1.0 - update dependencies
+#                   Task #5176: Migrate to sqlalchemy v2 API
+# Update to SQLAlchemy==2.0.23 and implement warnings for v2 migration as per
+# https://docs.sqlalchemy.org/en/20/changelog/migration_20.html
+import os
+os.environ['SQLALCHEMY_WARN_20'] = '1'
+
 # @added 20220405 - Task #4514: Integrate opentelemetry
 #                   Feature #4516: flux - opentelemetry traces
 OTEL_ENABLED = True
@@ -600,5 +607,148 @@ def ionosphere_minmax_table_meta(current_skyline_app, engine):
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: failed to reflect the ionosphere_minmax table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+# @added 20230729 - Feature #5038: snab_results_algorithms
+#                   Feature #4988: Allow snab to return and save results
+def algorithms_table_meta(current_skyline_app, engine):
+    """
+    Autoload the algorithms table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the algorithms table MetaData
+    try:
+        algorithms_meta = MetaData()
+        algorithms_table = Table('algorithms', algorithms_meta, autoload=True, autoload_with=engine)
+        return algorithms_table, 'algorithms_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the algorithms table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20230831 - Feature #5038: snab_results_algorithms
+def snab_results_algorithms_table_meta(current_skyline_app, engine):
+    """
+    Autoload the snab_results_algorithms table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the snab_results_algorithms table MetaData
+    try:
+        snab_results_algorithms_meta = MetaData()
+        snab_results_algorithms_table = Table('snab_results_algorithms', snab_results_algorithms_meta, autoload=True, autoload_with=engine)
+        return snab_results_algorithms_table, 'snab_results_algorithms meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the snab_results_algorithms table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+# @added 20230811 - Feature #5046: comments
+def comments_table_meta(current_skyline_app, engine):
+    """
+    Autoload the comments table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the comments table MetaData
+    try:
+        comments_meta = MetaData()
+        comments_table = Table('comments', comments_meta, autoload=True, autoload_with=engine)
+        return comments_table, 'comments meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the comments table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+# @added 20240618 - Feature #5370: anomalies_updated
+#                    Feature #5372: vista - bq_update
+def anomalies_updated_table_meta(current_skyline_app, engine):
+    """
+    Autoload the anomalies_updated table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the anomalies_updated table MetaData
+    try:
+        anomalies_updated_meta = MetaData()
+        anomalies_updated_table = Table('anomalies_updated', anomalies_updated_meta, autoload=True, autoload_with=engine)
+        return anomalies_updated_table, 'anomalies_updated meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the anomalies_updated table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+# @added 20241007 - Feature #5479: ionosphere.alias_features_profile
+def alias_features_profile_table_meta(current_skyline_app, engine):
+    """
+    Autoload the alias_features_profile table.
+
+    :param current_skyline_app: the app calling the function
+    :param engine: the sqlalchemy engine object
+    :type current_skyline_app: str
+    :type engine: object
+    :return: table_object, fail_msg, trace
+    :rtype: tuple
+
+    """
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the alias_features_profile table MetaData
+    try:
+        alias_features_profile_meta = MetaData()
+        alias_features_profile_table = Table('alias_features_profile', alias_features_profile_meta, autoload=True, autoload_with=engine)
+        return alias_features_profile_table, 'alias_features_profile meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the alias_features_profile table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace

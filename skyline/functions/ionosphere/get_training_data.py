@@ -80,6 +80,7 @@ def get_training_data(
     if len(metrics) == 1:
         use_url = '%s&metric=%s' % (url, metrics[0])
 
+    r = None
     try:
         if user and password:
             r = requests.get(use_url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password), verify=verify_ssl)
@@ -90,12 +91,13 @@ def get_training_data(
         current_logger.error('error :: %s :: failed get training_data from %s - %s' % (
             function_str, str(url), err))
     json_response = None
-    try:
-        json_response = r.json()
-    except Exception as err:
-        current_logger.error(traceback.format_exc())
-        current_logger.error('error :: %s :: failed get json from the reponse from %s - %s' % (
-            function_str, str(url), err))
+    if r:
+        try:
+            json_response = r.json()
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: failed get json from the reponse from %s - %s' % (
+                function_str, str(url), err))
     training_data = []
     if json_response:
         try:

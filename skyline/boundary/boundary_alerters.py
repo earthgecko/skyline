@@ -107,6 +107,8 @@ if True:
     from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
     from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
     from functions.metrics.get_dotted_representation import get_dotted_representation
+    # @added 20240407 - Feature #4214: alert.paused
+    from functions.settings.sms_alert_schedule import sms_alert_schedule
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -221,17 +223,17 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     #                   Branch #4300: prometheus
     # Handle getting data from Graphite and victoriametrics
     data_source = 'graphite'
-    use_base_name = str(base_name)
-    if base_name.startswith('labelled_metrics.'):
+    use_base_name = str(metric_name)
+    if metric_name.startswith('labelled_metrics.'):
         data_source = 'victoriametrics'
         try:
-            use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, base_name)
+            use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, metric_name)
         except Exception as err:
             logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
-                str(base_name), err))
-    if '_tenant_id="' in base_name:
+                str(metric_name), err))
+    if '_tenant_id="' in metric_name:
         data_source = 'victoriametrics'
-        use_base_name = str(base_name)
+        use_base_name = str(metric_name)
 
     # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
     # Use alert_context
@@ -465,6 +467,23 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     if no_email:
         logger.info('alert_smtp - no_email is set in BOUNDARY_SMTP_OPTS, not executing SMTP command')
 
+    # @added 20230913 - Feature #4932: mute_alerts_on
+    metric_muted = False
+    try:
+        metric_muted = REDIS_ALERTER_CONN.hget('metrics_manager.mute_alerts_on', metric_name)
+    except Exception as err:
+        logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+            err))
+    if not metric_muted and use_base_name != metric_name:
+        try:
+            metric_muted = REDIS_ALERTER_CONN.hget('metrics_manager.mute_alerts_on', use_base_name)
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+    if metric_muted:
+        send_email_alert = False
+        logger.info('alert_smtp - %s is muted, not alerting' % str(use_base_name))
+
     # @modified 20180524 - Task #2384: Change alerters to cc other recipients
     # Do not send to each recipient, send to primary_recipient and cc the other
     # recipients, thereby sending only one email
@@ -560,6 +579,34 @@ def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, alg
     if settings.PAGERDUTY_ENABLED:
         import pygerduty
         pager = pygerduty.PagerDuty(settings.BOUNDARY_PAGERDUTY_OPTS['subdomain'], settings.BOUNDARY_PAGERDUTY_OPTS['auth_token'])
+
+        # @added 20230913 - Feature #4932: mute_alerts_on
+        metric_muted = False
+        use_base_name = str(metric_name)
+        if metric_name.startswith('labelled_metrics.'):
+            try:
+                use_base_name = get_base_name_from_labelled_metrics_name(skyline_app, metric_name)
+            except Exception as err:
+                logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
+                    str(metric_name), err))
+        if '_tenant_id="' in metric_name:
+            use_base_name = str(metric_name)
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', metric_name)
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+        if not metric_muted and use_base_name != metric_name:
+            try:
+                metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', use_base_name)
+            except Exception as err:
+                logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                    err))
+        if metric_muted:
+            logger.info('alert_pagerduty - %s is muted, not alerting' % str(metric_name))
+            return False
+
         # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
         # pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
         pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s %s %s times' % (
@@ -755,6 +802,24 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     if '_tenant_id="' in base_name:
         data_source = 'victoriametrics'
         use_base_name = str(base_name)
+
+    # @added 20230913 - Feature #4932: mute_alerts_on
+    metric_muted = False
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', metric_name)
+    except Exception as err:
+        logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+            err))
+    if not metric_muted and use_base_name != metric_name:
+        try:
+            metric_muted = redis_conn_decoded.hget('metrics_manager.mute_alerts_on', use_base_name)
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+    if metric_muted:
+        logger.info('alert_slack - %s is muted, not alerting' % str(metric_name))
+        return False
 
     # The known_derivative_metric state is determine in case we need to surface
     # the png image from Graphite if the Ionosphere image is not available for
@@ -1218,7 +1283,14 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
 
 
 # @added 20200122: Feature #3396: http_alerter
-def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
+# @modified 20231115 -Feature #5104: boundary - external_settings
+def alert_http(
+        alerter, datapoint, metric_name, expiration_time, metric_trigger,
+        algorithm, metric_timestamp, alert_threshold, alerter_id=None,
+        # @added 20231122 - Feature #5104: boundary - external_settings
+        #                   Feature #3772: Add the anomaly_id to the http_alerter json
+        # Added labelled_metric
+        labelled_metric=None):
     """
     Called by :func:`~trigger_alert` and sends and resend anomalies to a http
     endpoint.
@@ -1257,6 +1329,17 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
 
         REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
 
+        # @added 20230913 - Feature #4932: mute_alerts_on
+        metric_muted = False
+        try:
+            metric_muted = REDIS_HTTP_ALERTER_CONN_DECODED.hget('metrics_manager.mute_alerts_on', metric_name)
+        except Exception as err:
+            logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                err))
+        if metric_muted:
+            logger.info('alert_htpp - %s is muted, not alerting' % str(metric_name))
+            return False
+
         source = 'boundary'
         metric_alert_dict = {}
         alert_data_dict = {}
@@ -1283,27 +1366,58 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 "metric_trigger": float(metric_trigger),
                 "alert_threshold": int(alert_threshold),
                 "source": str(source),
-                "token": alerter_token
+                "token": alerter_token,
+                # @modified 20231115 -Feature #5104: boundary - external_settings
+                # Added alerter_id 
+                'id': str(alerter_id),
             }
 
             # @added 20221208 - Feature #3772: Add the anomaly_id to the http_alerter json
             anomaly_id = 0
             anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
                 str(int(timestamp_str)), metric_name)
+            # @added 20231122 - Feature #5104: boundary - external_settings
+            #                   Feature #3772: Add the anomaly_id to the http_alerter json
+            # Added labelled_metric
+            if labelled_metric:
+                anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                    str(int(timestamp_str)), labelled_metric)
+                metric_alert_dict['labelled_metric'] = labelled_metric
+
             try_get_anomaly_id_redis_key_count = 0
-            while try_get_anomaly_id_redis_key_count < 20:
+
+            # @added 20231115 -Feature #5104: boundary - external_settings
+            #                  Feature #4482: Test alerts
+            # Add the anomalyScore to be compatible with the Analyzer and Mirage
+            # alerters
+            metric_alert_dict['anomalyScore'] = 1.0
+            # Added a default anomaly_id if testing
+            if algorithm == 'testing':
+                anomaly_id = 1
+                try_get_anomaly_id_redis_key_count = 21
+
+            # @modified 20231129 - Feature #5104: boundary - external_settings
+            # while try_get_anomaly_id_redis_key_count < 20:
+            while try_get_anomaly_id_redis_key_count < 10:
                 try_get_anomaly_id_redis_key_count += 1
                 try:
                     anomaly_id = int(REDIS_HTTP_ALERTER_CONN_DECODED.get(anomaly_id_redis_key))
                     break
                 except:
-                    sleep(1)
+                    # @modified 20231129 - Feature #5104: boundary - external_settings
+                    # sleep(1)
+                    sleep(0.5)
             if not anomaly_id:
                 logger.error('error :: alert_http - failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
                 anomaly_id = 0
             else:
                 logger.info('alert_http - determined anomaly_id as %s, appending to alert' % str(anomaly_id))
             metric_alert_dict['anomaly_id'] = str(anomaly_id)
+            # @added 20231129 - Feature #5104: boundary - external_settings
+            # Send 'None' instead of '0'
+            if str(anomaly_id) == '0':
+                metric_alert_dict['anomaly_id'] = str(None)
+                logger.info('alert_http - replaced anomaly_id in metric_alert_dict of \'0\' with \'None\'')
 
             # @added 20220301 - Feature #4482: Test alerts
             if algorithm == 'testing':
@@ -1410,26 +1524,52 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
 
             # @added 20221212 - Feature #3772: Add the anomaly_id to the http_alerter json
             try:
-                if alert_data_dict['data']['anomaly_id'] == '0':
+                if alert_data_dict['data']['alert']['anomaly_id'] == '0':
                     anomaly_id = 0
                     anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
-                        str(int(alert_data_dict['data']['timestamp'])), alert_data_dict['data']['metric'])
+                        str(int(alert_data_dict['data']['alert']['timestamp'])), alert_data_dict['data']['metric'])
+                    if 'labelled_metric' in alert_data_dict['data']['alert']:
+                        anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                            str(int(alert_data_dict['data']['alert']['timestamp'])), alert_data_dict['data']['labelled_metric'])
                     try_get_anomaly_id_redis_key_count = 0
-                    while try_get_anomaly_id_redis_key_count < 20:
+                    # @modified 20231129 - Feature #5104: boundary - external_settings
+                    # while try_get_anomaly_id_redis_key_count < 20:
+                    while try_get_anomaly_id_redis_key_count < 10:
                         try_get_anomaly_id_redis_key_count += 1
                         try:
                             anomaly_id = int(REDIS_HTTP_ALERTER_CONN_DECODED.get(anomaly_id_redis_key))
                             break
                         except:
-                            sleep(1)
+                            # @modified 20231129 - Feature #5104: boundary - external_settings
+                            # sleep(1)
+                            sleep(0.5)
                     if not anomaly_id:
                         logger.error('error :: alert_http - failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
                         anomaly_id = 0
                     else:
                         logger.info('alert_http - determined anomaly_id as %s, appending to alert' % str(anomaly_id))
                     alert_data_dict['data']['anomaly_id'] = str(anomaly_id)
+                    alert_data_dict['data']['alert']['anomaly_id'] = str(anomaly_id)
+                    # @added 20231129 - Feature #5104: boundary - external_settings
+                    # Send 'None' instead of '0'
+                    if str(anomaly_id) == '0':
+                        alert_data_dict['data']['alert']['anomaly_id'] = str(None)
+                        logger.info('alert_http - replaced anomaly_id as \'0\' to \'None\'')
+
             except Exception as err:
                 logger.error('error :: alert_http failed to determine anomaly_id for %s - %s' % (str(alert_data_dict), err))
+
+            # @added 20231129 - Feature #5104: boundary - external_settings
+            # Send 'None' instead of '0'
+            anomaly_none = False
+            try:
+                if 'anomaly_id' in alert_data_dict['data']['alert']:
+                    if alert_data_dict['data']['alert']['anomaly_id'] == '0':
+                        alert_data_dict['data']['alert']['anomaly_id'] = str(None)
+                        logger.info('alert_http - replaced anomaly_id as \'0\' to \'None\'')
+                        anomaly_none = True
+            except Exception as err:
+                logger.error('error :: alert_http failed to check anomaly_id in %s - %s' % (str(alert_data_dict), err))
 
             # @modified 20200403 - Feature #3396: http_alerter
             # Changed timeouts from 2, 2 to 5, 20
@@ -1444,6 +1584,11 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
             response = None
             try:
                 response = requests.post(alerter_endpoint, json=alert_data_dict, timeout=use_timeout)
+
+                logger.info('alert_http :: %s %s responded with status code %s and reason %s' % (
+                    str(alerter_name), str(alerter_endpoint),
+                    str(response.status_code), str(response.reason)))
+
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to post alert to %s - %s' % (
@@ -1536,8 +1681,35 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 add_to_resend_queue = True
                 fail_alerter = True
 
+            # @added 20231129 - Feature #5104: boundary - external_settings
+            # Send 'None' instead of '0'
+            if anomaly_none:
+                return
+
             number_of_send_attempts = previous_attempts + 1
             metric_alert_dict['attempts'] = number_of_send_attempts
+
+            # @added 20231122 - Feature #5104: boundary - external_settings
+            # Do not add the alert back to the resend queue if it has been
+            # attempted 5 times. This mitigates situations where an external
+            # failure creates an offset in timestamps between the boundary
+            # alert key and the panorama alert key which can be produced by a
+            # syslog trigger_alert and have Panorama record an anomaly
+            # resend queue and introduces an offset between panorama,
+            # the syslog alerter and the http_alert timestamps, which
+            # could not be fully reproduced or debugged sufficiently
+            # to determine the exact chain of events with the
+            # logging level implemented at the time.  The situation
+            # develops in where Panorama has an app alert key so
+            # will not record an anomaly if an offset due to an
+            # external failure is introduced
+            if add_to_resend_queue and number_of_send_attempts > 4:
+                add_to_resend_queue = False
+                logger.error('error :: alert_http :: NOT readding adding alert to %s after %s falied attempts to send to %s - %s - %s' % (
+                    str(redis_alert_queue_hash), str(number_of_send_attempts),
+                    str(alerter_name), str(alerter_endpoint),
+                    str(metric_alert_dict)))
+
             if add_to_resend_queue:
 
                 # @modified 20221102 - Bug #4720: dotted_representation breaking alert resend_queue
@@ -1623,6 +1795,20 @@ def alert_sms(datapoint, metric_name, expiration_time, metric_trigger, algorithm
         logger.error(traceback.format_exc())
         logger.error('error :: get_sms_recipients failed checking %s - %s' % (
             base_name, e))
+
+    # @added 20240407 - Feature #4214: alert.paused
+    sms_enabled = True
+    try:
+        sms_enabled = sms_alert_schedule(skyline_app, base_name)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: sms_alert_schedule failed checking %s, err: %s' % (
+            base_name, err))
+        sms_enabled = True
+    if not sms_enabled:
+        logger.info('no sending SMS alert for %s because it is currently in a disabled period in SMS_ALERTS_SCHEDULE' % base_name)
+        return 'disabled'
+
     logger.info('sending SMS alert to %s' % str(sms_recipients))
     for sms_number in sms_recipients:
         success = False
@@ -1637,11 +1823,23 @@ def alert_sms(datapoint, metric_name, expiration_time, metric_trigger, algorithm
             logger.info('sent SMS alert to %s' % sms_number)
         else:
             logger.warning('warning :: failed to send SMS alert to %s' % sms_number)
-
+        return success
 
 # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
 # def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
-def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
+# @modified 20231115 -Feature #5104: boundary - external_settings
+# Added alerter_id
+# @modified 20231122 - Feature #5104: boundary - external_settings
+#                      Feature #3772: Add the anomaly_id to the http_alerter json
+# Added anomaly_id
+# def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
+def trigger_alert(
+        alerter, datapoint, metric_name, expiration_time, metric_trigger,
+        algorithm, metric_timestamp, alert_threshold, alerter_id=None,
+        # @added 20231122 - Feature #5104: boundary - external_settings
+        #                      Feature #3772: Add the anomaly_id to the http_alerter json
+        # Added anomaly_id and labelled_metric
+        anomaly_id=None, labelled_metric=None):
 
     if alerter == 'smtp':
         strategy = 'alert_smtp'
@@ -1655,7 +1853,12 @@ def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigg
     try:
         if strategy == 'alert_http':
             # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-            getattr(boundary_alerters, strategy)(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+            # @modified 20231115 -Feature #5104: boundary - external_settings
+            # Added alerter_id
+            # @modified 20231122 - Feature #5104: boundary - external_settings
+            #                      Feature #3772: Add the anomaly_id to the http_alerter json
+            # Added labelled_metric
+            getattr(boundary_alerters, strategy)(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold, alerter_id=alerter_id, labelled_metric=labelled_metric)
         else:
             getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
     except:

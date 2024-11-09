@@ -1,4 +1,8 @@
-{% extends "layout.html" %}
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
 {% block body %}
 
   <script>
@@ -16,6 +20,45 @@
 		{{ host}}:{{port}} DB {{ db }}
 	</div>
 -->
+
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item"><a href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}"><span class="logo"><span class="re">re</span>brow</span>_server_db</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><span class="logo"><span class="sky">{{ host }}:{{ port}}</span> <span class="re">DB {{ db }}</span></span></li>
+      </div>
+    </ol>
+  </nav>
+  <br>
+  <div class="container-fluid">
+    <ul class="nav nav-tabs">
+    {% if url_for("rebrow_server_db", host=host, port=port, db=db, token=token, salt=salt) == request.path %}
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}">Server Status</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a>
+      </li>
+    {% endif %}
+    {% if url_for("rebrow_keys", host=host, port=port, db=db, token=token, salt=salt) in request.path %}
+      <li class="nav-item">
+        <a class="nav-link" href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}">Server Status</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" aria-current="page" href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a>
+      </li>
+    {% endif %}
+      <li class="nav-item">
+        <a class="nav-link" href="/rebrow_server_db/{{ host }}:{{ port }}/{{ db }}/?token={{ token }}">Server Status</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a>
+      </li>
+    </ul>
+  </div>
+{% else %}
 
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
@@ -49,30 +92,49 @@
           	><a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">Keys</a></li>
         </ul>
       </div><!-- /.nav-collapse -->
+{% endif %}
 
 	<div class="row">
 
-		<div class="col-md-3 col-md-push-9">
-
+{% if version == dev_ver %}
+  <p>Used Memory: {{ info["used_memory_human"] }}, peak: {{ info["used_memory_peak_human"] }}</p>
+  <p><strong>{{ dbsize }} Keys available.</strong></p>
+{% else %}
+    <div class="col-md-3 col-md-push-9">
 			<p>Used Memory: {{ info["used_memory_human"] }}, peak: {{ info["used_memory_peak_human"] }}</p>
-
 			<p><strong>{{ dbsize }} Keys available.</strong></p>
-
 			<form action="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}" method="get">Find keys matching pattern: <input name="pattern" value="*" /></form>
 			<div>or <a href="/rebrow_keys/{{ host }}:{{ port }}/{{ db }}/keys/?token={{ token }}">list all keys</a></div>
-
-
 		</div>
+{% endif %}
 
-		<div class="col-md-9 col-md-pull-3">
+{% if version == dev_ver %}
+    <div class="col-md-3 order-md-12">
+{% else %}
+		<div class="col-md-6 col-md-offset-3">
+{% endif %}
 
+{% if version == dev_ver %}
+    <ul class="nav nav-tabs" id="serverstatus-tabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#overall" role="tab" aria-controls="overall" aria-selected="true">Overall Status</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#commands" role="tab" aria-controls="commands" aria-selected="false">Command Statistics</a>
+      </li>
+    </ul>
+{% else %}
 			<ul class="nav nav-tabs" role="tablist" id="serverstatus-tabs">
 			  <li class="active"><a href="#overall">Overall Status</a></li>
 			  <li><a href="#commands">Command Statistics</a></li>
 			</ul>
-
 			<div class="tab-content">
 			  <div class="tab-pane active" id="overall">
+{% endif %}
+{% if version == dev_ver %}
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="overall" role="tabpanel" aria-labelledby="overall-tab">
+{% endif %}
 
 					<table class="table table-hover">
 						<thead>
@@ -100,7 +162,12 @@
 					</table>
 
 				</div>
-			  <div class="tab-pane" id="commands">
+
+{% if version == dev_ver %}
+        <div class="tab-pane fade" id="commands" role="tabpanel" aria-labelledby="commands-tab">
+{% else %}
+        <div class="tab-pane" id="commands">
+{% endif %}
 
 					<table class="table table-hover">
 						<thead>

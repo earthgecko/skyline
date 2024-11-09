@@ -181,15 +181,15 @@ What **Crucible** does
 
 Crucible has 3 roles:
 
-1. Store resources (timeseries json and graph pngs) for triggered anomalies.
-2. Run ad-hoc analysis on any timeseries and create matplotlib plots for the
+1. Store resources (time series json and graph pngs) for triggered anomalies.
+2. Run ad-hoc analysis on any time series and create matplotlib plots for the
    run algorithms.
 3. To update the Panorama database (tbd for future Panorama branch)
 
 Crucible can be used to analyse any triggered anomaly on an ad-hoc basis.  The
-timeseries is stored in gzipped json for triggered anomalies so that
-retrospective full analysis can be carried out on a snapshot of the timeseries
-as it was when the trigger/s fired without the timeseries being changed by
+time series is stored in gzipped json for triggered anomalies so that
+retrospective full analysis can be carried out on a snapshot of the time series
+as it was when the trigger/s fired without the time series being changed by
 aggregation and retention operations.
 
 Crucible can create a large amount of data files and require significant disk

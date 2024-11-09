@@ -38,7 +38,9 @@ import datetime as dt
 # Added gmtime and strftime
 # @modified 20191115 - Task #3290: Handle urllib2 in py3
 # from time import (time, gmtime, strftime)
-from time import gmtime, strftime
+# @modified 20230728 - Task #5028: Change Mirage alert graphs to downsampled merged
+# Added localtime
+from time import gmtime, strftime, localtime
 # @added 20200825 - Feature #3704: Add alert to anomalies
 from time import time
 
@@ -71,6 +73,11 @@ import pygerduty
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
 matplotlib.use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
+
 # @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features
 # Handle flake8 E402
 if True:
@@ -144,6 +151,12 @@ if True:
     from functions.mirage.get_vortex_metric_data_archive_filename import get_vortex_metric_data_archive_filename
     from functions.plots.vortex_training_data_graphs import get_vortex_training_data_graphs
 
+    # @added 20230728 - Task #5028: Change Mirage alert graphs to downsampled merged
+    from create_matplotlib_graph import create_matplotlib_graph
+
+    # @added 20240407 - Feature #4214: alert.paused
+    from functions.settings.sms_alert_schedule import sms_alert_schedule
+
 # @added 20200929 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
 try:
@@ -205,6 +218,12 @@ try:
 except:
     DOCKER_FAKE_EMAIL_ALERTS = False
 
+# @added 20230728 - Task #5032: Change matplotlib black background to grey
+# As it says on the tin and as prescribed by Dr Neil R Gunther.
+# background_hex_code = background_hex_code  # grey - pearlriver
+# background_hex_code = '#F5F5F5'  # white - whitesmoke
+background_hex_code = '#181b1f'  # grafana grey
+
 
 # @modified 20210304 - Feature #3642: Anomaly type classification
 #                      Feature #3970: custom_algorithm - adtk_level_shift
@@ -224,6 +243,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the
     # relevant timeseries data in the graph
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
+
+    # @added 20240122 - Task #5234: smtp_alert - optimise alert png saving
+    start_alert = time()
 
     # @added 20161229 - Feature #1830: Ionosphere alerts
     # Added Ionosphere variables
@@ -256,6 +278,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         data_source = 'vortex'
         metric_timestamp = metric[2]
         timeseries_dir = use_base_name.replace('.', '/')
+
+        # @added 20230803
+        if base_name.startswith('labelled_metrics.'):
+            timeseries_dir = base_name.replace('.', '/')
+
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, metric_timestamp,
             timeseries_dir)
@@ -270,6 +297,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     #         settings.FULL_NAMESPACE, '', 1)).hexdigest()
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = use_base_name.replace('.', '/')
+
+        # @added 20230803
+        if base_name.startswith('labelled_metrics.'):
+            timeseries_dir = base_name.replace('.', '/')
+
         training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
@@ -291,6 +323,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # Add any anomalies discovered by mirage_vortex to be alerted on
     if context == 'Vortex':
         timeseries_dir = use_base_name.replace('.', '/')
+
+        # @added 20230803
+        if base_name.startswith('labelled_metrics.'):
+            timeseries_dir = base_name.replace('.', '/')
+
         training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
@@ -353,8 +390,8 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # The alerters did send an individual email to each recipient. This would be
     # more useful if one email was sent with the first smtp recipient being the
     # to recipient and the subsequent recipients were add in cc.
+    primary_recipient = False
     if recipients:
-        primary_recipient = False
         cc_recipients = False
         for i_recipient in recipients:
             if not primary_recipient:
@@ -368,6 +405,30 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         logger.info(
             'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
             (str(primary_recipient), str(cc_recipients)))
+
+    # @modified 20240211 - Task #5266: Consolidate alerting for external alerters
+    # Moved from further down
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except Exception as err:
+        logger.error('error :: alert_smtp :: get_redis_conn_decoded failed - %s' % (
+            err))
+
+    # @added 20240211 - Task #5266: Consolidate alerting for external alerters
+    # Handle a metric with multiple alerts in external alert settings, only
+    # run smtp alert once
+    smtp_alerted_key = 'mirage.smtp.alerted.%s.%s' % (str(int(metric[2])), base_name)
+    smtp_alerted = False
+    if recipients == 'no_email' or primary_recipient == 'no_email':
+        try:
+            smtp_alerted = redis_conn_decoded.exists(smtp_alerted_key)
+        except Exception as err:
+            logger.error('error :: alert_smtp :: exists failed on %s, err: %s' % (
+                smtp_alerted_key, err))
+        if smtp_alerted:
+            logger.info('alert_smtp - already smtp alerted and created resources, recipients is no_email and external alert, so nothing to do')
+            logger.info('alert_smtp - took %s seconds' % str(time() - start_alert))
+            return
 
     # @modified 20161228 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
@@ -397,7 +458,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # @modified 20190820 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
     # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
     #     context, str(int(second_order_resolution_in_hours)), str(metric[0]))
-    unencoded_graph_title = '%s %s - ALERT at %s hours - %s' % (
+    # @modified 20230728 - Task #5030: Change ALERT
+    # Move Skyline away from using the term ALERT.  These are notifications of
+    # changes not ALERTS per se, they just also have been since Skyline. For the
+    # new observability niche -> information -> insights -> data, change the
+    # ALERT connotation.
+    # unencoded_graph_title = '%s %s - ALERT at %s hours - %s' % (
+    unencoded_graph_title = '%s %s at %s hours - %s' % (
         main_alert_title, alert_context, str(int(second_order_resolution_in_hours)),
         str(metric[0]))
 
@@ -446,7 +513,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         # Use main_alert_title and alert_context
         # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
         #     context, str(int(second_order_resolution_in_hours)), str(metric[0]))
-        unencoded_graph_title = '%s %s - ALERT at %s hours - derivative graph - %s' % (
+        # @modified 20230728 - Task #5030: Change ALERT
+        # unencoded_graph_title = '%s %s - ALERT at %s hours - derivative graph - %s' % (
+        unencoded_graph_title = '%s %s at %s hours - derivative graph - %s' % (
             main_alert_title, alert_context, str(int(second_order_resolution_in_hours)), str(metric[0]))
 
     # @added 20200907 - Feature #3734: waterfall alerts
@@ -685,12 +754,6 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     except:
         plot_redis_data = False
 
-    try:
-        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-    except Exception as err:
-        logger.error('error :: alert_smtp :: get_redis_conn_decoded failed - %s' % (
-            err))
-
     # @added 20221207 - Feature #4734: mirage_vortex
     #                   Feature #4732: flux vortex
     # Add any anomalies discovered by mirage_vortex to be alerted on
@@ -858,6 +921,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
             timeseries_x = [float(item[0]) for item in timeseries]
             timeseries_y = [item[1] for item in timeseries]
 
+        # @added 20240122 - Task #5234: smtp_alert - optimise alert png saving
+        start_calculate_arrays = time()
+
         pd_series_values = None
         mean_series = None
         original_anomalous_datapoint = metric[0]
@@ -917,13 +983,22 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 mean_series = None
 
         if mean_series:
+
+            # @added 20240122 - Task #5234: smtp_alert - optimise alert png saving
+            logger.info('debug :: alert_smtp - calculating arrays took %s seconds' % str(time() - start_calculate_arrays))
+            start_plot = time()
+
             # @modified 20170307 - Feature #1960: ionosphere_layers
             # To display the original anomalous datapoint value in the Redis plot
             # graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))
-            graph_title = '%s %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (main_alert_title, alert_context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+            # @modified 20230728 - Task #5030: Change ALERT
+            # graph_title = '%s %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (main_alert_title, alert_context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+            graph_title = '%s %s at %s hours - Redis data\n%s - anomalous value: %s' % (main_alert_title, alert_context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
             # @added 20170603 - Feature #2034: analyse_derivatives
             if known_derivative_metric:
-                graph_title = 'Skyline %s - ALERT - at %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+                # @modified 20230728 - Task #5030: Change ALERT
+                # graph_title = 'Skyline %s - ALERT - at %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+                graph_title = 'Skyline %s - %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
 
             # @modified 20200109 - Branch #3262: py3
             # Using io.StringIO throws an error related to
@@ -938,9 +1013,19 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
             buf = '%s/%s.%s.%s.png' % (
                 settings.SKYLINE_TMP_DIR, skyline_app, str(int(metric[2])), metric[1])
 
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            matplotlib.rcParams['path.simplify_threshold'] = 1.0
+
             # Too big
             # rcParams['figure.figsize'] = 12, 6
             rcParams['figure.figsize'] = 8, 4
+
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            rcParams['path.simplify_threshold'] = 1.0
+            plt.style.use('fast')
+
             try:
                 # fig = plt.figure()
                 fig = plt.figure(frameon=False)
@@ -950,9 +1035,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
                 # ax.set_axis_bgcolor('black')
                 if hasattr(ax, 'set_facecolor'):
-                    ax.set_facecolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_facecolor('black')
+                    ax.set_facecolor(background_hex_code)
                 else:
-                    ax.set_axis_bgcolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_axis_bgcolor('black')
+                    ax.set_axis_bgcolor(background_hex_code)
 
                 try:
                     datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
@@ -1016,15 +1105,23 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 #                      IssueID #49 'AxesSubplot' object has no attribute 'set_axis_bgcolor'
                 # ax.set_axis_bgcolor('black')
                 if hasattr(ax, 'set_facecolor'):
-                    ax.set_facecolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_facecolor('black')
+                    ax.set_facecolor(background_hex_code)
                 else:
-                    ax.set_axis_bgcolor('black')
+                    # @modified 20230728 - Task #5032: Change matplotlib black background to grey
+                    # ax.set_axis_bgcolor('black')
+                    ax.set_axis_bgcolor(background_hex_code)
 
                 rcParams['xtick.direction'] = 'out'
                 rcParams['ytick.direction'] = 'out'
                 ax.margins(y=.02, x=.03)
                 # tight_layout removes the legend box
                 # fig.tight_layout()
+
+                # @added 20240122 - Task #5234: smtp_alert - optimise alert png saving
+                logger.info('alert_smtp - plot took %s seconds' % str(time() - start_plot))
+                start_save_plot = time()
 
                 if settings.IONOSPHERE_ENABLED:
                     if not os.path.exists(training_data_dir):
@@ -1035,8 +1132,8 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                         try:
                             plt.savefig(training_data_redis_image, format='png')
                             logger.info(
-                                'alert_smtp - save Redis training data image - %s' % (
-                                    training_data_redis_image))
+                                'alert_smtp - save Redis training data image in %s seconds - %s' % (
+                                    str(time() - start_save_plot), training_data_redis_image))
                         except:
                             logger.info(traceback.format_exc())
                             logger.error(
@@ -1062,6 +1159,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                     redis_image_data = True
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - savefig: %s' % 'OK')
+                    logger.info(
+                        'alert_smtp - saved training data image in %s seconds - %s' % (
+                            str(time() - start_save_plot), buf))
+
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: alert_smtp - plt.savefig: %s' % 'FAIL')
@@ -1094,12 +1195,18 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         # Use main_alert_title
         # body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
         if main_alert_title == 'Skyline':
-            body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % alert_context
+            # @modified 20230728 - Task #5030: Change ALERT
+            # body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % alert_context
+            body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s notification</font></h3><br>' % alert_context
         else:
-            body = '<h3>%s<font color="black"> %s alert</font></h3><br>' % (main_alert_title, alert_context)
+            # @modified 20230728 - Task #5030: Change ALERT
+            # body = '<h3>%s<font color="black"> %s alert</font></h3><br>' % (main_alert_title, alert_context)
+            body = '<h3>%s<font color="black"> %s notification</font></h3><br>' % (main_alert_title, alert_context)
         # @added 20220301 - Feature #4482: Test alerts
         if triggered_algorithms == ['testing']:
-            body += '<font color="red"><b>TEST ALERT</b></font><br>'
+            # @modified 20230728 - Task #5030: Change ALERT
+            # body += '<font color="red"><b>TEST ALERT</b></font><br>'
+            body += '<font color="red"><b>TEST NOTIFICATION</b></font><br>'
 
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -1120,7 +1227,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         # Show a human date in alerts
         body += '<font color="black">Anomalous at: %s</font><br>' % alerted_at
         body += '<font color="black">At hours: %s</font><br>' % str(int(second_order_resolution_in_hours))
-        body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+        # @modified 20230728 - Task #5030: Change ALERT
+        # body += '<font color="black">Next alert in: %s seconds</font><br>' % str(alert[2])
+        body += '<font color="black">Next notification in: %s seconds</font><br>' % str(alert[2])
         # @added 20170603 - Feature #2034: analyse_derivatives
         if known_derivative_metric:
             body += '<font color="black">Derivative graph: True</font><br>'
@@ -1233,12 +1342,18 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
             # @modified 20200907 - Feature #3734: waterfall alerts
             # Add waterfall alert to subject
             if waterfall_alert:
-                msg['Subject'] = '[%s alert] - %s WATERFALL ALERT - %s' % (main_alert_title, alert_context, metric[1])
+                # @modified 20230728 - Task #5030: Change ALERT
+                # msg['Subject'] = '[%s alert] - %s WATERFALL ALERT - %s' % (main_alert_title, alert_context, metric[1])
+                msg['Subject'] = '[%s] - %s (WATERFALL) - %s' % (main_alert_title, alert_context, metric[1])
             else:
-                msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+                # @modified 20230728 - Task #5030: Change ALERT
+                # msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+                msg['Subject'] = '[%s] - %s - %s' % (main_alert_title, alert_context, metric[1])
                 # @added 20220301 - Feature #4482: Test alerts
                 if triggered_algorithms == ['testing']:
-                    msg['Subject'] = 'TEST - [%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+                    # @modified 20230728 - Task #5030: Change ALERT
+                    # msg['Subject'] = 'TEST - [%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+                    msg['Subject'] = 'TEST - [%s] - %s - %s' % (main_alert_title, alert_context, metric[1])
 
             msg['From'] = sender
             # @modified 20180524 - Task #2384: Change alerters to cc other recipients
@@ -1404,6 +1519,19 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
 
         if LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+    # @added 20240211 - Task #5266: Consolidate alerting for external alerters
+    # Handle a metric with multiple alerts in external alert settings, only
+    # run smtp alert once
+    try:
+        expiry = int(alert[2])
+        redis_conn_decoded.setex(smtp_alerted_key, expiry, int(time()))
+        logger.info('alert_smtp - set key %s' % smtp_alerted_key)
+    except Exception as err:
+        logger.error('error :: alert_smtp - could not setex smtp_alerted_key, err: %s' % err)
+
+    # @added 20240122 - Task #5234: smtp_alert - optimise alert png saving
+    logger.info('alert_smtp - took %s seconds' % str(time() - start_alert))
 
     return
 
@@ -1755,10 +1883,14 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         # slack_title = '*Skyline %s - ALERT* on %s at %s hours - derivative graph - %s' % (
         #     context, str(metric[1]), str(int(second_order_resolution_in_hours)),
         #     str(metric[0]))
-        unencoded_graph_title = '%s %s - ALERT at %s days - derivative graph - %s' % (
+        # @modified 20230728 - Task #5030: Change ALERT
+        # unencoded_graph_title = '%s %s - ALERT at %s days - derivative graph - %s' % (
+        unencoded_graph_title = '%s %s - %s days - derivative graph - %s' % (
             main_alert_title, alert_context, str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
-        slack_title = '*%s %s - ALERT* on %s at %s days - derivative graph - %s' % (
+        # @modified 20230728 - Task #5030: Change ALERT
+        # slack_title = '*%s %s - ALERT* on %s at %s days - derivative graph - %s' % (
+        slack_title = '*%s %s* %s at %s days - derivative graph - %s' % (
             main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
 
@@ -1766,7 +1898,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         #                   Feature #3970: custom_algorithm - adtk_level_shift
         # Added type
         if 'adtk_level_shift' in triggered_algorithms:
-            slack_title = '*%s %s - Level shift ALERT* on %s at %s days - derivative graph - %s' % (
+            # @modified 20230728 - Task #5030: Change ALERT
+            # slack_title = '*%s %s - Level shift ALERT* on %s at %s days - derivative graph - %s' % (
+            slack_title = '*%s %s - Level shift* on %s at %s days - derivative graph - %s' % (
                 main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
                 str(metric[0]))
             logger.info('adtk_level_shift alert - %s' % slack_title)
@@ -1778,10 +1912,14 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         # slack_title = '*Skyline %s - ALERT* on %s at %s hours - %s' % (
         #     context, str(metric[1]), str(int(second_order_resolution_in_hours)),
         #     str(metric[0]))
-        unencoded_graph_title = '%s %s - ALERT at %s days - %s' % (
+        # @modified 20230728 - Task #5030: Change ALERT
+        # unencoded_graph_title = '%s %s - ALERT at %s days - %s' % (
+        unencoded_graph_title = '%s %s - %s days - %s' % (
             main_alert_title, alert_context, str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
-        slack_title = '*%s %s - ALERT* on %s at %s days - %s' % (
+        # @modified 20230728 - Task #5030: Change ALERT
+        # slack_title = '*%s %s - ALERT* on %s at %s days - %s' % (
+        slack_title = '*%s %s* - %s at %s days - %s' % (
             main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
             str(metric[0]))
 
@@ -1789,13 +1927,17 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         #                      Feature #3970: custom_algorithm - adtk_level_shift
         # Added type
         if 'adtk_level_shift' in triggered_algorithms:
-            slack_title = '*%s %s - Level shift ALERT* on %s at %s days - %s' % (
+            # @modified 20230728 - Task #5030: Change ALERT
+            # slack_title = '*%s %s - Level shift ALERT* on %s at %s days - %s' % (
+            slack_title = '*%s %s - Level shift* on %s at %s days - %s' % (
                 main_alert_title, alert_context, str(metric[1]), str(int(int(second_order_resolution_in_hours) / 24)),
                 str(metric[0]))
             logger.info('adtk_level_shift alert - %s' % slack_title)
 
     if base_name.startswith('labelled_metrics.'):
-        slack_title = '*%s %s - ALERT* on %s - `%s` at %s days - %s' % (
+        # @modified 20230728 - Task #5030: Change ALERT
+        # slack_title = '*%s %s - ALERT* on %s - `%s` at %s days - %s' % (
+        slack_title = '*%s %s* - %s - `%s` at %s days - %s' % (
             main_alert_title, alert_context, str(base_name), str(use_base_name),
             str(int(int(second_order_resolution_in_hours) / 24)), str(metric[0]))
 
@@ -1816,8 +1958,11 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
             redis_waterfall_alert_key))
     if waterfall_alert:
-        unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL ALERT')
-        slack_title = slack_title.replace('ALERT', 'WATERFALL ALERT')
+        # @modified 20230728 - Task #5030: Change ALERT
+        # unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL ALERT')
+        # slack_title = slack_title.replace('ALERT', 'WATERFALL ALERT')
+        unencoded_graph_title = unencoded_graph_title + ' (WATERFALL)'
+        slack_title = slack_title + ' (*WATERFALL*)'
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
@@ -1879,6 +2024,11 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     # Use the Ionosphere image if it exists
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = base_name.replace('.', '/')
+
+        # @added 20230803
+        if base_name.startswith('labelled_metrics.'):
+            timeseries_dir = base_name.replace('.', '/')
+
         training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
@@ -1896,6 +2046,11 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     # Add any anomalies discovered by mirage_vortex to be alerted on
     if context == 'Vortex':
         timeseries_dir = use_base_name.replace('.', '/')
+
+        # @added 20230803
+        if base_name.startswith('labelled_metrics.'):
+            timeseries_dir = base_name.replace('.', '/')
+
         training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
             timeseries_dir)
@@ -2134,6 +2289,13 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
 
+        # @added 20240105 - Feature #5102: webapp - api smoke
+        # Add a quick api_train_request link as is done in smoke
+        if settings.IONOSPHERE_ENABLED:
+            ionosphere_quick_train_link = '%s&api_train_request=true&add_fp=true&learn=false&label=none&format=json' % ionosphere_link
+            initial_comment = initial_comment + ' :: *Quick train* :: <' + ionosphere_quick_train_link + '|quick train link>'
+            initial_comment = initial_comment + ' (at ' + str(int(int(second_order_resolution_in_hours) / 24)) + ' day only, no learning)'
+
         # @added 20201127 - Feature #3820: HORIZON_SHARDS
         # Add the origin and shard for debugging purposes
         if HORIZON_SHARDS:
@@ -2174,11 +2336,18 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                     settings.SKYLINE_URL, str(snab_id), str(anomaly_id))
                 tP_link = '%s&result=tP' % snab_link
                 fP_link = '%s&result=fP' % snab_link
-                tN_link = '%s&result=tN' % snab_link
-                fN_link = '%s&result=fN' % snab_link
+
+                # @modified 20230723 - Feature #5008: webapp - snab report page
+                # No need to pass tN or fN for Mirage
+                # tN_link = '%s&result=tN' % snab_link
+                # fN_link = '%s&result=fN' % snab_link
+
                 unsure_link = '%s&result=unsure' % snab_link
                 null_link = '%s&result=NULL' % snab_link
-                snab_slack_comment = initial_comment + '\nanomalyScore: ' + str(anomalyScore) + '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>  ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>  ::  <' + fN_link + '|fN - false negative>  :: <' + unsure_link + '|unsure>'
+                # @modified 20230723 - Feature #5008: webapp - snab report page
+                # No need to pass tN or fN for Mirage
+                # snab_slack_comment = initial_comment + '\nanomalyScore: ' + str(anomalyScore) + '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>  ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>  ::  <' + fN_link + '|fN - false negative>  :: <' + unsure_link + '|unsure>'
+                snab_slack_comment = initial_comment + '\nanomalyScore: ' + str(anomalyScore) + '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>   :: <' + unsure_link + '|unsure>   ::  <' + null_link + '|NULL - reset to NULL>'
                 initial_comment = snab_slack_comment
 
         add_to_panorama = True
@@ -2194,6 +2363,57 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         # @added 20230605 - Feature #4932: mute_alerts_on
         if not send_msg:
             logger.info('alert_slack - %s is muted, not alerting' % str(metric[1]))
+
+        # @added 20230728 - Task #5028: Change Mirage alert graphs to downsampled merged
+        # Change the Mirage alert graphs to the downsampled merged data graph if
+        # there is one. This makes SNAB user evaluation more efficient and is
+        # more accurate in displaying what was actually analysed.
+        if send_msg:
+            try:
+                downsampled_anomaly_data = '%s/%s.downsampled.json' % (training_data_dir, base_name)
+                create_downsampled_merged_graph = False
+                mirage_analysed_downsampled_graph = None
+                if os.path.isfile(downsampled_anomaly_data):
+                    create_downsampled_merged_graph = True
+                    mirage_analysed_downsampled_graph = downsampled_anomaly_data.replace('downsampled.json','mirage.analysed.downsampled.png')
+                if mirage_analysed_downsampled_graph and os.path.isfile(mirage_analysed_downsampled_graph):
+                    image_file = mirage_analysed_downsampled_graph
+                    create_downsampled_merged_graph = False
+                if create_downsampled_merged_graph:
+                    logger.info('alert_slack :: plotting Mirage analysed downsampled data graph - %s' % mirage_analysed_downsampled_graph)
+                    raw_timeseries = None
+                    timeseries = []
+                    try:
+                        with open(downsampled_anomaly_data, 'r') as f:
+                            raw_timeseries = f.read()
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_slack :: failed to read timeseries data from %s - %s' % (
+                            downsampled_anomaly_data, err))
+                    if raw_timeseries:
+                        timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        del raw_timeseries
+                        timeseries = literal_eval(timeseries_array_str)
+                    if timeseries:
+                        monotonic_timeseries = []
+                        try:
+                            human_date = strftime('%Y-%m-%d %H:%M:%S %Z (%A)', localtime(int(metric[2])))
+                            graph_title = 'Mirage downsampled Redis and merged Graphite data analysed (%s)\n%s' % (
+                                human_date, use_base_name)
+                            anomalies = []
+                            created_graph = create_matplotlib_graph(skyline_app, mirage_analysed_downsampled_graph, graph_title, timeseries, anomalies, monotonic_timeseries)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: alert_slack :: failed to plot %s - %s' % (
+                                mirage_analysed_downsampled_graph, err))
+                        if created_graph:
+                            logger.info('alert_slack :: created %s' % mirage_analysed_downsampled_graph)
+                            image_file = mirage_analysed_downsampled_graph
+                            filename = os.path.basename(image_file)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_slack :: failed to plot mirage_analysed_downsampled_graph - %s' % (
+                    err))
 
         if send_msg:
             try:
@@ -2373,6 +2593,37 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
 
             metric_timestamp = int(metric[2])
             cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+
+            # @added 20230925 - Task #5000: Replace alert key scans with sets
+            # Instead of using expiring keys with have a compute cost with
+            # using scan_iter(match='[PATTERN]') switch to using entries in a
+            # hash key, the management of which has a must lower compute cost.
+            try:
+                redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+            except Exception as err:
+                logger.error('error :: alert_slack :: get_redis_conn_decoded failed - %s' % (
+                    err))
+            hash_key = 'panorama.slack_threads_ts'
+            hash_key_key = str(slack_thread_ts)
+            hash_key_key_exists = False
+            try:
+                hash_key_key_exists = redis_conn_decoded.hget(hash_key, hash_key_key)
+            except Exception as err:
+                logger.error('error :: alert_slack :: could not query Redis for hash_key_key: %s' % err)
+            if hash_key_key_exists:
+                logger.info('alert_slack :: hash_key_key exists for previous channel, not updating %s' % str(hash_key_key))
+            else:
+                hash_key_value = {'metric': base_name, 'timestamp': metric_timestamp, 'slack_thread_ts': hash_key_key}
+                try:
+                    redis_conn_decoded.hset(hash_key, hash_key_key, str(hash_key_value))
+                    logger.info(
+                        'alert_slack :: added Panorama slack_thread_ts hash key - %s - %s' %
+                        (hash_key_key, str(hash_key_value)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: alert_slack :: failed to add Panorama slack_thread_ts hash key - %s - %s' %
+                        (hash_key_key, str(hash_key_value)))
 
             # @added 20190719 - Bug #3110: webapp - slack_response boolean object
             # When there are multiple channels declared Skyline only wants to
@@ -2567,6 +2818,13 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
             # exist
             training_data_available_for_sigma3 = False
 
+            # @modified 20240212 - Task #5266: Consolidate alerting for external alerters
+            # Moved redis connection from out of the below if settings.IONOSPHERE_ENABLED
+            try:
+                REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+            except Exception as err:
+                logger.error('error :: alert_http :: get_redis_conn_decoded failed, err: %s' % err)
+
             if settings.IONOSPHERE_ENABLED:
                 # @added 20201113 - Feature #3772: Add the anomaly_id to the http_alerter json
                 # Add the upper and lower 3sigma bounds, only if the metric is
@@ -2574,17 +2832,19 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 # training data
                 smtp_alerter_metric = False
                 try:
-                    REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+                    # @modified 20240212 - Task #5266: Consolidate alerting for external alerters
+                    # Moved connection to above
+                    # REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
                     redis_set = 'aet.analyzer.smtp_alerter_metrics'
                     try:
                         smtp_alerter_metric = REDIS_HTTP_ALERTER_CONN_DECODED.sismember(redis_set, metric_name)
                     except Exception as e:
                         logger.error('error :: alert_http :: could not query Redis set %s - %s' % (redis_set, e))
-                    if REDIS_HTTP_ALERTER_CONN_DECODED:
-                        try:
-                            del REDIS_HTTP_ALERTER_CONN_DECODED
-                        except:
-                            pass
+                    # if REDIS_HTTP_ALERTER_CONN_DECODED:
+                    #     try:
+                    #         del REDIS_HTTP_ALERTER_CONN_DECODED
+                    #     except:
+                    #         pass
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed to connect to query Redis for aet.smtp_alerter_metrics')
@@ -2603,7 +2863,34 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 else:
                     logger.info('alert_http :: will not calculated 3sigma upper and lower bounds for %s as it is not a smtp_alerter_metric s no training dat to calculate from' % metric_name)
 
-            if training_data_available_for_sigma3:
+            # @added 20240212 - Task #5266: Consolidate alerting for external alerters
+            # Calculate 3sigma values once
+            sigma_values_dict = {}
+            sigma_values_key = 'mirage.http_alerter.%s.%s.3sigma_values' % (str(anomaly_id), metric_name)
+            if training_data_available_for_sigma3 and anomaly_id:
+                try:
+                    sigma_values_dict = REDIS_HTTP_ALERTER_CONN_DECODED.hgetall(sigma_values_key)
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to get %s, err: %s' % (sigma_values_key, err))
+            sigma_values_set = False
+            if sigma_values_dict:
+                logger.info('alert_http :: sigma values retrieved from %s, %s' % (
+                    sigma_values_key, str(sigma_values_dict)))
+                try:
+                    sigma3_upper_bound = float(sigma_values_dict['3sigma_upper'])
+                    sigma3_lower_bound = float(sigma_values_dict['3sigma_lower'])
+                    sigma3_real_lower_bound = float(sigma_values_dict['3sigma_real_lower'])
+                    yhat_upper = float(sigma_values_dict['yhat_upper'])
+                    yhat_lower = float(sigma_values_dict['yhat_lower'])
+                    yhat_real_lower = float(sigma_values_dict['yhat_real_lower'])
+                    sigma_values_set = True
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to set sigma values, err: %s' % err)
+
+            # @modified 20240212 - Task #5266: Consolidate alerting for external alerters
+            # Calculate 3sigma values once
+            # if training_data_available_for_sigma3:
+            if training_data_available_for_sigma3 and not sigma_values_set:
                 logger.info('alert_http :: calculating 3sigma upper and lower bounds for %s' % metric_name)
                 try:
                     timeseries_dir = metric_name.replace('.', '/')
@@ -2678,6 +2965,23 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 yhat_upper = sigma3_upper_bound
                 yhat_lower = sigma3_lower_bound
                 yhat_real_lower = sigma3_real_lower_bound
+
+            # @added 20240212 - Task #5266: Consolidate alerting for external alerters
+            # Calculate 3sigma values once
+            if not sigma_values_dict:
+                sigma_values_dict = {
+                    "3sigma_upper": sigma3_upper_bound,
+                    "3sigma_lower": sigma3_lower_bound,
+                    "3sigma_real_lower": sigma3_real_lower_bound,
+                    "yhat_upper": yhat_upper,
+                    "yhat_lower": yhat_lower,
+                    "yhat_real_lower": yhat_real_lower,
+                }
+                try:
+                    REDIS_HTTP_ALERTER_CONN_DECODED.hset(sigma_values_key, mapping=sigma_values_dict)
+                    REDIS_HTTP_ALERTER_CONN_DECODED.expire(sigma_values_key, 1800)
+                except Exception as err:
+                    logger.error('error :: alert_http :: failed to hset %s, err: %s' % (sigma_values_key, err))
 
             # @added 20220830 - Feature #4652: http_alerter - dotted_representation
             #                   Task #2732: Prometheus to Skyline
@@ -3042,6 +3346,19 @@ def alert_sms(alert, metric, second_order_resolution_seconds, context, triggered
         logger.info('alert_sms - %s is muted, not alerting' % str(metric[1]))
         return
 
+    # @added 20240407 - Feature #4214: alert.paused
+    sms_enabled = True
+    try:
+        sms_enabled = sms_alert_schedule(skyline_app, base_name)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: sms_alert_schedule failed checking %s, err: %s' % (
+            base_name, err))
+        sms_enabled = True
+    if not sms_enabled:
+        logger.info('no sending SMS alert for %s because it is currently in a disabled period in SMS_ALERTS_SCHEDULE' % base_name)
+        return False
+
     logger.info('sending SMS alert to %s' % str(sms_recipients))
     for sms_number in sms_recipients:
         success = False
@@ -3097,6 +3414,64 @@ def trigger_alert(alert, metric, second_order_resolution_seconds, context, trigg
         strategy = 'alert_http'
     else:
         strategy = 'alert_%s' % alert[1]
+
+    # @added 20240304 - Feature #5302: thunder.thunder_alert
+    #                   Task #5300: Decouple alerting from analysis
+    mock_alert = False
+    try:
+        THUNDER_USED_FOR_ALERTING = settings.THUNDER_USED_FOR_ALERTING
+    except:
+        THUNDER_USED_FOR_ALERTING = False
+        #THUNDER_USED_FOR_ALERTING = True
+        mock_alert = True
+    if THUNDER_USED_FOR_ALERTING:
+        redis_thunder_alert_key = '%s.mirage.%s' % (str(time()), metric[1])
+        redis_thunder_alerted_key = 'mirage.sent.thunder_alert.%s.%s.%s' % (
+            metric[1], str(metric[2]), alert[1])
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        except Exception as err:
+            logger.error('error :: trigger_alert :: get_redis_conn_decoded failed - %s' % (
+                err))
+        thunder_alerted = False
+        logger.info('trigger_alert :: checking if %s exists' % (
+            redis_thunder_alerted_key))
+        try:
+            thunder_alerted = redis_conn_decoded.exists(redis_thunder_alerted_key)
+        except Exception as err:
+            logger.error('error :: trigger_alert :: exists failed on %s, err: %s' % (
+                redis_thunder_alerted_key, err))
+        logger.info('trigger_alert :: thunder_alerted: %s' % (
+            str(thunder_alerted)))
+        if thunder_alerted:
+            logger.info('trigger_alert :: thunder_alerted: %s, returning' % (
+                str(thunder_alerted)))
+            return
+        if not thunder_alerted:
+            alert_dict = {
+                'app': 'mirage',
+                'alert': alert,
+                'metric': metric,
+                'context': context,
+                'second_order_resolution_seconds': second_order_resolution_seconds,
+                'triggered_algorithms': triggered_algorithms
+            }
+            if mock_alert:
+                alert_dict['mock_alert'] = True
+            try:
+                redis_conn_decoded.hset('thunder.thunder_alert.alerts', redis_thunder_alert_key, str(alert_dict))
+                logger.info('trigger_alert :: hset thunder.thunder_alert.alerts key %s with alert_dict: %s' % (
+                    redis_thunder_alert_key, str(alert_dict)))
+            except Exception as err:
+                logger.error('error :: trigger_alert :: hset failed to set %s with alert_dict: %s, err: %s' % (
+                    redis_thunder_alert_key, str(alert_dict), err))
+            try:
+                redis_conn_decoded.setex(redis_thunder_alerted_key, 300, 1)
+                logger.info('trigger_alert :: created %s' % (
+                    redis_thunder_alerted_key))
+            except Exception as err:
+                logger.error('error :: trigger_alert :: setex failed on %s, err: %s' % (
+                    redis_thunder_alerted_key, err))
 
     try:
         # @modified 20210304 - Feature #3642: Anomaly type classification

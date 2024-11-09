@@ -134,6 +134,22 @@ settings for other Skyline modules such as Mirage, Boundary and Ionosphere and
 bring them online too.  However do consider enabling Ionosphere from the outset
 as well.
 
+rebrow
+------
+
+In the Skyline webapp UI there is rebrow, rebrow is a browser for Redis that
+allows to search and view all the data in Redis.  Users are highly encouraged to
+explore the Redis data in terms of keys, hashes and sets and look at the data.
+Skyline is a very complex application with a lot of different facets, rebrow
+allows you to explore all these facets and gain an understanding of what Skyline
+is doing and all the data that it is being done with.  Although one may simply
+assume that it is all time series data, that is where you are in for a big
+surprise, it is as much namespace data as it is time series data.
+
+All Skyline apps write their data to Redis so you can see all the sets, work
+queues, etc, etc with rebrow.  Please do explore.
+
+
 Add Mirage parameters to :mod:`settings.ALERTS`
 -----------------------------------------------
 

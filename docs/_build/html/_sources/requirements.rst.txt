@@ -5,14 +5,16 @@ Requirements
 
 The requirements are:
 
-- The recommended minimum spec for the Skyline server is a 4 CPU / 8GB RAM
+- The recommended minimum spec for the Skyline server is a 4 CPU / 8 GB RAM
   instance. For a small metric population a single CPU would suffice.
-- A server running CentOS Stream 8, Ubuntu 20.04 or Ubuntu 22.04.  Although
-  CentOS Stream 8 is recommended because Skyline is developed, tested and run
-  in production on CentOS Stream 8, only building is tested on Ubuntu.
+- If you wish to run a larger metric population or more than just Skyline on the
+  server (e.g. Graphite, VictoriaMetrics) at **least** 16 GB RAM is recommended.
+- A server running CentOS Stream 9, Ubuntu 20.04 or Ubuntu 22.04.  Although
+  CentOS Stream 9 is recommended because Skyline is developed, tested and run
+  in production on CentOS Stream 9, only building is tested on Ubuntu.
 - virtualenv
-- Python 3.8.17 (running in an isolated virtualenv)
-- Redis (or redis-stack-server)
+- Python 3.10.15 (running in an isolated virtualenv)
+- redis-stack-server
 - MariaDB
 - memcached (optional)
 - Additionally, a Graphite, Prometheus or VictoriaMetrics instance is required
@@ -33,4 +35,4 @@ longer term data).
 ####################
 
 The ``requirements.txt`` file lists the required packages and the last
-verified as working version with Python-3.8 within a virtualenv.
+verified as working version with Python-3.10 within a virtualenv.

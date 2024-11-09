@@ -53,7 +53,7 @@ def setup_package():
             'Natural Language :: English',
             'Operating System :: POSIX :: Linux',
         ],
-        keywords='timeseries anomaly detection numpy pandas statsmodels tsfresh matrixprofile numba stumpy',
+        keywords='time series anomaly detection numpy pandas statsmodels tsfresh matrixprofile numba adtk stumpy lof sigma dbscan isolation_forest  macd mad mstl spectral_residual OCSVM PCA prophet spectral_entropy azure_ai_anomalydetector',
         packages=['earthgecko-skyline'],
         # dependency_links=['http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86'],
         # install_requires=[

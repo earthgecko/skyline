@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mirage.mirage_vortex &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>mirage.mirage_vortex &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -143,6 +143,9 @@
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 
+<span class="c1"># @added 20230706 - Feature #4952: vortex - consensus_count</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">combinations</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span>
@@ -163,6 +166,12 @@
 <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="kn">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
 
 <span class="c1"># from custom_algorithm_sources.sigma.sigma import run_sigma_algorithms</span>
+
+<span class="c1"># @added 20240913 - Feature #5468: callback</span>
+<span class="kn">from</span> <span class="nn">functions.skyline.callback</span> <span class="kn">import</span> <span class="n">callback</span>
+
+<span class="c1"># @added 20241107 - Feature #5536: deduplicate_timeseries</span>
+<span class="kn">from</span> <span class="nn">functions.timeseries.deduplicate_timeseries</span> <span class="kn">import</span> <span class="n">deduplicate_timeseries</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage_vortex&#39;</span>
 <span class="c1"># skyline_app_logger = &#39;%sLog&#39; % skyline_app</span>
@@ -248,7 +257,9 @@
 <span class="n">failed_checks_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_vortex_failed&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span>
 
 
-<div class="viewcode-block" id="MirageVortex"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex">[docs]</a><span class="k">class</span> <span class="nc">MirageVortex</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="MirageVortex">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex">[docs]</a>
+<span class="k">class</span> <span class="nc">MirageVortex</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The MirageVortex thread</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -265,7 +276,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MirageVortex.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MirageVortex.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -276,7 +289,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent or current process dead&#39;</span><span class="p">)</span>
             <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MirageVortex.check_valid_algorithms"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.check_valid_algorithms">[docs]</a>    <span class="k">def</span> <span class="nf">check_valid_algorithms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">consensus</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.check_valid_algorithms">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.check_valid_algorithms">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_valid_algorithms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">consensus</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Verify that the algortihms are valid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -291,7 +307,10 @@
                     <span class="n">unknown_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">unknown_algorithms</span></div>
 
-<div class="viewcode-block" id="MirageVortex.check_consensus"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.check_consensus">[docs]</a>    <span class="k">def</span> <span class="nf">check_consensus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">algorithms_run</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.check_consensus">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.check_consensus">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_consensus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">algorithms_run</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check is consensus is achieved and still possible</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -317,7 +336,10 @@
             <span class="n">consensus_impossible</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="p">[],</span> <span class="n">consensus_impossible</span></div>
 
-<div class="viewcode-block" id="MirageVortex.create_echo_timeseries"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.create_echo_timeseries">[docs]</a>    <span class="k">def</span> <span class="nf">create_echo_timeseries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vortex_metric_data</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.create_echo_timeseries">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.create_echo_timeseries">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_echo_timeseries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vortex_metric_data</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add timeseries for echo</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -359,7 +381,10 @@
             <span class="n">echo_json</span><span class="p">,</span> <span class="n">vortex_metric_data</span><span class="p">[</span><span class="s1">&#39;request_id&#39;</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">echo_json</span></div>
 
-<div class="viewcode-block" id="MirageVortex.add_training_data"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_training_data">[docs]</a>    <span class="k">def</span> <span class="nf">add_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">vortex_metric_data</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">ionosphere_enabled</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.add_training_data">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_training_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_training_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">vortex_metric_data</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">ionosphere_enabled</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add training_data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -501,7 +526,10 @@
 
         <span class="k">return</span> <span class="n">metric_data_dir</span></div>
 
-<div class="viewcode-block" id="MirageVortex.add_results"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_results">[docs]</a>    <span class="k">def</span> <span class="nf">add_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.add_results">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add result to the mirage.vortex Redis hash</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -559,22 +587,35 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: failed to hset key for </span><span class="si">%s</span><span class="s1"> in mirage.vortex_saved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">request_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
+        <span class="n">jsonfile</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">VORTEX_TIMESERIES_JSON_TO_DISK</span><span class="p">:</span>
-            <span class="n">jsonfile</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">jsonfile</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no timeseries in metric_data for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">request_id</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no timeseries in metric_data for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">request_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex - failed to remove file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">jsonfile</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">del</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="c1"># @added 20240917 - Feature #5468: callback</span>
+        <span class="n">del_timeseries</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s1">&#39;return_timeseries&#39;</span> <span class="ow">in</span> <span class="n">metric_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;return_timeseries&#39;</span><span class="p">]:</span>
+                <span class="n">del_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="s1">&#39;use_timeseries&#39;</span> <span class="ow">in</span> <span class="n">metric_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;use_timeseries&#39;</span><span class="p">])</span>
+                    <span class="k">del</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;use_timeseries&#39;</span><span class="p">]</span>
+
+        <span class="c1"># @modified 20240917 - Feature #5468: callback</span>
+        <span class="c1"># Only delete timeseries if return_timeseries is not set</span>
+        <span class="k">if</span> <span class="n">del_timeseries</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
         <span class="n">analysis_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">analysis_start_time</span>
         <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;total_analysis_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">analysis_runtime</span>
 
@@ -608,7 +649,10 @@
 
         <span class="k">return</span> <span class="n">added_results</span></div>
 
-<div class="viewcode-block" id="MirageVortex.return_shard_test"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.return_shard_test">[docs]</a>    <span class="k">def</span> <span class="nf">return_shard_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.return_shard_test">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.return_shard_test">[docs]</a>
+    <span class="k">def</span> <span class="nf">return_shard_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a shard test.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -620,7 +664,10 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">added_results</span></div>
 
-<div class="viewcode-block" id="MirageVortex.shard_host"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.shard_host">[docs]</a>    <span class="k">def</span> <span class="nf">shard_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">check_horizon_shards</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.shard_host">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.shard_host">[docs]</a>
+    <span class="k">def</span> <span class="nf">shard_host</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">check_horizon_shards</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the shard host to which a metric belongs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -633,7 +680,10 @@
             <span class="k">if</span> <span class="n">modulo_result</span> <span class="o">==</span> <span class="n">check_horizon_shards</span><span class="p">[</span><span class="n">shost</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="n">shost</span></div>
 
-<div class="viewcode-block" id="MirageVortex.is_labelled_metric"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.is_labelled_metric">[docs]</a>    <span class="k">def</span> <span class="nf">is_labelled_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.is_labelled_metric">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.is_labelled_metric">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_labelled_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check whether a metric is a labelled_metric</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -643,7 +693,10 @@
                 <span class="n">labelled_metric</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">labelled_metric</span></div>
 
-<div class="viewcode-block" id="MirageVortex.generate_labelled_metric_name"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.generate_labelled_metric_name">[docs]</a>    <span class="k">def</span> <span class="nf">generate_labelled_metric_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_namespace_prefix</span><span class="p">,</span> <span class="n">server_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.generate_labelled_metric_name">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.generate_labelled_metric_name">[docs]</a>
+    <span class="k">def</span> <span class="nf">generate_labelled_metric_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_namespace_prefix</span><span class="p">,</span> <span class="n">server_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">server_id</span><span class="p">:</span>
             <span class="n">server_id_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">server_id</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -653,7 +706,10 @@
             <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">,</span> <span class="n">skyline_labels</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">labelled_metric_name</span></div>
 
-<div class="viewcode-block" id="MirageVortex.get_metric_data_from_archive"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.get_metric_data_from_archive">[docs]</a>    <span class="k">def</span> <span class="nf">get_metric_data_from_archive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.get_metric_data_from_archive">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.get_metric_data_from_archive">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_metric_data_from_archive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">):</span>
         <span class="n">metric_data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
@@ -669,7 +725,10 @@
                 <span class="n">metric_data_archive</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">metric_data</span></div>
 
-<div class="viewcode-block" id="MirageVortex.process_ionosphere_results"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.process_ionosphere_results">[docs]</a>    <span class="k">def</span> <span class="nf">process_ionosphere_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">ionosphere_results</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.process_ionosphere_results">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.process_ionosphere_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">process_ionosphere_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">ionosphere_results</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process results from Ionosphere.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -788,7 +847,7 @@
                     <span class="n">analysis_start_time</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;begin_analysis&#39;</span><span class="p">]</span>
                     <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: add_results failed for request_id: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: add_results failed for request_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">request_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
@@ -823,7 +882,10 @@
             <span class="n">processed_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_result</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">processed_results</span></div>
 
-<div class="viewcode-block" id="MirageVortex.return_request_results"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.return_request_results">[docs]</a>    <span class="k">def</span> <span class="nf">return_request_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">return_results_for</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.return_request_results">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.return_request_results">[docs]</a>
+    <span class="k">def</span> <span class="nf">return_request_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">return_results_for</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign a metrics for a process to analyze.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -879,7 +941,7 @@
                 <span class="n">analysis_start_time</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;begin_analysis&#39;</span><span class="p">]</span>
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: add_results failed for request_id: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: add_results failed for request_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">request_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: results added with anomalous: </span><span class="si">%s</span><span class="s1">, matched: None&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -923,7 +985,10 @@
 
         <span class="k">return</span> <span class="n">processed_results</span></div>
 
-<div class="viewcode-block" id="MirageVortex.add_to_mirage_vortex_anomalous_metrics"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_to_mirage_vortex_anomalous_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_mirage_vortex_anomalous_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.add_to_mirage_vortex_anomalous_metrics">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_to_mirage_vortex_anomalous_metrics">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_to_mirage_vortex_anomalous_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">):</span>
         <span class="n">added</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="n">algo</span> <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">][</span><span class="n">algo</span><span class="p">]]</span>
@@ -944,7 +1009,10 @@
                 <span class="n">err</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">added</span></div>
 
-<div class="viewcode-block" id="MirageVortex.add_to_illuminance"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_to_illuminance">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_illuminance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.add_to_illuminance">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.add_to_illuminance">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_to_illuminance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">):</span>
         <span class="n">current_illuminance_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">illuminance_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">try</span><span class="p">:</span>
@@ -966,7 +1034,10 @@
                 <span class="n">err</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">current_illuminance_dict</span></div>
 
-<div class="viewcode-block" id="MirageVortex.send_anomaly_to_panorama"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.send_anomaly_to_panorama">[docs]</a>    <span class="k">def</span> <span class="nf">send_anomaly_to_panorama</span><span class="p">(</span>
+
+<div class="viewcode-block" id="MirageVortex.send_anomaly_to_panorama">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.send_anomaly_to_panorama">[docs]</a>
+    <span class="k">def</span> <span class="nf">send_anomaly_to_panorama</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">labelled_metric_name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">algorithms_run</span><span class="p">,</span>
             <span class="n">triggered_algorithms</span><span class="p">):</span>
 
@@ -1024,7 +1095,10 @@
                     <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">sent_to_panorama</span></div>
 
-<div class="viewcode-block" id="MirageVortex.spin_process"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">assigned_checks</span><span class="p">,</span> <span class="n">ionosphere_results</span><span class="p">,</span> <span class="n">return_results_for</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.spin_process">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.spin_process">[docs]</a>
+    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">assigned_checks</span><span class="p">,</span> <span class="n">ionosphere_results</span><span class="p">,</span> <span class="n">return_results_for</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign a metrics or results to process.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1129,6 +1203,31 @@
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processing request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
 
+            <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+            <span class="n">callback_url</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">callback_data</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">callback_url</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;callback_url&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">callback_data</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;callback_data&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="c1"># @added 20240917 - Feature #5468: callback</span>
+            <span class="n">return_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">return_timeseries</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;return_timeseries&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">return_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+            <span class="n">csv_upload</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">csv_upload</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;csv_upload&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">csv_upload</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="n">consensus</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">MIRAGE_VORTEX_DEFAULT_CONSENSUS</span><span class="p">)</span>
             <span class="n">algorithms</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{}}</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1158,6 +1257,18 @@
                     <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed test_anomaly request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                    <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                    <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">callback_data</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                     <span class="k">continue</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -1174,6 +1285,22 @@
                 <span class="n">consensus_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;consensus_count&#39;</span><span class="p">])</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">consensus_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># @added 20230706 - Feature #4952: vortex - consensus_count</span>
+            <span class="c1"># Create all possible unique combinations of possible consensuses</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">check_all_consensuses</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;check_all_consensuses&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">check_all_consensuses</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">consensus_count</span> <span class="ow">and</span> <span class="n">check_all_consensuses</span><span class="p">:</span>
+                <span class="n">all_possible_consensuses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="n">algorithms_to_be_run</span><span class="p">,</span> <span class="n">consensus_count</span><span class="p">))</span>
+                <span class="n">consensuses</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">all_possible_consensuses</span><span class="p">:</span>
+                    <span class="c1"># x unique elements</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">))))</span> <span class="o">!=</span> <span class="n">consensus_count</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">consensuses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="n">consensus</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">consensuses</span><span class="p">)</span>
 
             <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -1225,6 +1352,19 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="c1"># Check that the algorithms_to_be_run are in consensus</span>
@@ -1251,13 +1391,26 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no metric in metric_data for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">check_item</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no metric in metric_data for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">check_item</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;anomalous&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">additional_info</span> <span class="o">=</span> <span class="s1">&#39;no metric name passed&#39;</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
@@ -1275,6 +1428,19 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1283,8 +1449,8 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">jsonfile</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no timeseries in metric_data for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">check_item</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no timeseries in metric_data for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">check_item</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                 <span class="n">file_metric_data</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">jsonfile</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
@@ -1302,8 +1468,8 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">timeseries</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;timeseries&#39;</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no timeseries in metric_data for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">check_item</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: no timeseries in metric_data for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">check_item</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="n">new_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1341,7 +1507,37 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
+
+            <span class="c1"># @added 20241107 - Feature #5536: deduplicate_timeseries</span>
+            <span class="c1"># Vortex has introduced the ability for data to be submitted with None</span>
+            <span class="c1"># or nan values and duplicate items. Many unsupervised algorithms do</span>
+            <span class="c1"># not tolerate Nan or duplicate items.</span>
+            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+            <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">deduplicate_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: deduplicate_timeseries ran to deduplicate the time series and remove nans, from </span><span class="si">%s</span><span class="s1"> data points to </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timestamps</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: deduplicate_timeseries failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
 
             <span class="n">shard_test</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1372,8 +1568,8 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: failed to determine last timestamp for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">request_id</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: failed to determine last timestamp for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">request_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_timestamp</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: failed no metric_timestamp for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">request_id</span><span class="p">)</span>
@@ -1394,6 +1590,19 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="n">is_unix_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1420,6 +1629,19 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
@@ -1430,7 +1652,12 @@
             <span class="n">coerce_errors</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">use_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+                    <span class="c1"># @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                    <span class="c1"># Handle nan</span>
+                    <span class="c1"># use_timeseries.append([int(item[0]), float(item[1])])</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;NAN&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;np.nan&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;null&#39;</span><span class="p">]:</span>
+                        <span class="n">use_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                     <span class="n">coerce_errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">coerce_errors</span><span class="p">:</span>
@@ -1455,6 +1682,19 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -1473,6 +1713,7 @@
                 <span class="n">algorithms_test_only</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">use_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">use_timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: full_duration: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
             <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_duration</span>
             <span class="n">hours_to_resolve</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
             <span class="n">nearest_full_duration</span> <span class="o">=</span> <span class="mi">86400</span> <span class="o">*</span> <span class="nb">round</span><span class="p">(</span><span class="n">full_duration</span> <span class="o">/</span> <span class="mi">86400</span><span class="p">)</span>
@@ -1578,6 +1819,24 @@
                 <span class="c1"># Coerce timestamps to ints</span>
                 <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">downsampled_timeseries</span><span class="p">]</span>
                 <span class="n">downsampled</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="c1"># @added 20241107 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                <span class="c1"># Handle nan</span>
+                <span class="n">use_downsampled_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">coerce_errors</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">downsampled_timeseries</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span> <span class="s1">&#39;np.nan&#39;</span><span class="p">]:</span>
+                            <span class="n">use_downsampled_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])])</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">coerce_errors</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">index</span><span class="p">,</span> <span class="n">err</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">coerce_errors</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: request_id: </span><span class="si">%s</span><span class="s1"> encountered </span><span class="si">%s</span><span class="s1"> coerce_errors for use_downsampled_timeseries, last err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coerce_errors</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">coerce_errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])))</span>
+                <span class="k">if</span> <span class="n">use_downsampled_timeseries</span><span class="p">:</span>
+                    <span class="n">downsampled_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">use_downsampled_timeseries</span><span class="p">)</span>
+
                 <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;downsampled_resolution&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">downsample_resolution</span>
                 <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;downsampled_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">downsampled_timeseries</span><span class="p">)</span>
                 <span class="n">use_timeseries</span> <span class="o">=</span> <span class="n">downsampled_timeseries</span>
@@ -1587,6 +1846,9 @@
             <span class="n">expected_timeseries_length</span> <span class="o">=</span> <span class="p">(</span><span class="mi">86400</span> <span class="o">*</span> <span class="mi">7</span><span class="p">)</span> <span class="o">/</span> <span class="mi">600</span>
             <span class="k">if</span> <span class="n">analysis_period</span> <span class="o">==</span> <span class="mi">86400</span><span class="p">:</span>
                 <span class="n">expected_timeseries_length</span> <span class="o">=</span> <span class="mi">86400</span> <span class="o">/</span> <span class="mi">60</span>
+            
+            <span class="k">if</span> <span class="n">override_7_day_limit</span><span class="p">:</span>
+                <span class="n">expected_timeseries_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">analysis_period</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.9</span><span class="p">)</span>
 
             <span class="n">use_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">use_timeseries</span><span class="p">)</span>
             <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;use_timeseries_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_timeseries_length</span>
@@ -1629,6 +1891,19 @@
                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
+                <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                 <span class="k">continue</span>
 
             <span class="c1"># Determine if there are any negatives values</span>
@@ -1659,8 +1934,22 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">added_results</span> <span class="ow">or</span> <span class="n">sent_to_ionosphere</span><span class="p">:</span>
                         <span class="k">break</span>
-
                     <span class="n">custom_algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
+
+                    <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+
+                    <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">for</span> <span class="n">algo_param</span> <span class="ow">in</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">algorithm</span><span class="p">]:</span>
+                            <span class="n">algorithm_parameters</span><span class="p">[</span><span class="n">algo_param</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="n">algo_param</span><span class="p">]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">anomaly_window</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
+
                     <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;prophet&#39;</span><span class="p">:</span>
                         <span class="n">custom_algorithm</span> <span class="o">=</span> <span class="s1">&#39;skyline_prophet&#39;</span>
 
@@ -1669,11 +1958,6 @@
 
                     <span class="k">if</span> <span class="n">algorithm</span> <span class="o">==</span> <span class="s1">&#39;sigma&#39;</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: running sigma for request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
-                        <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span>
-                        <span class="k">except</span><span class="p">:</span>
-                            <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
                         <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1753,7 +2037,7 @@
                             <span class="n">consensus_count_results</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                             <span class="n">consensus_count_results</span><span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="s1">&#39;sigma&#39;</span><span class="p">][</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalies</span>
                             <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
-                            <span class="n">anomalies_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">anomalies</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+                            <span class="n">anomalies_timestamps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ts</span><span class="p">))</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">anomalies</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
                             <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
                                 <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
                                 <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="ow">in</span> <span class="n">anomalies_timestamps</span><span class="p">:</span>
@@ -1776,7 +2060,10 @@
                                 <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
-                            <span class="n">outlier_value</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;outlier_value&#39;</span><span class="p">]</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">outlier_value</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;outlier_value&#39;</span><span class="p">]</span>
+                            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                                <span class="n">outlier_value</span> <span class="o">=</span> <span class="mi">1</span>
                             <span class="n">return_results</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
                             <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1803,7 +2090,7 @@
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">return_anomalies_only</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">anomaly_window</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">]</span>
+                                <span class="n">anomaly_window</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">])</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">anomaly_window</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -1811,7 +2098,10 @@
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">outlier_value</span> <span class="o">=</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;threshold&#39;</span><span class="p">]</span>
                                 <span class="k">except</span><span class="p">:</span>
-                                    <span class="n">outlier_value</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;outlier_value&#39;</span><span class="p">]</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">outlier_value</span> <span class="o">=</span> <span class="n">VORTEX_ALGORITHMS</span><span class="p">[</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;outlier_value&#39;</span><span class="p">]</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">outlier_value</span> <span class="o">=</span> <span class="mi">1</span>
 
                             <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;anomaly_window&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomaly_window</span>
                             <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;base_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric</span>
@@ -1846,6 +2136,12 @@
                             <span class="n">anomalyScore_list</span> <span class="o">=</span> <span class="p">[]</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">use_debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">algorithm_parameters</span><span class="p">[</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]:</span>
+                                        <span class="n">use_debug_logging</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="k">pass</span>
                                 <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">,</span> <span class="n">results</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="n">metric</span><span class="p">,</span> <span class="n">use_timeseries</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">],</span> <span class="n">use_debug_logging</span><span class="p">)</span>
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1892,8 +2188,16 @@
                                 <span class="s1">&#39;unreliable&#39;</span><span class="p">:</span> <span class="n">unreliable</span><span class="p">,</span>
                             <span class="p">}</span>
                             <span class="k">if</span> <span class="n">return_results</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">return_anomalies_only</span><span class="p">:</span>
-                                <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span>
-                                <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;scores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;scores&#39;</span><span class="p">]</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;anomalies&#39;</span><span class="p">]</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: </span><span class="si">%s</span><span class="s1"> failed to determine anomalies from results, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">algorithm</span><span class="p">][</span><span class="s1">&#39;scores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;scores&#39;</span><span class="p">]</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: </span><span class="si">%s</span><span class="s1"> failed to determine scores from results, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                             <span class="k">if</span> <span class="n">return_anomalies_only</span><span class="p">:</span>
                                 <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
                                 <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
@@ -1974,15 +2278,34 @@
                             <span class="n">anomalies</span> <span class="o">=</span> <span class="p">{}</span>
                             <span class="n">algorithms_with_results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+                                <span class="c1">#for index, item in enumerate(timeseries):</span>
+                                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">use_timeseries</span><span class="p">):</span>
                                     <span class="n">ts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                                     <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="c1"># @added 20241025 - Bug #5518: custom_algorithms_results - invalid JSON</span>
+                                    <span class="c1"># Coerce NaN to None or float</span>
+                                    <span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;NaN&#39;</span><span class="p">:</span>
+                                        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+
+                                    <span class="n">ts_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+
                                     <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
                                     <span class="n">consensus_anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;triggered&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
                                     <span class="k">for</span> <span class="n">i_algorithm</span> <span class="ow">in</span> <span class="n">algorithms_with_results</span><span class="p">:</span>
                                         <span class="n">algo_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
                                         <span class="k">try</span><span class="p">:</span>
                                             <span class="n">algo_anomaly</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">i_algorithm</span><span class="p">][</span><span class="s1">&#39;anomalies&#39;</span><span class="p">][</span><span class="n">ts</span><span class="p">]</span>
+                                        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="n">algo_anomaly</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms&#39;</span><span class="p">][</span><span class="n">i_algorithm</span><span class="p">][</span><span class="s1">&#39;anomalies&#39;</span><span class="p">][</span><span class="n">ts_str</span><span class="p">]</span>
+                                            <span class="k">except</span><span class="p">:</span>
+                                                <span class="k">pass</span>
                                         <span class="k">except</span><span class="p">:</span>
                                             <span class="k">pass</span>
                                         <span class="k">if</span> <span class="n">algo_anomaly</span><span class="p">:</span>
@@ -1996,7 +2319,7 @@
                                         <span class="k">if</span> <span class="n">i_consensus_reached</span><span class="p">:</span>
                                             <span class="n">score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">i_consensus_reached</span><span class="p">)</span>
                                             <span class="n">consensus_anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">score</span>
-                                            <span class="n">anomalies</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span> <span class="s1">&#39;triggered&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">consensus_anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;triggered&#39;</span><span class="p">])}</span>
+                                            <span class="n">anomalies</span><span class="p">[</span><span class="n">ts_str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index</span><span class="p">,</span> <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="n">score</span><span class="p">,</span> <span class="s1">&#39;triggered&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">consensus_anomalies</span><span class="p">[</span><span class="n">ts</span><span class="p">][</span><span class="s1">&#39;triggered&#39;</span><span class="p">])}</span>
                                     <span class="n">consensus_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: failed building consensus_anomalies for request_id: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -2158,6 +2481,7 @@
                         <span class="k">if</span> <span class="n">return_image_urls</span><span class="p">:</span>
                             <span class="n">image_urls</span> <span class="o">=</span> <span class="p">[]</span>
                             <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;nearest_full_duration&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
+
                             <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">])</span>
                             <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">use_base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
                             <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -2165,17 +2489,28 @@
                                 <span class="n">timeseries_dir</span><span class="p">)</span>
                             <span class="k">for</span> <span class="n">i_algorithm</span> <span class="ow">in</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms_run&#39;</span><span class="p">]:</span>
                                 <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">i_algorithm</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                                <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                <span class="k">if</span> <span class="n">csv_upload</span><span class="p">:</span>
+                                    <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">i_algorithm</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                        
                                 <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere_images?image=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
                                 <span class="n">image_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span>
 
                             <span class="k">if</span> <span class="n">consensus_anomalies</span><span class="p">:</span>
                                 <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.consensus.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                                <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                <span class="k">if</span> <span class="n">csv_upload</span><span class="p">:</span>
+                                    <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.consensus.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+
                                 <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere_images?image=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
                                 <span class="n">image_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span>
 
                             <span class="c1"># @added 20230616 - Feature #4952: vortex - consensus_count</span>
                             <span class="k">if</span> <span class="n">consensus_count</span><span class="p">:</span>
                                 <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.consensus_count.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                                <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                <span class="k">if</span> <span class="n">csv_upload</span><span class="p">:</span>
+                                    <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.consensus_count.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
                                 <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere_images?image=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
                                 <span class="n">image_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span>
 
@@ -2186,7 +2521,13 @@
                             <span class="k">if</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">60</span> <span class="ow">and</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">86400</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;analysis_period&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">86400</span><span class="p">:</span>
                                     <span class="n">create_echo_data</span> <span class="o">=</span> <span class="kc">True</span>
+
+                                <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                <span class="k">if</span> <span class="n">csv_upload</span><span class="p">:</span>
+                                    <span class="n">create_echo_data</span> <span class="o">=</span> <span class="kc">False</span>
+
                             <span class="k">if</span> <span class="n">create_echo_data</span><span class="p">:</span>
+                                <span class="n">created_echo_data</span> <span class="o">=</span> <span class="kc">None</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="n">created_echo_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_echo_timeseries</span><span class="p">(</span><span class="n">metric_data</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
                                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
@@ -2218,16 +2559,38 @@
                                 <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;nearest_full_duration&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">3600</span><span class="p">)</span>
                                 <span class="k">for</span> <span class="n">i_algorithm</span> <span class="ow">in</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;algorithms_run&#39;</span><span class="p">]:</span>
                                     <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">saved_training_data</span><span class="p">,</span> <span class="n">i_algorithm</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                                    <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                    <span class="k">if</span> <span class="n">csv_upload</span><span class="p">:</span>
+                                        <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">saved_training_data</span><span class="p">,</span> <span class="n">i_algorithm</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                    
                                     <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere_images?image=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
                                     <span class="n">image_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span>
 
                                 <span class="k">if</span> <span class="n">consensus_anomalies</span><span class="p">:</span>
                                     <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.consensus.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">saved_training_data</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                                    <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+                                    <span class="k">if</span> <span class="n">csv_upload</span><span class="p">:</span>
+                                        <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vortex.algorithm.consensus.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">saved_training_data</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+                    
                                     <span class="n">image_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere_images?image=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
                                     <span class="n">image_urls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image_url</span><span class="p">)</span>
 
                                 <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;image_urls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_urls</span>
                         <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;training_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saved_training_data</span>
+
+                        <span class="k">if</span> <span class="n">saved_training_data</span><span class="p">:</span>
+                            <span class="n">use_base_name</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;internal_metric_name&#39;</span><span class="p">]</span>
+                            <span class="n">labelled_metric_name</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;labelled_metric_name&#39;</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">labelled_metric_name</span><span class="p">:</span>
+                                <span class="n">use_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">labelled_metric_name</span><span class="p">)</span>
+                            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">]</span>
+                            <span class="n">training_data_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;vortex_results=true&amp;requested_timestamp=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+                                <span class="n">use_base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">))</span>
+                            <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;training_data_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_data_url</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: request_id: </span><span class="si">%s</span><span class="s1">, training_data_url: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">),</span> <span class="n">training_data_url</span><span class="p">))</span>
+
                         <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="s1">&#39;trainable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">add_results</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -2281,12 +2644,29 @@
                             <span class="k">continue</span>
 
                         <span class="k">if</span> <span class="n">add_results</span><span class="p">:</span>
+                            <span class="c1"># @added 20240917 - Feature #5468: callback</span>
+                            <span class="k">if</span> <span class="n">return_timeseries</span><span class="p">:</span>
+                                <span class="n">metric_data</span><span class="p">[</span><span class="s1">&#39;use_timeseries&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">use_timeseries</span><span class="p">)</span>
+
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">added_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_results</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">,</span> <span class="n">analysis_start_time</span><span class="p">)</span>
                             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: add_results failed for request_id: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: add_results failed for request_id: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="n">request_id</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
                                 <span class="k">break</span>
+                            <span class="c1"># @added 20240913 - Feature #5468: callback</span>
+                            <span class="k">if</span> <span class="n">callback_url</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">response_code</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">metric_data</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">response_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: callback successful to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">callback_url</span><span class="p">)</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback responded with </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">response_code</span><span class="p">),</span> <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: mirage_vortex :: callback failed for </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">check_item</span><span class="p">,</span> <span class="n">callback_url</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
                         <span class="k">if</span> <span class="n">added_results</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: processed request_id: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_id</span><span class="p">))</span>
                             <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
@@ -2365,7 +2745,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: </span><span class="si">%s</span><span class="s1"> checks processed in in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">checks_processed</span><span class="p">),</span> <span class="n">analysis_run_time</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="MirageVortex.run"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MirageVortex.run">
+<a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_vortex.MirageVortex.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2590,7 +2973,12 @@
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: </span><span class="si">%s</span><span class="s1"> :: stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
-                        <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                        <span class="c1"># @modified 20240202 - Task #5178: Build and test skyline v4.1.0</span>
+                        <span class="c1"># p.join()</span>
+                        <span class="n">killing_pid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pid</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: </span><span class="si">%s</span><span class="s1"> :: kill spin_process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: </span><span class="si">%s</span><span class="s1"> :: killed spin_process process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
 
                 <span class="c1"># @added 20200607 - Feature #3508: ionosphere.untrainable_metrics</span>
                 <span class="c1"># Check to non 3sigma algorithm errors too</span>
@@ -2703,7 +3091,9 @@
             <span class="c1"># Sleep if it went too fast</span>
             <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="mi">59</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage_vortex :: sleeping due to low run time...&#39;</span><span class="p">)</span>
-                <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>
@@ -2713,7 +3103,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

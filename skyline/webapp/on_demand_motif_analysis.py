@@ -9,6 +9,16 @@ import traceback
 
 from flask import request
 import numpy as np
+
+# @added 20231210 - Task #5168: v4.1.0 - update dependencies
+# As of numpy 1.2.4 there is no attribute warnings in np.  Before that
+# np.warnings was the same as the stdlib warnings.  This breaks mass_ts.
+# https://github.com/scikit-learn/scikit-learn/pull/23654
+# 2023-12-10 16:26:11 :: 3926034 :: error :: inference :: 5320 mts.mass2_batch error: module 'numpy' has no attribute 'warnings'
+if np.__version__ >= '1.24':
+    import warnings
+    np.warnings = warnings
+
 import mass_ts as mts
 
 # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -100,6 +110,9 @@ def on_demand_motif_analysis(
     # @added 20210425 - Feature #4014: Ionosphere - inference
     # Added max_area_percent_diff for computing the area under the curve
     motif_analysis[metric]['max_area_percent_diff'] = float(max_area_percent_diff)
+    # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+    exact_matches_found_dict = {}
+    exact_matches_run_on_fp_ids = []
 
     fps_checked_for_motifs = []
 
@@ -124,7 +137,7 @@ def on_demand_motif_analysis(
     full_duration_timeseries_json = '%s/%s.mirage.redis.%sh.json' % (
         metric_timeseries_dir, metric, str(full_duration_in_hours))
     try:
-        metric_vars_dict = mirage_load_metric_vars(skyline_app, metric_vars_file, True)
+        metric_vars_dict = mirage_load_metric_vars(skyline_app, metric_vars_file, return_dict=True)
     except Exception as e:
         logger.error('error :: inference :: failed to load metric variables from check file - %s - %s' % (
             metric_vars_file, e))
@@ -135,6 +148,18 @@ def on_demand_motif_analysis(
 
     full_duration = metric_vars_dict['metric_vars']['full_duration']
 
+    # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Feature #4732: flux vortex
+    #                   Feature #4734: mirage_vortex
+    # Handle csv uploaded metrics in training_data
+    if full_duration == 0:
+        try:
+            full_duration = metric_vars_dict['metric_vars']['metric_timestamp'] - metric_vars_dict['metric_vars']['from_timestamp']
+            full_duration = int(full_duration // 86400 * 86400)
+        except Exception as err:
+            logger.error('error :: %s :: failed to determine full_duration, err: %s' % (
+                function_str, err))
+        
     # Determine the metric details from the database
     metric_id = 0
     metric_db_object = {}
@@ -350,6 +375,12 @@ def on_demand_motif_analysis(
                 # @modified 20210418 - Feature #4014: Ionosphere - inference
                 # Handle top_matches being greater than possible kth that can be found
                 # best_indices, best_dists = mts.mass2_batch(relate_dataset, anomalous_ts, batch_size=int(batch_size), top_matches=int(top_matches))
+
+                # @modified 20240324 - Ideas #5316: motif_annihilation learning
+                #                      Feature #4014: Ionosphere - inference
+                # Added this comment because I can never remember what
+                # index is returned the starting index or the end index.
+                # Returns the starting index of the top matches
                 best_indices, best_dists = mts.mass2_batch(relate_dataset, anomalous_ts, batch_size=int(batch_size), top_matches=int(use_top_matches))
                 end_mass2_batch = timer()
                 mass2_batch_times.append((end_mass2_batch - start_mass2_batch))
@@ -363,19 +394,42 @@ def on_demand_motif_analysis(
                 fps_checked_for_motifs.append(fp_id)
             except Exception as e:
                 logger.error('error :: %s :: %s mts.mass2_batch error: %s' % (
-                    function_str, (fp_id), str(e)))
+                    function_str, str(fp_id), str(e)))
                 continue
 
             try:
                 if str(list(best_dists)) == str(list(empty_dists)):
                     logger.info('%s :: mts.mass2_batch no similar motif from fp id %s - best_dists: %s' % (
-                        function_str, (fp_id), str(list(best_dists))))
+                        function_str, str(fp_id), str(list(best_dists))))
                     continue
             except Exception as e:
                 dev_null = e
 
             if not current_best_indices[0]:
-                continue
+
+                # @modified 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+                #                      Feature #4014: Ionosphere - inference
+                #                      Task #5178: Build and test skyline v4.1.0
+                # Allow for current_best_indices[0] == 0, which is probably an exact_match
+                # as it was discovered that an exact match current_best_indices
+                # could be like [0, 180, 360, 540]
+                # 2024-01-05 10:08:35 :: 1106567 :: on_demand_motif_analysis :: current_best_indices for fp id 7277, current_best_indices: [0, 180, 360, 540]
+                # continue
+                if len(current_best_indices) == 0:
+                    logger.info('%s :: no current_best_indices for fp id %s, best_dists: %s' % (
+                        function_str, str(fp_id), str(list(best_dists))))
+                    logger.info('%s :: no current_best_indices for fp id %s, current_best_indices: %s' % (
+                        function_str, str(fp_id), str(list(current_best_indices))))
+                    continue
+
+                # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+                #                   Feature #4014: Ionosphere - inference
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Allow for current_best_indices[0] == 0, which is probably an exact_match
+                if current_best_indices[0] == 0:
+                    logger.info('%s :: current_best_indices[0] is 0, probable exact match for fp id %s' % (
+                        function_str, str(fp_id)))
+
             # if list(best_indices)[0] != anomalous_index:
             #     continue
             # If the best_dists is > 1 they are not very similar
@@ -468,6 +522,13 @@ def on_demand_motif_analysis(
                 find_exact_matches_run = True
 
             if find_exact_matches:
+
+                # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+                #                   Feature #4014: Ionosphere - inference
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Allow for current_best_indices[0] == 0, which is probably an exact_match
+                exact_matches_run_on_fp_ids.append(fp_id)
+
                 try:
                     start_exact_match = timer()
                     indexed_relate_dataset = []
@@ -480,6 +541,22 @@ def on_demand_motif_analysis(
                         if subsequence == anomalous_ts:
                             exact_matches_found.append([fp_id, current_index, 0.0, anomalous_timeseries_subsequence, full_duration])
                             motifs_found.append([fp_id, current_index, 0.0, anomalous_timeseries_subsequence, full_duration])
+
+                            # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+                            #                   Feature #4014: Ionosphere - inference
+                            #                   Task #5178: Build and test skyline v4.1.0
+                            # Allow for current_best_indices[0] == 0, which is probably an exact_match
+                            try:
+                                exact_matches_found_dict[fp_id][batch_size] = {'batch_size': batch_size}
+                            except:
+                                exact_matches_found_dict[fp_id] = {}
+                                exact_matches_found_dict[fp_id][batch_size] = {'batch_size': batch_size}
+                            exact_matches_found_dict[fp_id][batch_size]['index'] = current_index
+                            exact_matches_found_dict[fp_id][batch_size]['full_duration'] = full_duration
+                            exact_matches_found_dict[fp_id][batch_size]['anomalous_timeseries_subsequence'] = anomalous_timeseries_subsequence
+                            exact_matches_found_dict[fp_id][batch_size]['anomalous_ts'] = anomalous_ts
+                            exact_matches_found_dict[fp_id][batch_size]['subsequence'] = subsequence
+
                         current_index += 1
                     end_exact_match = timer()
                     exact_match_times.append((end_exact_match - start_exact_match))
@@ -493,6 +570,18 @@ def on_demand_motif_analysis(
         if find_exact_matches_run:
             logger.info('%s :: exact_match runs on %s fps of full_duration %s in %.6f seconds' % (
                 function_str, str(len(exact_match_times)), str(full_duration), sum(exact_match_times)))
+
+        # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+        #                   Feature #4014: Ionosphere - inference
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Allow for current_best_indices[0] == 0, which is probably an exact_match
+        if find_exact_matches_run:
+            logger.info('%s :: exact_match runs on fps %s, len(exact_matches_found_dict): %s' % (
+                function_str, str(list(set(exact_matches_run_on_fp_ids))),
+                str(len(exact_matches_found_dict))))
+            logger.info('%s :: exact_matches_found_dict: %s' % (
+                function_str, str(exact_matches_found_dict)))
+
         end_full_duration = timer()
         logger.info('%s :: analysed %s fps of full_duration %s in %.6f seconds' % (
             function_str, str(len(fp_ids)), str(full_duration), (end_full_duration - start_full_duration)))
@@ -526,6 +615,14 @@ def on_demand_motif_analysis(
                 motif_full_duration = motif[4]
 
                 match_type = 'not_similar_enough'
+
+                # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+                #                   Feature #4014: Ionosphere - inference
+                #                   Task #5178: Build and test skyline v4.1.0
+                # Declare default outside the below if not add_match block
+                motif_area = None
+                fp_motif_area = None
+                percent_different = None
 
                 if motif in exact_matches_found:
                     add_match = True
@@ -593,7 +690,15 @@ def on_demand_motif_analysis(
                                     function_str))
                                 add_match = False
                             # BUT ...
-                            if best_dist < 3 and not add_match:
+                            # @modified 20240326 - Ideas #5316: motif_annihilation learning
+                            #                      Feature #4014: Ionosphere - inference
+                            # Do not do this on very short motifs as it does not
+                            # have the desired effect because the range and area
+                            # can be too different even if the distance is very
+                            # small and this was actually removed from inference.py
+                            # on 20210504
+                            # if best_dist < 3 and not add_match:
+                            if best_dist < 3 and int(batch_size) > 30 and not add_match:
                                 logger.info('%s :: DISTANCE VERY SIMILAR - adding match even though area_percent_diff is greater than max_area_percent_diff because best_dist: %s' % (
                                     function_str, str(best_dist)))
                                 add_match = True
@@ -668,6 +773,7 @@ def on_demand_motif_analysis(
                         str(max_distance))
                     plotted_image = False
                     on_demand_motif_analysis = True
+
                     if not path.isfile(graph_image_file):
                         plotted_image, plotted_image_file = plot_motif_match(
                             skyline_app, metric, timestamp, fp_id, full_duration,
@@ -685,8 +791,8 @@ def on_demand_motif_analysis(
                         graph_image_file = None
             except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: inference :: proceesing motif at index: %s - %s' % (
-                    str(motif[0]), str(err)))
+                logger.error('error :: %s :: proceesing motif at index: %s - %s' % (
+                    function_str, str(motif[0]), str(err)))
                 continue
     end_timer = timer()
     motif_analysis[metric]['fps_checked'] = fps_checked_for_motifs
@@ -695,6 +801,13 @@ def on_demand_motif_analysis(
     motif_analysis[metric]['distance_motifs'] = distance_motifs
     motif_analysis[metric]['not_similar_motifs'] = not_similar_motifs
     motif_analysis[metric]['not_similar_enough_sample'] = not_similar_enough_sample
+
+    # @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid
+    #                   Feature #4014: Ionosphere - inference
+    #                   Task #5178: Build and test skyline v4.1.0
+    # Allow for current_best_indices[0] == 0, which is probably an exact_match
+    if exact_matches_found_dict:
+        motif_analysis[metric]['exact_matches'] = exact_matches_found_dict
 
     motif_analysis_file = '%s/motif.analysis.similarity_%s.batch_size_%s.top_matches_%s.max_distance_%s.dict' % (
         motif_images_dir, similarity, str(batch_size), str(top_matches),

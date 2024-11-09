@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Running Skyline in a Python virtualenv &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Running Skyline in a Python virtualenv &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,10 +46,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Running Skyline in a Python virtualenv</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#sudo"><code class="docutils literal notranslate"><span class="pre">sudo</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#howto-python-virtualenv-skyline">HOWTO Python virtualenv Skyline</a></li>
 </ul>
@@ -61,11 +60,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#virtualenv">virtualenv</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-a-skyline-python-virtualenv">Create a Skyline Python virtualenv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-virtualenvs-for-other-things">Other virtualenvs for other things</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -91,6 +91,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -99,7 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -125,7 +126,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Running Skyline in a Python virtualenv</li>
+      <li class="breadcrumb-item active">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/running-in-python-virtualenv.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -136,7 +137,7 @@
            <div itemprop="articleBody">
              
   <section id="running-skyline-in-a-python-virtualenv">
-<h1>Running Skyline in a Python virtualenv<a class="headerlink" href="#running-skyline-in-a-python-virtualenv" title="Permalink to this heading"></a></h1>
+<h1>Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv<a class="headerlink" href="#running-skyline-in-a-python-virtualenv" title="Link to this heading"></a></h1>
 <p>Running Skyline in a Python virtualenv is the recommended way to run
 Skyline. This allows for Skyline apps and all dependencies to be
 isolated from the system Python version and packages and allows Skyline
@@ -144,24 +145,36 @@ to be run with a specific version of Python and as importantly specific
 versions of the dependencies packages.</p>
 <p>The possible overhead of adding Python virtualenv functionality to any
 configuration management is probably worth the effort in the long run.</p>
+<p>If you are planning to use the quickstart skyline.dawn.sh build script you can
+skip this bit because that it does everything for you.</p>
 <section id="sudo">
-<h2><code class="docutils literal notranslate"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this heading"></a></h2>
+<h2><code class="docutils literal notranslate"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Link to this heading"></a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
 <section id="howto-python-virtualenv-skyline">
-<h3>HOWTO Python virtualenv Skyline<a class="headerlink" href="#howto-python-virtualenv-skyline" title="Permalink to this heading"></a></h3>
+<h3>HOWTO Python virtualenv Skyline<a class="headerlink" href="#howto-python-virtualenv-skyline" title="Link to this heading"></a></h3>
 </section>
 </section>
 <section id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this heading"></a></h2>
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h2>
 <p>Building Python versions from the Python sources in Python virtualenv
 requires the following system dependencies:</p>
 <ul class="simple">
-<li><p>RedHat family - only CentOS Stream 8 is tested.  CentOS 7 support has been
-deprecated due to the lagging Python version and environment and there Being
-no desire to support builds against SCL repos.</p></li>
+<li><p>RedHat family - only CentOS Stream 8 and 9 are tested, each have a code block
+below.  This is the final Skyline release that will support CentOS Stream 8
+which will be DEPRECATED in the next release.</p></li>
 </ul>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>epel-release
-<span class="c1"># CentOS Stream 8 only tested</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CentOS Stream 9</span>
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>--enablerepo<span class="o">=</span>crb<span class="w"> </span>gdbm-devel
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>epel-release
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>autoconf<span class="w"> </span>zlib-devel<span class="w"> </span>openssl-devel<span class="w"> </span>sqlite-devel<span class="w"> </span>bzip2-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>gcc<span class="w"> </span>gcc-c++<span class="w"> </span>readline-devel<span class="w"> </span>ncurses-devel<span class="w"> </span>freetype-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libpng-devel<span class="w"> </span>wget<span class="w"> </span>tar<span class="w"> </span>git<span class="w"> </span>xz-devel
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>libffi-devel
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>--enablerepo<span class="o">=</span>crb<span class="w"> </span>snappy-devel<span class="w"> </span>snappy
+</pre></div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CentOS Stream 8 - DEPRECATION NOTICE</span>
+yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>epel-release
 yum<span class="w"> </span>-y<span class="w"> </span>install<span class="w"> </span>autoconf<span class="w"> </span>zlib-devel<span class="w"> </span>openssl-devel<span class="w"> </span>sqlite-devel<span class="w"> </span>bzip2-devel<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>gcc<span class="w"> </span>gcc-c++<span class="w"> </span>readline-devel<span class="w"> </span>ncurses-devel<span class="w"> </span>gdbm-devel<span class="w"> </span>freetype-devel<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>libpng-devel<span class="w"> </span>python38<span class="w"> </span>wget<span class="w"> </span>tar<span class="w"> </span>git<span class="w"> </span>xz-devel
@@ -184,7 +197,7 @@ apt-get<span class="w"> </span>-y<span class="w"> </span>install<span class="w">
 </div>
 </section>
 <section id="virtualenv">
-<h2>virtualenv<a class="headerlink" href="#virtualenv" title="Permalink to this heading"></a></h2>
+<h2>virtualenv<a class="headerlink" href="#virtualenv" title="Link to this heading"></a></h2>
 <p>Regardless of your OS as long as you have pip installed you can install
 virtualenv. <em>NOTE:</em> if you are using a version of Python virtualenv
 already, this may not suit your set up.</p>
@@ -194,13 +207,13 @@ already, this may not suit your set up.</p>
 </div>
 </section>
 <section id="python-version">
-<h2>Python version<a class="headerlink" href="#python-version" title="Permalink to this heading"></a></h2>
+<h2>Python version<a class="headerlink" href="#python-version" title="Link to this heading"></a></h2>
 <p>Below we use the path <code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv</span></code>, which you can substitute
-with any path you choose.  We are going to use the Python-3.8.17 source and
-build and install an isolated Python-3.8.17, this has no effect on your system
+with any path you choose.  We are going to use the Python-3.10.15 source and
+build and install an isolated Python-3.10.15, this has no effect on your system
 Python:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.17&quot;</span>
-<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.10.15&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.10&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
 
 mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -222,16 +235,16 @@ make<span class="w"> </span>-j4
 make<span class="w"> </span>altinstall
 </pre></div>
 </div>
-<p>You will now have a Python-3.8.17 environment with the Python
-executable: <code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv/versions/3.8.17/bin/python3.8</span></code></p>
+<p>You will now have a Python-3.10.15 environment with the Python
+executable: <code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv/versions/3.10.15/bin/python3.10</span></code></p>
 </section>
 <section id="create-a-skyline-python-virtualenv">
-<h2>Create a Skyline Python virtualenv<a class="headerlink" href="#create-a-skyline-python-virtualenv" title="Permalink to this heading"></a></h2>
-<p>Once again using Python-3.8.17:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.17&quot;</span>
-<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
+<h2>Create a Skyline Python virtualenv<a class="headerlink" href="#create-a-skyline-python-virtualenv" title="Link to this heading"></a></h2>
+<p>Once again using Python-3.10.15:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.10.15&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.10&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py3817&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py31015&quot;</span>
 
 <span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
 virtualenv<span class="w"> </span>--python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
@@ -241,6 +254,22 @@ ln<span class="w"> </span>-sf<span class="w"> </span><span class="s2">&quot;</sp
 </div>
 <p>Make sure to add the <code class="docutils literal notranslate"><span class="pre">/etc/skyline/skyline.conf</span></code> file with the Python - see
 <a class="reference external" href="installation.html">Installation</a></p>
+</section>
+<section id="other-virtualenvs-for-other-things">
+<h2>Other virtualenvs for other things<a class="headerlink" href="#other-virtualenvs-for-other-things" title="Link to this heading"></a></h2>
+<p>The Skyline Python stack is extensive and runs some cutting edge things, because
+of this to allow for some cutting edge things to be used and some other more
+general things as well version management can be tricky or impossible in a
+single virtualenv.  It is possible to have addtional virtualenvs for specific
+things some that Skyline can run googleapis-common-protos 1.56.1 and pandas-gbq
+can use googleapis-common-protos 1.63.0.</p>
+<p>Due to shared dependencies it is safer and quite simple to include libraries
+from another virtualenv in Skyline so some Skyline functionality requires
+another virtualenv to be deployed to serve another version of a package far some
+function.</p>
+<p>If you implement some functionality that requires an additional virtualenv, the
+specific details of the virtualenv will be documented in the docs relevant to
+the functionality.</p>
 </section>
 </section>
 
@@ -255,7 +284,7 @@ ln<span class="w"> </span>-sf<span class="w"> </span><span class="s2">&quot;</sp
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

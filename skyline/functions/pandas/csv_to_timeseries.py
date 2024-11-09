@@ -84,7 +84,21 @@ def csv_to_timeseries(current_skyline_app, csv_file, log=True):
             df['timestamp'] = pd.to_datetime(df['timestamp'])
         df['timestamp'] = df.timestamp.values.astype(np.int64) // 10 ** 9
         timeseries = df.values.tolist()
-        timeseries = [[int(t), v] for t, v in timeseries]
+        # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
+        # Coerce nan
+        #timeseries = [[int(t), v] for t, v in timeseries]
+        coerced_timeseries = []
+        for t, v in timeseries:
+            ts = int(t)
+            value = None
+            try:
+                value = float(v)
+            except:
+                value = None
+            if str(value) in ['Nan', 'nan', 'NaN']:
+                value = None
+            coerced_timeseries.append([ts, value])
+        timeseries = list(coerced_timeseries)
         if log:
             current_logger.info('%s :: converted to timeseries of length: %s' % (
                 function_str, str(len(timeseries))))

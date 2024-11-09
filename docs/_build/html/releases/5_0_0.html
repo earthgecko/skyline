@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>5.0.0 &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">5.0.0</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/releases/5_0_0.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="id1">
+<h1>5.0.0<a class="headerlink" href="#id1" title="Link to this heading"></a></h1>
+<p>v5.0.0 - xx Xxx 2024</p>
+<p>Greetings Skylinians.</p>
+<p>The is a major release.
+This release with some miscellaneous changes and additions.</p>
+<section id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>SNAB results now also displayed in training data page along with graphs with the
+results of each algorithm run.</p></li>
+<li><p>Low variance metrics can now be automatically identified and analysed at 30
+days due to the fact that any outliers that occur occasionally on low variance
+metrics will more likely trigger due to there being less instances of them in
+the data.  The use of 30 days of data on these metrics results in a more
+representative sample of the data and is more robust to outliers.  This
+is not enabled by default as it requires exclusions to be defined, for
+example errors or 500s you probably want to continue to analyse at 7 days,
+rather than at 30 days.  See <a class="reference internal" href="../skyline.html#settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE" title="settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE</span></code></a>.</p></li>
+<li><p>Record results of individual algorithms run in snab checks.</p></li>
+</ul>
+<p>It is worth pointing out that although both Redis and Python could be updated
+with this version, Redis 7.2 has quite a few outstanding issues, so Redis is
+being kept at 6.2.  And there is no compelling reason to update to Python 3.8.18
+which is a security release relating to TLS server-side socket, seeing as all
+SSL with Skyline is handled via nginx, updating to 3.8.18 is not required
+because Skyline is not dealing with TLS client authentication.</p>
+</section>
+<section id="upgrade-notes">
+<h2>Upgrade notes<a class="headerlink" href="#upgrade-notes" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>These update instructions apply to upgrading from v4.0.0</p></li>
+<li><p>There are changes to settings.py in v5.0.0</p></li>
+<li><p>There are changes to dependencies in v5.0.0</p></li>
+<li><p>There are DB changes in v5.0.0</p></li>
+</ul>
+</section>
+<section id="how-to-update-from-v4-0-0">
+<h2>How to update from v4.0.0<a class="headerlink" href="#how-to-update-from-v4-0-0" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Build a new Python 3.10.15 version and virtualenv, use a new virtualenv with
+all the required libraries and do not affect your running install so you can
+rollback if necessarily.</p></li>
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed</p></li>
+<li><p>Copy your settings.py from v4.0.0 and update the copied v4.0.0 settings.py
+with your new v5.0.0 settings</p></li>
+<li><p>Stop the Skyline apps</p></li>
+<li><p><strong>Remove</strong> the numba cache dir</p></li>
+<li><p>Move to the new version</p></li>
+<li><p>Start the Skyline apps</p></li>
+</ul>
+<p>Ensure you read through all the steps below first and assess the steps you wish
+to do and if any paths, etc need to be changed for your set up.</p>
+<p>Here are the steps….</p>
+<ul class="simple">
+<li><p>Get the new version.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get the new version</span>
+<span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v5.0.0&quot;</span><span class="w">    </span><span class="c1"># Your new Skyline version</span>
+<span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v4.0.0&quot;</span><span class="w">    </span><span class="c1"># Your old Skyline version</span>
+
+<span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span><span class="w">                 </span><span class="c1"># Your Skyline path</span>
+<span class="nv">NEW_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w">  </span><span class="c1"># Your new Skyline path</span>
+
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/earthgecko/skyline<span class="w"> </span>.
+git<span class="w"> </span>checkout<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION</span><span class="s2">&quot;</span>
+
+<span class="c1"># settings.py</span>
+cp<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span>
+
+<span class="c1"># Create a new settings.py file in the new version based on your existing</span>
+<span class="c1"># settings.py file</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># You can diff the new settings with your settings that you just copied</span>
+diff<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">.bak&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/skyline/settings.py&quot;</span>
+
+<span class="c1"># UPDATE YOUR $NEW_SKYLINE_PATH/skyline/settings.py as appropriate</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>You are probably going to want to diff those settings in a visual diff like Meld.</p></li>
+<li><p>Deploy the new Python version and a new virtualenv and install the dependencies.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># DEPLOY A NEW Python 3.10.15 virtualenv</span>
+<span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.10.15&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.10&quot;</span>
+<span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+wget<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;https://www.python.org/ftp/python/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
+tar<span class="w"> </span>-zxvf<span class="w"> </span><span class="s2">&quot;Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/Python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+./configure<span class="w"> </span>--prefix<span class="o">=</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+make<span class="w"> </span>-j4
+make<span class="w"> </span>altinstall
+
+<span class="c1"># Create a new skyline-py31015 virtualenv</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py31015&quot;</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
+virtualenv<span class="w"> </span>--python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
+
+<span class="c1"># Ensure the requirements are installed in your new Python 3.10.15 virtualenv</span>
+<span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">source</span><span class="w"> </span>bin/activate
+
+<span class="c1"># Deploy the new requirements</span>
+<span class="s2">&quot;bin/pip</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">NEW_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>/requirements.txt
+
+deactivate
+<span class="nb">cd</span>
+
+<span class="c1"># Fix python-daemon</span>
+cp<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py.original.bak&quot;</span>
+cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">/utils/python-daemon/runner.2.3.0.py&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span>
+<span class="c1"># minor change related to unbuffered bytes I/O</span>
+diff<span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py.original.bak&quot;</span><span class="w"> </span><span class="s2">&quot;/opt/python_virtualenv/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">/lib/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">/site-packages/daemon/runner.py&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Ensure you have added all the new (and changed) settings to <cite>$NEW_SKYLINE_PATH/skyline/settings.py</cite> and test them</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># UPDATE YOUR $NEW_SKYLINE_PATH/skyline/settings.py as appropriate</span>
+
+<span class="c1"># **TEST**</span>
+<span class="c1"># Test your new settings.py BEFORE continuing with the upgrade,</span>
+<span class="c1"># test_settings.sh runs the validate_settings.py that the Skyline apps run</span>
+<span class="c1"># when they start</span>
+<span class="nv">$NEW_SKYLINE_PATH</span>/bin/test_settings.sh
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>At this point we are going to stop the Skyline services.</p></li>
+<li><p>Stop/disable any/all service controls like monit, etc that are controlling
+Skyline services.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stop/disable any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+
+<span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># or do not wish to run.</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;thunder</span>
+<span class="s2">analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">snab</span>
+<span class="s2">flux</span>
+<span class="s2">horizon&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>stop<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Remove the numba cache directory.  This needs to be done to ensure that new
+jit cache files are compiled for numba jit functions with the updated Python
+version and required dependencies like numpy.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv<span class="w"> </span>/opt/skyline/.cache/numba<span class="w"> </span>/opt/skyline/.cache/numba.skyline-v4.0.0.bak
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Backup the DB and apply the update</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># BACKUP THE DB AND APPLY THE NEW SQL</span>
+<span class="nv">BACKUP_DIR</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span><span class="w">  </span><span class="c1"># Where you want to backup the DB to</span>
+<span class="nv">MYSQL_USER</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span>
+<span class="nv">MYSQL_HOST</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="w">  </span><span class="c1"># Your MySQL IP</span>
+<span class="nv">MYSQL_DB</span><span class="o">=</span><span class="s2">&quot;skyline&quot;</span><span class="w">  </span><span class="c1"># Your MySQL Skyline DB name</span>
+
+<span class="c1"># Backup DB</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$BACKUP_DIR</span>
+mysqldump<span class="w"> </span>-u<span class="nv">$MYSQL_USER</span><span class="w"> </span>-p<span class="w"> </span><span class="nv">$MYSQL_DB</span><span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$BACKUP_DIR</span>/pre.<span class="nv">$NEW_SKYLINE_VERSION</span>.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Check you dump exists and has data</span>
+ls<span class="w"> </span>-al<span class="w"> </span><span class="nv">$BACKUP_DIR</span>/pre.<span class="nv">$NEW_SKYLINE_VERSION</span>.<span class="nv">$MYSQL_DB</span>.sql
+
+<span class="c1"># Update DB</span>
+mysql<span class="w"> </span>-u<span class="nv">$MYSQL_USER</span><span class="w"> </span>-p<span class="w"> </span><span class="nv">$MYSQL_DB</span><span class="w"> </span>&lt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">NEW_SKYLINE_PATH</span><span class="si">}</span><span class="s2">/updates/sql/v4.1.0.sql&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$?</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Update the path in /etc/skyline/skyline.conf and the project symlink</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>/etc/skyline/skyline.conf<span class="w"> </span>/etc/skyline/skyline.conf.v4.0.0.bak
+cat<span class="w"> </span>/etc/skyline/skyline.conf.v4.0.0.bak<span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;s/py3817/py31015/g;s/python3\.8/python3\.10/g&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>/etc/skyline/skyline.conf
+ln<span class="w"> </span>-sf<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/skyline&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Update the Skyline systemd service files. <strong>NOTE</strong> if your service files are
+managed by something like configration management, please manually assess the
+changes required and update as appropriate.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="k">$(</span>find<span class="w"> </span>/opt/skyline/github/skyline/etc/systemd/system<span class="w"> </span>-type<span class="w"> </span>f<span class="k">)</span>
+<span class="k">do</span>
+<span class="w">  </span>/bin/cp<span class="w"> </span>-f<span class="w"> </span><span class="nv">$i</span><span class="w"> </span>/etc/systemd/system/
+<span class="k">done</span>
+systemctl<span class="w"> </span>daemon-reload
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Move your current Skyline directory to a backup directory and move the new
+Skyline v5.0.0 with your new settings.py from the temp location to your
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+mv<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
+
+<span class="c1"># Set permission on the dump dir</span>
+chown<span class="w"> </span>skyline:skyline<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>/skyline/webapp/static/dump
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># NOTE ALL SKYLINE SERVICES ARE LISTED HERE, REMOVE TO ONES YOU DO NOT RUN</span>
+<span class="c1"># apart from the thunder Skyline app</span>
+
+<span class="c1"># Start all other Skyline services</span>
+<span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;horizon</span>
+<span class="s2">flux</span>
+<span class="s2">panorama</span>
+<span class="s2">webapp</span>
+<span class="s2">vista</span>
+<span class="s2">analyzer</span>
+<span class="s2">analyzer_batch</span>
+<span class="s2">mirage</span>
+<span class="s2">crucible</span>
+<span class="s2">boundary</span>
+<span class="s2">ionosphere</span>
+<span class="s2">luminosity</span>
+<span class="s2">snab</span>
+<span class="s2">thunder&quot;</span>
+<span class="k">for</span><span class="w"> </span>i<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$SKYLINE_SERVICES</span>
+<span class="k">do</span>
+<span class="w">  </span>systemctl<span class="w"> </span>start<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-ne<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;failed to start </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;started </span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="w">  </span><span class="k">fi</span>
+<span class="w">  </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$i</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+<span class="c1"># Restart any/all service controls like monit, etc that are controlling</span>
+<span class="c1"># Skyline services.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Check the logs.  You may see a few errors related to some missing Redis keys/hashes
+this is expected as they do not exist on starting the new version.</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+tail<span class="w"> </span>-n<span class="w"> </span><span class="m">20</span><span class="w"> </span>/var/log/skyline/*.log
+
+<span class="c1"># Any errors - each app</span>
+find<span class="w"> </span>/var/log/skyline<span class="w"> </span>-type<span class="w"> </span>f<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>access<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>skyline_logfile
+<span class="k">do</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;#####</span>
+<span class="s2"># Checking for errors in </span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span>
+<span class="w">  </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$skyline_logfile</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-B2<span class="w"> </span>-A10<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;error ::\|traceback&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="k">done</span>
+</pre></div>
+</div>
+<p>Congratulations, you are now running the best OSS anomaly detection stack in the
+world (probably).</p>
+</section>
+<section id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Feature #4994: custom_algorithm - mirages</p></li>
+<li><p>Task #4996: Improve matplotlib performance</p></li>
+<li><p>Task #5000: Replace alert key scans with sets</p></li>
+<li><p>Feature #5008: webapp - snab report page</p></li>
+<li><p>Task #5030: Change ALERT</p></li>
+<li><p>Task #5032: Change matplotlib black background to grey</p></li>
+<li><p>Feature #5038: snab_results_algorithms</p></li>
+<li><p>Feature #5040: functions.timeseries_prediction.fft_extrapolation</p></li>
+<li><p>Bug #5050: luminosity - process_correlations resolution handle NoneType</p></li>
+<li><p>Feature #5054: custom_algorithm - azure_ai_anomalydetector</p></li>
+<li><p>Feature #5070: snab - anomaly_detection_metrics</p></li>
+<li><p>Task #5088: Change membership of the list checks to sets</p></li>
+<li><p>Feature #5090: flux.d reload</p></li>
+<li><p>Feature #5092: ionosphere - create_training_data</p></li>
+<li><p>Task #5096: Incorporate irregular_unstable into Mirage</p></li>
+<li><p>Feature #5102: webapp - api skip_analysis</p></li>
+<li><p>Feature #5104: boundary - external_settings</p></li>
+<li><p>Feature #5108: boundary - functions</p></li>
+<li><p>Support #5114: debug.flux.request_times</p></li>
+<li><p>Task #5186: analyzer_labelled_metrics - handle high frequency</p></li>
+<li><p>Task #5188: Optimise redis renames</p></li>
+<li><p>Feature #5190: Add custom_algorithm results to Mirage and plots</p></li>
+</ul>
+<p>And more …</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

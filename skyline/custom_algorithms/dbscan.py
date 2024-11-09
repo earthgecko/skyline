@@ -40,7 +40,7 @@ def dbscan(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     desired results.  Seeing as there is a single epsilon value for all clusters
     the algorithm fails when varying density clusters are present in the data.
 
-    Therefore if DBSCAN identifies more that 33% of the data points in a
+    Therefore if DBSCAN identifies more than 33% of the data points in a
     timeseries as outliers, this algorithm will return an inconclusive results.
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
@@ -55,14 +55,49 @@ def dbscan(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  Example:
-        ``algorithm_parameters={'window_shape'=3, 'min_samples'=4, 'anomaly_window'=5, 'return_results'=True}``
+        custom_algorithm and algorithm itself.  For the lad custom algorithm no
+        specific algorithm_parameters are required apart from an empty dict but
+        the algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'window'`` (int):
+            The number of data points to use in the sliding window to calculate
+            Xmean and Xvar.  Default is ``3``.
+        - ``'min_samples'`` (int):
+            The number of samples (or total weight) in a neighborhood for a
+            point to be considered as a core point. This includes the point
+            itself. If min_samples is set to a higher value, DBSCAN will find
+            denser clusters, whereas if it is set to a lower value, the found
+            clusters will be more sparse.  Default is ``4``.
+         - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'window': 3,
+                'min_samples': 4,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
     :type algorithm_parameters: dict
-    :return: anomalous, anomalyScore, instance_scores
-    :rtype: tuple(boolean, float, instance_scores)
+    :return: anomalous, anomalyScore, results
+    :rtype: tuple(bool, float, dict)
 
     """
 

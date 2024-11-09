@@ -505,6 +505,12 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
     # resolution = determine_resolution(timeseries)
     resolution = determine_data_frequency(skyline_app, timeseries, False)
 
+    # @added 20230812 - Bug #5050: luminosity - process_correlations resolution handle NoneType
+    if not isinstance(resolution, int):
+        logger.warning('warning :: resolution could not be determined for %s, resolution: %s' % (
+            str(base_name), str(resolution)))
+        return [], resolution
+
     # Sample the time series
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # Added note here - if you modify the value of 600 here, it must be
@@ -1525,6 +1531,12 @@ def process_correlations(i, anomaly_id):
     # @modified 20230316 - Task #4872: Optimise luminosity for labelled_metrics
     # Added resolution to the return
     anomalous_ts, resolution = get_anomalous_ts(base_name, anomaly_timestamp)
+
+    # @added 20230812 - Bug #5050: luminosity - process_correlations resolution handle NoneType
+    if not isinstance(resolution, int):
+        logger.warning('warning :: get_anomalous_ts failed to return resolution for %s, resolution: %s, nothing to do, returning' % (
+            str(base_name), str(resolution)))
+        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
 
     if not anomalous_ts:
         metrics_checked_for_correlation = 0

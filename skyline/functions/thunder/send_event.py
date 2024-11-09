@@ -28,7 +28,7 @@ def thunder_send_event(current_skyline_app, event, log=True):
 
     """
 
-    function_str = 'functions.thunder.thunder_sent_event'
+    function_str = 'functions.thunder.thunder_send_event'
     if log:
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)

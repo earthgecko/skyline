@@ -440,6 +440,15 @@ class Cloudburst(Thread):
                 logger.error('error :: cloudburst :: find_cloudbursts :: failed to get non_derivative_monotonic_metrics from Redis - %s' % e)
                 non_derivative_monotonic_metrics = []
 
+        # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Also check the metrics_manager.non_derivative_metrics set
+        try:
+            metrics_manager_non_derivative_metrics = self.redis_conn_decoded.smembers('metrics_manager.non_derivative_metrics')
+        except:
+            metrics_manager_non_derivative_metrics = []
+
         timer_start = timer()
         processed = 0
         no_data = 0
@@ -502,6 +511,14 @@ class Cloudburst(Thread):
                         calculate_derivative = True
                     if metric_name in non_derivative_monotonic_metrics:
                         calculate_derivative = False
+
+                    # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                    #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                    #                   Task #5178: Build and test skyline v4.1.0
+                    # Also check the metrics_manager.non_derivative_metrics set
+                    if base_name in metrics_manager_non_derivative_metrics:
+                        calculate_derivative = False
+
                     if calculate_derivative:
                         try:
                             derivative_timeseries = nonNegativeDerivative(timeseries)

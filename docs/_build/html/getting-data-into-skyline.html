@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting data into Skyline &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Getting data into Skyline &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting data into Skyline</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#firstly-a-note-on-time-snyc">Firstly a note on time snyc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#secondly-a-note-on-the-reliability-of-metric-data">Secondly a note on the reliability of metric data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#third-a-note-on-renaming-metrics">Third, a note on renaming metrics</a></li>
@@ -100,6 +99,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -108,7 +108,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -134,7 +134,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Getting data into Skyline</li>
+      <li class="breadcrumb-item active">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/getting-data-into-skyline.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -145,9 +145,9 @@
            <div itemprop="articleBody">
              
   <section id="getting-data-into-skyline">
-<h1>Getting data into Skyline<a class="headerlink" href="#getting-data-into-skyline" title="Permalink to this heading"></a></h1>
+<h1>Getting data into <span class="skyblue">Sky</span><span class="red">line</span><a class="headerlink" href="#getting-data-into-skyline" title="Link to this heading"></a></h1>
 <section id="firstly-a-note-on-time-snyc">
-<h2>Firstly a note on time snyc<a class="headerlink" href="#firstly-a-note-on-time-snyc" title="Permalink to this heading"></a></h2>
+<h2>Firstly a note on time snyc<a class="headerlink" href="#firstly-a-note-on-time-snyc" title="Link to this heading"></a></h2>
 <p>Although it may seems obvious, it is important to note that any metrics
 coming into Skyline should come from synchronised sources.
 If there is more than 60 seconds (or highest resolution metric), certain
@@ -158,7 +158,7 @@ algorithms. In terms of machine related metrics, normal production grade
 time synchronisation will suffice.</p>
 </section>
 <section id="secondly-a-note-on-the-reliability-of-metric-data">
-<h2>Secondly a note on the reliability of metric data<a class="headerlink" href="#secondly-a-note-on-the-reliability-of-metric-data" title="Permalink to this heading"></a></h2>
+<h2>Secondly a note on the reliability of metric data<a class="headerlink" href="#secondly-a-note-on-the-reliability-of-metric-data" title="Link to this heading"></a></h2>
 <p>There are many ways to get data to Skyline, however some are better
 than others.  The first and most important point is that your metric pipeline
 should be transported via TCP, from source, to Graphite, to Skyline.  Although
@@ -174,7 +174,7 @@ your metric pipeline is fully TCP transported.  statsd now has a TCP listener,
 there is telegraf, sensu, etc there are lots of options.</p>
 </section>
 <section id="third-a-note-on-renaming-metrics">
-<h2>Third, a note on renaming metrics<a class="headerlink" href="#third-a-note-on-renaming-metrics" title="Permalink to this heading"></a></h2>
+<h2>Third, a note on renaming metrics<a class="headerlink" href="#third-a-note-on-renaming-metrics" title="Link to this heading"></a></h2>
 <p>It is not possible to rename metrics internally in Skyline.</p>
 <p>This is because changing a set of metric names from something to something_else
 internally may or may not algin with changes to metric names in the data store,
@@ -191,7 +191,7 @@ they just become new metrics and the original metrics go stale and will expire,
 along with any training on those metrics.</p>
 </section>
 <section id="lead-time-to-starting-analysis">
-<h2>Lead time to starting analysis<a class="headerlink" href="#lead-time-to-starting-analysis" title="Permalink to this heading"></a></h2>
+<h2>Lead time to starting analysis<a class="headerlink" href="#lead-time-to-starting-analysis" title="Link to this heading"></a></h2>
 <p>Any metric submitted will only start to be analysed when it has
 <a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a> data points to analyse.  That means when
 you start sending data, Skyline will only start analysing it
@@ -199,11 +199,11 @@ you start sending data, Skyline will only start analysing it
 point a minute).</p>
 </section>
 <section id="now-getting-the-data-in">
-<h2>Now getting the data in<a class="headerlink" href="#now-getting-the-data-in" title="Permalink to this heading"></a></h2>
+<h2>Now getting the data in<a class="headerlink" href="#now-getting-the-data-in" title="Link to this heading"></a></h2>
 <p>You currently have a number of options to get data into Skyline, via the
 Horizon, Vista and Flux services and via file upload:</p>
 <section id="horizon-tcp-pickles">
-<h3>Horizon - TCP pickles<a class="headerlink" href="#horizon-tcp-pickles" title="Permalink to this heading"></a></h3>
+<h3>Horizon - TCP pickles<a class="headerlink" href="#horizon-tcp-pickles" title="Link to this heading"></a></h3>
 <p>Horizon was designed to support a stream of pickles from the Graphite
 carbon-relay service, over port 2024 by default. Carbon relay is a
 feature of Graphite that immediately forwards all incoming metrics to
@@ -254,7 +254,7 @@ pack and pickle your data correctly (you’ll need to look at the source
 code for the exact protocol), you’ll be able to stream to this listener.</p>
 </section>
 <section id="horizon-udp-messagepack">
-<h3>Horizon - UDP messagepack<a class="headerlink" href="#horizon-udp-messagepack" title="Permalink to this heading"></a></h3>
+<h3>Horizon - UDP messagepack<a class="headerlink" href="#horizon-udp-messagepack" title="Link to this heading"></a></h3>
 <p>Generally do not use this.  It is UDP, but has not been removed.</p>
 <p>Horizon also accepts metrics in the form of messagepack encoded strings
 over UDP, on port 2025. The format is
@@ -264,12 +264,12 @@ as messagepack and send them on their way.</p>
 sorry if did you not get that.</p>
 </section>
 <section id="telegraf">
-<h3>Telegraf<a class="headerlink" href="#telegraf" title="Permalink to this heading"></a></h3>
+<h3>Telegraf<a class="headerlink" href="#telegraf" title="Link to this heading"></a></h3>
 <p>Skyline Flux can ingest data from the influxdata Telegraf collector, see Flux
 below, see the <a class="reference external" href="flux.html">Flux</a> page</p>
 </section>
 <section id="flux">
-<h3>Flux<a class="headerlink" href="#flux" title="Permalink to this heading"></a></h3>
+<h3>Flux<a class="headerlink" href="#flux" title="Link to this heading"></a></h3>
 <p>Metrics can be submitted to Flux via HTTP/S which forwards data to Graphite or
 RedisTimeseries and VictoriaMetrics.  Flux can accept data from Prometheus,
 VictoriaMetrics, telegraf and generic HTTP JSON see the <a class="reference external" href="flux.html">Flux</a>
@@ -277,21 +277,21 @@ page.</p>
 </section>
 </section>
 <section id="upload-data-to-flux">
-<h2>upload_data to Flux<a class="headerlink" href="#upload-data-to-flux" title="Permalink to this heading"></a></h2>
+<h2>upload_data to Flux<a class="headerlink" href="#upload-data-to-flux" title="Link to this heading"></a></h2>
 <p>See the <a class="reference external" href="upload-data-to-flux.html">upload_data to Flux</a> page.</p>
 <section id="vista">
-<h3>Vista<a class="headerlink" href="#vista" title="Permalink to this heading"></a></h3>
+<h3>Vista<a class="headerlink" href="#vista" title="Link to this heading"></a></h3>
 <p>Metrics to be fetched by Vista which submits to Flux, see the
 <a class="reference external" href="vista.html">Vista</a> page.</p>
 </section>
 <section id="adding-a-listener">
-<h3>Adding a Listener<a class="headerlink" href="#adding-a-listener" title="Permalink to this heading"></a></h3>
+<h3>Adding a Listener<a class="headerlink" href="#adding-a-listener" title="Link to this heading"></a></h3>
 <p>If none of these methods are acceptable, it’s easy enough to extend
 them. Add a method in listen.py and add a line in the horizon/agent.py that
 points to your new listener.</p>
 </section>
 <section id="settings-full-duration">
-<h3><a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a><a class="headerlink" href="#settings-full-duration" title="Permalink to this heading"></a></h3>
+<h3><a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a><a class="headerlink" href="#settings-full-duration" title="Link to this heading"></a></h3>
 <p>Once you get real data flowing through your system, the Analyzer will be
 able start analysing for anomalies.</p>
 <div class="admonition note">
@@ -321,7 +321,7 @@ into Redis.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,28 +1,28 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SNAB &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>SNAB &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="settings.EXTERNAL_SETTINGS" href="external_settings.html" />
-    <link rel="prev" title="Vista" href="vista.html" /> 
+    <link rel="prev" title="Vista - BigQuery - Configuration" href="vista-bigquery/vista_bigquery_configuration.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -81,6 +80,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">SNAB</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#snab-components">SNAB components</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#settings-py">settings.py</a></li>
@@ -98,7 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -135,7 +135,7 @@
            <div itemprop="articleBody">
              
   <section id="snab">
-<h1>SNAB<a class="headerlink" href="#snab" title="Permalink to this heading"></a></h1>
+<h1>SNAB<a class="headerlink" href="#snab" title="Link to this heading"></a></h1>
 <p><em>EXPERIMENTAL</em></p>
 <p>SNAB is for algorithm testing and benchmarking with real time data and
 historic data.  Allowing for custom_algorithms to be run against certain metrics
@@ -146,28 +146,28 @@ algorithms on real time data.</p>
 <p>SNAB is <em>not a replacement for NAB</em>, it is simply the beginning of a NAB-ish
 like implementation for testing that suits Skyline.</p>
 <section id="snab-components">
-<h2>SNAB components<a class="headerlink" href="#snab-components" title="Permalink to this heading"></a></h2>
+<h2>SNAB components<a class="headerlink" href="#snab-components" title="Link to this heading"></a></h2>
 <p>SNAB uses the <a class="reference internal" href="skyline.html#settings.SNAB_DATA_DIR" title="settings.SNAB_DATA_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_DATA_DIR</span></code></a> directory (for time series data),
 the snab database table for results and reports to log and a slack channel (if
 configured too) and it needs to be able to access the algorithm/s code for the
 algorithm/s that are configured to be used.</p>
 </section>
 <section id="settings-py">
-<h2>settings.py<a class="headerlink" href="#settings-py" title="Permalink to this heading"></a></h2>
+<h2>settings.py<a class="headerlink" href="#settings-py" title="Link to this heading"></a></h2>
 <p>Currently the snab module has two relevant settings <a class="reference internal" href="skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a>
 and <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a>.  For Analyzer and Mirage to send anomalies to
 SNAB to check against other algorithms, <a class="reference internal" href="skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a> must be
 set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </section>
 <section id="running-modes">
-<h2>Running Modes<a class="headerlink" href="#running-modes" title="Permalink to this heading"></a></h2>
+<h2>Running Modes<a class="headerlink" href="#running-modes" title="Link to this heading"></a></h2>
 <p>SNAB has 2 modes it can run in, <code class="docutils literal notranslate"><span class="pre">testing</span></code> and <code class="docutils literal notranslate"><span class="pre">realtime</span></code> (not tested).
 SNAB has only be tested running with Mirage.</p>
 <p>SNAB is only implemented as on v2.1.0 with the <code class="docutils literal notranslate"><span class="pre">testing</span></code> mode with Mirage with
 a single algorithm.</p>
 </section>
 <section id="the-snab-process">
-<h2>The snab process<a class="headerlink" href="#the-snab-process" title="Permalink to this heading"></a></h2>
+<h2>The snab process<a class="headerlink" href="#the-snab-process" title="Link to this heading"></a></h2>
 <p>The snab Skyline app is started like the other apps, using bin/snab.d in the
 repo and your choice of process manager, e.g. systemctl, etc.</p>
 <p>In terms of running, when a Skyline app is defined in the <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a>,
@@ -192,7 +192,7 @@ The slack alerts provide all the graphs and data necessary for a proper
 evaluation to be made.</p>
 </section>
 <section id="snab-checks">
-<h2>SNAB_CHECKS<a class="headerlink" href="#snab-checks" title="Permalink to this heading"></a></h2>
+<h2>SNAB_CHECKS<a class="headerlink" href="#snab-checks" title="Link to this heading"></a></h2>
 <p>To send any metrics to SNAB for them to be checked they must be defined in an
 item in the <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a> dictionary and <a class="reference internal" href="skyline.html#settings.SNAB_ENABLED" title="settings.SNAB_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_ENABLED</span></code></a>
 must be set to <code class="docutils literal notranslate"><span class="pre">True</span></code>.  The <a class="reference internal" href="skyline.html#settings.SNAB_CHECKS" title="settings.SNAB_CHECKS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_CHECKS</span></code></a> dictionary has the
@@ -204,6 +204,7 @@ following structure:</p>
                 <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">&lt;</span><span class="n">metric_namespace_1</span><span class="o">&gt;</span><span class="s1">&#39;, &#39;</span><span class="o">&lt;</span><span class="n">metric_namespace_2</span><span class="o">&gt;</span><span class="s1">&#39;],</span>
                 <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;absolute_path and filename&gt;&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;&lt;algorithm_parameter_1&gt;&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span><span class="p">,</span> <span class="s1">&#39;&lt;algorithm_parameter_2&gt;&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span><span class="p">},</span>
+                <span class="s1">&#39;comparing_with_algorithm&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;MIRAGE_&gt;&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">seconds</span><span class="o">|</span><span class="nb">float</span><span class="o">&gt;</span><span class="p">,</span>
                 <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">boolean</span><span class="o">&gt;</span><span class="p">,</span>
                 <span class="s1">&#39;alert_slack_channel&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;slack_channel&gt;&#39;</span>
@@ -232,7 +233,7 @@ following structure:</p>
 </div>
 </section>
 <section id="snab-load-test-analyzer">
-<h2>SNAB_LOAD_TEST_ANALYZER<a class="headerlink" href="#snab-load-test-analyzer" title="Permalink to this heading"></a></h2>
+<h2>SNAB_LOAD_TEST_ANALYZER<a class="headerlink" href="#snab-load-test-analyzer" title="Link to this heading"></a></h2>
 <p>SNAB can be used to load test Analyzer by defining the number of metrics you
 want to load test with is <a class="reference internal" href="skyline.html#settings.SNAB_LOAD_TEST_ANALYZER" title="settings.SNAB_LOAD_TEST_ANALYZER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SNAB_LOAD_TEST_ANALYZER</span></code></a>.  The load
 testing is not an exact reflection of the capability of Analyzer but rather an
@@ -323,7 +324,7 @@ load test and restart analyzer again.</p>
 </div>
 </section>
 <section id="snab-flux-load-tester">
-<h2>SNAB flux load tester<a class="headerlink" href="#snab-flux-load-tester" title="Permalink to this heading"></a></h2>
+<h2>SNAB flux load tester<a class="headerlink" href="#snab-flux-load-tester" title="Link to this heading"></a></h2>
 <p>So how many metrics can Skyline handle running on that digitalocean droplet?</p>
 <p>It is difficult to tell how many metrics a single Skyline server can handle
 given the myriad combinations of configurations and hardware resources it may be
@@ -365,14 +366,14 @@ times.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="vista.html" class="btn btn-neutral float-left" title="Vista" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="vista-bigquery/vista_bigquery_configuration.html" class="btn btn-neutral float-left" title="Vista - BigQuery - Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="external_settings.html" class="btn btn-neutral float-right" title="settings.EXTERNAL_SETTINGS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

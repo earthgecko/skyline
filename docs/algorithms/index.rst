@@ -4,6 +4,7 @@ Algorithms
 
 .. toctree::
 
+  core-algorithms.rst
   custom-algorithms.rst
   matrixprofile.rst
   spectral_residual.rst

@@ -98,6 +98,26 @@ if OTEL_ENABLED:
     if settings.MEMCACHE_ENABLED:
         from opentelemetry.instrumentation.pymemcache import PymemcacheInstrumentor
 
+# @added 20240625 - Feature #5378: functions.skyline.get_remote_data
+verify_ssl = True
+try:
+    running_on_docker = settings.DOCKER
+except:
+    running_on_docker = False
+if running_on_docker:
+    verify_ssl = False
+try:
+    overall_verify_ssl = settings.VERIFY_SSL
+except:
+    overall_verify_ssl = True
+if not overall_verify_ssl:
+    verify_ssl = False
+user = None
+password = None
+if settings.WEBAPP_AUTH_ENABLED:
+    user = str(settings.WEBAPP_AUTH_USER)
+    password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
+
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
           'host': settings.PANORAMA_DBHOST,
@@ -367,7 +387,26 @@ def mkdir_p(make_path):
     # except:
     #     import os
     try:
-        os.makedirs(make_path, mode=0o755)
+        # @modified 20240206 - Task #5258: Handle change in makedirs and mkdir
+        #                      Task #5178: Build and test skyline v4.1.0
+        # https://docs.python.org/3/library/os.html#os.makedirs
+        # os.makedirs - Changed in version 3.7: The mode argument no longer
+        # affects the file permission bits of newly created intermediate-level
+        # directories.
+        # So create them individually with the correct mode if they do not
+        # exist, instead of makedirs creating all the intermediate-level
+        # directories with 0o777, which the default mkdir mode.
+        # os.makedirs(make_path, mode=0o755)
+        last_path = '/'
+        for folder in make_path.split('/')[1:]:
+            check_path = '%s/%s' % (last_path, folder)
+            check_path = check_path.replace('//', '/')
+            last_path = str(check_path)
+            if os.path.isdir(check_path):
+                continue
+            else:
+                os.mkdir(check_path, mode=0o755)
+
         return True
     # Python >2.5
     except OSError as exc:
@@ -438,7 +477,14 @@ def get_graphite_graph_image(current_skyline_app, url=None, image_file=None):
             # Use requests
             # urllib.request.urlretrieve(url, image_file)  # nosec
             # os.chmod(image_file, mode=0o644)
-            r = requests.get(url)
+            # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+            # Add timeout for bandit B113
+            #r = requests.get(url)
+            connect_timeout = 5
+            read_timeout = 20
+            use_timeout = (int(connect_timeout), int(read_timeout))
+            r = requests.get(url, timeout=use_timeout)
+
             with open(image_file, 'wb') as f:
                 f.write(r.content)
         else:
@@ -803,9 +849,22 @@ def get_graphite_metric(
             known_derivative_metric = False
             metric_found_in_redis = True
 
+        # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Also check the metrics_manager.non_derivative_metrics set
+        try:
+            metrics_manager_non_derivative_metrics = REDIS_CONN_DECODED.smembers('metrics_manager.non_derivative_metrics')
+        except:
+            metrics_manager_non_derivative_metrics = []
+        if metric in metrics_manager_non_derivative_metrics:
+            known_derivative_metric = False
+            metric_found_in_redis = True
+
     # @added 20180423 - Feature #2034: analyse_derivatives
     #                   Branch #2270: luminosity
-    if not metric_found_in_redis and settings.OTHER_SKYLINE_REDIS_INSTANCES:
+    deprecate_old_redis_method = True
+    if not metric_found_in_redis and settings.OTHER_SKYLINE_REDIS_INSTANCES and not deprecate_old_redis_method:
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         # for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:
         for redis_ip, redis_port, redis_password in settings.OTHER_SKYLINE_REDIS_INSTANCES:
@@ -824,6 +883,41 @@ def get_graphite_metric(
                     metric_found_in_redis = True
                     if write_to_log:
                         current_logger.info('get_graphite_metric :: %s found in derivative_metrics in Redis at %s on port %s' % (redis_metric_name, str(redis_ip), str(redis_port)))
+
+    # @added 20240625 - Feature #5372: vista - bq_update
+    # Replace the old above direct Redis connect method for cluster nodes
+    if not metric_found_in_redis and settings.REMOTE_SKYLINE_INSTANCES:
+        remote_derivative_metrics = []
+        r = None
+        try:
+            url = '%s/api?derivative_metrics&cluster_data=true&include_labelled_metrics=true&metric=%s' % (
+                settings.SKYLINE_URL, metric)
+            if user and password:
+                r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password), verify=verify_ssl)
+            else:
+                r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, verify=verify_ssl)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error ::get_graphite_metric :: failed get data from %s, err: %s' % (
+                str(url), err))
+        json_response = None
+        if r:
+            try:
+                json_response = r.json()
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_graphite_metric :: failed get json from the reponse from %s, err: %s' % (
+                    str(url), err))
+        if json_response:
+            try:
+                remote_derivative_metrics = json_response['data']['metrics']
+            except Exception as err:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_graphite_metric :: failed get metrics list from json_response, err: %s' % err)
+        if metric in remote_derivative_metrics:
+            derivative_metrics.append(metric)
+            known_derivative_metric = True
+            metric_found_in_redis = True
 
     target_metric = metric
 
@@ -1978,12 +2072,15 @@ def is_derivative_metric(current_skyline_app, base_name):
     if not known_derivative_metric:
         last_derivative_metric_key = False
         try:
-            REDIS_CONN = None
-            try:
-                REDIS_CONN = get_redis_conn(current_skyline_app)
-            except Exception as err:
-                current_logger.error('error :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed - %s' % err)
-            last_derivative_metric_key = REDIS_CONN.get(derivative_metric_key)
+            # @modified 20240104 - Task #5178: Build and test skyline v4.1.0
+            # Just use REDIS_CONN_DECODED and exists
+            # REDIS_CONN = None
+            # try:
+            #     REDIS_CONN = get_redis_conn(current_skyline_app)
+            # except Exception as err:
+            #     current_logger.error('error :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed - %s' % err)
+            # last_derivative_metric_key = REDIS_CONN.get(derivative_metric_key)
+            last_derivative_metric_key = REDIS_CONN_DECODED.exists(derivative_metric_key)
         except Exception as err:
             current_logger.error('error :: is_derivative_metric :: could not query Redis for last_derivative_metric_key: %s' % err)
 
@@ -1995,6 +2092,18 @@ def is_derivative_metric(current_skyline_app, base_name):
     skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
     if skip_derivative:
         known_derivative_metric = False
+
+    # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                   Task #5178: Build and test skyline v4.1.0
+    # Also check the metrics_manager.non_derivative_metrics set
+    if known_derivative_metric:
+        try:
+            metrics_manager_non_derivative_metrics = REDIS_CONN_DECODED.smembers('metrics_manager.non_derivative_metrics')
+        except:
+            metrics_manager_non_derivative_metrics = []
+        if base_name in metrics_manager_non_derivative_metrics:
+            known_derivative_metric = False
 
     if known_derivative_metric:
         if redis_metric_name in non_derivative_metrics:
@@ -2147,6 +2256,8 @@ def get_user_details(current_skyline_app, desired_value, key, value):
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    start = time()
+
     if key == 'id':
         select_field = 'user'
         select_where = 'id'
@@ -2215,9 +2326,6 @@ def get_user_details(current_skyline_app, desired_value, key, value):
             raise
         return False, None
 
-    current_logger.info('%s :: get_user_details :: determined %s of %s for users.%s = %s' % (
-        str(current_skyline_app), select_field, str(result), select_where, str(value)))
-
     # @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy
     #                   Task #4778: v4.0.0 - update dependencies
     # Use sqlalchemy rather than string-based query construction
@@ -2226,6 +2334,10 @@ def get_user_details(current_skyline_app, desired_value, key, value):
     except Exception as err:
         current_logger.error('error :: get_user_details :: engine_disposal failed - %s' % (
             str(err)))
+
+    current_logger.info('%s :: get_user_details :: determined %s of %s for users.%s = %s, took %s seconds' % (
+        str(current_skyline_app), select_field, str(result), select_where,
+        str(value), str(time() - start)))
 
     if select_field == 'id':
         return True, int(result)
@@ -2299,15 +2411,19 @@ def forward_alert(current_skyline_app, alert_data):
 
 # @added 20200413 - Feature #3486: analyzer_batch
 #                   Feature #3480: batch_processing
-def is_batch_metric(current_skyline_app, base_name):
+# @modified 20240518 - Feature #5356: get_batch_processing_namespaces
+# Added the ability to pass the batch_processing_namespaces
+def is_batch_metric(current_skyline_app, base_name, batch_processing_namespaces=[]):
     """
     Determine if the metric is designated as an analyzer batch processing metric
 
     :param current_skyline_app: the app calling the function so the function
         knows which log to write too.
-    :param metric_name: the metric name
+    :param base_name: the metric base_name
+    :param batch_processing_namespaces: the list of batch_processing_namespaces
     :type current_skyline_app: str
-    :type metric_name: str
+    :type base_name: str
+    :type batch_processing_namespaces: list
     :return: False
     :rtype:  boolean
     """
@@ -2330,6 +2446,20 @@ def is_batch_metric(current_skyline_app, base_name):
     except:
         BATCH_PROCESSING_NAMESPACES = []
 
+    # @added 20240518 - Feature #5356: get_batch_processing_namespaces
+    #                   Feature #5352: vista - bigquery
+    #                   Feature #3480: batch_processing
+    # Use the metrics_manager set to also include BiqQuery batch metrics
+    if not batch_processing_namespaces:
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+            batch_processing_namespaces = redis_conn_decoded.smembers('metrics_manager.batch_processing_namespaces')
+        except:
+            batch_processing_namespaces = []
+    if batch_processing_namespaces:
+        BATCH_PROCESSING_NAMESPACES = list(batch_processing_namespaces)
+        BATCH_PROCESSING = True
+
     # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
     try:
         ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = settings.ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
@@ -2343,7 +2473,12 @@ def is_batch_metric(current_skyline_app, base_name):
 
     batch_metric = False
     if BATCH_PROCESSING:
-        batch_metric = True
+
+        # @modified 20240605 - Feature #5356: get_batch_processing_namespaces
+        #                      Feature #5352: vista - bigquery
+        # Do not just set everything to True if BATCH_PROCESSING
+        # batch_metric = True
+
         if BATCH_PROCESSING_NAMESPACES:
             batch_metric = False
             base_name_namespace_elements = base_name.split('.')
@@ -2533,6 +2668,12 @@ def add_panorama_alert(current_skyline_app, metric_timestamp, base_name):
     except:
         current_logger.error('error :: add_panorama_alert - get_redis_conn failed')
 
+    # @added 20230908 - Task #5000: Replace alert key scans with sets
+    hash_key = 'panorama.alerts'
+    hash_key_key = '%s.%s' % (str(metric_timestamp), base_name)
+    added_at = time()
+    hash_key_value = {'metric': base_name, 'timestamp': metric_timestamp, 'alerted_at': int(added_at)}
+
     cache_key = 'panorama.alert.%s.%s' % (str(metric_timestamp), base_name)
     cache_key_value = [base_name, metric_timestamp, int(time())]
     if REDIS_CONN:
@@ -2541,6 +2682,13 @@ def add_panorama_alert(current_skyline_app, metric_timestamp, base_name):
             current_logger.info(
                 'added Panorama alert Redis key - %s - %s' %
                 (cache_key, str(cache_key_value)))
+
+            # @added 20230908 - Task #5000: Replace alert key scans with sets
+            REDIS_CONN.hset(hash_key, hash_key_key, str(hash_key_value))
+            current_logger.debug(
+                'debug :: added entry to %s Redis hash - %s - %s' %
+                (hash_key, hash_key_key, str(hash_key_value)))
+
             return True
         except:
             current_logger.error(traceback.format_exc())
@@ -2837,8 +2985,9 @@ def get_anomaly_type(current_skyline_app, anomaly_id):
                 anomaly_type_list.append(anomaly_type)
     return (anomaly_type_list, anomaly_type_id_list)
 
-
-def mirage_load_metric_vars(current_skyline_app, metric_vars_file, return_dict=False):
+# @modified 20231225 - Feature #5102: webapp - api smoke
+# Added log parameter and made logging conditional
+def mirage_load_metric_vars(current_skyline_app, metric_vars_file, return_dict=False, log=True):
     """
     Load the mirage metric variables for a check from a metric check variables
     file
@@ -2856,9 +3005,10 @@ def mirage_load_metric_vars(current_skyline_app, metric_vars_file, return_dict=F
         pass
 
     if os.path.isfile(metric_vars_file):
-        current_logger.info(
-            'loading the mirage metric variables from metric_check_file - %s' % (
-                str(metric_vars_file)))
+        if log:
+            current_logger.info(
+                'loading the mirage metric variables from metric_check_file - %s' % (
+                    str(metric_vars_file)))
     else:
         current_logger.error(
             'error :: loading metric variables from metric_check_file - file not found - %s' % (
@@ -2996,7 +3146,8 @@ def mirage_load_metric_vars(current_skyline_app, metric_vars_file, return_dict=F
             variable = item[0]
             value = item[1]
             metric_vars_dict['metric_vars'][variable] = value
-        current_logger.debug('debug :: metric_vars_dict: %s' % str(metric_vars_dict))
+        if log:
+            current_logger.debug('debug :: metric_vars_dict: %s' % str(metric_vars_dict))
         return metric_vars_dict
 
     return metric_vars_array

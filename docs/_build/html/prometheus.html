@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prometheus &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Prometheus &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -79,14 +78,17 @@
 <li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Prometheus</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#ingestion">Ingestion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prometheus-retry">Prometheus retry</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#format">Format</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#considerations">Considerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ingesting-json">Ingesting JSON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#remote-storage-adapter">remote_storage_adapter</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -95,7 +97,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -132,7 +134,7 @@
            <div itemprop="articleBody">
              
   <section id="prometheus">
-<h1>Prometheus<a class="headerlink" href="#prometheus" title="Permalink to this heading"></a></h1>
+<h1>Prometheus<a class="headerlink" href="#prometheus" title="Link to this heading"></a></h1>
 <p>Skyline can ingest Prometheus metrics.  This requires Prometheus to be
 configured to send data to Skyline using the Prometheus <cite>remote_write</cite>
 configuration option or using a Prometheus <cite>remote_storage_adapter</cite>.</p>
@@ -161,17 +163,24 @@ VictoriaMetrics as the Skyline backend store to allow for greater data retention
 than the default Prometheus 14 days, because Skyline uses longer duration data
 for learning.</p>
 <section id="ingestion">
-<h2>Ingestion<a class="headerlink" href="#ingestion" title="Permalink to this heading"></a></h2>
+<h2>Ingestion<a class="headerlink" href="#ingestion" title="Link to this heading"></a></h2>
 <p>Skyline Flux accepts metrics from Prometheus and appends them to a Redis set.
 Every 60 seconds Skyline Horizon processes the Redis set and does a number of
-things depending on the Skyline set up.</p>
+things depending on the Skyline set up.  The values of the headers section of
+the remote_write add the following labels to incoming metrics:</p>
 <ul class="simple">
 <li><p>x-tenant-id</p></li>
 <li><p>x-server-id</p></li>
 <li><p>x-server-url</p></li>
 </ul>
-<p>Each x-tenant-id can have multiple x-server-ids and x-server-urls, one for
-each sending server.</p>
+<p>The x-tenant-id header value identifies the entity, an organisation, a customer,
+a site, etc.  Each x-tenant-id can have multiple x-server-ids and x-server-urls,
+one for each sending servers.  Each Prometheus or VictoriaMetrics server that
+sends data will have a unique ID and an associated URL.</p>
+<p>Note that Redis time series does not accept commas in label values and therefore
+on ingestion of any metrics with label values that include commas, Skyline replaces
+commas with underscores, e.g. <code class="docutils literal notranslate"><span class="pre">'tags':</span> <span class="pre">'netgo,builtinassets,stringlabels'</span></code> will
+become <code class="docutils literal notranslate"><span class="pre">'tags':</span> <span class="pre">'netgo_builtinassets_stringlabels'</span></code>.</p>
 <p>If a target is sending any noisy metrics that you don’t want sent, you can
 either specify that Prometheus should drop that data in the remote_write config
 using the write_relabel_configs and drop options</p>
@@ -202,7 +211,10 @@ remote_write seciton such as <code class="docutils literal notranslate"><span cl
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">remote_write</span><span class="p">:</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://&lt;YOUR_SKYLINE_FQDN&gt;/flux/prometheus/write</span>
 <span class="w">  </span><span class="nt">queue_config</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8000</span>
+<span class="w">    </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">batch_send_deadline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+<span class="w">    </span><span class="nt">min_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">    </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
 <span class="w">  </span><span class="nt">write_relabel_configs</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">source_labels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">alias</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;(Loki|Prometheus|Grafana|Telegraf)&quot;</span>
@@ -227,8 +239,67 @@ remote_write seciton such as <code class="docutils literal notranslate"><span cl
 </pre></div>
 </div>
 </section>
+<section id="prometheus-retry">
+<h2>Prometheus retry<a class="headerlink" href="#prometheus-retry" title="Link to this heading"></a></h2>
+<p>By default the Prometheus remote_write retry related settings result in
+Prometheus trying to process the retry queue VERY fast.  The defaults are:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="w"> </span><span class="nv">max_samples_per_send</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">&lt;int&gt; | default = 500</span><span class="p p-Indicator">]</span>
+<span class="c1"># Maximum time a sample will wait in buffer.</span>
+<span class="p p-Indicator">[</span><span class="w"> </span><span class="nv">batch_send_deadline</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">&lt;duration&gt; | default = 5s</span><span class="w"> </span><span class="p p-Indicator">]</span>
+<span class="c1"># Initial retry delay. Gets doubled for every retry.</span>
+<span class="p p-Indicator">[</span><span class="w"> </span><span class="nv">min_backoff</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">&lt;duration&gt; | default = 30ms</span><span class="w"> </span><span class="p p-Indicator">]</span>
+<span class="c1"># Maximum retry delay.</span>
+<span class="p p-Indicator">[</span><span class="w"> </span><span class="nv">max_backoff</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="nv">&lt;duration&gt; | default = 5s</span><span class="w"> </span><span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+<p>If there is an issue with flux ingestion or on the server itself or a
+long network partition, any delay or failure will result in Prometheus
+retrying everything, very fast.  Due to the fact that the operator
+may not have access to Prometheus to stop remote_write or even define
+the Prometheus remote_write min_backoff or max_backoff or any access
+to configure Prometheus, Skyline must be opinionated in this matter to
+prevent lots of thundering retry requests.  The Prometheus defaults make
+retry go FAST, 50 retries of all queued batches over 5s.  This results
+in flux being swamped with retry connections and many batches will
+timeout.  Prometheus will just then try again and again and there is
+no way to move forward as it insistently wants to retry everything,
+every time.  The end result is that flux can never catch up because it is being
+sent 10s of 1000s of samples every retry, which most fail entering
+into a retry death spiral.
+There is no backfill with Prometheus, thereafter Skyline is ONLY
+expecting real time data.  If data is not current return a 400 and
+Prometheus will not retry.
+As of Prometheus v2.50.0 you will be able to set the sample_age_limit which will
+be allowed in the remote_write config to allow for disabling retries on samples
+older than sample_age_limit, by default is disabled.</p>
+<p>Therefore Skyline itself by default is set to return 400 for any submissions
+that are older than <a class="reference internal" href="skyline.html#settings.FLUX_PROMETHEUS_MAX_AGE" title="settings.FLUX_PROMETHEUS_MAX_AGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_PROMETHEUS_MAX_AGE</span></code></a> (300 seconds by
+default).  Prometheus receiving a 400 constitutes a non-recoverable error which
+is not retried and Prometheus moves on to the next batch.  Although this may
+result in some gaps in the Skyline <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> Redis data,
+it means that any lengthy issue or network partition will not result in a retry
+spiral of death.</p>
+<p>The example settings on this page show more reasonable values for Prometheus
+remote_write queue settings which at least allow flux to process all the retries
+if an issue does develop and are much less likely to result in a retry spiral of
+death.  When loaded and pushed with a lot of data, flux can be expected to take
+&gt; 5s to process a request so batch_send_deadline is set to 30s, a more
+reasonable value and the request will 499 if flux is running behind nginx just
+before 30s and Prometheus will receive that response and not retry.  After an
+issue, flux will rarely respond in &lt; 5s when thundered with retries. min_backoff
+and max_backoff are also set to more realistic values in terms of flux.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">remote_write</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://&lt;YOUR_SKYLINE_FQDN&gt;/flux/prometheus/write</span>
+<span class="w">  </span><span class="nt">queue_config</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">batch_send_deadline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+<span class="w">    </span><span class="nt">min_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">    </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+</pre></div>
+</div>
+</section>
 <section id="format">
-<h2>Format<a class="headerlink" href="#format" title="Permalink to this heading"></a></h2>
+<h2>Format<a class="headerlink" href="#format" title="Link to this heading"></a></h2>
 <p>Skyline supports the standard Prometheus protobuf data ingestion and influxdb
 format therefore you can send Prometheus data to Skyline in two ways:</p>
 <ul class="simple">
@@ -260,7 +331,7 @@ and then add metrics that you want to analyse to the DO_NOT_SKIP_LIST.</p>
 <p>Both ways work almost the same with the exception of a prefix must be appended to</p>
 </section>
 <section id="considerations">
-<h2>Considerations<a class="headerlink" href="#considerations" title="Permalink to this heading"></a></h2>
+<h2>Considerations<a class="headerlink" href="#considerations" title="Link to this heading"></a></h2>
 <p>There is an issue in Prometheus metric types in so far as developers will not always
 adhere to metric typing rules and in some exporter you will find COUNTER and GAUGE
 metrics in the same metric namespace.  To overcome this analyzer periodically checks
@@ -269,13 +340,13 @@ cannot be trusted.</p>
 <p>Skyline is not storing the data for longer than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
 and it is storing preprocessed data.  Consider Skyline analysis as a broad
 overview of your Prometheus metrics, it is not about fine granular data it is a
-set of tradeoffs.  It gives you real time monitoring your metrics in broad
+set of tradeoffs.  It gives you real time monitoring of your metrics in broad
 strokes, but it has cardinality and resolution limitations.</p>
 <p>Skyline requires the following additional information per request to be passed
 along with the metric data.</p>
 <ul class="simple">
 <li><p>source: the Prometheus URL at which the metrics being submitted are available at.</p></li>
-<li><p>key: the FLUX_API_KEYS key</p></li>
+<li><p>key: the FLUX_API_KEY key</p></li>
 <li><p>prefix: a string to prefix the metrics with internally in Skyline</p></li>
 </ul>
 <p>Although the Prometheus metric name may be something along the lines of:
@@ -286,11 +357,48 @@ Skyline’s internal representation of that would be prefixed the x-tenant-id an
 from multiple Prometheus instances and whereas each metric and labels may
 be unique on one Prometheus server the same metric and labels may exist on
 another Prometheus server, so Skyline adds labels to every Prometheus metric.</p>
-<p>Pass this additional information using the remote_write method is easy, passing
-it using the remote_storage_adapter is a bit more obfuscate.</p>
+<p>Pass this additional information using the remote_write and JSON methods is easy
+as it just just passed as headers (as shown in the remote_write example above),
+passing it using the remote_storage_adapter is a bit more obfuscate.</p>
+</section>
+<section id="ingesting-json">
+<h2>Ingesting JSON<a class="headerlink" href="#ingesting-json" title="Link to this heading"></a></h2>
+<p>It is possible to post key value style metrics via JSON as well.  This allows
+for custom key/value metrics that perhaps are not collected in Prometheus or
+VictoriaMetrics to be sent directly to Skyline as “prometheus metrics” with the
+metric|str, timestamp|int and value|float</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">SAMPLE_TIMESTAMP</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+curl<span class="w"> </span>-v<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">  &quot;key&quot;:&quot;&lt;FLUX_SELF_API_KEY or a FLUX_API_KEYS&gt;&quot;,</span>
+<span class="s1">  &quot;metrics&quot;:[</span>
+<span class="s1">    {&quot;metric&quot;:&quot;cpu_user{instance=\&quot;server1\&quot;}&quot;,&quot;timestamp&quot;:&#39;</span><span class="nv">$SAMPLE_TIMESTAMP</span><span class="s1">&#39;,&quot;value&quot;:1.0},</span>
+<span class="s1">    {&quot;metric&quot;:&quot;cpu_system{instance=\&quot;server1\&quot;}&quot;,&quot;timestamp&quot;:&#39;</span><span class="nv">$SAMPLE_TIMESTAMP</span><span class="s1">&#39;,&quot;value&quot;:2.2}]}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;x-test-only: true&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;x-tenant-id: org_1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;x-server-id: 1&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;x-server-url: http://localhost:9090&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-X<span class="w"> </span>POST<span class="w"> </span>https://skyline.example.org/flux/prometheus/write
+</pre></div>
+</div>
+<p>The dropLabels and dropMetrics headers referenced above in the remote_write
+config section can also be used here.  Limit payloads to 1024K and if you have
+a large number of metrics being submitted consider using a gzip encoded request.</p>
+<p>Note for the JSON format requests if any one metric or part of the metric data
+is invalid it will be rejected.  A response code of 207 is returned for any
+requests that POST a mixture of valid data and invalid data.  Along with the 207
+response is a JSON response reporting the invalid metric data and the valid
+metric data along with the response for each item, either a 200 for valid data
+and a 400 for invalid data.  If all the data in the submission is valid a
+response of 204 is used and if no data is valid a response of 400 is returned.</p>
+<p>If you have thunder enabled then thunder will send out an invalid_metrics alert
+every hour if invalid metrics are submitted and a 207 response is returned with
+a link to the metric data which was invalid which is available for 2 hours.  Do
+note that only one thunder alert will be sent for a namespace per hour no matter
+how many requests are submitted with invalid data.</p>
 </section>
 <section id="remote-storage-adapter">
-<h2>remote_storage_adapter<a class="headerlink" href="#remote-storage-adapter" title="Permalink to this heading"></a></h2>
+<h2>remote_storage_adapter<a class="headerlink" href="#remote-storage-adapter" title="Link to this heading"></a></h2>
 <p>Due to the limited number of config options that the remote_storage_adapter
 can be run with some config options are used for different purposes than they
 are intended for.  This is because there is no ability to add headers to the
@@ -304,8 +412,11 @@ Skyline uses the
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://skyline.example.org/flux/prometheus/write&quot;</span>
 <span class="w">    </span><span class="nt">queue_config</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">max_samples_per_send</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">      </span><span class="nt">batch_send_deadline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
+<span class="w">      </span><span class="nt">min_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<span class="w">      </span><span class="nt">max_backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
 <span class="w">    </span><span class="nt">headers</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1234hbfq89iUGGDn9qiUHuads7we1234</span>
+<span class="w">      </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123456abcdefghijklmnopqrstuvwxyz</span>
 <span class="w">      </span><span class="nt">x-tenant-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123</span>
 <span class="w">      </span><span class="nt">x-server-id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">      </span><span class="nt">x-server-url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://minikube.mc12</span>
@@ -336,7 +447,7 @@ Skyline uses the
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

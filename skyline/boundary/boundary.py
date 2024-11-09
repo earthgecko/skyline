@@ -29,6 +29,9 @@ import sys
 # literal_eval required to evaluate Redis sets
 from ast import literal_eval
 
+# @added 20231026 - Feature #5104: boundary - external_settings
+import copy
+
 from msgpack import Unpacker, packb
 
 import settings
@@ -86,6 +89,11 @@ from functions.graphite.send_graphite_metric import send_graphite_metric
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
 from functions.prometheus.metric_name_labels_parser import metric_name_labels_parser
+
+# @added 20240720 - Feature #5352: vista - bigquery
+# Added external_settings and bq_accounts_settings
+from functions.settings.get_external_settings import get_external_settings
+from functions.settings.get_bq_accounts_settings import get_bq_accounts_settings
 
 skyline_app = 'boundary'
 skyline_app_logger = skyline_app + 'Log'
@@ -210,7 +218,11 @@ class Boundary(Thread):
     # Pass added_at as an argument to spin_process so that the panaroma_anomaly_file
     # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
     # def spin_process(self, i, boundary_metrics):
-    def spin_process(self, i, boundary_metrics, added_at):
+    # @modified 20231026 - Feature #5104: boundary - external_settings
+    # Change to using the precompiled list of boundary metrics, algos
+    # and settings from metrics_manager
+    # def spin_process(self, i, boundary_metrics, added_at):
+    def spin_process(self, i, boundary_metrics, boundary_metrics_dict, added_at):
         """
         Assign a bunch of metrics for a process to analyze.
         """
@@ -292,10 +304,29 @@ class Boundary(Thread):
         exceptions = defaultdict(int)
         anomaly_breakdown = defaultdict(int)
 
-        # Reset boundary_algortims
+        # @added 20231024 - Feature #5104: boundary - external_settings
+        #                   Feature #4188: metrics_manager.boundary_metrics
+        redis_boundary_metrics = {}
+
+        # Reset boundary_algorithms
         all_boundary_algorithms = []
         for metric in BOUNDARY_METRICS:
             all_boundary_algorithms.append(metric[1])
+
+        # @added 20231026 - Feature #5104: boundary - external_settings
+        # Change to using the precompiled list of boundary metrics, algos
+        # and settings from metrics_manager
+        all_boundary_algorithms = []
+        try:
+            for base_name in list(boundary_metrics_dict.keys()):
+                for algo in list(boundary_metrics_dict[base_name].keys()):
+                    if algo.startswith('mock_'):
+                        continue
+                    all_boundary_algorithms.append(algo)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to build all_boundary_algorithms from boundary_metrics_dict - %s' % (
+                err))
 
         # The unique algorithms that are being used
         boundary_algorithms = unique_noHash(all_boundary_algorithms)
@@ -325,6 +356,25 @@ class Boundary(Thread):
 
         discover_run_metrics = []
 
+        # @added 20240720 - Feature #5352: vista - bigquery
+        # Added external_settings and bq_accounts_settings
+        external_settings = {}
+        try:
+            external_settings = get_external_settings(skyline_app, None, True)
+        except Exception as err:
+            logger.error('error :: get_external_settings failed, err: %s' % (
+                err))
+        bq_accounts_settings = None
+        try:
+            bq_accounts_settings = get_bq_accounts_settings(skyline_app)
+            if isinstance(bq_accounts_settings, dict):
+                if len(bq_accounts_settings) == 0:
+                    bq_accounts_settings = None
+        except Exception as err:
+            logger.error('error :: get_bq_accounts_settings failed, err: %s' % err)
+        logger.info('len(external_settings): %s, bq_accounts_settings: %s' % (
+            str(len(external_settings)), str(bq_accounts_settings)))
+
         # @added 20230222 - Feature #4854: boundary - labelled_metrics
         #                   Task #2732: Prometheus to Skyline
         #                   Branch #4300: prometheus
@@ -338,8 +388,66 @@ class Boundary(Thread):
         }
         boundary_errors = {}
 
+        # @added 20231026 - Feature #5104: boundary - external_settings
+        # Change to using the precompiled list of boundary metrics, algos
+        # and settings from metrics_manager
+        ALL_BOUNDARY_METRICS = list(BOUNDARY_METRICS)
+        try:
+            for index, metric_name, in enumerate(unique_assigned_metrics):
+                if metric_name.startswith(FULL_NAMESPACE):
+                    base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = str(metric_name)
+                for algo in list(boundary_metrics_dict[base_name].keys()):
+                    if algo.startswith('mock_'):
+                        if ENABLE_BOUNDARY_DEBUG:
+                            logger.debug('debug :: skipping %s on %s' % (algo, metric_name))
+                        continue
+                    try:
+                        discover_run_metrics.append([
+                            index, metric_name,
+                            boundary_metrics_dict[base_name][algo]['expiry'],
+                            boundary_metrics_dict[base_name][algo]['min_average'],
+                            boundary_metrics_dict[base_name][algo]['min_average_seconds'],
+                            boundary_metrics_dict[base_name][algo]['trigger_value'],
+                            boundary_metrics_dict[base_name][algo]['alert_threshold'],
+                            boundary_metrics_dict[base_name][algo]['alert_vias'],
+                            algo])
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add to discover_run_metrics - %s' % (
+                            err))
+                    try:
+                        boundary_metric_tuple = (
+                            base_name, algo,
+                            boundary_metrics_dict[base_name][algo]['expiry'],
+                            boundary_metrics_dict[base_name][algo]['min_average'],
+                            boundary_metrics_dict[base_name][algo]['min_average_seconds'],
+                            boundary_metrics_dict[base_name][algo]['trigger_value'],
+                            boundary_metrics_dict[base_name][algo]['alert_threshold'],
+                            boundary_metrics_dict[base_name][algo]['alert_vias'])
+                        ALL_BOUNDARY_METRICS.append(boundary_metric_tuple)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add boundary_metric_tuple to ALL_BOUNDARY_METRICS - %s' % (
+                            err))
+
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to build discover_run_metrics from boundary_metrics_dict - %s' % (
+                err))
+
+        logger.info('%s checks to run in discover_run_metrics built from boundary_metrics_dict' % str(len(discover_run_metrics)))
+
         # Distill metrics into a run list
         for index, metric_name, in enumerate(unique_assigned_metrics):
+
+            # @modified 20231026 - Feature #5104: boundary - external_settings
+            # Change to using the precompiled list of boundary metrics, algos
+            # and settings from metrics_manager
+            if discover_run_metrics:
+                logger.debug('debug :: discover_run_metrics already built from boundary_metrics_dict')
+                break
 
             # @modified 20230222 - Feature #4854: boundary - labelled_metrics
             #                      Task #2732: Prometheus to Skyline
@@ -438,6 +546,29 @@ class Boundary(Thread):
                                         metric_alerters = metric[7]
                                 except:
                                     metric_alerters = False
+
+                                # @added 20240301 - Feature #5298: boundary - excludes
+                                # Allow for an excludes list to be added to the tuple
+                                excludes = []
+                                try:
+                                    if metric[8]:
+                                        excludes = metric[8]
+                                except:
+                                    excludes = []
+                                if excludes:
+                                    logger.debug('debug :: excludes: %s, for %s' % (str(excludes), str(boundary_alerter)))
+                                    try:
+                                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, excludes)
+                                        try:
+                                            del metric_matched_by
+                                        except:
+                                            pass
+                                        if pattern_match:
+                                            logger.debug('debug :: excluded - %s from %s' % (base_name, str(boundary_alerter)))
+                                            continue
+                                    except:
+                                        pattern_match = False
+
                             if metric_pattern_matched and algo_pattern_matched:
                                 if ENABLE_BOUNDARY_DEBUG:
                                     logger.debug('debug :: added metric - %s, %s, %s, %s, %s, %s, %s, %s, %s' % (str(i), metric_name, str(metric_expiration_time), str(metric_min_average), str(metric_min_average_seconds), str(metric_trigger), str(alert_threshold), metric_alerters, algorithm))
@@ -458,6 +589,24 @@ class Boundary(Thread):
             for run_metric in run_metrics:
                 logger.debug('debug :: run_metrics - %s' % str(run_metric))
 
+        # @added 20240104 - Task #5178: Build and test skyline v4.1.0
+        # Moved derivative_metrics from below in run_metrics loop so that
+        # smembers is called once only
+        derivative_metrics = []
+        try:
+            derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
+        except:
+            derivative_metrics = []
+
+        # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #5178: Build and test skyline v4.1.0
+        # Also check the metrics_manager.non_derivative_metrics set
+        try:
+            metrics_manager_non_derivative_metrics = self.redis_conn_decoded.smembers('metrics_manager.non_derivative_metrics')
+        except:
+            metrics_manager_non_derivative_metrics = []
+
         # Distill timeseries strings and submit to run_selected_algorithm
         for metric_and_algo in run_metrics:
             self.check_if_parent_is_alive()
@@ -469,6 +618,7 @@ class Boundary(Thread):
             datapoint = None
 
             try:
+
                 raw_assigned_id = metric_and_algo[0]
                 metric_name = metric_and_algo[1]
                 base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
@@ -480,8 +630,51 @@ class Boundary(Thread):
                 metric_alerters = metric_and_algo[7]
                 algorithm = str(metric_and_algo[8])
 
+                # @added 20231026 - Feature #5104: boundary - external_settings
+                # Skip mock_ algorithm, only used for testing
+                if algorithm.startswith('mock_'):
+                    logger.debug('debug :: skipping %s on %s' % (algorithm, metric_name))
+                    continue
+
                 if ENABLE_BOUNDARY_DEBUG:
                     logger.debug('debug :: unpacking timeseries for %s - %s' % (metric_name, str(raw_assigned_id)))
+
+                # @added 20231026 - Feature #5108: boundary - functions
+                try:
+                    boundary_function = boundary_metrics_dict[base_name][algorithm]['function']
+                except:
+                    boundary_function = None
+                try:
+                    boundary_function_seconds = boundary_metrics_dict[base_name][algorithm]['function_seconds']
+                except:
+                    boundary_function_seconds = None
+                function_value = None
+
+                # @added 20231115 - Feature #5104: boundary - external_settings
+                try:
+                    alerter_id = boundary_metrics_dict[base_name][algorithm]['id']
+                except:
+                    alerter_id = None
+
+                # @added 20240301 - Feature #5298: boundary - excludes
+                # Allow for an excludes list to be added to the tuple
+                excludes = []
+                try:
+                    excludes = boundary_metrics_dict[base_name][algorithm]['excludes']
+                except:
+                    excludes = []
+                if excludes:
+                    try:
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, excludes)
+                        try:
+                            del metric_matched_by
+                        except:
+                            pass
+                        if pattern_match:
+                            logger.debug('debug :: excluded - %s from %s' % (base_name, algorithm))
+                            continue
+                    except:
+                        pattern_match = False
 
                 # @added 20230220 - Feature #4854: boundary - labelled_metrics
                 #                   Task #2732: Prometheus to Skyline
@@ -515,7 +708,7 @@ class Boundary(Thread):
                         unpacker.feed(raw_series)
                         timeseries = list(unpacker)
                     except Exception as err:
-                        boundary_errors[metric_name] = {'err': str(str), 'traceback': str(traceback.format_exc())}
+                        boundary_errors[metric_name] = {'err': str(err), 'traceback': str(traceback.format_exc())}
                         timeseries = []
 
                     # @added 20230222 - Feature #4854: boundary - labelled_metrics
@@ -633,7 +826,10 @@ class Boundary(Thread):
                 run_tupple = False
                 boundary_metric_tuple = (base_name, algorithm, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters)
                 wildcard_namespace = True
-                for metric_tuple in BOUNDARY_METRICS:
+
+                # @added 20231026 - Feature #5104: boundary - external_settings
+                # for metric_tuple in BOUNDARY_METRICS:
+                for metric_tuple in ALL_BOUNDARY_METRICS:
                     if not has_unique_tuple:
                         # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
                         #                      Feature #3512: matched_or_regexed_in_list function
@@ -684,15 +880,21 @@ class Boundary(Thread):
                     # Convert the values of metrics strictly increasing monotonically
                     # to their deriative products
                     known_derivative_metric = False
-                    try:
-                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                        #                      Branch #3262: py3
-                        # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
-                        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
-                        # derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
-                        derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
-                    except:
-                        derivative_metrics = []
+
+                    # @modified 20240104 - Task #5178: Build and test skyline v4.1.0
+                    # Moved the derivative_metrics to outside the run_metrics
+                    # loop so that the smembers is only called once
+                    if not derivative_metrics:
+                        try:
+                            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                            #                      Branch #3262: py3
+                            # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+                            # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+                            # derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+                            derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
+                        except:
+                            derivative_metrics = []
+
                     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
                     if redis_metric_name in derivative_metrics:
                         known_derivative_metric = True
@@ -704,6 +906,15 @@ class Boundary(Thread):
                         skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
                         if skip_derivative:
                             known_derivative_metric = False
+
+                        # @added 20240104 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+                        #                   Task #5178: Build and test skyline v4.1.0
+                        # Also check the metrics_manager.non_derivative_metrics set
+                        if not skip_derivative:
+                            if base_name in metrics_manager_non_derivative_metrics:
+                                skip_derivative = True
+                                known_derivative_metric = False
 
                     # @added 20230220 - Feature #4854: boundary - labelled_metrics
                     #                   Task #2732: Prometheus to Skyline
@@ -775,7 +986,9 @@ class Boundary(Thread):
                     else:
                         # Submit the timeseries and settings to run_selected_algorithm
                         try:
-                            anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
+                            # @modified 20231026 - Feature #5108: boundary - functions
+                            # Added function_value
+                            anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, function_value = run_selected_algorithm(
                                 timeseries, metric_name,
                                 metric_expiration_time,
                                 metric_min_average,
@@ -785,7 +998,13 @@ class Boundary(Thread):
                                 metric_alerters,
                                 autoaggregate,
                                 autoaggregate_value,
-                                algorithm
+                                algorithm,
+                                # @added 20231026 - Feature #5108: boundary - functions
+                                boundary_function, boundary_function_seconds,
+                                # @added 20240720 - Feature #5352: vista - bigquery
+                                # Added external_settings and bq_accounts_settings
+                                external_settings=external_settings,
+                                bq_accounts_settings=bq_accounts_settings,
                             )
                         except TypeError:
                             exceptions['DeletedByRoomba'] += 1
@@ -859,7 +1078,42 @@ class Boundary(Thread):
                     # @added 20200122 - Feature #3396: http_alerter
                     # Add the metric timestamp for the http_alerter resend queue
                     # anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
-                    anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, metric_timestamp]
+                    # @modified 20231027 - Feature #5108: boundary - functions
+                    # Added boundary_function, boundary_function_seconds and
+                    # function_value
+                    anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, metric_timestamp,
+                                        # @added 20231115 - Feature #5104: boundary - external_settings
+                                        # Added alerter_id
+                                        alerter_id,
+                                        # @added 20231027 - Feature #5108: boundary - functions
+                                        # Added boundary_function, boundary_function_seconds and
+                                        # function_value
+                                        boundary_function, boundary_function_seconds, function_value]
+
+                    # @added 20231115 - Feature #5104: boundary - external_settings
+                    # Change to using a dict as the positional variables are get
+                    # long
+                    anomalous_metric = {
+                        'datapoint': datapoint, 'metric': metric_name,
+                        'expiry': metric_expiration_time,
+                        'min_avg': metric_min_average,
+                        'min_avg_seconds': metric_min_average_seconds,
+                        'trigger': metric_trigger,
+                        'threshold': alert_threshold,
+                        'alerters': metric_alerters,
+                        'algorithm': algorithm,
+                        'timestamp': metric_timestamp,
+                        # @added 20231115 - Feature #5104: boundary - external_settings
+                        # Added alerter_id
+                        'alerter_id': alerter_id,
+                        # @added 20231027 - Feature #5108: boundary - functions
+                        # Added boundary_function, boundary_function_seconds and
+                        # function_value
+                        'function': boundary_function,
+                        'function_seconds': boundary_function_seconds,
+                        'function_value': function_value
+                    }
+
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # self.anomalous_metrics.append(anomalous_metric)
                     try:
@@ -887,8 +1141,8 @@ class Boundary(Thread):
                             'value': float(datapoint),
                             'triggered_algorithms_count': len(triggered_algorithms)}
                     except Exception as err:
-                        logger.error('error :: failed to add %s to illuminance_dict' % (
-                            str(use_base_name)))
+                        logger.error('error :: failed to add %s to illuminance_dict, err: %s' % (
+                            str(use_base_name), err))
 
                     # If Crucible or Panorama are enabled determine details
                     determine_anomaly_details = False
@@ -1142,6 +1396,7 @@ class Boundary(Thread):
         analysis_stats['analysed_metrics'] = len(analysed_metrics)
         logger.info('analysis_stats: %s' % str(analysis_stats))
         if boundary_errors:
+            logger.warning('warning :: recording %s boundary_errors to Redis' % (str(len(boundary_errors))))
             # Convert dicts to strings as Redis hash requires strings
             for key, value in boundary_errors.items():
                 boundary_errors[key] = str(value)
@@ -1305,6 +1560,24 @@ class Boundary(Thread):
             # Reset boundary_metrics
             boundary_metrics = []
 
+            # @added 20231026 - Feature #5104: boundary - external_settings
+            # Change to using the precompiled list of boundary metrics, algos
+            # and settings from metrics_manager
+            boundary_metrics_dict = {}
+            for base_name in boundary_metrics_list:
+                metric_name = str(base_name)
+                if '_tenant_id="' not in metric_name:
+                    if settings.FULL_NAMESPACE:
+                        metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric_name)
+                boundary_metrics_dict[base_name] = {}
+                settings_dict = literal_eval(boundary_metrics_redis_dict[base_name])
+                for algo in list(settings_dict.keys()):
+                    boundary_metrics.append([metric_name, algo])
+                    boundary_metrics_dict[base_name][algo] = copy.deepcopy(settings_dict[algo])
+            # Reset boundary_metrics_list so that the it is not built by the old
+            # method below
+            boundary_metrics_list = []
+
             # Build boundary metrics
             # @modified 20230217 - Feature #4854: boundary - labelled_metrics
             #                      Task #2732: Prometheus to Skyline
@@ -1384,10 +1657,23 @@ class Boundary(Thread):
                         logger.info('test alert metric found - alerting on %s' % str((test_alert)))
                         metric_name = str(test_alert[0])
                         test_alerter = str(test_alert[1])
+
+                        # @added 20231115 - Feature #5104: boundary - external_settings
+                        #                   Feature #4482: Test alerts
+                        # Add external id if present
+                        alerter_id = 0
+                        try:
+                            alerter_id = test_alert[2]
+                        except:
+                            alerter_id = 0
+
                         logger.info('test alert to %s for %s' % (test_alerter, metric_name))
                         # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
                         # trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()))
-                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()), 0)
+                        # @modified 20231115 - Feature #5104: boundary - external_settings
+                        #                      Feature #4482: Test alerts
+                        # Added alerter_id
+                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()), 0, alerter_id=alerter_id)
                     except:
                         logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
                 try:
@@ -1416,7 +1702,11 @@ class Boundary(Thread):
                 # Pass added_at as an argument to spin_process so that the panaroma_anomaly_file
                 # can be moved from SKYLINE_TMP_DIR to the PANORAMA_CHECK_PATH
                 # p = Process(target=self.spin_process, args=(i, boundary_metrics))
-                p = Process(target=self.spin_process, args=(i, boundary_metrics, added_at))
+                # @modified 20231026 - Feature #5104: boundary - external_settings
+                # Change to using the precompiled list of boundary metrics, algos
+                # and settings from metrics_manager
+                # p = Process(target=self.spin_process, args=(i, boundary_metrics, added_at))
+                p = Process(target=self.spin_process, args=(i, boundary_metrics, boundary_metrics_dict, added_at))
                 pids.append(p)
                 p.start()
 
@@ -1537,371 +1827,598 @@ class Boundary(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to literal_eval metric_list_string - %s' % str(metric_list_string))
+            logger.info('%s boundary anomalous metrics to process' % str(len(boundary_anomalous_metrics)))
 
             # Send alerts
             if settings.BOUNDARY_ENABLE_ALERTS:
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # for anomalous_metric in self.anomalous_metrics:
                 for anomalous_metric in boundary_anomalous_metrics:
-                    datapoint = str(anomalous_metric[0])
-                    metric_name = anomalous_metric[1]
-                    base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
-                    expiration_time = str(anomalous_metric[2])
-                    metric_trigger = str(anomalous_metric[5])
-                    alert_threshold = int(anomalous_metric[6])
-                    metric_alerters = anomalous_metric[7]
-                    algorithm = str(anomalous_metric[8])
-                    # @added 20200122 - Feature #3396: http_alerter
-                    # Add the metric timestamp for the http_alerter resend queue
-                    metric_timestamp = anomalous_metric[9]
+                    try:
+                        # @modified 20231115 - Feature #5104: boundary - external_settings
+                        # Change to using a dict as the positional variables are get
+                        # long
+                        if isinstance(anomalous_metric, list):
+                            datapoint = str(anomalous_metric[0])
+                            metric_name = anomalous_metric[1]
+                            base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+                            expiration_time = str(anomalous_metric[2])
+                            metric_trigger = str(anomalous_metric[5])
+                            alert_threshold = int(anomalous_metric[6])
+                            metric_alerters = anomalous_metric[7]
+                            algorithm = str(anomalous_metric[8])
+                            # @added 20200122 - Feature #3396: http_alerter
+                            # Add the metric timestamp for the http_alerter resend queue
+                            metric_timestamp = anomalous_metric[9]
 
-                    if ENABLE_BOUNDARY_DEBUG:
-                        logger.info("debug :: anomalous_metric - " + str(anomalous_metric))
-
-                    # Determine how many times has the anomaly been seen if the
-                    # ALERT_THRESHOLD is set to > 1 and create a cache key in
-                    # redis to keep count so that alert_threshold can be honored
-                    if alert_threshold == 0:
-                        times_seen = 1
-                        if ENABLE_BOUNDARY_DEBUG:
-                            logger.info("debug :: alert_threshold - " + str(alert_threshold))
-
-                    if alert_threshold == 1:
-                        times_seen = 1
-                        if ENABLE_BOUNDARY_DEBUG:
-                            logger.info("debug :: alert_threshold - " + str(alert_threshold))
-
-                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
-                    #                   Task #2732: Prometheus to Skyline
-                    #                   Branch #4300: prometheus
-                    labelled_metric = False
-                    use_base_name = str(metric_name)
-                    if '_tenant_id="' in metric_name:
-                        try:
-                            metric_id = get_metric_id_from_base_name(skyline_app, base_name)
-                        except Exception as err:
-                            logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
-                                str(base_name), err))
-                            metric_id = 0
-                        labelled_metric = 'labelled_metrics.%s' % str(metric_id)
-                        use_base_name = str(labelled_metric)
-
-                    if alert_threshold > 1:
-                        if ENABLE_BOUNDARY_DEBUG:
-                            logger.debug('debug :: alert_threshold - ' + str(alert_threshold))
-                        anomaly_cache_key_count_set = False
-                        anomaly_cache_key_expiration_time = (int(alert_threshold) + 1) * 60
-
-                        # @modified 20230220 - Feature #4854: boundary - labelled_metrics
-                        #                      Task #2732: Prometheus to Skyline
-                        #                      Branch #4300: prometheus
-                        # anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
-                        anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, use_base_name)
-
-                        try:
-                            anomaly_cache_key_count = self.redis_conn.get(anomaly_cache_key)
-                            if not anomaly_cache_key_count:
-                                try:
-                                    if ENABLE_BOUNDARY_DEBUG:
-                                        logger.debug('debug :: redis no anomaly_cache_key - ' + str(anomaly_cache_key))
-                                    times_seen = 1
-                                    if ENABLE_BOUNDARY_DEBUG:
-                                        logger.debug('debug :: redis setex anomaly_cache_key - ' + str(anomaly_cache_key))
-                                    self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
-                                    logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
-                                except Exception as e:
-                                    logger.error('error :: redis setex failed :: %s' % str(anomaly_cache_key))
-                                    logger.error('error :: could not set key: %s' % e)
-                            else:
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.debug('debug :: redis anomaly_cache_key retrieved OK - ' + str(anomaly_cache_key))
-                                anomaly_cache_key_count_set = True
-                        except:
-                            if ENABLE_BOUNDARY_DEBUG:
-                                logger.debug('debug :: redis failed - anomaly_cache_key retrieval failed - ' + str(anomaly_cache_key))
-                            anomaly_cache_key_count_set = False
-
-                        if anomaly_cache_key_count_set:
-                            unpacker = Unpacker(use_list=False)
-                            unpacker.feed(anomaly_cache_key_count)
-                            raw_times_seen = list(unpacker)
-                            times_seen = int(raw_times_seen[0]) + 1
+                            # @added 20231115 - Feature #5104: boundary - external_settings
+                            alerter_id = None
                             try:
-                                self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
-                                logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
+                                alerter_id = anomalous_metric[10]
                             except:
-                                times_seen = 1
-                                logger.error('error :: set anomaly seen key failed :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
+                                alerter_id = None
 
-                    # Alert the alerters if times_seen > alert_threshold
-                    if times_seen >= alert_threshold:
+                            # @added 20231027 - Feature #5108: boundary - functions
+                            # Added boundary_function, boundary_function_seconds and
+                            # function_value
+                            try:
+                                boundary_function = anomalous_metric[11]
+                            except:
+                                boundary_function = None
+                            try:
+                                boundary_function_seconds = anomalous_metric[12]
+                            except:
+                                boundary_function_seconds = 0
+                            try:
+                                function_value = anomalous_metric[13]
+                            except:
+                                function_value = None
+
+                        # @added 20231115 - Feature #5104: boundary - external_settings
+                        # Change to using a dict as the positional variables are get
+                        # long
+                        if isinstance(anomalous_metric, dict):
+                            datapoint = str(anomalous_metric['datapoint'])
+                            metric_name = anomalous_metric['metric']
+                            base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+                            expiration_time = str(anomalous_metric['expiry'])
+                            metric_trigger = str(anomalous_metric['trigger'])
+                            alert_threshold = anomalous_metric['threshold']
+                            if not isinstance(alert_threshold, int):
+                                alert_threshold = 1
+                            metric_alerters = anomalous_metric['alerters']
+                            algorithm = str(anomalous_metric['algorithm'])
+                            # @added 20200122 - Feature #3396: http_alerter
+                            # Add the metric timestamp for the http_alerter resend queue
+                            metric_timestamp = anomalous_metric['timestamp']
+
+                            # @added 20231115 - Feature #5104: boundary - external_settings
+                            alerter_id = None
+                            try:
+                                alerter_id = anomalous_metric['alerter_id']
+                            except:
+                                alerter_id = None
+                            # @added 20231027 - Feature #5108: boundary - functions
+                            # Added boundary_function, boundary_function_seconds and
+                            # function_value
+                            try:
+                                boundary_function = anomalous_metric['function']
+                            except:
+                                boundary_function = None
+                            try:
+                                boundary_function_seconds = anomalous_metric['function_seconds']
+                            except:
+                                boundary_function_seconds = 0
+                            try:
+                                function_value = anomalous_metric['function_value']
+                            except:
+                                function_value = None
+
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.debug('debug :: times_seen %s is greater than or equal to alert_threshold %s' % (str(times_seen), str(alert_threshold)))
+                            logger.info("debug :: anomalous_metric - " + str(anomalous_metric))
 
-                        # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
-                        tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                            settings.SKYLINE_TMP_DIR, str(added_at),
-                            # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
-                            # Added algorithm as it is required if the metric has
-                            # multiple rules covering a number of algorithms
-                            str(algorithm), base_name)
+                        # Determine how many times has the anomaly been seen if the
+                        # ALERT_THRESHOLD is set to > 1 and create a cache key in
+                        # redis to keep count so that alert_threshold can be honored
+                        if alert_threshold == 0:
+                            times_seen = 1
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.info("debug :: alert_threshold - " + str(alert_threshold))
+
+                        if alert_threshold == 1:
+                            times_seen = 1
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.info("debug :: alert_threshold - " + str(alert_threshold))
 
                         # @added 20230220 - Feature #4854: boundary - labelled_metrics
-                        #                      Task #2732: Prometheus to Skyline
-                        #                      Branch #4300: prometheus
-                        if labelled_metric:
+                        #                   Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        labelled_metric = False
+                        use_base_name = str(metric_name)
+                        if '_tenant_id="' in metric_name:
+                            try:
+                                metric_id = get_metric_id_from_base_name(skyline_app, base_name)
+                            except Exception as err:
+                                logger.error('error :: get_metric_id_from_base_name failed for %s - %s' % (
+                                    str(base_name), err))
+                                metric_id = 0
+                            labelled_metric = 'labelled_metrics.%s' % str(metric_id)
+                            use_base_name = str(labelled_metric)
+
+                        if alert_threshold > 1:
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.debug('debug :: alert_threshold - ' + str(alert_threshold))
+                            anomaly_cache_key_count_set = False
+                            anomaly_cache_key_expiration_time = (int(alert_threshold) + 1) * 60
+
+                            # @modified 20230220 - Feature #4854: boundary - labelled_metrics
+                            #                      Task #2732: Prometheus to Skyline
+                            #                      Branch #4300: prometheus
+                            # anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
+                            anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, use_base_name)
+
+                            # @added 20231115 - Feature #5104: boundary - external_settings
+                            # @modified 20231120 - Feature #5104: boundary - external_settings
+                            # For now do not add the alerter_id dimension
+                            # if alerter_id:
+                            #     anomaly_cache_key = 'anomaly_seen.%s.%s.%s' % (algorithm, alerter_id, use_base_name)
+
+                            try:
+                                anomaly_cache_key_count = self.redis_conn.get(anomaly_cache_key)
+                                if not anomaly_cache_key_count:
+                                    try:
+                                        if ENABLE_BOUNDARY_DEBUG:
+                                            logger.debug('debug :: redis no anomaly_cache_key - ' + str(anomaly_cache_key))
+                                        times_seen = 1
+                                        if ENABLE_BOUNDARY_DEBUG:
+                                            logger.debug('debug :: redis setex anomaly_cache_key - ' + str(anomaly_cache_key))
+                                        self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                                        logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
+                                    except Exception as e:
+                                        logger.error('error :: redis setex failed :: %s' % str(anomaly_cache_key))
+                                        logger.error('error :: could not set key: %s' % e)
+                                else:
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.debug('debug :: redis anomaly_cache_key retrieved OK - ' + str(anomaly_cache_key))
+                                    anomaly_cache_key_count_set = True
+                            except:
+                                if ENABLE_BOUNDARY_DEBUG:
+                                    logger.debug('debug :: redis failed - anomaly_cache_key retrieval failed - ' + str(anomaly_cache_key))
+                                anomaly_cache_key_count_set = False
+
+                            if anomaly_cache_key_count_set:
+                                unpacker = Unpacker(use_list=False)
+                                unpacker.feed(anomaly_cache_key_count)
+                                raw_times_seen = list(unpacker)
+                                times_seen = int(raw_times_seen[0]) + 1
+                                try:
+                                    self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
+                                    logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
+                                except:
+                                    times_seen = 1
+                                    logger.error('error :: set anomaly seen key failed :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
+
+                        # Alert the alerters if times_seen > alert_threshold
+                        if times_seen >= alert_threshold:
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.debug('debug :: times_seen %s is greater than or equal to alert_threshold %s' % (str(times_seen), str(alert_threshold)))
+
+                            # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                             tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
                                 settings.SKYLINE_TMP_DIR, str(added_at),
-                                str(algorithm), labelled_metric)
-
-                        if ENABLE_BOUNDARY_DEBUG:
-                            logger.debug('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
-                        if os.path.isfile(tmp_panaroma_anomaly_file):
-                            panaroma_anomaly_file = '%s/%s.%s.txt' % (
-                                settings.PANORAMA_CHECK_PATH, str(added_at), base_name)
+                                # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                                # Added algorithm as it is required if the metric has
+                                # multiple rules covering a number of algorithms
+                                str(algorithm), base_name)
 
                             # @added 20230220 - Feature #4854: boundary - labelled_metrics
                             #                      Task #2732: Prometheus to Skyline
                             #                      Branch #4300: prometheus
                             if labelled_metric:
-                                panaroma_anomaly_file = '%s/%s.%s.txt' % (
-                                    settings.PANORAMA_CHECK_PATH, str(added_at), labelled_metric)
+                                tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                    settings.SKYLINE_TMP_DIR, str(added_at),
+                                    str(algorithm), labelled_metric)
 
-                            logger.info('moving tmp_panaroma_anomaly_file - %s to panaroma_anomaly_file %s' % (str(tmp_panaroma_anomaly_file), str(panaroma_anomaly_file)))
-                            # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
-                            # Added skyline_app
-                            try:
-                                # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
-                                # Correct move
-                                # move_file(skyline_app, tmp_panaroma_anomaly_file, panaroma_anomaly_file)
-                                move_file(skyline_app, settings.PANORAMA_CHECK_PATH, tmp_panaroma_anomaly_file)
-                            except:
-                                logger.info(traceback.format_exc())
-                                logger.error('error :: failed to move tmp_panaroma_anomaly_file to panaroma_anomaly_file')
-                            # @added 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
-                            # Rename moved file as the filename is used in Panorama
-                            try:
-                                tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                                    settings.PANORAMA_CHECK_PATH, str(added_at),
-                                    str(algorithm), base_name)
+                            # @added 20231115 - Feature #5104: boundary - external_settings
+                            # @modified 20231120 - Feature #5104: boundary - external_settings
+                            # For now do not add the alerter_id dimension
+                            # if alerter_id:
+                            #     tmp_panaroma_anomaly_file = '%s.%s' % (
+                            #         tmp_panaroma_anomaly_file, str(alerter_id))
+
+                            if ENABLE_BOUNDARY_DEBUG:
+                                logger.debug('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
+                            if os.path.isfile(tmp_panaroma_anomaly_file):
+                                panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                                    settings.PANORAMA_CHECK_PATH, str(added_at), base_name)
 
                                 # @added 20230220 - Feature #4854: boundary - labelled_metrics
-                                #                      Task #2732: Prometheus to Skyline
-                                #                      Branch #4300: prometheus
+                                #                   Task #2732: Prometheus to Skyline
+                                #                   Branch #4300: prometheus
                                 if labelled_metric:
+                                    panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                                        settings.PANORAMA_CHECK_PATH, str(added_at), labelled_metric)
+
+                                # @added 20231123 - Feature #5104: boundary - external_settings
+                                # Simply added this comment for clarification here
+                                # in terms of the process.  If a boundary anomaly
+                                # is triggered the panorama check file WILL be
+                                # sent to Panorama, regardless of whether an
+                                # alert is sent below.  Panorama will determine
+                                # whether to insert the anomaly or whether to
+                                # discard it based on the existence of a
+                                # panorama.last_check.boundary.[use_base_name]
+                                # key, based on the settings.PANORAMA_EXPIRY_TIME
+
+                                logger.info('moving tmp_panaroma_anomaly_file - %s to panaroma_anomaly_file %s for alerter_id: %s' % (
+                                    str(tmp_panaroma_anomaly_file), str(panaroma_anomaly_file),
+                                    str(alerter_id)))
+                                # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                                # Added skyline_app
+                                try:
+                                    # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                                    # Correct move
+                                    # move_file(skyline_app, tmp_panaroma_anomaly_file, panaroma_anomaly_file)
+                                    move_file(skyline_app, settings.PANORAMA_CHECK_PATH, tmp_panaroma_anomaly_file)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: failed to move tmp_panaroma_anomaly_file to panaroma_anomaly_file')
+                                # @added 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                                # Rename moved file as the filename is used in Panorama
+                                try:
                                     tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
                                         settings.PANORAMA_CHECK_PATH, str(added_at),
-                                        str(algorithm), labelled_metric)
+                                        str(algorithm), base_name)
 
-                                os.rename(tmp_panaroma_anomaly_file_to_rename, panaroma_anomaly_file)
-                            except:
-                                logger.info(traceback.format_exc())
-                                logger.error('error :: failed to rename tmp_panaroma_anomaly_filename to panaroma_anomaly_filename')
-                        else:
-                            logger.warning('warning :: tmp_panaroma_anomaly_file does not exist')
+                                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                                    #                      Task #2732: Prometheus to Skyline
+                                    #                      Branch #4300: prometheus
+                                    if labelled_metric:
+                                        tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                            settings.PANORAMA_CHECK_PATH, str(added_at),
+                                            str(algorithm), labelled_metric)
 
-                        for alerter in metric_alerters.split("|"):
-                            # Determine alerter limits
-                            send_alert = False
-                            alerts_sent = 0
-                            if ENABLE_BOUNDARY_DEBUG:
-                                logger.debug('debug :: checking alerter - %s' % alerter)
-                            try:
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.debug('debug :: determining alerter_expiration_time for settings')
-                                alerter_expiration_time_setting = settings.BOUNDARY_ALERTER_OPTS['alerter_expiration_time'][alerter]
-                                alerter_expiration_time = int(alerter_expiration_time_setting)
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.debug('debug :: determined alerter_expiration_time from settings - %s' % str(alerter_expiration_time))
-                            except:
-                                # Set an arbitrary expiry time if not set
-                                alerter_expiration_time = 160
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info("debug :: could not determine alerter_expiration_time from settings")
-                            try:
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info("debug :: determining alerter_limit from settings")
-                                alerter_limit_setting = settings.BOUNDARY_ALERTER_OPTS['alerter_limit'][alerter]
-                                alerter_limit = int(alerter_limit_setting)
-                                alerter_limit_set = True
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info("debug :: determined alerter_limit from settings - %s" % str(alerter_limit))
-                            except:
-                                alerter_limit_set = False
-                                send_alert = True
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info("debug :: could not determine alerter_limit from settings")
+                                    os.rename(tmp_panaroma_anomaly_file_to_rename, panaroma_anomaly_file)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: failed to rename tmp_panaroma_anomaly_filename to panaroma_anomaly_filename')
+                            else:
+                                logger.warning('warning :: tmp_panaroma_anomaly_file does not exist')
 
-                            # If the alerter_limit is set determine how many
-                            # alerts the alerter has sent
-                            if alerter_limit_set:
-                                alerter_sent_count_key = 'alerts_sent.%s' % (alerter)
+                            for alerter in metric_alerters.split("|"):
+                                # Determine alerter limits
+                                send_alert = False
+                                alerts_sent = 0
+                                if ENABLE_BOUNDARY_DEBUG:
+                                    logger.debug('debug :: checking alerter - %s' % alerter)
                                 try:
-                                    alerter_sent_count_key_data = self.redis_conn.get(alerter_sent_count_key)
-                                    if not alerter_sent_count_key_data:
-                                        if ENABLE_BOUNDARY_DEBUG:
-                                            logger.info("debug :: redis no alerter key, no alerts sent for - " + str(alerter_sent_count_key))
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.debug('debug :: determining alerter_expiration_time for settings')
+                                    alerter_expiration_time_setting = settings.BOUNDARY_ALERTER_OPTS['alerter_expiration_time'][alerter]
+                                    alerter_expiration_time = int(alerter_expiration_time_setting)
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.debug('debug :: determined alerter_expiration_time from settings - %s' % str(alerter_expiration_time))
+                                except:
+                                    # Set an arbitrary expiry time if not set
+                                    alerter_expiration_time = 160
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.info("debug :: could not determine alerter_expiration_time from settings")
+                                try:
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.info("debug :: determining alerter_limit from settings")
+                                    alerter_limit_setting = settings.BOUNDARY_ALERTER_OPTS['alerter_limit'][alerter]
+                                    alerter_limit = int(alerter_limit_setting)
+                                    alerter_limit_set = True
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.info("debug :: determined alerter_limit from settings - %s" % str(alerter_limit))
+                                except:
+                                    alerter_limit_set = False
+                                    send_alert = True
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.info("debug :: could not determine alerter_limit from settings")
+
+                                # If the alerter_limit is set determine how many
+                                # alerts the alerter has sent
+                                if alerter_limit_set:
+                                    alerter_sent_count_key = 'alerts_sent.%s' % (alerter)
+                                    try:
+                                        alerter_sent_count_key_data = self.redis_conn.get(alerter_sent_count_key)
+                                        if not alerter_sent_count_key_data:
+                                            if ENABLE_BOUNDARY_DEBUG:
+                                                logger.info("debug :: redis no alerter key, no alerts sent for - " + str(alerter_sent_count_key))
+                                            alerts_sent = 0
+                                            send_alert = True
+                                            if ENABLE_BOUNDARY_DEBUG:
+                                                logger.info("debug :: alerts_sent set to %s" % str(alerts_sent))
+                                                logger.info("debug :: send_alert set to %s" % str(send_alert))
+                                        else:
+                                            if ENABLE_BOUNDARY_DEBUG:
+                                                logger.debug('debug :: redis alerter key retrieved, unpacking %s' % str(alerter_sent_count_key))
+                                            unpacker = Unpacker(use_list=False)
+                                            unpacker.feed(alerter_sent_count_key_data)
+                                            raw_alerts_sent = list(unpacker)
+                                            alerts_sent = int(raw_alerts_sent[0])
+                                            if ENABLE_BOUNDARY_DEBUG:
+                                                logger.info("debug :: alerter %s alerts sent %s " % (str(alerter), str(alerts_sent)))
+                                    except:
+                                        logger.info("No key set - %s" % alerter_sent_count_key)
                                         alerts_sent = 0
                                         send_alert = True
                                         if ENABLE_BOUNDARY_DEBUG:
                                             logger.info("debug :: alerts_sent set to %s" % str(alerts_sent))
                                             logger.info("debug :: send_alert set to %s" % str(send_alert))
-                                    else:
+
+                                    if alerts_sent < alerter_limit:
+                                        send_alert = True
                                         if ENABLE_BOUNDARY_DEBUG:
-                                            logger.debug('debug :: redis alerter key retrieved, unpacking %s' % str(alerter_sent_count_key))
-                                        unpacker = Unpacker(use_list=False)
-                                        unpacker.feed(alerter_sent_count_key_data)
-                                        raw_alerts_sent = list(unpacker)
-                                        alerts_sent = int(raw_alerts_sent[0])
-                                        if ENABLE_BOUNDARY_DEBUG:
-                                            logger.info("debug :: alerter %s alerts sent %s " % (str(alerter), str(alerts_sent)))
-                                except:
-                                    logger.info("No key set - %s" % alerter_sent_count_key)
-                                    alerts_sent = 0
-                                    send_alert = True
-                                    if ENABLE_BOUNDARY_DEBUG:
-                                        logger.info("debug :: alerts_sent set to %s" % str(alerts_sent))
-                                        logger.info("debug :: send_alert set to %s" % str(send_alert))
+                                            logger.info("debug :: alerts_sent %s is less than alerter_limit %s" % (str(alerts_sent), str(alerter_limit)))
+                                            logger.info("debug :: send_alert set to %s" % str(send_alert))
 
-                                if alerts_sent < alerter_limit:
-                                    send_alert = True
-                                    if ENABLE_BOUNDARY_DEBUG:
-                                        logger.info("debug :: alerts_sent %s is less than alerter_limit %s" % (str(alerts_sent), str(alerter_limit)))
-                                        logger.info("debug :: send_alert set to %s" % str(send_alert))
-
-                            # @added 20210801 - Feature #4214: alert.paused
-                            alert_paused = False
-                            try:
-                                cache_key = 'alert.paused.%s.%s' % (alerter, base_name)
-                                # @added 20230220 - Feature #4854: boundary - labelled_metrics
-                                #                   Task #2732: Prometheus to Skyline
-                                #                   Branch #4300: prometheus
-                                if labelled_metric:
-                                    cache_key = 'alert.paused.%s.%s' % (alerter, labelled_metric)
-
-                                alert_paused = self.redis_conn_decoded.get(cache_key)
-                            except Exception as e:
-                                logger.error('error :: alert_paused check failed: %s' % str(e))
-                            if alert_paused:
-                                send_alert = False
-                                logger.info('alert_paused for %s %s until %s' % (
-                                    alerter, base_name, str(alert_paused)))
-
-                            # Send alert
-                            alerter_alert_sent = False
-                            if send_alert:
-                                cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, base_name, algorithm)
-                                # @added 20230220 - Feature #4854: boundary - labelled_metrics
-                                #                   Task #2732: Prometheus to Skyline
-                                #                   Branch #4300: prometheus
-                                if labelled_metric:
-                                    cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, labelled_metric, algorithm)
-
-                                if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info("debug :: checking cache_key - %s" % cache_key)
+                                # @added 20210801 - Feature #4214: alert.paused
+                                alert_paused = False
                                 try:
-                                    last_alert = self.redis_conn.get(cache_key)
-                                    if not last_alert:
-                                        try:
-                                            self.redis_conn.setex(cache_key, int(anomalous_metric[2]), packb(int(anomalous_metric[0])))
+                                    cache_key = 'alert.paused.%s.%s' % (alerter, base_name)
+                                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                                    #                   Task #2732: Prometheus to Skyline
+                                    #                   Branch #4300: prometheus
+                                    if labelled_metric:
+                                        cache_key = 'alert.paused.%s.%s' % (alerter, labelled_metric)
+
+                                    alert_paused = self.redis_conn_decoded.get(cache_key)
+                                except Exception as e:
+                                    logger.error('error :: alert_paused check failed: %s' % str(e))
+                                if alert_paused:
+                                    send_alert = False
+                                    logger.info('alert_paused for %s %s until %s' % (
+                                        alerter, base_name, str(alert_paused)))
+
+                                # Send alert
+                                alerter_alert_sent = False
+                                if send_alert:
+                                    cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, base_name, algorithm)
+                                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                                    #                   Task #2732: Prometheus to Skyline
+                                    #                   Branch #4300: prometheus
+                                    if labelled_metric:
+                                        cache_key = 'last_alert.boundary.%s.%s.%s' % (alerter, labelled_metric, algorithm)
+
+                                    if ENABLE_BOUNDARY_DEBUG:
+                                        logger.info("debug :: checking cache_key - %s" % cache_key)
+                                    try:
+                                        last_alert = self.redis_conn.get(cache_key)
+
+                                        # @added 20231122 - Feature #5104: boundary - external_settings
+                                        # If a panorama key exists for the metric do not alert.  This
+                                        if last_alert:
+                                            logger.info("last_alert cache_key - %s exists not sending alert for %s" % (
+                                                cache_key, str(alerter_id)))
+
+                                        # @added 20231122 - Feature #5104: boundary - external_settings
+                                        # If a panorama key exists for the metric do not alert.  This
+                                        # mitigates situations where an external failure creates a
+                                        # resend queue and introduces an offset between panorama,
+                                        # the syslog alerter and the http_alert timestamps, which
+                                        # could not be fully reproduced or debugged sufficiently
+                                        # to determine the exact chain of events with the
+                                        # logging level implemented at the time.  The situation
+                                        # develops in where Panorama has an app alert key so
+                                        # will not record an anomaly if an offset due to an
+                                        # external failure is introduced
+                                        if not last_alert:
+                                            panorama_key = 'panorama.last_check.boundary.%s' % base_name
+                                            if labelled_metric:
+                                                panorama_key = 'panorama.last_check.boundary.%s' % labelled_metric
+                                            try:
+                                                last_alert = self.redis_conn.get(panorama_key)
+                                            except:
+                                                last_alert = None
+                                            if last_alert:
+                                                logger.info('%s key exists, but %s does not - not alerting' % (
+                                                    panorama_key, cache_key))
+
+                                        if not last_alert:
+                                            try:
+                                                # self.redis_conn.setex(cache_key, int(anomalous_metric[2]), packb(int(anomalous_metric[0])))
+                                                self.redis_conn.setex(cache_key, int(expiration_time), packb(float(datapoint)))
+                                                if ENABLE_BOUNDARY_DEBUG:
+                                                    logger.debug('debug :: key setex OK - %s' % (cache_key))
+
+                                                # @added 20230913 - Feature #5066: boundary - recovered
+                                                # TODO
+                                                use_base_name = base_name
+                                                if labelled_metric:
+                                                    use_base_name = labelled_metric
+                                                # try:
+                                                #    self.redis_conn_decoded.hset('boundary.anomalies_alerts', use_base_name)
+
+                                                # @modified 20200122 - Feature #3396: http_alerter
+                                                # Add the metric timestamp for the http_alerter resend queue
+                                                # trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                                # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                                                # @modified 20231115 - Feature #5104: boundary - external_settings
+                                                # Added alerter_id
+                                                # @modified 20231122 - Feature #5104: boundary - external_settings
+                                                # Added labelled_metric for the key name
+                                                # @modified 20240407 - Feature #4214: alert.paused
+                                                # Handle SMS_ALERTS_SCHEDULE
+                                                # trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold, alerter_id=alerter_id, labelled_metric=labelled_metric)
+                                                if alerter == 'sms':
+                                                    trigger_alert_status = trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold, alerter_id=alerter_id, labelled_metric=labelled_metric)
+                                                    if trigger_alert_status == 'disabled':
+                                                        self.redis_conn.delete(cache_key)
+                                                        logger.info('SMS alert is currently in a disabled period, alert not sent')
+                                                    else:
+                                                        logger.info('alert sent :: %s - %s - via %s - %s %s %s times' % (
+                                                            base_name, str(datapoint), alerter, algorithm, str(metric_trigger), str(alert_threshold)))
+                                                else:
+                                                    trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold, alerter_id=alerter_id, labelled_metric=labelled_metric)
+                                                    logger.info('alert sent :: %s - %s - via %s - %s %s %s times' % (
+                                                        base_name, str(datapoint), alerter, algorithm, str(metric_trigger), str(alert_threshold)))
+                                                # @modified 20231120 - Feature #5104: boundary - external_settings
+                                                # Removed this syslog and the except syslog trigger_alert and
+                                                # separated them into there own blocks for the purpose of
+                                                # debugging.
+                                                # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                                ## logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                                # logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                                                #     base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
+                                                alerter_alert_sent = True
+                                            except Exception as err:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: alert failed :: %s - %s - via %s - %s' % (base_name, str(datapoint), alerter, algorithm))
+                                                logger.error('error :: could not send alert: %s' % str(err))
+                                                # @modified 20231120 - Feature #5104: boundary - external_settings
+                                                # Removed this syslog and the except syslog trigger_alert and
+                                                # separated them into there own blocks for the purpose of
+                                                # debugging.
+                                                # trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+
+                                            # @added 20231120 - Feature #5104: boundary - external_settings
+                                            # Added this syslog trigger_alert to replace the two above for
+                                            # for the purpose of debugging trigger_alert on http_alerter.
+                                            # This trigger_alert is the same as the above original.
+                                            # @added 20231123 - Feature #5104: boundary - external_settings
+                                            # Added this comment only.  It is possible that this is the
+                                            # culprit when the situation arises where an external
+                                            # http_alert fails and adds the alert to the resend queue,
+                                            # but no alert key is created, creating an offset which
+                                            # results in the http_alert never determining an anomaly
+                                            # id for the http_alert because at some point in the
+                                            # process the syslog trigger_alert sends to Panorama in the process
+                                            # and Panorama's panorama.last_check.boundary has expired at this
+                                            # point and Panorama records an anomaly with a metric_timestamp
+                                            # from the syslog alert, which prevents Panorama adding an anomaly
+                                            # for hte http_alert timestamp and as long as the boundary anomaly
+                                            # persists, the http_alerter will error continue if the external
+                                            # http_alerter requires an anomaly id.
+                                            try:
+                                                trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                            except Exception as err:
+                                                logger.error('error :: syslog alert failed :: %s - %s - via %s - %s' % (base_name, str(datapoint), alerter, algorithm))
+                                                logger.error('error :: could not send syslog alert: %s' % str(err))
+
+                                        else:
                                             if ENABLE_BOUNDARY_DEBUG:
-                                                logger.debug('debug :: key setex OK - %s' % (cache_key))
-                                            # @modified 20200122 - Feature #3396: http_alerter
-                                            # Add the metric timestamp for the http_alerter resend queue
-                                            # trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                                logger.debug("debug :: cache_key exists not alerting via %s for %s is less than alerter_limit %s" % (
+                                                    alerter, cache_key, str(alert_threshold)))
                                             # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-                                            trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
-                                            logger.info('alert sent :: %s - %s - via %s - %s %s %s times' % (
-                                                base_name, str(datapoint), alerter, algorithm, str(metric_trigger), str(alert_threshold)))
-                                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
-                                            # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                            # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
+                                            # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, str(datapoint), algorithm))
                                             logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
-                                                base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
-                                            alerter_alert_sent = True
-                                        except Exception as e:
-                                            logger.error('error :: alert failed :: %s - %s - via %s - %s' % (base_name, str(datapoint), alerter, algorithm))
-                                            logger.error('error :: could not send alert: %s' % str(e))
-                                            trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
-                                    else:
-                                        if ENABLE_BOUNDARY_DEBUG:
-                                            logger.debug("debug :: cache_key exists not alerting via %s for %s is less than alerter_limit %s" % (
-                                                alerter, cache_key, str(alert_threshold)))
+                                                # base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
+                                                base_name, str(datapoint), algorithm, str(metric_trigger), str(times_seen)))
+                                    except:
                                         # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-                                        # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
-                                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
-                                        # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, str(datapoint), algorithm))
+                                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                        # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
                                         logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
-                                            # base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
-                                            base_name, str(datapoint), algorithm, str(metric_trigger), str(times_seen)))
-                                except:
-                                    # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-                                    trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                            base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
+                                else:
+                                    # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                    trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
                                     # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
                                     logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
-                                        base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
-                            else:
-                                # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
-                                trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
-                                # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
-                                logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
-                                    # base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
-                                    base_name, str(datapoint), algorithm, str(metric_trigger), str(times_seen)))
-                            # Update the alerts sent for the alerter cache key,
-                            # to allow for alert limiting
-                            if alerter_alert_sent and alerter_limit_set:
-                                try:
-                                    alerter_sent_count_key = 'alerts_sent.%s' % (alerter)
-                                    new_alerts_sent = int(alerts_sent) + 1
-                                    self.redis_conn.setex(alerter_sent_count_key, alerter_expiration_time, packb(int(new_alerts_sent)))
-                                    logger.info('set %s - %s' % (alerter_sent_count_key, str(new_alerts_sent)))
-                                except:
-                                    logger.error('error :: failed to set %s - %s' % (alerter_sent_count_key, str(new_alerts_sent)))
-                    else:
-                        # Always alert to syslog, even if alert_threshold is not
-                        # breached or if send_alert is not True
-                        # @modified 20201214 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-                        # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
-                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
-                        # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
-                        logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
-                            # base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
-                            base_name, str(datapoint), algorithm, str(metric_trigger), str(times_seen)))
+                                        # base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
+                                        base_name, str(datapoint), algorithm, str(metric_trigger), str(times_seen)))
+                                # Update the alerts sent for the alerter cache key,
+                                # to allow for alert limiting
+                                if alerter_alert_sent and alerter_limit_set:
+                                    alerter_sent_count_key = 'alerts_sent.%s' % str(alerter)
+                                    try:
+                                        # alerter_sent_count_key = 'alerts_sent.%s' % (alerter)
+                                        new_alerts_sent = int(alerts_sent) + 1
+                                        self.redis_conn.setex(alerter_sent_count_key, alerter_expiration_time, packb(int(new_alerts_sent)))
+                                        logger.info('set %s - %s' % (alerter_sent_count_key, str(new_alerts_sent)))
+                                    except Exception as err:
+                                        logger.error('error :: failed to set Redis key %s, err:%s' % (alerter_sent_count_key, err))
+                        else:
+                            # Always alert to syslog, even if alert_threshold is not
+                            # breached or if send_alert is not True
+                            # @modified 20201214 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                            # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
+                            # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                            logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                                # base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
+                                base_name, str(datapoint), algorithm, str(metric_trigger), str(times_seen)))
 
-                    # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
-                    # Remove tmp_panaroma_anomaly_file
-                    tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                        # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
-                        # Added algorithm
-                        settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
-                        base_name)
-
-                    # @added 20230220 - Feature #4854: boundary - labelled_metrics
-                    #                   Task #2732: Prometheus to Skyline
-                    #                   Branch #4300: prometheus
-                    if labelled_metric:
+                        # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
+                        # Remove tmp_panaroma_anomaly_file
                         tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                            # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
+                            # Added algorithm
                             settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
-                            labelled_metric)
+                            base_name)
 
-                    if os.path.isfile(tmp_panaroma_anomaly_file):
-                        try:
-                            os.remove(str(tmp_panaroma_anomaly_file))
-                            logger.info('removed - %s' % str(tmp_panaroma_anomaly_file))
-                        except OSError:
-                            pass
+                        # @added 20230220 - Feature #4854: boundary - labelled_metrics
+                        #                   Task #2732: Prometheus to Skyline
+                        #                   Branch #4300: prometheus
+                        if labelled_metric:
+                            tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
+                                settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
+                                labelled_metric)
+
+                        if os.path.isfile(tmp_panaroma_anomaly_file):
+                            try:
+                                os.remove(str(tmp_panaroma_anomaly_file))
+                                logger.info('removed - %s' % str(tmp_panaroma_anomaly_file))
+                            except OSError:
+                                pass
+
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to process anomalous_metric: %s, err: %s' % (
+                            str(anomalous_metric), err))
 
             # Write anomalous_metrics to static webapp directory
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # if len(self.anomalous_metrics) > 0:
-            if len(boundary_anomalous_metrics) > 0:
+            # @modified 20231122 - Feature #5104: boundary - external_settings
+            # Do not write boundary anomalies to the jsonp file
+            update_jsonp = False
+            # if len(boundary_anomalous_metrics) > 0:
+            if len(boundary_anomalous_metrics) > 0 and update_jsonp:
+                logger.info('writing to JSONP')
                 filename = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
                 with open(filename, 'w') as fh:
                     # Make it JSONP with a handle_data() function
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # anomalous_metrics = list(self.anomalous_metrics)
-                    anomalous_metrics = boundary_anomalous_metrics
-                    anomalous_metrics.sort(key=operator.itemgetter(1))
-                    fh.write('handle_data(%s)' % anomalous_metrics)
+                    try:
+                        try:
+                            anomalous_metrics = copy.deepcopy(boundary_anomalous_metrics)
+                        except:
+                            try:
+                                anomalous_metrics = list(boundary_anomalous_metrics)
+                            except:
+                                anomalous_metrics = []
+
+                        # @modified 20231115 - Feature #5104: boundary - external_settings
+                        # Change to using a dict as the positional variables are
+                        # getting long
+                        if isinstance(boundary_anomalous_metrics, list):
+                            logger.info('converting boundary_anomalous_metrics dict to anomalous_metrics list. boundary_anomalous_metrics: %s' % (
+                                str(boundary_anomalous_metrics)))
+                            anomalous_metrics = []
+                            try:
+                                for anomalous_metric_dict in boundary_anomalous_metrics:
+                                    anomalous_metric_list = []
+                                    for kkey, value in anomalous_metric_dict.items():
+                                        anomalous_metric_list.append(value)
+                                    anomalous_metrics.append(anomalous_metric_list)
+                            except Exception as err:
+                                logger.error('error :: failed convert boundary_anomalous_metrics dict item to list: %s' % (
+                                    err))
+                            logger.info('boundary_anomalous_metrics dict converted to anomalous_metrics list. boundary_anomalous_metrics: %s, anomalous_metrics: %s' % (
+                                str(boundary_anomalous_metrics),
+                                str(anomalous_metrics)))
+
+                        anomalous_metrics.sort(key=operator.itemgetter(1))
+                        fh.write('handle_data(%s)' % anomalous_metrics)
+                    except Exception as err:
+                        logger.error('error :: failed to write webapp anomalous json file - boundary_anomalous_metrics: %s, err: %s' % (
+                            str(boundary_anomalous_metrics), err))
 
             # @added 20200121 - Feature #3396: http_alerter
             full_resend_queue = []
@@ -1962,6 +2479,13 @@ class Boundary(Thread):
                         metric_timestamp = int(resend_item_list[6])
                         metric_alert_dict = literal_eval(resend_item_list[7])
 
+                        # @modified 20231115 -Feature #5104: boundary - external_settings
+                        # Added alerter_id
+                        try:
+                            alerter_id = metric_alert_dict['id']
+                        except:
+                            alerter_id = None
+
                         # To ensure that Boundary does not loop through every alert in the queue
                         # for an alerter_endpoint, if the alerter_endpoint is down and wait for
                         # the connect timeout on each one, if an alerter_endpoint fails a Redis
@@ -1983,7 +2507,10 @@ class Boundary(Thread):
                             continue
                         logger.info('resend_queue item :: %s' % (str(resend_item_list)))
                         try:
-                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                            # @modified 20231115 -Feature #5104: boundary - external_settings
+                            # Added alerter_id
+                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold, alerter_id=alerter_id)
+
                             logger.info('trigger_alert :: %s resend %s' % (
                                 str(resend_item_list), str(metric_alert_dict)))
                         except:
@@ -2008,6 +2535,13 @@ class Boundary(Thread):
                         metric_timestamp = resend_item_list[6]
                         metric_alert_dict = resend_item_list[7]
 
+                        # @modified 20231115 -Feature #5104: boundary - external_settings
+                        # Added alerter_id
+                        try:
+                            alerter_id = metric_alert_dict['id']
+                        except:
+                            alerter_id = None
+
                         # To ensure that Boundary does not loop through every alert in the queue
                         # for an alerter_endpoint, if the alerter_endpoint is down and wait for
                         # the connect timeout on each one, if an alerter_endpoint fails a Redis
@@ -2029,7 +2563,9 @@ class Boundary(Thread):
                             continue
                         logger.info('resend_queue item :: %s' % (str(resend_item_list)))
                         try:
-                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                            # @modified 20231115 -Feature #5104: boundary - external_settings
+                            # Added alerter_id
+                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold, alerter_id=alerter_id)
                             logger.info('trigger_alert :: %s resend %s' % (
                                 str(resend_item_list), str(metric_alert_dict)))
                         except:

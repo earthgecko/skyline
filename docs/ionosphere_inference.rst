@@ -16,7 +16,7 @@ Note that the terms motif, shape, shapelet and subsuqeunces are somewhat
 synonymous in this regard.  HOWEVER their use in relation to
 :skyblue:`Sky`:red:`line` has distinctions made:
 
-- shapelet, ``subsequence`` or shape: is a snippet of a timeseries
+- shapelet, ``subsequence`` or shape: is a snippet of a time series
 - ``motif``: is shapelet that has be discovered based on distance.
 - ``matched_motif``: is a motif identified as matching some additional criteria
   (other than distance).  A matched_motif can represent a ``similar``,

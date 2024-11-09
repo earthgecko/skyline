@@ -38,6 +38,14 @@ def non_derivative_metrics(self, external_settings, unique_base_names):
         non_derivative_metric_namespaces = []
 
     for config_id in list(external_settings):
+
+        # @added 20240521 - Feature #5352: vista - bigquery
+        if 'bq_settings' in external_settings[config_id].keys():
+            if 'non_derivative_namespaces' in external_settings[config_id]['bq_settings'].keys():
+                external_settings_non_derivative_metric_namespaces = external_settings[config_id]['bq_settings']['non_derivative_namespaces']
+                if len(external_settings_non_derivative_metric_namespaces) > 0 and isinstance(external_settings_non_derivative_metric_namespaces, list):
+                    non_derivative_metric_namespaces = non_derivative_metric_namespaces + external_settings_non_derivative_metric_namespaces
+
         try:
             external_settings_non_derivative_metric_namespaces = list(external_settings[config_id]['non_derivative_namespaces'])
             if external_settings_non_derivative_metric_namespaces:

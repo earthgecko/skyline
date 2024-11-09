@@ -69,12 +69,18 @@ from skyline_functions import (
     sort_timeseries,
     # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
     #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-    sanitise_graphite_url)
+    sanitise_graphite_url,
+    # @added 20240117 - Feature #5226: crucible - labelled_metrics
+    nonNegativeDerivative,
+    )
 
 # @added 20220610 - Feature #3500: webapp - crucible_process_metrics
 # Added summarise option
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.timeseries.downsample import downsample_timeseries
+
+# @added 20240117 - Feature #5226: crucible - labelled_metrics
+from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
 
 from crucible_algorithms import run_algorithms
 
@@ -949,6 +955,7 @@ class Crucible(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: sanitise_graphite_url failed - %s - %s' % (str(url), err))
 
+
                     datapoints = []
                     try:
                         r = requests.get(url, timeout=use_timeout)
@@ -985,6 +992,21 @@ class Crucible(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to move check file - %s' % (err))
                         return
+
+                    # @added 20240117 - Feature #5226: crucible - labelled_metrics
+                    if converted:
+                        is_strictly_increasing_monotonic = None
+                        try:
+                            is_strictly_increasing_monotonic = strictly_increasing_monotonicity(converted)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: nonNegativeDerivative failed, err: %s' % (err))
+                        if is_strictly_increasing_monotonic:
+                            try:
+                                converted = nonNegativeDerivative(converted)
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: nonNegativeDerivative failed, err: %s' % (err))
 
                     if converted:
                         try:
@@ -1681,7 +1703,12 @@ class Crucible(Thread):
             for p in pids:
                 if p.is_alive():
                     logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
-                    p.join()
+                    # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
+                    # p.join()
+                    killing_pid = p.pid
+                    logger.info('%s :: kill spin_process with pid: %s' % (skyline_app, str(killing_pid)))
+                    p.terminate()
+                    logger.info('%s :: killed spin_process process with pid: %s' % (skyline_app, str(killing_pid)))
 
             while os.path.isfile(metric_check_file):
                 sleep(1)

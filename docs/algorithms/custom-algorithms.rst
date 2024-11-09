@@ -12,8 +12,9 @@ If you are wanting to implement a custom algorithm, ensure you read this
 documentation **thoroughly** and **understand the layout** in the example
 algorithms.  This will save you time if you do it properly from the beginning.
 
-Custom algorithms are currently only implemented in analyzer (also covers
-analyzer_batch), crucible and mirage.
+Custom algorithms can be used in analyzer, analyzer_batch, crucible, mirage,
+Vortex and SNAB.  The methods by which to enable and use custom_algorithms in
+the different Skyline apps varies according to the app/use.
 
 Available custom algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,79 +62,8 @@ The custom algorithms settings are therefore highly configurable, specifically
 take note of the consensus, run_3sigma_algorithms, run_before_3sigma and
 run_only_if_consensus parameters, especially if you are attempting to run
 multiple custom algorithms at different stages, before or after three-sigma and
-what consensus should be applied.  It is probably possible to configure poorly
-given the methods and modes that can be configured.
-
-The use of numba optimisations
-------------------------------
-
-Any performance optimisations that can be achieve in custom algortihm with numba
-jit functions is encouraged, with the following caveats.
-
-If the algorithm or any part thereof uses numba optimisations in anyway ensure
-that the ``jit`` or ``njit`` decorator has ``cache=True`` applied to ensure that
-the jit compilation overhead is only incurred once and is not incurred on every
-execution.  In terms of multiprocessing and threading if there is no jit cache
-file of a function the jit compilation happens every execution which is slow.
-
-Also note that in the normal Skyline build on CentOS 8 the default
-``NUMBA_CACHE_DIR`` is ``/opt/skyline/.cache/numba`` this is not specifically
-defined, it is what gets defaulted to by numba.  **IMPORTANT** as per relevant
-upgrade instructions in release notes, this directory needs to be flushed
-whenever an upgrade is made to Python and/or any dependencies, so that the numba
-jit cache files can be recompiled with the new versions.
-
-In terms of making changes to any existing numba optimised custom algorithms
-that are loaded by Skyline, numba will **automatically** replace it jit cache
-files when a change is made to the algorithm source file in Skyline when the
-relevant Skyline service is restarted and the custom algorithm function is
-called for the first time.
-
-That said this has a direct impact on the custom algorithm ``max_execution_time``
-parameter.  This is because the first execution of the jit function when the
-cache files are not present could take say 40 seconds to compile the function.
-Now if you can expect the algorithm to run in say less than 1 second WHEN the
-jit cache file is present, you may want to set the ``max_execution_time: 1.2,``
-however the custom algorithm will be terminated by the timeout decorator on
-**every** run and it will never compile and therefore never save the jit cache
-files.
-
-Therefore an additional key value pair can be passed in the
-:mod:`settings.CUSTOM_ALGORITHMS` definition for any custom algorithm that uses
-numba jit functions, e.g. ``'numba_cache_dirs': ['stumpy_'],``.  This is a list
-of cache dirs that are expected to exist and if do not exist then increase the
-``max_execution_time`` to 180 seconds to allow for first time numba jit
-compilations to occur so that the timeout decorator does not terminate the
-algorithm due to a low max_execution_time.
-
-The ``numba_cache_dirs`` is a list of substrings of the directories created in
-the default ``/opt/skyline/.cache/numba`` which are expected.
-
-For example the stumpy stump algorithm with njit caching enabled saves
-``/opt/skyline/.cache/numba/stumpy_7b65d2f0242c0368bd086e515d849481810e817d`` with nbc and nbi files:
-
-.. code-block::
-
-  (skyline-py3816) [root@skyline-test-1 skyline-py3816] ls -al /opt/skyline/.cache/numba/ | grep stump
-  drwxr-xr-x  2 skyline skyline 4096 Jan 12 16:37 stumpy_7b65d2f0242c0368bd086e515d849481810e817d
-  (skyline-py3816) [root@skyline-test-1 skyline-py3816] ls -al /opt/skyline/.cache/numba/stump*
-  total 460
-  drwxr-xr-x 2 skyline skyline   4096 Jan 12 16:37 .
-  drwxr-xr-x 8 skyline skyline   4096 Jan 12 16:09 ..
-  -rw-rw-rw- 1 skyline skyline 455583 Jan 12 16:37 stump._stump-216.py38.1.nbc
-  -rw-rw-rw- 1 skyline skyline   1487 Jan 12 16:37 stump._stump-216.py38.nbi
-  (skyline-py3816) [root@skyline-test-1 skyline-py3816]
-
-
-This would be declared as ``'numba_cache_dirs': ['stumpy_']``, and the
-``custom_algorithms.run_custom_algorithm_on_timeseries`` checks for the
-existence of a dir matching these substrings/patterns in
-``/opt/skyline/.cache/numba``, if not found sets the ``max_execution_time`` to
-180 seconds for that run to allow for the jit compile and save overhead without
-terminating the run before it has time to compile and save.
-
-You therefore need to be fully aware of what jit cache files your algorithm will
-create and declare them appropriately.
+what consensus should be applied.  It is possible to configure poorly given the
+methods and modes that can be configured.
 
 :mod:`settings.CUSTOM_ALGORITHMS`
 ---------------------------------
@@ -214,7 +144,6 @@ following **example**:
             'trigger_history_override': 4,
             'use_with': ['mirage'],
             'debug_logging': False,
-            'numba_cache_dirs': ['stumpy_',]
         },
     }
 
@@ -310,6 +239,27 @@ directory of the repo.  https://github.com/earthgecko/skyline/tree/master/skylin
   in Skyline's requirements.txt file, ensure that you install the algorithm's
   requirements in the Skyline virtualenv.
 
+General purpose algorithms only
+-------------------------------
+
+In general a custom algorithm should be able to be applied to all time series
+data with the same parameters, unless the custom algorithm determines the
+best parameters to use from the data itself during execution.
+
+JSON friendly results **ONLY**
+------------------------------
+
+Although a custom algorithm does not need to return a results ``dict``, it can.
+custom_algorithms can be used in various ways and internally Skyline makes use
+of them in a number of ways, therefore a custom algorithm can return a verbose
+results ``dict`` that is used elsewhere in the pipeline.  The results ``dict``
+can hold any data but the data **MUST** be in a JSON friendly format, no ``nan``
+or ``np.nan`` values, no ``None`` values, no ``np.array``, no ``np.int64``.
+There can be no types.  JSON only accepts, ints, floats and str and ``True``
+and ``False`` boolean values.  Therefore if you want your algorithm to return
+a results ``dict`` be sure that you ensure every output is validated to be JSON
+friendly.
+
 int and floats **ONLY** and no nans
 -----------------------------------
 
@@ -320,8 +270,8 @@ moved through the pipeline and saved as json.  Therefore results from any numpy
 arrays could have type ``int64`` or other which are not JSON serializable.
 
 The same is true for ``nan`` values, although floats in Python they are not
-valid in JSON, ensure ``nan`` values are coerced to ``None`` which json will
-dump to ``null`` or ``False`` which json will dump to ``false``.
+valid in JSON, ensure ``nan`` values are coerced to ``None`` types which json
+will dump to ``null``.
 
 ``anomalyScore``
 ~~~~~~~~~~~~~~~~
@@ -330,6 +280,16 @@ Unlike the core Skyline algorithms, custom algorithms introduces the requirement
 for the algorithm to also return a ``anomalyScore``.  The concept of the
 ``anomalyScore`` is used in many anomaly detection algorithms and methods and it
 is useful in many cases for algorithm testing.
+
+Test for unreliable results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Consider having a test in your custom algorithm, after it has run to check that
+the results are reliable.  Although algorithms may run fine against almost all
+the different types of time series data with a single set of parameters, with
+many algorithms there is always a chance that the algorithm may identify most or
+lots of the datapoints as anomalous.  If the custom algorithm returns say >= 20%
+of the time series data points as anomalous, consider the results unreliable. 
 
 Custom algorithm requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -364,7 +324,7 @@ Custom algorithm requirements
   your mileage may vary.  This method is only tested with the algorithm being a
   simple function.
 - The custom algorithm must return a boolean to state whether the data point is
-  anomalous **and** a ``anomalyScore``, e.g.
+  anomalous **and** a ``anomalyScore`` at the minimum, e.g.
 
 .. code-block:: python
 
@@ -377,7 +337,8 @@ Custom algorithm requirements
   - ``True`` - the data point **is** anomalous
   - ``False`` - the data point **is not** anomalous
   - ``None`` - returned when the algorithm could not determine ``True`` or
-    ``False``, an error occurred or there was no data, etc.
+    ``False``, an error occurred or there was no data, the results were not
+    reliable, etc.
 
 - The returned ``anomalyScore`` must be a **float** between 0.0 and 1.0, 0.0
   being not anomalous and 1.0 being a certain anomaly.  You can pass
@@ -389,6 +350,58 @@ Custom algorithm requirements
   not calculate an anomaly score, when your algorithm returns ``False`` just
   return it with a 0.0 and when your algorithm returns ``True`` just return it
   with 1.0
+
+Additional results in the return
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+At minimum your algorithm must return ``(anomalous, anomalyScore)``, however if
+you wish to use the custom algorithm with Vortex for testing then you will need
+to return results as well.
+
+The results object is dictionary of items that Vortex needs to apply consensus
+to, plot results, etc.
+
+.. code-block:: python
+
+    results = {
+        'anomalous': anomalous,  # boolean
+        'anomalies': anomalies,  # dict (at minimum must be keyed with timestamps with value, index and score, additional keys can be added)
+        'some_algo_specific_thing': json_friendly_object,  # str,list,dict (no nans)
+        'anomalyScore_list': anomalyScore_list,  # list of 0 and 1s
+        'scores': algorithm_scores,  # list of any algorithm specific scores (no nans use None)
+        'unreliable': unreliable,  # boolean
+        'unreliable_reason': unreliable_reason,  # str
+        'success': success,  # boolean
+    }
+
+All values in the dict keys **MUST BE** JSON friendly, this means convert all
+``nan`` to ``None`` which json will reflect as ``null``.  Convert any arrays to
+lists, etc.
+
+Below is an example of how the objects of each key should be defined.  Note how
+the timestamps are typed as str because you cannot use an int for a key in json,
+a json key must be a str.
+
+.. code-block:: python
+
+    results = {
+        'anomalous': True,
+        'anomalies': {
+            '1686585000': {'value': 6.944444444444445, 'index': 865, 'score': 4},
+            '1687449000': {'value': 0.375, 'index': 2305, 'score': 4},
+            '1687508400': {'value': 0.7, 'index': 2404, 'score': 4},
+            '1687509000': {'value': 0.8, 'index': 2405, 'score': 4},
+            ...,
+            '1688647800': {'value': 1.1, 'index': 4303, 'score': 4, 'triggered': ['lof', 'isolation_forest', 'one_class_svm', 'm66']}
+        },
+        'some_algo_specific_thing': json_friendly_object,  # str,list,dict (no nans)
+        'anomalyScore_list': [0, 0, 0, ..., 0, 1],
+        'scores': [0, ..., 4, ..., 0, 4],
+        'unreliable': True,
+        'unreliable_reason': 'None',
+        'success': True,
+    }
+
 
 Error handling
 ~~~~~~~~~~~~~~
@@ -418,6 +431,104 @@ once.  As shown in the example below.
 This allows for errors to be encountered while not spewing 1000s and 1000s of
 lines of errors to disk based the application logs and incurring masses of I/O.
 
+The use of numba optimisations
+------------------------------
+
+Any performance optimisations that can be achieve in custom algortihm with numba
+jit functions is encouraged, with the following caveats.
+
+If the algorithm or any part thereof uses numba optimisations in anyway ensure
+that the ``jit`` or ``njit`` decorator has ``cache=True`` applied to ensure that
+the jit compilation overhead is only incurred once and is not incurred on every
+execution.  In terms of multiprocessing and threading if there is no jit cache
+file of a function the jit compilation happens every execution which is slow.
+
+Also note that in the normal Skyline build on CentOS 8 the default
+``NUMBA_CACHE_DIR`` is ``/opt/skyline/.cache/numba`` this is not specifically
+defined, it is what gets defaulted to by numba.  **IMPORTANT** as per relevant
+upgrade instructions in release notes, this directory needs to be flushed or
+preferably just moved to back up the existing cache whenever an upgrade is made
+to Python and/or any dependencies, so that the numba jit cache files can be
+recompiled with the new versions.
+
+In terms of making changes to any existing numba optimised custom algorithms
+that are loaded by Skyline, numba will **automatically** replace it jit cache
+files when a change is made to the algorithm source file in Skyline when the
+relevant Skyline service is restarted and the custom algorithm function is
+called for the first time.
+
+That said this has a direct impact on the custom algorithm ``max_execution_time``
+parameter.  This is because the first execution of the jit function when the
+cache files are not present could take say 40 seconds to compile the function.
+Now if you can expect the algorithm to run in say less than 1 second WHEN the
+jit cache file is present, you may want to set the ``max_execution_time: 1.2,``
+however the custom algorithm will be terminated by the timeout decorator on
+**every** run and it will never compile and therefore never save the jit cache
+files.
+
+Therefore an additional key value pair can be passed in the
+:mod:`settings.CUSTOM_ALGORITHMS` definition for any custom algorithm that uses
+numba jit functions, e.g. ``'numba_cache_dirs': ['stumpy_'],``.  This is a list
+of cache dirs that are expected to exist and if do not exist then increase the
+``max_execution_time`` to 300 seconds to allow for first time numba jit
+compilations to occur so that the timeout decorator does not terminate the
+algorithm due to a low max_execution_time.
+
+The ``numba_cache_dirs`` is a list of substrings of the directories created in
+the default ``/opt/skyline/.cache/numba`` which are expected.
+
+For example the stumpy stump algorithm with njit caching enabled saves
+``/opt/skyline/.cache/numba/stumpy_7b65d2f0242c0368bd086e515d849481810e817d`` with nbc and nbi files:
+
+.. code-block::
+
+  (skyline-py3816) [root@skyline-test-1 skyline-py3816] ls -al /opt/skyline/.cache/numba/ | grep stump
+  drwxr-xr-x  2 skyline skyline 4096 Jan 12 16:37 stumpy_7b65d2f0242c0368bd086e515d849481810e817d
+  (skyline-py3816) [root@skyline-test-1 skyline-py3816] ls -al /opt/skyline/.cache/numba/stump*
+  total 460
+  drwxr-xr-x 2 skyline skyline   4096 Jan 12 16:37 .
+  drwxr-xr-x 8 skyline skyline   4096 Jan 12 16:09 ..
+  -rw-rw-rw- 1 skyline skyline 455583 Jan 12 16:37 stump._stump-216.py38.1.nbc
+  -rw-rw-rw- 1 skyline skyline   1487 Jan 12 16:37 stump._stump-216.py38.nbi
+  (skyline-py3816) [root@skyline-test-1 skyline-py3816]
+
+
+This would be declared as ``'numba_cache_dirs': ['stumpy_']``, and the
+``custom_algorithms.run_custom_algorithm_on_timeseries`` checks for the
+existence of a dir matching these substrings/patterns in
+``/opt/skyline/.cache/numba``, if not found sets the ``max_execution_time`` to
+300 seconds for that run to allow for the jit compile and save overhead without
+terminating the run before it has time to compile and save.
+
+You therefore need to be fully aware of what jit cache files your algorithm will
+create and declare them appropriately.
+
+flux/tornado
+------------
+
+ADVANCED_FEATURE
+
+Due to a numba of factors (pun intended) running numba jit compiled algorithms in
+custom_algorithms can introduce some performance issues in terms of load times.
+The dynamic nature of custom_algorithms and due to the use of multiprocessing,
+every call to a custom_algorithm is dynamic in terms of the process handling it
+and therefore the process will need to load and initial all the algorithms and
+deps when it is instantiated, if the process has been assigned multiple checks
+then the first check will incur the load time, every check thereafter will
+benefit from the cached and loaded functions.  This means that the initial load
+for a process can take a few seconds, depending on the custom_algorithm, it's
+complexity and deps.  This is not desirable in most cases, especially in Mirage.
+Consider a normal Mirage workflow, where say 10 checks are sent to Mirage, let
+us say Mirage is configured with 2 processes.  Mirage divides the checks, fires
+up 2 processes, each process initialises and takes 2 seconds to load the
+custom_algorithm, each first check then takes 4 seconds and the subsequent
+check benefit from the cached functions and take 0.3 seconds to run.  In
+which time an additional 30 checks were submitted to Mirage so as soon as it is
+complete, it fires up 2 new processes and does the same again.
+
+flux/tornado allows you to specify and added custom_algorithms or the
+expensive part of a custom_algorithm to be loaded and served by flux, so that
+every call is fast and incurs no load time penalities.
 
 Example custom algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -425,16 +536,14 @@ Example custom algorithms
 There are two example custom algorithms in the repo for you to model the
 structure of your custom algorithm on.
 
-abs_stddev_from_median
-^^^^^^^^^^^^^^^^^^^^^^
+**abs_stddev_from_median**
 
 This is the simplest custom algorithm structure, it does not have any
 ``algorithm_parameters`` and has no debug logging.
 
 https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/abs_stddev_from_median.py
 
-last_same_hours
-^^^^^^^^^^^^^^^
+**last_same_hours**
 
 This is an example of a more complex custom algorithm structure, that uses
 ``algorithm_parameters`` and can even debug log to the Skyline app log if

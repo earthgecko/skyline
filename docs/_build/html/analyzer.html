@@ -1,23 +1,23 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Analyzer &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Analyzer &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=132a70fa"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -36,9 +36,6 @@
           <a href="index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -49,13 +46,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
@@ -108,6 +107,7 @@
 <li class="toctree-l1"><a class="reference internal" href="vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
@@ -116,7 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Trouble shooting</a></li>
@@ -153,7 +153,7 @@
            <div itemprop="articleBody">
              
   <section id="analyzer">
-<h1>Analyzer<a class="headerlink" href="#analyzer" title="Permalink to this heading"></a></h1>
+<h1>Analyzer<a class="headerlink" href="#analyzer" title="Link to this heading"></a></h1>
 <p>The Analyzer service is responsible for analyzing collected data. It has
 a very simple divide-and-conquer strategy. It first checks Redis to get
 the total number of metrics stored, and then it fires up a number of
@@ -190,7 +190,7 @@ overhead of processing with a single process.</p>
 <p>See <a class="reference external" href="analyzer-optimizations.html#optimizations-results">Optimizations results</a>
 and <a class="reference external" href="analyzer-optimizations.html">Analyzer Optimizations</a></p>
 <section id="algorithms">
-<h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h2>
+<h2>Algorithms<a class="headerlink" href="#algorithms" title="Link to this heading"></a></h2>
 <p>Skyline Analyzer was designed to handle a very large number of metrics,
 for which picking models by hand would prove infeasible. As such,
 Skyline Analyzer relies upon the consensus of an ensemble of a few
@@ -213,7 +213,7 @@ Make sure your algorithm returns either <code class="docutils literal notranslat
 sure to update the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> setting appropriately.</p>
 </section>
 <section id="algorithm-philosophy">
-<h2>Algorithm philosophy<a class="headerlink" href="#algorithm-philosophy" title="Permalink to this heading"></a></h2>
+<h2>Algorithm philosophy<a class="headerlink" href="#algorithm-philosophy" title="Link to this heading"></a></h2>
 <p>The basic algorithms are based on 3-sigma, derived from Shewhart’s
 <a class="reference external" href="http://en.wikipedia.org/wiki/Statistical_process_control">statistical process
 control</a>.
@@ -222,7 +222,7 @@ want to use them - as long as you return a boolean, you can add any sort
 of algorithm you like to run on time series and vote.</p>
 </section>
 <section id="a-break-from-traditions">
-<h2>A break from traditions<a class="headerlink" href="#a-break-from-traditions" title="Permalink to this heading"></a></h2>
+<h2>A break from traditions<a class="headerlink" href="#a-break-from-traditions" title="Link to this heading"></a></h2>
 <p>As Skyline develops, the addition of non three-sigma algorithms and methodologies
 is inevitable.  Further Skyline was designed to analyse all metrics via the
 three-sigma algorithms, however there are instances where this is not
@@ -230,7 +230,7 @@ necessarily paramount and at times undesirable.  Therefore a number of
 alternative methods and related configurations have been introduced to allow the
 operator to analyse high and low priority metrics differently.</p>
 <section id="high-and-low-priority-metrics">
-<h3>High and low priority metrics<a class="headerlink" href="#high-and-low-priority-metrics" title="Permalink to this heading"></a></h3>
+<h3>High and low priority metrics<a class="headerlink" href="#high-and-low-priority-metrics" title="Link to this heading"></a></h3>
 <p>This supports the old monitoring mantra of “do not alert on everything, only
 alert on the important things”.</p>
 <ul class="simple">
@@ -271,7 +271,7 @@ basis to analyse low priority metrics as frequently as possible without causing
 lag on the analysis of high priority metrics.</p>
 </section>
 <section id="analyzer-mad-low-priority-metrics">
-<h3>ANALYZER_MAD_LOW_PRIORITY_METRICS<a class="headerlink" href="#analyzer-mad-low-priority-metrics" title="Permalink to this heading"></a></h3>
+<h3>ANALYZER_MAD_LOW_PRIORITY_METRICS<a class="headerlink" href="#analyzer-mad-low-priority-metrics" title="Link to this heading"></a></h3>
 <p>In order to reduce the required amount of analysis done by Analyzer to identify
 potential anomalous metrics, the use of the mean absolute deviation (MAD)
 algorithm can be used to determine whether to analyse the metric with the
@@ -299,13 +299,13 @@ results in a performance <strong>loss</strong> in terms of overall compute time.
 </section>
 </section>
 <section id="using-custom-algorithms">
-<h2>Using custom algorithms<a class="headerlink" href="#using-custom-algorithms" title="Permalink to this heading"></a></h2>
+<h2>Using custom algorithms<a class="headerlink" href="#using-custom-algorithms" title="Link to this heading"></a></h2>
 <p>Originally the intent in Skyline was allow users to add any algorithms they
 wanted directly into algorithms.py:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
 <span class="sd">as long as you return a boolean that determines whether the input</span>
-<span class="sd">timeseries is anomalous or not.</span>
+<span class="sd">time series is anomalous or not.</span>
 
 <span class="sd">To add an algorithm, define it here, and add its name to settings.ALGORITHMS.</span>
 <span class="sd">&quot;&quot;&quot;</span>
@@ -320,7 +320,7 @@ algorithm in terms of <cite>CONSENSUS</cite> and what namespaces to run it again
 <p>See <a class="reference external" href="algorithms/custom-algorithms.html">Custom algorithms</a></p>
 </section>
 <section id="explanation-of-exceptions">
-<h2>Explanation of Exceptions<a class="headerlink" href="#explanation-of-exceptions" title="Permalink to this heading"></a></h2>
+<h2>Explanation of Exceptions<a class="headerlink" href="#explanation-of-exceptions" title="Link to this heading"></a></h2>
 <p><strong>TooShort</strong>: The time series was too short, as defined in
 <a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a></p>
 <p><strong>Incomplete</strong>: The time series was less than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
@@ -336,14 +336,14 @@ for analysis.</p>
 changes or we have.</p>
 </section>
 <section id="metrics-monotonicity">
-<h2>Metrics monotonicity<a class="headerlink" href="#metrics-monotonicity" title="Permalink to this heading"></a></h2>
+<h2>Metrics monotonicity<a class="headerlink" href="#metrics-monotonicity" title="Link to this heading"></a></h2>
 <p>Analyzer is used to identify what metric time series are strictly increasing
 monotonically, metrics that have an incrementing increasing count, so that these
 time series can be handled via their derivative products where appropriate.  For
 full details see <a class="reference external" href="monotonic-metrics.html">Monotonic metrics</a></p>
 </section>
 <section id="anomaly-end-timestamp">
-<h2>Anomaly end_timestamp<a class="headerlink" href="#anomaly-end-timestamp" title="Permalink to this heading"></a></h2>
+<h2>Anomaly end_timestamp<a class="headerlink" href="#anomaly-end-timestamp" title="Link to this heading"></a></h2>
 <p>The <cite>end_timestamp</cite> means that the anomaly has either:</p>
 <ol class="arabic simple">
 <li><p>Ended, when it is a peak or trough anomaly, and the time series data returns
@@ -356,20 +356,20 @@ metric to still be in an anomalous state, but in terms of the
 </ol>
 </section>
 <section id="push-to-mirage">
-<h2>Push to Mirage<a class="headerlink" href="#push-to-mirage" title="Permalink to this heading"></a></h2>
+<h2>Push to Mirage<a class="headerlink" href="#push-to-mirage" title="Link to this heading"></a></h2>
 <p>Analyzer can push anomalous metrics that have a seasonality /
 periodicity that is greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> to the Mirage
 service (so ALL metrics then?), see <a class="reference external" href="mirage.html">Mirage</a>.</p>
 </section>
 <section id="push-to-ionosphere">
-<h2>Push to Ionosphere<a class="headerlink" href="#push-to-ionosphere" title="Permalink to this heading"></a></h2>
+<h2>Push to Ionosphere<a class="headerlink" href="#push-to-ionosphere" title="Link to this heading"></a></h2>
 <p>Analyzer pushes anomalous metrics that are ionosphere_enabled, but not Mirage
 enabled, to Ionosphere to check if the anomalous time series is known to be
 NOT ANOMALOUS due to it’s features profile matching a known NOT ANOMALOUS trained
 or learnt features profile see <a class="reference external" href="ionosphere.html">Ionosphere</a>.</p>
 </section>
 <section id="analyzer-batch">
-<h2>analyzer_batch<a class="headerlink" href="#analyzer-batch" title="Permalink to this heading"></a></h2>
+<h2>analyzer_batch<a class="headerlink" href="#analyzer-batch" title="Link to this heading"></a></h2>
 <p>analyzer_batch is a submodule of Analyzer that runs as an independent service
 with the sole purpose of handling and analysing metrics that are not streamed in
 real time but are updated in batches, every x minutes or hour/s.
@@ -391,10 +391,10 @@ wish to use Flux to process uploaded data files, see
 <a class="reference external" href="flux.html">Flux</a>.</p>
 </section>
 <section id="analyzer-settings-alerts">
-<h2>Analyzer <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#analyzer-settings-alerts" title="Permalink to this heading"></a></h2>
+<h2>Analyzer <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#analyzer-settings-alerts" title="Link to this heading"></a></h2>
 <p>For all the specific alert configurations see the <a class="reference external" href="alerts.html">Alerts</a> page.</p>
 <section id="order-matters">
-<h3>Order Matters<a class="headerlink" href="#order-matters" title="Permalink to this heading"></a></h3>
+<h3>Order Matters<a class="headerlink" href="#order-matters" title="Link to this heading"></a></h3>
 <p>In terms of the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> order matters in Analyzer and in the
 Mirage context as well.</p>
 <div class="admonition warning">
@@ -443,7 +443,7 @@ define a metric namespace as a Mirage metric.</p>
 </section>
 </section>
 <section id="analyzer-smtp-alert-graphs">
-<h2>Analyzer SMTP alert graphs<a class="headerlink" href="#analyzer-smtp-alert-graphs" title="Permalink to this heading"></a></h2>
+<h2>Analyzer SMTP alert graphs<a class="headerlink" href="#analyzer-smtp-alert-graphs" title="Link to this heading"></a></h2>
 <p>Analyzer by default now sends 2 graphs in any SMTP alert.  The original Graphite
 graph is sent and an additional graph image is sent that is plotted using the
 actual Redis time series data for the metric.</p>
@@ -462,11 +462,11 @@ the similar in the alert context.</p>
 <p>Should you wish to disable the Redis data graph and simply have the Graphite
 graph, simply set <a class="reference internal" href="skyline.html#settings.PLOT_REDIS_DATA" title="settings.PLOT_REDIS_DATA"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PLOT_REDIS_DATA</span></code></a> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 <section id="example-alert">
-<h3>Example alert<a class="headerlink" href="#example-alert" title="Permalink to this heading"></a></h3>
+<h3>Example alert<a class="headerlink" href="#example-alert" title="Link to this heading"></a></h3>
 <figure class="align-default" id="id1">
 <img alt="Redis data graph in Analyzer alert" src="_images/skyline.analyzer.redis.data.graph.png" />
 <figcaption>
-<p><span class="caption-text">Example of the Redis data graph in the alert</span><a class="headerlink" href="#id1" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Example of the Redis data graph in the alert</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <div class="admonition note">
@@ -477,7 +477,7 @@ matplotlib plots the alerts and the alert email larger in size.</p>
 </section>
 </section>
 <section id="analyzer-metrics-manager">
-<h2>Analyzer metrics_manager<a class="headerlink" href="#analyzer-metrics-manager" title="Permalink to this heading"></a></h2>
+<h2>Analyzer metrics_manager<a class="headerlink" href="#analyzer-metrics-manager" title="Link to this heading"></a></h2>
 <p>analyzer/metrics_manager is a process that runs with the sole purpose of
 managing all the aspects and data of the metrics that are required by Skyline.
 It does a mountain of work in optimising the data about the metrics into
@@ -488,13 +488,13 @@ populations. It also checks various aspects of the time series data in terms
 of sparisity, resolution, etc.</p>
 </section>
 <section id="monitoring-data-sparsity">
-<h2>Monitoring data sparsity<a class="headerlink" href="#monitoring-data-sparsity" title="Permalink to this heading"></a></h2>
+<h2>Monitoring data sparsity<a class="headerlink" href="#monitoring-data-sparsity" title="Link to this heading"></a></h2>
 <p>If you have a reliable metrics pipeline this generally is not required, however
 the Analyzer metrics_manager can be enabled to monitor how sparsely populated
 the metric population is.  If the Analyzer metrics_manager is enabled via
 <a class="reference internal" href="skyline.html#settings.CHECK_DATA_SPARSITY" title="settings.CHECK_DATA_SPARSITY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CHECK_DATA_SPARSITY</span></code></a>, the metric population will be analysed
 every <code class="docutils literal notranslate"><span class="pre">RUN_EVERY</span></code> (which for metrics_manager is 300 seconds) and the
-resolution of each metric will be dynamically determined from the timeseries
+resolution of each metric will be dynamically determined from the time series
 data, the expected number of data points in <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> will
 be determined and the data sparsity value will be calculated for each metric.
 A data sparsity of 100% means that the metric is fully populated, as the value
@@ -516,7 +516,7 @@ frequently but only occasionally, if you wish to exclude these types of metrics
 they can be declared in <a class="reference internal" href="skyline.html#settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES" title="settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES</span></code></a>.</p>
 </section>
 <section id="what-analyzer-does">
-<h2>What <strong>Analyzer</strong> does<a class="headerlink" href="#what-analyzer-does" title="Permalink to this heading"></a></h2>
+<h2>What <strong>Analyzer</strong> does<a class="headerlink" href="#what-analyzer-does" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Analyzer determines all unique metrics in Redis and divides them
 between <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to be analysed between
@@ -574,7 +574,7 @@ which are consumed by the other apps.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -2,12 +2,13 @@ import logging
 import traceback
 # @added 20220722 - Task #4624: Change all dict copy to deepcopy
 import copy
+# @added 20231122 - Feature #5104: boundary - external_settings
+from ast import literal_eval
 
 import settings
 from skyline_functions import get_redis_conn_decoded
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 from backend import get_cluster_data
-
 
 # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
 def get_boundary_metrics(
@@ -120,6 +121,7 @@ def get_boundary_metrics(
             current_logger.error('error :: %s :: %s :: failed to get Redis key %s - %s' % (
                 current_skyline_app, function_str, redis_key, e))
             raise
+
         for base_name in unique_base_names:
             try:
                 pattern_match, metric_matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, namespaces)
@@ -132,6 +134,13 @@ def get_boundary_metrics(
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: %s :: %s :: failed to get Redis key %s - %s' % (
                     current_skyline_app, function_str, redis_key, e))
+
+    # @added 20231122 - Feature #5104: boundary - external_settings
+    # If no metrics were found for the namespace return
+    if namespaces:
+        if not filter_by_metrics:
+            boundary_metrics = {}
+            return boundary_metrics
 
     if filter_by_metrics:
         if log:
@@ -148,13 +157,25 @@ def get_boundary_metrics(
                 continue
             if boundary_metric_dict:
                 filtered_boundary_metrics[base_name] = boundary_metric_dict
-        if filtered_boundary_metrics:
-            # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
-            # boundary_metrics = filtered_boundary_metrics.copy()
-            boundary_metrics = copy.deepcopy(filtered_boundary_metrics)
-            if log:
-                current_logger.info('%s :: %s :: filtered %s boundary_metrics' % (
-                    current_skyline_app, function_str,
-                    str(len(boundary_metrics))))
+        # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
+        # boundary_metrics = filtered_boundary_metrics.copy()
+        boundary_metrics = copy.deepcopy(filtered_boundary_metrics)
+        if log:
+            current_logger.info('%s :: %s :: filtered %s boundary_metrics' % (
+                current_skyline_app, function_str,
+                str(len(boundary_metrics))))
+
+    # @added 20231122 - Feature #5104: boundary - external_settings
+    # Coerce strings into dicts
+    for metric in list(boundary_metrics.keys()):
+        data = boundary_metrics[metric]
+        data_dict = None
+        if isinstance(data, str):
+            try:
+                data_dict = literal_eval(data)
+            except:
+                data_dict = None
+        if isinstance(data_dict, dict):
+            boundary_metrics[metric] = copy.deepcopy(data_dict)
 
     return boundary_metrics

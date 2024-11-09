@@ -17,6 +17,11 @@ import timeout_decorator
 from settings import (
     SKYLINE_TMP_DIR,
 )
+# @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+from skyline_functions import mkdir_p
+
+# @added 20241107 - Feature #5536: deduplicate_timeseries
+from functions.timeseries.deduplicate_timeseries import deduplicate_timeseries
 
 # @added 20230113 - Feature #4808: custom_algorithms - numba_cache_dirs
 try:
@@ -98,6 +103,7 @@ def run_custom_algorithm_on_timeseries(
 
     anomalous = None
     anomalyScore = None
+
     current_logger = None
     myPid = getpid()
 
@@ -105,6 +111,31 @@ def run_custom_algorithm_on_timeseries(
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         return current_logger
+
+    # @added 20230809 - Feature #4988: Allow snab to return and save results
+    anomalies = {}
+    return_anomalies = False
+    try:
+        return_anomalies = custom_algorithm_dict['algorithm_parameters']['return_anomalies']
+    except:
+        return_anomalies = False
+    return_results = False
+    try:
+        return_results = custom_algorithm_dict['algorithm_parameters']['return_results']
+        # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+        #                   Feature #3566: custom_algorithms
+        if return_results:
+            return_anomalies = True
+            custom_algorithm_dict['algorithm_parameters']['return_anomalies'] = True
+
+    except:
+        return_results = False
+    if not return_anomalies and return_results:
+        return_anomalies = True
+        # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+        #                   Feature #3566: custom_algorithms
+        custom_algorithm_dict['algorithm_parameters']['return_anomalies'] = True
+        custom_algorithm_dict['algorithm_parameters']['return_results'] = True
 
     def str_to_class(classname, current_logger):
         try:
@@ -141,6 +172,10 @@ def run_custom_algorithm_on_timeseries(
         current_logger.error(
             'error :: %s :: pid %s, failed determine algorithm_source for custom algorithm - %s' % (
                 func_name, str(myPid), custom_algorithm))
+        # @added 20230809 - Feature #4988: Allow snab to return and save results
+        if return_anomalies:
+            return (None, None, anomalies)
+
         return (None, None)
 
     if algorithm_source:
@@ -151,6 +186,10 @@ def run_custom_algorithm_on_timeseries(
                 'error :: %s :: pid %s, failed to find custom algorithm - %s - algorithm_source file - %s' % (
                     func_name, str(myPid), custom_algorithm,
                     str(algorithm_source)))
+            # @added 20230809 - Feature #4988: Allow snab to return and save results
+            if return_anomalies:
+                return (None, None, anomalies)
+
             return (None, None)
 
     # @added 20230113 - Feature #4808: custom_algorithms - numba_cache_dirs
@@ -184,6 +223,20 @@ def run_custom_algorithm_on_timeseries(
                     func_name, str(myPid), custom_algorithm,
                     str(custom_algorithm_dict['numba_cache_dirs'])))
         numba_cache_dirs = []
+
+        # @added 20240523 - Feature #5360: custom_algorithms - sigma_macd
+        if not os.path.exists(NUMBA_CACHE_DIR):
+            try:
+                mkdir_p(NUMBA_CACHE_DIR)
+            except Exception as err:
+                if not current_logger:
+                    current_logger = get_log(current_skyline_app)
+                current_logger.error(traceback.format_exc())
+                current_logger.error(
+                    'error :: %s :: pid %s, for %s mkdir_p failed on %s, err: %s' % (
+                        func_name, str(myPid), custom_algorithm,
+                        str(NUMBA_CACHE_DIR), err))
+                
         try:
             numba_cache_dirs = listdir(NUMBA_CACHE_DIR)
         except Exception as err:
@@ -213,16 +266,27 @@ def run_custom_algorithm_on_timeseries(
     # Check if the algorithm module is loaded and only load if not present
     load_algorithm = True
     if custom_algorithm == 'skyline_matrixprofile':
-        custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump', 'stumpy.stump', 'stump']
+        # @modified 20240108 - Feature #5198: flux - tornado
+        # custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump', 'stumpy.stump', 'stump']
+        custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump']
     else:
         custom_algorithm_modules = [custom_algorithm]
     algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
-    if len(algorithm_modules_loaded) > 0:
+    # @modified 20240108 - Feature #5198: flux - tornado
+    if debug_logging or debug_custom_algortihms:
+        current_logger.debug(
+            'debug :: %s :: %s :: pid %s, custom_algorithm_modules: %s' % (
+                func_name, str(myPid), custom_algorithm,
+                str(custom_algorithm_modules)))
+    # if len(algorithm_modules_loaded) > 0:
+    if len(algorithm_modules_loaded) > len(custom_algorithm_modules):
         load_algorithm = False
         if debug_logging or debug_custom_algortihms:
             current_logger.debug(
                 'debug :: %s :: pid %s, not importing %s as it is present in sys.modules BUT LOADING' % (func_name, str(myPid), custom_algorithm))
-        load_algorithm = True
+        # @modified 20240108 - Feature #5198: flux - tornado
+        # Commented this out
+        # load_algorithm = True
     else:
         if debug_logging or debug_custom_algortihms:
             current_logger.debug(
@@ -254,6 +318,10 @@ def run_custom_algorithm_on_timeseries(
             current_logger.error(
                 'error :: %s :: pid %s, failed to load custom algorithm - %s - from algorithm_source file - %s' % (
                     func_name, str(myPid), custom_algorithm, str(algorithm_source)))
+            # @added 20230809 - Feature #4988: Allow snab to return and save results
+            if return_anomalies:
+                return (None, None, anomalies)
+
             return (None, None)
 
     use_custom_algorithm = None
@@ -266,6 +334,10 @@ def run_custom_algorithm_on_timeseries(
         current_logger.error(
             'error :: %s :: pid %s, failed to interpolate module name for custom algorithm - %s' % (
                 func_name, str(myPid), custom_algorithm))
+        # @added 20230809 - Feature #4988: Allow snab to return and save results
+        if return_anomalies:
+            return (None, None, anomalies)
+
         return (None, None)
 
     if not use_custom_algorithm:
@@ -275,6 +347,10 @@ def run_custom_algorithm_on_timeseries(
         current_logger.error(
             'error :: %s :: pid %s, failed to get module name for custom algorithm - %s' % (
                 func_name, str(myPid), custom_algorithm))
+        # @added 20230809 - Feature #4988: Allow snab to return and save results
+        if return_anomalies:
+            return (None, None, anomalies)
+
         return (None, None)
 
     algorithm_parameters = {}
@@ -291,6 +367,7 @@ def run_custom_algorithm_on_timeseries(
     # @added 20210226 - Feature #3970: custom_algorithm - adtk_level_shift
     # Add the metric name to the algorithm_parameters
     algorithm_parameters['base_name'] = base_name
+    algorithm_parameters['metric'] = base_name
 
     # @added 20230118 - Task #4786: Switch from matrixprofile to stumpy
     #                   Task #4778: v4.0.0 - update dependencies
@@ -324,9 +401,10 @@ def run_custom_algorithm_on_timeseries(
 
     if debug_logging or debug_custom_algortihms:
         current_logger.debug(
-            'debug :: %s :: pid %s, %s on %s with max_execution_time - %s, algorithm_parameters - %s' % (
+            'debug :: %s :: pid %s, %s on %s with max_execution_time - %s, len(timeseries): %s, algorithm_parameters - %s' % (
                 func_name, str(myPid), custom_algorithm, base_name,
-                str(max_execution_time), str(algorithm_parameters)))
+                str(max_execution_time), str(len(timeseries)),
+                str(algorithm_parameters)))
 
     @timeout_decorator.timeout(max_execution_time, timeout_exception=StopIteration, use_signals=False)
     def run_custom_algorithm_with_timeout(current_logger, custom_algorithm, use_custom_algorithm, current_skyline_app, parent_pid, timeseries, algorithm_parameters, debug_custom_algortihms, max_execution_time):
@@ -345,6 +423,39 @@ def run_custom_algorithm_on_timeseries(
             return_anomalies = algorithm_parameters['return_anomalies']
         except:
             return_anomalies = False
+
+        # @added 20230720 - Feature #4988: Allow snab to return and save results
+        return_results = False
+        try:
+            return_results = algorithm_parameters['return_results']
+            # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+            #                   Feature #3566: custom_algorithms
+            if return_results:
+                return_anomalies = True
+                algorithm_parameters['return_anomalies'] = True
+        except:
+            return_results = False
+        if not return_anomalies and return_results:
+            return_anomalies = True
+
+        # @added 20241107 - Feature #5536: deduplicate_timeseries
+        # Vortex has introduced the ability for data to be submitted with None
+        # or nan values and duplicate items. Many unsupervised algorithms do
+        # not tolerate Nan or duplicate items.
+        timestamps = [t for t, _ in timeseries]
+        timestamps_set = set(timestamps)
+        if len(timestamps) > len(timestamps_set):
+            original_timeseries = list(timeseries)
+            try:
+                timeseries = deduplicate_timeseries(timeseries, skipna=True)
+            except Exception as err:
+                if not current_logger:
+                    current_logger = get_log(current_skyline_app)
+                current_logger.error(traceback.format_exc())
+                current_logger.error(
+                    'error :: run_custom_algorithm_with_timeout :: pid %s, deduplicate_timeseries failed for %s, err: %s' % (
+                        str(funcPid), custom_algorithm, err))
+                timeseries = list(original_timeseries)
 
         try:
             if not return_anomalies:
@@ -406,6 +517,23 @@ def run_custom_algorithm_on_timeseries(
         return_anomalies = algorithm_parameters['return_anomalies']
     except:
         return_anomalies = False
+
+    # @added 20230720 - Feature #4988: Allow snab to return and save results
+    return_results = False
+    try:
+        return_results = algorithm_parameters['return_results']
+        # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+        #                   Feature #3566: custom_algorithms
+        if return_results:
+            return_anomalies = True
+            algorithm_parameters['return_anomalies'] = True
+    except:
+        return_results = False
+    if not return_anomalies and return_results:
+        return_anomalies = True
+        # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+        #                   Feature #3566: custom_algorithms
+        algorithm_parameters['return_anomalies'] = True
 
     try:
         # anomalous, anomalyScore = use_custom_algorithm(current_skyline_app, timeseries, algorithm_parameters)

@@ -107,7 +107,7 @@ class UploadedDataWorker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.warning('warning :: parent process is dead')
             exit(0)
 
     def run(self):
@@ -426,7 +426,25 @@ class UploadedDataWorker(Process):
                     logger.info('uploaded_data_worker :: unzipping - %s' % str(data_filename))
                     try:
                         with zipfile.ZipFile(data_file, 'r') as zip_ref:
-                            zip_ref.extractall(extracted_data_dir)
+                            # @modified 20241106 - Task #5526: Build v5.0.0 and upgrade deps
+                            # bandit B202:tarfile_unsafe_members
+                            # tarfile.extractall used without any validation. Please check and discard dangerous members.
+                            #zip_ref.extractall(extracted_data_dir)
+                            for member in zip_ref.namelist():
+                                # Ensure that the file path is safe, if any path
+                                # would escape, errors and raises an exception
+                                # to protect against directory traversal attacks
+                                extracted_path = os.path.join(extracted_data_dir, member)
+                                if not extracted_path.startswith(extracted_data_dir):
+                                    logger.error('error :: uploaded_data_worker :: Unsafe file path detected in the zip file - %s' % str(data_file))
+                                    processing_upload_failed = True
+                                    if upload_status:
+                                        upload_error = 'Unsafe file path detected in the zip file - %s' % data_filename
+                                        upload_status.append(['error', upload_error])
+                                        upload_status = new_upload_status(upload_status, 'error', upload_error)
+                                    raise Exception('Unsafe file path detected in the zip file')
+                                zip_ref.extract(member, extracted_data_dir)
+
                         for root, dirs, files in os.walk(extracted_data_dir):
                             for file in files:
                                 if file.endswith('info.json'):

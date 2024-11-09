@@ -103,7 +103,7 @@ class Aggregator(Process):
         try:
             kill(self.parent_pid, 0)
         except:
-            logger.warn('warning :: parent process is dead')
+            logger.warning('warning :: parent process is dead')
             sys.exit(0)
 
     def run(self):

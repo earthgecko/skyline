@@ -37,6 +37,8 @@ if True:
         FULL_NAMESPACE,
     )
     # from algorithm_exceptions import *
+    # @added 20241107 - Feature #5536: deduplicate_timeseries
+    from functions.timeseries.deduplicate_timeseries import deduplicate_timeseries
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -50,6 +52,11 @@ if MIRAGE_ENABLE_SECOND_ORDER:
         redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
     else:
         redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+
+# @added 20240108 - Feature #5198: flux - tornado
+FLUX_TORNADO_ENABLED = False
+FLUX_TORNADO_URL = None
+FLUX_SELF_API_KEY = None
 
 # @added 20200607 - Feature #3566: custom_algorithms
 try:
@@ -70,6 +77,29 @@ if CUSTOM_ALGORITHMS:
         from custom_algorithms import run_custom_algorithm_on_timeseries
     except:
         run_custom_algorithm_on_timeseries = None
+
+    # @added 20240108 - Feature #5198: flux - tornado
+    FLUX_TORNADO_ENABLED = False
+    try:
+        from settings import FLUX_TORNADO_ENABLED
+    except:
+        FLUX_TORNADO_ENABLED = False
+    if FLUX_TORNADO_ENABLED:
+        import json
+        import requests
+        # @added 20240110 - Feature #5198: flux - tornado
+        # If tornado errors dump the response to a Redis key for inspection
+        from requests_toolbelt.utils import dump
+
+        try:
+            from settings import FLUX_TORNADO_URL
+        except:
+            FLUX_TORNADO_URL = None
+        try:
+            from settings import FLUX_SELF_API_KEY
+        except:
+            FLUX_SELF_API_KEY = None
+
     # @added 20230112 - Task #4786: Switch from matrixprofile to stumpy
     #                   Task #4778: v4.0.0 - update dependencies
     # Call the loaded and compiled skyline_matrixprofile directly
@@ -629,6 +659,7 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 
     return abs(intervals[-1] - mean) > 3 * stdDev
 
+# @added 20241107 - 
 
 # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
 # Added run_negatives_present
@@ -639,7 +670,10 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
 #                      Task #4778: v4.0.0 - update dependencies
 # Added current_func
-def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func=None):
+# @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
+#                   Feature #4576: mirage - process multiple metrics
+# Added mirage_busy
+def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func=None, mirage_busy=False):
     """
     Run selected algorithms
     """
@@ -666,6 +700,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     custom_algorithms_run = []
     custom_algorithms_run_results = []
 
+    # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+    #                   Feature #3566: custom_algorithms
+    custom_algorithms_results = {}
+
     # @added 20220111 - Feature #3566: custom_algorithms
     # Set default values
     base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
@@ -674,6 +712,11 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     #                   Branch #4300: prometheus
     if metric_name.startswith('labelled_metrics.'):
         base_name = str(metric_name)
+
+    # @added 20240110 - Feature #5198: flux - tornado
+    # Declare a default redis_conn_decoded so that Redis can be loaded if a
+    # flux/tornado response needs to be dumped for debug purposes
+    redis_conn_decoded = None
 
     custom_algorithms_to_run = {}
 
@@ -709,12 +752,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             base_name = str(metric_name)
 
         try:
-            custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
+            # @modified 20240717 - Feature #5390: custom_algorithms - condition
+            # Added timeseries
+            custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS, timeseries=timeseries)
             if DEBUG_CUSTOM_ALGORITHMS:
                 if custom_algorithms_to_run:
                     logger.debug('mirage_algorithms :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
         except:
-            logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
             custom_algorithms_to_run = {}
 
     if custom_algorithms_to_run or check_trigger_history_enabled:
@@ -726,19 +771,43 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
                 str(err)))
 
+    # @added 20241107 - Feature #5536: deduplicate_timeseries
+    # Vortex has introduced the ability for data to be submitted with None
+    # or nan values and duplicate items. Many unsupervised algorithms do
+    # not tolerate Nan or duplicate items.
+    timestamps = [t for t, _ in timeseries]
+    timestamps_set = set(timestamps)
+    deduplicate = False
+    skipna = False
+    if len(timestamps) > len(timestamps_set):
+        deduplicate = True
+    if custom_algorithms_to_run:
+        deduplicate = True
+        skipna = True
+    if deduplicate:
+        original_timeseries = list(timeseries)
+        try:
+            timeseries = deduplicate_timeseries(timeseries, skipna=skipna)
+            logger.info('mirage_algorithms :: deduplicate_timeseries ran and deduplicated time series (and removed nans %s) from %s data points to %s data points' % (
+                str(skipna), str(len(timestamps)), str(len(timeseries))))
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: mirage_algorithms :: deduplicate_timeseries failed, err: %s' % (
+                str(err)))
+            timeseries = list(original_timeseries)
+
     # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
     #                   Feature #4702: numba optimisations
     # Use start up key and allow numba cache files to be created
     # it took mirage 246 seconds to build the numba cache files
     max_custom_algorithm_execution_time = 0
     if custom_algorithms_to_run:
-        start_key = '%s.starting' % skyline_app
         try:
             starting = redis_conn_decoded.exists('mirage.starting')
             if starting:
                 max_custom_algorithm_execution_time = 300
         except Exception as err:
-            logger.error('error :: exists failed on Redis mirage.starting key - %s' % (
+            logger.error('error :: mirage_algorithms :: exists failed on Redis mirage.starting key - %s' % (
                 err))
 
     if custom_algorithms_to_run:
@@ -751,13 +820,43 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             if DEBUG_CUSTOM_ALGORITHMS:
                 debug_logging = True
 
+            # @added 20231004 - 
+            return_results = False
+            try:
+                return_results = custom_algorithms_to_run[custom_algorithm]['return_results']
+            except:
+                return_results = False
+            if not return_results:
+                try:
+                    return_results = custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['return_results']
+                except:
+                    return_results = False
+
+            # @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
+            #                   Feature #4576: mirage - process multiple metrics
+            try:
+                custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['mirage_busy'] = mirage_busy
+            except Exception as err:
+                logger.error('error :: mirage_algorithms :: failed to add mirage_busy to %s algorithm_parameters, err: %s' % (
+                    custom_algorithm, err))
+
+            custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['metric'] = base_name
+            custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['base_name'] = base_name
+
+            # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+            #                   Feature #3566: custom_algorithms
+            # Always return results
+            # return_results = True
+            # custom_algorithms_to_run[custom_algorithm]['return_results'] = return_results
+            # custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['return_results'] = return_results
+
             # @modified 20210304 - Feature #3642: Anomaly type classification
             #                      Feature #3970: custom_algorithm - adtk_level_shift
             # Added triggered_algorithms
             if custom_algorithm == 'adtk_level_shift':
                 if 'adtk_level_shift' not in triggered_algorithms:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.debug('debug :: custom_algorithms :: NOT running custom algorithm %s on %s as was not in triggered_algorithms' % (
+                        logger.debug('debug :: mirage_algorithms :: custom_algorithms :: NOT running custom algorithm %s on %s as was not in triggered_algorithms' % (
                             str(custom_algorithm), str(base_name)))
                     continue
 
@@ -800,7 +899,169 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                 use_debug_logging = True
 
-            if run_custom_algorithm_on_timeseries:
+            # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+            #                   Feature #3566: custom_algorithms
+            # Set default results
+            results = {}
+
+            # @added 20240108 - Feature #5198: flux - tornado
+            use_tornado = False
+            if custom_algorithm == 'mirages_nirvana_matrixprofile' and FLUX_TORNADO_URL:
+                use_tornado = True
+                try:
+                    custom_algorithms_run.append(custom_algorithm)
+                    logger.info('mirage_algorithms :: using tornado for %s' % custom_algorithm)
+                    headers = {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                    tornado_url = '%s?algorithm=%s' % (str(FLUX_TORNADO_URL), custom_algorithm)
+                    algorithm_dict = copy.deepcopy(custom_algorithms_to_run[custom_algorithm])
+                    algorithm_parameters = copy.deepcopy(custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+                    algorithm_parameters['tornado_url'] = tornado_url
+                    algorithm_parameters['skyline_app'] = skyline_app
+                    flux_tornado_dict = {
+                        'key': FLUX_SELF_API_KEY,
+                        'algorithm': custom_algorithm,
+                        'skyline_app': skyline_app,
+                        'base_name': base_name,
+                        'timeseries': timeseries,
+                        'algorithm_dict': algorithm_dict,
+                        'algorithm_parameters': algorithm_parameters,
+                    }
+                    try:
+                        max_exec_time = custom_algorithms_to_run[custom_algorithm]['max_execution_time']
+                    except:
+                        max_exec_time = 15
+                    start_compute = time()
+                    r = None
+                    dump_response = False
+                    try:
+                        use_timeout = (10, max_exec_time)
+                        r = requests.post(tornado_url, data=json.dumps(flux_tornado_dict), headers=headers, timeout=use_timeout)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: mirage_algorithms :: failed to get response from %s, err: %s' % (
+                            str(tornado_url), err))
+                        # failover and use the custom_algorithm directly
+                        use_tornado = False
+                        dump_response = True
+                        logger.info('mirage_algorithms :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                    response = None
+                    if r:
+                        try:
+                            response = r.json()
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: mirage_algorithms :: failed to parse json response from %s, err: %s' % (
+                                str(tornado_url), err))
+                            # failover and use the custom_algorithm directly
+                            use_tornado = False
+                            dump_response = True
+                            logger.info('mirage_algorithms :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                    if response:
+                        try:
+                            anomalous = response['data']['anomalous']
+                            anomalyScore = response['data']['anomalyScore']
+                            results = response['data']['results']
+                            result = anomalous
+                            custom_algorithms_run_results.append(result)
+                            algorithm_result = [anomalous]
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: mirage_algorithms :: failed to get expected element from response json from %s, err: %s' % (
+                                str(tornado_url), err))
+                            # failover and use the custom_algorithm directly
+                            use_tornado = False
+                            dump_response = True
+                            logger.info('mirage_algorithms :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+
+                    # @added 20240117 - Feature #5198: flux - tornado
+                    # Create error keys using a backoff strategy, only
+                    # record 3 response dumps per hour
+                    if dump_response:
+                        redis_error_response_count_key = '%s.flux.tornado.%s.error.response.count' % (
+                            skyline_app, str(custom_algorithm))
+                        error_response_count = 0
+                        try:
+                            error_response_count = redis_conn_decoded.get(redis_error_response_count_key)
+                            if not error_response_count:
+                                error_response_count = 0
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: mirage_algorithms :: failed to get count from Redis key %s, err: %s' % (
+                                redis_error_response_count_key, err))
+                        if error_response_count >= 3:
+                            dump_response = False
+
+                    # @added 20240110 - Feature #5198: flux - tornado
+                    # If tornado failed and there is a response write it to a
+                    # Redis key for inspection to identify bad things in json
+                    # like NaN
+                    if dump_response:
+                        redis_key = '%s.flux.tornado.%s.error.response.%s' % (
+                            skyline_app, str(custom_algorithm),
+                            str(int(start_compute))
+                        )
+                        logger.info('mirage_algorithms :: attempting to dump response to Redis key: %s' % (
+                            redis_key))
+                        if r:
+                            response_data = None
+                            try:
+                                response_data = dump.dump_all(r)
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: mirage_algorithms :: failed to dump response from %s, err: %s' % (
+                                    str(tornado_url), err))
+                            key_data = None
+                            if response_data:
+                                try:
+                                    key_data = str(response_data.decode('utf-8'))
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_algorithms :: failed to decode response_data from %s, err: %s' % (
+                                        str(tornado_url), err))
+                            response_dumped = False
+                            if key_data:
+                                try:
+                                    response_dumped = redis_conn_decoded.setex(redis_key, 86400, key_data)
+                                    logger.info('mirage_algorithms :: dumped response to Redis key: %s' % (
+                                        redis_key))
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_algorithms :: failed to set response dump in Redis key %s with key_data: %s, err: %s' % (
+                                        redis_key, str(key_data), err))
+                            # @added 20240117 - Feature #5198: flux - tornado
+                            # Create error keys using a backoff strategy, only
+                            # record 3 response dumps per hour
+                            if response_dumped:
+                                try:
+                                    redis_conn_decoded.incr(redis_error_response_count_key)
+                                    redis_conn_decoded.expire(redis_error_response_count_key, 3600)
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_algorithms :: failed to incr and expire Redis key %s, err: %s' % (
+                                        redis_error_response_count_key, err))
+
+                        else:
+                            logger.warning('warning :: mirage_algorithms :: there is no response to dump to Redis key: %s' % (
+                                redis_key))
+
+                    if results:
+                        custom_algorithms_results[custom_algorithm] = copy.deepcopy(results)
+                    end_compute = time()
+                    compute_runtime = end_compute - start_compute
+                    if debug_logging:
+                        logger.info('mirage_algorithms :: tornado %s took %.6f seconds' % (
+                            custom_algorithm, compute_runtime))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: mirage_algorithms :: running custom algorithm %s on %s via tornado, err: %s' % (
+                        str(custom_algorithm), str(base_name), err))
+
+            # @modified 20240108 - Feature #5198: flux - tornado
+            # if run_custom_algorithm_on_timeseries:
+            if run_custom_algorithm_on_timeseries and not use_tornado:
 
                 # @added 20211125 - Feature #3566: custom_algorithms
                 custom_algorithms_run.append(custom_algorithm)
@@ -813,11 +1074,25 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     logger.info('mirage_algorithms :: mirage.starting key exists so max_custom_algorithm_execution_time set to %s' % (
                         str(max_custom_algorithm_execution_time)))
 
+                # @added 20240104 - Task #5096: Incorporate irregular_unstable into Mirage
+                #                   Task #5178: Build and test skyline v4.1.0
+                # If the metric has been identified as having an irregular_unstable
+                # time series and 30 days of data is being used, extend the
+                # max_execution_time
+                if not max_custom_algorithm_execution_time:
+                    if len(timeseries) > 2000:
+                        max_custom_algorithm_execution_time = int(custom_algorithms_to_run[custom_algorithm]['max_execution_time'])
+                        custom_algorithms_to_run[custom_algorithm]['max_execution_time'] = int(max_custom_algorithm_execution_time * 2)
+
                 try:
                     # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
                     #                      Task #4778: v4.0.0 - update dependencies
                     # Added current_func
-                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
+                    # @modified 20231004 - 
+                    if return_results:
+                        result, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
+                    else:
+                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
@@ -835,9 +1110,15 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     # @added 20211125 - Feature #3566: custom_algorithms
                     custom_algorithms_run_results.append(False)
 
+                # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                if results:
+                    custom_algorithms_results[custom_algorithm] = copy.deepcopy(results)
+
             else:
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.error('error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
+                    if not use_tornado:
+                        logger.error('error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
             if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                 end_debug_timer = timer()
                 logger.debug('debug :: mirage_algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
@@ -865,8 +1146,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             except:
                 custom_run_3sigma_algorithms = True
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: error - algorithms :: could not determine custom_run_3sigma_algorithms - default to True')
-            if not custom_run_3sigma_algorithms and result:
+                    logger.debug('debug :: error :: mirage_algorithms :: could not determine custom_run_3sigma_algorithms - default to True')
+            # @modified 20231004
+            # if not custom_run_3sigma_algorithms and result:
+            if (not custom_run_3sigma_algorithms and result) or (not custom_run_3sigma_algorithms and result is False):
                 run_3sigma_algorithms = False
                 run_3sigma_algorithms_overridden_by.append(custom_algorithm)
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
@@ -905,7 +1188,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # @added 20200607 - Feature #3566: custom_algorithms
     # @modified 20201120 - Feature #3566: custom_algorithms
     # ensemble = []
-    ensemble = final_custom_ensemble
+    ensemble = list(final_custom_ensemble)
 
     # @added 20211125 - Feature #3566: custom_algorithms
     # If custom_algorithms were run and did not trigger reset the consensus
@@ -933,7 +1216,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             for algorithm in MIRAGE_ALGORITHMS:
                 algorithms_run.append(algorithm)
         except:
-            logger.error('Algorithm error: %s' % traceback.format_exc())
+            logger.error('mirage_algorithms :: Algorithm error: %s' % traceback.format_exc())
             # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
             # Added negatives_found
             # return False, [], 1
@@ -1070,7 +1353,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
     if run_custom_algorithm_after_3sigma:
         if DEBUG_CUSTOM_ALGORITHMS:
-            logger.debug('debug :: checking custom algorithms to run AFTER three-sigma algorithms')
+            logger.debug('debug :: mirage_algorithms :: checking custom algorithms to run AFTER three-sigma algorithms')
         for custom_algorithm in list(custom_algorithms_to_run.keys()):
             debug_logging = False
             try:
@@ -1152,7 +1435,135 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                 use_debug_logging = True
 
-            if run_custom_algorithm_on_timeseries:
+            # @added 20240108 - Feature #5198: flux - tornado
+            results = {}
+            use_tornado = False
+            if custom_algorithm == 'mirages_nirvana_matrixprofile' and FLUX_TORNADO_URL:
+                use_tornado = True
+                try:
+                    custom_algorithms_run.append(custom_algorithm)
+                    logger.info('mirage_algorithms :: using tornado for %s' % custom_algorithm)
+                    headers = {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                    tornado_url = '%s?algorithm=%s' % (str(FLUX_TORNADO_URL), custom_algorithm)
+                    algorithm_dict = copy.deepcopy(custom_algorithms_to_run[custom_algorithm])
+                    algorithm_parameters = copy.deepcopy(custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+                    algorithm_parameters['tornado_url'] = tornado_url
+                    algorithm_parameters['skyline_app'] = skyline_app
+                    flux_tornado_dict = {
+                        'key': FLUX_SELF_API_KEY,
+                        'algorithm': custom_algorithm,
+                        'skyline_app': skyline_app,
+                        'base_name': base_name,
+                        'timeseries': timeseries,
+                        'algorithm_dict': algorithm_dict,
+                        'algorithm_parameters': algorithm_parameters,
+                    }
+                    try:
+                        max_exec_time = custom_algorithms_to_run[custom_algorithm]['max_execution_time']
+                    except:
+                        max_exec_time = 15
+                    start_compute = time()
+                    results = {}
+                    r = None
+                    dump_response = False
+                    try:
+                        use_timeout = (10, max_exec_time)
+                        r = requests.post(tornado_url, data=json.dumps(flux_tornado_dict), headers=headers, timeout=use_timeout)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: mirage_algorithms :: failed to get response from %s, err: %s' % (
+                            str(tornado_url), err))
+                        # failover and use the custom_algorithm directly
+                        use_tornado = False
+                        dump_response = True
+                        logger.info('mirage_algorithms :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                    response = None
+                    if r:
+                        try:
+                            response = r.json()
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: mirage_algorithms :: failed to parse json response from %s, err: %s' % (
+                                str(tornado_url), err))
+                            # failover and use the custom_algorithm directly
+                            use_tornado = False
+                            dump_response = True
+                            logger.info('mirage_algorithms :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                    if response:
+                        try:
+                            anomalous = response['data']['anomalous']
+                            anomalyScore = response['data']['anomalyScore']
+                            results = response['data']['results']
+                            result = anomalous
+                            custom_algorithms_run_results.append(result)
+                            algorithm_result = [anomalous]
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: mirage_algorithms :: failed to get expected element from response json from %s, err: %s' % (
+                                str(tornado_url), err))
+                            # failover and use the custom_algorithm directly
+                            use_tornado = False
+                            dump_response = True
+                            logger.info('mirage_algorithms :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+
+                    # @added 20240110 - Feature #5198: flux - tornado
+                    # If tornado failed and there is a response write it to a
+                    # Redis key for inspection to identify bad things in json
+                    # like NaN
+                    if dump_response:
+                        redis_key = '%s.flux.tornado.%s.error.response.%s' % (
+                            skyline_app, str(custom_algorithm),
+                            str(int(start_compute))
+                        )
+                        logger.info('mirage_algorithms :: attempting to dump response to Redis key: %s' % (
+                            redis_key))
+                        if r:
+                            response_data = None
+                            try:
+                                response_data = dump.dump_all(r)
+                            except Exception as err:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: mirage_algorithms :: failed to dump response from %s, err: %s' % (
+                                    str(tornado_url), err))
+                            key_data = None
+                            if response_data:
+                                try:
+                                    key_data = str(response_data.decode('utf-8'))
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_algorithms :: failed to decode response_data from %s, err: %s' % (
+                                        str(tornado_url), err))
+                            if key_data:
+                                try:
+                                    redis_conn_decoded.setex(redis_key, 86400, key_data)
+                                    logger.info('mirage_algorithms :: dumped response to Redis key: %s' % (
+                                        redis_key))
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_algorithms :: failed to set response dump in Redis key %s with key_data: %s, err: %s' % (
+                                        redis_key, str(key_data), err))
+                        else:
+                            logger.warning('warning :: mirage_algorithms :: there is no response to dump to Redis key: %s' % (
+                                redis_key))
+
+                    if results:
+                        custom_algorithms_results[custom_algorithm] = copy.deepcopy(results)
+                    end_compute = time()
+                    compute_runtime = end_compute - start_compute
+                    if debug_logging:
+                        logger.info('mirage_algorithms :: tornado %s took %.6f seconds' % (
+                            custom_algorithm, compute_runtime))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: mirage_algorithms :: running custom algorithm %s on %s via tornado, err: %s' % (
+                        str(custom_algorithm), str(base_name), err))
+
+            # @modified 20240108 - Feature #5198: flux - tornado
+            # if run_custom_algorithm_on_timeseries:
+            if run_custom_algorithm_on_timeseries and not use_tornado:
 
                 # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
                 #                   Feature #4702: numba optimisations
@@ -1161,6 +1572,11 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     custom_algorithms_to_run[custom_algorithm]['max_execution_time'] = max_custom_algorithm_execution_time
                     logger.info('mirage_algorithms :: mirage.starting key exists so max_custom_algorithm_execution_time set to %s' % (
                         str(max_custom_algorithm_execution_time)))
+
+                # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                      Feature #3566: custom_algorithms
+                # Added default results
+                results = {}
 
                 try:
                     # @modified 20230117 - Task #4786: Switch from matrixprofile to stumpy
@@ -1171,10 +1587,20 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         # @modified 20230118 - Task #4786: Switch from matrixprofile to stumpy
                         #                      Task #4778: v4.0.0 - update dependencies
                         # Added current_func
-                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
+                        # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                        #                      Feature #3566: custom_algorithms
+                        # Added results
+                        if return_results:
+                            result, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
+                        else:
+                            result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
                     else:
                         # logger.debug('debug :: mirage_algorithms :: running skyline_matrixprofile')
-                        custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump', 'stumpy.stump', 'stump']
+
+                        # @modified 20240108 - Feature #5198: flux - tornado
+                        # custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump', 'stumpy.stump', 'stump']
+                        custom_algorithm_modules = ['custom_algorithm_sources.stumpy.stump']
+
                         algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
                         if len(algorithm_modules_loaded) > 0:
                             logger.debug('debug :: mirage_algorithms :: running skyline_matrixprofile, not importing stumpy as it is present in sys.modules')
@@ -1183,7 +1609,20 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         start_skmp = time()
                         if current_func:
                             custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['context'] = current_func
-                        result, anomalyScore = skyline_matrixprofile(skyline_app, getpid(), timeseries, custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+
+                        # @modified 20240108 - Feature #5198: flux - tornado
+                        if FLUX_TORNADO_ENABLED:
+                            custom_algorithms_to_run[custom_algorithm]['tornado_url'] = '%s?algorithm=stump' % str(FLUX_TORNADO_URL)
+                            custom_algorithms_to_run[custom_algorithm]['tornado_api_key'] =  str(FLUX_SELF_API_KEY)
+
+                        # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                        #                      Feature #3566: custom_algorithms
+                        # Added results
+                        if return_results:
+                            result, anomalyScore, results = skyline_matrixprofile(skyline_app, getpid(), timeseries, custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+                        else:
+                            result, anomalyScore = skyline_matrixprofile(skyline_app, getpid(), timeseries, custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+
                         logger.debug('debug :: mirage_algorithms :: skyline_matrixprofile took %s seconds to run' % str(time() - start_skmp))
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
@@ -1198,9 +1637,16 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                             custom_algorithm, base_name, str(err)))
                     result = None
                     algorithm_result = [None]
+
+                # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                   Feature #3566: custom_algorithms
+                if results:
+                    custom_algorithms_results[custom_algorithm] = copy.deepcopy(results)
+
             else:
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.error('error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
+                    if not use_tornado:
+                        logger.error('error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
             if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                 end_debug_timer = timer()
                 logger.debug('debug :: mirage_algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
@@ -1351,7 +1797,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     logger.info('%s negative values found for %s' % (
                         str(number_of_negatives_found), metric_name))
                 except:
-                    logger.error('Algorithm error: negatives_present :: %s' % traceback.format_exc())
+                    logger.error('mirage_algorithms :: Algorithm error: negatives_present :: %s' % traceback.format_exc())
                     negatives_found = False
 
             if MIRAGE_ENABLE_SECOND_ORDER:
@@ -1361,26 +1807,38 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     # return True, ensemble, timeseries[-1][1]
                     # @modified 20200607 - Feature #3566: custom_algorithms
                     # Added algorithms_run
-                    return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+                    # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                    #                      Feature #3566: custom_algorithms
+                    # Added custom_algorithms_results
+                    return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run, custom_algorithms_results
             else:
                 # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Added negatives_found
                 # return True, ensemble, timeseries[-1][1]
                 # @modified 20200607 - Feature #3566: custom_algorithms
                 # Added algorithms_run
-                return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+                # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+                #                      Feature #3566: custom_algorithms
+                # Added custom_algorithms_results
+                return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run, custom_algorithms_results
 
         # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # Added negatives_found
         # return False, ensemble, timeseries[-1][1]
         # @modified 20200607 - Feature #3566: custom_algorithms
         # Added algorithms_run
-        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+        # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+        #                      Feature #3566: custom_algorithms
+        # Added custom_algorithms_results
+        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, custom_algorithms_results
     except:
-        logger.error('Algorithm error: %s' % traceback.format_exc())
+        logger.error('mirage_algorithms :: Algorithm error: %s' % traceback.format_exc())
         # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # Added negatives_found
         # return False, [], 1
         # @modified 20200607 - Feature #3566: custom_algorithms
         # Added algorithms_run
-        return False, [], 1, False, algorithms_run
+        # @modified 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
+        #                      Feature #3566: custom_algorithms
+        # Added custom_algorithms_results
+        return False, [], 1, False, algorithms_run, custom_algorithms_results

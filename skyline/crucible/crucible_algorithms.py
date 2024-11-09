@@ -3,6 +3,10 @@ from __future__ import division
 # matplotlib.use is now required before statsmodels.api
 from matplotlib import use as matplotlib_use
 matplotlib_use('Agg')
+# @added 20230713 - Task #4996: Improve matplotlib performance
+# Improve matplotlib render performance
+import matplotlib.style as mplstyle
+mplstyle.use('fast')
 
 if True:
     import pandas
@@ -635,6 +639,12 @@ def run_algorithms(
 
         detected = ''
         try:
+
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            matplotlib.rcParams['path.simplify_threshold'] = 1.0
+            plt.style.use('fast')
+
             x_vals = np.arange(len(timeseries))
             y_vals = np.array([y[1] for y in timeseries])
             # Match default graphite graph size
@@ -902,6 +912,12 @@ def run_algorithms(
             logger.info('info :: plotting skyline.consensus.anomalies.png for %s' % str(timeseries_file))
             x_vals = np.arange(len(timeseries))
             y_vals = np.array([y[1] for y in timeseries])
+
+            # @added 20230713 - Task #4996: Improve matplotlib performance
+            # Improve matplotlib render performance
+            matplotlib.rcParams['path.simplify_threshold'] = 1.0
+            plt.style.use('fast')
+
             # Match default graphite graph size
             plt.figure(figsize=(5.86, 3.08), dpi=100)
             plt.plot(x_vals, y_vals)

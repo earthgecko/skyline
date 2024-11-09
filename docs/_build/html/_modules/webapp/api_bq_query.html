@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>webapp.api_bq_query &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">webapp.api_bq_query</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for webapp.api_bq_query</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">api_bq_query.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">nullcontext</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+
+<span class="c1"># For version pinning consider implementing a skyline-bq-py31013 environment</span>
+<span class="c1"># and adding that to the path so that imports come from there rather than from</span>
+<span class="c1"># the skyline-py31013 environment which has different versions of some libraries</span>
+<span class="c1"># e.g. googleapis-common-protos</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">functions.settings.get_bq_accounts_settings</span> <span class="kn">import</span> <span class="n">get_bq_accounts_settings</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_ACCOUNTS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">VISTA_BQ_ACCOUNTS</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_ACCOUNTS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_VIRTUALENV_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VISTA_BQ_VIRTUALENV_PATH</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_VIRTUALENV_PATH</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">VISTA_BQ_VIRTUALENV_PATH</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">VISTA_BQ_VIRTUALENV_PATH</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">functions.bigquery.bq_df_to_metrics</span> <span class="kn">import</span> <span class="n">bq_df_to_metrics</span>
+    <span class="kn">from</span> <span class="nn">functions.bigquery.bq_credentials</span> <span class="kn">import</span> <span class="n">get_bq_credentials</span>
+    <span class="kn">import</span> <span class="nn">pandas_gbq</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">bq_df_to_metrics</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+    <span class="n">get_bq_credentials</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+    <span class="n">get_bq_credentials</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+    <span class="n">pandas_gbq</span> <span class="o">=</span> <span class="n">nullcontext</span><span class="p">()</span>
+
+
+<span class="c1"># @added 20240725 - Feature #5372: vista - bq_update</span>
+<span class="c1">#                   Feature #5352: vista - bigquery</span>
+<div class="viewcode-block" id="api_bq_query">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.api_bq_query.api_bq_query">[docs]</a>
+<span class="k">def</span> <span class="nf">api_bq_query</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dict with the backfill job details.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :return: bq_query_results</span>
+<span class="sd">    :rtype: dict</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bq_query_results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;status_code&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span> <span class="s1">&#39;archive_csv&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;archive_csv_url&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">vista_bq_account_key</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Test whether form or json POST</span>
+    <span class="n">form_data</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vista_bq_account_key</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;vista_bq_account_key&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">vista_bq_account_key</span><span class="p">:</span>
+            <span class="n">form_data</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: form POST&#39;</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query - vista_bq_account_key passed: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">vista_bq_account_key</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query no form data trying json&#39;</span><span class="p">)</span>
+
+    <span class="n">post_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">form_data</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">post_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query - no POST data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: return 400 no POST data&#39;</span><span class="p">)</span>
+            <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+            <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no post data&#39;</span>
+            <span class="k">return</span> <span class="n">bq_query_results</span>
+        <span class="k">if</span> <span class="n">post_data</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: post_data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">post_data</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vista_bq_account_key</span> <span class="o">=</span> <span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;vista_bq_account_key&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">vista_bq_account_key</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query - vista_bq_account_key passed: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">vista_bq_account_key</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">vista_bq_account_key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">vista_bq_account_key</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query - evaluation of  post_data[</span><span class="se">\&#39;</span><span class="s1">data</span><span class="se">\&#39;</span><span class="s1">][</span><span class="se">\&#39;</span><span class="s1">vista_bq_account_key</span><span class="se">\&#39;</span><span class="s1">] failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">vista_bq_account_key</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: return 400 no vista_bq_account_key determined&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no vista_bq_account_key argument&#39;</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+
+    <span class="n">sql</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">form_data</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;sql&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sql</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">post_data</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;sql&#39;</span><span class="p">])</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: with sql: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sql</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: failed to determine sql, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: return 400 no sql passed&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;no sql argument&#39;</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+
+    <span class="n">vista_bq_accounts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vista_bq_accounts</span> <span class="o">=</span> <span class="n">get_bq_accounts_settings</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: get_bq_accounts_settings failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: returning 500&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;get_bq_accounts_settings failed&#39;</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+
+    <span class="n">bq_account_settings</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">bq_account_settings</span> <span class="o">=</span> <span class="n">vista_bq_accounts</span><span class="p">[</span><span class="n">vista_bq_account_key</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: failed to determine settings for </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bq_account_settings</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s1">&#39;failed to determine settings for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vista_bq_account_key</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err_msg</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: returning 500&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err_msg</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+
+    <span class="c1"># Credentials can be passed in a json file or as a dict (as from</span>
+    <span class="c1"># external_settings)</span>
+    <span class="n">credentials</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">use_credentials</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">oauth_credentials</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">service_credentials</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">oauth_credentials_file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">service_credentials_file</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">project_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;project_id&#39;</span> <span class="ow">in</span> <span class="n">bq_account_settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">project_id</span> <span class="o">=</span> <span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;project_id&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;oauth_credentials&#39;</span> <span class="ow">in</span> <span class="n">bq_account_settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">oauth_credentials</span> <span class="o">=</span> <span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;oauth_credentials&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;oauth_credentials_file&#39;</span> <span class="ow">in</span> <span class="n">bq_account_settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">oauth_credentials_file</span> <span class="o">=</span> <span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;oauth_credentials_file&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;service_credentials&#39;</span> <span class="ow">in</span> <span class="n">bq_account_settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">service_credentials</span> <span class="o">=</span> <span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;service_credentials&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;service_credentials_file&#39;</span> <span class="ow">in</span> <span class="n">bq_account_settings</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">service_credentials_file</span> <span class="o">=</span> <span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;service_credentials_file&#39;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">credentials</span> <span class="o">=</span> <span class="n">get_bq_credentials</span><span class="p">(</span>
+                            <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">credentials</span><span class="o">=</span><span class="n">use_credentials</span><span class="p">,</span>
+                            <span class="n">project_id</span><span class="o">=</span><span class="n">project_id</span><span class="p">,</span>
+                            <span class="n">oauth_credentials</span><span class="o">=</span><span class="n">oauth_credentials</span><span class="p">,</span>
+                            <span class="n">oauth_credentials_file</span><span class="o">=</span><span class="n">oauth_credentials_file</span><span class="p">,</span>
+                            <span class="n">service_credentials</span><span class="o">=</span><span class="n">service_credentials</span><span class="p">,</span>
+                            <span class="n">service_credentials_file</span><span class="o">=</span><span class="n">service_credentials_file</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: get_bq_credentials failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">credentials</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: no credentials retrieved for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vista_bq_account_key</span><span class="p">)</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s1">&#39;failed to get credentials for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">vista_bq_account_key</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err_msg</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: returning 500&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err_msg</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">use_credentials</span> <span class="o">=</span> <span class="n">credentials</span>
+
+    <span class="n">configuration</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;jobTimeoutMs&#39;</span><span class="p">:</span> <span class="mi">120000</span><span class="p">,</span> <span class="s1">&#39;timeoutMs&#39;</span><span class="p">:</span> <span class="mi">120000</span><span class="p">}</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pandas_gbq</span><span class="o">.</span><span class="n">read_gbq</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">project_id</span><span class="o">=</span><span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;project_id&#39;</span><span class="p">],</span> <span class="n">credentials</span><span class="o">=</span><span class="n">credentials</span><span class="p">,</span> <span class="n">progress_bar_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">configuration</span><span class="o">=</span><span class="n">configuration</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s1">&#39;pandas_gbq.read_gbq failed with sql: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sql</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err_msg</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: returning 500&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err_msg</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s1">&#39;pandas_gbq.read_gbq returned no data df is None&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: api_bq_query :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err_msg</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: returning 500&#39;</span><span class="p">)</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">bq_query_results</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">err_msg</span>
+        <span class="k">return</span> <span class="n">bq_query_results</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: fetched </span><span class="si">%s</span><span class="s1"> rows&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)))</span>
+
+    <span class="n">vista_bq_archive_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vista/bq_archives&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_DIR</span>
+    <span class="n">new_archive_csv</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.csv&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">vista_bq_archive_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)),</span> <span class="n">bq_account_settings</span><span class="p">[</span><span class="s1">&#39;project_id&#39;</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">new_archive_csv</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: created </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">new_archive_csv</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">err_msg</span> <span class="o">=</span> <span class="s1">&#39;df.to_csv failed to create archive_csv: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">new_archive_csv</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_update :: </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">err_msg</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">new_archive_csv</span><span class="p">):</span>
+        <span class="n">archive_csv_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vista_bq_archive_file?file=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">new_archive_csv</span><span class="p">)</span>
+        <span class="n">bq_query_results</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;status_code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">&#39;archive_csv&#39;</span><span class="p">:</span> <span class="n">new_archive_csv</span><span class="p">,</span> <span class="s1">&#39;archive_csv_url&#39;</span><span class="p">:</span> <span class="n">archive_csv_url</span><span class="p">}</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;api_bq_query :: returning bq_query_results: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">bq_query_results</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">bq_query_results</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

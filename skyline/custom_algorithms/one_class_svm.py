@@ -31,7 +31,13 @@ from sklearn.svm import OneClassSVM
 def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     """
-    Outlier detector for time-series data using One Class SVM
+    Outlier detector for time-series data using One Class SVM base on the moving
+    mean and variance, unless the variance is low in which case the standard
+    deviation will be used in place of variance.  The algorithm parameters to
+    be concerned with are ``'window'`` which defines the length of sliding
+    window to use, ``nu`` which defines the percentage that can be considered as
+    outliers e.g. 0.1 would be 10%.  Do note that if the variance is low each
+    spike or trough will probably be identified as an outlier.
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -45,12 +51,45 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
     :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  Example:
-        "algorithm_parameters": {
-            "n_neighbors": 2,
-            "anomaly_window": 5,
-            "return_results": True,
-        }
+        custom_algorithm and algorithm itself.  For the one_class_svm custom
+        algorithm no specific algorithm_parameters are required apart from an
+        empty dict but the algorithm_parameters that can be passed are:
+
+        - ``'anomaly_window'`` (int): The anomaly_window value.
+            This specifies how many of the last data points should be considered
+            when determining if the metric is anomalous. Only the last
+            ``anomaly_window`` data points in the time series will be used to
+            determine if the metric is anomalous.  Default is ``1``.
+        - ``'window'`` (int): The sliding window size.
+            Default is ``3``.
+        - ``'nu'`` (float): The threshold value.
+            The value for nu which defines the percentage that can be considered
+            as outliers e.g. 0.1 would be 10%.  Default is ``0.01``.
+        - ``'gamma'`` (str): Kernel coefficient for ``rbf``, ``poly`` and ``sigmoid``.
+            Default is ``scale``.
+            Possible values: `scale` | `auto`.
+                - `scale` - uses 1 / (n_features * X.var()) as value of gamma.
+                - `auto` - uses 1 / n_features as value of gamma.
+        - ``'return_results'`` (bool): Optional.
+            If ``True``, returns the results dict in addition to anomalous and
+            anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool): Optional.
+            If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool): Optional.
+            If ``True``, enables debug printing  (for Jupyter testing). Default
+            is ``False``.
+
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'window': 3,
+                'nu': 0.01,
+                'gamma': 'scale',
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list
@@ -59,6 +98,19 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     :rtype: tuple(boolean, float, dict)
 
     """
+
+    def normalised_variance(np_values):
+        normalised_var = np.nan
+        err = None
+        try:
+            # np_values = np.array(values)
+            np_max = np.amax(np_values)
+            np_min = np.amin(np_values)
+            norm_np_values = (np_values - np_min) / (np_max - np_min)
+            normalised_var = round(np.var(norm_np_values), 4)
+        except Exception as err:
+            normalised_var = np.nan
+        return normalised_var, err
 
     # You MUST define the algorithm_name
     algorithm_name = 'one_class_svm'
@@ -69,7 +121,15 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     # anomalyScore.
     anomalous = None
     anomalyScore = None
-    results = {}
+    anomalies = {}
+    anomalyScore_list = []
+    one_class_svm_scores = []
+    results = {
+        'anomalous': anomalous,
+        'anomalies': anomalies,
+        'anomalyScore_list': anomalyScore_list,
+        'scores': one_class_svm_scores,
+    }
 
     current_logger = None
 
@@ -120,17 +180,19 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
             return (None, None)
 
     # Use the algorithm_parameters to determine variables
-    debug_print = None
+    print_debug = None
     try:
-        debug_print = algorithm_parameters['debug_print']
+        print_debug = algorithm_parameters['print_debug']
     except:
-        debug_print = False
+        print_debug = False
 
-    nu = 0.01
+    # nu = 0.01
+    nu = 0.09
     try:
         nu = float(algorithm_parameters['nu'])
     except:
-        nu = 0.01
+        # nu = 0.01
+        nu = 0.09
     window_shape = 3
     try:
         window_shape = int(algorithm_parameters['window'])
@@ -147,34 +209,71 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
     except:
         anomaly_window = 1
 
-    if debug_print:
+    if print_debug:
         print('running one_class_svm with nu: %s, window_shape: %s, gamma: %s' % (
             str(nu), str(window_shape), str(gamma)))
     if debug_logging:
         current_logger.debug('debug :: running one_class_svm with nu: %s, window_shape: %s, gamma: %s' % (
             str(nu), str(window_shape), str(gamma)))
 
-    if debug_print:
+    if print_debug:
         print('running one_class_svm on timeseries with %s datapoints' % str(len(timeseries)))
     if debug_logging:
         current_logger.debug('debug :: running one_class_svm on timeseries with %s datapoints' % str(len(timeseries)))
 
+    results['algorithm_parameters'] = algorithm_parameters.copy()
+    results['algorithm_parameters_used'] = {
+        'anomaly_window': anomaly_window, 'nu': nu, 'gamma': gamma, 'window': window_shape,
+    }
+
+    # @added 20230707 - Feature #4750: custom_algorithm - one_class_svm
+    # Use standard deviation instead of variance if the variance is low
+    results['components'] = ['mean', 'variance']
+    low_variance = 0.009
+    use_column = 'variance'
+
     try:
         X = np.array([v for t, v in timeseries])
+        norm_var, err = normalised_variance(X)
+        if err:
+            results['normalised_variance_error'] = err
+            if debug_logging:
+                current_logger.debug('debug :: normalised_variance error: %s' % str(err))
+        # Only use json friendly values in results
+        if isinstance(normalised_variance, float):
+            results['normalised_variance'] = norm_var
+        else:
+            results['normalised_variance'] = str(norm_var)
+
         Xmean = np.average(sliding_window_view(X, window_shape=window_shape), axis=1)
-        Xvar = np.var(sliding_window_view(X, window_shape=window_shape), axis=1)
+
+        # @modified 20230707 - Feature #4750: custom_algorithm - one_class_svm
+        # Use standard deviation instead of variance if the variance is low
+        # Xvar = np.var(sliding_window_view(X, window_shape=window_shape), axis=1)
+        if norm_var <= low_variance:
+            Xvar = np.std(sliding_window_view(X, window_shape=window_shape), axis=1)
+            results['components'] = ['mean', 'std']
+            use_column = 'std'
+        else: 
+            Xvar = np.var(sliding_window_view(X, window_shape=window_shape), axis=1)
+
         xx = []
         xmeans = list(Xmean)
         xvars = list(Xvar)
         for index, value in enumerate(xmeans):
             xx.append([value, xvars[index]])
 
+        # @modified 20230707 - Feature #4750: custom_algorithm - one_class_svm
+        # Use standard deviation instead of variance if the variance is low
+        # df = pd.DataFrame(xx, columns=['mean', 'variance'])
+        df = pd.DataFrame(xx, columns=['mean', use_column])
+
         # Standardise
-        df = pd.DataFrame(xx, columns=['mean', 'variance'])
         st = StandardScaler()
         stdDf = pd.DataFrame(st.fit_transform(df), columns=df.columns)
         stdMean = stdDf['mean'].tolist()
-        stdVar = stdDf['variance'].tolist()
+        #stdVar = stdDf['variance'].tolist()
+        stdVar = stdDf[use_column].tolist()
         xx = []
         for index, value in enumerate(stdMean):
             xx.append([value, stdVar[index]])
@@ -191,6 +290,7 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
 
         # Coerce numpy.int64 to int
         one_class_svm_scores = [int(x) for x in one_class_svm_scores]
+        results['scores'] = one_class_svm_scores
 
         anomalyScore_list = []
         anomalies = {}
@@ -204,41 +304,59 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
                     anomalyScore_list.append(0)
             except:
                 anomalyScore_list.append(0)
+        results['anomalyScore_list'] = anomalyScore_list
+
+        # @added 20230707
+        # This would be to handle the algorithm occasionally flagging all the
+        # values of 0 as anomalies
+        # if sum(anomalyScore_list) >= len(timeseries) / 2:
 
         anomaly_sum = sum(anomalyScore_list[-anomaly_window:])
         if anomaly_sum > 0:
             anomalous = True
+            results['anomalous'] = True
         else:
             anomalous = False
-        results = {
-            'anomalous': anomalous,
-            'anomalies': anomalies,
-            'anomalyScore_list': anomalyScore_list,
-            'scores': one_class_svm_scores,
-        }
-        if debug_print:
+            results['anomalous'] = False
+
+        # @added 20230801
+        # If the algorithm identifies almost all of the data points as
+        # anomalous, class the results as invalid
+        if sum(anomalyScore_list) >= int((len(timeseries) / 100) * 95):
+            anomalous = False
+            results['anomalous'] = anomalous
+            results['unreliable'] = True
+            if print_debug:
+                print('one_class_svm results unreliable, %s anomalies in timeseries of length %s' % (
+                    str(sum(anomalyScore_list)), str(len(timeseries))))
+            if debug_logging:
+                current_logger.debug('debug :: one_class_svm results unreliable, %s anomalies in timeseries of length %s' % (
+                    str(sum(anomalyScore_list)), str(len(timeseries))))
+
+        if print_debug:
             print('ran one_class_svm OK in %.6f seconds' % (time() - start))
         if debug_logging:
             current_logger.debug('debug :: ran one_class_svm OK in %.6f seconds' % (time() - start))
         if results:
+            results['anomalies'] = anomalies
             if results['anomalous']:
                 anomalous = True
                 anomalyScore = 1.0
             else:
                 anomalous = False
                 anomalyScore = 0.0
-            if debug_print:
+            if print_debug:
                 print('anomalous: %s' % str(anomalous))
             if debug_logging:
-                current_logger.debug('debug :: anomalous: %s' % str(anomalous))
+                current_logger.debug('debug :: one_class_svm - anomalous: %s' % str(anomalous))
         else:
-            if debug_print:
+            if print_debug:
                 print('error - no results')
             if debug_logging:
                 current_logger.debug('debug :: error - no results')
 
     except StopIteration:
-        if debug_print:
+        if print_debug:
             print('warning - StopIteration called on one_class_svm')
         if debug_logging:
             current_logger.debug('debug :: warning - StopIteration called on one_class_svm')
@@ -255,7 +373,7 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
         return (None, None)
     except Exception as err:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
-        if debug_print:
+        if print_debug:
             print('error:', traceback.format_exc())
         if debug_logging:
             current_logger.debug('debug :: error - on one_class_svm - %s' % err)

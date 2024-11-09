@@ -1,0 +1,556 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>vista.bq_fetcher &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Skyline
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_inference.html">Ionosphere inference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_learn_repetitive_patterns.html">Ionosphere learning from repetitive patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../prometheus.html">Prometheus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">vista.bq_fetcher</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for vista.bq_fetcher</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">bq_fetcher.py</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">functions.settings.get_bq_accounts_settings</span> <span class="kn">import</span> <span class="n">get_bq_accounts_settings</span>
+<span class="kn">from</span> <span class="nn">functions.skyline.job_scheduled</span> <span class="kn">import</span> <span class="n">job_scheduled</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">get_redis_conn_decoded</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_ACCOUNTS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">VISTA_BQ_ACCOUNTS</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">VISTA_BQ_ACCOUNTS</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARDS</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">HORIZON_SHARDS</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARDS</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">HORIZON_SHARD</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+    <span class="n">HORIZON_SHARD</span> <span class="o">=</span> <span class="n">HORIZON_SHARDS</span><span class="p">[</span><span class="n">this_host</span><span class="p">]</span>
+
+<span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;vista&#39;</span>
+<span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;bq_fetcher&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">parent_skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">parent_skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># @added 20240515 - Feature #5352: vista - bigquery</span>
+<span class="c1"># Checks if there is any bq_backfill jobs and if so adds adds to a redis hash</span>
+<span class="c1"># and spawns and orphans bq_backfill process</span>
+<div class="viewcode-block" id="Bq_Fetcher">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.bq_fetcher.Bq_Fetcher">[docs]</a>
+<span class="k">class</span> <span class="nc">Bq_Fetcher</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The BQFetcher thread checks the BQ accounts schedule and update_schedule and</span>
+<span class="sd">    submits a bq_backfill or bq_update job as appropriate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Bq_Fetcher.check_if_parent_is_alive">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.bq_fetcher.Bq_Fetcher.check_if_parent_is_alive">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: parent process is dead&#39;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Bq_Fetcher.bq_fetch">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.bq_fetcher.Bq_Fetcher.bq_fetch">[docs]</a>
+    <span class="k">def</span> <span class="nf">bq_fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">):</span>
+
+        <span class="n">vista_bq_accounts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vista_bq_accounts</span> <span class="o">=</span> <span class="n">get_bq_accounts_settings</span><span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: get_bq_accounts_settings failed, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+
+        <span class="c1"># backfill needs to be offloaded</span>
+        <span class="c1"># each backfilled entitiy needs a key created to say that backfill is complete</span>
+        <span class="c1"># When backfill is completed a key needs to be set to say it is filled</span>
+        <span class="c1"># If a key is not found, the data needs to be checked in the data store to</span>
+        <span class="c1"># determine </span>
+
+        <span class="n">bq_backfill_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/bq_backfill&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">)</span>
+        <span class="n">bq_update_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/bq_update&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">)</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">acc_dict</span> <span class="ow">in</span> <span class="n">vista_bq_accounts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">scheduled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="s1">&#39;schedule&#39;</span> <span class="ow">in</span> <span class="n">acc_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">scheduled</span> <span class="o">=</span> <span class="n">job_scheduled</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">schedule_dict</span><span class="o">=</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;schedule&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: job_scheduled failed for vista_bq_account_keyount: </span><span class="si">%s</span><span class="s1">, schedule: </span><span class="si">%s</span><span class="s1"> , err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">vista_bq_account_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;schedule&#39;</span><span class="p">]),</span> <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">scheduled</span><span class="p">:</span>
+                <span class="c1"># Submit a bq_backfill job</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;schedule_interval&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: could not determine interval from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">//</span> <span class="n">interval</span> <span class="o">*</span> <span class="n">interval</span>
+                <span class="n">post_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">post_data</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;bq_backfill&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s1">&#39;vista_bq_account_key&#39;</span><span class="p">:</span> <span class="n">vista_bq_account_key</span><span class="p">,</span>
+                            <span class="s1">&#39;from_timestamp&#39;</span><span class="p">:</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                            <span class="c1"># Also use the from_timestamp for the until_timestamp in a backfill job</span>
+                            <span class="s1">&#39;until_timestamp&#39;</span><span class="p">:</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                            <span class="s1">&#39;interval&#39;</span><span class="p">:</span> <span class="n">interval</span><span class="p">,</span>
+                            <span class="s1">&#39;date_format&#39;</span><span class="p">:</span> <span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;date_format&#39;</span><span class="p">],</span>
+                            <span class="s1">&#39;replace_query_string&#39;</span><span class="p">:</span> <span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;replace_query_string&#39;</span><span class="p">],</span>
+                            <span class="s1">&#39;zero_fill&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="s1">&#39;replace_redis_timeseries&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="s1">&#39;max_creates_per_minute&#39;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>
+                            <span class="s1">&#39;dry_run&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="s1">&#39;flux_test&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="s1">&#39;added_by&#39;</span><span class="p">:</span> <span class="s1">&#39;vista&#39;</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to build post_data for bq_backfill job, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">bq_backfill_url</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">json</span><span class="o">=</span><span class="n">post_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: bq_backfill API request made for </span><span class="si">%s</span><span class="s1">, returned status_code: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: bq_backfill request failed for </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">bq_backfill_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to parse json response from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">bq_backfill_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: bq_backfill_job submitted for </span><span class="si">%s</span><span class="s1">, response: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: bq_backfill job submitted for </span><span class="si">%s</span><span class="s1"> but no response&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">))</span>
+
+            <span class="n">update_scheduled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="s1">&#39;update_data_schedule&#39;</span> <span class="ow">in</span> <span class="n">acc_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">update_scheduled</span> <span class="o">=</span> <span class="n">job_scheduled</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">schedule_dict</span><span class="o">=</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;update_data_schedule&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: job_scheduled failed for vista_bq_account_keyount: </span><span class="si">%s</span><span class="s1">, update_data_schedule: </span><span class="si">%s</span><span class="s1"> , err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">vista_bq_account_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;update_data_schedule&#39;</span><span class="p">]),</span> <span class="n">err</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">update_scheduled</span><span class="p">:</span>
+
+                <span class="c1"># @added 20240703 - Allow for more update checks</span>
+                <span class="n">last_bq_update_key</span> <span class="o">=</span> <span class="s1">&#39;vista.bq_update.</span><span class="si">%s</span><span class="s1">.last_update&#39;</span> <span class="o">%</span> <span class="n">vista_bq_account_key</span>
+                <span class="n">last_bq_update_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_bq_update_timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_bq_update_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to determine on last_bq_update_timestamp from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">last_bq_update_key</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="n">last_bq_update_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">last_bq_update_timestamp</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: bq_update is scheduled but </span><span class="si">%s</span><span class="s1"> key exists, skipping&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">last_bq_update_key</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Submit a bq_update job</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;schedule_interval&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: could not determine schedule_interval from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">until_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">//</span> <span class="n">interval</span> <span class="o">*</span> <span class="n">interval</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">update_data_period</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;update_data_period&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: could not determine update_data_period from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">until_timestamp</span> <span class="o">-</span> <span class="n">update_data_period</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;resolution&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: could not determine resolution from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">date_field_format</span> <span class="o">=</span> <span class="n">acc_dict</span><span class="p">[</span><span class="s1">&#39;date_field_format&#39;</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: could not determine date_field_format from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="n">intervals_to_fetch_timestamps</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">intervals_to_fetch</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">ctime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">)</span>
+                <span class="k">while</span> <span class="n">ctime</span> <span class="o">&lt;</span> <span class="n">end_timestamp</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">interval_date_fromat</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ctime</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">date_field_format</span><span class="p">)</span>
+                        <span class="n">intervals_to_fetch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval_date_fromat</span><span class="p">)</span>
+                        <span class="n">intervals_to_fetch_timestamps</span><span class="p">[</span><span class="n">interval_date_fromat</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ctime</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to convert </span><span class="si">%s</span><span class="s1"> to date_field_format, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">ctime</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="n">ctime</span> <span class="o">=</span> <span class="n">ctime</span> <span class="o">+</span> <span class="n">interval</span>
+                    <span class="k">if</span> <span class="n">ctime</span> <span class="o">&gt;</span> <span class="n">end_timestamp</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+                <span class="c1"># Search the path for the latest archive for the </span>
+                <span class="n">archive_data_search_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/vista/bq_archives/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_DIR</span><span class="p">,</span> <span class="n">vista_bq_account_key</span><span class="p">)</span>
+                <span class="n">bq_archives</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">archive_data_search_path</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">dir_path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">archive_data_search_path</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                                    <span class="n">path_and_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+                                        <span class="n">bq_archives</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path_and_file</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: os.walk failed on </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">archive_data_search_path</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                <span class="c1"># Sort latest to oldest</span>
+                <span class="n">bq_archives</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bq_archives</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">fetch_interval_archives</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">interval_to_fetch</span> <span class="ow">in</span> <span class="n">intervals_to_fetch</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">bq_archive</span> <span class="ow">in</span> <span class="n">bq_archives</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">interval_to_fetch</span> <span class="ow">in</span> <span class="n">bq_archive</span><span class="p">:</span>
+                            <span class="n">fetch_interval_archives</span><span class="p">[</span><span class="n">interval_to_fetch</span><span class="p">]</span> <span class="o">=</span> <span class="n">bq_archive</span>
+                            <span class="k">break</span>
+                <span class="k">for</span> <span class="n">interval_to_fetch</span> <span class="ow">in</span> <span class="n">intervals_to_fetch</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">interval_to_fetch</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fetch_interval_archives</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;warning :: bq_fetcher :: no archive found for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">interval_to_fetch</span><span class="p">)))</span>
+
+                <span class="n">post_data</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">post_data</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;bq_update&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s1">&#39;vista_bq_account_key&#39;</span><span class="p">:</span> <span class="n">vista_bq_account_key</span><span class="p">,</span>
+                            <span class="s1">&#39;from_timestamp&#39;</span><span class="p">:</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                            <span class="s1">&#39;until_timestamp&#39;</span><span class="p">:</span> <span class="n">until_timestamp</span><span class="p">,</span>
+                            <span class="s1">&#39;verify_ssl&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span><span class="p">,</span>
+                            <span class="s1">&#39;added_by&#39;</span><span class="p">:</span> <span class="s1">&#39;vista&#39;</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to build post_data for bq_update job, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span><span class="p">}</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">bq_update_url</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">json</span><span class="o">=</span><span class="n">post_data</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: bq_update API request made for </span><span class="si">%s</span><span class="s1">, returned status_code: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: bq_update request failed for </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">bq_update_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">r</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to parse json response from </span><span class="si">%s</span><span class="s1">, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">bq_update_url</span><span class="p">),</span> <span class="n">err</span><span class="p">))</span>
+                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: bq_update_job submitted for </span><span class="si">%s</span><span class="s1">, response: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: bq_update job submitted for </span><span class="si">%s</span><span class="s1"> but no response&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">vista_bq_account_key</span><span class="p">))</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: done&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="Bq_Fetcher.run">
+<a class="viewcode-back" href="../../skyline.vista.html#vista.bq_fetcher.Bq_Fetcher.run">[docs]</a>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+<span class="sd">        - Check job schedules</span>
+<span class="sd">        - Wait for the processes to finish.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> bq_fetcher run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="n">running</span><span class="p">:</span>
+            <span class="n">begin_fetcher_run</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+
+            <span class="n">vista_bq_worker</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># Only execute on a single node in the cluster</span>
+            <span class="k">if</span> <span class="n">HORIZON_SHARDS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">HORIZON_SHARD</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">vista_bq_worker</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">vista_bq_worker</span><span class="p">:</span>
+                <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: spawning a bq_fetch process&#39;</span><span class="p">)</span>
+                    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bq_fetch</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">begin_fetcher_run</span><span class="p">,))</span>
+                    <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                    <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: spawned a bq_fetch process with pid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to spawn bq_fetch, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span><span class="p">)</span>
+
+                <span class="c1"># Self monitor processes and terminate if any fetch_process has run</span>
+                <span class="c1"># for longer than VISTA_FETCHER_PROCESS_MAX_RUNTIME seconds</span>
+                <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                        <span class="c1"># Just to avoid hogging the CPU</span>
+                        <span class="n">sleep</span><span class="p">(</span><span class="mf">.1</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># the process is done, break now.</span>
+                        <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: bq_fetch completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">time_to_run</span><span class="p">)</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: timed out, killing bq_fetch&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: killing bq_fetch process&#39;</span><span class="p">)</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: killed bq_fetch process&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: stopping bq_fetch - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                        <span class="n">killing_pid</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">pid</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: kill bq_fetch with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: killed bq_fetch process with pid: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">killing_pid</span><span class="p">)))</span>
+
+            <span class="c1"># Sleep next next run</span>
+            <span class="n">process_runtime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">begin_fetcher_run</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">process_runtime</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">next_run</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">begin_fetcher_run</span><span class="p">)</span> <span class="o">+</span> <span class="mi">60</span>
+                <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                <span class="n">sleep_for</span> <span class="o">=</span> <span class="n">next_run</span> <span class="o">-</span> <span class="n">time_now</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bq_fetcher :: sleeping for </span><span class="si">%s</span><span class="s1"> seconds until next fetch&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="n">sleep_for</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">sleep_for</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to del sleep_for&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">next_run</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to del next_run&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">time_now</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bq_fetcher :: failed to del time_now&#39;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

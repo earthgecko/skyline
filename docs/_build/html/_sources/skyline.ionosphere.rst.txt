@@ -76,6 +76,14 @@ skyline.ionosphere.learn\_repetitive\_patterns module
    :undoc-members:
    :show-inheritance:
 
+skyline.ionosphere.motif\_annihilation module
+---------------------------------------------
+
+.. automodule:: ionosphere.motif_annihilation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

@@ -7,8 +7,12 @@ from time import time
 
 import settings
 from matched_or_regexed_in_list import matched_or_regexed_in_list
+# @added 20231223 - Task #5188: Optimise redis renames
+#                   Task #5178: Build and test skyline v4.1.0
+from functions.redis.redis_rename_key import redis_rename_key
+
 try:
-    SKIP_IRREGULAR_UNSTABLE = settings.SKIP_IRREGULAR_UNSTABLE
+    SKIP_IRREGULAR_UNSTABLE = settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE
 except:
     SKIP_IRREGULAR_UNSTABLE = []
 
@@ -65,7 +69,7 @@ def build_skip_irregular_unstable_metric_ids(self, metrics_with_ids, external_se
             namespace_metrics = [base_name for base_name in active_base_names if dotted_namespace in base_name or labelled_namespace in base_name]
             # If the namespace is an external namespace remove the metrics
             # from the active_base_names list so they are not evaluated by
-            # the local settings.SKIP_IRREGULAR_UNSTABLE patterns
+            # the local settings.MIRAGE_SKIP_IRREGULAR_UNSTABLE patterns
             for base_name in namespace_metrics:
                 active_base_names.remove(base_name)
 
@@ -137,9 +141,18 @@ def build_skip_irregular_unstable_metric_ids(self, metrics_with_ids, external_se
                 err))
         if success:
             try:
-                self.redis_conn_decoded.rename('metrics_manager.skip_irregular_unstable_metric_ids', 'aet.metrics_manager.skip_irregular_unstable_metric_ids')
-                logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: created aet.metrics_manager.skip_irregular_unstable_metric_ids with %s ids' % (
-                    str(success)))
+                # @modified 20231223 - Task #5188: Optimise redis renames
+                #                      Task #5178: Build and test skyline v4.1.0
+                # Use rename_key function to mitigate cmd_stat.rename failed_calls
+                # self.redis_conn_decoded.rename('metrics_manager.skip_irregular_unstable_metric_ids', 'aet.metrics_manager.skip_irregular_unstable_metric_ids')
+                redis_key_renamed = False
+                try:
+                    redis_key_renamed = redis_rename_key(skyline_app, 'metrics_manager.skip_irregular_unstable_metric_ids', 'aet.metrics_manager.skip_irregular_unstable_metric_ids', log=True)
+                except Exception as err:
+                    logger.error('error :: redis_rename_key failed renaming metrics_manager.skip_irregular_unstable_metric_ids to aet.metrics_manager.skip_irregular_unstable_metric_ids, err: %s' % err)
+                if redis_key_renamed:
+                    logger.info('metrics_manager :: build_skip_irregular_unstable_metric_ids :: created aet.metrics_manager.skip_irregular_unstable_metric_ids with %s ids' % (
+                        str(success)))
             except:
                 pass
 

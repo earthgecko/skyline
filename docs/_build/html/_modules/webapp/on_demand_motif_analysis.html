@@ -1,22 +1,22 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>webapp.on_demand_motif_analysis &mdash; Skyline 4.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>webapp.on_demand_motif_analysis &mdash; Skyline 5.0.0-alpha documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/skyline.styles.css?v=8195f343" />
+
   
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=132a70fa"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -33,9 +33,6 @@
           <a href="../../index.html" class="icon icon-home">
             Skyline
           </a>
-              <div class="version">
-                4.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -46,13 +43,15 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../brief-history.html">A brief history</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anomify-cutting-edge-skyline.html">Anomify - cutting edge <span class="skyblue">Sky</span><span class="red">line</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../where-is-your-skyline.html">Where’s your <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running <span class="skyblue">Sky</span><span class="red">line</span> in a Python virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
@@ -78,6 +77,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../vortex.html">Vortex</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../thunder/index.html">Thunder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista-bigquery/index.html">Vista - BigQuery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../SNAB.html">SNAB</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../external_settings.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.EXTERNAL_SETTINGS</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
@@ -86,7 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring <span class="skyblue">Sky</span><span class="red">line</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline_metrics.html"><span class="skyblue">Sky</span><span class="red">line</span> metrics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../opentelemetry.html">opentelemetry</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Trouble shooting</a></li>
@@ -134,6 +134,16 @@
 
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># @added 20231210 - Task #5168: v4.1.0 - update dependencies</span>
+<span class="c1"># As of numpy 1.2.4 there is no attribute warnings in np.  Before that</span>
+<span class="c1"># np.warnings was the same as the stdlib warnings.  This breaks mass_ts.</span>
+<span class="c1"># https://github.com/scikit-learn/scikit-learn/pull/23654</span>
+<span class="c1"># 2023-12-10 16:26:11 :: 3926034 :: error :: inference :: 5320 mts.mass2_batch error: module &#39;numpy&#39; has no attribute &#39;warnings&#39;</span>
+<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s1">&#39;1.24&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">warnings</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">warnings</span> <span class="o">=</span> <span class="n">warnings</span>
+
 <span class="kn">import</span> <span class="nn">mass_ts</span> <span class="k">as</span> <span class="nn">mts</span>
 
 <span class="c1"># @added 20230110 - Task #4022: Move mysql_select calls to SQLAlchemy</span>
@@ -176,7 +186,9 @@
 <span class="c1"># Allow the user to define the batch_size per similarity search</span>
 <span class="c1"># @modified 20210425 - Feature #4014: Ionosphere - inference</span>
 <span class="c1"># Added max_area_percent_diff for computing the area under the curve</span>
-<div class="viewcode-block" id="on_demand_motif_analysis"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.on_demand_motif_analysis.on_demand_motif_analysis">[docs]</a><span class="k">def</span> <span class="nf">on_demand_motif_analysis</span><span class="p">(</span>
+<div class="viewcode-block" id="on_demand_motif_analysis">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.on_demand_motif_analysis.on_demand_motif_analysis">[docs]</a>
+<span class="k">def</span> <span class="nf">on_demand_motif_analysis</span><span class="p">(</span>
         <span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">similarity</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">top_matches</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">,</span>
         <span class="n">range_padding</span><span class="p">,</span> <span class="n">max_area_percent_diff</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -225,6 +237,9 @@
     <span class="c1"># @added 20210425 - Feature #4014: Ionosphere - inference</span>
     <span class="c1"># Added max_area_percent_diff for computing the area under the curve</span>
     <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;max_area_percent_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_area_percent_diff</span><span class="p">)</span>
+    <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+    <span class="n">exact_matches_found_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">exact_matches_run_on_fp_ids</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">fps_checked_for_motifs</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -249,7 +264,7 @@
     <span class="n">full_duration_timeseries_json</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">metric_vars_dict</span> <span class="o">=</span> <span class="n">mirage_load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">metric_vars_dict</span> <span class="o">=</span> <span class="n">mirage_load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">,</span> <span class="n">return_dict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: failed to load metric variables from check file - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">metric_vars_file</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
@@ -260,6 +275,18 @@
 
     <span class="n">full_duration</span> <span class="o">=</span> <span class="n">metric_vars_dict</span><span class="p">[</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">][</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
 
+    <span class="c1"># @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps</span>
+    <span class="c1">#                   Feature #4732: flux vortex</span>
+    <span class="c1">#                   Feature #4734: mirage_vortex</span>
+    <span class="c1"># Handle csv uploaded metrics in training_data</span>
+    <span class="k">if</span> <span class="n">full_duration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="n">metric_vars_dict</span><span class="p">[</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">][</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">metric_vars_dict</span><span class="p">[</span><span class="s1">&#39;metric_vars&#39;</span><span class="p">][</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">]</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span> <span class="o">//</span> <span class="mi">86400</span> <span class="o">*</span> <span class="mi">86400</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to determine full_duration, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="n">err</span><span class="p">))</span>
+        
     <span class="c1"># Determine the metric details from the database</span>
     <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">metric_db_object</span> <span class="o">=</span> <span class="p">{}</span>
@@ -475,6 +502,12 @@
                 <span class="c1"># @modified 20210418 - Feature #4014: Ionosphere - inference</span>
                 <span class="c1"># Handle top_matches being greater than possible kth that can be found</span>
                 <span class="c1"># best_indices, best_dists = mts.mass2_batch(relate_dataset, anomalous_ts, batch_size=int(batch_size), top_matches=int(top_matches))</span>
+
+                <span class="c1"># @modified 20240324 - Ideas #5316: motif_annihilation learning</span>
+                <span class="c1">#                      Feature #4014: Ionosphere - inference</span>
+                <span class="c1"># Added this comment because I can never remember what</span>
+                <span class="c1"># index is returned the starting index or the end index.</span>
+                <span class="c1"># Returns the starting index of the top matches</span>
                 <span class="n">best_indices</span><span class="p">,</span> <span class="n">best_dists</span> <span class="o">=</span> <span class="n">mts</span><span class="o">.</span><span class="n">mass2_batch</span><span class="p">(</span><span class="n">relate_dataset</span><span class="p">,</span> <span class="n">anomalous_ts</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">top_matches</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">use_top_matches</span><span class="p">))</span>
                 <span class="n">end_mass2_batch</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                 <span class="n">mass2_batch_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_mass2_batch</span> <span class="o">-</span> <span class="n">start_mass2_batch</span><span class="p">))</span>
@@ -488,19 +521,42 @@
                 <span class="n">fps_checked_for_motifs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> mts.mass2_batch error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">function_str</span><span class="p">,</span> <span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
                 <span class="k">continue</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">empty_dists</span><span class="p">)):</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: mts.mass2_batch no similar motif from fp id </span><span class="si">%s</span><span class="s1"> - best_dists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">function_str</span><span class="p">,</span> <span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))))</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))))</span>
                     <span class="k">continue</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">dev_null</span> <span class="o">=</span> <span class="n">e</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="k">continue</span>
+
+                <span class="c1"># @modified 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+                <span class="c1">#                      Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                      Task #5178: Build and test skyline v4.1.0</span>
+                <span class="c1"># Allow for current_best_indices[0] == 0, which is probably an exact_match</span>
+                <span class="c1"># as it was discovered that an exact match current_best_indices</span>
+                <span class="c1"># could be like [0, 180, 360, 540]</span>
+                <span class="c1"># 2024-01-05 10:08:35 :: 1106567 :: on_demand_motif_analysis :: current_best_indices for fp id 7277, current_best_indices: [0, 180, 360, 540]</span>
+                <span class="c1"># continue</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no current_best_indices for fp id </span><span class="si">%s</span><span class="s1">, best_dists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">best_dists</span><span class="p">))))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: no current_best_indices for fp id </span><span class="si">%s</span><span class="s1">, current_best_indices: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">current_best_indices</span><span class="p">))))</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+                <span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+                <span class="c1"># Allow for current_best_indices[0] == 0, which is probably an exact_match</span>
+                <span class="k">if</span> <span class="n">current_best_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: current_best_indices[0] is 0, probable exact match for fp id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+
             <span class="c1"># if list(best_indices)[0] != anomalous_index:</span>
             <span class="c1">#     continue</span>
             <span class="c1"># If the best_dists is &gt; 1 they are not very similar</span>
@@ -593,6 +649,13 @@
                 <span class="n">find_exact_matches_run</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="k">if</span> <span class="n">find_exact_matches</span><span class="p">:</span>
+
+                <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+                <span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+                <span class="c1"># Allow for current_best_indices[0] == 0, which is probably an exact_match</span>
+                <span class="n">exact_matches_run_on_fp_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">start_exact_match</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                     <span class="n">indexed_relate_dataset</span> <span class="o">=</span> <span class="p">[]</span>
@@ -605,6 +668,22 @@
                         <span class="k">if</span> <span class="n">subsequence</span> <span class="o">==</span> <span class="n">anomalous_ts</span><span class="p">:</span>
                             <span class="n">exact_matches_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">])</span>
                             <span class="n">motifs_found</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">current_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">anomalous_timeseries_subsequence</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">])</span>
+
+                            <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+                            <span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+                            <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+                            <span class="c1"># Allow for current_best_indices[0] == 0, which is probably an exact_match</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">}</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                                <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;batch_size&#39;</span><span class="p">:</span> <span class="n">batch_size</span><span class="p">}</span>
+                            <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_index</span>
+                            <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_duration</span>
+                            <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;anomalous_timeseries_subsequence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous_timeseries_subsequence</span>
+                            <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;anomalous_ts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anomalous_ts</span>
+                            <span class="n">exact_matches_found_dict</span><span class="p">[</span><span class="n">fp_id</span><span class="p">][</span><span class="n">batch_size</span><span class="p">][</span><span class="s1">&#39;subsequence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subsequence</span>
+
                         <span class="n">current_index</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">end_exact_match</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
                     <span class="n">exact_match_times</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">end_exact_match</span> <span class="o">-</span> <span class="n">start_exact_match</span><span class="p">))</span>
@@ -618,6 +697,18 @@
         <span class="k">if</span> <span class="n">find_exact_matches_run</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: exact_match runs on </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exact_match_times</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exact_match_times</span><span class="p">)))</span>
+
+        <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+        <span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+        <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+        <span class="c1"># Allow for current_best_indices[0] == 0, which is probably an exact_match</span>
+        <span class="k">if</span> <span class="n">find_exact_matches_run</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: exact_match runs on fps </span><span class="si">%s</span><span class="s1">, len(exact_matches_found_dict): </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">exact_matches_run_on_fp_ids</span><span class="p">))),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exact_matches_found_dict</span><span class="p">))))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: exact_matches_found_dict: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">exact_matches_found_dict</span><span class="p">)))</span>
+
         <span class="n">end_full_duration</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: analysed </span><span class="si">%s</span><span class="s1"> fps of full_duration </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="p">(</span><span class="n">end_full_duration</span> <span class="o">-</span> <span class="n">start_full_duration</span><span class="p">)))</span>
@@ -651,6 +742,14 @@
                 <span class="n">motif_full_duration</span> <span class="o">=</span> <span class="n">motif</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 
                 <span class="n">match_type</span> <span class="o">=</span> <span class="s1">&#39;not_similar_enough&#39;</span>
+
+                <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+                <span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+                <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+                <span class="c1"># Declare default outside the below if not add_match block</span>
+                <span class="n">motif_area</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">fp_motif_area</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">percent_different</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="k">if</span> <span class="n">motif</span> <span class="ow">in</span> <span class="n">exact_matches_found</span><span class="p">:</span>
                     <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
@@ -718,7 +817,15 @@
                                     <span class="n">function_str</span><span class="p">))</span>
                                 <span class="n">add_match</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="c1"># BUT ...</span>
-                            <span class="k">if</span> <span class="n">best_dist</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">add_match</span><span class="p">:</span>
+                            <span class="c1"># @modified 20240326 - Ideas #5316: motif_annihilation learning</span>
+                            <span class="c1">#                      Feature #4014: Ionosphere - inference</span>
+                            <span class="c1"># Do not do this on very short motifs as it does not</span>
+                            <span class="c1"># have the desired effect because the range and area</span>
+                            <span class="c1"># can be too different even if the distance is very</span>
+                            <span class="c1"># small and this was actually removed from inference.py</span>
+                            <span class="c1"># on 20210504</span>
+                            <span class="c1"># if best_dist &lt; 3 and not add_match:</span>
+                            <span class="k">if</span> <span class="n">best_dist</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">30</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">add_match</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: DISTANCE VERY SIMILAR - adding match even though area_percent_diff is greater than max_area_percent_diff because best_dist: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_dist</span><span class="p">)))</span>
                                 <span class="n">add_match</span> <span class="o">=</span> <span class="kc">True</span>
@@ -793,6 +900,7 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">max_distance</span><span class="p">))</span>
                     <span class="n">plotted_image</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">on_demand_motif_analysis</span> <span class="o">=</span> <span class="kc">True</span>
+
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graph_image_file</span><span class="p">):</span>
                         <span class="n">plotted_image</span><span class="p">,</span> <span class="n">plotted_image_file</span> <span class="o">=</span> <span class="n">plot_motif_match</span><span class="p">(</span>
                             <span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span>
@@ -810,8 +918,8 @@
                         <span class="n">graph_image_file</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: inference :: proceesing motif at index: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">motif</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: proceesing motif at index: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">motif</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
                 <span class="k">continue</span>
     <span class="n">end_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
     <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;fps_checked&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fps_checked_for_motifs</span>
@@ -820,6 +928,13 @@
     <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;distance_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">distance_motifs</span>
     <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;not_similar_motifs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_similar_motifs</span>
     <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;not_similar_enough_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">not_similar_enough_sample</span>
+
+    <span class="c1"># @added 20240105 - Bug #5196: Ionosphere - inference - consider current_best_indices 0 as valid</span>
+    <span class="c1">#                   Feature #4014: Ionosphere - inference</span>
+    <span class="c1">#                   Task #5178: Build and test skyline v4.1.0</span>
+    <span class="c1"># Allow for current_best_indices[0] == 0, which is probably an exact_match</span>
+    <span class="k">if</span> <span class="n">exact_matches_found_dict</span><span class="p">:</span>
+        <span class="n">motif_analysis</span><span class="p">[</span><span class="n">metric</span><span class="p">][</span><span class="s1">&#39;exact_matches&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">exact_matches_found_dict</span>
 
     <span class="n">motif_analysis_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/motif.analysis.similarity_</span><span class="si">%s</span><span class="s1">.batch_size_</span><span class="si">%s</span><span class="s1">.top_matches_</span><span class="si">%s</span><span class="s1">.max_distance_</span><span class="si">%s</span><span class="s1">.dict&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">motif_images_dir</span><span class="p">,</span> <span class="n">similarity</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">top_matches</span><span class="p">),</span>
@@ -839,6 +954,7 @@
     <span class="k">if</span> <span class="n">dev_null</span><span class="p">:</span>
         <span class="k">del</span> <span class="n">dev_null</span>
     <span class="k">return</span> <span class="n">motif_analysis</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
 </pre></div>
 
            </div>
@@ -848,7 +964,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2023, Gary Wilson.</p>
+    <p>&#169; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2024, Gary Wilson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
