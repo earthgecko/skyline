@@ -30,9 +30,11 @@ from custom_algorithm_sources.spectral_residual.spectral_residual import Spectra
 def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     """
     Outlier detector for time-series data using the spectral residual algorithm.
-    Based on the alibi-detect implementation of
+    Based on the alibi-detect implementation of:
     
     Time-Series Anomaly Detection Service at Microsoft (Ren et al., 2019) https://arxiv.org/abs/1906.03821
+
+    https://github.com/SeldonIO/alibi-detect/blob/81486cd48b19e4adbb2c5b9d27e0fb601f4a5d41/alibi_detect/od/sr.py
 
     For Mirage this algorithm is FAST
     

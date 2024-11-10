@@ -5,7 +5,8 @@ spectral_residual
 =================
 
 Outlier detector for time-series data using the spectral residual algorithm.
-Based on the alibi-detect implementation of
+Based on the
+`alibi-detect implementation <https://github.com/SeldonIO/alibi-detect/blob/81486cd48b19e4adbb2c5b9d27e0fb601f4a5d41/alibi_detect/od/sr.py>`_ of
 
 Time-Series Anomaly Detection Service at Microsoft (Ren et al., 2019) https://arxiv.org/abs/1906.03821
 

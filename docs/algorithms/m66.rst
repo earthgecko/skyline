@@ -29,19 +29,23 @@ expected, it is places 6th overall.
 
 **Heatmap**
 
-.. image:: ../../images/m66/m66.with.TCPDBench.results.heatmap.greens.png
+.. figure:: images/m66/m66.with.TCPDBench.results.heatmap.greens.png
+   :alt: m66 TCPDBench results heatmap
 
 **Best highlighted**
 
-.. image:: ../../images/m66/m66.with.TCPDBench.results.highlight.blue.png
+.. figure:: images/m66/m66.with.TCPDBench.results.highlight.blue.png
+   :alt: m66 TCPDBench results best highlighted heatmap
 
 **Top and bottom 3**
 
-.. image:: ../../images/m66/m66.with.TCPDBench.results.top.bottom.3.png
+.. figure:: images/m66/m66.with.TCPDBench.results.top.bottom.3.png
+   :alt: m66 TCPDBench results top and bottom 3 heatmap
 
 **Results and rank**
 
 .. image:: ../../images/m66/m66.with.TCPDBench.results.heatmap.rank.rank.png
+   :alt: m66 TCPDBench results rank heatmap
 
 
 Testing m66 with TCPDBench
