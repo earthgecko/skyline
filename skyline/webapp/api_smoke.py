@@ -314,6 +314,11 @@ def get_api_smoke(
                                             if check_name in ionosphere_unique_metrics:
                                                 training_data_dict[ts][base_name]['details']['added_by'] = 'ionosphere'
 
+                                # @added 20241111 - Feature #5270: webapp - panorama smoke
+                                if 'added_by' in training_data_dict[ts][base_name]['details']:
+                                    if training_data_dict[ts][base_name]['details']['added_by'] == 'analyzer':
+                                        untrainable = True
+
                             if file == trained_txt_file:
                                 trained = True
                             if file.endswith('profile_id_matched.fp_id'):
