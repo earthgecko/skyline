@@ -30,10 +30,14 @@ from custom_algorithm_sources.spectral_residual.spectral_residual import Spectra
 def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     """
     Outlier detector for time-series data using the spectral residual algorithm.
-    Based on the alibi-detect implementation of "Time-Series Anomaly Detection
-    Service at Microsoft" (Ren et al., 2019) https://arxiv.org/abs/1906.03821
+    Based on the alibi-detect implementation of
+    
+    Time-Series Anomaly Detection Service at Microsoft (Ren et al., 2019) https://arxiv.org/abs/1906.03821
+
     For Mirage this algorithm is FAST
+    
     For Analyzer this algorithm is SLOW
+    
     Although this algorithm is fast, it is not fast enough to be run in Analyzer,
     even if only deployed against a subset of metrics.  In testing
     spectral_residual took between 0.134828 and 0.698201 seconds to run per
@@ -68,50 +72,58 @@ def spectral_residual(current_skyline_app, parent_pid, timeseries, algorithm_par
             when determining if the metric is anomalous. Only the last 
             ``anomaly_window`` data points in the time series will be used to
             determine if the metric is anomalous.  Default is ``3``.
-        - ``'threshold'`` (float): Threshold used to classify outliers. Relative
-                saliency map distance from the moving average. Default is ``None``
-                because Skyline is using spectral_residual in an unsupervised
-                manner and makes use of the spectral_residual infer_threshold
-                function method to dynamically calculate the outlier threshold
-                from the data.
-        - ``'threshold_perc'`` (float): a threshold a value inferred from the
-                percentage of instances considered to be outliers in a sample of
-                the dataset.. Default is ``99.0``.
-        - ``'window_amp'`` (int): Window for the average log amplitude. Default
-                is ``20``.
-        - ``'window_local'`` (int): Window for the local average of the saliency
-                map. Note that the averaging is performed over the
-            previous `window_local` data points (i.e., is a local average of the
-                preceding `window_local` points for
-            the current index). Default is ``20``.
-        - ``'n_est_points'`` (int): Number of estimated points padded to the end
-                of the sequence. Default is ``20``.
-        - ``'n_grad_points'`` (int): Number of points used for the gradient
-                estimation of the additional points padded to the end of the
-                sequence. Default is ``20``.
-        - ``'padding_amp_method'`` (str): Padding method to be used prior to
-                each convolution over log amplitude.
+        - ``'threshold'`` (float): Threshold used to classify outliers.
+                Relative saliency map distance from the moving average. Default
+                is ``None`` because Skyline is using spectral_residual in an
+                unsupervised manner and makes use of the spectral_residual
+                infer_threshold function method to dynamically calculate the
+                outlier threshold from the data.
+        - ``'threshold_perc'`` (float):
+                A threshold a value inferred from the percentage of instances
+                considered to be outliers in a sample of the dataset.  Default
+                is ``99.0``.
+        - ``'window_amp'`` (int): Window for the average log amplitude.
+                Default is ``20``.
+        - ``'window_local'`` (int):
+                Window for the local average of the saliency map. Note that the
+                averaging is performed over the previous `window_local` data
+                points (i.e., is a local average of the preceding `window_local`
+                points for the current index). Default is ``20``.
+        - ``'n_est_points'`` (int):
+                Number of estimated points padded to the end of the sequence.
+                Default is ``20``.
+        - ``'n_grad_points'`` (int):
+                Number of points used for the gradient estimation of the
+                additional points padded to the end of the sequence. Default is
+                ``20``.
+        - ``'padding_amp_method'`` (str):
+                Padding method to be used prior to each convolution over log
+                amplitude.
                 Possible values: `constant` | `replicate` | `reflect`.
                     - `constant` - padding with constant 0.
                     - `replicate` - repeats the last/extreme value.
                     - `reflect` - reflects the time series.
                 Default value: `reflect`.
-        - ``'padding_local_method'`` (str): Padding method to be used prior to
-                each convolution over saliency map.
+        - ``'padding_local_method'`` (str):
+                Padding method to be used prior to each convolution over
+                saliency map.
                 Possible values: `constant` | `replicate` | `reflect`.
                     - `constant` - padding with constant 0.
                     - `replicate` - repeats the last/extreme value.
                     - `reflect` - reflects the time series.
                 Default value: `reflect`.
-        - ``'padding_amp_side'`` (str): Whether to pad the amplitudes on both
-                sides or only on one side.
+        - ``'padding_amp_side'`` (str):
+                Whether to pad the amplitudes on both sides or only on one side.
                 Possible values: `bilateral` | `left` | `right`.
                 Default value: `bilateral`.
-        - ``'return_results'`` (bool): If ``True``, returns the results dict in
-                addition to anomalous and anomalyScore.  Default is ``False``.
-        - ``'debug_logging'`` (bool): If ``True``, enables debug logging.
-        - ``'debug_print'`` (bool): If ``True``, enables debug printing  (for
-            Jupyter testing). Default is ``False``.
+        - ``'return_results'`` (bool):
+                If ``True``, returns the results dict in addition to anomalous
+                and anomalyScore.  Default is ``False``.
+        - ``'debug_logging'`` (bool):
+                If ``True``, enables debug logging.
+        - ``'debug_print'`` (bool):
+                If ``True``, enables debug printing  (for Jupyter testing).
+                Default is ``False``.
 
         Example usage:
         

@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="DBSCAN" href="dbscan.html" />
-    <link rel="prev" title="matrixprofile" href="matrixprofile.html" /> 
+    <link rel="prev" title="sigma" href="sigma.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -66,6 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="core-algorithms.html">Core algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom-algorithms.html">Custom algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matrixprofile.html">matrixprofile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sigma.html">sigma</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">spectral_residual</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dbscan.html">DBSCAN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
@@ -76,7 +78,9 @@
 <li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lad.html">LAD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="probabilistic_forecasts_generalized_pareto_distribution_ets.html">probabilistic_forecasts_generalized_pareto_distribution_ets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grafana_promql_anomaly_detection.html">grafana_promql_anomaly_detection</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
@@ -144,6 +148,15 @@
              
   <section id="spectral-residual">
 <h1>spectral_residual<a class="headerlink" href="#spectral-residual" title="Link to this heading"></a></h1>
+<p>Outlier detector for time-series data using the spectral residual algorithm.
+Based on the alibi-detect implementation of</p>
+<p>Time-Series Anomaly Detection Service at Microsoft (Ren et al., 2019) <a class="reference external" href="https://arxiv.org/abs/1906.03821">https://arxiv.org/abs/1906.03821</a></p>
+<p>For Mirage this algorithm is FAST</p>
+<p>For Analyzer this algorithm is SLOW</p>
+<p>Although this algorithm is fast, it is not fast enough to be run in Analyzer,
+even if only deployed against a subset of metrics.  In testing spectral_residual
+took between 0.134828 and 0.698201 seconds to run per metrics, which is much too
+long for Analyzer.</p>
 <p>See the docstrings - <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.spectral_residual">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.spectral_residual</a></p>
 <p>See the custom_algorithms source - <a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/spectral_residual.py">https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/spectral_residual.py</a></p>
 <p>See the custom_algorithm_sources - <a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithm_sources/spectral_residual/spectral_residual.py">https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithm_sources/spectral_residual/spectral_residual.py</a></p>
@@ -153,7 +166,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="matrixprofile.html" class="btn btn-neutral float-left" title="matrixprofile" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sigma.html" class="btn btn-neutral float-left" title="sigma" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="dbscan.html" class="btn btn-neutral float-right" title="DBSCAN" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

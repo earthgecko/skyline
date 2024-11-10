@@ -305,7 +305,9 @@ rsync<span class="w"> </span>-az<span class="w"> </span><span class="s2">&quot;<
 <span class="w">  </span><span class="c1"># bandit -r &quot;$APPDIR&quot; -x &quot;${APPDIR}/skyline/settings.py&quot;</span>
 <span class="w">  </span><span class="c1"># @modified 20230110 - Task #4778: v4.0.0 - update dependencies</span>
 <span class="w">  </span><span class="c1"># bandit -r &quot;$APPDIR&quot; -x &quot;${APPDIR}/skyline/settings.py&quot; --skip B110,B112</span>
-<span class="w">  </span>bandit<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;*/settings.py&quot;</span><span class="w"> </span>--skip<span class="w"> </span>B110,B112
+<span class="w">  </span><span class="c1"># @modified 20241110 - Task #4236: Test m66 with TCPDBench</span>
+<span class="w">  </span><span class="c1"># bandit -r &quot;$APPDIR&quot; -x &quot;*/settings.py&quot; --skip B110,B112</span>
+<span class="w">  </span>bandit<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span><span class="w"> </span>-x<span class="w"> </span><span class="s2">&quot;*/settings.py,*/20210814.POC.task4236.test.m66.with.TCPDBench.ipynb.py&quot;</span><span class="w"> </span>--skip<span class="w"> </span>B110,B112
 
 <span class="w">  </span><span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
 <span class="w">  </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Building Skyline documentation - in </span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>

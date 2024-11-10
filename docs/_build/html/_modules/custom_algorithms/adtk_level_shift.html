@@ -185,12 +185,18 @@
 <span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
 <span class="sd">        custom_algorithm and algorithm itself.  For the matrixprofile custom</span>
 <span class="sd">        algorithm the following parameters are required, example:</span>
-<span class="sd">        ``algorithm_parameters={</span>
-<span class="sd">            &#39;c&#39;: 9.0,</span>
-<span class="sd">            &#39;run_every&#39;: 5,</span>
-<span class="sd">            &#39;side&#39;: &#39;both&#39;,</span>
-<span class="sd">            &#39;window&#39;: 5</span>
-<span class="sd">        }``</span>
+<span class="sd">        Example usage:</span>
+<span class="sd">        </span>
+<span class="sd">            algorithm_parameters={</span>
+<span class="sd">                &#39;anomaly_window&#39;: 1,</span>
+<span class="sd">                &#39;c&#39;: 9.0,</span>
+<span class="sd">                &#39;run_every&#39;: 5,</span>
+<span class="sd">                &#39;side&#39;: &#39;both&#39;,</span>
+<span class="sd">                &#39;window&#39;: 5,</span>
+<span class="sd">                &#39;debug_logging&#39;: True,</span>
+<span class="sd">                &#39;return_results&#39;: True,</span>
+<span class="sd">            }</span>
+
 <span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type parent_pid: int</span>
 <span class="sd">    :type timeseries: list</span>

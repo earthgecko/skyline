@@ -4,9 +4,8 @@
 macd
 ====
 
-Moving Average Convergence/Divergence
-
-THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT
+Outlier detection for time series data using Moving Average
+Convergence/Divergence
 
 See the docstrings - https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.macd
 

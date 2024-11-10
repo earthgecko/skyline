@@ -84,11 +84,9 @@ def adtk_persist(current_skyline_app, parent_pid, timeseries, algorithm_paramete
     immediately triple the analyzer runtime every if only run every 5 windows/
     minutes.
 
-    ####
     UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
     is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
     is!
-    ####
 
     Due to the computational complexity and long run time of the adtk
     PersistAD algorithm on the size of timeseries data used by Skyline.

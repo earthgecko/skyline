@@ -224,6 +224,11 @@ def process_graphite_fail_queue(self):
         pickle_data.append(tuple_data)
         items_to_readd.append(item)
 
+    # @added 20241108 - Task #5526: Build v5.0.0 and upgrade deps
+    # Declare the variable as if not pickle_data it errors, never seen as there
+    # is always pickle data :)
+    pickle_data_submitted = None
+
     if pickle_data:
         try:
             pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)

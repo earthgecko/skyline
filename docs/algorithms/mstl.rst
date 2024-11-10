@@ -4,7 +4,12 @@
 MSTL
 ====
 
-THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT
+A basic implementation of statsforecast MSTL.
+
+https://github.com/Nixtla/statsforecast
+
+https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html
+
 
 See the docstrings - https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.mstl
 

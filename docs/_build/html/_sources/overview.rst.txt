@@ -21,18 +21,13 @@ We have a plethora of algorithms and algorithmic methods for detecting anomalies
 Detecting anomalies is **EASY**!  Not detecting anomalies is **HARD**.
 
 As Rajiv Shah (@rajistics) from Snowflake recently said:
-..
+
   "After simple baselines, Anomaly detection is hard."
 
 The irony is that in advanced 3rd, 4th and 5th generation anomaly detection, it
 is not about detecting anomalies (the easy part).  Once you move from 1st and
 2nd generation anomaly detection methods, anomaly detection is about **not**
-detecting anomalies.
-
-Luckily metrics are generally co-operative in that sense, it is the Lima
-Snydrome component of their quantum like nature, the opposing being our general
-Stockholm Snydrome reliance on them (an inside joke in reply to a comment mode
-by Charity Majors @mipsytipsy).
+detecting anomalies.  Luckily metrics are generally co-operative in that sense.
 
 Seeing as we desire our metrics to be not anomalous most of the time and we want
 to know when they ARE anomalous and given the fact that we try and build systems
@@ -63,7 +58,7 @@ The use of these methods enables Skyline to be trained and autonomously learn
 what is normal without any training (unsupervised).  This autonomous learning is
 highly accurate and reliable.  This is due to the fact it is based on
 well-established mathematical and geometric principles.  Compared to neural
-networks, other black-box methods and probabilistic methods, which can be harder
+networks and black-box and probabilistic methods, which can be harder
 to understand and interpret, Matrix Profile and MASS are straightforward
 distance calculations which are relatively simple to understand in terms of
 explainability and they are reliable in terms of their results can be trusted
@@ -71,11 +66,6 @@ because the results are based purely on maths and geometry.  It is a no
 parameters, zero knowledge, no tuning, FAST method that is accurate.
 
 It sounds perfect and it pretty much is.
-
-Given the fact that they work **so well**!!!  Why would you want to try and use
-anything else for time series similiarity search?  That problem has been solved
-with Matrix Profile and MASS, you do not need AI or some massive time series
-foundation model.
 
 This all results in having a 6th generation anomaly detection and not anomalous
 detection system, that is years ahead of anything else in this space.

@@ -4,7 +4,8 @@
 prophet
 =======
 
-THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT
+Facebook prophet.  Slow not suitable for Analyzer or Mirage takes around 30
+seconds to analysis a data set of 1008 data points.
 
 See the docstrings - https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.specskyline_prophet
 

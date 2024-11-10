@@ -30,7 +30,6 @@ from kneed import KneeLocator
 
 # @added 20221111 - Feature #4746: custom_algorithm - dbscan
 def dbscan(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
-
     """
     Outlier detector based on DBSCAN.  EXPERIMENTAL
 

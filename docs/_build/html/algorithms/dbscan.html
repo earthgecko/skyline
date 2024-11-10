@@ -66,6 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="core-algorithms.html">Core algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom-algorithms.html">Custom algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matrixprofile.html">matrixprofile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sigma.html">sigma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_residual.html">spectral_residual</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">DBSCAN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
@@ -76,7 +78,9 @@
 <li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lad.html">LAD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="probabilistic_forecasts_generalized_pareto_distribution_ets.html">probabilistic_forecasts_generalized_pareto_distribution_ets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grafana_promql_anomaly_detection.html">grafana_promql_anomaly_detection</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
@@ -144,7 +148,15 @@
              
   <section id="dbscan">
 <h1>DBSCAN<a class="headerlink" href="#dbscan" title="Link to this heading"></a></h1>
-<p>THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT</p>
+<p>Outlier detector based on DBSCAN.</p>
+<p>Fairly unreliable as it is very sensitive to input parameters which make it
+difficult to automatically determine suitable parameters.  Automatically
+determined parameters can sometimes be very effective, but often they do not
+have the desired results.  Seeing as there is a single epsilon value for all
+clusters the algorithm fails when varying density clusters are present in the
+data.</p>
+<p>Therefore if DBSCAN identifies more than 33% of the data points in a time series
+as outliers, this algorithm will return an inconclusive results.</p>
 <p>See the docstrings - <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.dbscan">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.dbscan</a></p>
 <p>See the custom_algorithm source - <a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/dbscan.py">https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/dbscan.py</a></p>
 </section>

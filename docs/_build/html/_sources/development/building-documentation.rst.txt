@@ -172,7 +172,9 @@ Build
     # bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py"
     # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
     # bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py" --skip B110,B112
-    bandit -r "$APPDIR" -x "*/settings.py" --skip B110,B112
+    # @modified 20241110 - Task #4236: Test m66 with TCPDBench
+    # bandit -r "$APPDIR" -x "*/settings.py" --skip B110,B112
+    bandit -r "$APPDIR" -x "*/settings.py,*/20210814.POC.task4236.test.m66.with.TCPDBench.ipynb.py" --skip B110,B112
 
     cd "$APPDIR/docs"
     echo "Building Skyline documentation - in $APPDIR/docs"

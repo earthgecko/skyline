@@ -30,8 +30,11 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
 
     """
     grafana_promql_anomaly_detection
+
     A loose Python implementation of the Grafana PromQL Anomaly Detection method
+    
     https://github.com/grafana/promql-anomaly-detection/tree/cd5a307ac7e44beb7e42299fe05cd71dd5647237
+    
     https://grafana.com/blog/2024/10/03/how-to-use-prometheus-to-efficiently-detect-anomalies-at-scale/
 
     This implementation does not take into account the alert only if breached
@@ -49,20 +52,6 @@ def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries
         algorithm must accept it as the second argument.
     :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],
         [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``
-    :param algorithm_parameters: a dictionary of any required parameters for the
-        custom_algorithm and algorithm itself.  Example:
-        "algorithm_parameters": {
-            "anomaly_window": 1,
-            "min_anomaly_duration_seconds": 300,
-            "threshold_by_covar": 0.5,
-            "sparse_threshold": 0.083333,
-            "stddev_multiplier": 2,
-            "margin_multiplier": 0.5,
-            "short_window": 3600,
-            "smoothing_window_seconds": 93600,
-            "debug_logging": True,
-            "return_results": True,
-        }
     :param algorithm_parameters: a dictionary of any required parameters for the
         custom_algorithm and algorithm itself.  For the 
         grafana_promql_anomaly_detection custom algorithm no specific

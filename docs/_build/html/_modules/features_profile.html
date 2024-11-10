@@ -231,6 +231,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculates a tsfresh features profile from a training data set</span>
 
+<span class="sd">    :param current_skyline_app: the app calling the function so the function</span>
+<span class="sd">        knows which log to write too.</span>
+<span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :param timestamp: the timestamp of metric anomaly with training data</span>
 <span class="sd">    :type timestamp: str</span>
 <span class="sd">    :param metric: the base_name of the metric</span>
@@ -238,7 +241,7 @@
 <span class="sd">    :param context: the context</span>
 <span class="sd">    :type context: str</span>
 <span class="sd">    :param preprocess_validate_training: whether this is a preprocess_validate_training request</span>
-<span class="sd">    :type bool</span>
+<span class="sd">    :type preprocess_validate_training: bool</span>
 <span class="sd">    :return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)</span>
 <span class="sd">    :rtype: int</span>
 <span class="sd">    :rtype: (str, boolean, str, str, str)</span>

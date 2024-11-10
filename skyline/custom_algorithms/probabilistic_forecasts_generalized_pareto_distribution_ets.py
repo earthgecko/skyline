@@ -36,9 +36,12 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
 
     """
     A basic Python implementation of Probabilistic forecasts for anomaly detection
-    as proposed by Rob J Hyndman - 3 July 2024 - https://robjhyndman.com/seminars/isf2024.html
-    International Symposium on Forecasting, Dijon, France
+    as proposed by Rob J Hyndman - 3 July 2024
+    
+    https://robjhyndman.com/seminars/isf2024.html International Symposium on Forecasting, Dijon, France
+
     https://raw.githubusercontent.com/robjhyndman/forecast-anomalies-talk/main/forecast_anomalies.pdf
+    
     When a forecast is very inaccurate, it is sometimes because a poor
     forecasting model is used, but it can also occur when an unusual observation
     occurs. A good forecasting model can be used to identify anomalies. The

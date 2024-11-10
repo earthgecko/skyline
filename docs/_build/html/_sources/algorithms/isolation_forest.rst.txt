@@ -4,7 +4,7 @@
 isolation_forest
 ================
 
-THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT
+Outlier detector based on Isolation Forest.
 
 See the docstrings - https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.isolation_forest
 

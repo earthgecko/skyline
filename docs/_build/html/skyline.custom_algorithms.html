@@ -273,14 +273,20 @@ algorithm must accept it as the second argument.</p></li>
 <li><p><strong>algorithm_parameters</strong> (<em>dict</em>) – <p>a dictionary of any required parameters for the
 custom_algorithm and algorithm itself.  For the matrixprofile custom
 algorithm the following parameters are required, example:
-<a href="#id1"><span class="problematic" id="id2">``</span></a>algorithm_parameters={</p>
+Example usage:</p>
 <blockquote>
-<div><p>’c’: 9.0,
+<div><dl class="simple">
+<dt>algorithm_parameters={</dt><dd><p>‘anomaly_window’: 1,
+‘c’: 9.0,
 ‘run_every’: 5,
 ‘side’: ‘both’,
-‘window’: 5</p>
+‘window’: 5,
+‘debug_logging’: True,
+‘return_results’: True,</p>
+</dd>
+</dl>
+<p>}</p>
 </div></blockquote>
-<p>}``</p>
 </p></li>
 </ul>
 </dd>
@@ -436,7 +442,7 @@ algorithm must accept it as the second argument.</p></li>
 <li><p><strong>algorithm_parameters</strong> (<em>dict</em>) – <p>a dictionary of any required parameters for the
 custom_algorithm and algorithm itself.  For the matrixprofile custom
 algorithm the following parameters are required, example:
-<a href="#id3"><span class="problematic" id="id4">``</span></a>algorithm_parameters={</p>
+<a href="#id1"><span class="problematic" id="id2">``</span></a>algorithm_parameters={</p>
 <blockquote>
 <div><p>’c’: 9.0,
 ‘run_every’: 5,
@@ -467,8 +473,9 @@ the adtk PersistAD algortihm can be implemented to detect and alert on
 these.  It is not recommended to run on all your metrics as it would
 immediately triple the analyzer runtime every if only run every 5 windows/
 minutes.</p>
-<section id="is">
-<h3>is!<a class="headerlink" href="#is" title="Link to this heading"></a></h3>
+<p>UPDATE: 20241026 - under Python 3.10 the load time adtk algorithms alone
+is between 3 and 21.099188 seconds in lumnosity, depending how busy the box
+is!</p>
 <p>Due to the computational complexity and long run time of the adtk
 PersistAD algorithm on the size of timeseries data used by Skyline.
 Therefore the analysis methodology implemented for the adtk_persist
@@ -529,7 +536,6 @@ Example CUSTOM_ALGORITHMS configuration:</p>
 </dd>
 </dl>
 <p>},</p>
-</section>
 </dd></dl>
 
 </section>
@@ -557,7 +563,7 @@ algorithm must accept it as the second argument.</p></li>
 <li><p><strong>algorithm_parameters</strong> (<em>dict</em>) – <p>a dictionary of any required parameters for the
 custom_algorithm and algorithm itself.  For the matrixprofile custom
 algorithm the following parameters are required, example:
-<a href="#id5"><span class="problematic" id="id6">``</span></a>algorithm_parameters={</p>
+<a href="#id3"><span class="problematic" id="id4">``</span></a>algorithm_parameters={</p>
 <blockquote>
 <div><p>’c’: 9.0,
 ‘run_every’: 5,
@@ -677,7 +683,7 @@ algorithm must accept it as the second argument.</p></li>
 <li><p><strong>algorithm_parameters</strong> (<em>dict</em>) – <p>a dictionary of any required parameters for the
 custom_algorithm and algorithm itself.  For the matrixprofile custom
 algorithm the following parameters are required, example:
-<a href="#id7"><span class="problematic" id="id8">``</span></a>algorithm_parameters={</p>
+<a href="#id5"><span class="problematic" id="id6">``</span></a>algorithm_parameters={</p>
 <blockquote>
 <div><p>’c’: 9.0,
 ‘run_every’: 5,
@@ -940,9 +946,9 @@ is <code class="docutils literal notranslate"><span class="pre">False</span></co
 <dl class="py function">
 <dt class="sig sig-object py" id="custom_algorithms.grafana_promql_anomaly_detection.grafana_promql_anomaly_detection">
 <span class="sig-name descname"><span class="pre">grafana_promql_anomaly_detection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_skyline_app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custom_algorithms/grafana_promql_anomaly_detection.html#grafana_promql_anomaly_detection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custom_algorithms.grafana_promql_anomaly_detection.grafana_promql_anomaly_detection" title="Link to this definition"></a></dt>
-<dd><p>A loose Python implementation of the Grafana PromQL Anomaly Detection method
-<a class="reference external" href="https://github.com/grafana/promql-anomaly-detection/tree/cd5a307ac7e44beb7e42299fe05cd71dd5647237">https://github.com/grafana/promql-anomaly-detection/tree/cd5a307ac7e44beb7e42299fe05cd71dd5647237</a>
-<a class="reference external" href="https://grafana.com/blog/2024/10/03/how-to-use-prometheus-to-efficiently-detect-anomalies-at-scale/">https://grafana.com/blog/2024/10/03/how-to-use-prometheus-to-efficiently-detect-anomalies-at-scale/</a></p>
+<dd><p>A loose Python implementation of the Grafana PromQL Anomaly Detection method</p>
+<p><a class="reference external" href="https://github.com/grafana/promql-anomaly-detection/tree/cd5a307ac7e44beb7e42299fe05cd71dd5647237">https://github.com/grafana/promql-anomaly-detection/tree/cd5a307ac7e44beb7e42299fe05cd71dd5647237</a></p>
+<p><a class="reference external" href="https://grafana.com/blog/2024/10/03/how-to-use-prometheus-to-efficiently-detect-anomalies-at-scale/">https://grafana.com/blog/2024/10/03/how-to-use-prometheus-to-efficiently-detect-anomalies-at-scale/</a></p>
 <p>This implementation does not take into account the alert only if breached
 x times which in a running implementation on Grafana would be provided by
 the rules.</p>
@@ -961,23 +967,6 @@ algorithm must accept it as the second argument.</p></li>
 <li><p><strong>timeseries</strong> (<em>list</em>) – the time series as a list e.g. <code class="docutils literal notranslate"><span class="pre">[[1667608854,</span> <span class="pre">1269121024.0],</span>
 <span class="pre">[1667609454,</span> <span class="pre">1269174272.0],</span> <span class="pre">[1667610054,</span> <span class="pre">1269174272.0]]</span></code></p></li>
 <li><p><strong>algorithm_parameters</strong> (<em>dict</em>) – <p>a dictionary of any required parameters for the
-custom_algorithm and algorithm itself.  Example:
-“algorithm_parameters”: {</p>
-<blockquote>
-<div><p>”anomaly_window”: 1,
-“min_anomaly_duration_seconds”: 300,
-“threshold_by_covar”: 0.5,
-“sparse_threshold”: 0.083333,
-“stddev_multiplier”: 2,
-“margin_multiplier”: 0.5,
-“short_window”: 3600,
-“smoothing_window_seconds”: 93600,
-“debug_logging”: True,
-“return_results”: True,</p>
-</div></blockquote>
-<p>}</p>
-</p></li>
-<li><p><strong>algorithm_parameters</strong> – <p>a dictionary of any required parameters for the
 custom_algorithm and algorithm itself.  For the 
 grafana_promql_anomaly_detection custom algorithm no specific
 algorithm_parameters are required apart from an empty dict but
@@ -1872,8 +1861,8 @@ arguments you wish to pass to the algorithm.</p></li>
 <dt class="sig sig-object py" id="custom_algorithms.mstl.mstl">
 <span class="sig-name descname"><span class="pre">mstl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_skyline_app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custom_algorithms/mstl.html#mstl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custom_algorithms.mstl.mstl" title="Link to this definition"></a></dt>
 <dd><p>EXPERIMENTAL</p>
-<p>An implement of statsforecast MSTL - <a class="reference external" href="https://github.com/Nixtla/statsforecast">https://github.com/Nixtla/statsforecast</a>
-<a class="reference external" href="https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html">https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html</a></p>
+<p>A basic implementation of statsforecast MSTL - <a class="reference external" href="https://github.com/Nixtla/statsforecast">https://github.com/Nixtla/statsforecast</a></p>
+<p><a class="reference external" href="https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html">https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2192,10 +2181,10 @@ is <code class="docutils literal notranslate"><span class="pre">False</span></co
 <dt class="sig sig-object py" id="custom_algorithms.probabilistic_forecasts_generalized_pareto_distribution_ets.probabilistic_forecasts_generalized_pareto_distribution_ets">
 <span class="sig-name descname"><span class="pre">probabilistic_forecasts_generalized_pareto_distribution_ets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_skyline_app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custom_algorithms/probabilistic_forecasts_generalized_pareto_distribution_ets.html#probabilistic_forecasts_generalized_pareto_distribution_ets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custom_algorithms.probabilistic_forecasts_generalized_pareto_distribution_ets.probabilistic_forecasts_generalized_pareto_distribution_ets" title="Link to this definition"></a></dt>
 <dd><p>A basic Python implementation of Probabilistic forecasts for anomaly detection
-as proposed by Rob J Hyndman - 3 July 2024 - <a class="reference external" href="https://robjhyndman.com/seminars/isf2024.html">https://robjhyndman.com/seminars/isf2024.html</a>
-International Symposium on Forecasting, Dijon, France
-<a class="reference external" href="https://raw.githubusercontent.com/robjhyndman/forecast-anomalies-talk/main/forecast_anomalies.pdf">https://raw.githubusercontent.com/robjhyndman/forecast-anomalies-talk/main/forecast_anomalies.pdf</a>
-When a forecast is very inaccurate, it is sometimes because a poor
+as proposed by Rob J Hyndman - 3 July 2024</p>
+<p><a class="reference external" href="https://robjhyndman.com/seminars/isf2024.html">https://robjhyndman.com/seminars/isf2024.html</a> International Symposium on Forecasting, Dijon, France</p>
+<p><a class="reference external" href="https://raw.githubusercontent.com/robjhyndman/forecast-anomalies-talk/main/forecast_anomalies.pdf">https://raw.githubusercontent.com/robjhyndman/forecast-anomalies-talk/main/forecast_anomalies.pdf</a></p>
+<p>When a forecast is very inaccurate, it is sometimes because a poor
 forecasting model is used, but it can also occur when an unusual observation
 occurs. A good forecasting model can be used to identify anomalies. The
 approach taken is to use a probabilistic forecast, and to compute the
@@ -2808,11 +2797,11 @@ is <code class="docutils literal notranslate"><span class="pre">False</span></co
 <dt class="sig sig-object py" id="custom_algorithms.spectral_residual.spectral_residual">
 <span class="sig-name descname"><span class="pre">spectral_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_skyline_app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeseries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm_parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custom_algorithms/spectral_residual.html#spectral_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#custom_algorithms.spectral_residual.spectral_residual" title="Link to this definition"></a></dt>
 <dd><p>Outlier detector for time-series data using the spectral residual algorithm.
-Based on the alibi-detect implementation of “Time-Series Anomaly Detection
-Service at Microsoft” (Ren et al., 2019) <a class="reference external" href="https://arxiv.org/abs/1906.03821">https://arxiv.org/abs/1906.03821</a>
-For Mirage this algorithm is FAST
-For Analyzer this algorithm is SLOW
-Although this algorithm is fast, it is not fast enough to be run in Analyzer,
+Based on the alibi-detect implementation of</p>
+<p>Time-Series Anomaly Detection Service at Microsoft (Ren et al., 2019) <a class="reference external" href="https://arxiv.org/abs/1906.03821">https://arxiv.org/abs/1906.03821</a></p>
+<p>For Mirage this algorithm is FAST</p>
+<p>For Analyzer this algorithm is SLOW</p>
+<p>Although this algorithm is fast, it is not fast enough to be run in Analyzer,
 even if only deployed against a subset of metrics.  In testing
 spectral_residual took between 0.134828 and 0.698201 seconds to run per
 metrics, which is much too long for Analyzer</p>
@@ -2855,50 +2844,50 @@ determine if the metric is anomalous.  Default is <code class="docutils literal 
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'threshold'</span></code> (float): Threshold used to classify outliers. Relative</dt><dd><p>saliency map distance from the moving average. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code>
-because Skyline is using spectral_residual in an unsupervised
-manner and makes use of the spectral_residual infer_threshold
-function method to dynamically calculate the outlier threshold
-from the data.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'threshold'</span></code> (float): Threshold used to classify outliers.</dt><dd><p>Relative saliency map distance from the moving average. Default
+is <code class="docutils literal notranslate"><span class="pre">None</span></code> because Skyline is using spectral_residual in an
+unsupervised manner and makes use of the spectral_residual
+infer_threshold function method to dynamically calculate the
+outlier threshold from the data.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'threshold_perc'</span></code> (float): a threshold a value inferred from the</dt><dd><p>percentage of instances considered to be outliers in a sample of
-the dataset.. Default is <code class="docutils literal notranslate"><span class="pre">99.0</span></code>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'threshold_perc'</span></code> (float):</dt><dd><p>A threshold a value inferred from the percentage of instances
+considered to be outliers in a sample of the dataset.  Default
+is <code class="docutils literal notranslate"><span class="pre">99.0</span></code>.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'window_amp'</span></code> (int): Window for the average log amplitude. Default</dt><dd><p>is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'window_amp'</span></code> (int): Window for the average log amplitude.</dt><dd><p>Default is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'window_local'</span></code> (int):</dt><dd><p>Window for the local average of the saliency map. Note that the
+averaging is performed over the previous <cite>window_local</cite> data
+points (i.e., is a local average of the preceding <cite>window_local</cite>
+points for the current index). Default is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_est_points'</span></code> (int):</dt><dd><p>Number of estimated points padded to the end of the sequence.
+Default is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_grad_points'</span></code> (int):</dt><dd><p>Number of points used for the gradient estimation of the
+additional points padded to the end of the sequence. Default is
+<code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
 </dd>
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">'window_local'</span></code> (int): Window for the local average of the saliency</dt><dd><blockquote>
-<div><p>map. Note that the averaging is performed over the</p>
-</div></blockquote>
-<dl class="simple">
-<dt>previous <cite>window_local</cite> data points (i.e., is a local average of the</dt><dd><p>preceding <cite>window_local</cite> points for</p>
-</dd>
-</dl>
-<p>the current index). Default is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'n_est_points'</span></code> (int): Number of estimated points padded to the end</dt><dd><p>of the sequence. Default is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'n_grad_points'</span></code> (int): Number of points used for the gradient</dt><dd><p>estimation of the additional points padded to the end of the
-sequence. Default is <code class="docutils literal notranslate"><span class="pre">20</span></code>.</p>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">'padding_amp_method'</span></code> (str): Padding method to be used prior to</dt><dd><p>each convolution over log amplitude.
+<dt><code class="docutils literal notranslate"><span class="pre">'padding_amp_method'</span></code> (str):</dt><dd><p>Padding method to be used prior to each convolution over log
+amplitude.
 Possible values: <cite>constant</cite> | <cite>replicate</cite> | <cite>reflect</cite>.</p>
 <blockquote>
 <div><ul class="simple">
@@ -2912,7 +2901,8 @@ Possible values: <cite>constant</cite> | <cite>replicate</cite> | <cite>reflect<
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">'padding_local_method'</span></code> (str): Padding method to be used prior to</dt><dd><p>each convolution over saliency map.
+<dt><code class="docutils literal notranslate"><span class="pre">'padding_local_method'</span></code> (str):</dt><dd><p>Padding method to be used prior to each convolution over
+saliency map.
 Possible values: <cite>constant</cite> | <cite>replicate</cite> | <cite>reflect</cite>.</p>
 <blockquote>
 <div><ul class="simple">
@@ -2926,20 +2916,26 @@ Possible values: <cite>constant</cite> | <cite>replicate</cite> | <cite>reflect<
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'padding_amp_side'</span></code> (str): Whether to pad the amplitudes on both</dt><dd><p>sides or only on one side.
+<dt><code class="docutils literal notranslate"><span class="pre">'padding_amp_side'</span></code> (str):</dt><dd><p>Whether to pad the amplitudes on both sides or only on one side.
 Possible values: <cite>bilateral</cite> | <cite>left</cite> | <cite>right</cite>.
 Default value: <cite>bilateral</cite>.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'return_results'</span></code> (bool): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, returns the results dict in</dt><dd><p>addition to anomalous and anomalyScore.  Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'return_results'</span></code> (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, returns the results dict in addition to anomalous
+and anomalyScore.  Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'debug_logging'</span></code> (bool): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, enables debug logging.</p></li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'debug_print'</span></code> (bool): If <code class="docutils literal notranslate"><span class="pre">True</span></code>, enables debug printing  (for</dt><dd><p>Jupyter testing). Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'debug_logging'</span></code> (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, enables debug logging.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'debug_print'</span></code> (bool):</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, enables debug printing  (for Jupyter testing).
+Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
 </dd>
 </dl>
 </li>

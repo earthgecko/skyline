@@ -343,7 +343,7 @@ def seed():
         # r = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
     else:
         r = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-    time.sleep(10)
+    time.sleep(3)
 
     try:
         x = r.smembers(settings.FULL_NAMESPACE + metric_set)

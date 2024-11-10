@@ -2294,7 +2294,7 @@ server {
   cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.prometheus
   cat /opt/skyline/github/skyline/skyline/settings.py.no.prometheus \
     | sed -e "s/VICTORIAMETRICS_ENABLED = False/VICTORIAMETRICS_ENABLED = True/g" \
-    | sed -e "s/'public_url' = None/'public_url' = 'http:\/\/$YOUR_SKYLINE_SERVER_FQDN:8886'/g" \
+    | sed -e "s/'public_url': None/'public_url': 'http:\/\/$YOUR_SKYLINE_SERVER_FQDN:8886'/g" \
     | sed -e "s/# ('_tenant_id', 'smtp/('_tenant_id', 'smtp/g" \
     | sed -e "s/PROMETHEUS_INGESTION = False/PROMETHEUS_INGESTION = True/g" > /opt/skyline/github/skyline/skyline/settings.py
 

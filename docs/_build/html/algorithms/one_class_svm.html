@@ -66,6 +66,8 @@
 <li class="toctree-l2"><a class="reference internal" href="core-algorithms.html">Core algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="custom-algorithms.html">Custom algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="matrixprofile.html">matrixprofile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sigma.html">sigma</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_residual.html">spectral_residual</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dbscan.html">DBSCAN</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lof.html">Local Outlier Factor</a></li>
@@ -76,7 +78,9 @@
 <li class="toctree-l2"><a class="reference internal" href="mstl.html">MSTL</a></li>
 <li class="toctree-l2"><a class="reference internal" href="spectral_entropy.html">spectral_entropy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="macd.html">macd</a></li>
-<li class="toctree-l2"><a class="reference internal" href="m66.html">m66</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lad.html">LAD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="probabilistic_forecasts_generalized_pareto_distribution_ets.html">probabilistic_forecasts_generalized_pareto_distribution_ets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grafana_promql_anomaly_detection.html">grafana_promql_anomaly_detection</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
@@ -144,7 +148,13 @@
              
   <section id="one-class-svm">
 <h1>one_class_svm<a class="headerlink" href="#one-class-svm" title="Link to this heading"></a></h1>
-<p>THIS DOCUMENTATION IS STILL UNDER DEVELOPMENT</p>
+<p>Outlier detector for time series data using One Class SVM base on the moving
+mean and variance, unless the variance is low in which case the standard
+deviation will be used in place of variance.  The algorithm parameters to
+be concerned with are <code class="docutils literal notranslate"><span class="pre">'window'</span></code> which defines the length of sliding
+window to use, <code class="docutils literal notranslate"><span class="pre">nu</span></code> which defines the percentage that can be considered as
+outliers e.g. 0.1 would be 10%.  Do note that if the variance is low each
+spike or trough will probably be identified as an outlier.</p>
 <p>See the docstrings - <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.one_class_svm">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.one_class_svm</a></p>
 <p>See the custom_algorithm source - <a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/one_class_svm.py">https://github.com/earthgecko/skyline/blob/master/skyline/custom_algorithms/one_class_svm.py</a></p>
 </section>

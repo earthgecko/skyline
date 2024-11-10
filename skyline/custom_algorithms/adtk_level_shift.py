@@ -57,12 +57,18 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
     :param algorithm_parameters: a dictionary of any required parameters for the
         custom_algorithm and algorithm itself.  For the matrixprofile custom
         algorithm the following parameters are required, example:
-        ``algorithm_parameters={
-            'c': 9.0,
-            'run_every': 5,
-            'side': 'both',
-            'window': 5
-        }``
+        Example usage:
+        
+            algorithm_parameters={
+                'anomaly_window': 1,
+                'c': 9.0,
+                'run_every': 5,
+                'side': 'both',
+                'window': 5,
+                'debug_logging': True,
+                'return_results': True,
+            }
+
     :type current_skyline_app: str
     :type parent_pid: int
     :type timeseries: list

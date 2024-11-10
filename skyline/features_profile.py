@@ -101,6 +101,9 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
     """
     Calculates a tsfresh features profile from a training data set
 
+    :param current_skyline_app: the app calling the function so the function
+        knows which log to write too.
+    :type current_skyline_app: str
     :param timestamp: the timestamp of metric anomaly with training data
     :type timestamp: str
     :param metric: the base_name of the metric
@@ -108,7 +111,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
     :param context: the context
     :type context: str
     :param preprocess_validate_training: whether this is a preprocess_validate_training request
-    :type bool
+    :type preprocess_validate_training: bool
     :return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)
     :rtype: int
     :rtype: (str, boolean, str, str, str)

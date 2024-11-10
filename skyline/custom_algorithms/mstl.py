@@ -31,7 +31,8 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     """
     EXPERIMENTAL
 
-    An implement of statsforecast MSTL - https://github.com/Nixtla/statsforecast
+    A basic implementation of statsforecast MSTL - https://github.com/Nixtla/statsforecast
+
     https://nixtlaverse.nixtla.io/statsforecast/docs/models/multipleseasonaltrend.html
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This

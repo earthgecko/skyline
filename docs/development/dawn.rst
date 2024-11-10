@@ -227,13 +227,17 @@ how you want to set it up with regards to your existing telemetry/collectors.
   chmod 0755 /tmp/skyline.dawn.sh
   /tmp/skyline.dawn.sh   # This will take ~30mins
 
-Copy the final output from the build and save it as it contains all the details
-regarding the build, list endpoints, ports, configs, etc.  You will need all of
-those to view and manage the components you elected to install.
+Copy the final part of the output from the build and save it as it contains all
+the details regarding the build, list endpoints, ports, configs, etc.  You will
+need all of those to view and manage the all the components you elected to
+install.
 
-Add an entry into your /etc/hosts file that maps the instance IP to
-YOUR_SKYLINE_SERVER_FQDN and open the URL in your web browser, accepting the
+Remeber to add the entry into **YOUR** /etc/hosts file that maps the instance IP
+to YOUR_SKYLINE_SERVER_FQDN and open the URL in your web browser, accepting the
 self signed SSL certificate.
+
+Apologies for repeating things here and there, but think of it as reinforcement
+learning :)  There is so much to explain, some times things get repeated.
 
 Check the Skyline logs.
 
@@ -241,6 +245,14 @@ Check the Skyline logs.
 
   # Check the logs
   tail -n 60 /var/log/skyline/*.log
+
+.. raw:: html
+
+   <p style="font-size: 0.8em; color: gray; text-align: left;">
+       v5.0.0-alpha Numberwang series: A number you have seen < 1000. What other number/s explains the < 1000 number?
+       See the next release to see if you got Numberwang!
+   </p>
+
 
 All Installed services are controlled via systemctl
 
@@ -317,7 +329,7 @@ Relevant configuration files
 - Skyline - /etc/skyline/skyline.conf and /opt/skyline/github/skyline/skyline/settings.py
 - Prometheus - /etc/prometheus/prometheus.yml
 - VictoriaMetrics - /opt/victoriametrics/victoriametrics.service
-- Telegraf - /etc/telegraf/telegraf.conf and /etc/telegraf/telegraf.d/*.conf
+- Telegraf - /etc/telegraf/telegraf.conf and /etc/telegraf/telegraf.d/\*.conf
 - node_exporter - node scrape job in /etc/prometheus/prometheus.yml
 
 Take Skyline for a spin
@@ -387,3 +399,4 @@ following things.
   configure Skyline SMTP related settings.
 - In /opt/skyline/github/skyline/skyline/settings.py replace the occurrences of
   ``no_email`` with the email address you want alerts sent to.
+

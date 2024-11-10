@@ -302,6 +302,8 @@
         <span class="c1"># correlate_or_relate_with,</span>
         <span class="c1"># @added 20210324 - Feature #3642: Anomaly type classification</span>
         <span class="n">get_anomaly_type</span><span class="p">,</span>
+        <span class="c1"># @added 20241108 - Feature #5537: webapp - tsdbs</span>
+        <span class="n">get_graphite_port</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="kn">from</span> <span class="nn">backend</span> <span class="kn">import</span> <span class="p">(</span>
@@ -511,6 +513,8 @@
     <span class="c1"># @added 20240118 - Task #2732: Prometheus to Skyline</span>
     <span class="c1">#                   Branch #4300: prometheus</span>
     <span class="kn">from</span> <span class="nn">functions.victoriametrics.get_victoriametrics_metric_link</span> <span class="kn">import</span> <span class="n">get_victoriametrics_metric_link</span>
+    <span class="c1"># @added 20241108 - Feature #5537: webapp - tsdbs</span>
+    <span class="kn">from</span> <span class="nn">functions.victoriametrics.get_victoriametrics_metric_link</span> <span class="kn">import</span> <span class="n">get_victoriametrics_url</span>
 
     <span class="c1"># @added 20240502 - Feature #5026: luminosity - pearson_closest </span>
     <span class="c1">#                   Feature #5342: utilities - pearson_closest</span>
@@ -16518,6 +16522,46 @@
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :( - err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+
+
+<span class="c1"># @added 20241108 - Feature #5537: webapp - tsdbs</span>
+<div class="viewcode-block" id="tsdbs">
+<a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.tsdbs">[docs]</a>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/tsdbs&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<span class="nd">@requires_auth</span>
+<span class="k">def</span> <span class="nf">tsdbs</span><span class="p">():</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="n">tsdbs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">graphite_link</span> <span class="o">=</span> <span class="s1">&#39;Not connected&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">graphite_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_port</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Failed to interpolate graphite_link, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+    <span class="n">tsdbs</span><span class="p">[</span><span class="s1">&#39;graphite&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">graphite_link</span>
+    <span class="n">vm_url</span> <span class="o">=</span> <span class="s1">&#39;Not connected&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">vm_url</span> <span class="o">=</span> <span class="n">get_victoriametrics_url</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;get_victoriametrics_url failed to interpolate vm_url, err: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">err</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+    <span class="n">tsdbs</span><span class="p">[</span><span class="s1">&#39;victoriametrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vm_url</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
+            <span class="s1">&#39;tsdbs.html&#39;</span><span class="p">,</span> <span class="n">tsdbs</span><span class="o">=</span><span class="n">tsdbs</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">dev_ver</span><span class="o">=</span><span class="n">DEV_VER</span><span class="p">,</span>
+            <span class="n">serve_jaeger</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_SERVE_JAEGER</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)),</span> <span class="mi">200</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+
 
 
 <span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>

@@ -158,8 +158,11 @@
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    grafana_promql_anomaly_detection</span>
+
 <span class="sd">    A loose Python implementation of the Grafana PromQL Anomaly Detection method</span>
+<span class="sd">    </span>
 <span class="sd">    https://github.com/grafana/promql-anomaly-detection/tree/cd5a307ac7e44beb7e42299fe05cd71dd5647237</span>
+<span class="sd">    </span>
 <span class="sd">    https://grafana.com/blog/2024/10/03/how-to-use-prometheus-to-efficiently-detect-anomalies-at-scale/</span>
 
 <span class="sd">    This implementation does not take into account the alert only if breached</span>
@@ -177,20 +180,6 @@
 <span class="sd">        algorithm must accept it as the second argument.</span>
 <span class="sd">    :param timeseries: the time series as a list e.g. ``[[1667608854, 1269121024.0],</span>
 <span class="sd">        [1667609454, 1269174272.0], [1667610054, 1269174272.0]]``</span>
-<span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
-<span class="sd">        custom_algorithm and algorithm itself.  Example:</span>
-<span class="sd">        &quot;algorithm_parameters&quot;: {</span>
-<span class="sd">            &quot;anomaly_window&quot;: 1,</span>
-<span class="sd">            &quot;min_anomaly_duration_seconds&quot;: 300,</span>
-<span class="sd">            &quot;threshold_by_covar&quot;: 0.5,</span>
-<span class="sd">            &quot;sparse_threshold&quot;: 0.083333,</span>
-<span class="sd">            &quot;stddev_multiplier&quot;: 2,</span>
-<span class="sd">            &quot;margin_multiplier&quot;: 0.5,</span>
-<span class="sd">            &quot;short_window&quot;: 3600,</span>
-<span class="sd">            &quot;smoothing_window_seconds&quot;: 93600,</span>
-<span class="sd">            &quot;debug_logging&quot;: True,</span>
-<span class="sd">            &quot;return_results&quot;: True,</span>
-<span class="sd">        }</span>
 <span class="sd">    :param algorithm_parameters: a dictionary of any required parameters for the</span>
 <span class="sd">        custom_algorithm and algorithm itself.  For the </span>
 <span class="sd">        grafana_promql_anomaly_detection custom algorithm no specific</span>

@@ -1832,6 +1832,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.csv_to_timeseries_data"><code class="docutils literal notranslate"><span class="pre">csv_to_timeseries_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.vortex"><code class="docutils literal notranslate"><span class="pre">vortex()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.accept_test_request"><code class="docutils literal notranslate"><span class="pre">accept_test_request()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.tsdbs"><code class="docutils literal notranslate"><span class="pre">tsdbs()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.get_redis"><code class="docutils literal notranslate"><span class="pre">get_redis()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.get_client_details"><code class="docutils literal notranslate"><span class="pre">get_client_details()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html#webapp.webapp.decode_token"><code class="docutils literal notranslate"><span class="pre">decode_token()</span></code></a></li>
@@ -2487,17 +2488,24 @@ knows which log to write too.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>current_skyline_app</strong> (<em>str</em>) – the app calling the function so the function
+knows which log to write too.</p></li>
 <li><p><strong>timestamp</strong> (<em>str</em>) – the timestamp of metric anomaly with training data</p></li>
 <li><p><strong>metric</strong> (<em>str</em>) – the base_name of the metric</p></li>
 <li><p><strong>context</strong> (<em>str</em>) – the context</p></li>
-<li><p><strong>preprocess_validate_training</strong> – whether this is a preprocess_validate_training request</p></li>
+<li><p><strong>preprocess_validate_training</strong> (<em>bool</em>) – whether this is a preprocess_validate_training request</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(str, boolean, str, str, str)</p>
+</dd>
 </dl>
-<p>:type bool
-:return: (features_profile_csv_file_path, successful, fail_msg, traceback_format_exc, calc_time)
-:rtype: int
-:rtype: (str, boolean, str, str, str)</p>
 </dd></dl>
 
 </section>

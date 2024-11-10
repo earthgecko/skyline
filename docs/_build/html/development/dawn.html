@@ -359,18 +359,24 @@ chmod<span class="w"> </span><span class="m">0755</span><span class="w"> </span>
 /tmp/skyline.dawn.sh<span class="w">   </span><span class="c1"># This will take ~30mins</span>
 </pre></div>
 </div>
-<p>Copy the final output from the build and save it as it contains all the details
-regarding the build, list endpoints, ports, configs, etc.  You will need all of
-those to view and manage the components you elected to install.</p>
-<p>Add an entry into your /etc/hosts file that maps the instance IP to
-YOUR_SKYLINE_SERVER_FQDN and open the URL in your web browser, accepting the
+<p>Copy the final part of the output from the build and save it as it contains all
+the details regarding the build, list endpoints, ports, configs, etc.  You will
+need all of those to view and manage the all the components you elected to
+install.</p>
+<p>Remeber to add the entry into <strong>YOUR</strong> /etc/hosts file that maps the instance IP
+to YOUR_SKYLINE_SERVER_FQDN and open the URL in your web browser, accepting the
 self signed SSL certificate.</p>
+<p>Apologies for repeating things here and there, but think of it as reinforcement
+learning :)  There is so much to explain, some times things get repeated.</p>
 <p>Check the Skyline logs.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
 tail<span class="w"> </span>-n<span class="w"> </span><span class="m">60</span><span class="w"> </span>/var/log/skyline/*.log
 </pre></div>
 </div>
-<p>All Installed services are controlled via systemctl</p>
+<p style="font-size: 0.8em; color: gray; text-align: left;">
+    v5.0.0-alpha Numberwang series: A number you have seen < 1000. What other number/s explains the < 1000 number?
+    See the next release to see if you got Numberwang!
+</p><p>All Installed services are controlled via systemctl</p>
 <p><strong>Skyline services</strong>:
 - analyzer.service
 - analyzer_batch.service
@@ -433,7 +439,7 @@ specifying them in <a class="reference internal" href="../skyline.html#settings.
 <li><p>Skyline - /etc/skyline/skyline.conf and /opt/skyline/github/skyline/skyline/settings.py</p></li>
 <li><p>Prometheus - /etc/prometheus/prometheus.yml</p></li>
 <li><p>VictoriaMetrics - /opt/victoriametrics/victoriametrics.service</p></li>
-<li><p>Telegraf - /etc/telegraf/telegraf.conf and /etc/telegraf/telegraf.d/<a href="#id1"><span class="problematic" id="id2">*</span></a>.conf</p></li>
+<li><p>Telegraf - /etc/telegraf/telegraf.conf and /etc/telegraf/telegraf.d/*.conf</p></li>
 <li><p>node_exporter - node scrape job in /etc/prometheus/prometheus.yml</p></li>
 </ul>
 </section>
