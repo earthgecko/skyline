@@ -45,26 +45,53 @@ def get_all_inactive_db_metric_names(current_skyline_app, with_ids=False):
 
     # @added 20241026 - Bug #5522: Handle duplicate metric names
     duplicate_metrics = {}
+    # @added 20241111 - Bug #5522: Handle duplicate metric names
+    duplicate_metrics_errors = []
 
     try:
         connection = engine.connect()
         if with_ids:
             stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
         else:
-            stmt = select([metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
+            # @modified 20241111 - Bug #5522: Handle duplicate metric names
+            # The id column is now required to deduplicate metrics so actually
+            # the with_ids conditional is no longer required but it makes no
+            # different the to the iteration of rows
+            #stmt = select([metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
+            stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 1)
         result = connection.execute(stmt)
         for row in result:
             base_name = row['metric']
 
             # @added 20241026 - Bug #5522: Handle duplicate metric names
             if base_name in metric_names:
-                duplicate_metrics[row['id']] = base_name
-                continue
+                # @modified 20241111 - Bug #5522: Handle duplicate metric names
+                #duplicate_metrics[row['id']] = base_name
+                #continue
+                # Wrapped in try
+                i_metric_id = None
+                try:
+                    i_metric_id = row['id']
+                except KeyError:
+                    continue
+                if i_metric_id:
+                    try:
+                        duplicate_metrics[i_metric_id] = base_name
+                        continue
+                    except Exception as err:
+                        duplicate_metrics_errors.append(['duplicate_metrics dict err', err])
 
             metric_names.append(base_name)
             if with_ids:
                 metric_names_with_ids[base_name] = row['id']
         connection.close()
+
+        # @added 20241111 - Bug #5522: Handle duplicate metric names
+        if duplicate_metrics_errors:
+            current_logger.error('error :: %s :: %s duplicate_metrics errors reported, last: %s' % (
+                function_str, str(len(duplicate_metrics_errors)),
+                str(duplicate_metrics_errors[-1])))
+
         current_logger.info('%s :: determined metric names from the db: %s' % (
             function_str, str(len(metric_names))))
     except Exception as e:
