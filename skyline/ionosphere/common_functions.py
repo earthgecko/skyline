@@ -205,7 +205,12 @@ def get_metrics_db_object(base_name):
                 # @added 20170115 - Feature #1854: Ionosphere learn - generations
                 # Create the metrics_db_object so it is available throughout
                 # Here we go! Learn!
-                metrics_db_object = row
+                # @modified 20241111 - Bug #5542: v5.0.0-alpha - memcache regression
+                # Everything expects this object to now be a dict not a
+                # sqlalchemy.engine.row.LegacyRow type object, coercing to a
+                # dict.  This is not related to a regression in pymemcache. 
+                #metrics_db_object = row
+                metrics_db_object = dict(row)
             else:
                 logger.info('could not determine metric id for %s' % base_name)
 
