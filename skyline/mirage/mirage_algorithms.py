@@ -1261,6 +1261,16 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 str(err)))
         tmp_final_ensemble = ensemble + final_after_custom_ensemble
 
+        tmp_final_ensemble
+
+        # @added 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # Coerce all numpy.bool_ typed elements introduced with
+        # numpy >= 2 to Python bool so they are literal_eval and
+        # json safe
+        tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+
         # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         # Prune entries older than 1 day from the trigger_history
@@ -1726,6 +1736,15 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     logger.info('mirage_algorithms :: %s trigger_history count after removing entries older than %s: %s' % (
                         base_name, str(oldest_trigger_timestamp), str(len(recent_trigger_history))))
                     tmp_final_ensemble = ensemble + final_after_custom_ensemble
+
+                    # @added 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    #                   Feature #4482: Test alerts
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+
                     trigger_dict = {
                         'count': ensemble_pre_custom_algorithms_true_count,
                         'ensemble': ensemble_pre_custom_algorithms,
