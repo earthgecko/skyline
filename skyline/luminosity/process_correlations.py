@@ -1105,6 +1105,17 @@ def get_correlations(
     if not anomalies:
         no_data = True
         logger.info('get_correlations :: no anomalies')
+
+    # @added 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    #                   Task #4872: Optimise luminosity for labelled_metrics
+    # Do not error if not assigned_metrics are passed and then is no data, this
+    # is expected.  The get_assigned_metrics can return no metrics if they are
+    # all filtered out and get_correlations is called with no assigned_metrics.
+    if no_data and not assigned_metrics:
+        logger.info('get_correlations :: no data, but no assigned_metrics where assigned so OK.')
+        return (correlated_metrics, correlations, [], 0)
+
     if no_data:
         logger.error('error :: get_correlations :: no data')
         # return (correlated_metrics, correlations)
