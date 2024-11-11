@@ -2968,7 +2968,7 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
 
             # @added 20241111 - Bug #5541: np.float64 - yhat and sigma3
             #                   Task #5526: Build v5.0.0 and upgrade deps
-            #                   Branch #5532: v5.0.0-alpha and 
+            #                   Branch #5532: v5.0.0-alpha
             # Coerce np.float64 to float to be literal_eval and json safe
             yhat_upper = float(yhat_upper) if isinstance(yhat_upper, np.float64) else yhat_upper
             yhat_lower = float(yhat_lower) if isinstance(yhat_lower, np.float64) else yhat_lower

@@ -1568,6 +1568,13 @@ def alert_pagerduty(alert, metric, context):
             # pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
             pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
 
+        # @added 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # test_alert was never defined as it is not used here in mirage it is
+        # and is identified by triggered_algorithms being ['testing']
+        test_alert = False
+
         # @added 20200825 - Feature #3704: Add alert to anomalies
         # @modified 20220301 - Feature #4482: Test alerts
         # if settings.PANORAMA_ENABLED:
