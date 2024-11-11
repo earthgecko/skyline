@@ -2176,17 +2176,24 @@ def get_yhat_values(
                 # Change dict key to int not float
                 int_ts = int(ts)
                 yhat_dict[int_ts] = {}
+
+                # @modified 20241111 - Bug #5541: np.float64 - yhat and sigma3
+                #                      Task #5526: Build v5.0.0 and upgrade deps
+                #                      Branch #5532: v5.0.0-alpha
+                # Coerce all values below to float to be literal_eval and json
+                # safe so there are no np.float64 types
+
                 if include_value:
-                    yhat_dict[int_ts]['value'] = value
+                    yhat_dict[int_ts]['value'] = float(value)
                 if include_mean:
-                    yhat_dict[int_ts]['mean'] = va_mean
+                    yhat_dict[int_ts]['mean'] = float(va_mean)
                 if include_mean:
-                    yhat_dict[int_ts]['mean'] = va_mean
+                    yhat_dict[int_ts]['mean'] = float(va_mean)
 
                 # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 # yhat_lower = va_mean - va_std_3
-                yhat_lower = lower
-                yhat_upper = upper
+                yhat_lower = float(lower)
+                yhat_upper = float(upper)
 
                 if include_yhat_real_lower:
                     # @modified 20201202 - Feature #3850: webapp - yhat_values API endoint
@@ -2196,17 +2203,17 @@ def get_yhat_values(
                     if yhat_lower < 0 and array_amin > -0.0000000001:
                         yhat_dict[int_ts]['yhat_real_lower'] = 0
                     else:
-                        yhat_dict[int_ts]['yhat_real_lower'] = yhat_lower
-                yhat_dict[int_ts]['yhat_lower'] = yhat_lower
+                        yhat_dict[int_ts]['yhat_real_lower'] = float(yhat_lower)
+                yhat_dict[int_ts]['yhat_lower'] = float(yhat_lower)
                 # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 # yhat_dict[int_ts]['yhat_upper'] = va_mean + va_std_3
-                yhat_dict[int_ts]['yhat_upper'] = upper
+                yhat_dict[int_ts]['yhat_upper'] = float(upper)
                 # @added 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 if use_extended:
                     if yhat_lower != three_sigma_lower:
-                        yhat_dict[int_ts]['3sigma_lower'] = three_sigma_lower
+                        yhat_dict[int_ts]['3sigma_lower'] = float(three_sigma_lower)
                     if yhat_upper != three_sigma_upper:
-                        yhat_dict[int_ts]['3sigma_upper'] = three_sigma_upper
+                        yhat_dict[int_ts]['3sigma_upper'] = float(three_sigma_upper)
                 if include_anomalous_periods:
                     yhat_dict[int_ts]['anomalous_period'] = anomalous_period
         except:

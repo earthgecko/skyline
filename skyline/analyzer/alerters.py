@@ -2873,6 +2873,17 @@ def alert_http(alert, metric, context):
                 yhat_lower = sigma3_lower_bound
                 yhat_real_lower = sigma3_real_lower_bound
 
+            # @added 20241111 - Bug #5541: np.float64 - yhat and sigma3
+            #                   Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha and 
+            # Coerce np.float64 to float to be literal_eval and json safe
+            yhat_upper = float(yhat_upper) if isinstance(yhat_upper, np.float64) else yhat_upper
+            yhat_lower = float(yhat_lower) if isinstance(yhat_lower, np.float64) else yhat_lower
+            yhat_real_lower = float(yhat_real_lower) if isinstance(yhat_real_lower, np.float64) else yhat_real_lower
+            sigma3_upper_bound = float(sigma3_upper_bound) if isinstance(sigma3_upper_bound, np.float64) else sigma3_upper_bound
+            sigma3_lower_bound = float(sigma3_lower_bound) if isinstance(sigma3_lower_bound, np.float64) else sigma3_lower_bound
+            sigma3_real_lower_bound = float(sigma3_real_lower_bound) if isinstance(sigma3_real_lower_bound, np.float64) else sigma3_real_lower_bound
+
             # @added 20220830 - Feature #4652: http_alerter - dotted_representation
             #                   Task #2732: Prometheus to Skyline
             #                   Branch #4300: prometheus
