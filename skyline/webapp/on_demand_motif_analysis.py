@@ -760,10 +760,12 @@ def on_demand_motif_analysis(
 
                     motif_analysis[metric]['motifs'][motif_id]['image'] = None
 
-                    motif_analysis[metric]['motifs'][motif_id]['motif_area'] = motif_area
-                    motif_analysis[metric]['motifs'][motif_id]['fp_motif_area'] = fp_motif_area
-                    motif_analysis[metric]['motifs'][motif_id]['area_percent_diff'] = percent_different
-                    motif_analysis[metric]['motifs'][motif_id]['max_area_percent_diff'] = max_area_percent_diff
+                    # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                    # Coerce new strict np.float64 with numpy 2.2.3 to float
+                    motif_analysis[metric]['motifs'][motif_id]['motif_area'] = float(motif_area)
+                    motif_analysis[metric]['motifs'][motif_id]['fp_motif_area'] = float(fp_motif_area)
+                    motif_analysis[metric]['motifs'][motif_id]['area_percent_diff'] = float(percent_different)
+                    motif_analysis[metric]['motifs'][motif_id]['max_area_percent_diff'] = float(max_area_percent_diff)
 
                     if (time.time() - start) >= 25:
                         continue

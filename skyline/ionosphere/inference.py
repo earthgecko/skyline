@@ -1086,11 +1086,13 @@ def ionosphere_motif_inference(metric, timestamp):
                 matched_motifs[motif_id]['fp_motif_sequence'] = relate_timeseries
                 # @added 20210423 - Feature #4014: Ionosphere - inference
                 # Compute the area using the composite trapezoidal rule.
-                matched_motifs[motif_id]['motif_area'] = motif_area
-                matched_motifs[motif_id]['fp_motif_area'] = fp_motif_area
+                # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                # Coerce new strict np.float64 with numpy 2.2.3 to float
+                matched_motifs[motif_id]['motif_area'] = float(motif_area)
+                matched_motifs[motif_id]['fp_motif_area'] = float(fp_motif_area)
                 # @added 20210424 - Feature #4014: Ionosphere - inference
-                matched_motifs[motif_id]['area_percent_diff'] = percent_different
-                matched_motifs[motif_id]['max_area_percent_diff'] = motif_max_area_percent_diff
+                matched_motifs[motif_id]['area_percent_diff'] = float(percent_different)
+                matched_motifs[motif_id]['max_area_percent_diff'] = float(motif_max_area_percent_diff)
                 # @added 20210428 - Feature #4014: Ionosphere - inference
                 # Add time taken and fps checked
                 matched_motifs[motif_id]['fps_checked'] = len(list(set(fps_checked_for_motifs)))
