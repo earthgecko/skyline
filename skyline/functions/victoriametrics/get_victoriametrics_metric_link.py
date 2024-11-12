@@ -17,6 +17,7 @@ except:
     VICTORIAMETRICS_ENABLED = False
 
 vmui_url = None
+vm_url = None
 if VICTORIAMETRICS_ENABLED:
     vmui_scheme = None
     try:
@@ -68,11 +69,12 @@ for key in list(skyline_metric_types.keys()):
 
 # @added 20241108 - Feature #5537: webapp - tsdbs
 def get_victoriametrics_url():
+    vm_url = None
     if VICTORIAMETRICS_ENABLED:
         try:
             vm_url = settings.VICTORIAMETRICS_OPTS['public_url']
         except:
-            vm_url = vm_url
+            vm_url = None
     return vm_url
 
 # @added 20240118 - Task #2732: Prometheus to Skyline

@@ -1261,8 +1261,6 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 str(err)))
         tmp_final_ensemble = ensemble + final_after_custom_ensemble
 
-        tmp_final_ensemble
-
         # @added 20241111 - Task #5526: Build v5.0.0 and upgrade deps
         #                   Branch #5532: v5.0.0-alpha
         #                   Feature #4482: Test alerts
@@ -1270,6 +1268,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
         # numpy >= 2 to Python bool so they are literal_eval and
         # json safe
         tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+        ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
 
         # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -1744,6 +1743,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     # numpy >= 2 to Python bool so they are literal_eval and
                     # json safe
                     tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+                    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
 
                     trigger_dict = {
                         'count': ensemble_pre_custom_algorithms_true_count,

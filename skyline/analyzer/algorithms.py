@@ -1705,6 +1705,13 @@ def run_selected_algorithm(
     # @modified 20201120 - Feature #3566: custom_algorithms
     # ensemble = []
     ensemble = list(final_custom_ensemble)
+    # @added 20241112 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    #                   Feature #4482: Test alerts
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
 
     # @added 20221019 - Feature #4700: algorithms - single series
     # This optimisation is added to save microseconds on interpolating the
@@ -1797,6 +1804,13 @@ def run_selected_algorithm(
     # added above
     if not run_3sigma_algorithms:
         ensemble = list(final_custom_ensemble)
+        # @added 20241112 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # Coerce all numpy.bool_ typed elements introduced with
+        # numpy >= 2 to Python bool so they are literal_eval and
+        # json safe
+        ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
 
     # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
     if run_custom_algorithm_after_3sigma:
@@ -1945,6 +1959,15 @@ def run_selected_algorithm(
         ensemble.append(item)
 
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
+
+    # @added 20241112 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    #                   Feature #4482: Test alerts
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+    final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in final_ensemble]
 
     try:
         # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]

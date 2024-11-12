@@ -1137,6 +1137,15 @@ def run_selected_batch_algorithm(
 
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
 
+    # @added 20241112 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    #                   Feature #4482: Test alerts
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+    final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in final_ensemble]
+
     try:
         # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
         ensemble = list(final_ensemble)
