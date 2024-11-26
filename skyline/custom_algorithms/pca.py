@@ -276,6 +276,49 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 current_logger.debug('debug :: error on pca deduplicate_timeseries, err: %s' % err)
                 current_logger.debug(traceback.format_exc())
 
+    # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Check that the data suits the PCA algorithm and if not do not run and
+    # fail/error with 
+    # /opt/python_virtualenv/projects/skyline-py31015/lib/python3.10/site-packages/sklearn/decomposition/_pca.py:653: RuntimeWarning: invalid value encountered in divide
+    #    explained_variance_ratio_ = explained_variance_ / total_var
+    def check_pca_suitability(data, dataset='train'):
+        reason = 'ok'
+        suitable = True
+        try:
+            variances = np.var(data, axis=0)
+            if np.any(variances == 0):
+                suitable = False
+                reason = '%s has features with zero variance, which are unsuitable for PCA' % dataset
+                if debug_logging:
+                    current_logger.info('warning :: %s' % reason)
+            if suitable:
+                # Low variability threshold
+                if np.all(variances < 1e-5):
+                    suitable = False
+                    reason = '%s has very low variance overall, which may make PCA ineffective' % dataset
+                    if debug_logging:
+                        current_logger.info('warning :: %s' % reason)
+            if suitable:
+                if data.shape[0] < data.shape[1]:
+                    suitable = False
+                    reason = '%s has more features than samples, which may not be ideal for PCA' % dataset
+                    if debug_logging:
+                        current_logger.info('warning :: %s' % reason)
+            if suitable:
+                # Low correlation threshold
+                corr_matrix = pd.DataFrame(data).corr()
+                if corr_matrix.abs().values.max() < 0.1:
+                    suitable = False
+                    reason = '%s has low correlation between features, which may reduce PCA effectiveness' % dataset
+                    if debug_logging:
+                        current_logger.info('warning :: %s' % reason)
+        except Exception as err:
+            if debug_logging:
+                current_logger.error('error :: debug :: check_pca_suitability failed on %s, err: %s' % (
+                    dataset, err))
+        return suitable, reason
+
     try:
         # Use the last n_test data points to train on
         n_train = len(timeseries) - n_test
@@ -299,12 +342,55 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         # preprocess or 'featurize' the training data
         train_data = pca_preprocess_df(df_train, lags_n, diffs_n, smooth_n)
 
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        # Check that the data suits the PCA algorithm and if not do not run and
+        check_dataset = 'train_data'
+        suitable_for_pca = True
+        reason = 'OK'
+        try:
+            suitable_for_pca, reason = check_pca_suitability(train_data, dataset=check_dataset)
+        except Exception as err:
+            if debug_logging:
+                current_logger.error('error :: debug :: check_pca_suitability on %s, err: %s' % (
+                    check_dataset, err))
+        if not suitable_for_pca:
+            if debug_logging:
+                current_logger.debug('debug :: not suitable for pca returning, took %.6f seconds' % (time() - start))
+            results['anomalies'] = {}
+            results['error'] = reason
+            if return_results:
+                return (None, None, results)
+            return (None, None)
+
         # @modified 20241107 - Task #5526: Build v5.0.0 and upgrade deps
         df_anomalous = df.tail((len(timeseries) - len(train_data)))
 #        df_anomalous_start = len(df) - len(train_data) - reduction  # Starting point for df_anomalous
 #        df_anomalous = df.iloc[df_anomalous_start:]  # Tail slice after train_data
 
         anomalous_data = pca_preprocess_df(df_anomalous, lags_n, diffs_n, smooth_n)
+
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        # Check that the data suits the PCA algorithm and if not do not run and
+        check_dataset = 'anomalous_data'
+        suitable_for_pca = True
+        reason = 'OK'
+        try:
+            suitable_for_pca, reason = check_pca_suitability(anomalous_data, dataset=check_dataset)
+        except Exception as err:
+            if debug_logging:
+                current_logger.error('error :: debug :: check_pca_suitability on %s, err: %s' % (
+                    check_dataset, err))
+        if not suitable_for_pca:
+            if debug_logging:
+                current_logger.debug('debug :: not suitable for pca returning, took %.6f seconds' % (time() - start))
+            results['anomalies'] = {}
+            results['error'] = reason
+            if return_results:
+                return (None, None, results)
+            return (None, None)
+
         # build PCA model
         n_pca = PCA(n_components=2)
         # scale based on training data
@@ -381,8 +467,8 @@ def pca(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         except ValueError:
             reindex_data = True
             if debug_logging:
-                current_logger.warning(traceback.format_exc())
-                current_logger.warning('warning - ValueError encountered on pca from pd.concat([df_train_scores, df_scores])')
+                current_logger.error(traceback.format_exc())
+                current_logger.info('warning - ValueError encountered on pca from pd.concat([df_train_scores, df_scores])')
         if reindex_data:
             if debug_logging:
                 current_logger.debug('debug :: pca - resetting indexes to avoid duplicates')
