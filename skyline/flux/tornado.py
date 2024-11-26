@@ -26,6 +26,8 @@ if True:
     import flux
     from skyline_functions import get_redis_conn_decoded
     from tornadoes.tornado_stump import tornado_stump
+    # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
+    from tornadoes.tornado_laoccfdlpnc import tornado_laoccfdlpnc
 
 FLUX_SELF_API_KEY = settings.FLUX_SELF_API_KEY
 
@@ -117,7 +119,7 @@ class TornadoPost(object):
                     str(req.query_string), str(postData)))
 
             if not postData:
-                logger.warning('warning :: tornado :: no POST data recieved')
+                logger.info('warning :: tornado :: no POST data recieved')
                 resp.status = falcon.HTTP_400
                 return
 
@@ -197,6 +199,10 @@ class TornadoPost(object):
 
             profile = []
             run_stump = False
+
+            # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
+            run_laoccfdlpnc = False
+
             custom_algorithm_modules = ['stumpy','stump','stumpy.stamp','custom_algorithm_sources.stumpy','custom_algorithm_sources.stumpy.stump']
             if 'algorithm' in postData:
                 if postData['algorithm'] == 'stump':
@@ -222,6 +228,36 @@ class TornadoPost(object):
                     logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (after): %s' % (
                         postData['algorithm'], str(algorithm_modules_loaded)))
 
+                if postData['algorithm'] == 'laoccfdlpnc':
+                    custom_algorithm_modules = ['custom_algorithms.laoccfdlpnc']
+                    try:
+                        algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                        logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (before): %s' % (
+                            postData['algorithm'], str(algorithm_modules_loaded)))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: determine and log algorithm_modules_loaded, err: %s' % (
+                            err))
+                    run_laoccfdlpnc = True
+                    response_dict = {
+                        'anomalous': None,
+                        'anomalyScore': None,
+                        'results': {},
+                    }
+                    try:
+                        response_dict = tornado_laoccfdlpnc(postData)
+                        logger.info('tornado :: request_id: %s, tornado_laoccfdlpnc run' % (
+                            request_id))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: tornado :: tornado_laoccfdlpnc failed, err: %s' % (
+                            err))
+                        resp.status = falcon.HTTP_500
+                        return
+                    algorithm_modules_loaded = [i for i in list(sys.modules.keys()) if i in custom_algorithm_modules]
+                    logger.debug('debug :: tornado :: %s :: algorithm_modules_loaded (after): %s' % (
+                        postData['algorithm'], str(algorithm_modules_loaded)))
+
             request_time = round((timer() - start_request_timer), 6)
             timings_dict['request_time'] = round((timer() - start_request_timer), 6)
             if TIMINGS:
@@ -231,6 +267,23 @@ class TornadoPost(object):
                 body = {"status": {"code": 200, "request_id": request_id, "request_time": request_time}, "data": {"profile": profile}}
                 resp.text = json.dumps(body)
                 logger.info('tornado :: returning stump profile of length: %s' % str(len(profile)))
+                resp.status = falcon.HTTP_200
+                return
+
+            # @added 20241116 - Feature #5553: custom_algorithm - laoccfdlpnc
+            if run_laoccfdlpnc:
+                try:
+                    body = {
+                        "status": {"code": 200, "request_id": request_id, "request_time": request_time},
+                        "data": response_dict,
+                    }
+                    resp.text = json.dumps(body)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: tornado :: failed to create response from laoccfdlpnc, err: %s' % (
+                        err))
+                logger.info('tornado :: laoccfdlpnc - anomalous: %s, base_name: %s' % (
+                    str(response_dict['anomalous']), postData['base_name']))
                 resp.status = falcon.HTTP_200
                 return
 
