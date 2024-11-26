@@ -1013,7 +1013,7 @@ def bq_update(bq_update_job_id):
                             base_name, str(fetch_interval_timestamp),
                             str(previous_value), str(value), str(metric_timeseries[-3:])))
                     else:
-                        logger.warning('warning :: bq_update :: get_graphite_metric for %s at %s with previous_value: %s, new value: %s, no time series from Graphite, len(metric_timeseries): %s' % (
+                        logger.info('warning :: bq_update :: get_graphite_metric for %s at %s with previous_value: %s, new value: %s, no time series from Graphite, len(metric_timeseries): %s' % (
                             base_name, str(fetch_interval_timestamp),
                             str(previous_value), str(value),
                             str(len(metric_timeseries))))

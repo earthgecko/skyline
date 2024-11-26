@@ -188,7 +188,7 @@ class Boundary(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
     def unique_noHash(self, seq):
@@ -1006,6 +1006,14 @@ class Boundary(Thread):
                                 external_settings=external_settings,
                                 bq_accounts_settings=bq_accounts_settings,
                             )
+
+                            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                            #                   Branch #5532: v5.0.0-alpha
+                            # Coerce all numpy.bool_ typed elements introduced with
+                            # numpy >= 2 to Python bool so they are literal_eval and
+                            # json safe
+                            ensemble = [item if item is None else bool(item) for item in ensemble]
+
                         except TypeError:
                             exceptions['DeletedByRoomba'] += 1
                             anomalous = None
@@ -1022,7 +1030,7 @@ class Boundary(Thread):
                             logger.info('Boring metric :: %s - %s' % (base_name, str(metric_timestamp)))
                             anomalous = None
                         except Exception as err:
-                            logger.warning('warning :: run_selected_algorithm failed on %s - %s' % (metric_name, err))
+                            logger.info('warning :: run_selected_algorithm failed on %s - %s' % (metric_name, err))
                             boundary_errors[metric_name] = {'err': str(str), 'traceback': str(traceback.format_exc())}
                             anomalous = None
 
@@ -1325,7 +1333,7 @@ class Boundary(Thread):
             #     exceptions['Other'] += 1
             #     logger.error('error :: exceptions[\'Other\']')
             except Exception as err:
-                logger.warning('warning :: analysis failed on %s - %s' % (base_name, err))
+                logger.info('warning :: analysis failed on %s - %s' % (base_name, err))
                 boundary_errors[base_name] = {'err': str(str), 'traceback': str(traceback.format_exc())}
                 exceptions['Other'] += 1
 
@@ -1396,12 +1404,12 @@ class Boundary(Thread):
         analysis_stats['analysed_metrics'] = len(analysed_metrics)
         logger.info('analysis_stats: %s' % str(analysis_stats))
         if boundary_errors:
-            logger.warning('warning :: recording %s boundary_errors to Redis' % (str(len(boundary_errors))))
+            logger.info('warning :: recording %s boundary_errors to Redis' % (str(len(boundary_errors))))
             # Convert dicts to strings as Redis hash requires strings
             for key, value in boundary_errors.items():
                 boundary_errors[key] = str(value)
             hash_key = 'boundary.errors.%s' % str(time())
-            logger.warning('warning :: recording %s boundary_errors to Redis hash %s' % (
+            logger.info('warning :: recording %s boundary_errors to Redis hash %s' % (
                 str(len(boundary_errors)), hash_key))
             try:
                 self.redis_conn.hset(hash_key, mapping=boundary_errors)
@@ -2083,7 +2091,7 @@ class Boundary(Thread):
                                     logger.info(traceback.format_exc())
                                     logger.error('error :: failed to rename tmp_panaroma_anomaly_filename to panaroma_anomaly_filename')
                             else:
-                                logger.warning('warning :: tmp_panaroma_anomaly_file does not exist')
+                                logger.info('warning :: tmp_panaroma_anomaly_file does not exist')
 
                             for alerter in metric_alerters.split("|"):
                                 # Determine alerter limits

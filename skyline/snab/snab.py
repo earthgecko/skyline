@@ -133,7 +133,7 @@ class SNAB(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     def spin_snab_process(self, i, check_details):
@@ -338,7 +338,7 @@ class SNAB(Thread):
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
             timeseries = literal_eval(timeseries_array_str)
         if anomaly_data.endswith('.csv'):
-            logger.warning('warning :: spin_snab_process - anomaly_data file is csv format which is not currently handled, skipping %s' % (
+            logger.info('warning :: spin_snab_process - anomaly_data file is csv format which is not currently handled, skipping %s' % (
                 str(anomaly_data)))
             update_check_details(original_updated_check_details, 'remove')
             return anomalous
@@ -819,7 +819,7 @@ class SNAB(Thread):
                     logger.error('error :: results: %s' % (
                         str(results)))
             else:
-                logger.warning('warning :: no training_dir: %s, to save results json to %s' % (
+                logger.info('warning :: no training_dir: %s, to save results json to %s' % (
                     training_dir, results_json))
 
         # @added 20230729 - Feature #5038: snab_results_algorithms

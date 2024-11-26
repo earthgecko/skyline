@@ -264,7 +264,7 @@ def process_graphite_queue(self, current_skyline_app, skyline_graphite_metrics_s
                 try:
                     data_dict['value'] = float(data_dict['value'])
                 except Exception as err:
-                    current_logger.warning('warning :: process_graphite_queue :: failed to evaluate data_dict[\'value\'] string a float for %s, value: %s, err: %s' % (
+                    current_logger.info('warning :: process_graphite_queue :: failed to evaluate data_dict[\'value\'] string a float for %s, value: %s, err: %s' % (
                         str(metric), str(data_dict['value']), err))
             elif isinstance(data_dict['value'], float):
                 value = float(data_dict['value'])
@@ -275,14 +275,14 @@ def process_graphite_queue(self, current_skyline_app, skyline_graphite_metrics_s
             elif data_dict['value'] == '0':
                 value = 0.0
             else:
-                current_logger.warning('warning :: process_graphite_queue :: failed to evaluate value as a float for %s, value: %s, skipping' % (
+                current_logger.info('warning :: process_graphite_queue :: failed to evaluate value as a float for %s, value: %s, skipping' % (
                     str(metric), str(data_dict['value'])))
                 invalid_keys.append(key)
                 continue
             try:
                 ts = int(data_dict['timestamp'])
             except Exception as err:
-                current_logger.warning('warning :: process_graphite_queue :: failed to evaluate  ts as an int for %s, timestamp: %s, skipping, err: %s' % (
+                current_logger.info('warning :: process_graphite_queue :: failed to evaluate  ts as an int for %s, timestamp: %s, skipping, err: %s' % (
                     str(metric), str(data_dict['timestamp']), err))
                 invalid_keys.append(key)
                 continue

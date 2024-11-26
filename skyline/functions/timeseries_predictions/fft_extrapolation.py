@@ -86,7 +86,7 @@ def fft_extrapolation(current_skyline_app, timeseries, n_predict=10, n_harmonics
                 no_mean = True
             if no_mean:
                 if log:
-                    current_logger.warning('warning :: %s :: cannot predict values - no mean, mean_value: %s' % (
+                    current_logger.info('warning :: %s :: cannot predict values - no mean, mean_value: %s' % (
                         function_str, str(mean_value)))
                 predicted_timeseries = list(timeseries)
                 return predicted_timeseries

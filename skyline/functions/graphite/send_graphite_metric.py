@@ -111,7 +111,7 @@ def send_graphite_metric(self, current_skyline_app, metric, value, timestamp=Non
             except Exception as err:
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
                 current_logger = logging.getLogger(current_skyline_app_logger)
-                current_logger.warning('warning :: send_graphite_metric :: failed to determine float value for %s, value: %s, err: %s' % (
+                current_logger.info('warning :: send_graphite_metric :: failed to determine float value for %s, value: %s, err: %s' % (
                     str(metric), str(value), err))
                 return added
             data = {'metric': metric, 'value': float(value), 'timestamp': int(ts)}
@@ -187,18 +187,16 @@ def send_graphite_metric(self, current_skyline_app, metric, value, timestamp=Non
             current_logger.error('error :: send_graphite_metric :: process_graphite_queue failed, err: %s' % (
                 err))
         if sent_count == len(skyline_graphite_metrics_single_submit_data):
-            if not current_logger:
-                current_skyline_app_logger = str(current_skyline_app) + 'Log'
-                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.info('send_graphite_metric :: sent %s skyline.graphite_metrics_single_submit items' % (
                 str(sent_count)))
             skyline_graphite_metrics_single_submit_success = True
             # return True
         else:
-            if not current_logger:
-                current_skyline_app_logger = str(current_skyline_app) + 'Log'
-                current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.warning('warning :: send_graphite_metric :: sent %s skyline.graphite_metrics_single_submit items of %s metrics in skyline.graphite_metrics_single_submit' % (
+            current_skyline_app_logger = str(current_skyline_app) + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.info('warning :: send_graphite_metric :: sent %s skyline.graphite_metrics_single_submit items of %s metrics in skyline.graphite_metrics_single_submit' % (
                 str(sent_count), str(len(skyline_graphite_metrics_single_submit_data))))
             skyline_graphite_metrics_single_submit_success = True
             # return True

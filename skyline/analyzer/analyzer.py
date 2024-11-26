@@ -514,7 +514,7 @@ class Analyzer(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     # @added 20200213 - Bug #3448: Repeated airgapped_metrics
@@ -634,7 +634,7 @@ class Analyzer(Thread):
         # global_anomalies can occur per shard in a cluster
         global_anomaly_in_progress = False
         if global_anomaly_in_progress:
-            logger.warning('warning :: a global anomaly event is in progress')
+            logger.info('warning :: a global anomaly event is in progress')
 
         # @added 20230331 - Feature #4886: analyzer - operation_timings
         boring_timings = []
@@ -1851,7 +1851,7 @@ class Analyzer(Thread):
                         str(len(metrics_last_timestamp_dict)),
                         metrics_last_timestamp_hash_key))
                 else:
-                    logger.warning('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
+                    logger.info('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
                         metrics_last_timestamp_hash_key))
             except:
                 logger.error(traceback.format_exc())
@@ -2152,7 +2152,7 @@ class Analyzer(Thread):
                 #                      Feature #4838: functions.metrics.get_namespace_metric.count
                 # Only warn if there is no data, do not error
                 if 'a bytes-like object is required' in str(err) and 'NoneType' in str(err):
-                    logger.warning('warning :: failed to unpack %s timeseries - %s' % (
+                    logger.info('warning :: failed to unpack %s timeseries - %s' % (
                         str(base_name), err))
                 else:
                     logger.error('error :: failed to unpack %s timeseries - %s' % (
@@ -2720,7 +2720,7 @@ class Analyzer(Thread):
                     #                      Feature #4838: functions.metrics.get_namespace_metric.count
                     # Only warn if there is no data, do not error
                     if 'a bytes-like object is required' in str(err) and 'NoneType' in str(err):
-                        logger.warning('warning :: failed to unpack timeseries for %s - %s' % (
+                        logger.info('warning :: failed to unpack timeseries for %s - %s' % (
                             metric_name, err))
                     else:
                         logger.error('error :: failed to unpack timeseries for %s - %s' % (
@@ -3708,6 +3708,14 @@ class Analyzer(Thread):
                     # @added 20230331 - Feature #4886: analyzer - operation_timings
                     start_run_selected_algorithm = time()
                     anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only, custom_stale_metrics_dict)
+
+                    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
+
                     run_selected_algorithm_count += 1
                     # @added 20220420 - Feature #4530: namespace.analysed_events
                     analysed_metrics.append(base_name)
@@ -5214,6 +5222,13 @@ class Analyzer(Thread):
                         anomalous = None
                         try:
                             anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
+                            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                            #                   Branch #5532: v5.0.0-alpha
+                            # Coerce all numpy.bool_ typed elements introduced with
+                            # numpy >= 2 to Python bool so they are literal_eval and
+                            # json safe
+                            ensemble = [item if item is None else bool(item) for item in ensemble]
+
                             del metric_airgaps
                             del metric_airgaps_filled
                         except:
@@ -6161,7 +6176,7 @@ class Analyzer(Thread):
             except:
                 anomalous_metrics_count = 0
             if anomalous_metrics_count > 0:
-                logger.warning('warning :: resetting analyzer.anomalous_metrics which has %s entries from the last run' % (
+                logger.info('warning :: resetting analyzer.anomalous_metrics which has %s entries from the last run' % (
                     str(anomalous_metrics_count)))
                 try:
                     self.redis_conn.delete('analyzer.anomalous_metrics')
@@ -6175,7 +6190,7 @@ class Analyzer(Thread):
             except:
                 all_anomalous_metrics_count = 0
             if all_anomalous_metrics_count > 0:
-                logger.warning('warning :: resetting analyzer.all_anomalous_metrics which has %s entries from the last run' % (
+                logger.info('warning :: resetting analyzer.all_anomalous_metrics which has %s entries from the last run' % (
                     str(all_anomalous_metrics_count)))
                 try:
                     self.redis_conn.delete('analyzer.all_anomalous_metrics')
@@ -6274,7 +6289,7 @@ class Analyzer(Thread):
             pid_count = 0
             for i in range(1, settings.ANALYZER_PROCESSES + 1):
                 if i > len(unique_metrics):
-                    logger.warning('WARNING: skyline is set for more cores than needed.')
+                    logger.info('warning :: skyline is set for more cores than needed.')
                     # break
                 try:
                     # @modified 20240719 - Feature #5396: test_value
@@ -7409,7 +7424,7 @@ class Analyzer(Thread):
                                         if LOCAL_DEBUG:
                                             logger.debug('debug :: %s metric resolution - %s' % (metric[1], str(mirage_metric_key)))
                                     except Exception as e:
-                                        logger.warning('warning :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key, setting mirage_metric_key to False.  error: %s' % (
+                                        logger.info('warning :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key, setting mirage_metric_key to False.  error: %s' % (
                                             metric[1], e))
                                         mirage_metric_key = False
 
@@ -8102,7 +8117,7 @@ class Analyzer(Thread):
                     logger.info('alert_on_stale_metrics :: %s' % str(alert_on_stale_metrics))
                 except Exception as e:
                     alert_on_stale_metrics = []
-                    logger.warning('warning :: alert_on_stale_metrics list could not be determined from analyzer.alert_on_stale_metrics - %s' % e)
+                    logger.info('warning :: alert_on_stale_metrics list could not be determined from analyzer.alert_on_stale_metrics - %s' % e)
 
                 # @added 20210519 - Branch #1444: thunder
                 #                   Feature #4076: CUSTOM_STALE_PERIOD
@@ -8113,7 +8128,7 @@ class Analyzer(Thread):
                         logger.info('alert_on_stale_metrics determine from aet.analyzer.alert_on_stale_metrics :: %s' % str(alert_on_stale_metrics))
                     except Exception as e:
                         alert_on_stale_metrics = []
-                        logger.warning('warning :: alert_on_stale_metrics list could not be determined from aet.analyzer.alert_on_stale_metrics - %s' % e)
+                        logger.info('warning :: alert_on_stale_metrics list could not be determined from aet.analyzer.alert_on_stale_metrics - %s' % e)
                 if alert_on_stale_metrics:
                     # Get all the known custom stale periods
                     custom_stale_metrics_dict = {}
@@ -8729,7 +8744,7 @@ class Analyzer(Thread):
                 try:
                     self.redis_conn.delete('analyzer.illuminance_datapoints')
                 except:
-                    logger.warning('warning :: failed to delete analyzer.illuminance_datapoints Redis set')
+                    logger.info('warning :: failed to delete analyzer.illuminance_datapoints Redis set')
 
             # Reset counters
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -8737,7 +8752,7 @@ class Analyzer(Thread):
             try:
                 self.redis_conn.delete('analyzer.anomalous_metrics')
             except:
-                logger.warning('warning :: failed to delete analyzer.anomalous_metrics Redis set')
+                logger.info('warning :: failed to delete analyzer.anomalous_metrics Redis set')
 
             # @modified 20190522 - Branch #3002: docker
             #                      Task #3032: Debug number of Python processes and memory use
@@ -9313,7 +9328,7 @@ class Analyzer(Thread):
                 except Exception as e:
                     traceback_str = traceback.format_exc()
                     if 'no such key' in str(e):
-                        logger.warning('warning :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed as the key does not exist')
+                        logger.info('warning :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed as the key does not exist')
                     else:
                         logger.error(traceback_str)
                         logger.error('error :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed to aet.analyzer.low_priority_metrics.last_dynamically_analyzed')

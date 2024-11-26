@@ -146,7 +146,7 @@ class Fetcher(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             exit(0)
 
     # @added 20240516 - Feature #5352: vista - bigquery
@@ -489,7 +489,7 @@ class Fetcher(Thread):
                     if 'Remote end closed connection without response' in str(err):
                         remote_error = True
                     if remote_error:
-                        logger.warning('warning :: fetcher :: failed to get data from %s - %s' % (
+                        logger.info('warning :: fetcher :: failed to get data from %s - %s' % (
                             str(url), err))
                     else:
                         logger.error(traceback.format_exc())

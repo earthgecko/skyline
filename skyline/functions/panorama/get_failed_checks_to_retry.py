@@ -68,7 +68,7 @@ def get_failed_checks_to_retry(self):
 
         # Remove fails older than max_age_seconds
         if (now - check_timestamp) > max_age_seconds:
-            logger.warning('warning :: %s :: %s key is older than max_age_seconds: %s seconds and will be removed' % (
+            logger.info('warning :: %s :: %s key is older than max_age_seconds: %s seconds and will be removed' % (
                 function_str, key, str(max_age_seconds)))
             remove_key = True
 

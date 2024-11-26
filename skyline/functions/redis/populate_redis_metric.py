@@ -160,7 +160,7 @@ def populate_redis_metric(
             current_logger.error('error :: %s :: get_graphite_metric failed, err: %s' % (function_str, err))
 
     if not timeseries:
-        current_logger.warning('warning :: %s :: no Graphite timeseries from %s to populate in Redis key %s' % (
+        current_logger.info('warning :: %s :: no Graphite timeseries from %s to populate in Redis key %s' % (
             function_str, base_name, metric_name))
         return submitted_timeseries
 

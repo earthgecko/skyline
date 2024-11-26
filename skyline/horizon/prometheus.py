@@ -267,7 +267,7 @@ class PrometheusMetrics(Process):
             kill(self.parent_pid, 0)
         except:
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
     def metric_in_shard(self, metric_name):
@@ -937,7 +937,7 @@ class PrometheusMetrics(Process):
 
                     if metric_data_dropped:
                         dropped_key = 'horizon.dropped.prometheus_metrics.%s' % str(current_run_ts)
-                        logger.warning('horizon.prometheus :: adding %s dropped metrics to the %s Redis set' % (
+                        logger.info('warning :: horizon.prometheus :: adding %s dropped metrics to the %s Redis set' % (
                             str(len(metric_data_dropped)), dropped_key))
                         try:
                             self.redis_conn_decoded.setex(dropped_key, 86400, str(metric_data_dropped))
@@ -1360,7 +1360,7 @@ class PrometheusMetrics(Process):
                                 # https://github.com/RedisTimeSeries/RedisTimeSeries/issues/1478
                                 # @modified 20230704 - Bug #4968: horizon.prometheus - handle TSDB not being able to parse LABELS
                                 # if warn_on_labels:
-                                #     logger.warning('warning :: horizon.prometheus :: changing tags on %s' % (
+                                #     logger.info('warning :: horizon.prometheus :: changing tags on %s' % (
                                 #        str(labels_)))
 
                             except Exception as err:

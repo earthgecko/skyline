@@ -1264,7 +1264,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
     except Exception as err:
         logger.error('error :: get_cluster_data - %s' % err)
     if cluster_call:
-        logger.warning('warning :: get_cluster_data was call with a request that pased cluster_call=true, prevent loop returning empty data')
+        logger.info('warning :: get_cluster_data was call with a request that pased cluster_call=true, prevent loop returning empty data')
         return data
 
     if only_host != 'all':
@@ -1365,7 +1365,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             # Added 400 to handle bad request on cluster node
             # if r.status_code == 404:
             if r.status_code in [404, 400]:
-                logger.warning('get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
+                logger.info('warning :: get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
                     api_endpoint, str(item), str(r.status_code), str(r.reason)))
                 # @modified 20220504 - Feature #4530: namespace.analysed_events
                 # return data
@@ -1420,7 +1420,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
             # if r.status_code == 404:
             # If there is no r ....
             # if r.status_code in [404, 400]:
-            logger.warning('get_cluster_data :: %s no response from %s ' % (
+            logger.info('warning :: get_cluster_data :: %s no response from %s ' % (
                 api_endpoint, str(item[0])))
             # @modified 20220504 - Feature #4530: namespace.analysed_events
             # return data
@@ -1981,7 +1981,7 @@ def get_yhat_values(
             sigma3_array = True
 
     if use_numba and not sigma3_array:
-        logger.warning('get_yhat_values - numba_sigma3_array did not populate sigma3_array')
+        logger.info('warning :: get_yhat_values - numba_sigma3_array did not populate sigma3_array')
 
     yhat_dict = {}
     if use_numba and sigma3_array:
@@ -1996,7 +1996,7 @@ def get_yhat_values(
             logger.error('error :: numba_yhat_dict failed - %s' % err)
         logger.info('get_yhat_values - numba_yhat_dict took %.6f seconds' % (timer() - start_numba_yhat_dict))
         if not yhat_array_dict:
-            logger.warning('warning get_yhat_values - numba_yhat_dict did not return dictionary')
+            logger.info('warning :: get_yhat_values - numba_yhat_dict did not return dictionary')
 
         if yhat_array_dict:
             start_yhat_array_dict = timer()

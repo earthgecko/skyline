@@ -147,7 +147,7 @@ class SpectralResidual(BaseDetector, ThresholdMixin):
         super().__init__()
 
         # if threshold is None:
-        #     logger.warning("No threshold level set. Need to infer threshold using `infer_threshold`.")
+        #     logger.info("No threshold level set. Need to infer threshold using `infer_threshold`.")
 
         self.threshold = threshold
         self.window_amp = window_amp
@@ -313,7 +313,14 @@ class SpectralResidual(BaseDetector, ThresholdMixin):
 
         fft = np.fft.fft(X)
         amp = np.abs(fft)
-        log_amp = np.log(amp)
+        # @modified 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                      Branch #5532: v5.0.0-alpha
+        # Prevent divide by zero encountered in log add EPSILON for numerical
+        # stability for division
+        # https://github.com/SeldonIO/alibi-detect/pull/907
+        #log_amp = np.log(amp)
+        log_amp = np.log(amp + EPSILON)
+
         phase = np.angle(fft)
         # split spectrum into bias term and symmetric frequencies
         bias, sym_freq = log_amp[:1], log_amp[1:]

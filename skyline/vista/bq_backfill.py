@@ -812,13 +812,13 @@ def bq_backfill(bq_backfill_job_id):
                             logger.info('bq_backfill :: posted %s metrics to flux for %s' % (
                                 str(len(metrics_payload)), fetch_interval))
                         elif r.status_code == 207:
-                            logger.warning('warning :: bq_backfill :: flux responded with status_code of 207, some metrics for %s not accepted' % str(fetch_interval))
+                            logger.info('warning :: bq_backfill :: flux responded with status_code of 207, some metrics for %s not accepted' % str(fetch_interval))
                             success = True
                             if '207_responses' not in work_dict.keys():
                                 work_dict['207_responses'] = {}
                             work_dict['207_responses'][fetch_interval] = r.json()
                         else:
-                            logger.warning('warning :: bq_backfill :: flux responded with status_code of %s for %s' % (
+                            logger.info('warning :: bq_backfill :: flux responded with status_code of %s for %s' % (
                                 str(r.status_code), str(fetch_interval)))
                             ##### TEMP
                             failed_job = True

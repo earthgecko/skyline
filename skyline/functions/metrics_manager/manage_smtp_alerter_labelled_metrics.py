@@ -102,7 +102,7 @@ def manage_smtp_alerter_labelled_metrics(self, ids_with_metric_names):
         logger.error('error :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s errors encountered in determining smtp_alert_metrics, last entry sample: %s' % (
             str(len(errors)), str(errors[-1])))
         redis_set = 'metrics_manager.manage_smtp_alerter_labelled_metrics.errors.%s' % timestamp_str
-        logger.warning('warning :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s errors reported being added to Redis set %s' % (
+        logger.info('warning :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s errors reported being added to Redis set %s' % (
             str(len(errors)), redis_set))
         for error in errors:
             try:
@@ -120,10 +120,10 @@ def manage_smtp_alerter_labelled_metrics(self, ids_with_metric_names):
         errors = []
 
     if warns:
-        logger.warning('warning :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s warnings encountered in determining smtp_alert_metrics, last entry sample: %s' % (
+        logger.info('warning :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s warnings encountered in determining smtp_alert_metrics, last entry sample: %s' % (
             str(len(warns)), str(warns[-1])))
         redis_set = 'metrics_manager.manage_smtp_alerter_labelled_metrics.warnings.%s' % timestamp_str
-        logger.warning('warning :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s warnings reported being added to Redis set %s' % (
+        logger.info('warning :: metrics_manager :: manage_smtp_alerter_labelled_metrics :: %s warnings reported being added to Redis set %s' % (
             str(len(warns)), redis_set))
         for warn in warns:
             try:

@@ -102,7 +102,7 @@ class Roomba(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             sys.exit(0)
 
     def vacuum(self, i, namespace, duration):
@@ -493,7 +493,7 @@ class Roomba(Thread):
             try:
                 ROOMBA_OPTIMUM_RUN_DURATION = int(settings.ROOMBA_OPTIMUM_RUN_DURATION)
             except Exception as e:
-                logger.warning('%s :: roomba failed to determine ROOMBA_OPTIMUM_RUN_DURATION from settings, defaulting to 60 - %s' % (
+                logger.info('warning :: %s :: roomba failed to determine ROOMBA_OPTIMUM_RUN_DURATION from settings, defaulting to 60 - %s' % (
                     skyline_app, e))
                 ROOMBA_OPTIMUM_RUN_DURATION = 60
 

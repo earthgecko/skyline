@@ -177,7 +177,7 @@ def manage_labelled_metrics_longterm_metric_type(self, run_every, active_labelle
                 str(item), err))
 
     if errors:
-        logger.warning('warning :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: encountered %s errors, sample follows: %s' % (
+        logger.info('warning :: metrics_manager :: manage_labelled_metrics_longterm_metric_type :: encountered %s errors, sample follows: %s' % (
             str(len(errors)), str(errors[-2:])))
 
     if update_types:

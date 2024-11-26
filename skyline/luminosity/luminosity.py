@@ -99,7 +99,7 @@ except:
 try:
     LUMINOSITY_PROCESSES = settings.LUMINOSITY_PROCESSES
 except:
-    logger.warning('warning :: cannot determine LUMINOSITY_PROCESSES from settings')
+    logger.info('warning :: cannot determine LUMINOSITY_PROCESSES from settings')
     # @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch
     # It is fast and lightweight
     # luminosity_processes = 2
@@ -244,7 +244,7 @@ class Luminosity(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy

@@ -114,7 +114,7 @@ def add_bq_update_job(current_skyline_app):
         current_logger.info('add_bq_update_job :: with added_by: %s' % str(added_by))
         bq_update_job_dict['added_by'] = added_by
     except Exception as err:
-        current_logger.warning('warning :: add_bq_update_job :: added_by was not passed, err: %s' % (
+        current_logger.info('warning :: add_bq_update_job :: added_by was not passed, err: %s' % (
             err))
         bq_update_job_dict['status_code'] = 400
         bq_update_job_dict['error'] = 'no valid added_by argument'

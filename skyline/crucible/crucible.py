@@ -145,7 +145,7 @@ class Crucible(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     # @added 20200327 - Branch #3262: py3
@@ -528,7 +528,7 @@ class Crucible(Thread):
             # @modified 20230109 - Task #4798: Deprecate run_script from crucible
             #                      Task #4778: v4.0.0 - update dependencies
             # logger.info('running - %s' % (run_script))
-            logger.warning('WARNING :: DEPRECATED run_script in v4.0.0')
+            logger.info('WARNING :: DEPRECATED run_script in v4.0.0')
         except:
             run_script = False
         if settings.ENABLE_CRUCIBLE_DEBUG:
@@ -1315,6 +1315,13 @@ class Crucible(Thread):
             #                      Feature #1448: Crucible web UI
             # Added padded_timeseries and from_timestamp
             anomalous, ensemble, alert_interval_discarded_anomalies_count = run_algorithms(timeseries, str(metric), end_timestamp, full_duration, str(anomaly_json), skyline_app, algorithms, alert_interval, add_to_panorama, padded_timeseries, from_timestamp)
+            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha
+            # Coerce all numpy.bool_ typed elements introduced with
+            # numpy >= 2 to Python bool so they are literal_eval and
+            # json safe
+            ensemble = [item if item is None else bool(item) for item in ensemble]
+
         except:
             logger.error('error :: run_algorithms failed - %s' % str(traceback.print_exc()))
             try:
@@ -1402,7 +1409,7 @@ class Crucible(Thread):
                 # @modified 20230109 - Task #4798: Deprecate run_script from crucible
                 #                      Task #4778: v4.0.0 - update dependencies
                 # logger.info('running - %s' % (run_script))
-                logger.warning('WARNING :: not running - %s - DEPRECATED run_script in v4.0.0' % (run_script))
+                logger.info('WARNING :: not running - %s - DEPRECATED run_script in v4.0.0' % (run_script))
 
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests

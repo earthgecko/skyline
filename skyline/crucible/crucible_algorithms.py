@@ -591,7 +591,7 @@ def run_algorithms(
                     str(algorithm), err))
                 custom_algorithms_to_remove.append(algorithm)
     if custom_algorithms_to_remove:
-        logger.warning('warning :: removing unknown custom algorithms - %s' % (
+        logger.info('warning :: removing unknown custom algorithms - %s' % (
             str(custom_algorithms_to_remove)))
         for algorithm in custom_algorithms_to_remove:
             check_algorithms.remove(algorithm)

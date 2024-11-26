@@ -96,6 +96,6 @@ def api_get_anomaly(current_skyline_app, anomaly_id):
         current_logger.info('%s :: created anomaly_dict: %s' % (
             function_str, str(anomaly_dict)))
     else:
-        current_logger.warning('warning :: %s :: no anomaly data to created anomaly_dict' % function_str)
+        current_logger.info('warning :: %s :: no anomaly data to created anomaly_dict' % function_str)
 
     return anomaly_dict

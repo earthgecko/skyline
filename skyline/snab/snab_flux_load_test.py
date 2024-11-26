@@ -102,7 +102,7 @@ class SNAB_flux_load_test(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     def spin_snab_flux_load_test_process(self, current_timestamp):

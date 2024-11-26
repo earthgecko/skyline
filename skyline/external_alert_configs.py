@@ -286,7 +286,7 @@ def get_external_alert_configs(current_skyline_app):
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_external_alert_configs :: failed to set %s' % redis_key)
-        current_logger.warning('warning :: get_external_alert_configs :: recieved %s external alerters with empty boundary keys, see Redis key %s' % (
+        current_logger.info('warning :: get_external_alert_configs :: recieved %s external alerters with empty boundary keys, see Redis key %s' % (
             str(len(empty_boundary_alert_configs)), redis_key))
 
     # If the key expired and no alerter_configs were constructed from the

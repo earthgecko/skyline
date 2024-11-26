@@ -124,7 +124,7 @@ def generate_prometheus_metrics(current_skyline_app):
                 if 'Duplicated timeseries in CollectorRegistry' in str(err):
                     continue
                 if 'Incorrect label names' in str(err):
-                    current_logger.warning('warning :: %s :: failed to create gauge for metric_name: %s, metric_name_labels: %s, metric_labels: %s - %s' % (
+                    current_logger.info('warning :: %s :: failed to create gauge for metric_name: %s, metric_name_labels: %s, metric_labels: %s - %s' % (
                         function_str, metric_name, str(metric_name_labels),
                         str(metric_labels), err))
                     continue
@@ -140,7 +140,7 @@ def generate_prometheus_metrics(current_skyline_app):
                     generated_metrics += 1
                 except Exception as err:
                     if 'Incorrect label names' in str(err):
-                        current_logger.warning('warning :: %s :: failed to create gauge for metric_name: %s, metric_name_labels: %s, metric_labels: %s - %s' % (
+                        current_logger.info('warning :: %s :: failed to create gauge for metric_name: %s, metric_name_labels: %s, metric_labels: %s - %s' % (
                             function_str, metric_name, str(metric_name_labels),
                             str(metric_labels), err))
                         continue

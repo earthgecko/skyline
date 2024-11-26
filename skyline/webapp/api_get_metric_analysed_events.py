@@ -99,7 +99,7 @@ def api_get_metric_analysed_events(current_skyline_app, cluster_data=False):
         return analysed_events
 
     if not local_metric and not cluster_data:
-        current_logger.warning('warning :: %s :: no analysed_events, metric not found in Redis - %s' % (
+        current_logger.info('warning :: %s :: no analysed_events, metric not found in Redis - %s' % (
             function_str, base_name))
         return analysed_events
 

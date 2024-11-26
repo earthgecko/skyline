@@ -47,7 +47,7 @@ def send_sms(current_skyline_app, number, message):
             current_logger.error('error :: %s :: failed to determine if SMS was sent for %s, %s - %s' % (
                 function_str, number, message, e))
     else:
-        current_logger.warning('warning :: %s :: unkown SMS message status to %s, %s - AWS response: %s' % (
+        current_logger.info('warning :: %s :: unkown SMS message status to %s, %s - AWS response: %s' % (
             function_str, number, message, str(response)))
 
     return success, response

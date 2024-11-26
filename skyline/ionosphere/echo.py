@@ -517,7 +517,7 @@ def ionosphere_echo(base_name, mirage_full_duration):
             logger.info('ionosphere_echo :: calculated features - %s' % (calculated_feature_file))
         else:
             if 'insufficient data' in log_msg:
-                logger.warning('warning :: ionosphere_echo :: %s' % log_msg)
+                logger.info('warning :: ionosphere_echo :: %s' % log_msg)
             else:
                 logger.error('error :: ionosphere_echo :: failed to calculate features no file found - %s' % calculated_feature_file)
             continue

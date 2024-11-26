@@ -77,42 +77,42 @@ try:
     if SERVER_METRIC_PATH == '.':
         SERVER_METRIC_PATH = ''
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine SERVER_METRIC_PATH from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine SERVER_METRIC_PATH from settings - %s' % outer_err)
     SERVER_METRIC_PATH = ''
 try:
     SINGLE_MATCH = settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % outer_err)
     SINGLE_MATCH = True
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
 try:
     # @modified 20220722 - Task #4624: Change all dict copy to deepcopy
     # IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = copy.deepcopy(settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS)
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = settings.IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING
 except Exception as outer_err:
-    logger.warning('warn :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - %s' % outer_err)
+    logger.info('warning :: inference :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING from settings - %s' % outer_err)
     IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = 10
 
 context = 'ionosphere_inference'

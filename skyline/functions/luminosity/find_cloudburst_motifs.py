@@ -44,7 +44,7 @@ this_host = str(os.uname()[1])
 try:
     SINGLE_MATCH = settings.IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH from settings - %s' % e)
     SINGLE_MATCH = True
 
 try:
@@ -52,19 +52,19 @@ try:
     # IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS.copy()
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = copy.deepcopy(settings.IONOSPHERE_INFERENCE_MOTIFS_SETTINGS)
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_SETTINGS from settings - %s' % e)
     IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {}
 
 try:
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = settings.IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES from settings - %s' % e)
     IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = 20.0
 
 try:
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = settings.IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE
 except Exception as e:
-    logger.warning('warn :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % e)
+    logger.info('warning :: functions.luminosity.find_cloudburst_motifs :: cannot determine IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE from settings - %s' % e)
     IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = 20.0
 
 context = 'inference_inference'

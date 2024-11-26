@@ -176,7 +176,7 @@ def manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_wit
                 for metric in map(all_metric_names_with_ids.pop, remove_from_all_metric_names_set):
                     pass
             except Exception as err:
-                logger.warning('%s :: the fast map pop method failed removing metrics from all_metric_names_with_ids that do not belong to this shard, but failover over to the robust del method, err: %s' % (
+                logger.info('warning :: %s :: the fast map pop method failed removing metrics from all_metric_names_with_ids that do not belong to this shard, but failover over to the robust del method, err: %s' % (
                     function_str, err))
                 use_del_method = True
             if use_del_method:
@@ -285,7 +285,7 @@ def manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_wit
                 for metric in map(active_metric_names_with_ids.pop, remove_from_active_metric_names_set):
                     pass
             except Exception as err:
-                logger.warning('%s :: the fast map pop method failed removing metrics from all_metric_names_with_ids that do not belong to this shard, but failover over to the robust del method, err: %s' % (
+                logger.info('warning :: %s :: the fast map pop method failed removing metrics from all_metric_names_with_ids that do not belong to this shard, but failover over to the robust del method, err: %s' % (
                     function_str, err))
                 use_del_method = True
             if use_del_method:
@@ -362,7 +362,7 @@ def manage_inactive_metrics(self, unique_base_names, active_labelled_metrics_wit
         # @added 20240102 - Task #5178: Build and test skyline v4.1.0
         # Handle new metrics in active_unique_base_names in manage_inactive_metrics
         if active_unique_base_names_errors:
-            logger.warning('warning :: %s :: %s errors encountered building active_unique_base_names (probably new metrics), sample last 3 errors: %s' % (
+            logger.info('warning :: %s :: %s errors encountered building active_unique_base_names (probably new metrics), sample last 3 errors: %s' % (
                 function_str, str(len(active_unique_base_names_errors)),
                 str(active_unique_base_names_errors[-3:])))
 

@@ -127,7 +127,7 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
             determine if the metric is anomalous.  Default is ``1`` but with
             matrix profile ``3`` generally works a bit better.
         - ``'windows'`` (int): The window size to use for the matrix profile.
-            There is no default a value must be passed.
+            Default is ``5``.
         - ``'k_discords'`` (int): The number of discords to detect in the matrix 
             profile. Default is ``20``.
         - ``'use_fft_extrapolation'`` (bool):
@@ -331,21 +331,13 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
                 current_logger.debug('debug :: %s :: windows - %s' % (
                     func_name, str(windows)))
         except Exception as err:
-            # This except pattern MUST be used in ALL custom algortihms to
-            # facilitate the traceback from any errors.  The algorithm we want to
-            # run super fast and without spamming the log with lots of errors.
-            # But we do not want the function returning and not reporting
-            # anything to the log, so the pythonic except is used to "sample" any
-            # algorithm errors to a tmp file and report once per run rather than
-            # spewing tons of errors into the log e.g. analyzer.log
-            if debug_logging:
-                current_logger.error('error :: %s :: windows not passed - %s' % (
-                    func_name, err))
-            record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
-            # Return None and None as the algorithm could not determine True or False
-            if return_results:
-                return (None, None, results)
-            return (None, None)
+            windows = None
+
+    if not windows:
+        windows = 5
+        if debug_logging:
+            current_logger.debug('debug :: %s :: no windows parameter passed usings default of 5' % (
+                func_name))
 
     # Allow the matrixprofile k discords parameter to be passed in the
     # check_details for snab as well
@@ -855,7 +847,7 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
                     current_logger.debug('debug :: %s :: stumpy.stump generated a profile of length: %s' % (
                         func_name, str(len(profile))))
                 else:
-                    current_logger.warning('warning :: %s :: stumpy.stump did not generate a profile' % (
+                    current_logger.info('warning :: %s :: stumpy.stump did not generate a profile' % (
                         func_name))
 
         start_discord = timer()

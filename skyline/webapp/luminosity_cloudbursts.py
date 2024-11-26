@@ -265,7 +265,7 @@ def get_cloudbursts(metric, namespaces, from_timestamp, until_timestamp):
                     cloudbursts_dict[cloudburst_id]['metric'] = ids_with_metric_names[metric_id]
                 except KeyError:
                     use_metric_name = 'labelled_metrics.%s' % str(metric_id)
-                    logger.warning('warning :: %s :: failed to find metric name for metric id in ids_with_metric_names, using %s' % (
+                    logger.info('warning :: %s :: failed to find metric name for metric id in ids_with_metric_names, using %s' % (
                         function_str, use_metric_name))
                     cloudbursts_dict[cloudburst_id]['metric'] = use_metric_name
             except Exception as err:

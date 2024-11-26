@@ -67,7 +67,7 @@ class Bq_Fetcher(Thread):
         try:
             os.kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             sys.exit(0)
 
     def bq_fetch(self, timestamp):
@@ -249,7 +249,7 @@ class Bq_Fetcher(Thread):
                             break
                 for interval_to_fetch in intervals_to_fetch:
                     if interval_to_fetch not in fetch_interval_archives.keys():
-                        logger.warning('warning :: bq_fetcher :: no archive found for %s at %s' % (
+                        logger.info('warning :: bq_fetcher :: no archive found for %s at %s' % (
                             vista_bq_account_key, str(interval_to_fetch)))
 
                 post_data = {}

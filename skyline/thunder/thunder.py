@@ -98,7 +98,7 @@ class Thunder(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             exit(0)
 
     def spin_thunder_process(self, i, validated_event_details, redis_item, event_file):
@@ -333,7 +333,7 @@ class Thunder(Thread):
                     str(alerts_sent_dict['to_send']),
                     str(alerts_sent_dict['sent']), parent_namespace))
             if not all_sent:
-                logger.warning('warning :: all alerts were not sent - %s' % (
+                logger.info('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent:
                 if level == 'alert':
@@ -383,7 +383,7 @@ class Thunder(Thread):
                         str(alerts_sent_dict['to_send']),
                         str(alerts_sent_dict['sent']), parent_namespace))
                 if not all_sent:
-                    logger.warning('warning :: all alerts were not sent - %s' % (
+                    logger.info('warning :: all alerts were not sent - %s' % (
                         str(alerts_sent_dict)))
                 if all_sent:
                     remove_event(redis_item, event_file)
@@ -408,7 +408,7 @@ class Thunder(Thread):
                     str(alerts_sent_dict['to_send']),
                     str(alerts_sent_dict['sent']), parent_namespace))
             if not all_sent:
-                logger.warning('warning :: all alerts were not sent - %s' % (
+                logger.info('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent:
                 cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (
@@ -435,7 +435,7 @@ class Thunder(Thread):
                     str(alerts_sent_dict['to_send']),
                     str(alerts_sent_dict['sent']), parent_namespace))
             if not all_sent:
-                logger.warning('warning :: all alerts were not sent - %s' % (
+                logger.info('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent:
                 cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (
@@ -467,7 +467,7 @@ class Thunder(Thread):
                     logger.info('no alerts for invalid_metrics on %s were sent, in_expiry, ttl: %s seconds' % (
                         parent_namespace, str(ttl)))
             if not all_sent:
-                logger.warning('warning :: all alerts were not sent - %s' % (
+                logger.info('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent and not in_expiry:
                 cache_key = 'thunder.alert.%s.%s.%s.%s.%s' % (

@@ -151,7 +151,7 @@ except Exception as outer_err:
                     str(len(skyline_external_settings))))
             else:
                 skyline_external_settings = {}
-                logger.warning('warning :: prometheus :: failed to get skyline.external_settings memcache dict')
+                logger.info('warning :: prometheus :: failed to get skyline.external_settings memcache dict')
         except Exception as outer_err2:
             logger.error('error :: prometheus :: could not get memcache set skyline.external_settings - %s' % str(outer_err2))
             skyline_external_settings = {}
@@ -258,7 +258,7 @@ except Exception as outer_err:
                 logger.info('prometheus :: there are %s items in the namespace_quotas_dict memcache dict' % (
                     str(len(namespace_quotas_dict))))
             else:
-                logger.warning('warning :: prometheus :: failed to get namespace_quotas_dict memcache dict')
+                logger.info('warning :: prometheus :: failed to get namespace_quotas_dict memcache dict')
                 namespace_quotas_dict = {}
         except Exception as outer_err2:
             logger.error('error :: prometheus :: could not get memcache dict metrics_manager.flux.namespace_quotas - %s' % str(outer_err2))
@@ -409,7 +409,7 @@ class PrometheusMetricDataPost(object):
             logger.error('prometheus :: get_header(\'shard_request\') error - %s' % str(err))
         if shard_request_node:
             if shard_request_node not in list(HORIZON_SHARDS.keys()):
-                logger.warning('warning :: prometheus :: invalid horizon-shard request - %s' % (
+                logger.info('warning :: prometheus :: invalid horizon-shard request - %s' % (
                     str(shard_request_node)))
                 resp.status = falcon.HTTP_403
                 return
@@ -1310,7 +1310,7 @@ class PrometheusMetricDataPost(object):
                 prometheus_metric_name = prometheus_metric_name.replace('\\', '')
 
             except Exception as err:
-                logger.warning('warning :: prometheus :: skipping, failed to determine name from raw_metric_data: %s - %s' % (
+                logger.info('warning :: prometheus :: skipping, failed to determine name from raw_metric_data: %s - %s' % (
                     str(raw_metric_data), str(err)))
                 prometheus_metric_name = None
 
@@ -1698,7 +1698,7 @@ class PrometheusMetricDataPost(object):
                     exploding_namespaces[cardinality_namespace]['kept_count'] = len(namespaces_cardinality[cardinality_namespace]['kept_metrics'])
                     exploding_namespaces[cardinality_namespace]['max_cardinality'] = max_cardinality
                     cardinality_breached_metric_count += removed_count
-                    logger.warning('warning :: prometheus :: cardinality_breached on %s: %s' % (
+                    logger.info('warning :: prometheus :: cardinality_breached on %s: %s' % (
                         namespace, str(exploding_namespaces[cardinality_namespace])))
                 except Exception as err:
                     if not c_error_logged:
@@ -1740,7 +1740,7 @@ class PrometheusMetricDataPost(object):
                 if current_namespace_cardinality_count:
                     current_namespace_cardinality_count = update_namespace_cardinality_count(current_namespace_cardinality_count)
                 else:
-                    logger.warning('warning :: prometheus :: %s :: no data to updated namespace_cardinality_count for %s' % (
+                    logger.info('warning :: prometheus :: %s :: no data to updated namespace_cardinality_count for %s' % (
                         str(now), str(current_aligned_ts)))
             except Exception as err:
                 logger.error('error :: prometheus :: update_namespace_cardinality_count failed - %s' % str(err))
@@ -2019,7 +2019,7 @@ class PrometheusMetricDataPost(object):
                     str(tenant_id)))
                 prometheus_metrics_list = list(prometheus_metrics_list_in_quota)
             if prometheus_metrics_list_removed_over_quota:
-                logger.warning('prometheus :: %s :: will not accept %s metrics for tenant_id %s which are over quota' % (
+                logger.info('warning :: prometheus :: %s :: will not accept %s metrics for tenant_id %s which are over quota' % (
                     str(now), str(len(prometheus_metrics_list_removed_over_quota)),
                     str(tenant_id)))
                 redis_key = 'flux.prometheus_metrics.over_quota.%s.%s' % (tenant_id, str(current_aligned_ts))

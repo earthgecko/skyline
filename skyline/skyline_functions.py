@@ -649,6 +649,13 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20241113 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # If the check file does not exist do not error
+    if not os.path.isfile(check_file_to_fail):
+        current_logger.info('warning :: no check file to move, it has already been removed, check_file_to_fail: %s' % str(check_file_to_fail))
+        return False
+
     if not os.path.exists(failed_check_dir):
         try:
             mkdir_p(failed_check_dir)
@@ -3056,9 +3063,11 @@ def mirage_load_metric_vars(current_skyline_app, metric_vars_file, return_dict=F
 
     string_keys = ['metric', 'added_by']
     float_keys = ['value']
+    # @modified 20241120 - Feature #5064: mirage.inflection
+    # Added anomaly_id
     int_keys = [
         'hours_to_resolve', 'metric_timestamp', 'full_duration',
-        'from_timestamp', 'parent_id', 'added_at']
+        'from_timestamp', 'parent_id', 'added_at', 'anomaly_id']
     # @added 20200916 - Branch #3068: SNAB
     #                   Task #3744: POC matrixprofile
     boolean_keys = ['snab_only_check', 'graphite_metric', 'run_crucible_tests']

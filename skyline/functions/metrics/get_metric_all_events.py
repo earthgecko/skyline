@@ -231,7 +231,7 @@ def get_metric_all_events(
                 try:
                     analyzer_all_events[ts] = copy.deepcopy(c_analyzer_all_events[ts])
                 except Exception as err:
-                    current_logger.warning('warning :: %s :: failed to deepcopy %s from c_analyzer_all_events - %s' % (
+                    current_logger.info('warning :: %s :: failed to deepcopy %s from c_analyzer_all_events - %s' % (
                         function_str, str(ts), err))
 
             # @modified 20230324 - Feature #4530: namespace.analysed_events

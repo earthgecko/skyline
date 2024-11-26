@@ -539,7 +539,7 @@ def get_snab_results(filter_on):
             try:
                 algorithm_name = str(all_algorithms_by_id[algorithm_id])
             except Exception as err:
-                logger.warning('warning :: get_snab_results :: failed find algorithm in all_algorithms_by_id for algorithm_id: %s - %s' % (
+                logger.info('warning :: get_snab_results :: failed find algorithm in all_algorithms_by_id for algorithm_id: %s - %s' % (
                     str(algorithm_id), str(err)))
         # Change algorithm_id key to algorithm and maintain order 
         results_data[snab_id] = {'algorithm' if k == 'algorithm_id' else k:v for k, v in results_data[snab_id].items()}
@@ -553,7 +553,7 @@ def get_snab_results(filter_on):
         try:
             app = str(apps[results_data[snab_id]['app_id']])
         except Exception as err:
-            logger.warning('warning :: get_snab_results :: failed find app in apps for app_id: %s - %s' % (
+            logger.info('warning :: get_snab_results :: failed find app in apps for app_id: %s - %s' % (
                 str(algorithm_id), str(err)))
         # Change app_id key to app and maintain order 
         results_data[snab_id] = {'app' if k == 'app_id' else k:v for k, v in results_data[snab_id].items()}

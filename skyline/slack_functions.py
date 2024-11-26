@@ -141,7 +141,7 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message, image_f
                 slack_post = {'ok': False, 'slack_ssl_error': True}
                 fail_msg = 'warning :: slack_post_message :: failed to post message to thread (slack SSL issue) - %s - %s - %s' % (
                     thread_ts, message, err)
-                current_logger.warning('%s' % fail_msg)
+                current_logger.info('%s' % fail_msg)
             else:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(
@@ -173,7 +173,7 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message, image_f
                 slack_post = {'ok': False, 'slack_ssl_error': True}
                 fail_msg = 'warning :: slack_post_message :: failed to post message to thread (slack SSL issue) - %s - %s - %s' % (
                     thread_ts, message, err)
-                current_logger.warning('%s' % fail_msg)
+                current_logger.info('%s' % fail_msg)
             else:
                 current_logger.error(traceback.format_exc())
                 current_logger.error(
@@ -287,10 +287,10 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
             slack_response = {'ok': False, 'slack_ssl_error': True}
 
             fail_msg = 'warning :: create_features_profile :: failed to slack_post_message - %s' % err
-            current_logger.warning('%s' % fail_msg)
+            current_logger.info('%s' % fail_msg)
         else:
-            current_logger.warning(traceback.format_exc())
-            current_logger.warning(
+            current_logger.error(traceback.format_exc())
+            current_logger.info(
                 'warning :: slack_post_reaction :: failed to post reaction to thread %s - %s - %s' % (
                     thread_ts, emoji, err))
             # @modified 20200826 - Bug #3710: Gracefully handle slack failures

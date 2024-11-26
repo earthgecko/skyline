@@ -226,7 +226,7 @@ def alert_on_invalid_metrics(
                 function_str, times_alerted_key, err))
         number_of_times_alerted = int(float(number_of_times_alerted)) + 1
         if number_of_times_alerted == 5:
-            logger.warning('warning :: %s :: attempted to alert 5 times and an alert_via has failed for %s on %s, setting all_sent to True to delete hash key' % (
+            logger.info('warning :: %s :: attempted to alert 5 times and an alert_via has failed for %s on %s, setting all_sent to True to delete hash key' % (
                 function_str, data['status'], parent_namespace))
             all_sent = True
         else:

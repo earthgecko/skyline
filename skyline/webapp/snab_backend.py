@@ -510,7 +510,7 @@ def get_snab_algorithms(algorithms):
             snab_engine_disposal(engine)
         raise  # to webapp to return in the UI
     if warnings:
-        logger.warning('warning :: get_snab_algorithms :: failed to determine algorithm from some ids, last 3 warnings - %s' % (
+        logger.info('warning :: get_snab_algorithms :: failed to determine algorithm from some ids, last 3 warnings - %s' % (
             str(warnings[-3:])))
     if engine:
         snab_engine_disposal(engine)

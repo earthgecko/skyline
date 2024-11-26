@@ -1144,7 +1144,7 @@ class AnalyzerBatch(Thread):
                 if shard_metric is None:
                     shard_metric = is_shard_metric(base_name)
                 if not shard_metric:
-                    logger.warning('warning :: removing non shard metric %s from this cluster node and resetting to an empty timeseries' % base_name)
+                    logger.info('warning :: removing non shard metric %s from this cluster node and resetting to an empty timeseries' % base_name)
                     try:
                         self.redis_conn_decoded.srem(full_uniques, metric_name)
                     except Exception as err:
@@ -1675,6 +1675,14 @@ class AnalyzerBatch(Thread):
                     triggered_algorithms = None
                     if len(oneshot_results) == 0:
                         anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms, custom_algorithms_results = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present, custom_algorithm_overrides=custom_algorithm_overrides)
+
+                        # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                        #                   Branch #5532: v5.0.0-alpha
+                        # Coerce all numpy.bool_ typed elements introduced with
+                        # numpy >= 2 to Python bool so they are literal_eval and
+                        # json safe
+                        ensemble = [item if item is None else bool(item) for item in ensemble]
+        
                     else:
                         # Check if the timestamp is recorded in the anomalies
                         # as the oneshot analysis could be anomalous because
@@ -1698,6 +1706,13 @@ class AnalyzerBatch(Thread):
                             if 'algorithms_results' in oneshot_results['anomalies'][batch_timestamp]:
                                 try:
                                     ensemble = list(oneshot_results['anomalies'][batch_timestamp]['algorithms_results'].values())
+                                    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                                    #                   Branch #5532: v5.0.0-alpha
+                                    # Coerce all numpy.bool_ typed elements introduced with
+                                    # numpy >= 2 to Python bool so they are literal_eval and
+                                    # json safe
+                                    ensemble = [item if item is None else bool(item) for item in ensemble]
+
                                     algorithms_run = list(oneshot_results['anomalies'][batch_timestamp]['algorithms_results'].keys())
                                 except:
                                     pass

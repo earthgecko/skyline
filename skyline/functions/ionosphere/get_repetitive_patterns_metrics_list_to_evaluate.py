@@ -133,7 +133,7 @@ def get_repetitive_patterns_metrics_list_to_evaluate(current_skyline_app, metric
         dicts_defined.append('include')
     except:
         IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE = {}
-        current_logger.warning('%s :: IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE is not defined in settings.py' % (
+        current_logger.info('warning :: %s :: IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE is not defined in settings.py' % (
             function_str))
     include_and_exclude_dicts['include'] = IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE
     try:
@@ -141,7 +141,7 @@ def get_repetitive_patterns_metrics_list_to_evaluate(current_skyline_app, metric
         dicts_defined.append('exclude')
     except:
         IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE = {}
-        current_logger.warning('%s :: IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE is not defined in settings.py' % (
+        current_logger.info('warning :: %s :: IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE is not defined in settings.py' % (
             function_str))
 
     # @added 20221215 - Feature #4658: ionosphere.learn_repetitive_patterns

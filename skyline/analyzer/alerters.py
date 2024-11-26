@@ -1659,7 +1659,7 @@ def alert_syslog(alert, metric, context):
         try:
             syslog_level = settings.SYSLOG_OPTS['level']
             if syslog_level not in ['warn', 'notice', 'info']:
-                logger.warning('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
+                logger.info('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
                 syslog_level = 'warn'
         except:
             syslog_level = 'warn'
@@ -2810,7 +2810,7 @@ def alert_http(alert, metric, context):
                 if alerter_name == 'http_alerter-mock_api_alerter_receiver':
                     calc_three_sigma_bounds = False
                 if anomaly_json and not os.path.isfile(anomaly_json):
-                    logger.warning('warning :: alert_http :: cannot calculate 3sigma upper and lower bounds, file does not exist anomaly_json: %s' % anomaly_json)
+                    logger.info('warning :: alert_http :: cannot calculate 3sigma upper and lower bounds, file does not exist anomaly_json: %s' % anomaly_json)
 
                 # @modified 20241025 - Bug #5520: Handle missing redis json in analyzer alert_http
                 # if anomaly_json:
@@ -3331,7 +3331,7 @@ def alert_sms(alert, metric, context):
         if success:
             logger.info('sent SMS alert to %s' % sms_number)
         else:
-            logger.warning('warning :: falied to send SMS alert to %s' % sms_number)
+            logger.info('warning :: falied to send SMS alert to %s' % sms_number)
     return
 
 

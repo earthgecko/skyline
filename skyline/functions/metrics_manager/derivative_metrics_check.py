@@ -144,7 +144,7 @@ def derivative_metrics_check(self):
             try:
                 first_timestamp = int(timeseries[0][0])
             except Exception as err:
-                logger.warning('metrics_manager :: derivative_metric_check :: could not determine first timestamp for %s - %s' % (
+                logger.info('warning :: metrics_manager :: derivative_metric_check :: could not determine first timestamp for %s - %s' % (
                     base_name, err))
                 first_timestamp = now
 

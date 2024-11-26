@@ -195,7 +195,7 @@ class Worker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             sys.exit(0)
 
     def run(self):
@@ -484,7 +484,7 @@ class Worker(Process):
                                 logger.info('worker :: Redis connection established - RECOVERED')
                         except:
                             redis_up = False
-                            logger.warning('worker :: Redis connection not established')
+                            logger.info('warning :: worker :: Redis connection not established')
                             failed_over_to_memcache = True
                 except Exception as err:
                     if not failed_over_to_memcache:
@@ -503,7 +503,7 @@ class Worker(Process):
                     failed_over_to_memcache = False
                 if failed_over_to_memcache:
                     redis_up = True
-                    logger.warning('warning :: worker :: Redis is unavailable, no further Redis errors will be logged in this run, failed_over_to_memcache: %s' % str(failed_over_to_memcache))
+                    logger.info('warning :: worker :: Redis is unavailable, no further Redis errors will be logged in this run, failed_over_to_memcache: %s' % str(failed_over_to_memcache))
 
             if LOCAL_DEBUG:
                 try:
@@ -715,7 +715,7 @@ class Worker(Process):
                                                     if not memcache_flux_last_metric_data:
                                                         # Only check once and fail once
                                                         memcache_flux_last_metric_data = False
-                                                        logger.warning('warning :: worker :: get_memcache_key flux.last.metric_data no data found')
+                                                        logger.info('warning :: worker :: get_memcache_key flux.last.metric_data no data found')
                                                     else:
                                                         logger.info('worker :: get_memcache_key flux.last.metric_data data loaded')
                                                 except Exception as err:
@@ -1297,7 +1297,7 @@ class Worker(Process):
                                 traceback_str = traceback.format_exc()
                                 if not failed_over_to_memcache:
                                     if 'no such key' in str(err):
-                                        logger.warning('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
+                                        logger.info('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
                                     else:
                                         logger.error(traceback_str)
                                         logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
@@ -2486,7 +2486,7 @@ class Worker(Process):
                         traceback_str = traceback.format_exc()
                         if not failed_over_to_memcache:
                             if 'no such key' in str(err):
-                                logger.warning('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
+                                logger.info('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, err))
                             else:
                                 logger.error(traceback_str)
                                 logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)

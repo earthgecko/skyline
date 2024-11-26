@@ -1596,7 +1596,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     if 'CERTIFICATE_VERIFY_FAILED' in str(err):
                         slack_ssl_error = True
                         fail_msg = 'warning :: create_features_profile :: failed to slack_post_message - %s' % err
-                        current_logger.warning('%s' % fail_msg)
+                        current_logger.info('%s' % fail_msg)
                     else:
                         trace = traceback.format_exc()
                         current_logger.error(trace)
@@ -1616,7 +1616,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         current_logger.error('%s' % str(slack_response))
                     else:
                         fail_msg = 'warning :: create_features_profile :: failed to slack_post_message due to slack SSL issue'
-                        current_logger.warning('%s' % fail_msg)
+                        current_logger.info('%s' % fail_msg)
 
                 else:
                     current_logger.info('create_features_profile :: posted slack update to %s, thread %s' % (
@@ -1640,7 +1640,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                     if 'CERTIFICATE_VERIFY_FAILED' in str(err):
                         slack_ssl_error = True
                         fail_msg = 'warning :: create_features_profile :: failed to slack_post_reaction - %s' % err
-                        current_logger.warning('%s' % fail_msg)
+                        current_logger.info('%s' % fail_msg)
                     else:
                         trace = traceback.format_exc()
                         current_logger.error(trace)
@@ -1659,7 +1659,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         slack_ssl_error = slack_response['slack_ssl_error']
                         if slack_ssl_error:
                             fail_msg = 'warning :: create_features_profile :: failed to slack_post_message due to slack SSL issue'
-                            current_logger.warning('%s' % fail_msg)
+                            current_logger.info('%s' % fail_msg)
                     except:
                         pass
 
@@ -1697,7 +1697,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         if 'CERTIFICATE_VERIFY_FAILED' in str(err):
                             slack_ssl_error = True
                             fail_msg = 'warning :: create_features_profile :: failed to slack_post_reaction - %s' % err
-                            current_logger.warning('%s' % fail_msg)
+                            current_logger.info('%s' % fail_msg)
                         else:
                             trace = traceback.format_exc()
                             current_logger.error(trace)
@@ -1711,7 +1711,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                             slack_ssl_error = slack_response['slack_ssl_error']
                             if slack_ssl_error:
                                 fail_msg = 'warning :: create_features_profile :: failed to slack_post_message due to slack SSL issue'
-                                current_logger.warning('%s' % fail_msg)
+                                current_logger.info('%s' % fail_msg)
                         except:
                             pass
 

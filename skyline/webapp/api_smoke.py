@@ -290,13 +290,15 @@ def get_api_smoke(
                 for path, folders, files in os.walk(training_data_dir):
                     if files:
                         for file in files:
-                            if file.endswith('.png'):
-                                if 'mirage.graphite' in file:
+                            if file.endswith('h.png'):
+                                if 'mirage.graphite' in str(file):
                                     image = '%s/%s' % (training_data_dir, file)
+                                    current_logger.debug('debug :: api_smoke image: %s' % image)
                                     training_data_dict[ts][base_name]['image'] = image
                                     image_url = '%s/ionosphere_images?image=%s' % (
                                         settings.SKYLINE_URL, image)
                                     training_data_dict[ts][base_name]['image_url'] = image_url
+                                    current_logger.debug('debug :: training_data_dict image_url: %s' % training_data_dict[ts][base_name]['image_url'])
                             if file == anomaly_txt_file:
                                 metric_vars_dict = mirage_load_metric_vars(current_skyline_app, anomaly_file, return_dict=True, log=False)
                                 training_data_dict[ts][base_name]['details'] = metric_vars_dict['metric_vars']
@@ -326,7 +328,7 @@ def get_api_smoke(
                         # @added 20240514 - Feature #5270: webapp - panorama smoke
                         # Handle Analyzer only anomalies if the mirage image is
                         # not available
-                        if not 'image_url' not in training_data_dict[ts][base_name]:
+                        if 'image_url' not in training_data_dict[ts][base_name]:
                             for file in files:
                                 if 'analyzer.graphite' in file and file.endswith('h.png'):
                                     image = '%s/%s' % (training_data_dir, file)
@@ -337,17 +339,21 @@ def get_api_smoke(
                                     break
                         # @added 20241108 - Feature #5270: webapp - panorama smoke
                         # Handle new VictoriaMetrics metrics
-                        if not 'image_url' not in training_data_dict[ts][base_name]:
+                        if 'image_url' not in training_data_dict[ts][base_name]:
                             for file in files:
                                 if 'mirage.redis.plot.24h' in file and file.endswith('.png'):
+                                    current_logger.debug('debug :: no image_url in training_data_dict keys: %s' % (
+                                        str(training_data_dict[ts][base_name].keys())))
+                                    current_logger.debug('debug :: api_smoke image: %s' % image)
                                     image = '%s/%s' % (training_data_dir, file)
                                     training_data_dict[ts][base_name]['image'] = image
                                     image_url = '%s/ionosphere_images?image=%s' % (
                                         settings.SKYLINE_URL, image)
                                     training_data_dict[ts][base_name]['image_url'] = image_url
+                                    current_logger.debug('debug :: training_data_dict image_url: %s' % training_data_dict[ts][base_name]['image_url'])
                                     break
                         # Handle metrics submitted via vortex
-                        if not 'image_url' not in training_data_dict[ts][base_name]:
+                        if 'image_url' not in training_data_dict[ts][base_name]:
                             for file in files:
                                 if 'vortex.analysed' in file and file.endswith('h.png'):
                                     image = '%s/%s' % (training_data_dir, file)

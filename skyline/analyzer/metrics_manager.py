@@ -556,7 +556,7 @@ class Metrics_Manager(Thread):
             # @modified 20220510 - Task #4568: Reduce cluster logging
             #                      Release #4562: v3.0.4
             if LOCAL_DEBUG:
-                logger.warning('warning :: metrics_manager :: get_remote_data - no r from %s on %s' % (
+                logger.info('warning :: metrics_manager :: get_remote_data - no r from %s on %s' % (
                     endpoint, str(remote_skyline_instance[0])))
             return data
         if r:
@@ -675,7 +675,7 @@ class Metrics_Manager(Thread):
 
         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
             if training_data_fetched >= max_training_data_to_fetch:
-                logger.warning('warning :: metrics_manager :: fetched training data has reached the limit of %s, not continuing to fetch more this run' % str(max_training_data_to_fetch))
+                logger.info('warning :: metrics_manager :: fetched training data has reached the limit of %s, not continuing to fetch more this run' % str(max_training_data_to_fetch))
                 break
             remote_training_data = []
             data_required = 'metrics'
@@ -890,7 +890,7 @@ class Metrics_Manager(Thread):
         if get_features_profile_dirs:
             for fp_id in get_features_profile_dirs:
                 if fps_fetched >= max_fps_to_fetch:
-                    logger.warning('warning :: metrics_manager :: get_features_profile_dirs has reached the limit of %s, not continuing to fetch more this run' % str(max_fps_to_fetch))
+                    logger.info('warning :: metrics_manager :: get_features_profile_dirs has reached the limit of %s, not continuing to fetch more this run' % str(max_fps_to_fetch))
                     break
                 features_profile_dir = None
                 endpoint = None
@@ -1310,7 +1310,7 @@ class Metrics_Manager(Thread):
             with memray_tracker:
 
                 if not self.redis_conn or not self.redis_conn_decoded:
-                    logger.warning('metrics_manager :: no redis connection, returning')
+                    logger.info('warning :: metrics_manager :: no redis connection, returning')
                     return
 
                 logger.info('metrics_manager :: metric_management_process :: memory usage at start of run - %s' % (
@@ -4417,7 +4417,7 @@ class Metrics_Manager(Thread):
                                     except:
                                         alerter_id = None
 
-                                logger.warning('warning :: metrics_manager :: removing %s metrics for boundary alert for alerter_id: %s, on %s, %s' % (
+                                logger.info('warning :: metrics_manager :: removing %s metrics for boundary alert for alerter_id: %s, on %s, %s' % (
                                     str(len(rule_remove_cardinality_limited_metrics)),
                                     str(alerter_id), algorithm, str(metric)))
                                 removal_errors = []
@@ -4854,7 +4854,7 @@ class Metrics_Manager(Thread):
                                     check_metrics.remove(metric_name)
                                     removed_new_metrics_from_check_metrics += 1
                             except Exception as err:
-                                logger.warning('metrics_manager :: could not remove %s from check_metrics - %s' % (str(metric_name), err))
+                                logger.info('warning :: metrics_manager :: could not remove %s from check_metrics - %s' % (str(metric_name), err))
                         logger.info('metrics_manager :: removed %s new metrics from check_metrics for check_data_sparsity' % str(removed_new_metrics_from_check_metrics))
 
                     # Multi get series
@@ -4868,7 +4868,7 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: failed to get check_metrics from Redis')
                         raw_assigned = []
                     if not raw_assigned:
-                        logger.warning('warning :: metrics_manager :: No raw_assigned for check sparisty')
+                        logger.info('warning :: metrics_manager :: No raw_assigned for check sparisty')
                     else:
                         logger.info('metrics_manager :: checking data sparsity on %s metric timeseries from Redis' % str(len(raw_assigned)))
                     last_metrics_data_sparsity = {}
@@ -5436,7 +5436,7 @@ class Metrics_Manager(Thread):
                                 str(len(metrics_last_timestamp_dict)),
                                 metrics_last_timestamp_hash_key))
                         else:
-                            logger.warning('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
+                            logger.info('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
                                 metrics_last_timestamp_hash_key))
                     except:
                         logger.error(traceback.format_exc())
@@ -6458,7 +6458,7 @@ class Metrics_Manager(Thread):
                             if c_time > (v_ts + vortex_purge_times[vortex_hash_key]):
                                 remove_v_keys.append(v_key)
                         if remove_v_keys:
-                            logger.warning('warning :: metrics_manager :: purging %s keys from %s older than % seconds' % (
+                            logger.info('warning :: metrics_manager :: purging %s keys from %s older than % seconds' % (
                                 str(len(remove_v_keys)), vortex_hash_key,
                                 str(vortex_purge_times[vortex_hash_key])))
                             try:
@@ -6719,7 +6719,7 @@ class Metrics_Manager(Thread):
                                 unpacker.feed(raw_series)
                                 timeseries = list(unpacker)
                             except Exception as err:
-                                logger.warning('warning :: metrics_manager :: roomba batch_processing_metrics failed to unpack %s timeseries - %s' % (
+                                logger.info('warning :: metrics_manager :: roomba batch_processing_metrics failed to unpack %s timeseries - %s' % (
                                     str(metric_name), err))
                                 try:
                                     self.redis_conn_decoded.srem('aet.analyzer.batch_processing_metrics', metric_name)
@@ -6934,7 +6934,7 @@ class Metrics_Manager(Thread):
                 SERVER_METRIC_PATH = ''
         except Exception as e:
             SERVER_METRIC_PATH = ''
-            logger.warning('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
+            logger.info('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
         try:
             ANALYZER_ENABLED = settings.ANALYZER_ENABLED
             logger.info('metrics_manager :: ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))

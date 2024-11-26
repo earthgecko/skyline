@@ -504,7 +504,7 @@ def ionosphere_learn_repetitive_patterns(timestamp):
                 label = 'LEARNT - repetitive pattern'
                 fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, ts, metric, create_context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
                 if fp_exists:
-                    logger.warning('warning :: %s :: failed to create a features profile for %s, %s as an fp already exists' % (
+                    logger.info('warning :: %s :: failed to create a features profile for %s, %s as an fp already exists' % (
                         function_str, metric, str(ts)))
             except Exception as err:
                 logger.error(traceback.format_exc())

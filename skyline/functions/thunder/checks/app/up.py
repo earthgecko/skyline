@@ -124,7 +124,7 @@ def thunder_check_app(self, check_app):
     if not app_last_timestamp:
         success = False
         send_event = True
-        logger.warning('warning :: %s :: failed to get app_last_timestamp from %s Redis key' % (
+        logger.info('warning :: %s :: failed to get app_last_timestamp from %s Redis key' % (
             function_str, cache_key))
 
     # Determine what to last known app run timestamp was
@@ -161,7 +161,7 @@ def thunder_check_app(self, check_app):
 
     # The app has not recovered yet still down, return
     if not app_last_timestamp and check_down_alert:
-        logger.warning('warning :: %s :: %s still down but alert key exists so not alerting' % (
+        logger.info('warning :: %s :: %s still down but alert key exists so not alerting' % (
             function_str, check_app))
         return False
 

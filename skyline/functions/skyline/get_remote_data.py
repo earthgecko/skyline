@@ -60,7 +60,7 @@ def get_remote_data(current_skyline_app, remote_skyline_instance, data_required,
             current_logger.error('error :: get_remote_data :: failed to get %s from %s, err: %s' % (
                 str(endpoint), str(remote_skyline_instance[0]), err))
         if not r:
-            current_logger.warning('warning :: get_remote_data :: no r from %s on %s' % (
+            current_logger.info('warning :: get_remote_data :: no r from %s on %s' % (
                 endpoint, str(remote_skyline_instance[0])))
             continue
         if r:

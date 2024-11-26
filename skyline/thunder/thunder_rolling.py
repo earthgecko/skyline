@@ -117,7 +117,7 @@ class RollingThunder(Thread):
         check_apps_up = []
         for check_app in check_apps:
             if not redis_available:
-                logger.warning('warning :: thunder/rolling :: redis not available not check %s' % (
+                logger.info('warning :: thunder/rolling :: redis not available not check %s' % (
                     check_app))
                 continue
             try:
@@ -128,7 +128,7 @@ class RollingThunder(Thread):
                         check_app))
                     check_apps_up.append(check_app)
                 else:
-                    logger.warning('warning :: thunder/rolling :: %s is NOT reporting UP' % (
+                    logger.info('warning :: thunder/rolling :: %s is NOT reporting UP' % (
                         check_app))
             except Exception as err:
                 logger.error(traceback.format_exc())
@@ -149,7 +149,7 @@ class RollingThunder(Thread):
                     e))
 
             if not redis_available:
-                logger.warning('warning :: thunder/rolling :: redis not available not checking analyzer run_time')
+                logger.info('warning :: thunder/rolling :: redis not available not checking analyzer run_time')
                 run_time_check = False
 
             if run_time_check:
@@ -158,7 +158,7 @@ class RollingThunder(Thread):
                     if success:
                         logger.info('thunder/rolling :: analyzer run_time OK')
                     else:
-                        logger.warning('warning :: thunder/rolling :: analyzer run_time overruning')
+                        logger.info('warning :: thunder/rolling :: analyzer run_time overruning')
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: thunder/rolling :: thunder_check_analyzer_run_time errored - %s' % (
@@ -174,7 +174,7 @@ class RollingThunder(Thread):
                 logger.error('error :: thunder/rolling :: failed to determine if horizon metrics_received check should be run - %s' % (
                     e))
             if not redis_available:
-                logger.warning('warning :: thunder/rolling :: redis not available not checking horizon metrics_received')
+                logger.info('warning :: thunder/rolling :: redis not available not checking horizon metrics_received')
                 metrics_received_check = False
 
             if metrics_received_check:
@@ -183,13 +183,13 @@ class RollingThunder(Thread):
                     if success:
                         logger.info('thunder/rolling :: horizon metrics_received OK')
                     else:
-                        logger.warning('warning :: thunder/rolling :: horizon metrics_received has significantly changed')
+                        logger.info('warning :: thunder/rolling :: horizon metrics_received has significantly changed')
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - %s' % (
                         e))
                 else:
-                    logger.warning('warning :: thunder/rolling :: did not check horizon metrics_recieved as thunder_check_horizon_metrics_received failed to import')
+                    logger.info('warning :: thunder/rolling :: did not check horizon metrics_recieved as thunder_check_horizon_metrics_received failed to import')
 
         if not redis_available:
             for check_app in check_apps:
@@ -212,7 +212,7 @@ class RollingThunder(Thread):
                     if success:
                         logger.info('thunder/rolling :: webapp_features_profile OK')
                     else:
-                        logger.warning('warning :: thunder/rolling :: webapp_features_profile unknown')
+                        logger.info('warning :: thunder/rolling :: webapp_features_profile unknown')
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - %s' % (

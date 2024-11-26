@@ -1226,7 +1226,7 @@ def get_ionosphere_performance(
             try:
                 yesterday_fps_total_count = yesterday_data[yesterday_end_date]['fps_total_count']
             except Exception as err:
-                logger.warning('get_ionosphere_performance - could not determine fps_total_count from yesterday_data, err: %s' % err)
+                logger.info('get_ionosphere_performance - could not determine fps_total_count from yesterday_data, err: %s' % err)
         performance_fps_total_count = performance_df['fps_total_count'][-1]
         if yesterday_fps_total_count:
             if performance_fps_total_count == 0:

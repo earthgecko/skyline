@@ -157,7 +157,7 @@ class MirageVortex(Thread):
             os.kill(self.current_pid, 0)
             os.kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
     def check_valid_algorithms(self, consensus):
@@ -1135,7 +1135,7 @@ class MirageVortex(Thread):
             if unknown_algorithms:
                 metric_data['anomalous'] = None
                 additional_info = 'unknown algorithm values passed - %s' % str(unknown_algorithms)
-                logger.warning('warning :: mirage_vortex :: not processing request_id: %s, %s' % (
+                logger.info('warning :: mirage_vortex :: not processing request_id: %s, %s' % (
                     str(request_id), additional_info))
                 results = {
                     'success': False,
@@ -1160,7 +1160,7 @@ class MirageVortex(Thread):
             if unknown_algorithms:
                 metric_data['anomalous'] = None
                 additional_info = 'unknown algorithm values passed - %s' % str(unknown_algorithms)
-                logger.warning('warning :: mirage_vortex :: not processing request_id: %s, %s' % (
+                logger.info('warning :: mirage_vortex :: not processing request_id: %s, %s' % (
                     str(request_id), additional_info))
                 results = {
                     'success': False,
@@ -1199,7 +1199,7 @@ class MirageVortex(Thread):
             if not in_consensus:
                 metric_data['anomalous'] = None
                 additional_info = 'input error - algorithms passed do not match any algorithms in consensus no consensus could ever be achieved'
-                logger.warning('warning :: mirage_vortex :: not processing request_id: %s, %s' % (
+                logger.info('warning :: mirage_vortex :: not processing request_id: %s, %s' % (
                     str(request_id), additional_info))
                 results = {
                     'success': False,
@@ -1311,7 +1311,7 @@ class MirageVortex(Thread):
                 del new_timeseries
 
             if not timeseries:
-                logger.warning('warning :: mirage_vortex :: no timeseries in metric_data for %s' % (
+                logger.info('warning :: mirage_vortex :: no timeseries in metric_data for %s' % (
                     check_item))
                 metric_data['anomalous'] = False
                 additional_info = 'no timeseries data found'
@@ -2148,10 +2148,22 @@ class MirageVortex(Thread):
                                 logger.error('error :: mirage_vortex :: failed building consensus_anomalies for request_id: %s - %s' % (
                                     request_id, err))
                         if consensus_anomalies:
+                            # @added 20241113 - Feature #4952: vortex - consensus_count
+                            # Use consensus_anomalous because there will always
+                            # be consensus_anomalies
+                            consensus_anomalous = False
+                            if anomalies:
+                                consensus_anomalous = True
                             metric_data['results']['consensus_results'] = {}
-                            metric_data['results']['consensus_results']['anomalous'] = True
+                            # @modified 20241113 - Feature #4952: vortex - consensus_count
+                            #metric_data['results']['consensus_results']['anomalous'] = True
+                            metric_data['results']['consensus_results']['anomalous'] = consensus_anomalous
                             metric_data['results']['consensus_results']['anomaly_window'] = anomaly_window
                             anomalies_in_window = len([x for x in consensus_scores[-anomaly_window:] if x >= 1])
+                            # @added 20241113 - Feature #4952: vortex - consensus_count
+                            if not anomalies_in_window:
+                                metric_data['results']['consensus_results']['anomalous'] = False
+
                             metric_data['results']['consensus_results']['anomalies_in_window'] = anomalies_in_window
                             metric_data['results']['consensus_results']['unreliable'] = False
                             metric_data['results']['consensus_results']['anomalies'] = copy.deepcopy(anomalies)
@@ -2357,7 +2369,7 @@ class MirageVortex(Thread):
                                     logger.error('error :: mirage_vortex :: create_echo_timeseries failed for request_id: %s - %s' % (
                                         request_id, err))
                                 if not created_echo_data:
-                                    logger.warning('warning :: mirage_vortex :: create_echo_timeseries failed for request_id: %s' % (
+                                    logger.info('warning :: mirage_vortex :: create_echo_timeseries failed for request_id: %s' % (
                                         request_id))
 
                             try:

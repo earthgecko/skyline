@@ -46,7 +46,7 @@ def thunder_check_webapp_features_profile(self):
 
     webapp_features_profile_pid_file = '%s/webapp_features_profile.pid' % settings.PID_PATH
     if not path.isfile(webapp_features_profile_pid_file):
-            logger.warning('warning :: thunder/rolling :: %s does not exist, nothing to check' % (
+            logger.info('warning :: thunder/rolling :: %s does not exist, nothing to check' % (
                   webapp_features_profile_pid_file))
             return True
 
@@ -63,10 +63,10 @@ def thunder_check_webapp_features_profile(self):
     if r_json:
         try:
             if r_json['status'] != 'OK':
-                logger.warning('warning :: thunder/rolling :: webapp_features_profile did not report status OK - %s' % str(r_json))
+                logger.info('warning :: thunder/rolling :: webapp_features_profile did not report status OK - %s' % str(r_json))
                 webapp_features_profile_status = False
         except Exception as err:
-                logger.warning('warning :: thunder/rolling :: webapp_features_profile did not report status OK - %s' % err)
+                logger.info('warning :: thunder/rolling :: webapp_features_profile did not report status OK - %s' % err)
                 webapp_features_profile_status = False
     if not webapp_features_profile_status:
         logger.info('thunder/rolling :: getting main pid of webapp_features_profile gunicorn process')

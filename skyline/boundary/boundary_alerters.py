@@ -724,7 +724,7 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
         try:
             syslog_level = settings.SYSLOG_OPTS['level']
             if syslog_level not in ['warn', 'notice', 'info']:
-                logger.warning('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
+                logger.info('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
                 syslog_level = 'warn'
         except:
             syslog_level = 'warn'
@@ -1822,7 +1822,7 @@ def alert_sms(datapoint, metric_name, expiration_time, metric_trigger, algorithm
         if success:
             logger.info('sent SMS alert to %s' % sms_number)
         else:
-            logger.warning('warning :: failed to send SMS alert to %s' % sms_number)
+            logger.info('warning :: failed to send SMS alert to %s' % sms_number)
         return success
 
 # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts

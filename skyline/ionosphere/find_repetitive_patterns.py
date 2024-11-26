@@ -605,7 +605,7 @@ def find_repetitive_patterns(metric, anomaly_timestamp):
                 label = 'LEARNT - repetitive pattern'
                 fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, t, metric, create_context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
                 if fp_exists:
-                    logger.warning('warning :: %s :: failed to create a features profile for %s, %s as an fp already exists' % (
+                    logger.info('warning :: %s :: failed to create a features profile for %s, %s as an fp already exists' % (
                         function_str, metric, str(t)))
             except Exception as err:
                 logger.error(traceback.format_exc())
@@ -745,7 +745,7 @@ def ionosphere_find_repetitive_patterns(timestamp):
             except Exception as err:
                 errors.append(['failed to determine untrainable metric', untrainable_metric, err])
     if errors:
-        logger.warning('warning :: %s :: determine untrainable metric failed with %s errors, sample: %s' % (
+        logger.info('warning :: %s :: determine untrainable metric failed with %s errors, sample: %s' % (
             function_str, str(len(errors)), str(errors[0])))
     new_untrainable_metrics = []
     try:
@@ -775,7 +775,7 @@ def ionosphere_find_repetitive_patterns(timestamp):
         except Exception as err:
             errors.append(['falied to look up metric in base_names_and_metric_ids', metric, err])
     if errors:
-        logger.warning('warning :: %s :: failed to find %s metrics in base_names_and_metric_ids, sample: %s' % (
+        logger.info('warning :: %s :: failed to find %s metrics in base_names_and_metric_ids, sample: %s' % (
             function_str, str(len(errors)), str(errors[0])))
     logger.info('%s :: determined %s metric_ids for include_metrics' % (
         function_str, str(len(learn_repetitive_pattern_metric_ids))))

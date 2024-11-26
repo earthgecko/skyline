@@ -108,7 +108,7 @@ class Worker(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent process is dead')
+            logger.info('warning :: parent process is dead')
             exit(0)
 
     def run(self):
@@ -531,7 +531,7 @@ class Worker(Process):
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to request %s - %s' % (str(flux_url), err))
                         if not success:
-                            logger.warning('warning :: worker :: failed to submit data to flux')
+                            logger.info('warning :: worker :: failed to submit data to flux')
                             logger.debug('debug :: timeseries - %s' % str(timeseries))
 
                     if success:

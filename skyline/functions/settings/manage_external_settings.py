@@ -392,7 +392,7 @@ def manage_external_settings(current_skyline_app):
                 last_known_redis_key, e))
         # @added 20220614 - Bug #4608: functions.settings.manage_external_settings - use cache data on bad response
         if error_use_cache_data:
-            current_logger.warning('warning :: manage_external_settings :: error_use_cache_data set to True so returning skyline.last_known.external_settings from cache')
+            current_logger.info('warning :: manage_external_settings :: error_use_cache_data set to True so returning skyline.last_known.external_settings from cache')
 
         return (external_settings, external_from_cache)
 

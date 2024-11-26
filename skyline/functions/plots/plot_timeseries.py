@@ -177,11 +177,11 @@ def plot_timeseries(
         try:
             ax.get_yaxis().get_major_formatter().set_useOffset(False)
         except Exception as err:
-            current_logger.warning('warning :: %s :: get_major_formatter - %s' % (function_str, err))
+            current_logger.info('warning :: %s :: get_major_formatter - %s' % (function_str, err))
         try:
             ax.get_yaxis().get_major_formatter().set_scientific(False)
         except Exception as err:
-            current_logger.warning('warning :: %s :: get_major_formatter - %s' % (function_str, err))
+            current_logger.info('warning :: %s :: get_major_formatter - %s' % (function_str, err))
 
         box = ax.get_position()
         ax.set_position([box.x0, box.y0 + box.height * 0.1,

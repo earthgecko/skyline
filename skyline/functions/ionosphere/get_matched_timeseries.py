@@ -75,7 +75,7 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
         return matched_timeseries
 
     if not matched['match']:
-        current_logger.warning('warning :: %s :: no match found' % (function_str))
+        current_logger.info('warning :: %s :: no match found' % (function_str))
         return matched_timeseries
 
     try:

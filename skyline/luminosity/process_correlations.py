@@ -507,7 +507,7 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
 
     # @added 20230812 - Bug #5050: luminosity - process_correlations resolution handle NoneType
     if not isinstance(resolution, int):
-        logger.warning('warning :: resolution could not be determined for %s, resolution: %s' % (
+        logger.info('warning :: resolution could not be determined for %s, resolution: %s' % (
             str(base_name), str(resolution)))
         return [], resolution
 
@@ -1545,7 +1545,7 @@ def process_correlations(i, anomaly_id):
 
     # @added 20230812 - Bug #5050: luminosity - process_correlations resolution handle NoneType
     if not isinstance(resolution, int):
-        logger.warning('warning :: get_anomalous_ts failed to return resolution for %s, resolution: %s, nothing to do, returning' % (
+        logger.info('warning :: get_anomalous_ts failed to return resolution for %s, resolution: %s, nothing to do, returning' % (
             str(base_name), str(resolution)))
         return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
 

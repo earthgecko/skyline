@@ -130,7 +130,7 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
                 metric_ids.append(int(metric_id))
 
     if not metrics_to_set_as_inactive:
-        current_logger.warning('warning :: %s :: no metrics to set as inactive %s' % (
+        current_logger.info('warning :: %s :: no metrics to set as inactive %s' % (
             function_str, dry_run_str))
         return metrics_set_as_inactive
 

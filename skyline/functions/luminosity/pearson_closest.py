@@ -310,7 +310,7 @@ def pearson_closest(
     df_corr = df.corr(method='pearson', min_periods=3)
     pearson_cc = df_corr['t1']['t2']
     results['timings']['df.corr'] = time() - start_pd_corr
-    results['pearson_cc'] = pearson_cc
+    results['pearson_cc'] = float(pearson_cc)
     results['timings']['total'] = time() - start
     if print_debug:
         print(results, '(took', (time() - start), 'seconds')

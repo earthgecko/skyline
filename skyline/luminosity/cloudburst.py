@@ -833,7 +833,7 @@ class Cloudburst(Thread):
                             logger.error('error :: cloudburst :: find_cloudbursts :: failed add timeseries to metrics_timeseries for %s - %s' % (
                                 base_name, err))
                     else:
-                        logger.warning('warning :: cloudburst :: find_cloudbursts :: failed to retrieve timeseries from VictoriaMetrics for %s: %s' % (
+                        logger.info('warning :: cloudburst :: find_cloudbursts :: failed to retrieve timeseries from VictoriaMetrics for %s: %s' % (
                             base_name, use_base_name))
 
             for base_name in current_base_names:
@@ -853,7 +853,7 @@ class Cloudburst(Thread):
                     # @modified 20220506 - Feature #4164: luminosity - cloudbursts
                     # Change error to warning
                     # logger.error('error :: cloudburst :: find_cloudbursts :: no timeseries from Graphite for %s' % base_name)
-                    logger.warning('warning :: cloudburst :: find_cloudbursts :: no timeseries from %s for %s' % (data_source, base_name))
+                    logger.info('warning :: cloudburst :: find_cloudbursts :: no timeseries from %s for %s' % (data_source, base_name))
                     continue
 
                 if truncate_last_datapoint:
@@ -1561,7 +1561,7 @@ class Cloudburst(Thread):
                                     if isinstance(anomaly_id, int):
                                         break
                                 except KeyError:
-                                    logger.warning('warning :: cloudburst :: find_cloudbursts :: due to KeyError in period_anomalies[%s][%s] could not determine anomaly_id in cloudburst_ts_range (%s, %s) for %s with metric_id %s from period_anomalies: %s' % (
+                                    logger.info('warning :: cloudburst :: find_cloudbursts :: due to KeyError in period_anomalies[%s][%s] could not determine anomaly_id in cloudburst_ts_range (%s, %s) for %s with metric_id %s from period_anomalies: %s' % (
                                         str(metric_id), str(anomaly_timestamp),
                                         str(cloudburst_ts_range_start),
                                         str(cloudburst_ts_range_end), base_name,
@@ -1755,7 +1755,7 @@ class Cloudburst(Thread):
         logger.info('luminosity/cloudburst :: starting find_cloudbursts')
 
         if SERVER_METRIC_PATH == '':
-            logger.warning('warning :: luminosity/cloudburst :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\'')
+            logger.info('warning :: luminosity/cloudburst :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\'')
 
         while 1:
             now = time()
@@ -1817,7 +1817,7 @@ class Cloudburst(Thread):
             pid_count = 0
             for i in range(1, LUMINOSITY_CLOUDBURST_PROCESSES + 1):
                 if i > len(unique_metrics):
-                    logger.warning('warning :: cloudburst :: skyline is set for more cores than needed.')
+                    logger.info('warning :: cloudburst :: skyline is set for more cores than needed.')
                     break
                 try:
                     p = Process(target=self.find_cloudbursts, args=(i, unique_metrics))
@@ -1950,7 +1950,7 @@ class Cloudburst(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: cloudburst :: failed to set expire on %s Redis set - %s' % (
                                 not_processed_metrics_key, e))
-                        logger.warning('warning :: cloudburst :: there are %s metrics that were not processed of the %s unique_metrics' % (
+                        logger.info('warning :: cloudburst :: there are %s metrics that were not processed of the %s unique_metrics' % (
                             str(len(not_processed_metrics)),
                             str(len(unique_metrics))))
                         del set_difference

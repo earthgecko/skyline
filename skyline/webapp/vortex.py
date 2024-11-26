@@ -224,8 +224,8 @@ def get_timeseries_from_training_data():
             function_str, err))
         raise
     if not os.path.isfile(training_data_json):
-        logger.error('error :: %s :: training_data_json not passed in POST data - %s' % (
-            function_str, err))
+        logger.error('error :: %s :: training_data_json not passed in POST data' % (
+            function_str))
         raise ValueError('error :: file not found %s' % training_data_json)
     try:
         with open(training_data_json, 'r') as f:
@@ -295,7 +295,7 @@ def get_vortex_results(vortex_post_data):
         request_body = gzip.compress(json.dumps(vortex_post_data).encode('utf-8'))
         r = requests.post(url, data=request_body, headers=headers, timeout=60, verify=settings.VERIFY_SSL)
         if r.status_code != 200:
-            logger.warning('%s :: got response with status code %s and reason %s' % (
+            logger.info('warning :: %s :: got response with status code %s and reason %s' % (
                 function_str, str(r.status_code), str(r.reason)))
         else:
             logger.info('%s :: got vortex response' % function_str)
@@ -433,6 +433,10 @@ def vortex_request():
             logger.error('error :: %s :: failed to load timeseries from training_data_json' % (
                 function_str))
             raise ValueError('error :: failed to load timeseries from training_data_json')
+        if not isinstance(timeseries, list):
+            logger.error('error :: %s :: failed to load the timeseries list from training_data_json' % (
+                function_str))
+            raise ValueError('error :: failed to load timeseries list from training_data_json')
 
     if data_source in ['graphite', 'victoriametrics', 'redis']:
         try:
@@ -495,12 +499,20 @@ def vortex_request():
         try:
             status_code = results['status_code']
         except Exception as err:
-            logger.error('error :: %s :: failed to determine status_code from results: %s - %s' % (
-                function_str, str(results), err))
-            status_code = 0
+            try:
+                status_code = results['code']
+            except Exception as err2:
+                logger.error('error :: %s :: failed to determine status_code from results: %s, err: %s, err2: %s' % (
+                    function_str, str(results), err, err2))
+                status_code = 0
 
         if status_code == 200:
             successfully_processed = True
+        if status_code >= 400:
+            logger.error('error :: %s :: status_code: %s, results: %s' % (
+                function_str, str(status_code), str(results)))
+            raise ValueError('error :: /flux/vortex returned status_code: %s, with results: %s' % (
+                str(status_code), str(results)))
 
     logger.info('vortex_request :: status_code: %s, successfully_processed: %s' % (
         str(status_code), str(successfully_processed)))

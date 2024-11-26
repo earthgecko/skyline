@@ -83,7 +83,7 @@ def api_get_analysed_events(current_skyline_app, cluster_data=False):
     if analysed_events_dict:
         current_logger.info('api_get_analysed_events :: determined local analysed_events')
     else:
-        current_logger.warning('warning :: api_get_analysed_events :: determined not local analysed_events')
+        current_logger.info('warning :: api_get_analysed_events :: determined not local analysed_events')
 
     remote_analysed_events = []
     if REMOTE_SKYLINE_INSTANCES and cluster_data:

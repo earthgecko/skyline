@@ -218,7 +218,7 @@ class AnalyzerLabelledMetrics(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     def spawn_alerter_process(self, alert, metric, context):
@@ -712,7 +712,7 @@ class AnalyzerLabelledMetrics(Thread):
                             logger.info('labelled_metrics_spin_process :: load_shedding_active reordered metrics by last analysed timestamp, last metric in list now: %s' % (
                                 str(metrics_last_analyzed_timestamp_sorted[-1])))
                         else:
-                            logger.warning('warning :: labelled_metrics_spin_process :: load_shedding_active but could not reorder metrics by last analysed timestamp because metrics_last_analyzed_timestamp_sorted is empty, the unordered list will be used')
+                            logger.info('warning :: labelled_metrics_spin_process :: load_shedding_active but could not reorder metrics by last analysed timestamp because metrics_last_analyzed_timestamp_sorted is empty, the unordered list will be used')
                         last_analysed_ordered_metrics = [labelled_metric for ts, labelled_metric in metrics_last_analyzed_timestamp_sorted]
                         del metrics_last_analyzed_timestamp_sorted
                     if last_analysed_ordered_metrics:
@@ -1992,6 +1992,13 @@ class AnalyzerLabelledMetrics(Thread):
                                 del negatives_found
                             except:
                                 pass
+                            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                            #                   Branch #5532: v5.0.0-alpha
+                            # Coerce all numpy.bool_ typed elements introduced with
+                            # numpy >= 2 to Python bool so they are literal_eval and
+                            # json safe
+                            ensemble = [item if item is None else bool(item) for item in ensemble]
+
                         # It could have been deleted by the Roomba
                         except TypeError:
                             exceptions['DeletedByRoomba'] += 1
@@ -3172,7 +3179,7 @@ class AnalyzerLabelledMetrics(Thread):
             pid_count = 0
             for i_process in range(1, ANALYZER_LABELLED_METRICS_PROCESSES + 1):
                 if i_process > unique_labelled_metrics_count:
-                    logger.warning('warning :: analyzer_labelled_metrics :: skyline is set for more cores than needed.')
+                    logger.info('warning :: analyzer_labelled_metrics :: skyline is set for more cores than needed.')
 
                 logger.info('analyzer_labelled_metrics :: memory usage before starting process - %s' % str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss))
                 if i_process == ANALYZER_LABELLED_METRICS_PROCESSES:

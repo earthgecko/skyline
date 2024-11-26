@@ -34,7 +34,7 @@ def get_bq_accounts_settings(current_skyline_app):
     if len(external_bq_accounts) > 0:
         for bq_account, bq_account_dict in external_bq_accounts.items():
             if bq_account in internal_bq_accounts:
-                current_logger.warning('warning :: get_bq_account_settings :: settings for %s from settings.VISTA_BQ_ACCOUNTS are being overwritten from external_settings' % str(bq_account))
+                current_logger.info('warning :: get_bq_account_settings :: settings for %s from settings.VISTA_BQ_ACCOUNTS are being overwritten from external_settings' % str(bq_account))
             vista_bq_accounts[bq_account] = copy.deepcopy(bq_account_dict)
 
     vista_bq_accounts_log = copy.deepcopy(vista_bq_accounts)
@@ -63,5 +63,5 @@ def get_bq_accounts_settings(current_skyline_app):
     current_logger.debug('debug :: get_bq_account_settings :: vista_bq_accounts: %s' % str(vista_bq_accounts_log))
 
     if not vista_bq_accounts:
-        current_logger.warning('warning :: get_bq_account_settings :: no vista_bq_accounts settings found')
+        current_logger.info('warning :: get_bq_account_settings :: no vista_bq_accounts settings found')
     return vista_bq_accounts
