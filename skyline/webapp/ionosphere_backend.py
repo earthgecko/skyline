@@ -649,7 +649,12 @@ def ionosphere_metric_data(
 
         string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
         float_keys = ['value']
-        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        int_keys = [
+            'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
+            'anomaly_id',
+        ]
         array_keys = ['algorithms', 'triggered_algorithms', 'algorithms_run']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -2607,6 +2612,8 @@ def ionosphere_search(default_query, search_query):
         default_ionosphere_search = True
 
     metrics = []
+    # @added 20241120 - Bug #5522: Handle duplicate metric names
+    duplicate_metrics = {}
 
     try:
         connection = engine.connect()
@@ -2615,13 +2622,20 @@ def ionosphere_search(default_query, search_query):
         logger.info('selecting all metrics with id > 0')
         if default_ionosphere_search:
             stmt = select([metrics_table]).where(metrics_table.c.id == 0)
-            logger.info('defult Ionosphere search some not selecting all metrics')
+            logger.info('defult Ionosphere search so not selecting all metrics')
 
         result = connection.execute(stmt)
         for row in result:
             metric_id = int(row['id'])
             metric_name = str(row['metric'])
+            # @added 20241120 - Bug #5522: Handle duplicate metric names
+            if metric_name in duplicate_metrics.keys():
+                duplicate_metrics[metric_name].append(metric_id)
+                continue
             metrics.append([metric_id, metric_name])
+            # @added 20241120 - Bug #5522: Handle duplicate metric names
+            duplicate_metrics[metric_name] = [metric_id]
+
         connection.close()
     except:
         trace = traceback.format_exc()
@@ -2970,14 +2984,22 @@ def ionosphere_search(default_query, search_query):
                     # [SQL: SELECT * FROM metrics WHERE id in ()]
                     if select_metric_ids == '':
                         select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id=0'
-                        logger.warning('warn :: determined 0 metrics with features profiles for the default Ionosphere search')
+                        logger.info('warning :: determined 0 metrics with features profiles for the default Ionosphere search')
 
                     try:
                         metrics_result = connection.execute(select_metric_ids_stmt)
                         for row in metrics_result:
                             metric_id = int(row['id'])
                             metric_name = str(row['metric'])
+
+                            # @added 20241120 - Bug #5522: Handle duplicate metric names
+                            if metric_name in duplicate_metrics.keys():
+                                duplicate_metrics[metric_name].append(metric_id)
+                                continue
                             metrics.append([metric_id, metric_name])
+                            # @added 20241120 - Bug #5522: Handle duplicate metric names
+                            duplicate_metrics[metric] = [metric_id]
+
                         logger.info('engine_needed and engine and search_query - determined %s metric objects for the default Ionosphere search' % str(len(metrics)))
                     except:
                         trace = traceback.format_exc()
@@ -4152,6 +4174,9 @@ def metric_layers_alogrithms(base_name):
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
+    # @added 20241120 - Bug #5522: Handle duplicate metric names
+    duplicate_metrics = {}
+
     metric_id = 0
     try:
         connection = engine.connect()
@@ -4159,6 +4184,9 @@ def metric_layers_alogrithms(base_name):
         result = connection.execute(stmt)
         for row in result:
             metric_id = int(row['id'])
+            # @added 20241120 - Bug #5522: Handle duplicate metric names
+            break
+
         connection.close()
     except:
         trace = traceback.format_exc()
@@ -7931,6 +7959,10 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             if engine:
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
+
+        # @added 20241120 - Bug #5522: Handle duplicate metric names
+        duplicate_metrics = {}
+
         metric_id = None
         try:
             connection = engine.connect()
@@ -7938,6 +7970,9 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             result = connection.execute(stmt)
             for row in result:
                 metric_id = int(row['id'])
+                # @added 20241120 - Bug #5522: Handle duplicate metric names
+                break
+
             connection.close()
         except:
             logger.error(traceback.format_exc())

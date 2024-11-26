@@ -257,7 +257,7 @@ class Panorama(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
 
@@ -287,6 +287,10 @@ class Panorama(Thread):
         insert_errors = []
         if not metrics_to_insert and metric_name:
             metrics_to_insert = [metric_name]
+
+        # @added 20241120 - Bug #5522: Handle duplicate metric names
+        metrics_to_insert = list(set(metrics_to_insert))
+
         logger.info('insert_new_metric :: %s new metrics to insert into the metrics table' % (
             str(len(metrics_to_insert))))
         try:
@@ -559,7 +563,12 @@ class Panorama(Thread):
         # Added label to string_keys and user_id to int_keys
         string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source', 'label']
         float_keys = ['value']
-        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration', 'user_id']
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        int_keys = [
+            'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
+            'user_id', 'anomaly_id',
+        ]
         array_keys = ['algorithms', 'triggered_algorithms']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -706,6 +715,8 @@ class Panorama(Thread):
                     result = connection.execute(stmt)
                     for row in result:
                         metric_id = int(row['id'])
+                        # @added 20241120 - Bug #5522: Handle duplicate metric names
+                        break
                     connection.close()
                 except:
                     logger.error(traceback.format_exc())
@@ -1043,6 +1054,8 @@ class Panorama(Thread):
                 result = connection.execute(stmt)
                 for row in result:
                     metric_id = int(row['id'])
+                    # @added 20241120 - Bug #5522: Handle duplicate metric names
+                    break
                 connection.close()
             except:
                 logger.error(traceback.format_exc())
@@ -1500,6 +1513,8 @@ class Panorama(Thread):
                     result = connection.execute(stmt)
                     for row in result:
                         metric_id = int(row['id'])
+                        # @added 20241120 - Bug #5522: Handle duplicate metric names
+                        break
                     connection.close()
                 except:
                     logger.error(traceback.format_exc())
@@ -2625,6 +2640,30 @@ class Panorama(Thread):
                         'error :: could not set anomaly_id_redis_key - %s - %s' % (
                             anomaly_id_redis_key, e))
 
+            # @added 20241119 - Feature #5064: mirage.inflection
+            mirage_inflection = False
+            if anomaly_id and app in ['mirage', 'ionosphere']:
+                if 'mmzrmp' not in triggered_algorithms:
+                    mirage_inflection = True
+            if mirage_inflection:
+                key_data = {
+                    'anomaly_id': anomaly_id, 'app': app,
+                    'base_name': metric, 'metric': metric,
+                    'full_duration': full_duration,
+                    'timestamp': int(metric_timestamp)
+                }
+                if labelled_metrics_name:
+                    key_data['metric'] = labelled_metrics_name
+                key_name = '%s.%s' % (str(metric_timestamp), str(anomaly_id))
+                logger.info('adding %s to mirage.inflection' % key_name)
+                try:
+                    self.redis_conn_decoded.hset('mirage.inflection', key_name, str(key_data))
+                    logger.info('added %s key to mirage.inflection' % key_name)
+                except Exception as err:
+                    logger.error(
+                        'error :: hset failed on mirage.inflection for key %s, err: %s' % (
+                            key_name, err))
+
             # Set anomaly record cache key
             # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
             #                      Feature #1448: Crucible web UI
@@ -2988,6 +3027,18 @@ class Panorama(Thread):
                                         base_name = unique_metric.replace(settings.FULL_NAMESPACE, '', 1)
                                     else:
                                         base_name = unique_metric
+
+                                        # @added 20241120 - Bug #5522: Handle duplicate metric names
+                                        # It is possible that when a lot of new metrics are recieved such as
+                                        # when a new Skyline or existing Skyline instance has lots of new
+                                        # metrics submitted to it that metrics can be identified as new
+                                        # metrics multiple times due to them not being in the Redis sets yet
+                                        # which are checked to determine if they are new metrics because
+                                        # horizon skips until a metric id is assigned.  This should also
+                                        # cover labelled_metrics.
+                                        if base_name in db_metric_names:
+                                            continue
+
                                     new_base_names_to_insert.append(base_name)
 
                             # @modified 20240119 - Task #5228: panorama - optimise insertions
@@ -3003,6 +3054,17 @@ class Panorama(Thread):
                                                 base_name = unique_metric.replace(settings.FULL_NAMESPACE, '', 1)
                                             else:
                                                 base_name = unique_metric
+
+                                            # @added 20241120 - Bug #5522: Handle duplicate metric names
+                                            # It is possible that when a lot of new metrics are recieved such as
+                                            # when a new Skyline or existing Skyline instance has lots of new
+                                            # metrics submitted to it that metrics can be identified as new
+                                            # metrics multiple times due to them not being in the Redis sets yet
+                                            # which are checked to determine if they are new metrics because
+                                            # horizon skips until a metric id is assigned.  This should also
+                                            # cover labelled_metrics.
+                                            if base_name in db_metric_names:
+                                                continue
 
                                             # @added 20240119 - Task #5228: panorama - optimise insertions
                                             # Optimise the insertions of new metric by inserting
