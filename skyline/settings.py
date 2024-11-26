@@ -2463,6 +2463,13 @@ MIRAGE_ANALYSIS_RESOLUTION = 0
 :vartype MIRAGE_ANALYSIS_RESOLUTION: int
 """
 
+MIRAGE_INFLECTION = False
+"""
+:var MIRAGE_INFLECTION: Whether to enable mirage_inflection which alert on
+    SUSTAINED anomalies after 15 minutes.
+:vartype MIRAGE_INFLECTION: bool
+"""
+
 """
 Boundary settings
 """
@@ -5265,6 +5272,14 @@ VORTEX_ALGORITHMS = {
             'max_execution_time': 3.0,
         },
     },
+    'mmzrmp': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'return_results': True,
+            'max_execution_time': 180,
+        },
+    },
     'mstl': {
         'outlier_value': 1,
         'algorithm_parameters': {
@@ -5273,6 +5288,62 @@ VORTEX_ALGORITHMS = {
             'level': 99,
             'season_hours': 24,
             'season_days': 7,
+            'return_results': True,
+            'max_execution_time': 180,
+        },
+    },
+    'lad': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'threshold': 95,
+            'return_results': True,
+            'max_execution_time': 30,
+        },
+    },
+    'grafana_promql_anomaly_detection': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'min_anomaly_duration_seconds': 300,
+            'threshold_by_covar': 0.5,
+            'sparse_threshold': 0.083333,
+            'stddev_multiplier': 2,
+            'margin_multiplier': 0.5,
+            'short_window': 3600,
+            'smoothing_window_seconds': 93600,
+            'return_results': True,
+            'max_execution_time': 30,
+        },
+    },
+    'probabilistic_forecasts_generalized_pareto_distribution_ets': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'threshold': 95,
+            'p_value': 95,
+            'interior_point_p_value': 1.5,
+            'return_results': True,
+            'max_execution_time': 180,
+        },
+    },
+    'laoccfdlpnc': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'oc_svm_nu': 0.05,
+            'if_contamination': 0.05,
+            'interior_point_p_value': 1.5,
+            'return_results': True,
+            'max_execution_time': 180,
+        },
+    },
+    'RePAD2': {
+        'outlier_value': 1,
+        'algorithm_parameters': {
+            'anomaly_window': 1,
+            'adaptive_error_window_size': 1000,
+            'epochs': 100,
             'return_results': True,
             'max_execution_time': 180,
         },
