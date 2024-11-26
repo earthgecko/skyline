@@ -148,7 +148,7 @@ if __name__ == "__main__":
         #                      Branch 3262: py3
         # sys.exit(1)
         if start_if_no_db:
-            logger.warning('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+            logger.info('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
                 str(mysql_up), str(start_if_no_db)))
             mysql_up = True
         else:
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     #                   Branch 3262: py3
     if start_if_no_db:
         if not mysql_up:
-            logger.warning('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+            logger.info('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
                 str(mysql_up), str(start_if_no_db)))
             mysql_up = True
 
