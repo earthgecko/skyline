@@ -23,6 +23,9 @@ import pandas as pd
 from skyline_functions import mkdir_p
 from settings import FULL_DURATION
 
+# @added 20230731 - Feature #5040: functions.timeseries_prediction.fft_extrapolation
+from functions.timeseries_predictions.fft_extrapolation import fft_extrapolation
+
 # The name of the fucntion MUST be the same as the name declared in
 # settings.CUSTOM_ALGORITHMS.
 # It MUST have 3 parameters:
@@ -70,6 +73,9 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             Default is ``6``.
         - ``'window'`` (int): The number of data points in a window.
             Default is ``5``.
+        - ``'use_fft_extrapolation'`` (bool):
+            If ``True``, enables the use of FFT (Fast Fourier Transform)
+            extrapolation to pad time series by window + 1. Default is ``True``.
          - ``'return_results'`` (bool): Optional.
             If ``True``, returns the results dict in addition to anomalous and
             anomalyScore.  Default is ``False``.
@@ -202,6 +208,13 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                 return (anomalous, anomalyScore, anomalies)
             return (anomalous, anomalyScore)
 
+    # Use the algorithm_parameters to determine variables
+    debug_print = None
+    try:
+        debug_print = algorithm_parameters['debug_print']
+    except:
+        debug_print = False
+
     # Allow the m66 parameters to be passed in the algorithm_parameters
     window = 6
     try:
@@ -211,6 +224,13 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     except Exception as e:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())
         dev_null = e
+
+    # @added 20230731 - Feature #5040: functions.timeseries_prediction.fft_extrapolation
+    use_fft_extrapolation = True
+    try:
+        use_fft_extrapolation = algorithm_parameters['use_fft_extrapolation']
+    except:
+        use_fft_extrapolation = True
 
     nth_median = 6
     try:
@@ -357,7 +377,10 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         anomaly_window = 1
 
     try:
-        base_name = algorithm_parameters['base_name']
+        try:
+            base_name = algorithm_parameters['base_name']
+        except:
+            base_name = 'unknown'
     except Exception as e:
         # This except pattern MUST be used in ALL custom algortihms to
         # facilitate the traceback from any errors.  The algorithm we want to
@@ -640,6 +663,28 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     return (anomalous, anomalyScore, anomalies)
                 return (anomalous, anomalyScore)
 
+        # @added 20230731 - Feature #5040: functions.timeseries_prediction.fft_extrapolation
+        use_timeseries = list(timeseries)
+        fft_extrapolation_timeseries = []
+        if use_fft_extrapolation:
+            start_fft = timer()
+            try:
+                fft_extrapolation_timeseries = fft_extrapolation(current_skyline_app, timeseries, n_predict=(window + 1), log=debug_logging)
+                if len(fft_extrapolation_timeseries) <= len(timeseries):
+                    fft_extrapolation_timeseries = []
+            except Exception as err:
+                fft_extrapolation_timeseries = []
+                if debug_logging:
+                    current_logger.error(traceback.format_exc())
+                    current_logger.error('error :: %s fft_extrapolation error - %s' % (algorithm_name, err))
+            fft_timing = timer() - start_fft
+            if debug_logging:
+                current_logger.debug('debug :: %s :: fft_extrapolation_timeseries of length: %s (original: %s), created in %.6f seconds' % (
+                    algorithm_name, str(len(fft_extrapolation_timeseries)),
+                    str(len(timeseries)), fft_timing))
+            if fft_extrapolation_timeseries:
+                use_timeseries = list(fft_extrapolation_timeseries)
+
         end_preprocessing = timer()
         preprocessing_runtime = end_preprocessing - start_preprocessing
         if debug_logging:
@@ -705,9 +750,30 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                         return (anomalous, anomalyScore, anomalies)
                     return (anomalous, anomalyScore)
 
-                x_np = np.asarray([x[1] for x in timeseries])
+                #x_np = np.asarray([x[1] for x in timeseries])
+                x_np = np.asarray([x[1] for x in use_timeseries])
+
                 # Fast Min-Max scaling
-                data = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                # @modified 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+                #                      Branch #5532: v5.0.0-alpha
+                # Prevent invalid value encountered in divide errors
+                #data = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                np_max = np.amax(x_np)
+                np_min = np.amin(x_np)
+                if np_max == np_min:
+                    data = np.zeros_like(x_np)
+                else:
+                    try:
+                        data = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                    except Exception as err:
+                        if debug_logging:
+                            current_logger.debug('debug :: %s :: error MinMax scaling, err: %s' % (
+                                algorithm_name, err))
+                        if debug_print:
+                            print('%s :: error MinMax scaling, err: %s' % (
+                                algorithm_name, err))
+                    # normalised
+                    data = (x_np - np.nanmin(x_np)) / (np.nanmax(x_np) - np.nanmin(x_np))
 
                 # m66 - calculate to nth_median
                 median_count = 0
@@ -728,7 +794,8 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                     current_logger.debug('debug :: %s :: std_nth_median calculated with bn' % (
                         algorithm_name))
             else:
-                df = pd.DataFrame(timeseries, columns=['date', 'value'])
+                #df = pd.DataFrame(timeseries, columns=['date', 'value'])
+                df = pd.DataFrame(use_timeseries, columns=['date', 'value'])
                 df['date'] = pd.to_datetime(df['date'], unit='s')
                 datetime_index = pd.DatetimeIndex(df['date'].values)
                 df = df.set_index(datetime_index)
@@ -794,7 +861,8 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             # for (window / 2)
             if anomalies_found:
                 current_triggers = []
-                for index, item in enumerate(timeseries):
+                #for index, item in enumerate(timeseries):
+                for index, item in enumerate(use_timeseries):
                     if std_nth_median_n_sigma[index] == 1:
                         current_triggers.append(index)
                     else:
@@ -803,9 +871,9 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                                 # Shift the anomaly back to the beginning of the
                                 # window
                                 if shift_to_start_of_window:
-                                    anomalies.append(timeseries[(trigger_index - (window * int((nth_median / 2))))])
+                                    anomalies.append(use_timeseries[(trigger_index - (window * int((nth_median / 2))))])
                                 else:
-                                    anomalies.append(timeseries[trigger_index])
+                                    anomalies.append(use_timeseries[trigger_index])
                         current_triggers = []
                 # Process any remaining current_triggers
                 if len(current_triggers) > int(window / 2):
@@ -813,9 +881,9 @@ def m66(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
                         # Shift the anomaly back to the beginning of the
                         # window
                         if shift_to_start_of_window:
-                            anomalies.append(timeseries[(trigger_index - (window * int((nth_median / 2))))])
+                            anomalies.append(use_timeseries[(trigger_index - (window * int((nth_median / 2))))])
                         else:
-                            anomalies.append(timeseries[trigger_index])
+                            anomalies.append(use_timeseries[trigger_index])
 
             if not anomalies:
                 anomalous = False
