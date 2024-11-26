@@ -72,6 +72,8 @@ if True:
     from functions.flux.reload_for_keys import reload_for_keys
     # @added 20240913 - Feature #5468: callback
     from functions.skyline.callback import callback
+    # @added 20241113 - Task #5547: flux - vortex - return results if exist
+    from functions.mirage.get_vortex_metric_data_from_archive import get_vortex_metric_data_from_archive
 
 # @added 20200818 - Feature #3694: flux - POST multiple metrics
 # Added validation of FLUX_API_KEYS
@@ -239,7 +241,7 @@ if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
                         str(len(aggregate_metrics))))
                 else:
                     aggregate_metrics = []
-                    logger.warning('warning :: listen :: failed to get metrics_manager.flux.aggregate_metrics memcache list')
+                    logger.info('warning :: listen :: failed to get metrics_manager.flux.aggregate_metrics memcache list')
 
             except Exception as outer_err2:
                 logger.error('error :: listen :: could not get memcache set metrics_manager.flux.aggregate_metrics - %s' % str(outer_err2))
@@ -265,7 +267,7 @@ except Exception as outer_err:
                     str(len(skyline_external_settings))))
             else:
                 skyline_external_settings = {}
-                logger.warning('warning :: listen :: failed to get skyline.external_settings memcache dict')
+                logger.info('warning :: listen :: failed to get skyline.external_settings memcache dict')
         except Exception as outer_err2:
             logger.error('error :: listen :: could not get memcache set skyline.external_settings - %s' % str(outer_err2))
             skyline_external_settings = {}
@@ -357,7 +359,7 @@ except Exception as outer_err:
                 logger.info('listen :: there are %s items in the namespace_quotas_dict memcache dict' % (
                     str(len(namespace_quotas_dict))))
             else:
-                logger.warning('warning :: listen :: failed to get namespace_quotas_dict memcache dict')
+                logger.info('warning :: listen :: failed to get namespace_quotas_dict memcache dict')
                 namespace_quotas_dict = {}
         except Exception as outer_err2:
             logger.error('error :: listen :: could not get memcache dict metrics_manager.flux.namespace_quotas - %s' % str(outer_err2))
@@ -395,7 +397,7 @@ except Exception as outer_err:
                     str(len(aggregate_namespaces_dict))))
             else:
                 aggregate_namespaces_dict = {}
-                logger.warning('warning :: listen :: failed to get metrics_manager.flux.aggregate_namespaces memcache dict')
+                logger.info('warning :: listen :: failed to get metrics_manager.flux.aggregate_namespaces memcache dict')
         except Exception as outer_err2:
             logger.error('error :: listen :: could not get memcache dict metrics_manager.flux.aggregate_namespaces - %s' % str(outer_err2))
             aggregate_namespaces_dict = {}
@@ -1973,7 +1975,7 @@ class MetricDataPost(object):
                     message = 'invalid key'
                     body = {"code": 401, "message": message}
                     resp.text = json.dumps(body)
-                    logger.warning('warning :: listen :: %s, returning 401' % message)
+                    logger.info('warning :: listen :: %s, returning 401' % message)
 
                     # @modified 20210909
                     # Return 401 if bad key
@@ -2005,7 +2007,7 @@ class MetricDataPost(object):
                 message = 'invalid key'
                 body = {"code": 401, "message": message}
                 resp.text = json.dumps(body)
-                logger.warning('warning :: listen :: %s, returning 401' % message)
+                logger.info('warning :: listen :: %s, returning 401' % message)
 
                 # @modified 20210909
                 # Return 401 if bad key
@@ -2998,7 +3000,7 @@ class MetricDataPost(object):
                                 resp.status = falcon.HTTP_400
                                 return
                         except:
-                            logger.warning('warning :: listen :: invalid timestamp value found in POST data - %s' % (
+                            logger.info('warning :: listen :: invalid timestamp value found in POST data - %s' % (
                                 str(timestamp_present)))
 
                             # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
@@ -3938,7 +3940,7 @@ class OTLPTracePost(object):
                 message = 'invalid key'
                 body = {"code": 401, "message": message}
                 resp.text = json.dumps(body)
-                logger.warning('warning :: listen :: OTLPTracePost :: %s, returning 401' % message)
+                logger.info('warning :: listen :: OTLPTracePost :: %s, returning 401' % message)
                 resp.status = falcon.HTTP_401
                 return
 
@@ -3972,7 +3974,7 @@ class OTLPTracePost(object):
                 message = 'invalid OLTP trace data'
                 body = {"code": 400, "message": message}
                 resp.text = json.dumps(body)
-                logger.warning('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
+                logger.info('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
             resourceSpans = []
@@ -3985,7 +3987,7 @@ class OTLPTracePost(object):
                 message = 'invalid OLTP trace data no resourceSpans'
                 body = {"code": 400, "message": message}
                 resp.text = json.dumps(body)
-                logger.warning('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
+                logger.info('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
             timings = {}
@@ -4042,7 +4044,7 @@ class OTLPTracePost(object):
                         try:
                             valid_metric_name, reason = validate_metric_name('listen :: OTLPTracePost', metric)
                         except Exception as err:
-                            logger.warning('warning :: listen :: OTLPTracePost :: could validate_metric_name - %s - %s - %s' % (
+                            logger.info('warning :: listen :: OTLPTracePost :: could validate_metric_name - %s - %s - %s' % (
                                 reason, metric, str(err)))
                             valid_metric_name = False
                         if not valid_metric_name:
@@ -4374,7 +4376,7 @@ class VortexDataPost(object):
                     message = 'invalid key'
                     body = {"code": 401, "message": message}
                     resp.text = json.dumps(body)
-                    logger.warning('warning :: listen :: vortex :: %s, returning 401' % message)
+                    logger.info('warning :: listen :: vortex :: %s, returning 401' % message)
                     # Return 401 if bad key
                     resp.status = falcon.HTTP_401
                     return
@@ -4394,7 +4396,7 @@ class VortexDataPost(object):
                 message = 'invalid key'
                 body = {"code": 401, "message": message}
                 resp.text = json.dumps(body)
-                logger.warning('warning :: listen :: vortex :: %s, returning 401' % message)
+                logger.info('warning :: listen :: vortex :: %s, returning 401' % message)
                 resp.status = falcon.HTTP_401
                 return
 
@@ -4630,7 +4632,7 @@ class VortexDataPost(object):
                         del postData['timeseries']
                     except:
                         pass
-                    logger.warning('warning :: listen :: vortex :: unauthorized shard request made - postData (excl. timeseries):  %s' % str(postData))
+                    logger.info('warning :: listen :: vortex :: unauthorized shard request made - postData (excl. timeseries):  %s' % str(postData))
                     resp.status = falcon.HTTP_403
                     return
                 try:
@@ -5200,6 +5202,27 @@ class VortexResults(object):
                     break
                 sleep(1)
                 time_now = int(time())
+
+            # @added 20241113 - Task #5547: flux - vortex - return results if exist
+            if not results:
+                request_id_elements = request_id.split('.')
+                request_id_timestamp = request_id_elements[0]
+                request_id_time = '.'.join(request_id_elements[0:2])
+                request_id_timestamp_aligned = int(request_id_timestamp) // 3600 * 3600
+                vortex_save_path = '%s/flux/vortex/results/%s/%s' % (
+                    settings.SKYLINE_DIR, str(request_id_timestamp_aligned),
+                    str(request_id_time))
+                vortex_filename = 'vortex.%s.json.gz' % str(request_id)
+                vortex_metric_data_archive = '%s/%s' % (vortex_save_path, vortex_filename)
+                if os.path.isfile(vortex_metric_data_archive):
+                    try:
+                        results = get_vortex_metric_data_from_archive(skyline_app, vortex_metric_data_archive)
+                    except Exception as err:
+                        logger.error('error :: listen :: vortex :: get_vortex_metric_data_archive_filename failed to determine results from %s - %s' % (
+                            vortex_metric_data_archive, err))
+                if results:
+                    logger.info('listen :: vortex_results :: results being returned from %s' % (
+                        vortex_metric_data_archive))
 
             if not results:
                 end_request_timer = timer()
