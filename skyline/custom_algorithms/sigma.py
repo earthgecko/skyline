@@ -167,6 +167,16 @@ def sigma(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     try:
         anomalous, anomalies = run_sigma_algorithms(current_skyline_app, timeseries, sigma_value, consensus, anomaly_window)
+        # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        #                   Feature #4482: Test alerts
+        # Coerce all numpy.bool_ typed elements introduced with
+        # numpy >= 2 to Python bool so they are literal_eval and
+        # json safe.  ideally if isinstance np.bool_ but without incurring
+        # the overhead of importing numpy here just to load the type
+        if type(anomalous) is not None and type(anomalous).__name__ == 'bool_':
+            anomalous = bool(anomalous)
+
         if anomalous:
             anomalyScore = 1.0
         else:

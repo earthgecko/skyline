@@ -315,7 +315,10 @@ def get_vortex_training_data_graphs(current_skyline_app, metric_data_archive, un
         try:
             anomaly_window = vortex_metric_data['algorithms'][algorithm]['algorithm_parameters']['anomaly_window']
         except KeyError:
-            anomaly_window = 1
+            try:
+                anomaly_window = vortex_metric_data['algorithms'][algorithm]['anomaly_window']
+            except:
+                anomaly_window = 1
         except Exception as err:
             current_logger.error('error :: %s :: scores not found in vortex_metric_data[\'algorithms\'][\'%s\'][\'algorithm_parameters\'][\'anomaly_window\'] - %s' % (
                 function_str, algorithm, err))

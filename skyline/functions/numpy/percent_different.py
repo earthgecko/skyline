@@ -19,8 +19,33 @@ def get_percent_different(base_value, compare_value, always_return_as_positive=T
 
     """
     percent_different = None
+
+    # @added 20241121 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Validate values
+    for v in [base_value, compare_value]:
+        try:
+            float_value = float(v)
+            if np_isnan(float_value):
+                return percent_different
+            if np_isinf(float_value):
+                return percent_different
+        except:
+            return percent_different
+    # Prevent invalid value encountered in divide warnings
+    if base_value == 0 and compare_value == 0:
+        percent_different = 0
+        return percent_different
+
     try:
         sums_array = np_array([base_value, compare_value], dtype=float)
+
+        # @added 20241121 - Task #5526: Build v5.0.0 and upgrade deps
+        #                   Branch #5532: v5.0.0-alpha
+        # Prevent divide by zero encountered in divide warnings
+        if (sums_array[:-1] * 100.) == 0:
+            return percent_different
+
         calc_percent_different = np_diff(sums_array) / sums_array[:-1] * 100.
         percent_different = calc_percent_different[0]
     except:

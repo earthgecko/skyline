@@ -239,7 +239,7 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
             # of the df, that is just how it rolls.
             if str(score) == 'nan':
                 score = 0.0
-            macd_scores.append([index, score])
+            macd_scores.append([index, float(score)])
         # Sort the scores, lowest to highest
         sorted_scores = sorted(macd_scores, key=lambda x: x[1])
         scores = [s for i, s in sorted_scores]
@@ -255,10 +255,14 @@ def macd(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
         # Determine the lowest value bin
         bins = h[1]
-        lowest_value_bin = bins[0]  # e.g. -90.16033348
-        second_lowest_value_bin = bins[1]  # e.g. -63.07251163
-        highest_value_bin = bins[-1]  # e.g. 316.15699428
-        second_highest_value_bin = bins[-2]  # e.g. 289.06917243
+        # @modified 20241114 - Bug #5541: np.float64 - yhat and sigma3
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Branch #5532: v5.0.0-alpha and 
+        # Coerce np.float64 to float to be literal_eval and json safe
+        lowest_value_bin = float(bins[0])  # e.g. -90.16033348
+        second_lowest_value_bin = float(bins[1])  # e.g. -63.07251163
+        highest_value_bin = float(bins[-1])  # e.g. 316.15699428
+        second_highest_value_bin = float(bins[-2])  # e.g. 289.06917243
 
         # In some cases the bin with the highest values will incorporate
         # most of the datapoints signifying that the upper value bins

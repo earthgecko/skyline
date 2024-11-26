@@ -322,8 +322,8 @@ def spectral_entropy(current_skyline_app, parent_pid, timeseries, algorithm_para
         #   0.59824279, 0.63841851, 0.67859423, 0.71876995, 0.75894567,
         #   0.79912139, 0.83929712, 0.87947284, 0.91964856, 0.95982428,
         # 1.        ])
-        lowest_value_bin = bins[0]  # e.g. 0.39736418
-        second_lowest_value_bin = bins[1]  # e.g. 0.43753991
+        lowest_value_bin = float(bins[0])  # e.g. 0.39736418
+        second_lowest_value_bin = float(bins[1])  # e.g. 0.43753991
         # Estimate the low entropy value based on the difference
         # between the bins and then some.  This gives a low
         # value to use as 

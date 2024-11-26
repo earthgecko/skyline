@@ -228,7 +228,7 @@ class MirageLabelledMetrics(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
     # @added 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
@@ -298,7 +298,9 @@ class MirageLabelledMetrics(Thread):
 
         string_keys = ['metric']
         float_keys = ['value']
-        int_keys = ['hours_to_resolve', 'metric_timestamp']
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        int_keys = ['hours_to_resolve', 'metric_timestamp', 'anomaly_id']
         # @added 20200916 - Branch #3068: SNAB
         #                   Task #3744: POC matrixprofile
         boolean_keys = ['snab_only_check']
@@ -1180,10 +1182,10 @@ class MirageLabelledMetrics(Thread):
             if first_timestamp:
                 if first_timestamp > valid_if_before_timestamp:
                     valid_mirage_timeseries = False
-                    logger.warning('warning :: first_timestamp is greater than first FULL_DURATION timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
+                    logger.info('warning :: first_timestamp is greater than first FULL_DURATION timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
             else:
                 valid_mirage_timeseries = False
-                logger.warning('warning :: no first_timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
+                logger.info('warning :: no first_timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
 
             # valid_mirage_timeseries = True
 
@@ -1230,6 +1232,13 @@ class MirageLabelledMetrics(Thread):
                     # @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
                     # Added mirage_busy
                     anomalous, ensemble, datapoint, negatives_found, algorithms_run, custom_algorithm_results = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func='mirage_labelled_metrics', mirage_busy=analyzer_labelled_metrics_busy)
+
+                    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
 
                     logger.info('mirage_labelled_metrics :: analysed :: %s - anomalous: %s' % (metric, str(anomalous)))
 
@@ -1568,6 +1577,13 @@ class MirageLabelledMetrics(Thread):
                     except Exception as err:
                         logger.error('error :: mirage_labelled_metrics :: failed to add %s to Redis hash %s - %s' % (
                             str(redis_metric_name), str(redis_hash), err))
+
+            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha
+            # Coerce all numpy.bool_ typed elements introduced with
+            # numpy >= 2 to Python bool so they are literal_eval and
+            # json safe
+            ensemble = [item if item is None else bool(item) for item in ensemble]
 
             # @added 20220504 - Feature #2580: illuminance
             # @modified 20230419 - Feature #2580: illuminance

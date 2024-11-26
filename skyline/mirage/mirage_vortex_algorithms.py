@@ -786,6 +786,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # ensemble = []
     ensemble = final_custom_ensemble
 
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [item if item is None else bool(item) for item in ensemble]
+
     # @added 20211125 - Feature #3566: custom_algorithms
     # If custom_algorithms were run and did not trigger reset the consensus
     if run_3sigma_algorithms:
@@ -835,6 +842,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     if not run_3sigma_algorithms:
         ensemble = final_custom_ensemble
 
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [item if item is None else bool(item) for item in ensemble]
+
     # @added 20220218 - Bug #4308: matrixprofile - fN on big drops
     if check_trigger_history_enabled and ensemble.count(True) >= MIRAGE_CONSENSUS:
         logger.info('mirage_vortex_algorithms :: getting trigger_history for %s' % base_name)
@@ -863,8 +877,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
         # Coerce all numpy.bool_ typed elements introduced with
         # numpy >= 2 to Python bool so they are literal_eval and
         # json safe
-        tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
-        ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+        #tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+        #ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+        tmp_final_ensemble = [item if item is None else bool(item) for item in tmp_final_ensemble]
+        ensemble = [item if item is None else bool(item) for item in ensemble]
 
         # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -1083,7 +1099,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 # @added 20201127 - Feature #3566: custom_algorithms
                 # Handle if the result is None
                 if result is None:
-                    logger.warning('warning :: mirage_vortex_algorithms :: %s failed to run on %s' % (
+                    logger.info('warning :: mirage_vortex_algorithms :: %s failed to run on %s' % (
                         str(custom_algorithm), str(base_name)))
                 else:
                     if custom_consensus == 1:
@@ -1133,8 +1149,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     # Coerce all numpy.bool_ typed elements introduced with
                     # numpy >= 2 to Python bool so they are literal_eval and
                     # json safe
-                    tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
-                    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+                    #tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+                    #ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+                    tmp_final_ensemble = [item if item is None else bool(item) for item in tmp_final_ensemble]
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
 
                     trigger_dict = {
                         'count': ensemble_pre_custom_algorithms_true_count,
@@ -1175,6 +1193,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
 
     for item in final_after_custom_ensemble:
         ensemble.append(item)
+
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [item if item is None else bool(item) for item in ensemble]
 
     # @modified 20200607 - Feature #3566: custom_algorithms
     try:

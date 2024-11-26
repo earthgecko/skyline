@@ -903,6 +903,8 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             #                   Feature #3566: custom_algorithms
             # Set default results
             results = {}
+            # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+            algorithm_result = []
 
             # @added 20240108 - Feature #5198: flux - tornado
             use_tornado = False
@@ -1044,7 +1046,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                                         redis_error_response_count_key, err))
 
                         else:
-                            logger.warning('warning :: mirage_algorithms :: there is no response to dump to Redis key: %s' % (
+                            logger.info('warning :: mirage_algorithms :: there is no response to dump to Redis key: %s' % (
                                 redis_key))
 
                     if results:
@@ -1093,6 +1095,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         result, anomalyScore, results = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
                     else:
                         result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging, current_func=current_func)
+                    # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    #                   Feature #4482: Test alerts
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    result = bool(result)
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
@@ -1190,6 +1199,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # ensemble = []
     ensemble = list(final_custom_ensemble)
 
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [item if item is None else bool(item) for item in ensemble]
+
     # @added 20211125 - Feature #3566: custom_algorithms
     # If custom_algorithms were run and did not trigger reset the consensus
     if run_3sigma_algorithms:
@@ -1213,6 +1229,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
         try:
             logger.info('mirage_algorithms :: running three-sigma algorithms against %s' % base_name)
             ensemble = [globals()[algorithm](timeseries, second_order_resolution_seconds) for algorithm in MIRAGE_ALGORITHMS]
+
+            # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha
+            # Coerce all numpy.bool_ typed elements introduced with
+            # numpy >= 2 to Python bool so they are literal_eval and
+            # json safe
+            ensemble = [item if item is None else bool(item) for item in ensemble]
+
             for algorithm in MIRAGE_ALGORITHMS:
                 algorithms_run.append(algorithm)
         except:
@@ -1238,6 +1262,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # added above
     if not run_3sigma_algorithms:
         ensemble = final_custom_ensemble
+
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [item if item is None else bool(item) for item in ensemble]
 
     # @added 20220218 - Bug #4308: matrixprofile - fN on big drops
     if check_trigger_history_enabled and ensemble.count(True) >= MIRAGE_CONSENSUS:
@@ -1267,8 +1298,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
         # Coerce all numpy.bool_ typed elements introduced with
         # numpy >= 2 to Python bool so they are literal_eval and
         # json safe
-        tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
-        ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+        # @modifed 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+        #                      Branch #5532: v5.0.0-alpha
+        # Simplify
+        #tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+        #ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+        tmp_final_ensemble = [item if item is None else bool(item) for item in tmp_final_ensemble]
+        ensemble = [item if item is None else bool(item) for item in ensemble]
 
         # @added 20220506 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
@@ -1555,7 +1591,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                                     logger.error('error :: mirage_algorithms :: failed to set response dump in Redis key %s with key_data: %s, err: %s' % (
                                         redis_key, str(key_data), err))
                         else:
-                            logger.warning('warning :: mirage_algorithms :: there is no response to dump to Redis key: %s' % (
+                            logger.info('warning :: mirage_algorithms :: there is no response to dump to Redis key: %s' % (
                                 redis_key))
 
                     if results:
@@ -1690,7 +1726,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 # @added 20201127 - Feature #3566: custom_algorithms
                 # Handle if the result is None
                 if result is None:
-                    logger.warning('warning :: mirage_algorithms :: %s failed to run on %s' % (
+                    logger.info('warning :: mirage_algorithms :: %s failed to run on %s' % (
                         str(custom_algorithm), str(base_name)))
                 else:
                     if custom_consensus == 1:
@@ -1742,8 +1778,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     # Coerce all numpy.bool_ typed elements introduced with
                     # numpy >= 2 to Python bool so they are literal_eval and
                     # json safe
-                    tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
-                    ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+                    #tmp_final_ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in tmp_final_ensemble]
+                    #ensemble = [bool(item) if isinstance(item, np.bool_) else item for item in ensemble]
+                    tmp_final_ensemble = [item if item is None else bool(item) for item in tmp_final_ensemble]
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
 
                     trigger_dict = {
                         'count': ensemble_pre_custom_algorithms_true_count,
@@ -1790,6 +1828,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
 
     for item in final_after_custom_ensemble:
         ensemble.append(item)
+
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe
+    ensemble = [item if item is None else bool(item) for item in ensemble]
 
     # @modified 20200607 - Feature #3566: custom_algorithms
     try:

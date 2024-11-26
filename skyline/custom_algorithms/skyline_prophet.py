@@ -132,7 +132,11 @@ def skyline_prophet(current_skyline_app, parent_pid, timeseries, algorithm_param
         forecasted.loc[forecasted['fact'] > forecasted['yhat_upper'], 'anomaly'] = 1
         forecasted.loc[forecasted['fact'] < forecasted['yhat_lower'], 'anomaly'] = -1
         # anomaly importances
-        forecasted['importance'] = 0
+        # @modified 20241121 - Task #5526: Build v5.0.0 and upgrade deps
+        #                      Branch #5532: v5.0.0-alpha
+        # Now requries being specifically cast as a float
+        # forecasted['importance'] = 0
+        forecasted['importance'] = 0.0
         forecasted.loc[forecasted['anomaly'] == 1, 'importance'] = (forecasted['fact'] - forecasted['yhat_upper']) / forecast['fact']
         forecasted.loc[forecasted['anomaly'] == -1, 'importance'] = (forecasted['yhat_lower'] - forecasted['fact']) / forecast['fact']
         return forecasted

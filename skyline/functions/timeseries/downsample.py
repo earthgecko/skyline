@@ -11,9 +11,14 @@ from functions.pandas.timeseries_to_datetime_indexed_df import timeseries_to_dat
 
 # @added 20220414 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
 #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+# @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+#                      Branch #5532: v5.0.0-alpha
+# Added bfill argument to facilitate replacing Nans to ensure no nans are
+# present as some unsupervised algorithms does not accept missing values encoded
+# as NaN
 def downsample_timeseries(
         current_skyline_app, timeseries, current_resolution,
-        required_resolution, method='mean', origin='end'):
+        required_resolution, method='mean', origin='end', bfill=False):
     """
     Downsample the timeseries to resolution and align to resolution.  This is
     done by default using Panda Backward resample, using origin='end' which was
@@ -28,6 +33,8 @@ def downsample_timeseries(
     :param required_resolution: the resolution to downsample to
     :param method: the Pandas resample method to use, mean or sum (for derivative metrics)
     :param origin: the Pandas resample origin parameter to use
+    :param bfill: whether to apply backfill to fill any NaN values by carrying
+        the next valid (non-NaN) value backwards to fill gaps.
     :type current_skyline_app: str
     :type timeseries: list
     :type current_resolution: int
@@ -51,42 +58,77 @@ def downsample_timeseries(
 
         # @added 20240125 - Task #5178: Build and test skyline v4.1.0
         # Handle downsample to 60 seconds as well
+        # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+        #                      Branch #5532: v5.0.0-alpha
+        # changed T to min as per warning in pandas 2.2.3
+        # FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
         if required_resolution == 600:
             T = '10T'
+            T = '10min'
         if required_resolution == 900:
             T = '15T'
+            T = '15min'
         if required_resolution == 1200:
             T = '20T'
+            T = '20min'
         if required_resolution == 1800:
             T = '30T'
+            T = '30min'
         if required_resolution == 3600:
             T = '60T'
+            T = '60min'
         if required_resolution <= 60 and current_resolution < 60:
             if required_resolution == 60:
                 T = '60S'
+                T = '1min'
 
         if method == 'mean':
             try:
-                resampled_df = df.resample(T, origin=origin).mean()
+                # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                #                      Branch #5532: v5.0.0-alpha
+                # Added bfill argument
+                if not bfill:
+                    resampled_df = df.resample(T, origin=origin).mean()
+                else:
+                    resampled_df = df.resample(T, origin=origin).mean().bfill()
+
             # @added 20231228 - Task #5178: Build and test skyline v4.1.0
             # Handle ZeroDivisionError
             except ZeroDivisionError:
                 try:
-                    resampled_df = df.resample(T, origin=origin).median()
+                    # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                      Branch #5532: v5.0.0-alpha
+                    # Added bfill argument
+                    if not bfill:
+                        resampled_df = df.resample(T, origin=origin).median()
+                    else:
+                        resampled_df = df.resample(T, origin=origin).median().bfill()
                 except Exception as err:
                     current_logger.error('error :: %s :: failed to resample timeseries on median after mean fail - %s' % (
                         function_str, err))
 
         if method == 'sum':
             try:
-                resampled_df = df.resample(T, origin=origin).sum()
+                # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                #                      Branch #5532: v5.0.0-alpha
+                # Added bfill argument
+                if not bfill:
+                    resampled_df = df.resample(T, origin=origin).sum()
+                else:
+                    resampled_df = df.resample(T, origin=origin).sum().bfill()
             except Exception as err:
                 current_logger.error('error :: %s :: failed to resample timeseries on sum - %s' % (
                     function_str, err))
 
         if method == 'median':
             try:
-                resampled_df = df.resample(T, origin=origin).median()
+                # @modified 20241111 - Task #5526: Build v5.0.0 and upgrade deps
+                #                      Branch #5532: v5.0.0-alpha
+                # Added bfill argument
+                if not bfill:
+                    resampled_df = df.resample(T, origin=origin).median()
+                else:
+                    resampled_df = df.resample(T, origin=origin).median().bfill()
             except Exception as err:
                 current_logger.error('error :: %s :: failed to resample timeseries on median - %s' % (
                     function_str, err))

@@ -231,7 +231,10 @@ def get_snab_training_data_graphs(current_skyline_app, results, context='snab'):
             try:
                 anomaly_window = results['algorithms'][algorithm]['algorithm_parameters']['anomaly_window']
             except:
-                anomaly_window = 1
+                try:
+                    anomaly_window = results['algorithms'][algorithm]['anomaly_window']
+                except:
+                    anomaly_window = 1
         except:
             anomaly_window = 1
 

@@ -463,6 +463,16 @@ def run_custom_algorithm_on_timeseries(
             else:
                 anomalous, anomalyScore, anomalies = use_custom_algorithm(current_skyline_app, parent_pid, timeseries, algorithm_parameters)
 
+            # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+            #                   Branch #5532: v5.0.0-alpha
+            #                   Feature #4482: Test alerts
+            # Coerce all numpy.bool_ typed elements introduced with
+            # numpy >= 2 to Python bool so they are literal_eval and
+            # json safe.  ideally if isinstance np.bool_ but without incurring
+            # the overhead of importing numpy here just to load the type
+            if type(anomalous) is not None:
+                anomalous = bool(anomalous)
+ 
             if debug_custom_algortihms:
                 end_debug_timer = timer()
                 if not current_logger:
@@ -550,7 +560,7 @@ def run_custom_algorithm_on_timeseries(
         # This should not be recorded as an error, it is simply a warning
         # current_logger.error(
         #     'error :: %s :: pid %s, terminated evaluation of time series after max_execution_time %s was reached (timeout) with custom algorithm - %s - loaded from algorithm_source file - %s' % (
-        current_logger.warning(
+        current_logger.info(
             'warning :: %s :: pid %s, terminated evaluation of time series after max_execution_time %s was reached (timeout) with custom algorithm - %s - loaded from algorithm_source file - %s' % (
                 func_name, str(myPid), str(max_execution_time),
                 custom_algorithm, str(algorithm_source)))
@@ -568,6 +578,15 @@ def run_custom_algorithm_on_timeseries(
         if not return_anomalies:
             return (None, None)
         return (None, None, [])
+
+    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+    #                   Branch #5532: v5.0.0-alpha
+    # Coerce all numpy.bool_ typed elements introduced with
+    # numpy >= 2 to Python bool so they are literal_eval and
+    # json safe.  ideally if isinstance np.bool_ but without incurring
+    # the overhead of importing numpy here just to load the type
+    if type(anomalous) is not None:
+        anomalous = bool(anomalous)
 
     if debug_logging or debug_custom_algortihms:
         current_logger.debug(

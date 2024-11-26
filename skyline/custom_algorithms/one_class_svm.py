@@ -106,7 +106,16 @@ def one_class_svm(current_skyline_app, parent_pid, timeseries, algorithm_paramet
             # np_values = np.array(values)
             np_max = np.amax(np_values)
             np_min = np.amin(np_values)
-            norm_np_values = (np_values - np_min) / (np_max - np_min)
+
+            # @modified 20241114 - Task #5526: Build v5.0.0 and upgrade deps
+            #                      Branch #5532: v5.0.0-alpha
+            # Prevent invalid value encountered in divide errors
+            # norm_np_values = (np_values - np_min) / (np_max - np_min)
+            if np_max == np_min:
+                norm_np_values = np.zeros_like(np_values)
+            else:
+                norm_np_values = (np_values - np_min) / (np_max - np_min)
+
             normalised_var = round(np.var(norm_np_values), 4)
         except Exception as err:
             normalised_var = np.nan
