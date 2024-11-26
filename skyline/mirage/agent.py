@@ -31,6 +31,14 @@ if True:
     if VORTEX_ENABLED:
         from mirage_vortex import MirageVortex
 
+    # @added 20241119 - Feature #5064: mirage.inflection
+    try:
+        MIRAGE_INFLECTION = settings.MIRAGE_INFLECTION
+    except:
+        MIRAGE_INFLECTION = True
+    if MIRAGE_INFLECTION:
+        from mirage_inflection import MirageInflection
+
     from mirage_algorithms import *
 
     from validate_settings import validate_settings_variables
@@ -70,6 +78,11 @@ class MirageAgent():
         if VORTEX_ENABLED:
             logger.info('agent starting skyline mirage_vortex')
             MirageVortex(getpid()).start()
+
+        # @added 20241119 - Feature #5064: mirage.inflection
+        if MIRAGE_INFLECTION:
+            logger.info('agent starting skyline mirage_inflection')
+            MirageInflection(getpid()).start()
 
         while 1:
             sleep(100)

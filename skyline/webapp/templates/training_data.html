@@ -294,11 +294,31 @@ Also note:
     {% if print_debug == 'True' %}
 <code> DEBUG </code> :: /ionosphere metric_files block<br>
     {% endif %}
+
+    {% if metric_vars %}
+      {% if 'mirage_inflection' in metric_vars|string %}
+        {% set mirage_inflection = True %}
+      {% else %}
+        {% set mirage_inflection = False %}
+      {% endif %}
+    {% else %}
+      {% set mirage_inflection = False %}
+    {% endif %}
+
 <!-- # @added 20170617 - Feature #2054: ionosphere.save.training_data
 # Allow the operator to save a training_data set -->
 		<div class="container-fluid">
     {% if saved_metric_td == False %}
     <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span>{{ use_for_metric }} - {{ human_date }}</h4>
+
+      {% if mirage_inflection %}
+    <center><h2><span class="logo"><span class="sky">mirage.inflection</span> <span class="re">SUSTAINED</span></span></h2></center>
+    <center><h2><span class="logo">anomaly id {{ panorama_anomaly_id }} persisted</span></h2></center>
+    <strong>A persisting condition has been identified on anomaly id {{ panorama_anomaly_id }} for {{ use_for_metric }}.<br>
+    This event in itself does not have an anomaly id it is only an extension of anomaly id {{ panorama_anomaly_id }} identified
+    by mirage.inflection.</strong>
+      {% endif %}
+
 <!-- # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR -->
       {% if historical_training_data == True %}
     <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is HISTORICAL training data</span></span></h4></center>
@@ -730,6 +750,12 @@ Image file: {{ motif_analysis[use_for_metric]['motifs'][motif_id]['image'] }}<br
 	  </div>
     {% endif %}
 
+    {% if mirage_inflection %}
+	  <div class="alert alert-warning">
+	    This a mirage.inflection instance and should not be trained on.
+	  </div>
+    {% endif %}
+
     {% if comments %}
     <h4><b><span class="logo"><span class="sky">Comments ::</span> <span class="re"> found</span></span></b> {{ comments|length }}</h4>
     {% else %}
@@ -1115,6 +1141,10 @@ you need to try and be quicker next time.
   {% else %}
       <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% endif %}
+  {% if mirage_inflection %}
+      <center><h2><span class="logo"><span class="sky"></span> <span class="re">SUSTAINED</span> for anomaly id {{ panorama_anomaly_id }}</span></h2></center>
+  {% endif %}
+
   {% if panorama_anomaly_id == None %}
     {% if layers_id_matched %}
 	  <div class="alert alert-success">

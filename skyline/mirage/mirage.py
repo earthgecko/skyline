@@ -127,6 +127,10 @@ from functions.victoriametrics.get_victoriametrics_metric import get_victoriamet
 # @added 20241107 - Feature #5536: deduplicate_timeseries
 from functions.timeseries.deduplicate_timeseries import deduplicate_timeseries
 
+# @added 20241121 - Feature #5519: functions.skyline.coerce_to_valid_json
+#                   Bug #5518: custom_algorithms_results - invalid JSON
+from functions.custom_algorithms.create_results_json import create_results_json
+
 LOCAL_DEBUG = False
 
 # ENABLE_MEMORY_PROFILING - DEVELOPMENT ONLY
@@ -367,7 +371,7 @@ class Mirage(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
     # @modified 20210304 - Feature #3642: Anomaly type classification
@@ -587,7 +591,9 @@ class Mirage(Thread):
 
         string_keys = ['metric']
         float_keys = ['value']
-        int_keys = ['hours_to_resolve', 'metric_timestamp']
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        int_keys = ['hours_to_resolve', 'metric_timestamp', 'anomaly_id']
         # @added 20200916 - Branch #3068: SNAB
         #                   Task #3744: POC matrixprofile
         boolean_keys = ['snab_only_check']
@@ -1527,7 +1533,7 @@ class Mirage(Thread):
                     valid_mirage_timeseries = False
             else:
                 valid_mirage_timeseries = False
-                logger.warning('warning :: no first_timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
+                logger.info('warning :: no first_timestamp, valid_mirage_timeseries: %s' % str(valid_mirage_timeseries))
 
             # @added 20170603 - Feature #2034: analyse_derivatives
             # Convert the values of metrics strictly increasing monotonically
@@ -1961,6 +1967,13 @@ class Mirage(Thread):
                     # Set the datapoint to that of the original timeseries
                     datapoint = timeseries[-1][1]
 
+                    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
+
                     logger.info('anomalous: %s, ensemble: %s, algorithms_run: %s' % (
                         str(anomalous), str(ensemble), str(algorithms_run)))
 
@@ -2070,6 +2083,13 @@ class Mirage(Thread):
                     # downsampled_timeseries with the actual data point from the
                     # Graphite data
                     datapoint = timeseries[-1][1]
+
+                    # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                    #                   Branch #5532: v5.0.0-alpha
+                    # Coerce all numpy.bool_ typed elements introduced with
+                    # numpy >= 2 to Python bool so they are literal_eval and
+                    # json safe
+                    ensemble = [item if item is None else bool(item) for item in ensemble]
 
                     logger.info('anomalous: %s, ensemble: %s, algorithms_run: %s' % (
                         str(anomalous), str(ensemble), str(algorithms_run)))
@@ -2241,6 +2261,13 @@ class Mirage(Thread):
                         logger.info('mirage :: anomalous_daily_peak is overrriding anomalous result for %s' % (
                             metric))
                         anomalous = False
+
+                # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
+                #                   Branch #5532: v5.0.0-alpha
+                # Coerce all numpy.bool_ typed elements introduced with
+                # numpy >= 2 to Python bool so they are literal_eval and
+                # json safe
+                ensemble = [item if item is None else bool(item) for item in ensemble]
 
                 logger.info('anomalous: %s, ensemble: %s, algorithms_run: %s' % (
                     str(anomalous), str(ensemble), str(algorithms_run)))
@@ -2537,15 +2564,36 @@ class Mirage(Thread):
                         mkdir_p(training_dir)
                     custom_algorithms_results['results_path'] = training_dir
                     results_json = '%s/%s.custom_algorithms_results.json' % (training_dir, metric)
-                    try:
-                        with open(results_json, 'w') as f:
-                            f.write(json.dumps(custom_algorithms_results, skipkeys=True))
-                        os.chmod(results_json, mode=0o644)
-                        logger.info('saved custom_algorithms_results json %s' % results_json)
-                    except Exception as err:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to save results json %s - %s' % (
+
+                    # @modified 20241121 - Feature #5519: functions.skyline.coerce_to_valid_json
+                    #                      Bug #5518: custom_algorithms_results - invalid JSON
+                    # Use new json safe function
+                    use_new_json_safe_function = True
+                    if not use_new_json_safe_function:
+                        try:
+                            with open(results_json, 'w') as f:
+                                f.write(json.dumps(custom_algorithms_results, skipkeys=True))
+                            os.chmod(results_json, mode=0o644)
+                            logger.info('saved custom_algorithms_results json %s' % results_json)
+                        except Exception as err:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to save results json %s - %s' % (
                             results_json, err))
+                    else:
+                        coereced_custom_algorithms_results = None
+                        results_json_created = None
+                        coerced = {}
+                        try:
+                            coereced_custom_algorithms_results, coerced, results_json_created = create_results_json(skyline_app, custom_algorithms_results, results_json)
+                        except Exception as err:
+                            logger.error('error :: create_results_json failed to save %s, err: %s' % (
+                            results_json, err))
+                        if not coereced_custom_algorithms_results:
+                            logger.error('error :: coereced_custom_algorithms_results were not returned')
+                        if results_json != str(results_json_created):
+                            if str(results_json_created).endswith('txt'):
+                                logger.info('warning :: DEBUG - the custom_algorithms_results written to %s' % (
+                                    results_json_created))
 
                 if os.path.exists(training_dir):
                     training_metric_json_file = '%s/%s.json' % (training_dir, str(metric))
@@ -4918,6 +4966,9 @@ class Mirage(Thread):
 
             not_ionosphere_metrics = []
 
+            # @added 20241119 - Feature #5064: mirage.inflectionFeature #5064: mirage.inflection - 
+            mirage_inflection_alerts = []
+
             # @modified 20200610 - Feature #3560: External alert config
             # for alert in settings.ALERTS:
             for alert in all_alerts:
@@ -4976,6 +5027,25 @@ class Mirage(Thread):
                     if metric[1] in mirage_vortex_anomalous_basenames:
                         if metric_name in ionosphere_unique_metrics:
                             ionosphere_unique_metrics.remove(metric_name)
+
+                    # @added 20241119 - Feature #5064: mirage.inflection
+                    # Handle mirage.inflection added metrics
+                    mirage_inflection_alert = False
+                    mirage_inflection_anomaly_id = None
+                    try:
+                        triggered_algorithms = metric[4]
+                    except:
+                        triggered_algorithms = []
+                    if 'mmzrmp' in triggered_algorithms:
+                        mirage_inflection_alert = True
+                        logger.info('mirage.inflection alert for %s' % str(metric))
+                        mirage_inflection_alerts.append(metric)
+                        if metric_name in ionosphere_unique_metrics:
+                            ionosphere_unique_metrics.remove(metric_name)
+                        try:
+                            mirage_inflection_anomaly_id = metric[6]
+                        except:
+                            mirage_inflection_anomaly_id = None
 
                     if not ionosphere_unique_metrics:
                         ionosphere_unique_metrics = []
@@ -5084,6 +5154,11 @@ class Mirage(Thread):
                         else:
                             cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
 
+                        # @added 20241119 - Feature #5064: mirage.inflection
+                        # Handle mirage.inflection added metrics
+                        if mirage_inflection_alert:
+                            cache_key = 'mirage.inflection.%s' % cache_key
+
                         try:
                             # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
                             #                      Feature #3486: analyzer_batch
@@ -5092,6 +5167,10 @@ class Mirage(Thread):
                             # anomaly timestamp
                             # last_alert = self.redis_conn.get(cache_key)
                             last_alert = self.redis_conn_decoded.get(cache_key)
+
+#                            # @added 20241119 - Feature #5064: mirage.inflection
+#                            if mirage_inflection_alert:
+#                                last_alert = False
 
                             # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
                             #                   Feature #3486: analyzer_batch
@@ -5192,7 +5271,12 @@ class Mirage(Thread):
                                     # anomalies in one batch that might be
                                     # EXPIRATION_TIME apart.
                                     # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                    self.redis_conn.setex(cache_key, str(alert[2]), int(metric[2]))
+                                    # @modified 20241119 - Feature #5064: mirage.inflection
+                                    #self.redis_conn.setex(cache_key, str(alert[2]), int(metric[2]))
+                                    use_cache_key = str(cache_key)
+                                    if mirage_inflection_alert:
+                                        use_cache_key = 'mirage.inflection.%s' % str(cache_key)
+                                    self.redis_conn.setex(use_cache_key, str(alert[2]), int(metric[2]))
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to set Redis key %s for %s' % (
@@ -5244,6 +5328,12 @@ class Mirage(Thread):
                                                         except:
                                                             logger.error(traceback.format_exc())
                                                             logger.error('error :: failed to check if %s is a snab_check_metric' % base_name)
+
+                                        # @added 20241119 - Feature #5064: mirage.inflection
+                                        # Do not send mirage.inflection to snab
+                                        if mirage_inflection_alert:
+                                            snab_check_metric = False
+
                                         if snab_check_metric:
                                             algorithm_group = 'three-sigma'
 
@@ -5401,7 +5491,7 @@ class Mirage(Thread):
                                             second_order_resolution_seconds = int(metric[3])
                                         except:
                                             logger.error(traceback.format_exc())
-                                            logger.warning('warning :: failed to determine full_duration for alert on %s' % (metric[1]))
+                                            logger.info('warning :: failed to determine full_duration for alert on %s' % (metric[1]))
                                             logger.info('using settings.FULL_DURATION * 7 - %s' % (str(settings.FULL_DURATION)))
                                             second_order_resolution_seconds = int(settings.FULL_DURATION * 7)
 
@@ -5417,6 +5507,13 @@ class Mirage(Thread):
                                             try_get_anomaly_id_redis_key_count = 0
                                             while try_get_anomaly_id_redis_key_count < 20:
                                                 try_get_anomaly_id_redis_key_count += 1
+
+                                                # @added 20241119 - Feature #5064: mirage.inflection
+                                                # Do not send mirage.inflection to snab
+                                                if mirage_inflection_alert:
+                                                    anomaly_id = mirage_inflection_anomaly_id
+                                                    break
+
                                                 try:
                                                     anomaly_id = int(self.redis_conn_decoded.get(anomaly_id_redis_key))
                                                     break
@@ -5573,7 +5670,12 @@ class Mirage(Thread):
                                 # @added 20200913 - Branch #3068: SNAB
                                 #                   Task #3744: POC matrixprofile
                                 #                   Info #1792: Shapelet extraction
-                                if SNAB_ENABLED:
+                                # @modified 20241119 - Feature #5064: mirage.inflection
+                                # Do not send mirage.inflection to snab
+                                #if SNAB_ENABLED:
+                                if mirage_inflection_alert:
+                                    snab_check_metric = False
+                                if SNAB_ENABLED and snab_check_metric:
                                     timeseries_dir = base_name.replace('.', '/')
                                     training_dir = '%s/%s/%s' % (
                                         settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
@@ -5755,7 +5857,7 @@ class Mirage(Thread):
                                         logger.info('removed item from mirage.anomalous_metrics Redis set - %s' % (
                                             str(metric)))
                                     else:
-                                        logger.warning('warning :: could not remove item from mirage.anomalous_metrics Redis set - %s' % (
+                                        logger.info('warning :: could not remove item from mirage.anomalous_metrics Redis set - %s' % (
                                             str(metric)))
                                 except Exception as err:
                                     logger.error('error :: failed to srem item from mirage.anomalous_metrics %s - %s' % (
@@ -5763,6 +5865,10 @@ class Mirage(Thread):
 
                         except Exception as e:
                             logger.error('error :: could not query Redis for cache_key - %s' % e)
+
+            # @added 20241119 - Feature #5064: mirage.inflection
+            if mirage_inflection_alerts:
+                logger.info('%s mirage.inflection alerts were sent' % str(len(mirage_inflection_alerts)))
 
             # @added 20200916 - Branch #3068: SNAB
             #                   Task #3744: POC matrixprofile

@@ -425,6 +425,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         except Exception as err:
             logger.error('error :: alert_smtp :: exists failed on %s, err: %s' % (
                 smtp_alerted_key, err))
+        # @added 20241119 - Feature #5064: mirage.inflection
+        if 'mmzrmp' in triggered_algorithms:
+            smtp_alerted = False
+
         if smtp_alerted:
             logger.info('alert_smtp - already smtp alerted and created resources, recipients is no_email and external alert, so nothing to do')
             logger.info('alert_smtp - took %s seconds' % str(time() - start_alert))
@@ -537,6 +541,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         unencoded_graph_title = 'TEST - %s' % unencoded_graph_title
         main_alert_title = 'TEST - %s' % main_alert_title
 
+    # @added 20241119 - Feature #5064: mirage.inflection
+    if 'mmzrmp' in triggered_algorithms:
+        unencoded_graph_title = 'SUSTAINED - %s' % unencoded_graph_title
+
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
@@ -577,6 +585,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
     encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, base_name)
 
+    # @added 20241119 - Feature #5064: mirage.inflection
+    use_colour = 'orange'
+    if 'mmzrmp' in triggered_algorithms:
+        use_colour = 'red'
+
     # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
     # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
     #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
@@ -584,12 +597,14 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     #     metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
     # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-    link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
+    link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=%s' % (
         settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
         graphite_render_uri, str(graphite_from), str(graphite_until),
         # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
         # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+        # @added 20241119 - Feature #5064: mirage.inflection
+        use_colour)
 
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
@@ -600,13 +615,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         #     metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
         # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=%s' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
             graphite_render_uri, str(graphite_from),
             # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
             # str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
             str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
-            graph_title)
+            graph_title,
+            # @added 20241119 - Feature #5064: mirage.inflection
+            use_colour)
 
     # @added 20221207 - Feature #4734: mirage_vortex
     #                   Feature #4732: flux vortex
@@ -672,8 +689,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                     title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
                 else:
                     title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+
+                # @added 20241119 - Feature #5064: mirage.inflection
+                if 'mmzrmp' in triggered_algorithms:
+                    title = 'SUSTAINED - %s' % title
+
                 plot_parameters = {
-                    'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                    # @modified 20241119 - Feature #5064: mirage.inflection
+                    #'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                    'title': title, 'line_color': use_colour, 'bg_color': 'black',
                     'figsize': (8, 4)
                 }
                 try:
@@ -1000,6 +1024,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 # graph_title = 'Skyline %s - ALERT - at %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
                 graph_title = 'Skyline %s - %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
 
+            # @added 20241119 - Feature #5064: mirage.inflection
+            if 'mmzrmp' in triggered_algorithms:
+                graph_title = 'SUSTAINED - %s' % graph_title
+
             # @modified 20200109 - Branch #3262: py3
             # Using io.StringIO throws an error related to
             # plt.savefig(buf, format='png')
@@ -1056,7 +1084,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
 
                 ax.xaxis.set_major_formatter(xfmt)
 
-                ax.plot(datetimes, timeseries_y, color='orange', lw=0.6, zorder=3)
+                # @modified 20241119 - Feature #5064: mirage.inflection
+                #ax.plot(datetimes, timeseries_y, color='orange', lw=0.6, zorder=3)
+                ax.plot(datetimes, timeseries_y, color=use_colour, lw=0.6, zorder=3)
                 ax.tick_params(axis='both', labelsize='xx-small')
 
                 max_value_label = 'max - %s' % str(array_amax)
@@ -1208,6 +1238,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
             # body += '<font color="red"><b>TEST ALERT</b></font><br>'
             body += '<font color="red"><b>TEST NOTIFICATION</b></font><br>'
 
+        # @added 20241119 - Feature #5064: mirage.inflection
+        if 'mmzrmp' in triggered_algorithms:
+            body += '<font color="red"><b>SUSTAINED</b></font><br>'
+
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         if main_alert_title == 'Skyline':
@@ -1354,6 +1388,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                     # @modified 20230728 - Task #5030: Change ALERT
                     # msg['Subject'] = 'TEST - [%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
                     msg['Subject'] = 'TEST - [%s] - %s - %s' % (main_alert_title, alert_context, metric[1])
+
+                # @added 20241119 - Feature #5064: mirage.inflection
+                if 'mmzrmp' in triggered_algorithms:
+                    msg['Subject'] = 'SUSTAINED - [%s] - %s - %s' % (main_alert_title, alert_context, metric[1])
 
             msg['From'] = sender
             # @modified 20180524 - Task #2384: Change alerters to cc other recipients
@@ -1693,7 +1731,7 @@ def alert_syslog(alert, metric, second_order_resolution_seconds, context, trigge
         try:
             syslog_level = settings.SYSLOG_OPTS['level']
             if syslog_level not in ['warn', 'notice', 'info']:
-                logger.warning('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
+                logger.info('warning :: alert_syslog - settings.SYSLOG_OPTS[\'level\'] is set to an invalid value of %s, valid values are warn, notice or info' % str(syslog_level))
                 syslog_level = 'warn'
         except:
             syslog_level = 'warn'
@@ -1946,6 +1984,11 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         unencoded_graph_title = 'TEST - %s' % unencoded_graph_title
         slack_title = '*TEST* - %s - *TEST*' % slack_title
 
+    # @added 20241119 - Feature #5064: mirage.inflection
+    if 'mmzrmp' in triggered_algorithms:
+        unencoded_graph_title = 'SUSTAINED - %s' % unencoded_graph_title
+        slack_title = '*SUSTAINED* - %s' % slack_title
+
     # @added 20200907 - Feature #3734: waterfall alerts
     # Add waterfall alert to title
     waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), base_name)
@@ -1992,27 +2035,42 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
     encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, base_name)
 
+    # @added 20241119 - Feature #5064: mirage.inflection
+    use_colour = 'orange'
+    if 'mmzrmp' in triggered_algorithms:
+        use_colour = 'red'
+
     if known_derivative_metric:
 
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
         # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
+        # @modified 20241119 - Feature #5064: mirage.inflection
+        # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=%s' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             graphite_port, graphite_render_uri, str(
                 graphite_from), str(graphite_until),
             # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
             # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+            # @added 20241119 - Feature #5064: mirage.inflection
+            use_colour,
+        )
     else:
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
         # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
+        # @modified 20241119 - Feature #5064: mirage.inflection
+        # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=%s' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             graphite_port, graphite_render_uri, str(
                 graphite_from), str(graphite_until),
             # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
             # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
+            # @added 20241119 - Feature #5064: mirage.inflection
+            use_colour,
+        )
 
     if base_name.startswith('labelled_metrics.'):
         link = 'None'
@@ -2105,8 +2163,15 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                 title = '%s hours (at %s seconds)' % (str(target_hours), str(step))
             else:
                 title = '%s days (at %s minutes)' % (str(int(target_hours / 24)), str(int(step / 60)))
+
+            # @added 20241119 - Feature #5064: mirage.inflection
+            if 'mmzrmp' in triggered_algorithms:
+                title = 'SUSTAINED - %s' % title
+
             plot_parameters = {
-                'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                # @modified 20241119 - Feature #5064: mirage.inflection
+                # 'title': title, 'line_color': 'orange', 'bg_color': 'black',
+                'title': title, 'line_color': use_colour, 'bg_color': 'black',
                 'figsize': (8, 4)
             }
             try:
@@ -2327,6 +2392,12 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                     anomalyScore = snab_details[3]
             except:
                 snab_check_metric = False
+
+        # @added 20241119 - Feature #5064: mirage.inflection
+        # Do not send mirage.inflection alerts to snab
+        if 'mmzrmp' in triggered_algorithms:
+            snab_check_metric = False
+
         if SNAB_ENABLED and snab_check_metric:
             if not anomaly_id or not snab_id:
                 snab_comment = initial_comment + '\nThe anomaly id was not determined to generate snab results links'
@@ -2400,6 +2471,12 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                             human_date = strftime('%Y-%m-%d %H:%M:%S %Z (%A)', localtime(int(metric[2])))
                             graph_title = 'Mirage downsampled Redis and merged Graphite data analysed (%s)\n%s' % (
                                 human_date, use_base_name)
+
+                            # @added 20241119 - Feature #5064: mirage.inflection
+                            # Do not send mirage.inflection alerts to snab
+                            if 'mmzrmp' in triggered_algorithms:
+                                graph_title = 'SUSTAINED - %s' % graph_title
+
                             anomalies = []
                             created_graph = create_matplotlib_graph(skyline_app, mirage_analysed_downsampled_graph, graph_title, timeseries, anomalies, monotonic_timeseries)
                         except Exception as err:
@@ -3062,6 +3139,11 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
             if triggered_algorithms == ['testing']:
                 metric_alert_dict['test alert'] = True
 
+            # @added 20241119 - Feature #5064: mirage.inflection
+            # Do not send mirage.inflection alerts to snab
+            if 'mmzrmp' in triggered_algorithms:
+                metric_alert_dict['sustained'] = True
+
             # @modified 20201127 - Feature #3820: HORIZON_SHARDS
             # Add the origin and shard to status for debugging purposes
             if not HORIZON_SHARDS:
@@ -3266,7 +3348,7 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
             # Discard after 15 attempts
             if number_of_send_attempts >= 15:
                 add_to_resend_queue = False
-                logger.warning('warning :: alert_http :: failing alert after %s attempts to send - %s' % (
+                logger.info('warning :: alert_http :: failing alert after %s attempts to send - %s' % (
                     str(number_of_send_attempts), str(metric_alert_dict)))
 
             if add_to_resend_queue:
@@ -3337,6 +3419,10 @@ def alert_sms(alert, metric, second_order_resolution_seconds, context, triggered
     if triggered_algorithms == ['testing']:
         message = 'TEST - %s' % message
 
+    # @added 20241119 - Feature #5064: mirage.inflection
+    if 'mmzrmp' in triggered_algorithms:
+        message = '[Skyline alert] Mirage - SUSTAINED - %s: %s' % (base_name, str(metric[0]))
+
     sms_recipients = []
     try:
         sms_recipients = get_sms_recipients(skyline_app, base_name)
@@ -3383,7 +3469,7 @@ def alert_sms(alert, metric, second_order_resolution_seconds, context, triggered
         if success:
             logger.info('sent SMS alert to %s' % sms_number)
         else:
-            logger.warning('warning :: failed to send SMS alert to %s' % sms_number)
+            logger.info('warning :: failed to send SMS alert to %s' % sms_number)
     return
 
 

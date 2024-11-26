@@ -1893,7 +1893,7 @@ def api():
                     matched_timeseries = literal_eval(matched_timeseries_str)
                     logger.info('/api?get_matched_timeseries with details_only cache data created from get_matched_timeseries retrieved')
                 else:
-                    logger.warning('warning :: /api?get_matched_timeseries with details_only no cache data retrieved from get_matched_timeseries')
+                    logger.info('warning :: /api?get_matched_timeseries with details_only no cache data retrieved from get_matched_timeseries')
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: api get_matched_timeseries :: failed to hget %s from Redis - %s' % (
@@ -2145,7 +2145,7 @@ def api():
                             all_data = data + redis_data_lists
                             data = list(set(all_data))
                         else:
-                            logger.warning('warning :: /api?redis_data - got data from a remote Skyline instance for %s but not a list' % key)
+                            logger.info('warning :: /api?redis_data - got data from a remote Skyline instance for %s but not a list' % key)
                     if key_type == 'hash':
                         logger.info('/api?redis_data - got list of dicts of length %s from a remote Skyline instance' % str(len(redis_data_lists)))
                         for data_dict in redis_data_lists:
@@ -2160,7 +2160,7 @@ def api():
                     logger.error('error :: /api?redis_data failed to build data from remote data - %s - %s' % (
                         str(redis_data_list), err))
             else:
-                logger.warning('warning :: failed to get redis_data_lists from the remote Skyline instances')
+                logger.info('warning :: failed to get redis_data_lists from the remote Skyline instances')
         if key_type == 'key' and len(data) == 1:
             data = data[0]
         data = {key: data}
@@ -2227,7 +2227,7 @@ def api():
                     for base_name in list(inactive_metrics_dict.keys()):
                         inactive_metrics[base_name] = inactive_metrics_dict[base_name]
             else:
-                logger.warning('warning :: failed to get inactive_metrics_dicts from the remote Skyline instances')
+                logger.info('warning :: failed to get inactive_metrics_dicts from the remote Skyline instances')
         end_inactive_metrics = timer()
         inactive_metrics_time = (end_inactive_metrics - start_inactive_metrics)
         # @added 20230921 - Feature #5076: Add request_id and timing to api requests
@@ -2509,7 +2509,7 @@ def api():
                     resolutions_dict = copy.deepcopy(new_resolutions_dict)
                     del new_resolutions_dict
             else:
-                logger.warning('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
+                logger.info('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
         logger.info('%s resolutions determined' % (
             str(len(resolutions_dict))))
         filtered_discarded = 0
@@ -2655,7 +2655,7 @@ def api():
                     sparsity_dict = copy.deepcopy(new_sparsity_dict)
                     del new_sparsity_dict
             else:
-                logger.warning('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
+                logger.info('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
         logger.info('%s sparsity determined' % (
             str(len(sparsity_dict))))
         filtered_discarded = 0
@@ -2765,7 +2765,7 @@ def api():
                     timestamp_resolutions_dict = copy.deepcopy(new_timestamp_resolutions_dict)
                     del new_timestamp_resolutions_dict
             else:
-                logger.warning('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
+                logger.info('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
         logger.info('%s timestamp_resolutions determined' % (
             str(len(timestamp_resolutions_dict))))
         filtered_discarded = 0
@@ -2837,7 +2837,7 @@ def api():
                 if timeseries:
                     logger.info('got timeseries of length %s from the remote Skyline instances' % str(len(timeseries)))
                 else:
-                    logger.warning('warning :: failed to get timeseries from the remote Skyline instances')
+                    logger.info('warning :: failed to get timeseries from the remote Skyline instances')
         if not timeseries:
             data_dict = {"status": {"cluster_data": cluster_data, "response": 404}, "data": {"sparsity": 'null'}}
             return jsonify(data_dict), 404
@@ -3529,7 +3529,7 @@ def api():
         # @added 20210511 - Feature #3770: webapp - analyzer_last_status API endoint
         # Handle a None result as a warning not an error
         except ValueError as e:
-            logger.warning('warning :: Webapp could not get the analyzer key from Redis - %s' % e)
+            logger.info('warning :: Webapp could not get the analyzer key from Redis - %s' % e)
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the analyzer key from Redis - %s' % e)
@@ -5486,7 +5486,7 @@ def api():
                 if timeseries:
                     logger.info('got timeseries of length %s from the remote Skyline instances' % str(len(timeseries)))
                 else:
-                    logger.warning('warning :: failed to get timeseries from the remote Skyline instances')
+                    logger.info('warning :: failed to get timeseries from the remote Skyline instances')
 
         if not timeseries:
             data_dict = {"status": {"cluster_data": cluster_data, "response": 404}}
@@ -5556,7 +5556,7 @@ def mock_api():
                 try:
                     post_data = request.get_json()
                 except:
-                    logger.warning('warning :: mock_api :: /alert_reciever request.get_json() failed trying request.json() to see if data is cached')
+                    logger.info('warning :: mock_api :: /alert_reciever request.get_json() failed trying request.json() to see if data is cached')
                     try:
                         post_data = request.json()
                     except Exception as err:
@@ -6501,7 +6501,7 @@ def panorama():
                 message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
                 return internal_error(message, trace)
         else:
-            logger.warning('warning :: no not_anomalous_dict or anomalies_dict to plot for %s' % base_name)
+            logger.info('warning :: no not_anomalous_dict or anomalies_dict to plot for %s' % base_name)
 
         anomalies_plot = False
         if anomalies_param:
@@ -6513,7 +6513,7 @@ def panorama():
                     message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
                     return internal_error(message, trace)
             else:
-                logger.warning('warning :: no anomalies_dict to plot for %s' % base_name)
+                logger.info('warning :: no anomalies_dict to plot for %s' % base_name)
 
         labelled_metric_name = None
         labelled_metric_base_name = None
@@ -11365,7 +11365,7 @@ def ionosphere():
                             try:
                                 custom_algorithms_results = json.loads(json_str)
                             except Exception as err:
-                                logger.warning('warning :: data from custom_algorithms_results %s could not be loaded as json, err: %s' % (
+                                logger.info('warning :: data from custom_algorithms_results %s could not be loaded as json, err: %s' % (
                                     str(metric_file), err))
                                 coerce_json = True
                             # @added 20241025 - Feature #5519: functions.skyline.coerce_to_valid_json
@@ -11681,7 +11681,7 @@ def ionosphere():
                 try:
                     ionosphere_metrics = list(REDIS_CONN.smembers('ionosphere.unique_metrics'))
                 except:
-                    logger.warning('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
+                    logger.info('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
                 metric_name = settings.FULL_NAMESPACE + str(base_name)
 
                 if labelled_metric_name:
@@ -11765,7 +11765,7 @@ def ionosphere():
                         if int(i_layer_algorithm[1]) == int(l_id):
                             fp_layer_algorithms.append(i_layer_algorithm)
                     except:
-                        logger.warning('warning :: Webapp could not determine layer_algorithm in metric_layers_algorithm_details')
+                        logger.info('warning :: Webapp could not determine layer_algorithm in metric_layers_algorithm_details')
             fp_current_layer = []
             if metric_layers_details:
                 for i_layer in metric_layers_details:
@@ -11773,7 +11773,7 @@ def ionosphere():
                         if int(i_layer[0]) == int(l_id):
                             fp_current_layer.append(i_layer)
                     except:
-                        logger.warning('warning :: Webapp could not determine layer in metric_layers_details')
+                        logger.info('warning :: Webapp could not determine layer in metric_layers_details')
 
             # @added 20170617 - Feature #2054: ionosphere.save.training_data
             training_data_saved = False
@@ -12549,6 +12549,32 @@ def ionosphere():
                     if i not in sorted_images:
                         sorted_images.append(i)
 
+                # @added 20241120 - Feature #5064: mirage.inflection
+                # Allowing for algorithm results in algorithm results,
+                # custom_algorithms in custom_algorithms
+                if 'algorithms' in custom_algorithms_results.keys():
+                    for algo in custom_algorithms_results['algorithms'].keys():
+                        if 'algorithms' in custom_algorithms_results['algorithms'][algo].keys():
+                            custom_algorithm_algorithms_results = copy.deepcopy(custom_algorithms_results['algorithms'][algo]['algorithms'])
+                            new_custom_algorithms_results = copy.deepcopy(custom_algorithms_results)
+                            try:
+                                del new_custom_algorithms_results['algorithms']
+                            except:
+                                pass
+                            new_custom_algorithms_results['algorithms'] = copy.deepcopy(custom_algorithm_algorithms_results)
+                            try:
+                                new_custom_algorithms_results['metric'] = base_name
+                                new_custom_algorithms_graphs = get_snab_training_data_graphs(skyline_app, new_custom_algorithms_results, context='custom_algorithms')
+                            except Exception as err:
+                                message = 'get_snab_training_data_graphs encountered an error - %s' % err
+                                trace = traceback.format_exc()
+                                return internal_error(message, trace)
+                            for i in new_custom_algorithms_graphs:
+                                if i not in sorted_images:
+                                    sorted_images.append(i)
+                                if i not in custom_algorithms_graphs:
+                                    custom_algorithms_graphs.append(i)
+
             # @added 20230811 - Feature #5046: comments
             comments_keys = []
             remove_comment_keys = [
@@ -13053,7 +13079,7 @@ def ionosphere_files():
                 logger.error('error :: ionosphere_files failed to build files_list from %s' % str(required_dir))
     duration = time.time() - start
     if not files_dict:
-        logger.warning('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
+        logger.info('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
         # return 'Not Found', 404
         data_dict = {"status": {"response": 404, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "files": "not found"}}
         if algorithm_name and source == 'classify_metrics':
@@ -13162,7 +13188,7 @@ def ionosphere_file():
                         logger.error('error :: ionosphere_file failed to send_file - %s' % filename)
                         return 'Internal Server Error', 500
                 else:
-                    logger.warning('warning :: ionosphere_file not found - %s' % filename)
+                    logger.info('warning :: ionosphere_file not found - %s' % filename)
                     return 'Not Found', 404
     return 'Bad Request', 400
 
