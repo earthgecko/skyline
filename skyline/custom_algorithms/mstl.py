@@ -229,6 +229,8 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     res_minute = int(resolution / 60)
     freq_str = '%sT' % str(res_minute)
+    # site-packages/utilsforecast/processing.py:384: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+    freq_str = '%smin' % str(res_minute)
 
     number_of_predictions = 1
     level = 99
@@ -263,8 +265,15 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         models = [MSTL(season_length=[season_hours, (season_hours * season_days)])]
         if debug_logging:
             current_logger.debug('debug :: mstl :: defined MSTL model for %s' % (base_name))
+        # @modified 20241122 - Feature #4896: custom_algorithms - mstl
+        # Commented out passing the df to quick_sf
+        #/opt/python_virtualenv/projects/skyline-py31015/lib/python3.10/site-packages/statsforecast/core.py:476: 
+        # FutureWarning: The `df` argument of the StatsForecast constructor as well as reusing stored dfs
+        # from other methods is deprecated and will raise an error in a future version. Please provide the
+        # `df` argument to the corresponding method instead, e.g. fit/forecast.
         quick_sf = StatsForecast(
-            df=df[-60:], 
+            # df=df[-60:],
+            df=df[-60:],
             models=models, 
             freq=freq_str, 
             n_jobs=2,
@@ -275,11 +284,23 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         start = time()
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculating quick_fcst for %s' % (base_name))
+
+        # @added 20241122 - Feature #4896: custom_algorithms - mstl
+        # Provide the `df` argument to the corresponding method
+        quick_sf_df = df[-60:].copy()
+        quick_sf.fit(df=quick_sf_df)
+
         quick_fcst = quick_sf.forecast(h=horizon, level=levels, fitted=True)
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculated quick_fcst for %s' % (base_name))
+        # @modified 20241122 - Feature #4896: custom_algorithms - mstl
+        # Commented out passing the df to quick_sf
+        #/opt/python_virtualenv/projects/skyline-py31015/lib/python3.10/site-packages/statsforecast/core.py:476: 
+        # FutureWarning: The `df` argument of the StatsForecast constructor as well as reusing stored dfs
+        # from other methods is deprecated and will raise an error in a future version. Please provide the
+        # `df` argument to the corresponding method instead, e.g. fit/forecast.
         sf = StatsForecast(
-            df=df, 
+            #df=df,
             models=models, 
             freq=freq_str, 
             n_jobs=2,
@@ -289,6 +310,12 @@ def mstl(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
         start = time()
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculating fcst for %s' % (base_name))
+
+        # @added 20241122 - Feature #4896: custom_algorithms - mstl
+        # Provide the `df` argument to the corresponding method
+        sf_df = df.copy()
+        sf.fit(df=sf_df)
+
         fcst = sf.forecast(h=horizon, level=levels, fitted=True)
         if debug_logging:
             current_logger.debug('debug :: mstl :: calculated fcst for %s' % (base_name))
