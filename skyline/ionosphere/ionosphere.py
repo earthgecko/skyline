@@ -168,6 +168,9 @@ from find_repetitive_patterns import ionosphere_find_repetitive_patterns
 # @added 20241010 - Feature #5479: ionosphere.alias_features_profile
 from functions.database.queries.get_alias_fps_for_metrics import get_alias_fps_for_metrics
 
+# @added 20241115 - Feature #5548: functions.numpy.minmax_scale
+from functions.numpy.minmax_scale import minmax_scale
+
 # @added 20241004 - Feature #5479: ionosphere.alias_features_profile
 
 skyline_app = 'ionosphere'
@@ -398,7 +401,7 @@ class Ionosphere(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys_exit(0)
 
     # These are the ionosphere mysql functions used to surface and input
@@ -1125,10 +1128,13 @@ class Ionosphere(Thread):
         string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
         float_keys = ['value']
         # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
-        # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+        # Added ionosphere_parent_id, always zero from Analyzer and Mirage        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
+        # @modified 20241120 - Feature #5064: mirage.inflection
+        # Added anomaly_id
         int_keys = [
             'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
-            'ionosphere_parent_id']
+            'ionosphere_parent_id', 'anomaly_id']
         # @added 20201001 - Task #3748: POC SNAB
         # Added algorithms_run required to determine the anomalyScore
         # so this needs to be sent to Ionosphere so Ionosphere
@@ -3247,7 +3253,7 @@ class Ionosphere(Thread):
             # Handle insufficient data to create profile and just remove the
             # check rather than failing it as reporting an error
             if log_msg and 'insufficient data to create profile' in log_msg:
-                logger.warning('warning :: calculated features file not available as insufficient date')
+                logger.info('warning :: calculated features file not available as insufficient date')
                 self.remove_metric_check_file(str(metric_check_file))
             else:
                 logger.error('error :: calculated features file not available - %s' % (calculated_feature_file))
@@ -4120,7 +4126,15 @@ class Ionosphere(Thread):
                                 minmax_fp_values = [x[1] for x in fp_id_metric_ts]
                                 x_np = np.asarray(minmax_fp_values)
                                 # Min-Max scaling
-                                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                                # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+                                #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                                np_minmax = np.array([])
+                                try:
+                                    np_minmax = minmax_scale(x_np)                    
+                                except Exception as err:
+                                    logger.error('error :: minmax_scale failed with fp id %s time series for %s, err: %s' % (
+                                        str(fp_id), str(use_base_name), err))
+
                                 for (ts, v) in zip(fp_id_metric_ts, np_minmax):
                                     minmax_fp_ts.append([ts[0], v])
                                 logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
@@ -4144,7 +4158,15 @@ class Ionosphere(Thread):
                                 minmax_anomalous_values = [x2[1] for x2 in use_anomalous_timeseries]
                                 x_np = np.asarray(minmax_anomalous_values)
                                 # Min-Max scaling
-                                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                                # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+                                # np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                                np_minmax = np.array([])
+                                try:
+                                    np_minmax = minmax_scale(x_np)                    
+                                except Exception as err:
+                                    logger.error('error :: minmax_scale failed with current time series anomalous_timeseries fp id %s time series for %s, err: %s' % (
+                                        str(fp_id), str(use_base_name), err))
+
                                 # @modified 20221027 - Feature #4708: ionosphere - store and cache fp minmax data
                                 # for (ts, v) in zip(fp_id_metric_ts, np_minmax):
                                 for (ts, v) in zip(use_anomalous_timeseries, np_minmax):

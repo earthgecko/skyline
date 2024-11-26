@@ -39,6 +39,8 @@ from functions.timeseries.downsample import downsample_timeseries
 from functions.timeseries_predictions.fft_extrapolation import fft_extrapolation
 from functions.wind.wind_return_results import wind_return_results
 from functions.wind.wind_submit_job import wind_submit_job
+# @added 20241115 - Feature #5548: functions.numpy.minmax_scale
+from functions.numpy.minmax_scale import minmax_scale
 
 warnings.filterwarnings('ignore')
 mplstyle.use('fast')
@@ -113,7 +115,7 @@ class MotifAnnihilation(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            logger.warning('warning :: parent or current process dead')
+            logger.info('warning :: parent or current process dead')
             sys.exit(0)
 
 
@@ -1537,7 +1539,15 @@ class MotifAnnihilation(Thread):
             x_np = np.asarray(minmax_values)
             # Min-Max scaling
             if len(x_np) > 0:
-                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+                #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                np_minmax = np.array([])
+                try:
+                    np_minmax = minmax_scale(x_np)                    
+                except Exception as err:
+                    logger.error('error :: %s :: %s :: minmax_scale failed, err: %s' % (
+                        app_module, function_str, err))
+
                 for (ts, v) in zip(converted, np_minmax):
                     minmax_timeseries.append([ts[0], float(v)])
 
@@ -1845,7 +1855,7 @@ class MotifAnnihilation(Thread):
             label = 'LEARNT - motif_annihilation'
             fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, metric_timestamp, metric, create_context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
             if fp_exists:
-                logger.warning('warning :: %s :: %s :: failed to create a features profile for %s, %s as an fp already exists' % (
+                logger.info('warning :: %s :: %s :: failed to create a features profile for %s, %s as an fp already exists' % (
                     app_module, function_str, metric, str(metric_timestamp)))
         except Exception as err:
             logger.error(traceback.format_exc())

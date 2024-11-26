@@ -42,6 +42,9 @@ from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_ba
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.timeseries.downsample import downsample_timeseries
 
+# @added 20241115 - Feature #5548: functions.numpy.minmax_scale
+from functions.numpy.minmax_scale import minmax_scale
+
 skyline_version = skyline_version.__absolute_version__
 
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -406,7 +409,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
     if not converted:
         trace = 'None'
         fail_msg = 'warning :: %s :: no data to create profile' % log_context
-        current_logger.warning('%s' % fail_msg)
+        current_logger.info('%s' % fail_msg)
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
     metric_resolution = 60
     expected_datapoints = int(int(ts_full_duration) / int(metric_resolution))
@@ -474,7 +477,16 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
             minmax_values = [x[1] for x in converted]
             x_np = np.asarray(minmax_values)
             # Min-Max scaling
-            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+            #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            try:
+                np_minmax = minmax_scale(x_np)                    
+            except Exception as err:
+                fail_msg = 'error :: %s :: minmax_scale failed, err: %s' % (
+                    log_context, err)
+                current_logger.error('%s' % fail_msg)
+                return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
+
             for (ts, v) in zip(converted, np_minmax):
                 minmax_timeseries.append([ts[0], v])
             if minmax_timeseries:
@@ -494,7 +506,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
         trace = 'None'
         fail_msg = 'warning :: %s :: insufficient data to create profile, len(timeseries): %s' % (
             log_context, str(len(converted)))
-        current_logger.warning('%s' % fail_msg)
+        current_logger.info('%s' % fail_msg)
 
     # @added 20220822 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -526,7 +538,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
         fail_msg = 'warning :: %s :: insufficient data to create profile, last_timestamp: %s, ts_full_duration: %s, first_timestamp: %s, timestamp_limit: %s' % (
             log_context, str(last_timestamp), str(ts_full_duration),
             str(first_timestamp), str(timestamp_limit))
-        current_logger.warning('%s' % fail_msg)
+        current_logger.info('%s' % fail_msg)
 
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
@@ -545,7 +557,7 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context, 
                 log_context, err)
             current_logger.error('%s' % fail_msg)
         fail_msg = 'warning :: %s :: insufficient data to create profile' % log_context
-        current_logger.warning('%s' % fail_msg)
+        current_logger.info('%s' % fail_msg)
         return 'error', False, fp_created, fp_id, fail_msg, trace, f_calc
 
     if os.path.isfile(ts_csv):

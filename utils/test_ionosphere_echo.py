@@ -33,6 +33,9 @@ from functions.numpy.percent_different import get_percent_different
 
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
+# @added 20241115 - Feature #5548: functions.numpy.minmax_scale
+from functions.numpy.minmax_scale import minmax_scale
+
 # @modified 20230110 - Task #4778: v4.0.0 - update dependencies
 # Added nosec B108 for bandit
 settings.LOG_PATH = '/tmp'  # nosec B108
@@ -319,7 +322,15 @@ def calculate_features_other_minmax(use_file, i_json_file, metric):
             minmax_fp_values = [x[1] for x in fp_id_metric_ts]
             x_np = np.asarray(minmax_fp_values)
             # Min-Max scaling
-            np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+            #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+            np_minmax = np.array([])
+            try:
+                np_minmax = minmax_scale(x_np)                    
+            except Exception as err:
+                print('error :: could not minmax scale fp id %s time series for %s, err: %s' % (
+                    str(fp_id), str(base_name), err))
+
             for (ts, v) in zip(fp_id_metric_ts, np_minmax):
                 minmax_fp_ts.append([ts[0], v])
             print('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
@@ -338,19 +349,28 @@ def calculate_features_other_minmax(use_file, i_json_file, metric):
                 minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
                 x_np = np.asarray(minmax_anomalous_values)
                 # Min-Max scaling
-                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+                #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                np_minmax = np.array([])
+                try:
+                    np_minmax = minmax_scale(x_np)                    
+                except Exception as err:
+                    print('error :: could not minmax scale minmax_anomalous_values for %s, err: %s' % (
+                        str(base_name), err))
+
                 for (ts, v) in zip(fp_id_metric_ts, np_minmax):
                     minmax_anomalous_ts.append([ts[0], v])
                 del anomalous_timeseries
                 del minmax_anomalous_values
             except:
-                print('error :: could not minmax scale current time series anomalous_timeseries for %s' % (str(fp_id), str(base_name)))
+                print('error :: could not minmax scale current time series anomalous_timeseries for %s' % str(base_name))
             if len(minmax_anomalous_ts) > 0:
                 print('minmax_anomalous_ts is populated with %s data points' % str(len(minmax_anomalous_ts)))
             else:
                 print('error :: minmax_anomalous_ts is not populated')
         else:
-            print('minmax scaled check will be skipped - anomalous_ts_values_count is %s and minmax_fp_ts is %s' % (str(anomalous_ts_values_count), str(minmax_fp_ts_values_count)))
+            print('minmax scaled check will be skipped - anomalous_ts_values_count is %s and minmax_fp_ts is %s' % (
+                str(anomalous_ts_values_count), str(minmax_fp_ts_values_count)))
 
     minmax_fp_ts_csv = '%s/fpid.%s.%s.minmax_fp_ts.tsfresh.input.std.csv' % (
         settings.SKYLINE_TMP_DIR, str(fp_id), base_name)

@@ -32,6 +32,9 @@ from functions.numpy.percent_different import get_percent_different
 from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 
+# @added 20241115 - Feature #5548: functions.numpy.minmax_scale
+from functions.numpy.minmax_scale import minmax_scale
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -471,7 +474,15 @@ def minmax_scale_check(
                 minmax_fp_values = [x[1] for x in fp_id_metric_ts]
                 x_np = np.asarray(minmax_fp_values)
                 # Min-Max scaling
-                np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+                #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                np_minmax = np.array([])
+                try:
+                    np_minmax = minmax_scale(x_np)                    
+                except Exception as err:
+                    logger.error('error :: minmax_scale failed with fp id %s time series for %s, err: %s' % (
+                        str(fp_id), str(base_name), err))
+
                 for (ts, v) in zip(fp_id_metric_ts, np_minmax):
                     minmax_fp_ts.append([ts[0], v])
                 logger.info('minmax_fp_ts list populated with the minmax scaled time series with %s data points' % str(len(minmax_fp_ts)))
@@ -505,7 +516,15 @@ def minmax_scale_check(
                     minmax_anomalous_values = [x2[1] for x2 in anomalous_timeseries]
                     x_np = np.asarray(minmax_anomalous_values)
                     # Min-Max scaling
-                    np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                    # @modified 20241115 - Feature #5548: functions.numpy.minmax_scale
+                    #np_minmax = (x_np - x_np.min()) / (x_np.max() - x_np.min())
+                    np_minmax = np.array([])
+                    try:
+                        np_minmax = minmax_scale(x_np)                    
+                    except Exception as err:
+                        logger.error('error :: minmax_scale failed with minmax_anomalous_values for fp id %s for %s, err: %s' % (
+                            str(fp_id), str(base_name), err))
+
                     for (ts, v) in zip(fp_id_metric_ts, np_minmax):
                         minmax_anomalous_ts.append([ts[0], v])
                 except:
