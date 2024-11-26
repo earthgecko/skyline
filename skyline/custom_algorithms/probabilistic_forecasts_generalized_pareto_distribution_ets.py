@@ -54,6 +54,9 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
     scores. A Generalized Pareto Distribution is fitted to the largest density
     scores to estimate the probability of each observation being an anomaly.
 
+    probabilistic_forecasts_generalized_pareto_distribution_ets designated as
+    pfgpde.
+
     This implementation uses statespace ExponentialSmoothing.  Although
     holtwinters ExponentialSmoothing could also be used, a seasonal parameter
     needs to be defined therefore holtwinters ExponentialSmoothing is not suited
@@ -81,10 +84,20 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
             when determining if the metric is anomalous. Only the last
             ``anomaly_window`` data points in the time series will be used to
             determine if the metric is anomalous.  Default is ``1``.
-        - ``'threshold'`` (int): The percentile value for the threshold.
-            The percentile value for the threshold to use.  Default is ``95``.
-        - ``'p_value'`` (int): The p_value.
-            The p_value to use.  Default is ``95``.
+        - ``'threshold'`` (float): The percent for the threshold.
+            A cutoff value above which density scores are considered for
+            fitting the Generalized Pareto Distribution (GPD).  This value is
+            calculated based on the ``p_value`` parameter as the percentile of
+            the density scores.   For example, if ``p_value`` is 95, the
+            `threshold` corresponds to the 95th percentile of the density
+            scores.  All density scores above than this threshold are used as
+            exceedances to fit the GPD.  Default is ``0.95``.
+        - ``'p_value'`` (int): [0, 100] The p_value.
+            The percentile threshold used to determine the cutoff for selecting
+            the **largest** density scores.  This value represents the percentile
+            (e.g., 95 for the 95th percentile) used to compute the threshold for
+            fitting the Generalized Pareto Distribution (GPD). Must be in the
+            range [0, 100].  Default is ``95``.
         - ``'return_results'`` (bool): Optional.
             If ``True``, returns the results dict in addition to anomalous and
             anomalyScore.  Default is ``False``.
@@ -93,12 +106,15 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
         - ``'debug_print'`` (bool): Optional.
             If ``True``, enables debug printing  (for Jupyter testing). Default
             is ``False``.
+        - ``'return_full_results'`` (bool): Optional.
+            If ``True``, returns the addition data in the results dict.  Default
+            is ``False``.
 
         Example usage:
         
             algorithm_parameters={
                 'anomaly_window': 1,
-                'threshold': 95,
+                'threshold': 0.95,
                 'p_value': 95,
                 'debug_logging': True,
                 'return_results': True,
@@ -115,6 +131,8 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
 
     # You MUST define the algorithm_name
     algorithm_name = 'probabilistic_forecasts_generalized_pareto_distribution_ets'
+
+    algo_name = 'pfgpde'
 
     # Define the default state of None and None, anomalous does not default to
     # False as that is not correct, False is only correct if the algorithm
@@ -147,6 +165,12 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
         except:
             return_results = False
 
+    return_full_results = False
+    try:
+        return_full_results = algorithm_parameters['return_full_results']
+    except:
+        return_full_results = False
+        
     # Use the algorithm_parameters to determine the sample_period
     debug_logging = None
     try:
@@ -157,7 +181,7 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
         try:
             current_logger = get_log(current_skyline_app)
             current_logger.debug('debug :: %s :: debug_logging enabled with algorithm_parameters - %s' % (
-                algorithm_name, str(algorithm_parameters)))
+                algo_name, str(algorithm_parameters)))
         except:
             # This except pattern MUST be used in ALL custom algortihms to
             # facilitate the traceback from any errors.  The algorithm we want to
@@ -179,11 +203,11 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
     except:
         debug_print = False
 
-    threshold = 95
+    threshold = 0.95
     try:
         threshold = int(algorithm_parameters['threshold'])
     except:
-        threshold = 95
+        threshold = 0.95
 
     p_value = 95
     try:
@@ -198,53 +222,115 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
         anomaly_window = 1
 
     if debug_print:
-        print('running probabilistic_forecasts_generalized_pareto_distribution_ets with threshold: %s, p_value: %s' % (
-            str(threshold), str(p_value)))
+        print('running %s with threshold: %s, p_value: %s' % (
+            algo_name, str(threshold), str(p_value)))
     if debug_logging:
-        current_logger.debug('debug :: running probabilistic_forecasts_generalized_pareto_distribution_ets with threshold: %s, p_value: %s' % (
-            str(threshold), str(p_value)))
+        current_logger.debug('debug :: running %s with threshold: %s, p_value: %s with anomaly_window: %s' % (
+            algo_name, str(threshold), str(p_value), str(anomaly_window)))
 
+    data = {}
+    errors = []
     try:
         df = pd.DataFrame(timeseries, columns=['ts','value'])
         # Fit the state space Exponential Smoothing model to the entire time series
         model = ETS(df['value'], trend=True, initialization_method="estimated")
         #fit = model.fit(optimized=True)
         fit = model.fit()
+        if debug_logging:
+            current_logger.debug('debug :: %s model fitted' % algo_name)
         # Calculate the residuals
         residuals = df['value'] - fit.fittedvalues
+        if debug_logging:
+            current_logger.debug('debug :: %s residuals calculated, len(residuals): %s' % (
+                algo_name, str(len(residuals))))
+        if return_full_results:
+            data['residuals'] = [float(v) for v in residuals] 
         # Calculate the standard deviation of the residuals
         sigma = residuals.std()
+        if debug_logging:
+            current_logger.debug('debug :: %s sigma calculated, sigma: %s' % (
+                algo_name, str(sigma)))
+        if return_full_results:
+            data['sigma'] = float(sigma)
+
         # Generate one-step ahead forecasts and their standard deviations
         forecasts = fit.fittedvalues
+        if return_full_results:
+            data['forecasts'] = [float(v) for v in forecasts] 
+
+        if debug_logging:
+            current_logger.debug('debug :: %s forecasts calculated, len(forecasts): %s' % (
+                algo_name, str(len(forecasts))))
         forecast_stds = np.full_like(forecasts, sigma)
+        if return_full_results:
+            data['forecast_stds'] = [float(v) for v in forecast_stds] 
+
         # Calculate the density scores (negative log likelihoods)
         density_scores = -norm.logpdf(df['value'], loc=forecasts, scale=forecast_stds)
+        if debug_logging:
+            current_logger.debug('debug :: %s density_scores calculated, len(density_scores): %s' % (
+                algo_name, str(len(density_scores))))
+        if return_full_results:
+            data['density_scores'] = [float(v) for v in density_scores] 
+
         # Identify the largest density scores (e.g., above the 95th percentile)
         p_threshold = np.percentile(density_scores, p_value)
+        if return_full_results:
+            data['p_threshold'] = float(p_threshold)
+        if debug_logging:
+            current_logger.debug('debug :: %s set p_threshold: %s' % (
+                algo_name, str(p_threshold)))
         large_density_scores = density_scores[density_scores > p_threshold] - p_threshold
+        if return_full_results:
+            data['large_density_scores'] = [float(v) for v in large_density_scores] 
+
         # Fit the Generalized Pareto Distribution to the largest density scores
         params = genpareto.fit(large_density_scores)
         # Estimate the probability of each observation being an anomaly
         probabilities = genpareto.cdf(density_scores - p_threshold, *params)
+        if return_full_results:
+            data['probabilities'] = [float(v) for v in probabilities] 
+
+        if debug_logging:
+            current_logger.debug('debug :: %s probabilities calculated, len(probabilities): %s' % (
+                algo_name, str(len(probabilities))))
         # Identify anomalies based on the estimated probability (e.g., probability > 0.95)
         anomaly_labels = (probabilities > threshold).astype(int)
+        if return_full_results:
+            data['anomaly_labels'] = [float(v) for v in anomaly_labels] 
+
+        if debug_logging:
+            current_logger.debug('debug :: %s anomaly_labels calculated, len(anomaly_labels): %s' % (
+                algo_name, str(len(anomaly_labels))))
         # Coerce results from numpy.int64 to ints
         probabilistic_forecasts_generalized_pareto_distribution_ets_scores = []
         for i in list(anomaly_labels):
             probabilistic_forecasts_generalized_pareto_distribution_ets_scores.append(int(i))
+        if return_full_results:
+            data['probabilistic_forecasts_generalized_pareto_distribution_ets_scores'] = [float(v) for v in probabilistic_forecasts_generalized_pareto_distribution_ets_scores] 
+
+        if debug_logging:
+            current_logger.debug('debug :: %s probabilistic_forecasts_generalized_pareto_distribution_ets_scores calculated, len(probabilistic_forecasts_generalized_pareto_distribution_ets_scores): %s' % (
+                algo_name, str(len(probabilistic_forecasts_generalized_pareto_distribution_ets_scores))))
         anomalies = {}
         anomalyScore_list = []
         for index, item in enumerate(timeseries):
             try:
                 probabilistic_forecasts_generalized_pareto_distribution_ets_score = probabilistic_forecasts_generalized_pareto_distribution_ets_scores[index]
-            except:
+            except Exception as err:
                 probabilistic_forecasts_generalized_pareto_distribution_ets_score = 0
+                errors.append(['determining score', index, err])
             if probabilistic_forecasts_generalized_pareto_distribution_ets_score == 0:
                 anomalyScore_list.append(0)
             else:
                 anomalyScore_list.append(1)
                 ts = int(item[0])
                 anomalies[ts] = {'value': item[1], 'index': index, 'score': 1}
+
+        if errors:
+            if debug_logging:
+                current_logger.debug('error :: debug :: %s - errors reported in determining scores, last recorded err: %s' % (
+                    algo_name, str(errors[-1])))
 
         anomaly_sum = sum(anomalyScore_list[-anomaly_window:])
         if anomaly_sum > 0:
@@ -260,9 +346,11 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
             'runtime': runtime,
         }
         if debug_print:
-            print('ran probabilistic_forecasts_generalized_pareto_distribution_ets OK in %.6f seconds' % runtime)
+            print('ran %s OK in %.6f seconds' % (algo_name, runtime))
         if debug_logging:
-            current_logger.debug('debug :: ran probabilistic_forecasts_generalized_pareto_distribution_ets OK in %.6f seconds' % runtime)
+            current_logger.debug('debug :: %s anomalies_in_window: %s, total_anomalies: %s' % (
+                algo_name, str(anomaly_sum), str(len(anomalies))))
+            current_logger.debug('debug :: ran %s OK in %.6f seconds' % (algo_name, runtime))
         if results:
             if results['anomalous']:
                 anomalous = True
@@ -273,18 +361,22 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
             if debug_print:
                 print('anomalous: %s' % str(anomalous))
             if debug_logging:
-                current_logger.debug('debug :: anomalous: %s' % str(anomalous))
+                current_logger.debug('debug :: %s anomalous: %s' % (algo_name, str(anomalous)))
+
+            if return_full_results:
+                results['data'] = data
+
         else:
             if debug_print:
                 print('error - no results')
             if debug_logging:
-                current_logger.debug('debug :: error - no results')
+                current_logger.debug('debug :: %s error - no results' % algo_name)
 
     except StopIteration:
         if debug_print:
-            print('warning - StopIteration called on probabilistic_forecasts_generalized_pareto_distribution_ets')
+            print('warning - StopIteration called on %s' % algo_name)
         if debug_logging:
-            current_logger.debug('debug :: warning - StopIteration called on probabilistic_forecasts_generalized_pareto_distribution_ets')
+            current_logger.debug('debug :: warning - StopIteration called on %s' % algo_name)
 
         # This except pattern MUST be used in ALL custom algortihms to
         # facilitate the traceback from any errors.  The algorithm we want to
@@ -301,7 +393,7 @@ def probabilistic_forecasts_generalized_pareto_distribution_ets(current_skyline_
         if debug_print:
             print('error:', traceback.format_exc())
         if debug_logging:
-            current_logger.debug('debug :: error - on probabilistic_forecasts_generalized_pareto_distribution_ets - %s' % err)
+            current_logger.debug('debug :: error - %s, err: %s' % (algo_name, err))
             current_logger.debug(traceback.format_exc())
 
         # Return None and None as the algorithm could not determine True or False

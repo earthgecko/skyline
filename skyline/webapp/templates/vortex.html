@@ -44,7 +44,12 @@
   and the results will be output in json format and returned directly, just like a normal skyline/flux/vortex request would do,
   with the addition of a training data page URL appended to the results data.
   <br>
-
+  Each of the below algorithms and their parameters is available in the local
+  documentation on <a href="/static/docs/algorithms/custom-algorithms.html">custom_algorithms</a> 
+  in their relevant section which also has a link to docstrings for the algorithm
+  parameters or online at
+  <a href="https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html">https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</a>.
+  
 {% if results %}
   <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#process_options">Show process options</button>
   <div id="process_options" class="collapse">
@@ -113,7 +118,7 @@
           being anomalous.
           <br>
   {% for algorithm in vortex_algorithms %}
-            <input type="checkbox" id="{{ algorithm }}" name="{{ algorithm }}" value="{{ algorithm }}"> <strong>{{ algorithm }}</strong> ::
+            <input type="checkbox" id="{{ algorithm }}" name="{{ algorithm }}" value="{{ algorithm }}"> <strong><a target='_blank' href="/static/docs/skyline.custom_algorithms.html#module-custom_algorithms.{{ algorithm }}">{{ algorithm }}</a></strong> ::
     {% for parameter in vortex_algorithms[algorithm]['algorithm_parameters'] %}
       {% set value = vortex_algorithms[algorithm]['algorithm_parameters'][parameter] %}
         {% if parameter == 'return_results' %}

@@ -29,6 +29,8 @@ import pandas as pd
 def grafana_promql_anomaly_detection(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
 
     """
+    EXPERIMENTAL
+
     grafana_promql_anomaly_detection
 
     A loose Python implementation of the Grafana PromQL Anomaly Detection method
