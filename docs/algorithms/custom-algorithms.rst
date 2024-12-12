@@ -5,8 +5,10 @@ Custom algorithms
 **py3 only**
 
 This section describes the process, steps and resources required to run custom
-algorithms in Skyline. Adding a custom algorithm or algorithms is easier and
-better than modifying the core Skyline algorithm files yourself.
+algorithms in Skyline. Whether that is adding your own or running any of the
+custom algorithms that come with Skyline.  If you want to run your own algorithm
+adding a custom algorithm or algorithms is easier and better than modifying the
+core Skyline algorithm files yourself.
 
 If you are wanting to implement a custom algorithm, ensure you read this
 documentation **thoroughly** and **understand the layout** in the example
@@ -20,13 +22,18 @@ Available custom algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There is a collection of custom algorithms already available in Skyline and each
-has a page here.  However currently most are only documented in the code and their
-pages refer to the source code.
+has a page here listed in the left hand menu or this page.
 
 The performance and accuracy of the available algorithms vary, their inclusion is
-not a validation of the method, simply that they can function as outlier detectors.
-Each generates different results and few seldom agree.  The Vortex webapp UI can be
-used to run them adhoc on any time series should you wish to assess there performance.
+not a validation of the method, simply that they can function as outlier or
+changepoint detectors.  Each generates different results and few seldom agree.
+The Vortex webapp UI can be used to run them adhoc on any time series should you
+wish to assess there performance.
+
+Each algorithm page also has example results and timings against a set of time
+series.  The timings are simply a gauge as to the approximate performance of the
+algorithm.  The analysis was done on a heavily loaded running server and the
+run times may vary in different environments (probably faster).
 
 Implementing a custom algorithm
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -314,8 +321,9 @@ Custom algorithm requirements
     **required** for error handling and logging.  You do not have to worry about
     handling the ``parent_pid`` argument in your algorithm, your algorithm must
     just accept it as the second argument.
-  - ``timeseries`` - the algorithm must accept a time series as a list e.g.
-    ``[[1578916800.0, 29.0], [1578920400.0, 55.0], ... [1580353200.0, 55.0]]``
+  - ``timeseries`` - the algorithm must accept a time series as a list of list
+    e.g. ``[[t, v], [t, v]], ..., [t, v]]`` like ``[[1578916800, 29.0],
+    [1578920400, 55.0], ... [1580353200, 55.0]]``
   - ``algorithm_parameters`` - this is a dictionary of any of parameters that
     the algorithm requires.
 
@@ -343,13 +351,11 @@ Custom algorithm requirements
 - The returned ``anomalyScore`` must be a **float** between 0.0 and 1.0, 0.0
   being not anomalous and 1.0 being a certain anomaly.  You can pass
   `(False, 0.7)`,  you just have to normalise your ``anomalyScore`` between 0.0
-  and 1.0.  The ``anomalyScore`` is currently only for testing it is not used in
-  any way but it **must** be returned.  The anomalous classification is
-  currently **only** determined from the boolean and the ``anomalyScore`` is
-  currently not used in any way other than for testing.  If your algorithm does
-  not calculate an anomaly score, when your algorithm returns ``False`` just
-  return it with a 0.0 and when your algorithm returns ``True`` just return it
-  with 1.0
+  and 1.0.  The anomalous classification is currently **only** determined from
+  the boolean value and the ``anomalyScore`` is used in other ways later in the
+  pipeline for plots, etc.  If your algorithm does not calculate an anomaly
+  score, when your algorithm returns ``False`` just return it with a 0.0 and
+  when your algorithm returns ``True`` just return it with 1.0
 
 Additional results in the return
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -366,9 +372,9 @@ to, plot results, etc.
     results = {
         'anomalous': anomalous,  # boolean
         'anomalies': anomalies,  # dict (at minimum must be keyed with timestamps with value, index and score, additional keys can be added)
-        'some_algo_specific_thing': json_friendly_object,  # str,list,dict (no nans)
+        'some_algo_specific_thing': json_friendly_object,  # str,list,dict,int,float (no nans or np.float64, etc)
         'anomalyScore_list': anomalyScore_list,  # list of 0 and 1s
-        'scores': algorithm_scores,  # list of any algorithm specific scores (no nans use None)
+        'scores': algorithm_scores,  # list of any algorithm specific scores (no nans use None, float or int only no np.float64, etc)
         'unreliable': unreliable,  # boolean
         'unreliable_reason': unreliable_reason,  # str
         'success': success,  # boolean
@@ -394,9 +400,9 @@ a json key must be a str.
             ...,
             '1688647800': {'value': 1.1, 'index': 4303, 'score': 4, 'triggered': ['lof', 'isolation_forest', 'one_class_svm', 'm66']}
         },
-        'some_algo_specific_thing': json_friendly_object,  # str,list,dict (no nans)
+        'some_algo_specific_thing': json_friendly_object,  # str,list,dict,int,float (no nans or np.float64, etc)
         'anomalyScore_list': [0, 0, 0, ..., 0, 1],
-        'scores': [0, ..., 4, ..., 0, 4],
+        'scores': [0, ..., 4, ..., 0, 4],  # no nans use None, float or int only no np.float64, etc
         'unreliable': True,
         'unreliable_reason': 'None',
         'success': True,
@@ -530,6 +536,15 @@ flux/tornado allows you to specify and added custom_algorithms or the
 expensive part of a custom_algorithm to be loaded and served by flux, so that
 every call is fast and incurs no load time penalities.
 
+An example of a flux/tornado implementation can gleaned for the following:
+
+https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/skyline_laoccfdlpnc.py
+
+https://github.com/earthgecko/skyline/tree/master/skyline/flux/tornado.py
+
+https://github.com/earthgecko/skyline/tree/master/skyline/flux/tornadoes/tornado_laoccfdlpnc.py
+
+
 Example custom algorithms
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -550,6 +565,15 @@ This is an example of a more complex custom algorithm structure, that uses
 ``debug_logging`` is passed and enabled via the ``algorithm_parameters``.
 
 https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/last_same_hours.py
+
+**laoccfdlpnc**
+
+This is an example of very complex custom algorithm.
+
+https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/laoccfdlpnc.py
+
+It is also possible to create a custom_algorithm that uses other
+custom_algorithms in it and use consensus based ensembles.
 
 Running a Mirage only custom algorithm on a metric all the time
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

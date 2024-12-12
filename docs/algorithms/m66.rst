@@ -22,10 +22,21 @@ m66 TCPDBench results
 
 https://github.com/alan-turing-institute/TCPDBench
 
+https://arxiv.org/abs/2003.06222
+
+
+    @article{vandenburg2020evaluation,
+        title={An Evaluation of Change Point Detection Algorithms},
+        author={{Van den Burg}, G. J. J. and Williams, C. K. I.},
+        journal={arXiv preprint arXiv:2003.06222},
+        year={2020}
+    }
+
+
 Seeing as there is a changepoint algorithm benchmarking app might as well test
 it.  It would probably score low seeing as it is not detecting **all**
-changepoints by design, only significant changepoints.  But it scores but than
-expected, it is places 6th overall.
+changepoints by design, only significant changepoints.  But it scores are better
+than expected, it is places 6th overall.
 
 **Heatmap**
 
@@ -47,16 +58,84 @@ expected, it is places 6th overall.
 .. image:: ../images/m66/m66.with.TCPDBench.results.heatmap.rank.rank.png
    :alt: m66 TCPDBench results rank heatmap
 
+Example analysis output
+------------------------
+
+The below graphs show the results of m66 run with the default
+algorithm_parameters against seasonal, seasonal unstable, stable and unstable
+time series.
+
+.. note:: This is a changepoint detection algorithm only.
+
+.. figure:: ../images/custom_algorithms/m66/m66.seasonal.A.png
+    :alt: m66 seasonal time series A
+    
+    *m66.seasonal.A - runtime: 0.197 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.seasonal.B.png
+    :alt: m66 seasonal time series B
+    
+    *m66.seasonal.B - runtime: 0.087 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.seasonal.C.png
+    :alt: m66 seasonal time series C
+    
+    *m66.seasonal.C - runtime: 0.081 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.seasonal.D.png
+    :alt: m66 seasonal time series D
+    
+    *m66.seasonal.D - runtime: 0.394 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.seasonal_unstable.A.png
+    :alt: m66 seasonal_unstable time series A
+    
+    *m66.seasonal_unstable.A - runtime: 0.019 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.seasonal_unstable.B.png
+    :alt: m66 seasonal_unstable time series B
+    
+    *m66.seasonal_unstable.B - runtime: 0.014 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.stable.A.png
+    :alt: m66 stable time series A
+    
+    *m66.stable.A - runtime: 0.087 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.stable.B.png
+    :alt: m66 stable time series B
+    
+    *m66.stable.B - runtime: 0.013 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.stable.E.png
+    :alt: m66 stable time series E
+    
+    *m66.stable.E - runtime: 0.095 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.stable.F.png
+    :alt: m66 stable time series F
+    
+    *m66.stable.F - runtime: 0.023 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.unstable.A.png
+    :alt: m66 unstable time series A
+    
+    *m66.unstable.A - runtime: 0.086 seconds*
+
+.. figure:: ../images/custom_algorithms/m66/m66.unstable.B.png
+    :alt: m66 unstable time series B
+    
+    *m66.unstable.B - runtime: 0.092 seconds*
 
 Testing m66 with TCPDBench
 ==========================
 
-   "If you want to climb the mountain, you most do all the hard things and climb it."
+   "If you want to climb the mountain, you must do all the hard things and climb it."
 
    -- Kukuczka
 
-Apart from some lacking docs and deps bugs with TCPDBench, got there in the end.
-
+Apart from some lacking docs and dependencies bugs with TCPDBench, got there in
+the end.
 
 Build datasets on CentOS 8
 --------------------------

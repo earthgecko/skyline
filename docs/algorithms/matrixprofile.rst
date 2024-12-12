@@ -136,6 +136,73 @@ appropriate.
 
 See the docstrings - https://earthgecko-skyline.readthedocs.io/en/latest/skyline.custom_algorithms.html#module-custom_algorithms.skyline_matrixprofile
 
+Example analysis output
+------------------------
+
+The below graphs show the results of matrixprofile run with the default
+algorithm_parameters against seasonal, seasonal unstable, stable and unstable
+time series.
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.seasonal.A.png
+    :alt: matrixprofile seasonal time series A
+    
+    *matrixprofile.seasonal.A - runtime: 0.316 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.seasonal.B.png
+    :alt: matrixprofile seasonal time series B
+    
+    *matrixprofile.seasonal.B - runtime: 3.721 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.seasonal.C.png
+    :alt: matrixprofile seasonal time series C
+    
+    *matrixprofile.seasonal.C - runtime: 3.388 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.seasonal.D.png
+    :alt: matrixprofile seasonal time series D
+    
+    *matrixprofile.seasonal.D - runtime: 2.322 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.seasonal_unstable.A.png
+    :alt: matrixprofile seasonal_unstable time series A
+    
+    *matrixprofile.seasonal_unstable.A - runtime: 1.481 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.seasonal_unstable.B.png
+    :alt: matrixprofile seasonal_unstable time series B
+    
+    *matrixprofile.seasonal_unstable.B - runtime: 2.692 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.stable.A.png
+    :alt: matrixprofile stable time series A
+    
+    *matrixprofile.stable.A - runtime: 4.913 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.stable.B.png
+    :alt: matrixprofile stable time series B
+    
+    *matrixprofile.stable.B - runtime: 3.48 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.stable.E.png
+    :alt: matrixprofile stable time series E
+    
+    *matrixprofile.stable.E - runtime: 3.604 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.stable.F.png
+    :alt: matrixprofile stable time series F
+    
+    *matrixprofile.stable.F - runtime: 2.33 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.unstable.A.png
+    :alt: matrixprofile unstable time series A
+    
+    *matrixprofile.unstable.A - runtime: 1.301 seconds*
+
+.. figure:: ../images/custom_algorithms/matrixprofile/skyline_matrixprofile.unstable.B.png
+    :alt: matrixprofile unstable time series B
+    
+    *matrixprofile.unstable.B - runtime: 3.887 seconds*
+
 
 .. _MASS: https://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html
 .. _matrixprofile: https://github.com/matrix-profile-foundation/matrixprofile
