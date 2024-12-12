@@ -810,6 +810,10 @@ class Analyzer(Thread):
             logger.info('0 assigned metrics, nothing to do')
             return
 
+        # @added 20241212 - Feature #4888: analyzer - load_shedding
+        # Define an empty dict
+        last_metrics_last_analysis_dict = {}
+
         # @added 20230402 - Feature #4888: analyzer - load_shedding
         analyzer_last_run_time = 0
         analyzer_last_run_time_timestamp = int(spin_start)
@@ -5291,7 +5295,13 @@ class Analyzer(Thread):
                     logger.error('error :: failed to update analysis timestamp in Redis analyzer.metrics.last_analysis hash key - %s' % err)
                 try:
                     key_ttl = self.redis_conn_decoded.ttl('analyzer.metrics.last_analysis_timestamp')
-                    if key_ttl == -1:
+                    # @modified 20241212 - Feature #4888: analyzer - load_shedding
+                    # Prevent an edge case which can occur on a restart where
+                    # activating_load_shedding is set due to the time between
+                    # last analysis and now but load_shedding_active is not set.
+                    # Only set the TTL if load_shedding_active not
+                    # if key_ttl == -1:
+                    if key_ttl == -1 and load_shedding_active:
                         self.redis_conn_decoded.expire('analyzer.metrics.last_analysis_timestamp', 300)
                         logger.info('set the unset expire TTL on Redis analyzer.metrics.last_analysis hash key to 300')
                 except Exception as err:
