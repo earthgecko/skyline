@@ -277,7 +277,9 @@ class Cloudburst(Thread):
                     unique_metric_ids_errors += 1
             unique_metric_ids_with_metric[metric_id] = metric
         if unique_metric_ids_errors:
-            logger.error('error :: cloudburst :: find_cloudbursts :: unique_metric_ids_with_metric %s errors encountered, last error: %s' % (
+            # @modified 20241127 - Feature #4674: cloudburst active events only
+            # Changed from error to warning
+            logger.info('warning :: cloudburst :: find_cloudbursts :: unique_metric_ids_with_metric %s errors encountered, last error: %s' % (
                 str(len(errors)), str(errors[-1])))
 
         metric_ids_to_check = []
