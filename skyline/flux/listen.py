@@ -4442,6 +4442,8 @@ class VortexDataPost(object):
                 'callback_url', 'progress_url', 'return_timeseries',
                 # @added 20241030 - Task #5526: Build v5.0.0 and upgrade deps
                 'csv_upload',
+                # @added 20241127 - Task #5562: Add adhoc parameter for vortex requests
+                'adhoc',
             ]
             # Allow FLUX_SELF_API_KEY requests to pass additional parameters
             if key == FLUX_SELF_API_KEY:
@@ -4495,6 +4497,7 @@ class VortexDataPost(object):
                 logger.info('listen :: vortex :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
+
 
             # Determine if the number of algorithms declared breaches the
             # maximum

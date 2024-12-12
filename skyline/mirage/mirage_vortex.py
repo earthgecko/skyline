@@ -48,11 +48,14 @@ from functions.skyline.callback import callback
 # @added 20241107 - Feature #5536: deduplicate_timeseries
 from functions.timeseries.deduplicate_timeseries import deduplicate_timeseries
 
+# @added 20241127 - Feature #5563: mirage_vortex - use tornado
+from functions.flux.get_tornadoes import get_tornadoes
+
+parent_skyline_app = 'mirage'
 skyline_app = 'mirage_vortex'
-# skyline_app_logger = '%sLog' % skyline_app
-skyline_app_logger = 'mirageLog'
+skyline_app_logger = '%sLog' % parent_skyline_app
 logger = logging.getLogger(skyline_app_logger)
-skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
+skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, parent_skyline_app)
 skyline_app_loglock = '%s.lock' % skyline_app_logfile
 skyline_app_logwait = '%s.wait' % skyline_app_logfile
 
@@ -110,6 +113,30 @@ except:
         604800: 600,
     }
 
+# @added 20241127 - Feature #5563: mirage_vortex - use tornado
+#                   Feature #5198: flux - tornado
+#                   Feature #4734: mirage_vortex
+FLUX_TORNADO_ENABLED = False
+try:
+    from settings import FLUX_TORNADO_ENABLED
+except:
+    FLUX_TORNADO_ENABLED = False
+if FLUX_TORNADO_ENABLED:
+    import json
+    import requests
+    # If tornado errors dump the response to a Redis key for inspection
+    from requests_toolbelt.utils import dump
+    try:
+        from settings import FLUX_TORNADO_URL
+    except:
+        FLUX_TORNADO_URL = None
+    try:
+        from settings import FLUX_SELF_API_KEY
+    except:
+        FLUX_SELF_API_KEY = None
+    if not FLUX_TORNADO_URL and not FLUX_SELF_API_KEY:
+        FLUX_TORNADO_ENABLED = False
+
 try:
     HORIZON_SHARDS = copy.deepcopy(settings.HORIZON_SHARDS)
 except:
@@ -146,8 +173,8 @@ class MirageVortex(Thread):
         self.current_pid = os.getpid()
         self.mirage_vortex_exceptions_q = Queue()
         self.mirage_vortex_anomaly_breakdown_q = Queue()
-        self.redis_conn = get_redis_conn(skyline_app)
-        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        self.redis_conn = get_redis_conn(parent_skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(parent_skyline_app)
 
     def check_if_parent_is_alive(self):
         """
@@ -403,46 +430,6 @@ class MirageVortex(Thread):
                 settings.SKYLINE_DIR, str(request_id_timestamp_aligned),
                 str(request_id_time))
 
-        if vortex_save_path:
-            logger.info('mirage_vortex :: saving data for request_id %s to %s' % (
-                request_id, vortex_save_path))
-            if not os.path.exists(vortex_save_path):
-                try:
-                    mkdir_p(vortex_save_path)
-                except Exception as err:
-                    logger.error('error :: flux :: failed to create dir - %s - %s' % (
-                        vortex_save_path, err))
-            jsonfile = '%s/vortex.%s.json' % (vortex_save_path, request_id)
-            gzip_jsonfile = '%s.gz' % jsonfile
-            try:
-                with open(jsonfile, 'w') as fw:
-                    json.dump(metric_data, fw)
-            except Exception as err:
-                logger.error('error :: mirage_vortex :: failed to save metric_data for request_id %s to %s - %s' % (
-                    request_id, jsonfile, err))
-
-            if os.path.isfile(jsonfile):
-                try:
-                    with open(jsonfile, 'rb') as f_in:
-                        with gzip.open(gzip_jsonfile, 'wb') as f_out:
-                            shutil.copyfileobj(f_in, f_out)
-                except Exception as err:
-                    logger.error('error :: mirage_vortex :: failed to gzip jsonfile %s for request_id %s - %s' % (
-                        jsonfile, request_id, err))
-            if os.path.isfile(gzip_jsonfile):
-                try:
-                    os.remove(jsonfile)
-                except OSError:
-                    logger.error('error :: mirage_vortex - failed to remove file - %s' % jsonfile)
-            try:
-                added_save = self.redis_conn_decoded.hset('mirage.vortex_saved', request_id, save_path)
-                if added_save:
-                    logger.info('mirage_vortex :: added key for %s to mirage.vortex_saved' % (
-                        request_id))
-            except Exception as err:
-                logger.error('error :: mirage_vortex :: failed to hset key for %s in mirage.vortex_saved - %s' % (
-                    request_id, err))
-
         jsonfile = None
         if VORTEX_TIMESERIES_JSON_TO_DISK:
             try:
@@ -492,6 +479,46 @@ class MirageVortex(Thread):
                 del metric_data['results']['algorithms'][algorithm]['scores']
             except:
                 pass
+
+        if vortex_save_path:
+            logger.info('mirage_vortex :: saving data for request_id %s to %s' % (
+                request_id, vortex_save_path))
+            if not os.path.exists(vortex_save_path):
+                try:
+                    mkdir_p(vortex_save_path)
+                except Exception as err:
+                    logger.error('error :: flux :: failed to create dir - %s - %s' % (
+                        vortex_save_path, err))
+            jsonfile = '%s/vortex.%s.json' % (vortex_save_path, request_id)
+            gzip_jsonfile = '%s.gz' % jsonfile
+            try:
+                with open(jsonfile, 'w') as fw:
+                    json.dump(metric_data, fw)
+            except Exception as err:
+                logger.error('error :: mirage_vortex :: failed to save metric_data for request_id %s to %s - %s' % (
+                    request_id, jsonfile, err))
+
+            if os.path.isfile(jsonfile):
+                try:
+                    with open(jsonfile, 'rb') as f_in:
+                        with gzip.open(gzip_jsonfile, 'wb') as f_out:
+                            shutil.copyfileobj(f_in, f_out)
+                except Exception as err:
+                    logger.error('error :: mirage_vortex :: failed to gzip jsonfile %s for request_id %s - %s' % (
+                        jsonfile, request_id, err))
+            if os.path.isfile(gzip_jsonfile):
+                try:
+                    os.remove(jsonfile)
+                except OSError:
+                    logger.error('error :: mirage_vortex - failed to remove file - %s' % jsonfile)
+            try:
+                added_save = self.redis_conn_decoded.hset('mirage.vortex_saved', request_id, save_path)
+                if added_save:
+                    logger.info('mirage_vortex :: added key for %s to mirage.vortex_saved' % (
+                        request_id))
+            except Exception as err:
+                logger.error('error :: mirage_vortex :: failed to hset key for %s in mirage.vortex_saved - %s' % (
+                    request_id, err))
 
         if metric_data['source_app'] == 'flux':
             try:
@@ -921,6 +948,7 @@ class MirageVortex(Thread):
                     str(data), str(redis_set)))
         return sent_to_panorama
 
+
     def spin_process(self, i, run_timestamp, assigned_checks, ionosphere_results, return_results_for):
         """
         Assign a metrics or results to process.
@@ -1026,6 +1054,15 @@ class MirageVortex(Thread):
 
             logger.info('mirage_vortex :: processing request_id: %s' % str(request_id))
 
+            # @added 20241127 - Task #5562: Add adhoc parameter for vortex requests
+            try:
+                adhoc = metric_data['adhoc']
+            except KeyError:
+                adhoc = False
+            if adhoc:
+                logger.info('mirage_vortex :: not local Skyline metric, adhoc parameter is set for request_id: %s' % (
+                    str(request_id)))
+
             # @added 20240913 - Feature #5468: callback
             callback_url = None
             callback_data = {}
@@ -1083,7 +1120,7 @@ class MirageVortex(Thread):
                     # @added 20240913 - Feature #5468: callback
                     if callback_url:
                         try:
-                            response_code = callback(skyline_app, callback_url, callback_data)
+                            response_code = callback(parent_skyline_app, callback_url, callback_data)
                             if response_code == 200:
                                 logger.info('mirage_vortex :: callback successful to %s' % metric_data)
                             else:
@@ -1178,7 +1215,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1217,7 +1254,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1254,7 +1291,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1333,7 +1370,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1416,7 +1453,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1455,7 +1492,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1508,7 +1545,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1717,7 +1754,7 @@ class MirageVortex(Thread):
                 # @added 20240913 - Feature #5468: callback
                 if callback_url:
                     try:
-                        response_code = callback(skyline_app, callback_url, metric_data)
+                        response_code = callback(parent_skyline_app, callback_url, metric_data)
                         if response_code == 200:
                             logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                         else:
@@ -1735,6 +1772,14 @@ class MirageVortex(Thread):
                 logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
                 trainable = False
             run_negatives_present = False
+
+            # @added 20241127 - Feature #5563: mirage_vortex - use tornado
+            tornadoes = {}
+            try:
+                tornadoes = get_tornadoes(parent_skyline_app)
+            except Exception as err:
+                logger.error('error :: mirage_vortex :: get_tornadoes failed, err: %s' % (
+                    err))
 
             anomalous = None
             triggered_algorithms = []
@@ -1766,12 +1811,26 @@ class MirageVortex(Thread):
                         algorithm_parameters = {}
 
                     if algorithm in metric_data['algorithms'].keys():
-                        for algo_param in metric_data['algorithms'][algorithm]:
-                            algorithm_parameters[algo_param] = metric_data['algorithms'][algorithm][algo_param]
+                        # @modified 20241205 - Feature #5563: mirage_vortex - use tornado
+                        # Iterate the algorithm_parameters key if set
+                        if 'algorithm_parameters' in metric_data['algorithms'][algorithm].keys():
+                            for algo_param in metric_data['algorithms'][algorithm]['algorithm_parameters']:
+                                algorithm_parameters[algo_param] = metric_data['algorithms'][algorithm]['algorithm_parameters'][algo_param]
+                        else:
+                            for algo_param in metric_data['algorithms'][algorithm]:
+                                algorithm_parameters[algo_param] = metric_data['algorithms'][algorithm][algo_param]
                     try:
                         anomaly_window = algorithm_parameters['anomaly_window']
                     except:
                         anomaly_window = 1
+
+                    # @added 20241127 - Feature #5563: mirage_vortex - use tornado
+                    if 'anomaly_window' in metric_data['algorithms'][algorithm]:
+                        anomaly_window = int(metric_data['algorithms'][algorithm]['anomaly_window'])
+                        algorithm_parameters['anomaly_window'] = int(anomaly_window)
+                    logger.info('mirage_vortex :: %s with anomaly_window: %s' % (
+                        str(algorithm), str(anomaly_window)))
+                    algorithm_parameters['debug_logging'] = True
 
                     if algorithm == 'prophet':
                         custom_algorithm = 'skyline_prophet'
@@ -1816,12 +1875,14 @@ class MirageVortex(Thread):
                                 'algorithm_parameters': algorithm_parameters,
                             },
                         }
+
                         sigma_analysis_start_time = time()
                         sigma_anomalous = anomalyScore = None
                         success = False
                         anomalies = []
                         try:
-                            use_debug_logging = False
+                            #use_debug_logging = False
+                            use_debug_logging = True
                             sigma_anomalous, anomalyScore, anomalies = run_custom_algorithm_on_timeseries('mirage', os.getpid(), metric, use_timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
                             # Try direct
                             # sigma_anomalous, anomalies = run_sigma_algorithms('mirage', timeseries, algorithm_parameters['sigma_value'], algorithm_parameters['consensus'], anomaly_window)
@@ -1850,7 +1911,9 @@ class MirageVortex(Thread):
                             'analysis_runtime': sigma_run_time,
                         }
                         if return_results:
-                            metric_data['results']['algorithms']['sigma']['anomalies'] = anomalies
+                            # @modified 20241205 - Feature #5563: mirage_vortex - use tornado
+                            #metric_data['results']['algorithms']['sigma']['anomalies'] = anomalies
+                            metric_data['results']['algorithms']['sigma']['anomalies'] = anomalies['anomalies']
 
                         if not success:
                             metric_data['results']['algorithms']['sigma']['error'] = 'an error occurred during sigma analysis'
@@ -1943,8 +2006,12 @@ class MirageVortex(Thread):
                                     'algorithm_source': algorithm_source,
                                     'max_execution_time': 30.0,
                                     'algorithm_parameters': algorithm_parameters,
+                                    'debug_logging': True,
                                 },
                             }
+
+                            logger.info('mirage_vortex :: %s with algorithm_parameters: %s' % (
+                                str(algorithm), str(algorithm_parameters)))
 
                             if algorithm == 'mstl':
                                 try:
@@ -1957,6 +2024,83 @@ class MirageVortex(Thread):
                             success = False
                             results = {'anomalies': {}, 'anomalyScore_list': [], 'scores': []}
                             anomalyScore_list = []
+
+                            # @added 20241127 - Feature #5563: mirage_vortex - use tornado
+                            use_tornado = False
+                            if custom_algorithm in tornadoes:
+                                logger.info('mirage_vortex :: %s will be used via tornado' % custom_algorithm)
+                                headers = {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                }
+                                use_debug_logging = False
+                                try:
+                                    if algorithm_parameters['debug_logging']:
+                                        use_debug_logging = True
+                                        custom_algorithms_to_run[custom_algorithm]['debug_logging'] = True
+                                except:
+                                    pass
+                                tornado_url = tornadoes[custom_algorithm]['tornado_url']
+                                algorithm_dict = copy.deepcopy(custom_algorithms_to_run[custom_algorithm])
+                                algorithm_parameters = copy.deepcopy(custom_algorithms_to_run[custom_algorithm]['algorithm_parameters'])
+                                algorithm_parameters['tornado_url'] = tornado_url
+                                algorithm_parameters['skyline_app'] = parent_skyline_app
+                                algorithm_parameters['debug_logging'] = True
+                                flux_tornado_dict = {
+                                    'key': FLUX_SELF_API_KEY,
+                                    'algorithm': custom_algorithm,
+                                    'skyline_app': parent_skyline_app,
+                                    'base_name': metric,
+                                    'timeseries': timeseries,
+                                    'algorithm_dict': algorithm_dict,
+                                    'algorithm_parameters': algorithm_parameters,
+                                    'debug_logging': True,
+                                }
+                                try:
+                                    max_exec_time = custom_algorithms_to_run[custom_algorithm]['max_execution_time']
+                                except:
+                                    max_exec_time = 15
+                                start_tornado = time()
+                                r = None
+                                try:
+                                    use_timeout = (10, max_exec_time)
+                                    r = requests.post(tornado_url, data=json.dumps(flux_tornado_dict), headers=headers, timeout=use_timeout)
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_vortex :: failed to get response from %s, err: %s' % (
+                                        str(tornado_url), err))
+                                    # failover and use the custom_algorithm directly
+                                    use_tornado = False
+                                    logger.info('mirage_vortex :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                                response = None
+                                if r:
+                                    try:
+                                        response = r.json()
+                                    except Exception as err:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: mirage_vortex :: failed to parse json response from %s, err: %s' % (
+                                            str(tornado_url), err))
+                                        # failover and use the custom_algorithm directly
+                                        use_tornado = False
+                                        logger.info('mirage_vortex :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                                if response:
+                                    try:
+                                        anomalous = response['data']['anomalous']
+                                        anomalyScore = response['data']['anomalyScore']
+                                        results = response['data']['results']
+                                        use_tornado = True
+                                        logger.info('mirage_vortex :: %s run via tornado OK, anomalous: %s' % (
+                                            custom_algorithm, str(anomalous)))
+                                    except Exception as err:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: mirage_vortex :: failed to get expected element from response json from %s, err: %s' % (
+                                            str(tornado_url), err))
+                                        # failover and use the custom_algorithm directly
+                                        use_tornado = False
+                                        logger.info('mirage_vortex :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+                                logger.info('mirage_vortex :: %s run via tornado in %s seconds' % (
+                                    custom_algorithm, str(time() - start_tornado)))
+
                             try:
                                 use_debug_logging = False
                                 try:
@@ -1965,7 +2109,10 @@ class MirageVortex(Thread):
                                         custom_algorithms_to_run[custom_algorithm]['debug_logging'] = True
                                 except:
                                     pass
-                                anomalous, anomalyScore, results = run_custom_algorithm_on_timeseries('mirage', os.getpid(), metric, use_timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
+                                # @modified 20241127 - Feature #5563: mirage_vortex - use tornado
+                                # Only run if tornado was not used
+                                if not use_tornado:
+                                    anomalous, anomalyScore, results = run_custom_algorithm_on_timeseries('mirage', os.getpid(), metric, use_timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
                             except Exception as err:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: mirage_vortex :: %s unhandled error - %s' % (custom_algorithm, err))
@@ -2194,7 +2341,14 @@ class MirageVortex(Thread):
                                 str(request_id)))
                             save_training_data = True
 
-                        if anomalous or save_training_data:
+                        # @added 20241127 - Task #5562: Add adhoc parameter for vortex requests
+                        if adhoc:
+                            save_training_data = False
+
+                        # @modified 20241127 - Task #5562: Add adhoc parameter for vortex requests
+                        # Do not process adhoc requests through this block
+                        #if anomalous or save_training_data:
+                        if (anomalous or save_training_data) and not adhoc:
                             save_training_data = True
                             metric_namespace_prefix = metric_data['metric_namespace_prefix']
                             skyline_metric = None
@@ -2280,6 +2434,11 @@ class MirageVortex(Thread):
                             if send_to_ionosphere:
                                 save_training_data = True
 
+                        # @added 20241127 - Task #5562: Add adhoc parameter for vortex requests
+                        if adhoc:
+                            save_training_data = False
+                            send_to_ionosphere = False
+
                         # @added 20230616 - Feature #4952: vortex - consensus_count
                         if consensus_count:
                             logger.info('mirage_vortex :: adding consensus_count results for request_id: %s' % (
@@ -2312,6 +2471,15 @@ class MirageVortex(Thread):
                             metric_data['results']['consensus_count_results']['unreliable'] = False
                             metric_data['results']['consensus_count_results']['anomalies'] = copy.deepcopy(consensus_count_anomalies)
                             metric_data['results']['consensus_count_results']['scores'] = list(consensus_count_scores)
+
+                            # @added 20241211 - Task #5562: Add adhoc parameter for vortex requests
+                            adhoc_replace = False
+                            if metric_data['results']['consensus_count_results'] and adhoc:
+                                if 'consensus_results' in metric_data['results'].keys():
+                                    adhoc_replace = True
+                            if adhoc_replace:
+                                for key, item in metric_data['results']['consensus_count_results'].items():
+                                    metric_data['results']['consensus_results'][key] = item
 
                         if return_image_urls:
                             image_urls = []
@@ -2441,6 +2609,11 @@ class MirageVortex(Thread):
                             anomalous = ionosphere_enabled = send_to_ionosphere = False
                             add_results = True
 
+                        # @added 20241127 - Task #5562: Add adhoc parameter for vortex requests
+                        if adhoc:
+                            ionosphere_enabled = False
+                            send_to_ionosphere = False
+
                         if ionosphere_enabled or send_to_ionosphere:
                             add_results = False
                             # Send to ionosphere
@@ -2492,7 +2665,7 @@ class MirageVortex(Thread):
                             # @added 20240913 - Feature #5468: callback
                             if callback_url:
                                 try:
-                                    response_code = callback(skyline_app, callback_url, metric_data)
+                                    response_code = callback(parent_skyline_app, callback_url, metric_data)
                                     if response_code == 200:
                                         logger.info('mirage_vortex :: callback successful to %s' % callback_url)
                                     else:
@@ -2504,7 +2677,13 @@ class MirageVortex(Thread):
 
                         if added_results:
                             logger.info('mirage_vortex :: processed request_id: %s' % str(request_id))
-                            if anomalous:
+
+                            # @modified 20241127 - Task #5562: Add adhoc parameter for vortex requests
+                            #if anomalous:
+                            if anomalous and adhoc:
+                                logger.info('mirage_vortex :: adhoc parameter present will not record anomaly or save training_data for request_id: %s' % (
+                                    str(request_id)))
+                            if anomalous and not adhoc:
                                 logger.info('mirage_vortex :: anomaly detected - %s' % labelled_metric_name)
                                 # If the metric has no features profiles and is anomalous
                                 # add a panorama anomaly because Ionosphere will not add
@@ -2549,28 +2728,32 @@ class MirageVortex(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: mirage_vortex :: failed to increment mirage_vortex.checks.done Redis key - %s' % str(err))
 
-            # @added 20220420 - Feature #4530: namespace.analysed_events
-            parent_namespace = metric_data['metric_namespace_prefix']
-            if not parent_namespace:
+            # @modified 20241127 - Task #5562: Add adhoc parameter for vortex requests
+            # Only update the namespace.analysed_events.mirage Redis hash if not
+            # an adhoc request
+            if not adhoc:
+                # @added 20220420 - Feature #4530: namespace.analysed_events
+                parent_namespace = metric_data['metric_namespace_prefix']
+                if not parent_namespace:
+                    try:
+                        parent_namespace = metric.split('.')[0]
+                    except:
+                        pass
+                date_string = str(strftime('%Y-%m-%d', gmtime()))
+                namespace_analysed_events_hash = 'namespace.analysed_events.mirage.%s' % (date_string)
                 try:
-                    parent_namespace = metric.split('.')[0]
-                except:
-                    pass
-            date_string = str(strftime('%Y-%m-%d', gmtime()))
-            namespace_analysed_events_hash = 'namespace.analysed_events.mirage.%s' % (date_string)
-            try:
-                self.redis_conn.hincrby(namespace_analysed_events_hash, parent_namespace, 1)
-            except Exception as err:
-                logger.error(traceback.format_exc())
-                logger.error('error :: mirage_vortex :: failed to increment %s Redis hash - %s' % (
-                    namespace_analysed_events_hash, err))
-            try:
-                self.redis_conn.expire(namespace_analysed_events_hash, (86400 * 15))
-                logger.info('mirage_vortex :: updated %s Redis hash' % namespace_analysed_events_hash)
-            except Exception as err:
-                logger.error(traceback.format_exc())
-                logger.error('error :: mirage_vortex :: failed to set expire %s Redis hash - %s' % (
-                    namespace_analysed_events_hash, err))
+                    self.redis_conn.hincrby(namespace_analysed_events_hash, parent_namespace, 1)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: mirage_vortex :: failed to increment %s Redis hash - %s' % (
+                        namespace_analysed_events_hash, err))
+                try:
+                    self.redis_conn.expire(namespace_analysed_events_hash, (86400 * 15))
+                    logger.info('mirage_vortex :: updated %s Redis hash' % namespace_analysed_events_hash)
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: mirage_vortex :: failed to set expire %s Redis hash - %s' % (
+                        namespace_analysed_events_hash, err))
 
             if added_results or sent_to_ionosphere:
                 continue
@@ -2619,8 +2802,8 @@ class MirageVortex(Thread):
                 sleep(10)
                 logger.info('mirage_vortex :: attempting to connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 try:
-                    self.redis_conn = get_redis_conn(skyline_app)
-                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                    self.redis_conn = get_redis_conn(parent_skyline_app)
+                    self.redis_conn_decoded = get_redis_conn_decoded(parent_skyline_app)
                 except Exception as err:
                     logger.error('error :: mirage_vortex :: failed to connect to Redis - %s' % err)
                 try:
@@ -2792,25 +2975,25 @@ class MirageVortex(Thread):
                     else:
                         # All the processes are done, break now.
                         time_to_run = time() - p_starts
-                        logger.info('mirage_vortex :: %s :: %s spin_process/es completed in %.2f seconds' % (
+                        logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (
                             skyline_app, str(MIRAGE_PROCESSES), time_to_run))
                         break
                 else:
                     # We only enter this if we didn't 'break' above.
-                    logger.info('mirage_vortex :: %s :: timed out, killing all spin_process processes' % (skyline_app))
+                    logger.info('%s :: timed out, killing all spin_process processes' % (skyline_app))
                     for p in pids:
                         p.terminate()
                         # p.join()
 
                 for p in pids:
                     if p.is_alive():
-                        logger.info('mirage_vortex :: %s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
+                        logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                         # @modified 20240202 - Task #5178: Build and test skyline v4.1.0
                         # p.join()
                         killing_pid = p.pid
-                        logger.info('mirage_vortex :: %s :: kill spin_process with pid: %s' % (skyline_app, str(killing_pid)))
+                        logger.info('%s :: kill spin_process with pid: %s' % (skyline_app, str(killing_pid)))
                         p.terminate()
-                        logger.info('mirage_vortex :: %s :: killed spin_process process with pid: %s' % (skyline_app, str(killing_pid)))
+                        logger.info('%s :: killed spin_process process with pid: %s' % (skyline_app, str(killing_pid)))
 
                 # @added 20200607 - Feature #3508: ionosphere.untrainable_metrics
                 # Check to non 3sigma algorithm errors too
@@ -2897,7 +3080,7 @@ class MirageVortex(Thread):
                 logger.info('mirage_vortex :: seconds to run    :: %.2f' % run_time)
                 graphite_run_time = '%.2f' % run_time
                 send_metric_name = skyline_app_graphite_namespace + '.run_time'
-                send_graphite_metric(self, skyline_app, send_metric_name, graphite_run_time)
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, graphite_run_time)
 
             if int(time()) >= (last_sent_to_graphite + 60):
                 checks_done = 0
@@ -2916,7 +3099,7 @@ class MirageVortex(Thread):
                     checks_done = 0
                 logger.info('mirage_vortex :: checks.done   :: %s' % str(checks_done))
                 send_metric_name = '%s.checks.done' % skyline_app_graphite_namespace
-                send_graphite_metric(self, skyline_app, send_metric_name, str(checks_done))
+                send_graphite_metric(self, parent_skyline_app, send_metric_name, str(checks_done))
 
                 last_sent_to_graphite = int(time())
 

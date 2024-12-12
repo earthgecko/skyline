@@ -162,7 +162,8 @@ example are required.
           "spectral_residual": {},
       },
       "consensus": [["sigma", "spectral_residual"]],
-      "reference": "a reference id for you|str|optional"
+      "reference": "a reference id for you|str|optional",
+      "adhoc": true/false|bool|optional
   }
 
 Required key value pairs that must be sent in the POST json data are:
@@ -188,6 +189,10 @@ Optional key value pairs are:
 - ``override_7_day_limit``:  Allows to override the requirement for 24h or 7d
   data, **be advised training_data is not suitable for training with on these
   requests**
+- ``adhoc``:  A boolean that can be set if this is not a known Skyline metric or
+  it is and you do not want training data saved on it or piped through the alert
+  pipeline if the metric name used matches or happens to match an alert
+  namespace pass adhoc as ``true``.
 
 Using the mod:`settings.FLUX_SELF_API_KEY` key allows for additional parameters
 to be passed and can be used to remove the maximum algorithm limit of 3.
@@ -306,26 +311,30 @@ removal at some point in the future:
 - ``lof`` - Local Outlier Factor
 - ``one_class_svm`` - One Class SVM
 - ``pca`` - Principal Component Analysis
-- ``prophet`` - the fbprophet algorithm (long running and not suited to realtime 
-    analysis)
+- ``prophet``
+  The fbprophet algorithm (long running and not suited to realtime analysis)
 - ``spectral_residual`` - Spectral Residual
 - ``isolation_forest`` - Isolation Forest
-- ``m66`` - A skyline changepoint detection algorithm, similar to
-    PELT, ruptures and Bayesian Online Changepoint Detection, however it is
-    more robust to instaneous outliers and more conditionally selective of
-    changepoints.
+- ``m66``
+  A skyline changepoint detection algorithm, similar to PELT, ruptures and
+  Bayesian Online Changepoint Detection, however it is more robust to instaneous
+  outliers and more conditionally selective of changepoints.
 - ``adtk_level_shift`` - ADTK LevelShiftAD algorithm
 - ``adtk_persist`` - ADTK PersistAD algorithm
 - ``adtk_seasonal`` - ADTK SeasonalAD algorithm
 - ``adtk_volatility_shift`` - ADTK VolatilityShiftAD algorithm
 - ``macd`` - Moving Average Convergence/Divergence
 - ``spectral_entropy`` - Spectral Entropy
-- ``mstl`` - statsforecast MSTL algorithm (the mstl algorithm is very long running
-    and not suited for realtime analysis)
+- ``mstl``
+  statsforecast MSTL algorithm (the mstl algorithm is very long running and not
+  suited for realtime analysis)
 - ``lad`` - Large Deviations Anomaly Detection
-- ``probabilistic_forecasts_generalized_pareto_distribution_ets`` - Probabilistic
-    forecasts for anomaly detection using Generalized Pareto Distribution (long
-    running and not suited for realtime analysis)
+- ``probabilistic_forecasts_generalized_pareto_distribution_ets``
+  Probabilistic forecasts for anomaly detection using Generalized Pareto
+  Distribution (long running and not suited for realtime analysis)
+- ``laoccfdlpnc``
+  Locally Adaptive One-Class Classifier Fusion with Dynamic ℓp-Norm Constraints
+  for Robust Anomaly Detection
 
 The algorithms are run in the order in which they are declared and the analysis
 will stop before running all algorithms, if a consensus is reached before all
