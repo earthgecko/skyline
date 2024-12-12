@@ -1213,6 +1213,19 @@ class PrometheusMetrics(Process):
                     metrics_with_id_found_in_db = {}
                     updated_global_metrics_with_id_dict_count = 0
 
+
+                    # @added 20241126 - Bug #5554: redistimeseries - handle conflict with duplicate_policy
+                    # The ts.add method only applies the duplicate_policy
+                    # transiently to the add operation. A timeseries created with
+                    # ts.add does not persist the duplicate_policy. Usually this
+                    # is not a problem but when a timeseries is created using the
+                    # ts.add method and has multiple data points for a timestamp
+                    # and is pipelined an error can result:
+                    # ResponseError('TSDB: Error at upsert, update is not supported when DUPLICATE_POLICY is set to BLOCK mode')
+                    # Ensure that when this is encountered, the timeseries keys
+                    # is set to persist the policy.
+                    set_duplicate_policy_on = []
+
                     # @added 20240315 - Task #5306: Implement pipelining with Redis
                     # Add run time metrics
                     start_send_to_redis = time()
@@ -1440,6 +1453,12 @@ class PrometheusMetrics(Process):
                                         except:
                                             pass
                                         err_data = {'metric': metric, 'err': value}
+
+                                        # @added 20241126 - Bug #5554: redistimeseries - handle conflict with duplicate_policy
+                                        if 'update is not supported when DUPLICATE_POLICY is set to BLOCK mode' in str(value):
+                                            set_duplicate_policy_on.append(labelled_metric)
+                                            continue
+
                                         errors_dict[labelled_metric] = str(err_data)
                             if len(errors_dict) > 0:
                                 redis_errors_key = 'horizon.prometheus.pipe_errors.%s' % str(now_ts)
@@ -1460,6 +1479,22 @@ class PrometheusMetrics(Process):
                     if redis_timeseries_errors:
                         logger.error('error :: horizon.prometheus :: last 3 redistimeseries errors: %s' % (
                             str(redis_timeseries_errors[-3:])))
+
+                    # @added 20241126 - Bug #5554: redistimeseries - handle conflict with duplicate_policy
+                    if len(set_duplicate_policy_on) > 0:
+                        logger.info('horizon.prometheus :: explicitly setting duplicate_policy to first on %s keys because BLOCK errors were encountered' % (
+                            str(len(set_duplicate_policy_on))))
+                        policy_persisted_on = 0
+                        for ts_key in set_duplicate_policy_on:
+                            try:
+                                policy_persisted = self.redis_conn_decoded.execute_command('TS.ALTER', ts_key, 'DUPLICATE_POLICY', 'FIRST')
+                                if policy_persisted:
+                                    policy_persisted_on += 1
+                            except Exception as err:
+                                logger.error('error :: horizon.prometheus :: TS.ALTER failed to set DUPLICATE_POLICY to FIRST on %s, err: %s' % (
+                                    ts_key, str(err)))
+                        logger.info('horizon.prometheus :: explicitly set duplicate_policy to first on %s keys' % (
+                            str(policy_persisted_on)))
 
                     # @added 20240315 - Task #5306: Implement pipelining with Redis
                     # Add run time metrics
