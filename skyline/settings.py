@@ -2297,7 +2297,7 @@ To add a new algorithm, you must both define the algorithm in
 ``mirage/mirage_algorithms.py`` and add it's name here.
 """
 
-MIRAGE_STALE_SECONDS = 120
+MIRAGE_STALE_SECONDS = 300
 """
 :var MIRAGE_STALE_SECONDS: The number of seconds after which a check is
     considered stale and discarded.
@@ -2320,7 +2320,7 @@ MIRAGE_ENABLE_SECOND_ORDER = False
     by default.
 """
 
-MIRAGE_ENABLE_ALERTS = False
+MIRAGE_ENABLE_ALERTS = True
 """
 :var MIRAGE_ENABLE_ALERTS: This enables Mirage alerting. [USER_DEFINED]
 :vartype MIRAGE_ENABLE_ALERTS: boolean
@@ -2515,7 +2515,7 @@ BOUNDARY_ALGORITHMS = [
   must both define the algorithm in boundary_algorithms.py and add its name here.
 """
 
-BOUNDARY_ENABLE_ALERTS = False
+BOUNDARY_ENABLE_ALERTS = True
 """
 :var BOUNDARY_ENABLE_ALERTS: Enables Boundary alerting
 :vartype BOUNDARY_ENABLE_ALERTS: boolean
@@ -2654,9 +2654,7 @@ timeseries dataset has 6 data points per minute but only one data value every
 minute then autoaggregate can be used to aggregate the required sample.
 """
 
-BOUNDARY_AUTOAGGRERATION_METRICS = (
-    ('nometrics.either', 60),
-)
+BOUNDARY_AUTOAGGRERATION_METRICS = ()
 """
 :var BOUNDARY_AUTOAGGRERATION_METRICS: The namespaces to autoaggregate
 :vartype BOUNDARY_AUTOAGGRERATION_METRICS: tuples
@@ -2736,31 +2734,6 @@ BOUNDARY_SMTP_OPTS = {
 :vartype BOUNDARY_SMTP_OPTS: dictionary
 """
 
-BOUNDARY_HIPCHAT_OPTS = {
-    'auth_token': 'hipchat_auth_token',
-    'sender': 'hostname or identifier',
-    # list of hipchat room_ids to notify about each anomaly
-    # (similar to SMTP_OPTS['recipients'])
-    # Wildcard metric namespacing is allowed
-    'rooms': {
-        'skyline_test.alerters.test': (12345,),
-        'nometrics': (12345,),
-    },
-    # Background color of hipchat messages
-    # (One of 'yellow', 'red', 'green', 'purple', 'gray', or 'random'.)
-    'color': 'purple',
-    # Send graphite graphs at the most meaningful resolution if different from
-    # FULL_DURATION
-    'graphite_previous_hours': 7,
-    'graphite_graph_line_color': 'pink',
-}
-"""
-:var BOUNDARY_HIPCHAT_OPTS: [DEPRECATED] Your Hipchat settings.
-:vartype BOUNDARY_HIPCHAT_OPTS: dictionary
-
-HipChat alerts require python-simple-hipchat
-"""
-
 # PagerDuty alerts require pygerduty
 BOUNDARY_PAGERDUTY_OPTS = {
     # Your pagerduty subdomain and auth token
@@ -2813,7 +2786,7 @@ CRUCIBLE_PROCESSES = 1
 :vartype CRUCIBLE_PROCESSES: int
 """
 
-CRUCIBLE_TESTS_TIMEOUT = 60
+CRUCIBLE_TESTS_TIMEOUT = 1200
 """
 :var CRUCIBLE_TESTS_TIMEOUT: # This is the number of seconds that Crucible tests
     can take. 60 is a reasonable default for a run with a
@@ -3555,7 +3528,7 @@ IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
 :vartype IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY: boolean
 """
 
-MEMCACHE_ENABLED = False
+MEMCACHE_ENABLED = True
 """
 :var MEMCACHE_ENABLED: Enables the use of memcache in Ionosphere to optimise
     DB usage [USER_DEFINED]
@@ -3579,6 +3552,7 @@ IONOSPHERE_LEARN_REPETITIVE_PATTERNS = False
 :var IONOSPHERE_LEARN_REPETITIVE_PATTERNS: Whether to allow Ionosphere to learn
     repetetive, seasonal patterns from the existing training data (by default
     3 days, defined by :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`).
+    [USER_DEFINED]
 :vartype IONOSPHERE_LEARN_REPETITIVE_PATTERNS: boolean
 """
 
@@ -3586,6 +3560,7 @@ IONOSPHERE_FIND_REPETITIVE_PATTERNS = False
 """
 :var IONOSPHERE_FIND_REPETITIVE_PATTERNS: Whether to allow Ionosphere to find
     and learn repetetive patterns in anomalies over the previous 30 days.
+    [USER_DEFINED]
 :vartype IONOSPHERE_FIND_REPETITIVE_PATTERNS: boolean
 """
 
@@ -3607,7 +3582,7 @@ IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE = {}
     allow for testing repetitive learning with limited set of metrics before
     implementing on the entire metric population.  It has the same data
     structure as :mod:`settings.IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE`
-    below.
+    below.  [USER_DEFINED]
 
 :vartype IONOSPHERE_REPETITIVE_PATTERNS_INCLUDE: dict
 """
@@ -3651,6 +3626,7 @@ IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE = {
     dictionary keys and tertiary match filter which holds list values.
     Additionally there is a special key that can be use, _NOT.  This key can
     either be a single list or a dict of keys each with a single list.
+    [USER_DEFINED]
 :vartype IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE: dict
 
 - **Annotated example** - pay attention the comments regarding using values with labelled metrics::
@@ -4905,39 +4881,6 @@ PROMETHEUS_INGESTION = False
 :vartype PROMETHEUS_INGESTION: boolean
 """
 
-PROMETHEUS_SETTINGS = {}
-"""
-:var PROMETHEUS_SETTINGS: UNDER DEVELOPMENT (**not functional**) Prometheus can be
-    enabled to push metrics to Skyline which Skyline will add to Redis and analyse.
-    In the Mirage context Skyline will fetch data from Prometheus.  For full details of
-    this functionality please see the Prometheus integration documentation page at:
-    https://earthgecko-skyline.readthedocs.io/en/latest/prometheus.html
-:vartype PROMETHEUS_SETTINGS: dict
-
-- **Example**::
-
-    PROMETHEUS_SETTINGS = {
-        'prometheus.example.org': {
-            'scheme': 'https',
-            'port': '443',
-            # Usernames and hashed passwords that have full access to the web
-            # server via basic authentication. If empty, no basic authentication is
-            # required. Passwords are hashed with bcrypt.
-            'basic_auth_users': {
-                'prometheus': '<bcrypt_password_str>',
-            },
-            'endpoint': 'api/v1',
-            'format': '<influxdb|graphite>',  # default influxdb
-            'learn_key_metrics': True,
-            'analyse_mode': '<key_metrics_and_group|key_metrics|all>',
-            'key_metrics_config': '<path_to_key_metrics_file>',
-            'longterm_storage': '<promscale|thanos|cortex>',
-            'longterm_storage_endpoint': '<promscale|thanos|cortex>',
-        }
-    }
-
-"""
-
 """
 opentelemetry settings - EXPERIMENTAL and for DEVELOPMENT
 """
@@ -4972,31 +4915,11 @@ WEBAPP_SERVE_JAEGER = False
 """
 
 """
-julialang settings
-"""
-
-JULIA_OPTS = {
-    'analyzer': {
-        'enabled': False,
-    },
-    'analyzer_batch': {
-        'enabled': False,
-    },
-    'mirage': {
-        'enabled': False,
-    },
-}
-"""
-:var JULIA_OPTS: Options for running algorithms with julialang.
-:vartype JULIA_OPTS: dict
-"""
-
-"""
-victoriametrics settings - EXPERIMENTAL and for DEVELOPMENT
+victoriametrics settings
 """
 VICTORIAMETRICS_ENABLED = False
 """
-:var VICTORIAMETRICS_ENABLED: EXPERIMENTAL FEATURE.  Whether victoriametrics is
+:var VICTORIAMETRICS_ENABLED: ADVANCED FEATURE.  Whether victoriametrics is
     enabled as a backend store for labelled metrics from Prometheus, influxdb,
     etc.
 :vartype VICTORIAMETRICS_ENABLED: boolean
@@ -5021,7 +4944,7 @@ VICTORIAMETRICS_OPTS = {
     'public_url': None,
 }
 """
-:var VICTORIAMETRICS_OPTS: EXPERIMENTAL FEATURE.  A dictionary with the
+:var VICTORIAMETRICS_OPTS: ADVANCED FEATURE.  A dictionary with the
     details for the victoriametrics backend store.  The jsonl_insert_path and
     select_path defaults to the standalone VictoriaMetrics paths however for a
     clustered version of VictoriaMetrics these would be as in the cluster
