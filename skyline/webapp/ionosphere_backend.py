@@ -7408,7 +7408,18 @@ def get_features_profiles_to_validate(base_name):
     all_full_durations = []
     metric_fp_ids = get_ionosphere_fp_ids_for_full_duration(skyline_app, metric_id, full_duration=0, enabled=True)
     for i_fp_id in list(metric_fp_ids.keys()):
-        all_full_durations.append(metric_fp_ids[i_fp_id][2])
+        # @modified 20241203 - Feature #5479: ionosphere.alias_features_profile
+        # Check dict item
+        #all_full_durations.append(metric_fp_ids[i_fp_id][2])
+        try:
+            all_full_durations.append(metric_fp_ids[i_fp_id][2])
+        except Exception as err:
+            try:
+                all_full_durations.append(metric_fp_ids[i_fp_id]['full_duration'])
+            except Exception as err2:
+                logger.error('error :: failed to determine full_duration for fp id %s from %s, err: %s, err2: %s' % (
+                    str(i_fp_id), str(metric_fp_ids[i_fp_id]), err, err2))
+
     all_full_durations = sorted(list(set(all_full_durations)))
     logger.info('%s :: all_full_durations: %s' % (
         function_str, str(all_full_durations)))
