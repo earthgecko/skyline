@@ -2126,6 +2126,18 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: /api?redis_data - failed - %s' % (
                 err))
+            # @added 20241211 - Feature #4466: webapp - api - redis_data
+            if 'WRONGTYPE' in err:
+                # Return 400
+                logger.info('/api?redis_data - returning 400')
+                data = {'message': 'incorrect key type', 'error': err, 'status_code': 400}
+                data_dict = {"status": {"cluster_data": cluster_data, "response": 400}, "data": data}
+                return jsonify(data_dict), 400
+            else:
+                # Return 500
+                logger.info('/api?redis_data - returning 500')
+                return 'Internal Server Error', 500
+
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             redis_data_lists = []
             # @modified 20220509 - Feature #3824: get_cluster_data
