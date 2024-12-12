@@ -43,7 +43,9 @@ def get_failed_checks_to_retry(self):
             function_str, err))
         return retry_checks
 
-    if not retry_checks:
+    # @modified 20241204 - Feature #5294: panorama - retry failed checks
+    # if not retry_checks:
+    if not retry_checks_dict:
         logger.info('%s :: there are no failed checks to retry' % function_str)
         return retry_checks
 
@@ -85,6 +87,13 @@ def get_failed_checks_to_retry(self):
                 if last_fail_timestamp > (now - 60):
                     continue
 
+        # @added 20241204 - Feature #5294: panorama - retry failed checks
+        # Remove old keys
+        if not remove_key:
+            if fail_count > 0:
+                if (now - 86400) > last_fail_timestamp:
+                    remove_key = True
+
         if remove_key:
             try:
                 retry_removed = self.redis_conn_decoded.hdel('panorama.retry_failed_checks', key)
@@ -106,14 +115,42 @@ def get_failed_checks_to_retry(self):
         # Readd the check
         retry_added = False
         try:
-            copyfile(failed_check_file, key)
-            logger.info('%s :: readded failed check to %s' % (
-                function_str, key))
-            retry_checks.append(key)
-            retry_added = True
+            # @modified 20241204 - Feature #5294: panorama - retry failed checks
+            #copyfile(failed_check_file, key)
+            key_check_file = '%s/%s' % (settings.PANORAMA_CHECK_PATH, key)
+            if os.path.isfile(failed_check_file):
+                copyfile(failed_check_file, key_check_file)
+                logger.info('%s :: readded failed check to %s' % (
+                    function_str, key))
+                retry_checks.append(key)
+                retry_added = True
+            else:
+                logger.info('%s :: removing key, failed_check_file does not exist - %s' % (
+                    function_str, str(failed_check_file)))
+                remove_key = True
         except Exception as err:
-            logger.error('error :: %s :: failed copyfile(%s, %s), err: %s' % (
+            logger.error('error :: %s :: failed copyfile(%s, %s), removing key, err: %s' % (
                 function_str, failed_check_file, key, err))
+            remove_key = True
+
+        if remove_key:
+            try:
+                retry_removed = self.redis_conn_decoded.hdel('panorama.retry_failed_checks', key)
+                if retry_removed:
+                    logger.info('%s :: failed check removed from panorama.retry_failed_checks after %s fails' % (
+                        function_str, str(fail_count)))
+            except Exception as err:
+                logger.error('error :: %s :: failed to hdel %s key from Redis hash panorama.retry_failed_checks, err: %s' % (
+                    function_str, key, err))
+            if os.path.isfile(str(failed_check_file)):
+                try:
+                    os.remove(str(failed_check_file))
+                    logger.info('%s :: failed check metric_check_file removed - %s' % (
+                        function_str, str(failed_check_file)))
+                except OSError:
+                    pass
+            continue
+
         # Remove the failed_check_file as if it fails again it will be readded
         if retry_added:
             if os.path.isfile(str(failed_check_file)):
