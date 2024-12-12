@@ -1447,6 +1447,9 @@ requests-toolbelt
 # @added 20240514 - Feature #5350: functions.skyline.job_scheduled
 croniter
 
+# @added 20241112 - Feature #5553: custom_algorithm - laoccfdlpnc
+cvxpy==1.6.0
+
 # @added 20241111 - Task #5525: Python 3.10 - update dependencies
 # Declaring non-conflicting jupyter version here.  It has never been a problem
 # where jupyter deps have uninstalled any version of a skyline dep, but it is

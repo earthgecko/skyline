@@ -87,3 +87,4 @@ stumpy==1.13.0
 statsforecast==1.7.8
 requests-toolbelt
 croniter
+cvxpy==1.6.0
