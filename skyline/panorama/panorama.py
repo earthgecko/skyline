@@ -91,6 +91,9 @@ from functions.panorama.get_failed_checks_to_retry import get_failed_checks_to_r
 # @added 20240602 - Feature #5368: analyzer_batch - reprocess
 from functions.database.queries.query_anomalies import get_anomalies_for_period
 
+# @added 20241203 - Bug #5522: Handle duplicate metric names
+from slack_functions import slack_post_message
+
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -313,6 +316,9 @@ class Panorama(Thread):
                     err))
             return inserted_metric_ids
 
+        # @added 20241203 - Bug #5522: Handle duplicate metric names
+        duplicate_inserts = {}
+
         # @modified 20240119 - Task #5228: panorama - optimise insertions
         # Optimise the insertions of new metric by inserting multiple metrics at
         # once rather than one at a time
@@ -402,6 +408,33 @@ class Panorama(Thread):
             if len(metrics_to_insert) < 100:
                 logger.info('inserting %s into metrics table' % metric_name)
 
+            # @added 20241203 - Bug #5522: Handle duplicate metric names
+            # This is not ideal as the reason for doing bulk inserts was to
+            # reduce load on the DB but until and if the conditions that result
+            # in duplicate metrics are isolated and mitigated, this is the best
+            # way to ensure that duplicate metrics are not inserted into the DB,
+            # without setting the metric column in the metrics table as unique,
+            # which could have quite significant backwards compatibility
+            # implications in some set ups.
+            known_metric_id = 0
+            try:
+                connection = engine.connect()
+                stmt = select([metrics_table.c.id]).where(metrics_table.c.metric == metric_name)
+                result = connection.execute(stmt)
+                try:
+                    for row in result:
+                        known_metric_id = int(row['id'])
+                        if known_metric_id:
+                            duplicate_inserts[known_metric_id] = metric_name
+                            break
+                except:
+                    pass
+                connection.close()
+            except Exception as err:
+                insert_errors.append(['duplicate metric check', metric_name, err])
+            if known_metric_id:
+                continue
+
             try:
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
@@ -465,6 +498,50 @@ class Panorama(Thread):
         except Exception as err:
             logger.error('error :: insert_new_metric :: engine.dispose() failed - %s' % (
                 err))
+
+        # @added 20241203 - Bug #5522: Handle duplicate metric names
+        duplicate_metrics_count = len(duplicate_inserts)
+        if duplicate_metrics_count > 0:
+            logger.info('insert_new_metric :: %s duplicate metrics identified and not inserted, recorded in Redis hash panorama.not_inserted_duplicate_metrics' % (
+                str(duplicate_metrics_count)))
+            try:
+                self.redis_conn_decoded.delete('panorama.not_inserted_duplicate_metrics')
+                self.redis_conn_decoded.hset('panorama.not_inserted_duplicate_metrics', mapping=duplicate_inserts)
+                # Send a notification - thunder
+            except Exception as err:
+                logger.error('error :: failed to hset panorama.not_inserted_duplicate_metrics' % (
+                    err))
+            try:
+                notify_slack = len(settings.SLACK_OPTS['bot_user_oauth_access_token'])
+            except:
+                notify_slack = False
+            if notify_slack:
+                slack_alerted = False
+                try:
+                    slack_alerted = self.redis_conn_decoded.exists('panorama.not_inserted_duplicate_metrics.slack_alerted')
+                except Exception as err:
+                    logger.error('error :: failed to hset panorama.not_inserted_duplicate_metrics.slack_alerted' % (
+                        err))
+                if slack_alerted:
+                    notify_slack = False
+            if notify_slack:
+                slack_post = None
+                try:
+                    alert_slack_channel = None
+                    slack_message = '*Skyline - NOTICE - panorama* - %s duplicate metrics were submitted to be inserted into the database, see Redis hash panorama.not_inserted_duplicate_metrics (which is replaced every time duplicate insertions are requested).  This notice has a 6 hour expiry, this notice Redis hash is panorama.not_inserted_duplicate_metrics.slack_alerted' % (
+                        str(duplicate_metrics_count))
+                    slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
+                    logger.info('posted notice to slack - %s' % (slack_message))
+                except Exception as err:
+                    logger.error('error :: slack_post_message failed, err: %s' % (
+                        err))
+                if slack_post:
+                    try:
+                        self.redis_conn_decoded.hset('panorama.not_inserted_duplicate_metrics.slack_alerted', mapping=duplicate_inserts)
+                        self.redis_conn_decoded.expire('panorama.not_inserted_duplicate_metrics.slack_alerted', 21600)
+                    except Exception as err:
+                        logger.error('error :: failed to hset panorama.not_inserted_duplicate_metrics.slack_alerted' % (
+                            err))
 
         # @added 20240122 - Task #5228: panorama - optimise insertions
         # Add to the Redis ionosphere.untrainable_metrics set
@@ -2737,7 +2814,10 @@ class Panorama(Thread):
                     if failed_check_data_str:
                         try:
                             failed_check_data = literal_eval(failed_check_data_str)
-                            fail_count = failed_check_data['fail_count']
+                            try:
+                                fail_count = failed_check_data['fail_count']
+                            except:
+                                fail_count = 0
                         except Exception as err:
                             logger.error('error :: failed to literal_eval values from %s key in Redis hash panorama.retry_failed_checks, err: %s' % (
                                 check_file_name, err))
@@ -4121,7 +4201,10 @@ class Panorama(Thread):
                         if failed_check_data_str:
                             try:
                                 failed_check_data = literal_eval(failed_check_data_str)
-                                key_data['fail_count'] = failed_check_data['failed_count'] + 1
+                                try:
+                                    key_data['fail_count'] = failed_check_data['failed_count'] + 1
+                                except:
+                                    key_data['fail_count'] = 1
                             except Exception as err:
                                 logger.error('error :: failed to literal_eval values from %s key in Redis hash panorama.retry_failed_checks, err: %s' % (
                                     check_file_name, err))
