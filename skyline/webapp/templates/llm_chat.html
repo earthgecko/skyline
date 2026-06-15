@@ -1,0 +1,575 @@
+{% if version == dev_ver %}
+  {% extends "layout.bootstrap-5.3.2.html" %}
+{% else %}
+  {% extends "layout.html" %}
+{% endif %}
+{% block body %}
+
+<!-- BEGIN /llm_chat block -->
+
+<script src="/static/js/marked.min.js"></script>
+
+<style>
+  #llm-chat-container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  #llm-messages {
+    height: 520px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 16px;
+    background: #fafafa;
+    margin-bottom: 12px;
+  }
+  .llm-message {
+    margin-bottom: 14px;
+  }
+  .llm-message .llm-role {
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+  }
+  .llm-message.user .llm-role  { color: #337ab7; }
+  .llm-message.assistant .llm-role { color: #5cb85c; }
+  .llm-message.error .llm-role { color: #d9534f; }
+  .llm-message .llm-body {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    padding: 10px 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  .llm-message.user .llm-body {
+    background: #eaf3fb;
+    border-color: #c8dff0;
+  }
+  .llm-message.assistant .llm-body {
+    background: #fafffa;
+    border-color: #c8e6c8;
+  }
+  .llm-message.error .llm-body {
+    background: #fdf2f2;
+    border-color: #f0c0c0;
+    color: #a94442;
+  }
+  .llm-tool-calls {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+    font-style: italic;
+  }
+  #llm-thinking {
+    display: none;
+    color: #888;
+    font-style: italic;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  #llm-input-row {
+    display: flex;
+    gap: 8px;
+  }
+  #llm-input {
+    flex: 1;
+    resize: none;
+    font-size: 13.5px;
+  }
+  #llm-send-btn {
+    align-self: flex-end;
+  }
+  .llm-suggestions {
+    margin-bottom: 14px;
+  }
+  .llm-suggestions .llm-suggestion-btn {
+    font-size: 12px;
+    margin: 3px 3px 3px 0;
+    white-space: normal;
+    text-align: left;
+  }
+  .llm-message.llm-results .llm-role { color: #8a6d3b; }
+  .llm-message.llm-results .llm-body {
+      background: #fcf8e3;
+      border-color: #e8d5a3;
+      padding: 8px;
+      overflow-x: auto;  /* handles wide tables */
+  }
+</style>
+
+{% if version == dev_ver %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <div class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">
+          <span class="logo"><span class="sky">LLM</span> <span class="re">chat</span></span>
+        </li>
+      </div>
+    </ol>
+  </nav>
+{% else %}
+  <ol class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    <li class="active">
+      <span class="logo"><span class="sky">LLM</span> <span class="re">chat</span></span>
+    </li>
+  </ol>
+{% endif %}
+
+<div id="llm-chat-container">
+
+{% if llm_chat_enabled %}
+  <div class="page-header">
+    <h3>
+      <span class="logo"><span class="sky">Sky</span><span class="re">line</span> <span class="sky">LLM</span> <span class="re">chat</span></span>
+      <br>
+      <small>Ask <strong>{{ llm_model }}</strong> questions about your metrics, anomalies, matches, events or database.</small>
+    </h3>
+    <br>
+    <h4><center>This is a <strong>BETA</strong> feature and can results in <strong><code>HIGH TOKEN USAGE</code></strong> - watch your costs</center></h4>
+    <br>
+    Currently this only has access to query the DB tables.
+    <br>
+    Skyline only sends {{ llm_model }} the first row and last row of returned query data so it can verify the
+    query had the desired result.  The actual full results themselves are not sent to {{ llm_model }} they are
+    rather saved to csv. {{ llm_model }} can query these csv files via pandas to determine anything that it
+    cannot determine via a single query.  This allows {{ llm_model }} to make multiple queries and then get
+    Skyline to load the csv files as pandas DataFrames which it can then query via a pandas query.  Consider
+    this as tokenminning rather than tokenmaxxing.
+    <br>
+    This does mean that Skyline <strong>will send</strong> {{ llm_model }} a few of your metric names, timestamps and values.
+  </div>
+
+  <!-- Suggested starter questions -->
+  <div class="llm-suggestions">
+    <span style="font-size:12px; color:#888; margin-right:6px;">Try asking:</span>
+    <button class="btn btn-default btn-xs llm-suggestion-btn"
+            onclick="llmSuggest('Summarise what happened in the last 24 hours')">
+      Summarise the last 24 hours
+    </button>
+    <button class="btn btn-default btn-xs llm-suggestion-btn"
+            onclick="llmSuggest('Anything I should look at this morning that happened overnight?')">
+      Anything overnight to review?
+    </button>
+    <button class="btn btn-default btn-xs llm-suggestion-btn"
+            onclick="llmSuggest('Number of matches in the last 7 days?')">
+      Most chatty metrics (last week)
+    </button>
+    <button class="btn btn-default btn-xs llm-suggestion-btn"
+            onclick="llmSuggest('What anomalies occurred in the last hour?')">
+      Anomalies in the last hour
+    </button>
+  </div>
+
+  <!-- Message history display -->
+  <div id="llm-messages">
+    <div class="llm-message assistant">
+      <div class="llm-role">Skyline {{ llm_model }}</div>
+      <div class="llm-body">Hello! I have access to your Skyline anomaly data, metrics, correlations and events. Ask me anything about what has been happening in your infrastructure.</div>
+    </div>
+  </div>
+
+  <!-- Thinking indicator -->
+  <div id="llm-thinking">
+    <span class="glyphicon glyphicon-refresh"></span> Thinking&hellip;
+  </div>
+
+  {% if available_models %}
+  <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+    <label for="llm-model-select" style="font-size:12px; color:#888; margin:0;">Use model:</label>
+    <select id="llm-model-select" class="form-control" style="width: auto; font-size:12px;">
+      {% for model in available_models %}
+      <option value="{{ model }}"
+        {% if model == default_model %}selected{% endif %}>
+        {{ model }}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+
+  <!-- Input area -->
+  <div id="llm-input-row">
+    <textarea id="llm-input" class="form-control" rows="3"
+              placeholder="Ask a question about your metrics or anomalies&hellip;"></textarea>
+    <button id="llm-send-btn" class="btn btn-primary" onclick="llmSend()">
+      Send
+    </button>
+  </div>
+
+  <div style="margin-top:8px; text-align:right;">
+    <button class="btn btn-default btn-xs" onclick="llmClearHistory()"
+            title="Clear conversation history and start fresh">
+      Clear conversation
+    </button>
+    <input type="text" id="llm-save-label" class="form-control input-xs"
+           style="display:inline-block; width:200px; font-size:12px; margin-left:8px;"
+           placeholder="Label to save conversation...">
+    <button class="btn btn-default btn-xs" onclick="llmSaveConversation()"
+            title="Save conversation to Redis">
+      Save
+    </button>
+    <button class="btn btn-default btn-xs" onclick="llmLoadConversation()"
+            title="Load saved conversation from Redis">
+      Load
+    </button>
+  </div>
+{% else %}
+  <div class="page-header">
+    <h3>
+      <span class="logo"><span class="sky">Sky</span><span class="re">line</span> <span class="re">LLM chat</span></span>
+      <small>LLM_CHAT_ENABLED is not enabled</small>
+    </h3>
+  </div>
+{% endif %}
+
+</div><!-- /#llm-chat-container -->
+
+
+<script>
+// ---------------------------------------------------------------------------
+// Skyline LLM chat UI
+// ---------------------------------------------------------------------------
+
+var llmBusy = false;
+
+// Submit on Ctrl+Enter / Cmd+Enter
+document.getElementById('llm-input').addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    llmSend();
+  }
+});
+
+// Load history
+$(document).ready(function() {
+  $.ajax({
+      url: '/llm_chat/history',
+      method: 'GET',
+      success: function(data) {
+          if (data.history && data.history.length > 0) {
+              // Clear the welcome message first
+              document.getElementById('llm-messages').innerHTML = '';
+              data.history.forEach(function(msg) {
+                  llmAppendMessage(msg.role, msg.content, null);
+              });
+          }
+      }
+  });
+});
+
+function llmSuggest(text) {
+  document.getElementById('llm-input').value = text;
+  document.getElementById('llm-input').focus();
+}
+
+function llmAppendMessage(role, content, toolCallsMade) {
+  var container = document.getElementById('llm-messages');
+
+  var div = document.createElement('div');
+  div.className = 'llm-message ' + role;
+
+  var roleLabel = document.createElement('div');
+  roleLabel.className = 'llm-role';
+  roleLabel.textContent = (role === 'user') ? 'You' :
+                           (role === 'assistant') ? '{{ llm_model }}' : 'Error';
+  div.appendChild(roleLabel);
+
+  var body = document.createElement('div');
+  body.className = 'llm-body';
+//  body.textContent = content;
+  // Render markdown for assistant, plain text for user/error
+  if (role === 'assistant') {
+    body.innerHTML = marked.parse(content);
+  } else {
+    body.textContent = content;
+  }
+  div.appendChild(body);
+
+  if (toolCallsMade && toolCallsMade.length > 0) {
+    var toolDiv = document.createElement('div');
+    toolDiv.className = 'llm-tool-calls';
+    toolDiv.textContent = 'Data lookups: ' + toolCallsMade.join(', ');
+    div.appendChild(toolDiv);
+  }
+
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function llmRenderResults(results) {
+    var container = document.getElementById('llm-messages');
+
+    var div = document.createElement('div');
+    div.className = 'llm-message llm-results';
+
+    var roleLabel = document.createElement('div');
+    roleLabel.className = 'llm-role';
+    roleLabel.textContent = 'Data';
+    div.appendChild(roleLabel);
+
+    var body = document.createElement('div');
+    body.className = 'llm-body';
+
+    // Render query above table if present
+    if (results.query) {
+      var queryDiv = document.createElement('div');
+      queryDiv.style.fontFamily = 'Consolas, courier new, monospace';
+      queryDiv.style.fontSize = '11px';
+      queryDiv.style.color = '#555';
+      queryDiv.style.background = '#f1f1f1';
+      queryDiv.style.padding = '6px 8px';
+      queryDiv.style.marginBottom = '8px';
+      queryDiv.style.borderRadius = '3px';
+      queryDiv.style.whiteSpace = 'pre-wrap';
+      queryDiv.style.wordBreak = 'break-all';
+      queryDiv.textContent = results.query;
+      body.appendChild(queryDiv);
+      // Not sent to LLM note
+      var not_sent_note = document.createElement('div');
+      not_sent_note.style.fontSize = '11px';
+      not_sent_note.style.color = '#888';
+      not_sent_note.style.marginTop = '4px';
+      not_sent_note.textContent = 'Results from the query were saved to ' + results.csv + ' and not sent to {{ llm_model }}.  Only the first and last rows were sent to {{ llm_model }}.';
+      body.appendChild(not_sent_note);
+
+    }
+
+//    if (results.columns && results.rows) {
+    if (results.result.columns && results.result.rows) {
+
+        // Render as a table
+        var table = document.createElement('table');
+        table.className = 'table table-condensed table-bordered table-hover';
+        table.style.fontSize = '12px';
+
+        // Header row
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        results.result.columns.forEach(function(col) {
+            var th = document.createElement('th');
+            th.textContent = col;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        // Data rows
+        var tbody = document.createElement('tbody');
+        results.result.rows.forEach(function(row) {
+            var tr = document.createElement('tr');
+            results.result.columns.forEach(function(col) {
+                var td = document.createElement('td');
+                td.textContent = row[col] !== null ? row[col] : '';
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        body.appendChild(table);
+
+        // Row count note
+        var note = document.createElement('div');
+        note.style.fontSize = '11px';
+        note.style.color = '#888';
+        note.style.marginTop = '4px';
+        note.textContent = results.result.rows.length + ' rows';
+        if (results.result.truncated) {
+            note.textContent += ' (truncated, full data in: ' + results.result.filename + ')';
+        }
+        body.appendChild(note);
+    } else {
+        body.textContent = 'No results data.';
+    }
+
+    div.appendChild(body);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function llmSetBusy(busy) {
+  llmBusy = busy;
+  document.getElementById('llm-send-btn').disabled = busy;
+  document.getElementById('llm-input').disabled = busy;
+  document.getElementById('llm-thinking').style.display = busy ? 'block' : 'none';
+}
+
+function llmSend() {
+  if (llmBusy) { return; }
+
+  var input = document.getElementById('llm-input');
+  var message = input.value.trim();
+  if (!message) { return; }
+
+  // Read selected model if dropdown exists
+  var modelSelect = document.getElementById('llm-model-select');
+//  var selectedModel = modelSelect ? modelSelect.value : null;
+  var selectedModel = modelSelect ? modelSelect.value : '{{ provider_llm_model }}';
+  // Parse provider and model from the selected string
+  // e.g. 'bedrock/converse/openai.gpt-oss-120b-1:0' -> provider is everything
+  // before last slash group, or just pass raw and let Python parse it
+  var payload = {
+      message: message,
+      provider_llm_model: selectedModel,
+      llm_model: selectedModel,
+  };
+
+  llmAppendMessage('user', message, null);
+//  input.value = '';
+  document.getElementById('llm-input').value = '';
+  llmSetBusy(true);
+
+/*
+  $.ajax({
+    url: '/llm_chat/query',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ message: message }),
+    success: function(data) {
+      llmSetBusy(false);
+      if (data.error) {
+        llmAppendMessage('error', 'Error: ' + data.error, null);
+      } else {
+        llmAppendMessage('assistant', data.response, data.tool_calls_made);
+      }
+    },
+    error: function(xhr) {
+      llmSetBusy(false);
+      var msg = 'Request failed.';
+      try {
+        var resp = JSON.parse(xhr.responseText);
+        if (resp.error) { msg = resp.error; }
+      } catch(e) {}
+      llmAppendMessage('error', msg, null);
+    }
+  });
+*/
+
+  $.ajax({
+    url: '/llm_chat/query',
+    method: 'POST',
+    contentType: 'application/json',
+    // data: JSON.stringify({ message: message }),
+    data: JSON.stringify(payload),
+    timeout: 120000,  // 120 seconds
+    success: function(data) {
+      llmSetBusy(false);
+      if (data.error) {
+        llmAppendMessage('error', 'Error: ' + data.error, null);
+      } else {
+        llmAppendMessage('assistant', data.response, data.tool_calls_made);
+        // Render results separately, never touches history
+//        if (data.llm_results) {
+//            llmRenderResults(data.llm_results);
+//        }
+        if (data.query_results) {
+            for (var key in data.query_results) {
+                if (data.query_results.hasOwnProperty(key)) {
+                    var results = data.query_results[key];
+                    if (results && results.result) {
+//                        llmRenderResults(result.results);
+                        llmRenderResults(results);
+                    }
+                }
+            }
+        }
+      }
+    },
+    error: function(xhr, textStatus) {
+        llmSetBusy(false);
+        var msg = 'Request failed.';
+        if (textStatus === 'timeout') {
+            msg = 'Request timed out - the query took too long. Try a simpler question or try again.';
+        } else {
+            try {
+                var resp = JSON.parse(xhr.responseText);
+                if (resp.error) { msg = resp.error; }
+            } catch(e) {}
+        }
+        llmAppendMessage('error', msg, null);
+    }
+  });
+
+}
+
+function llmClearHistory() {
+  if (llmBusy) { return; }
+  $.ajax({
+    url: '/llm_chat/clear',
+    method: 'POST',
+    success: function() {
+      var container = document.getElementById('llm-messages');
+      container.innerHTML =
+        '<div class="llm-message assistant">' +
+        '<div class="llm-role">Skyline LLM</div>' +
+        '<div class="llm-body">Conversation cleared. How can I help?</div>' +
+        '</div>';
+    }
+  });
+}
+
+function llmSaveConversation() {
+    var label = document.getElementById('llm-save-label').value.trim();
+    if (!label) {
+        alert('Please enter a label to save the conversation.');
+        return;
+    }
+    $.ajax({
+        url: '/llm_chat/save',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ label: label }),
+        success: function(data) {
+            if (data.error) {
+                alert('Save failed: ' + data.error);
+            } else {
+                document.getElementById('llm-save-label').value = '';
+                alert('Conversation saved as: ' + data.key);
+            }
+        },
+        error: function() {
+            alert('Save request failed.');
+        }
+    });
+}
+
+function llmLoadConversation() {
+    var label = document.getElementById('llm-save-label').value.trim();
+    if (!label) {
+        alert('Please enter a label to load.');
+        return;
+    }
+    $.ajax({
+        url: '/llm_chat/load',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ label: label }),
+        success: function(data) {
+            if (data.error) {
+                alert('Load failed: ' + data.error);
+                return;
+            }
+            // Clear current UI
+            document.getElementById('llm-messages').innerHTML = '';
+            document.getElementById('llm-save-label').value = '';
+            // Replay history into UI
+            data.history.forEach(function(msg) {
+                llmAppendMessage(msg.role, msg.content, null);
+            });
+        },
+        error: function() {
+            alert('Load request failed.');
+        }
+    });
+}
+
+</script>
+
+<!-- END /llm_chat block -->
+{% endblock %}
