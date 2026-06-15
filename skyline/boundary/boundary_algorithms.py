@@ -29,10 +29,15 @@ if True:
         CUSTOM_STALE_PERIOD,
         # @added 20210603 - Feature #4000: EXTERNAL_SETTINGS
         EXTERNAL_SETTINGS,
+        # @added 20241227 - Feature #5585: boundary - tsdb_function
+        FULL_NAMESPACE,
     )
     from algorithm_exceptions import (TooShort, Stale, Boring)
     # @added 20210518 - Feature #4076: CUSTOM_STALE_PERIOD
     from functions.settings.get_custom_stale_period import custom_stale_period
+    # @added 20241227 - Feature #5585: boundary - tsdb_function
+    from skyline_functions import get_graphite_metric
+    from functions.victoriametrics.get_victoriametrics_metric import get_victoriametrics_metric
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -333,6 +338,7 @@ def moving_timeseries(timeseries, boundary_function, boundary_function_seconds):
         resolution = get_resolution(timeseries)
         if boundary_function_seconds < resolution:
             return timeseries
+
         window = int(boundary_function_seconds / resolution)
         x_np = np.asarray([x[1] for x in timeseries])
         if boundary_function == 'mean':
@@ -352,6 +358,66 @@ def moving_timeseries(timeseries, boundary_function, boundary_function_seconds):
         return timeseries
     return rolling_timeseries
 
+# @added 20241227 - Feature #5585: boundary - functions - tsdb_function
+def tsdb_timeseries(timeseries, metric, boundary_function, boundary_function_seconds):
+    """
+    Fetch the time series data from the TSDB with boundary_function_seconds with
+    the function applied.
+
+    The function is declared as it would be to retrieve the metric from the TSDB
+    with the constant of METRIC being used to represent the position of the
+    metric name in the query.  When analysis is run Skyline automatically
+    replaces the METRIC constant string with the name of the metric being
+    analysed.  Although it would be possible to build queries via a dictionary
+    it is much simpler to just use literal query string this allows for the
+    handling of very complex query strings.  In terms of VictoriaMetrics metrics
+    do not declare rate, the get_victoriametrics_metric function automatically
+    identifies COUNTER metrics and wraps them in rate.
+
+    boundary_function = {
+        'tsdb': 'graphite',
+        'function': 'exponentialMovingAverage(METRIC,1008)',
+    }
+
+    boundary_function = {
+        'tsdb': 'victoriametrics',
+        'function': 'smooth_exponential(rate(METRIC[10m]),0.25)',
+    }
+    
+    """
+    tsdb_timeseries = list(timeseries)
+    until_timestamp = int(timeseries[-1][0])
+    from_timestamp = until_timestamp - boundary_function_seconds
+    try:
+        tsdb = boundary_function['tsdb']
+        tsdb_function = None
+        try:
+            tsdb_function = boundary_function['function']
+        except KeyError:
+            tsdb_function = None
+    except Exception as err:
+        logger.error('error :: failed to determine boundary_function parameters for %s with boundary_function: %s, err: %s' % (
+            metric, str(boundary_function), err))
+    use_metric = str(metric)
+    if use_metric.startswith(FULL_NAMESPACE):
+        use_metric = use_metric.replace(FULL_NAMESPACE, '', 1)
+    metric_function = str(metric)
+    if tsdb_function:
+        metric_function = tsdb_function.replace('METRIC', use_metric)
+    logger.info('fetching metric: %s, metric_function: %s' % (metric, metric_function))
+    if tsdb == 'graphite':
+        try:
+            tsdb_timeseries = get_graphite_metric(skyline_app, metric_function, from_timestamp, until_timestamp, 'list', 'object')
+        except Exception as err:
+            logger.error('error :: get_graphite_metric failed - %s' % (
+                err))
+    if tsdb == 'victoriametrics':
+        try:
+            tsdb_timeseries = get_victoriametrics_metric(skyline_app, metric_function, from_timestamp, until_timestamp, 'list', 'object')
+        except Exception as err:
+            logger.error('error :: get_victoriametrics_metric failed, metric: %s, err: %s' % (
+                metric, err))
+    return tsdb_timeseries
 
 def run_selected_algorithm(
         timeseries, metric_name, metric_expiration_time, metric_min_average,
@@ -461,6 +527,18 @@ def run_selected_algorithm(
             except Exception as err:
                 logger.error('%s' % traceback.format_exc())
                 logger.error('error :: moving_timeseries failed - %s' % err)
+                use_timeseries = list(timeseries)
+
+        # @added 20241227 - Feature #5585: boundary - functions - tsdb_functions
+        if isinstance(boundary_function, dict):
+            try:
+                logger.info('fetching TSDB data for %s' % metric_name)
+                use_timeseries = tsdb_timeseries(timeseries, metric_name, boundary_function, boundary_function_seconds)
+                logger.info('fetched time series from TSDB for %s with length %s' % (
+                    metric_name, str(len(use_timeseries))))
+            except Exception as err:
+                logger.error('%s' % traceback.format_exc())
+                logger.error('error :: tsdb_timeseries failed, err: %s' % err)
                 use_timeseries = list(timeseries)
 
     try:
