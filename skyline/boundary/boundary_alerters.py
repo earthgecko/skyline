@@ -84,7 +84,7 @@ if True:
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         get_redis_conn_decoded,
         # @modified 20191105 - Branch #3002: docker
         #                      Branch #3262: py3
@@ -261,10 +261,10 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         #     # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
         #     #                      Branch #3262: py3
         #     # REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        #     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
         # else:
         #     # REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-        #     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
         REDIS_ALERTER_CONN = get_redis_conn_decoded(skyline_app)
     except:
         logger.error('error :: alert_smtp - redis connection failed')
@@ -410,7 +410,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         if python_version == 2:
             try:
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 # image_data = urllib2.urlopen(link).read()  # nosec
                 image_data = None
             except urllib2.URLError:
@@ -573,6 +573,13 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
                 logger.error(
                     'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
                         str(metric_timestamp), metric_name))
+    # @added 20260510 - Feature #4854: boundary - labelled_metrics
+    # Clean up
+    if os.path.isfile(image_file):
+        try:
+            os.remove(image_file)
+        except OSError:
+            logger.error('error :: failed to remove file - %s' % image_file)
 
 
 def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
@@ -619,93 +626,6 @@ def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, alg
                 logger.error(
                     'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
                         str(metric_timestamp), metric_name))
-    else:
-        return False
-
-
-def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
-
-    if settings.HIPCHAT_ENABLED:
-        sender = settings.BOUNDARY_HIPCHAT_OPTS['sender']
-        import hipchat
-        hipster = hipchat.HipChat(token=settings.BOUNDARY_HIPCHAT_OPTS['auth_token'])
-
-        # Allow for absolute path metric namespaces but also allow for and match
-        # match wildcard namepaces if there is not an absolute path metric namespace
-        rooms = 'unknown'
-        notify_rooms = []
-        matched_rooms = []
-        try:
-            rooms = settings.BOUNDARY_HIPCHAT_OPTS['rooms'][metric_name]
-            notify_rooms.append(rooms)
-        except:
-            for room in settings.BOUNDARY_HIPCHAT_OPTS['rooms']:
-                CHECK_MATCH_PATTERN = room
-                check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                pattern_match = check_match_pattern.match(metric_name)
-                if pattern_match:
-                    matched_rooms.append(room)
-
-        if matched_rooms != []:
-            for i_metric_name in matched_rooms:
-                rooms = settings.BOUNDARY_HIPCHAT_OPTS['rooms'][i_metric_name]
-                notify_rooms.append(rooms)
-
-        alert_algo = str(algorithm)
-        alert_context = alert_algo.upper()
-
-        unencoded_graph_title = 'Skyline Boundary - %s at %s hours - %s - %s' % (
-            alert_context, graphite_previous_hours, metric_name, datapoint)
-        graph_title_string = quote(unencoded_graph_title, safe='')
-        graph_title = '&title=%s' % graph_title_string
-
-        # @modified 20170706 - Support #2072: Make Boundary hipchat alerts show fixed timeframe
-        graphite_now = int(time())
-        target_seconds = int((graphite_previous_hours * 60) * 60)
-        from_timestamp = str(graphite_now - target_seconds)
-        until_timestamp = str(graphite_now)
-        graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
-        graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
-
-        if settings.GRAPHITE_PORT != '':
-            # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=%s' % (
-                # settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
-                # graphite_previous_hours, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
-            # @modified 20190520 - Branch #3002: docker
-            # Use GRAPHITE_RENDER_URI
-            # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
-            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
-            #     graphite_from, graphite_until, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
-            #     graph_title, graphite_graph_line_color)
-            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
-            # link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
-            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=%s' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
-                settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
-                metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
-                graphite_graph_line_color)
-        else:
-            # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=%s' % (
-                # settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_previous_hours,
-            # @modified 20190520 - Branch #3002: docker
-            # Use GRAPHITE_RENDER_URI
-            # link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
-            #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_from, graphite_until,
-            #     metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
-            #     graphite_graph_line_color)
-            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
-            # link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
-            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=%s' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
-                metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
-                graphite_graph_line_color)
-
-        embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric_name + "</a>"
-
-        for rooms in notify_rooms:
-            for room in rooms:
-                hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.BOUNDARY_HIPCHAT_OPTS['color'], 'message': '%s - Boundary - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, algorithm, metric_name, datapoint, graphite_previous_hours, embed_graph)})
     else:
         return False
 
@@ -770,15 +690,23 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     #                      Task #3556: Update deps
     # slackclient v2 has a version function, < v2 does not
     # from slackclient import SlackClient
-    try:
-        from slack import version as slackVersion
-        slack_version = slackVersion.__version__
-    except:
-        slack_version = '1.3'
-    if slack_version == '1.3':
-        from slackclient import SlackClient
-    else:
-        from slack import WebClient
+    # @modified 20260222 - Task #5344: Migrate slack files.upload method
+    # Fully deprecate slack and slackclient
+    #try:
+    #    from slack import version as slackVersion
+    #    slack_version = slackVersion.__version__
+    #except:
+    #    slack_version = '1.3'
+    #if slack_version == '1.3':
+    #    from slackclient import SlackClient
+    #else:
+        # @modified 20250305 - Task #5344: Migrate slack files.upload method
+        #from slack import WebClient
+    #    from slack_sdk import WebClient
+    # @modified 20260222 - Task #5344: Migrate slack files.upload method
+    # Fully deprecate slack and slackclient
+    slack_version = 0
+    from slack_sdk import WebClient
 
     metric = metric_name
     logger.info('alert_slack - anomalous metric :: metric: %s - %s' % (metric, algorithm))
@@ -834,10 +762,10 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
 #            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
 #            #                      Branch #3262: py3
 #            # REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-#            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
 #        else:
 #            # REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-#            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, encoding='utf-8', decode_responses=True)
 #    except:
 #        logger.error('error :: alert_slack - redis connection failed')
 #    try:
@@ -1193,6 +1121,49 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
         logger.error('error :: alert_slack - could not initiate SlackClient')
         return False
 
+    # @added 20250305 - Task #5344: Migrate slack files.upload method
+    # The new slack_sdk files_upload_v2 method does not handle channel names,
+    # channel ids must be used
+    try:
+        default_channel = settings.SLACK_OPTS['default_channel']
+        default_channel_id = settings.SLACK_OPTS['default_channel_id']
+    except:
+        default_channel = None
+        default_channel_id = None
+
+    try:
+        channel_ids = settings.SLACK_OPTS['channel_ids']
+    except:
+        channel_ids = {}
+    channel_ids_from_redis = False
+    if not channel_ids:
+        try:
+            channel_ids = redis_conn_decoded.hgetall('skyline.slack_channel_ids')
+            if channel_ids:
+                channel_ids_from_redis = True
+        except Exception as err:
+            logger.error('error :: failed to hgetall skyline.slack_channel_ids - %s' % (
+                err))
+    if not channel_ids:
+        try:
+            conversations_channels = sc.conversations_list()
+            if conversations_channels['ok']:
+                for channel in conversations_channels['channels']:
+                    channel_ids[channel['name']] = channel['id']
+        except Exception as err:
+            logger.error('error :: alert_slack - failed to determine conversations_list for channel ids, err: %s' % err)
+        if channel_ids:
+            if not channel_ids_from_redis:
+                try:
+                    channel_ids_from_redis = redis_conn_decoded.hset('skyline.slack_channel_ids', mapping=channel_ids)
+                    if channel_ids:
+                        channel_ids_from_redis = True
+                except Exception as err:
+                    logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                        err))
+    if default_channel_id:
+        channel_ids[default_channel] = default_channel_id
+
     # @added 20200815 - Bug #3676: Boundary slack alert errors
     #                   Task #3608: Update Skyline to Python 3.8.3 and deps
     #                   Task #3612: Upgrade to slack v2
@@ -1234,9 +1205,20 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                         'files.upload', filename=filename, channels=channel,
                         initial_comment=initial_comment, file=open(image_file, 'rb'))
                 else:
-                    slack_file_upload = sc.files_upload(
-                        filename=filename, channels=channel,
-                        initial_comment=initial_comment, file=open(image_file, 'rb'))
+                    # @modified 20250305 - Task #5344: Migrate slack files.upload method
+                    #slack_file_upload = sc.files_upload(
+                    #    filename=filename, channels=channel,
+                    #    initial_comment=initial_comment, file=open(image_file, 'rb'))
+                    try:
+                        channel_id = channel_ids[channel]
+                    except:
+                        channel_id = channel
+                    slack_file_upload = sc.files_upload_v2(
+                        file=image_file,
+                        channel=channel_id,
+                        initial_comment=initial_comment,
+                    )
+
                 if not slack_file_upload['ok']:
                     logger.error('error :: alert_slack - failed to send slack message with file upload')
                     logger.error('error :: alert_slack - slack_file_upload - %s' % str(slack_file_upload))
