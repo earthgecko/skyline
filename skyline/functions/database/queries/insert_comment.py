@@ -42,15 +42,22 @@ def insert_comment(
         return new_comment_id
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         ins = comments_table.insert().values(
             metric_id=int(metric_id),
             timestamp=int(timestamp),
             user_id=int(user_id),
             comment=str(comment_data))
-        result = connection.execute(ins)
-        connection.close()
-        new_comment_id = result.inserted_primary_key[0]
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #connection.close()
+        #new_comment_id = result.inserted_primary_key[0]
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_comment_id = result.inserted_primary_key[0]
+
     except Exception as err:
         current_logger.error('error :: %s :: could not insert into comments_table - %s' % (
             function_str, err))
@@ -64,80 +71,119 @@ def insert_comment(
 
     if anomaly_id and new_comment_id:
         try:
-            connection = engine.connect()
-            stmt = comments_table.update().values(
-                anomaly_id=int(anomaly_id)).\
-                where(comments_table.c.id == int(new_comment_id))
-            result = connection.execute(stmt)
-            if result.rowcount == 1:
-                current_logger.info('%s :: updated row %s with anomaly_id: %s' % (
-                    function_str, str(new_comment_id), str(anomaly_id)))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = comments_table.update().values(
+            #    anomaly_id=int(anomaly_id)).\
+            #    where(comments_table.c.id == int(new_comment_id))
+            #result = connection.execute(stmt)
+            stmt = comments_table.update().\
+                where(comments_table.c.id == int(new_comment_id)).values(
+                anomaly_id=int(anomaly_id))
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+                if result.rowcount == 1:
+                    current_logger.info('%s :: updated row %s with anomaly_id: %s' % (
+                        function_str, str(new_comment_id), str(anomaly_id)))
+            #connection.close()
         except Exception as err:
             current_logger.error('error :: %s :: could not update row %s with anomaly_id: %s - %s' % (
                 function_str, str(new_comment_id), str(anomaly_id), err))
     if fp_id and new_comment_id:
         try:
-            connection = engine.connect()
-            stmt = comments_table.update().values(
-                fp_id=int(fp_id)).\
-                where(comments_table.c.id == int(new_comment_id))
-            result = connection.execute(stmt)
-            if result.rowcount == 1:
-                current_logger.info('%s :: updated row %s with fp_id: %s' % (
-                    function_str, str(new_comment_id), str(fp_id)))
-            connection.close()
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = comments_table.update().values(
+            #    fp_id=int(fp_id)).\
+            #    where(comments_table.c.id == int(new_comment_id))
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            stmt = comments_table.update().\
+                where(comments_table.c.id == int(new_comment_id)).values(
+                fp_id=int(fp_id))
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+                if result.rowcount == 1:
+                    current_logger.info('%s :: updated row %s with fp_id: %s' % (
+                        function_str, str(new_comment_id), str(fp_id)))
+            #connection.close()
         except Exception as err:
             current_logger.error('error :: %s :: could not update row %s with fp_id: %s - %s' % (
                 function_str, str(new_comment_id), str(fp_id), err))
     if match_id and new_comment_id:
         try:
-            connection = engine.connect()
-            stmt = comments_table.update().values(
-                match_id=int(match_id)).\
-                where(comments_table.c.id == int(new_comment_id))
-            result = connection.execute(stmt)
-            if result.rowcount == 1:
-                current_logger.info('%s :: updated row %s with match_id: %s' % (
-                    function_str, str(new_comment_id), str(match_id)))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = comments_table.update().values(
+            #    match_id=int(match_id)).\
+            #    where(comments_table.c.id == int(new_comment_id))
+            #result = connection.execute(stmt)
+            stmt = comments_table.update().\
+                where(comments_table.c.id == int(new_comment_id)).values(
+                match_id=int(match_id))
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+                if result.rowcount == 1:
+                    current_logger.info('%s :: updated row %s with match_id: %s' % (
+                        function_str, str(new_comment_id), str(match_id)))
+            #connection.close()
         except Exception as err:
             current_logger.error('error :: %s :: could not update row %s with match_id: %s - %s' % (
                 function_str, str(new_comment_id), str(match_id), err))
     if motif_match_id and new_comment_id:
         try:
-            connection = engine.connect()
-            stmt = comments_table.update().values(
-                motif_match_id=int(motif_match_id)).\
-                where(comments_table.c.id == int(new_comment_id))
-            result = connection.execute(stmt)
-            if result.rowcount == 1:
-                current_logger.info('%s :: updated row %s with motif_match_id: %s' % (
-                    function_str, str(new_comment_id), str(motif_match_id)))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = comments_table.update().values(
+            #    motif_match_id=int(motif_match_id)).\
+            #    where(comments_table.c.id == int(new_comment_id))
+            #result = connection.execute(stmt)
+            stmt = comments_table.update().\
+                where(comments_table.c.id == int(new_comment_id)).values(
+                motif_match_id=int(motif_match_id))
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+                if result.rowcount == 1:
+                    current_logger.info('%s :: updated row %s with motif_match_id: %s' % (
+                        function_str, str(new_comment_id), str(motif_match_id)))
+            #connection.close()
         except Exception as err:
             current_logger.error('error :: %s :: could not update row %s with motif_match_id: %s - %s' % (
                 function_str, str(new_comment_id), str(motif_match_id), err))
     if snab_id and new_comment_id:
         try:
-            connection = engine.connect()
-            stmt = comments_table.update().values(
-                snab_id=int(snab_id)).\
-                where(comments_table.c.id == int(new_comment_id))
-            result = connection.execute(stmt)
-            if result.rowcount == 1:
-                current_logger.info('%s :: updated row %s with snab_id: %s' % (
-                    function_str, str(new_comment_id), str(snab_id)))
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = comments_table.update().values(
+            #    snab_id=int(snab_id)).\
+            #    where(comments_table.c.id == int(new_comment_id))
+            #result = connection.execute(stmt)
+            stmt = comments_table.update().\
+                where(comments_table.c.id == int(new_comment_id)).values(
+                snab_id=int(snab_id))
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+                if result.rowcount == 1:
+                    current_logger.info('%s :: updated row %s with snab_id: %s' % (
+                        function_str, str(new_comment_id), str(snab_id)))
+            #connection.close()
         except Exception as err:
             current_logger.error('error :: %s :: could not update row %s with snab_id: %s - %s' % (
                 function_str, str(new_comment_id), str(snab_id), err))
 
-    if connection:
-        try:
-            connection.close()
-        except:
-            pass
+    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #if connection:
+    #    try:
+    #        connection.close()
+    #    except:
+    #        pass
 
     if engine:
         engine_disposal(current_skyline_app, engine)
