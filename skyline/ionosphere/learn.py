@@ -11,6 +11,8 @@ import shutil
 import glob
 from sys import version_info
 import traceback
+# @added 20250625 - Bug #5636: ionosphere learn - vm json
+import json
 
 # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
@@ -43,7 +45,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded)
 
 from features_profile import calculate_features_profile
@@ -95,6 +97,14 @@ try:
 except:
     learn_full_duration = 86400 * 30  # 2592000
 
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
 # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                      Branch #3262: py3
@@ -107,7 +117,7 @@ except:
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
 # Added a single functions to deal with Redis connection and the
-# charset='utf-8', decode_responses=True arguments required in py3
+# encoding='utf-8', decode_responses=True arguments required in py3
 redis_conn = get_redis_conn(skyline_app)
 redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -265,19 +275,31 @@ def get_metric_from_metrics(base_name, engine):
                 base_name, err))
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
         # @added 20220729 - Task #2732: Prometheus to Skyline
         #                   Branch #4300: prometheus
         # Handle labelled_metrics
         if labelled_metric_base_name:
-            stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+            stmt = select(metrics_table).where(metrics_table.c.metric == labelled_metric_base_name)
 
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         metric_db_object = row
         metrics_id = row['id']
-        connection.close()
+        #connection.close()
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: learn :: could not determine id from metrics table for - %s' % base_name)
@@ -308,12 +330,22 @@ def get_ionosphere_fp_ids(base_name, metrics_id, engine):
         return fp_ids
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
+        stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == metrics_id)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             fp_ids.append(row['id'])
-        connection.close()
+        #connection.close()
         fp_ids_count = len(fp_ids)
         logger.info('learn :: detemined %s fp ids for %s' % (str(fp_ids_count), base_name))
     except:
@@ -343,14 +375,23 @@ def get_ionosphere_record(fp_id, engine):
         return row
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.id == fp_id)
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table]).where(ionosphere_table.c.id == fp_id)
+        stmt = select(ionosphere_table).where(ionosphere_table.c.id == fp_id)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         # @added 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                   Task #4778: v4.0.0 - update dependencies
         # Added missing close
-        connection.close()
+        #connection.close()
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: could not get the fp_ids_db_object_count from the DB for %s' % str(fp_id))
@@ -681,6 +722,26 @@ def ionosphere_learn(timestamp):
                 logger.error('error :: learn :: failed get the metric details from the database')
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
 
+            # @added 20260221 - Feature #5712: skyline.dawn
+            #                   Task #5628: Build v5.0.0 and test
+            dawn_expiry_timestamp = None
+            if SKYLINE_DAWN_ENABLED:
+                try:
+                    dawn_expiry_timestamp = redis_conn_decoded.get('skyline.dawn.ionosphere.learn')
+                except Exception as err:
+                    logger.error('error :: failed on get skyline.dawn.ionosphere.learn, err: %s' % (
+                        err))
+                if dawn_expiry_timestamp:
+                    logger.info('learn :: NOTICE - skyline.dawn.ionosphere.learn key exists, not learning until %s' % (
+                        str(dawn_expiry_timestamp)))
+                    logger.info('learn :: removing this work %s from Redis set %s as it is over 4 hours old' % (work_set, str(learn_metric_list)))
+                    try:
+                        redis_conn.srem(work_set, str(learn_metric_list))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: learn :: failed remove %s from Redis set %s' % (str(learn_metric_list), work_set))
+                    continue
+
             if not metrics_id:
                 logger.error('error :: learn :: failed get the metrics_id from the database')
 
@@ -803,21 +864,30 @@ def ionosphere_learn(timestamp):
                 str(learn_parent_id)))
             exisitng_recent_fps = []
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # Use sqlalchemy rather than string-based query construction
                 # result = connection.execute(
                 #     'SELECT * FROM ionosphere WHERE metric_id=%s AND parent_id=%s AND full_duration=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 2 HOUR) <= created_timestamp' % (str(metrics_id), str(learn_parent_id), str(learn_full_duration_seconds)))  # nosec
                 two_hours_ago = datetime.now() - timedelta(hours=2)
-                stmt = select([ionosphere_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).\
+                stmt = select(ionosphere_table).\
                     where(ionosphere_table.c.metric_id == int(metrics_id)).\
                     where(ionosphere_table.c.parent_id == int(learn_parent_id)).\
                     where(ionosphere_table.c.full_duration == int(learn_full_duration_seconds)).\
                     where(ionosphere_table.c.created_timestamp >= two_hours_ago)
-                result = connection.execute(stmt)
 
-                for row in result:
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
+                for row in results:
                     try:
                         recent_fp_id = int(row['id'])
                         recent_fp_full_duration = int(row['full_duration'])
@@ -830,7 +900,7 @@ def ionosphere_learn(timestamp):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: learn :: failed to determine exisitng_recent_fps from DB response for work check')
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed to determine exisitng_recent_fps for work check')
@@ -855,7 +925,7 @@ def ionosphere_learn(timestamp):
             exisitng_recent_fps = []
 
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
 
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
@@ -863,12 +933,21 @@ def ionosphere_learn(timestamp):
                 # result = connection.execute(
                 #     'SELECT * FROM ionosphere WHERE metric_id=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 1 HOUR) <= created_timestamp' % (str(metrics_id)))  # nosec
                 hour_ago = datetime.now() - timedelta(hours=1)
-                stmt = select([ionosphere_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table]).\
+                stmt = select(ionosphere_table).\
                     where(ionosphere_table.c.metric_id == int(metrics_id)).\
                     where(ionosphere_table.c.created_timestamp >= hour_ago)
-                result = connection.execute(stmt)
 
-                for row in result:
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
+                for row in results:
                     try:
                         recent_fp_id = int(row['id'])
                         # @modified 202000902 - Bug #3382: Prevent ionosphere.learn loop edge cases
@@ -878,7 +957,7 @@ def ionosphere_learn(timestamp):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: learn :: failed to determine exisitng_recent_fps from DB response for work check')
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed to determine exisitng_recent_fps for work check')
@@ -1317,6 +1396,8 @@ def ionosphere_learn(timestamp):
             logger.info('learn :: exiting this work but not removing work item, as Graphite may be available again before the work expires')
             continue
 
+        timeseries = []
+
         # @added 20170123 - Feature #1854: Ionosphere learn - generations
         # TODO
         # ionosphere_learn needs to test that use_full_duration_days data is available
@@ -1331,7 +1412,25 @@ def ionosphere_learn(timestamp):
                 # timeseries = json.loads(f.read())
                 raw_timeseries = f.read()
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
-                timeseries = literal_eval(timeseries_array_str)
+                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                if 'nan' in timeseries_array_str:
+                    try:
+                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                    except Exception as err:
+                        logger.error('error :: learn :: failed to replace nan with None, err: %s' % (
+                            err))
+                # @modified 20250625 - Bug #5636: ionosphere learn - vm json
+                # If literal_eval fails try json
+                #timeseries = literal_eval(timeseries_array_str)
+                try:
+                    timeseries = literal_eval(timeseries_array_str)
+                except Exception as err:
+                    try:
+                        timeseries = json.loads(f.read())
+                    except Exception as err2:
+                        logger.error('error :: learn :: failed to load data from json, literal_eval err: %s, json err2: %s' % (
+                            err, err2))
+
                 # @modified 20180811 - Bug #2506: nonNegativeDerivative applied twice in learn.py to existing json data
                 # Not required if the preprocessed json exists
                 # datapoints = timeseries
@@ -1581,9 +1680,9 @@ def ionosphere_learn(timestamp):
             #       have, not 100% sure.
             child_use_full_duration_count_of_origin_fp_id = 0
             try:
-                connection = engine.connect()
+                #connection = engine.connect()
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
 
                 # @modified 20230109 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
@@ -1593,15 +1692,25 @@ def ionosphere_learn(timestamp):
                 # for row in result:
                 #     child_fp_count = row['COUNT(id)']
                 child_fp_count = 0
-                stmt = select([ionosphere_table.c.id]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_table.c.id]).\
+                stmt = select(ionosphere_table.c.id).\
                     where(ionosphere_table.c.parent_id == int(origin_fp_id)).\
                     where(ionosphere_table.c.full_duration == int(use_full_duration))
-                results = connection.execute(stmt)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #results = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+
                 for row in results:
                     child_fp_count += 1
 
                 child_use_full_duration_count_of_origin_fp_id = int(child_fp_count)
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: determining parent id of the 0 generation origin')
