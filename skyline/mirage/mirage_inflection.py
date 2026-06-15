@@ -128,6 +128,14 @@ class MirageInflection(Thread):
                 logger.error('error :: mirage_inflection :: not run for %s reported anomalies, skipping' % (
                     app))
 
+            # @added 20250314 - Feature #5064: mirage.inflection
+            # Remove keys older than the mirage.inflection expiry
+            timestamp_anomaly_id_int = int(float(timestamp_anomaly_id))
+            if process_start_timestamp > (timestamp_anomaly_id_int + 14399):
+                skip = True
+                logger.info('mirage_inflection :: removing old expired timestamp_anomaly_id: %s' % (
+                    timestamp_anomaly_id))
+
             if not skip:
                 until_timestamp = int(timestamp) + 900
                 redis_from_timestamp = until_timestamp - settings.FULL_DURATION
@@ -176,6 +184,9 @@ class MirageInflection(Thread):
 
             if skip:
                 removed_key = remove_key(timestamp_anomaly_id)
+                if removed_key:
+                    logger.info('mirage_inflection :: removed timestamp_anomaly_id: %s from mirage.inflection' % (
+                        timestamp_anomaly_id))
                 try:
                     self.redis_conn_decoded.incr('mirage.inflection.checks.done')
                 except Exception as err:
