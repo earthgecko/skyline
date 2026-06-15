@@ -1,6 +1,9 @@
 from __future__ import division, print_function
 import logging
 # import hashlib
+# @added 20250325 - Feature #5611: custom_algorithm_only
+import json
+
 from smtplib import SMTP
 # @added 20220203 - Feature #4416: settings - additional SMTP_OPTS
 from smtplib import SMTP_SSL
@@ -115,7 +118,7 @@ if True:
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         get_redis_conn, is_derivative_metric,
         # @modified 20191105 - Task #3290: Handle urllib2 in py3
         #                      Branch #3262: py3
@@ -157,12 +160,21 @@ if True:
     # @added 20240407 - Feature #4214: alert.paused
     from functions.settings.sms_alert_schedule import sms_alert_schedule
 
+    # @added 20250325 - Feature #5611: custom_algorithm_only
+    from functions.skyline.coerce_to_valid_json import coerce_to_valid_json
+
 # @added 20200929 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
 try:
     SNAB_ENABLED = settings.SNAB_ENABLED
 except:
     SNAB_ENABLED = False
+
+# @added 20250407 - Feature #5611: custom_algorithm_only
+# Do not allow training on specific custom_algorithms
+NO_TRAINING_CUSTOM_ALGORITHMS = [
+    'decreased_percent_with_increasing_pair',
+]
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -257,6 +269,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
     else:
         base_name = metric_name
+
+    # @added 20250324 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    custom_algorithm_only = None
+    try:
+        if metric[6] == 'custom_algorithm_only':
+            custom_algorithm_only = 'custom_algorithm_only'
+    except:
+        custom_algorithm_only = None
 
     # @added 20220805 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -418,6 +439,55 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # Handle a metric with multiple alerts in external alert settings, only
     # run smtp alert once
     smtp_alerted_key = 'mirage.smtp.alerted.%s.%s' % (str(int(metric[2])), base_name)
+
+    # @added 20250324 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    pair_metric = None
+    if custom_algorithm_only == 'custom_algorithm_only':
+        smtp_alerted_key = smtp_alerted_key + '.custom_algorithm_only'
+        logger.info('alert_smtp - custom_algorithm_only - smtp_alerted_key: %s' % smtp_alerted_key)
+        # @added 20250325 - Feature #5611: custom_algorithm_only
+        get_results = False
+        if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
+            get_results = True
+        custom_algorithm_results_file = '%s/%s.custom_algorithms_results.json' % (training_data_dir, use_base_name, )
+        custom_algorithms_results = None
+        if os.path.isfile(custom_algorithm_results_file) and get_results:
+            try:
+                with open(custom_algorithm_results_file, 'r') as f:
+                    json_str = f.read()
+            except Exception as err:
+                logger.error('error :: alert_smtp :: data from custom_algorithms_results %s could not be loaded - %s' % (
+                    str(custom_algorithm_results_file), err))
+            coerce_json = False
+            try:
+                custom_algorithms_results = json.loads(json_str)
+            except Exception as err:
+                logger.info('warning :: alert_smtp :: data from custom_algorithms_results %s could not be loaded as json, err: %s' % (
+                    str(custom_algorithm_results_file), err))
+                coerce_json = True
+            if coerce_json:
+                coerced_json_str = None
+                try:
+                    coerced_json_str = coerce_to_valid_json(skyline_app, json_str=json_str)
+                except Exception as err:
+                    logger.error('error :: alert_smtp :: coerce_to_valid_json failed on string from custom_algorithms_results %s, err: %s' % (
+                        str(custom_algorithm_results_file), err))
+                if coerced_json_str:
+                    try:
+                        custom_algorithms_results = json.loads(coerced_json_str)
+                    except Exception as err:
+                        logger.error('error :: alert_smtp :: data from custom_algorithms_results %s could not be loaded as json from the coerced_json_str, err: %s' % (
+                            str(custom_algorithm_results_file), err))
+                    if custom_algorithms_results:
+                        logger.info('alert_smtp :: loaded custom_algorithms_results from COERCED json')
+        if custom_algorithms_results:
+            if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
+                try:
+                    pair_metric = custom_algorithms_results['algorithms']['decreased_percent_with_increasing_pair']['pair_metric']
+                except:
+                    pair_metric = None
+
     smtp_alerted = False
     if recipients == 'no_email' or primary_recipient == 'no_email':
         try:
@@ -545,6 +615,12 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     if 'mmzrmp' in triggered_algorithms:
         unencoded_graph_title = 'SUSTAINED - %s' % unencoded_graph_title
 
+    # @added 20250324 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    if custom_algorithm_only == 'custom_algorithm_only':
+        if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
+            unencoded_graph_title = 'decreased_percent_with_increasing_pair\n %s' % unencoded_graph_title
+
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
@@ -588,6 +664,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
     # @added 20241119 - Feature #5064: mirage.inflection
     use_colour = 'orange'
     if 'mmzrmp' in triggered_algorithms:
+        use_colour = 'red'
+    # @added 20250324 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
         use_colour = 'red'
 
     # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
@@ -643,6 +723,28 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
             except Exception as err:
                 logger.error('error :: alert_smtp - vortex_training_data_graphs failed - %s' % err)
 
+    # @added 20250325 - Feature #5611: custom_algorithm_only
+    if pair_metric:
+        encoded_graphite_pair_metric_name = encode_graphite_metric_name(skyline_app, pair_metric)
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)&target=secondYAxis(cactiStyle(color(%s%%2C%%22red%%22)))%s%s' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+            graphite_render_uri, str(graphite_from), str(graphite_until),
+            encoded_graphite_metric_name, encoded_graphite_pair_metric_name,
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @added 20250329 - Feature #5611: custom_algorithm_only
+        # Create a graph that is focused specifically on the period in question
+        short_graphite_from = int(until_timestamp) - (60 * 45)
+        unencoded_graph_title = '%s %s at 0.75 hours - %s' % (
+            main_alert_title, alert_context, str(metric[0]))
+        if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
+            unencoded_graph_title = 'decreased_percent_with_increasing_pair\n %s' % unencoded_graph_title
+        graph_title = unencoded_graph_title
+        short_period_link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)&target=secondYAxis(cactiStyle(color(%s%%2C%%22red%%22)))%s%s' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
+            graphite_render_uri, str(short_graphite_from), str(graphite_until),
+            encoded_graphite_metric_name, encoded_graphite_pair_metric_name,
+            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+
     content_id = metric[1]
     image_data = None
     if settings.SMTP_OPTS.get('embed-images'):
@@ -662,11 +764,23 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 logger.error('error :: alert_smtp - %s' % str(link))
                 image_data = None
 
+        # @added 20250324 - Feature #5611: custom_algorithm_only
+        # Added custom_algorithm_only
+        if pair_metric:
+            image_data = None
+
         # @added 20191105 - Task #3290: Handle urllib2 in py3
         #                   Branch #3262: py3
         if image_data is None:
             if not base_name.startswith('labelled_metrics.'):
                 get_graphite_graph_image(skyline_app, link, graphite_image_file)
+
+                # @added 20250329 - Feature #5611: custom_algorithm_only
+                # Create a graph that is focused specifically on the period in question
+                if pair_metric:
+                    short_period_graphite_image_file = '%s/%s.%s.graphite.0_75h.png' % (
+                        training_data_dir, base_name, skyline_app)
+                    get_graphite_graph_image(skyline_app, short_period_link, short_period_graphite_image_file)
 
             # @added 20220805 - Task #2732: Prometheus to Skyline
             #                   Branch #4300: prometheus
@@ -731,7 +845,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
         # if image_data is None:
         #     try:
         #        # @modified 20170913 - Task #2160: Test skyline with bandit
-        #        # Added nosec to exclude from bandit tests
+        #        # Added "nosec" to exclude from bandit tests
         #        image_data = urllib2.urlopen(link).read()  # nosec
         #        if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         #            logger.info('debug :: alert_smtp - image data OK')
@@ -894,6 +1008,14 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                     with open(anomaly_json, 'r') as f:
                         raw_timeseries = f.read()
                     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                    if 'nan' in timeseries_array_str:
+                        try:
+                            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                        except Exception as err:
+                            logger.error('error :: failed to replace nan with None, err: %s' % (
+                                err))
+
                     timeseries = literal_eval(timeseries_array_str)
                     logger.info('%s Redis timeseries replaced with timeseries from :: %s' % (skyline_app, anomaly_json))
                     timeseries_x = [float(item[0]) for item in timeseries]
@@ -1072,7 +1194,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                     ax.set_axis_bgcolor(background_hex_code)
 
                 try:
-                    datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+                    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+                    #datetimes = [dt.datetime.utcfromtimestamp(ts) for ts in timeseries_x]
+                    datetimes = [dt.datetime.fromtimestamp(int(ts), tz=dt.timezone.utc) for ts in timeseries_x]
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
                         logger.info('debug :: alert_smtp - datetimes: %s' % 'OK')
                 except:
@@ -1124,7 +1248,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
                 # @modified 20230626 - Task #4962: Build and test skyline v4.0.0
                 #                      Task #4778: v4.0.0 - update dependencies
                 # As per https://matplotlib.org/stable/api/prev_api_changes/api_changes_3.7.0.html#the-first-parameter-of-axes-grid-and-axis-grid-has-been-renamed-to-visible
-                if matplotlib_version < '3.7.0':
+                # @modified 20250610 - Task #5627: v5.0.0 update dependencies
+                #if matplotlib_version < '3.7.0':
+                if matplotlib_version == 'deprecated':
                     ax.grid(b=True, which='both', axis='both', color='lightgray',
                             linestyle='solid', alpha=0.5, linewidth=0.6)
                 else:
@@ -1218,7 +1344,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggere
 
     # @added 20170806 - Feature #1830: Ionosphere alerts
     # Show a human date in alerts
-    alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
+    # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+    #alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
+    alerted_at = str(dt.datetime.fromtimestamp(int(metric[2]), tz=dt.timezone.utc))
 
     try:
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -1653,71 +1781,6 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds, context, tri
 # @modified 20210304 - Feature #3642: Anomaly type classification
 #                      Feature #3970: custom_algorithm - adtk_level_shift
 # Added triggered_algorithms
-def alert_hipchat(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
-    """
-    Called by :func:`~trigger_alert` and sends an alert the hipchat room that is
-    configured in settings.py.
-    """
-
-    # SECOND_ORDER_RESOLUTION_SECONDS to hours so that Mirage surfaces the
-    # relevant timeseries data in the graph
-    second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
-
-    if settings.HIPCHAT_ENABLED:
-        sender = settings.HIPCHAT_OPTS['sender']
-        import hipchat
-        hipster = hipchat.HipChat(token=settings.HIPCHAT_OPTS['auth_token'])
-        rooms = settings.HIPCHAT_OPTS['rooms'][alert[0]]
-        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
-            context, str(int(second_order_resolution_in_hours)), str(metric[0]))
-        graph_title_string = quote(unencoded_graph_title, safe='')
-        graph_title = '&title=%s' % graph_title_string
-
-        # @added 20180809 - Bug #2498: Incorrect scale in some graphs
-        # If -xhours is used the scale is incorrect if x hours > than first
-        # retention period, passing from and until renders the graph with the
-        # correct scale.
-        # @modified 20181009 - Feature #2618: alert_slack
-        #                      Bug #2498: Incorrect scale in some graphs
-        # Corrected the from_timestamp and until_timestamp as they were incorrectly
-        # order, however Graphite still rendered the correct graph as it plotted
-        # reverse, which is the same.  Also using the metric[0] value instead of
-        # time()
-        # from_timestamp = int(time())
-        # until_timestamp = from_timestamp - int(second_order_resolution_seconds)
-        until_timestamp = int(metric[2])
-        from_timestamp = until_timestamp - int(second_order_resolution_seconds)
-
-        graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
-        logger.info('graphite_from - %s' % str(graphite_from))
-        graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
-        logger.info('graphite_until - %s' % str(graphite_until))
-
-        graphite_port = get_graphite_port(skyline_app)
-        graphite_render_uri = get_graphite_render_uri(skyline_app)
-
-        if settings.GRAPHITE_PORT != '':
-            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
-            # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
-            link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        else:
-            # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
-            # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
-            # link = '%s://%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
-
-        for room in rooms:
-            hipster.method('rooms/message', method='POST', parameters={'room_id': room, 'from': 'skyline', 'color': settings.HIPCHAT_OPTS['color'], 'message': '%s - %s - Anomalous metric: %s (value: %s) at %s hours %s' % (sender, context, metric[1], str(metric[0]), str(int(second_order_resolution_in_hours)), embed_graph)})
-    else:
-        return False
-
-
-# @modified 20210304 - Feature #3642: Anomaly type classification
-#                      Feature #3970: custom_algorithm - adtk_level_shift
-# Added triggered_algorithms
 def alert_syslog(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :func:`~trigger_alert` and logs anomalies to syslog.
@@ -1785,7 +1848,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         logger.error('error :: alert_slack - could not determine bot_user_oauth_access_token')
         return False
     # @modified 20230107 - Task #4778: v4.0.0 - update dependencies
-    # Added nosec for bandit B105:hardcoded_password_string - Possible hardcoded password
+    # Added nosec for bandit "B105":hardcoded_password_string - Possible hardcoded password
     if bot_user_oauth_access_token == 'YOUR_slack_bot_user_oauth_access_token':  # nosec B105
         logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
@@ -1793,17 +1856,25 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     # @modified 20200701 - Task #3612: Upgrade to slack v2
     #                      Task #3608: Update Skyline to Python 3.8.3 and deps
     #                      Task #3556: Update deps
-    # from slackclient import SlackClient
     # slackclient v2 has a version function, < v2 does not
-    try:
-        from slack import version as slackVersion
-        slack_version = slackVersion.__version__
-    except:
-        slack_version = '1.3'
-    if slack_version == '1.3':
-        from slackclient import SlackClient
-    else:
-        from slack import WebClient
+    # from slackclient import SlackClient
+    # @modified 20260222 - Task #5344: Migrate slack files.upload method
+    # Fully deprecate slack and slackclient
+    #try:
+    #    from slack import version as slackVersion
+    #    slack_version = slackVersion.__version__
+    #except:
+    #    slack_version = '1.3'
+    #if slack_version == '1.3':
+    #    from slackclient import SlackClient
+    #else:
+        # @modified 20250305 - Task #5344: Migrate slack files.upload method
+        #from slack import WebClient
+    #    from slack_sdk import WebClient
+    # @modified 20260222 - Task #5344: Migrate slack files.upload method
+    # Fully deprecate slack and slackclient
+    slack_version = 0
+    from slack_sdk import WebClient
 
     import simplejson as json
 
@@ -1829,6 +1900,15 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
             logger.error('error :: get_base_name_from_labelled_metrics_name failed for %s - %s' % (
                 str(base_name), err))
         data_source = 'victoriametrics'
+
+    # @added 20250325 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    custom_algorithm_only = None
+    try:
+        if metric[6] == 'custom_algorithm_only':
+            custom_algorithm_only = 'custom_algorithm_only'
+    except:
+        custom_algorithm_only = None
 
     # @added 20221207 - Feature #4734: mirage_vortex
     #                   Feature #4732: flux vortex
@@ -1989,6 +2069,12 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         unencoded_graph_title = 'SUSTAINED - %s' % unencoded_graph_title
         slack_title = '*SUSTAINED* - %s' % slack_title
 
+    # @added 20250325 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    if custom_algorithm_only == 'custom_algorithm_only':
+        if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
+            unencoded_graph_title = 'decreased_percent_with_increasing_pair - %s' % unencoded_graph_title
+
     # @added 20200907 - Feature #3734: waterfall alerts
     # Add waterfall alert to title
     waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), base_name)
@@ -2038,6 +2124,11 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     # @added 20241119 - Feature #5064: mirage.inflection
     use_colour = 'orange'
     if 'mmzrmp' in triggered_algorithms:
+        use_colour = 'red'
+
+    # @added 20250325 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    if 'decreased_percent_with_increasing_pair' in triggered_algorithms:
         use_colour = 'red'
 
     if known_derivative_metric:
@@ -2233,6 +2324,16 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
     except:
         filename = None
 
+    # @added 20250304 - Task #5344: Migrate slack files.upload method
+    # The new slack_sdk files_upload_v2 method does not handle channel names,
+    # channel ids must be used
+    try:
+        default_channel = settings.SLACK_OPTS['default_channel']
+        default_channel_id = settings.SLACK_OPTS['default_channel_id']
+    except:
+        default_channel = None
+        default_channel_id = None
+
     try:
         bot_user_oauth_access_token = settings.SLACK_OPTS['bot_user_oauth_access_token']
     except:
@@ -2266,9 +2367,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
             sc = SlackClient(bot_user_oauth_access_token)
         else:
             sc = WebClient(bot_user_oauth_access_token, timeout=10)
-    except:
+    except Exception as err:
         logger.info(traceback.format_exc())
-        logger.error('error :: alert_slack - could not initiate SlackClient')
+        logger.error('error :: alert_slack - could not initiate slack WebClient, err: %s' % err)
         return False
 
     # @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -2321,6 +2422,42 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
             err))
     if metric_muted:
         send_msg = False
+
+    # @added 20250304 - Task #5344: Migrate slack files.upload method
+    # The new slack_sdk files_upload_v2 method does not handle channel names,
+    # channel ids must be used
+    try:
+        channel_ids = settings.SLACK_OPTS['channel_ids']
+    except:
+        channel_ids = {}
+    channel_ids_from_redis = False
+    if not channel_ids:
+        try:
+            channel_ids = redis_conn_decoded.hgetall('skyline.slack_channel_ids')
+            if channel_ids:
+                channel_ids_from_redis = True
+        except Exception as err:
+            logger.error('error :: failed to hgetall skyline.slack_channel_ids - %s' % (
+                err))
+    if not channel_ids:
+        try:
+            conversations_channels = sc.conversations_list()
+            if conversations_channels['ok']:
+                for channel in conversations_channels['channels']:
+                    channel_ids[channel['name']] = channel['id']
+        except Exception as err:
+            logger.error('error :: alert_slack - failed to determine conversations_list for channel ids, err: %s' % err)
+        if channel_ids:
+            if not channel_ids_from_redis:
+                try:
+                    channel_ids_from_redis = redis_conn_decoded.hset('skyline.slack_channel_ids', mapping=channel_ids)
+                    if channel_ids:
+                        channel_ids_from_redis = True
+                except Exception as err:
+                    logger.error('error :: failed to hgetall metrics_manager.mute_alerts_on - %s' % (
+                        err))
+    if default_channel_id:
+        channel_ids[default_channel] = default_channel_id
 
     for channel in channels:
         if send_slack_message:
@@ -2463,6 +2600,14 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                             downsampled_anomaly_data, err))
                     if raw_timeseries:
                         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                        if 'nan' in timeseries_array_str:
+                            try:
+                                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                            except Exception as err:
+                                logger.error('error :: alert_slack :: failed to replace nan with None, err: %s' % (
+                                    err))
+
                         del raw_timeseries
                         timeseries = literal_eval(timeseries_array_str)
                     if timeseries:
@@ -2506,9 +2651,20 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                             'files.upload', filename=filename, channels=channel,
                             initial_comment=initial_comment, file=open(image_file, 'rb'))
                     else:
-                        slack_file_upload = sc.files_upload(
-                            filename=filename, channels=channel,
-                            initial_comment=initial_comment, file=open(image_file, 'rb'))
+                        # @modified 20250304 - Task #5344: Migrate slack files.upload method
+                        #slack_file_upload = sc.files_upload(
+                        #    filename=filename, channels=channel,
+                        #    initial_comment=initial_comment, file=open(image_file, 'rb'))
+                        try:
+                            channel_id = channel_ids[channel]
+                        except:
+                            channel_id = channel
+                        slack_file_upload = sc.files_upload_v2(
+                            file=image_file,
+                            channel=channel_id,
+                            initial_comment=initial_comment,
+                        )
+
                     if not slack_file_upload['ok']:
                         logger.error('error :: alert_slack - failed to send slack message')
                     # @added 20190501 - Branch #2646: slack
@@ -2519,7 +2675,45 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
                     # is created.
                     else:
                         logger.info('alert_slack - sent slack message')
-                        if slack_thread_updates:
+
+                        # @added 20250304 - Task #5344: Migrate slack files.upload method
+                        # The new files_upload_v2 method does not return the
+                        # same response as the previous files_upload method as
+                        # this new method can have multiple files uploads and
+                        # each of them have their file info.
+                        file_id = None
+                        try:
+                            file_id = slack_file_upload['file']['id']
+                        except Exception as err:
+                            logger.error('error :: alert_slack :: failed to determine file_id, err: %s' % (
+                                err))
+                        loop_start = time()
+                        while True:
+                            now = time()
+                            if (now - loop_start) > 5:
+                                break
+                            try:
+                                file_info = sc.files_info(file=file_id)
+                                shares = file_info['file'].get('shares')
+                                if shares:
+                                    for share_type in ['public', 'private']:
+                                        if share_type in shares:
+                                            for channel_id, share_list in shares[share_type].items():
+                                                for share in share_list:
+                                                    slack_thread_ts = share['ts']
+                                                    break
+                            except Exception as err:
+                                logger.error('error :: alert_slack :: failed to determine file_id, err: %s' % (
+                                    err))
+                            sleep(1)
+                        if slack_thread_ts:
+                            logger.info('alert_slack - the slack_thread_ts is %s' % (
+                                str(slack_thread_ts)))
+
+                        # @modified 20250304 - Task #5344: Migrate slack files.upload method
+                        #if slack_thread_updates:
+                        if slack_thread_updates and slack_thread_ts is None:
+
                             # @added 20190508 - Bug #2986: New slack messaging does not handle public channel
                             #                   Issue #111: New slack messaging does not handle public channel
                             # The sc.api_call 'files.upload' response which generates
@@ -2824,6 +3018,15 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
             full_duration_str = str(int(full_duration))
             expiry_str = str(int(alert[2]))
 
+            # @added 20250325 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            custom_algorithm_only = None
+            try:
+                if metric[6] == 'custom_algorithm_only':
+                    custom_algorithm_only = 'custom_algorithm_only'
+            except:
+                custom_algorithm_only = None
+
             # @added 20200624 - Feature #3560: External alert config
             # Add the external alerter id to the metric_alert_dict
             external_alerter_id = None
@@ -2835,6 +3038,19 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                     external_alerter_id = alert[4]['id'].replace('external-', '')
             except:
                 external_alerter_id = None
+
+            # @added 20250407 - Feature #5611: custom_algorithm_only
+            # Do not expect an anomaly_id some custom_algorithms
+            non_anomaly = False
+            if custom_algorithm_only == 'custom_algorithm_only':
+                for ca in NO_TRAINING_CUSTOM_ALGORITHMS:
+                    if ca in triggered_algorithms:
+                        non_anomaly = True
+                        break
+
+            # @added 20250821 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Do not expect an anomaly_id for mock alert endpoint
+            mock_alert = False
 
             # @added 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
             anomaly_id = None
@@ -2854,8 +3070,24 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                         anomalyScore = 1.0
                 except:
                     anomaly_id = None
-                if not anomaly_id:
+
+                # @added 20250821 - Feature #3772: Add the anomaly_id to the http_alerter json
+                # Do not expect an anomaly_id for mock alert endpoint
+                if not anomaly_id and not non_anomaly:
+                    if 'mock_api' in alerter_name:
+                        mock_alert = True
+
+                # @modified 20250407 - Feature #5611: custom_algorithm_only
+                # Do not expect an anomaly_id some custom_algorithms
+                # if not anomaly_id:
+                if not anomaly_id and not non_anomaly:
                     logger.error('error :: alert_http :: failed to determine anomaly_id from alert[4] or alert[5]')
+                if non_anomaly and not anomaly_id:
+                    if not mock_alert:
+                        logger.info('alert_http :: no anomaly_id determined for NO_TRAINING_CUSTOM_ALGORITHMS anomaly, OK')
+                        if external_alerter_id:
+                            logger.info('alert_http :: no anomaly_id not sending alert')
+                            return
 
             # @added 20201111 - Feature #3772: Add the anomaly_id to the http_alerter json
             # Add the real anomalyScore
@@ -2873,6 +3105,12 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                         anomalyScore = anomalyScore_details[1]
                 except:
                     pass
+
+            # @added 20250821 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Do not expect an anomaly_id for mock alert endpoint
+            if not anomalyScore and mock_alert:
+                anomalyScore = 1.0
+
             if not anomalyScore:
                 logger.error('error :: alert_http :: failed to determine anomalyScore from alert[5] or alert[6] - set anomalyScore to 1.0')
                 anomalyScore = 1.0
@@ -2991,6 +3229,14 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
                 if raw_timeseries:
                     try:
                         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                        if 'nan' in timeseries_array_str:
+                            try:
+                                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                            except Exception as err:
+                                logger.error('error :: alert_http :: failed to replace nan with None, err: %s' % (
+                                    err))
+
                         timeseries = literal_eval(timeseries_array_str)
                         values = pd.Series([x[1] for x in timeseries])
                         array_amin = np.amin(values)
@@ -3143,6 +3389,12 @@ def alert_http(alert, metric, second_order_resolution_seconds, context, triggere
             # Do not send mirage.inflection alerts to snab
             if 'mmzrmp' in triggered_algorithms:
                 metric_alert_dict['sustained'] = True
+
+            # @added 20250325 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            if custom_algorithm_only == 'custom_algorithm_only':
+                metric_alert_dict['custom_algorithm_only'] = True
+                metric_alert_dict['triggered_algorithms'] = triggered_algorithms
 
             # @modified 20201127 - Feature #3820: HORIZON_SHARDS
             # Add the origin and shard to status for debugging purposes

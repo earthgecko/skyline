@@ -1837,6 +1837,11 @@ class MirageVortex(Thread):
 
                     if algorithm == 'matrixprofile':
                         custom_algorithm = 'skyline_matrixprofile'
+                        # @added 20250110 - Feature #4734: mirage_vortex
+                        # Allow mirage_vortex to pass downsample parameter
+                        if no_downsample:
+                            algorithm_parameters['downsample'] = False
+                            algorithm_parameters['no_downsample'] = True
 
                     if algorithm == 'sigma':
                         logger.info('mirage_vortex :: running sigma for request_id: %s' % str(request_id))
@@ -2000,11 +2005,30 @@ class MirageVortex(Thread):
                             if algorithm == 'matrixprofile':
                                 custom_algorithm = 'skyline_matrixprofile'
 
+                            # @added 20250314 - Feature #4734: mirage_vortex
+                            # Use the passed max_execution_time
+                            try:
+                                max_execution_time = algorithm_parameters['max_execution_time']
+                            except:
+                                try:
+                                    max_execution_time = VORTEX_ALGORITHMS[algorithm]['max_execution_time']
+                                except:
+                                    max_execution_time = 30.0
+
+                            # @added 20250110 - Feature #4734: mirage_vortex
+                            # Allow mirage_vortex to pass downsample parameter
+                            if no_downsample:
+                                algorithm_parameters['downsample'] = False
+                                algorithm_parameters['no_downsample'] = True
+
                             algorithm_source = '/opt/skyline/github/skyline/skyline/custom_algorithms/%s.py' % custom_algorithm
                             custom_algorithms_to_run = {
                                 custom_algorithm: {
                                     'algorithm_source': algorithm_source,
-                                    'max_execution_time': 30.0,
+                                    # @added 20250314 - Feature #4734: mirage_vortex
+                                    # Use the passed max_execution_time
+                                    #'max_execution_time': 30.0,
+                                    'max_execution_time': max_execution_time,
                                     'algorithm_parameters': algorithm_parameters,
                                     'debug_logging': True,
                                 },
@@ -2046,6 +2070,11 @@ class MirageVortex(Thread):
                                 algorithm_parameters['tornado_url'] = tornado_url
                                 algorithm_parameters['skyline_app'] = parent_skyline_app
                                 algorithm_parameters['debug_logging'] = True
+                                # @added 20250110 - Feature #4734: mirage_vortex
+                                # Allow mirage_vortex to pass downsample parameter
+                                if not downsample:
+                                    algorithm_parameters['downsample'] = False
+
                                 flux_tornado_dict = {
                                     'key': FLUX_SELF_API_KEY,
                                     'algorithm': custom_algorithm,
@@ -2083,6 +2112,43 @@ class MirageVortex(Thread):
                                         # failover and use the custom_algorithm directly
                                         use_tornado = False
                                         logger.info('mirage_vortex :: %s will be used directly seeing as tornado failed' % custom_algorithm)
+
+                                        # @added 20250110 - Bug #5518: custom_algorithms_results - invalid JSON
+                                        # If the json in the tornado response fails to be parsed
+                                        # write it to a Redis key for inspection to identify bad
+                                        # things in json like NaN
+                                        redis_key = '%s.vortex.flux.tornado.%s.error.response.%s' % (
+                                            skyline_app, str(custom_algorithm),
+                                            str(int(time()))
+                                        )
+                                        logger.info('mirage_vortex :: attempting to dump response which failed to parse to Redis key: %s' % (
+                                            redis_key))
+                                        response_data = None
+                                        try:
+                                            response_data = dump.dump_all(r)
+                                        except Exception as err:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: mirage_vortex :: failed to dump response from %s, err: %s' % (
+                                                str(tornado_url), err))
+                                        key_data = None
+                                        if response_data:
+                                            try:
+                                                key_data = str(response_data.decode('utf-8'))
+                                            except Exception as err:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: mirage_vortex :: failed to decode response_data from %s, err: %s' % (
+                                                    str(tornado_url), err))
+                                        response_dumped = False
+                                        if key_data:
+                                            try:
+                                                response_dumped = self.redis_conn_decoded.setex(redis_key, 1800, key_data)
+                                                logger.info('mirage_vortex :: dumped response to Redis key: %s' % (
+                                                    redis_key))
+                                            except Exception as err:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: mirage_vortex :: failed to set response dump in Redis key %s with key_data: %s, err: %s' % (
+                                                    redis_key, str(key_data), err))
+
                                 if response:
                                     try:
                                         anomalous = response['data']['anomalous']
@@ -2157,6 +2223,15 @@ class MirageVortex(Thread):
                                 'analysis_runtime': ca_run_time,
                                 'unreliable': unreliable,
                             }
+
+                            # @added 20251120 - Feature #4734: mirage_vortex
+                            if return_results:
+                                try:
+                                    metric_data['results']['algorithms'][algorithm]['results'] = copy.deepcopy(results)
+                                except Exception as err:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: mirage_vortex :: %s failed to add results, err: %s' % (custom_algorithm, err))
+
                             if return_results and not return_anomalies_only:
                                 try:
                                     metric_data['results']['algorithms'][algorithm]['anomalies'] = results['anomalies']
@@ -2294,6 +2369,21 @@ class MirageVortex(Thread):
                             except Exception as err:
                                 logger.error('error :: mirage_vortex :: failed building consensus_anomalies for request_id: %s - %s' % (
                                     request_id, err))
+
+                        # @added 20250110 - Feature #4734: mirage_vortex
+                        # Allow mirage_vortex to use the consensus_results of
+                        # the algorithm if they have been calculated via the
+                        # algorithm itself
+                        if 'consensus_achieved' in results:
+                            if results['consensus_achieved']:
+                                if 'consensus_results' in results:
+                                    consensus_anomalies = {}
+                                    logger.info('mirage_vortex :: using consensus_results from results for request_id: %s' % (
+                                        str(request_id)))
+                                    metric_data['results']['consensus_results'] = {}
+                                    for key, item in results['consensus_results'].items():
+                                        metric_data['results']['consensus_results'][key] = results['consensus_results'][key]
+
                         if consensus_anomalies:
                             # @added 20241113 - Feature #4952: vortex - consensus_count
                             # Use consensus_anomalous because there will always

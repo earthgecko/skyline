@@ -36,6 +36,10 @@ if True:
         # @added 20200607 - Feature #3566: custom_algorithms
         FULL_NAMESPACE,
     )
+
+    # @added 20250922 - Feature #5198: flux - tornado
+    import settings
+
     # from algorithm_exceptions import *
     # @added 20241107 - Feature #5536: deduplicate_timeseries
     from functions.timeseries.deduplicate_timeseries import deduplicate_timeseries
@@ -443,9 +447,27 @@ def histogram_bins(timeseries, second_order_resolution_seconds):
         # @modified 20210420 - Support #4026: Change from scipy array to numpy array
         # Deprecation of scipy.array
         # series = scipy.array([x[1] for x in timeseries])
-        series = np.array([x[1] for x in timeseries])
+        # @modified 20260510 - Bug #5742: mirage_algorithms.histogram_bins regression
+        # Since upgrading to numpy==2.4.4 and pandas==3.0.2 there have been a
+        # few edge case errors in mirage_algorithms histogram_bins related to
+        # labelled_metrics with nan values
+        #File "/opt/skyline/github/skyline/skyline/mirage/mirage_algorithms.py", line 453, in histogram_bins
+        #    h = np.histogram(series, bins=15)
+        #        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #File "/opt/python_virtualenv/projects/skyline-py31212/lib/python3.12/site-packages/numpy/lib/_histograms_impl.py", line 792, in histogram
+        #    bin_edges, uniform_bins = _get_bin_edges(a, bins, range, weights)
+        #                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #File "/opt/python_virtualenv/projects/skyline-py31212/lib/python3.12/site-packages/numpy/lib/_histograms_impl.py", line 425, in _get_bin_edges
+        #    first_edge, last_edge = _get_outer_edges(a, range)
+        #                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        #File "/opt/python_virtualenv/projects/skyline-py31212/lib/python3.12/site-packages/numpy/lib/_histograms_impl.py", line 317, in _get_outer_edges
+        #    raise ValueError(
+        #ValueError: autodetected range of [nan, nan] is not finite
+        #series = np.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries if not np.isnan(x[1])])
 
         t = tail_avg(timeseries, second_order_resolution_seconds)
+
         h = np.histogram(series, bins=15)
         bins = h[1]
         for index, bin_size in enumerate(h[0]):
@@ -502,6 +524,12 @@ def ks_test(timeseries, second_order_resolution_seconds):
         probe = np.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
 
         if reference.size < 20 or probe.size < 20:
+            return False
+
+        # @added 20250623 - Bug #5635: statsmodels - adfuller handle constant
+        #                   Bug #5593: statsmodels adfuller error in Analyzer
+        # Handle ValueError: Invalid input, x is constant
+        if np.all(reference == reference[0]):
             return False
 
         ks_d, ks_p_value = scipy.stats.ks_2samp(reference, probe)
@@ -673,7 +701,15 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 # @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
 #                   Feature #4576: mirage - process multiple metrics
 # Added mirage_busy
-def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func=None, mirage_busy=False):
+# @modified 20250324 - Feature #5611: custom_algorithm_only
+# Added custom_algorithm_only
+def run_selected_algorithm(
+        timeseries, metric_name, second_order_resolution_seconds,
+        run_negatives_present, triggered_algorithms, custom_algorithm_only,
+        # @added 20250326 - Feature #5611: custom_algorithm_only
+        # Added derivative_metrics for custom_algorithm_only
+        derivative_metrics=[],
+        current_func=None, mirage_busy=False):
     """
     Run selected algorithms
     """
@@ -718,6 +754,13 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # flux/tornado response needs to be dumped for debug purposes
     redis_conn_decoded = None
 
+    # @added 20250324 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    custom_algorithm_only_run = False
+    if custom_algorithm_only == 'custom_algorithm_only':
+        custom_algorithm_only_run = True
+        logger.info('mirage_algorithms :: custom_algorithm_only_run: %s' % str(custom_algorithm_only_run))
+
     custom_algorithms_to_run = {}
 
     c_time = int(time())
@@ -742,6 +785,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             logger.error(traceback.format_exc())
             logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
                 str(err)))
+
+    # @added 20251117 - Feature #5665: custom_algorithm - mirage_nirvana
+    #                   Feature #5198: flux - tornado
+    flux_tornado_custom_algorithms = []
 
     custom_algorithms_to_run = {}
     if CUSTOM_ALGORITHMS:
@@ -771,6 +818,59 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
                 str(err)))
 
+        # @added 20251117 - Feature #5665: custom_algorithm - mirage_nirvana
+        #                   Feature #5198: flux - tornado
+        # Automatically determine which algorithms are run via flux/tornado
+        for c_algo in CUSTOM_ALGORITHMS:
+            if 'tornado_url' in CUSTOM_ALGORITHMS[c_algo]['algorithm_parameters']:
+                if 'tornado_api_key' in CUSTOM_ALGORITHMS[c_algo]['algorithm_parameters']:
+                    flux_tornado_custom_algorithms.append(c_algo)
+
+    # @added 20250324 - Feature #5611: custom_algorithm_only
+    # Added custom_algorithm_only
+    if not custom_algorithm_only_run:
+        custom_algorithms_to_remove = []
+        for custom_algorithm in custom_algorithms_to_run:
+            custom_algorithm_only = False
+            try:
+                custom_algorithm_only = custom_algorithms_to_run[custom_algorithm]['custom_algorithm_only']
+            except:
+                custom_algorithm_only = False
+            if not custom_algorithm_only:
+                try:
+                    custom_algorithm_only = custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['custom_algorithm_only']
+                except:
+                    custom_algorithm_only = False
+            if custom_algorithm_only:
+                custom_algorithms_to_remove.append(custom_algorithm)
+        if custom_algorithms_to_remove:
+            for custom_algorithm in custom_algorithms_to_remove:
+                del custom_algorithms_to_run[custom_algorithm]
+    if custom_algorithm_only_run:
+        run_3sigma_algorithms = False
+        custom_algorithms_to_remove = []
+        for custom_algorithm in custom_algorithms_to_run:
+            custom_algorithm_only = False
+            try:
+                custom_algorithm_only = custom_algorithms_to_run[custom_algorithm]['custom_algorithm_only']
+            except:
+                custom_algorithm_only = False
+            if not custom_algorithm_only:
+                try:
+                    custom_algorithm_only = custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['custom_algorithm_only']
+                except:
+                    custom_algorithm_only = False
+            if not custom_algorithm_only:
+                custom_algorithms_to_remove.append(custom_algorithm)
+
+        # @added 20250326 - Feature #5611: custom_algorithm_only
+        # Added derivative_metrics for custom_algorithm_only
+        if derivative_metrics and custom_algorithm_only_run:
+            custom_algorithms_to_run[custom_algorithm]['algorithm_parameters']['derivative_metrics'] = derivative_metrics
+        if custom_algorithms_to_remove:
+            for custom_algorithm in custom_algorithms_to_remove:
+                del custom_algorithms_to_run[custom_algorithm]
+
     # @added 20241107 - Feature #5536: deduplicate_timeseries
     # Vortex has introduced the ability for data to be submitted with None
     # or nan values and duplicate items. Many unsupervised algorithms do
@@ -795,6 +895,11 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             logger.error('error :: mirage_algorithms :: deduplicate_timeseries failed, err: %s' % (
                 str(err)))
             timeseries = list(original_timeseries)
+        # @added 20260218 - Feature #5536: deduplicate_timeseries
+        if len(timeseries) < settings.MIN_TOLERABLE_LENGTH:
+            logger.info('mirage_algorithms :: warning - timeseries length of %s too short after de-duplication' % (
+                str(len(timeseries))))
+            return False, [], 1, False, algorithms_run, custom_algorithms_results
 
     # @added 20230609 - Task #4806: Manage NUMBA_CACHE_DIR
     #                   Feature #4702: numba optimisations
@@ -906,9 +1011,53 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             # @added 20241114 - Task #5526: Build v5.0.0 and upgrade deps
             algorithm_result = []
 
+            # @added 20250922 - Feature #5198: flux - tornado
+            try:
+                FLUX_TORNADO_URL = settings.FLUX_TORNADO_URL
+            except:
+                FLUX_TORNADO_URL = None
+
             # @added 20240108 - Feature #5198: flux - tornado
             use_tornado = False
             if custom_algorithm == 'mirages_nirvana_matrixprofile' and FLUX_TORNADO_URL:
+                use_tornado = True
+
+            # @added 20251117 - Feature #5665: custom_algorithm - mirage_nirvana
+            #                   Feature #5198: flux - tornado
+            if custom_algorithm in flux_tornado_custom_algorithms:
+                use_tornado = True
+
+            # @added 20250922 - Feature #5198: flux - tornado
+            # If tornado is enabled and check if the mirage.flux.tornado.failed
+            # key is in Redis, if so just run the algorithm locally until the
+            # key expires.  Situations occur where flux will not respond to a
+            # tornado request within the max_execution_time and any subsequent
+            # requests will probably also fail during this period if pushed
+            # through to tornado.
+            if use_tornado:
+                if not redis_conn_decoded:
+                    from skyline_functions import get_redis_conn_decoded
+                    try:
+                        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: mirage_algorithms :: get_redis_conn_decoded failed - %s' % (
+                            str(err)))
+                tornado_failed = None
+                try:
+                    tornado_failed = redis_conn_decoded.exists('mirage.flux.tornado.failed')
+                except Exception as err:
+                    logger.error('error :: mirage_algorithms :: exists failed on mirage.flux.tornado.failed, err: %s' % (
+                        str(err)))
+                if tornado_failed:
+                    FLUX_TORNADO_URL = None
+                    logger.info('mirage_algorithms :: not using tornado for %s as mirage.flux.tornado.failed key exists' % custom_algorithm)
+
+            # @added 20251117 - Feature #5665: custom_algorithm - mirage_nirvana
+            # @modified 20251117 - Feature #5665: custom_algorithm - mirage_nirvana
+            #                      Feature #5198: flux - tornado
+            #if custom_algorithm == 'mirages_nirvana_matrixprofile' and FLUX_TORNADO_URL:
+            if custom_algorithm in flux_tornado_custom_algorithms and FLUX_TORNADO_URL:
                 use_tornado = True
                 try:
                     custom_algorithms_run.append(custom_algorithm)
@@ -995,6 +1144,21 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                                 redis_error_response_count_key, err))
                         if error_response_count >= 3:
                             dump_response = False
+
+                    # @added 20250922 - Feature #5198: flux - tornado
+                    # If tornado is enabled and check if the mirage.flux.tornado.failed
+                    # key is in Redis, if so just run the algorithm locally until the
+                    # key expires.  Situations occur where flux will not respond to a
+                    # tornado request within the max_execution_time and any subsequent
+                    # requests will probably also fail during this period if pushed
+                    # through to tornado.
+                    if dump_response:
+                        try:
+                            tornado_failed = redis_conn_decoded.setex('mirage.flux.tornado.failed', 60, c_time)
+                            logger.info('mirage_algorithms :: set mirage.flux.tornado.failed key with TTL of 60')
+                        except Exception as err:
+                            logger.error('error :: mirage_algorithms :: exists failed on mirage.flux.tornado.failed, err: %s' % (
+                                str(err)))
 
                     # @added 20240110 - Feature #5198: flux - tornado
                     # If tornado failed and there is a response write it to a

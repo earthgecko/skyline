@@ -64,7 +64,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
     #                   Bug #3778: Handle single encoded forward slash requests to Graphite
@@ -303,6 +303,20 @@ try:
 except:
     VORTEX_ENABLED = False
 
+# @added 20250328 - Feature #5611: custom_algorithm_only
+# Do not allow training on specific custom_algorithms
+NO_TRAINING_CUSTOM_ALGORITHMS = [
+    'decreased_percent_with_increasing_pair',
+]
+
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 # @added 20191107 - Branch #3262: py3
@@ -357,7 +371,7 @@ class Mirage(Thread):
         # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
-        # charset='utf-8', decode_responses=True arguments required in py3
+        # encoding='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
         self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -493,7 +507,7 @@ class Mirage(Thread):
                     new_datapoint = [float(datapoint[1]), float(datapoint[0])]
                     converted.append(new_datapoint)
                 # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
+                # Added "nosec" to exclude from bandit tests
                 except:  # nosec
                     continue
 
@@ -589,7 +603,11 @@ class Mirage(Thread):
                 logger.error('metric_vars not loaded with literal_eval')
                 metric_vars = []
 
-        string_keys = ['metric']
+        # @modified 20250324 - Feature #5611: custom_algorithm_only
+        # Added custom_algorithm_only
+        #string_keys = ['metric']
+        string_keys = ['metric', 'custom_algorithm_only']
+
         float_keys = ['value']
         # @modified 20241120 - Feature #5064: mirage.inflection
         # Added anomaly_id
@@ -1238,6 +1256,15 @@ class Mirage(Thread):
             except:
                 triggered_algorithms = []
 
+            # @modified 20250324 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            try:
+                key = 'custom_algorithm_only'
+                value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+                custom_algorithm_only = value_list[0]
+            except:
+                custom_algorithm_only = None
+
             metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric))
 
             # @added 20231005 - Task #5096: Incorporate irregular_unstable into Mirage
@@ -1284,6 +1311,25 @@ class Mirage(Thread):
             # or not.
             mirage_alert_key_ttl = 0
             mirage_smtp_alert_key = 'mirage.last_alert.smtp.%s' % metric
+
+            # @modified 20250324 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            if custom_algorithm_only == 'custom_algorithm_only':
+                mirage_smtp_alert_key = mirage_smtp_alert_key + '.custom_algorithm_only'
+
+            # @added 20260221 - Feature #5712: skyline.dawn
+            #                   Task #5628: Build v5.0.0 and test
+            dawn_expiry_timestamp = None
+            if SKYLINE_DAWN_ENABLED:
+                try:
+                    dawn_expiry_timestamp = self.redis_conn_decoded.get('skyline.dawn.mirage')
+                except Exception as err:
+                    logger.error('error :: failed on get skyline.dawn.mirage, err: %s' % (
+                        err))
+                if dawn_expiry_timestamp:
+                    logger.info('NOTICE - skyline.dawn.mirage key exists, not analyzing metrics until %s' % (
+                        str(dawn_expiry_timestamp)))
+
             try:
                 mirage_alert_key_ttl = self.redis_conn_decoded.ttl(mirage_smtp_alert_key)
             except Exception as err:
@@ -1292,6 +1338,12 @@ class Mirage(Thread):
             if mirage_alert_key_ttl > 59:
                 logger.info('skipping analysis - smtp alert key exists %s with TTL: %s seconds' % (
                     mirage_smtp_alert_key, str(mirage_alert_key_ttl)))
+
+            # @modified 20260221 - Feature #5712: skyline.dawn
+            #                      Task #5628: Build v5.0.0 and test
+            # Made the conditional based on mirage_alert_key_ttl or dawn_expiry_timestamp
+            #if mirage_alert_key_ttl > 59:
+            if mirage_alert_key_ttl > 59 or dawn_expiry_timestamp:
                 # Remove metric check file
                 if os.path.isfile(metric_check_file):
                     os.remove(metric_check_file)
@@ -1840,6 +1892,12 @@ class Mirage(Thread):
                     err))
             irregular_unstable_inline = True
             irregular_unstable_results = {'irregular_unstable': False}
+
+            # @added 20250324 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            if custom_algorithm_only == 'custom_algorithm_only':
+                skip_irregular_unstable = True
+
             timeseries_30d = []
             if irregular_unstable_inline and not skip_irregular_unstable:
                 logger.info('checking if metric is irregular and unstable')
@@ -1914,6 +1972,17 @@ class Mirage(Thread):
             custom_algorithms_results = {'metric': metric, 'labelled_metric': None, 'algorithms': {}, 'timeseries': use_timeseries}
             custom_algorithm_results = {}
 
+            # @added 20260218 - Feature #3566: custom_algorithms
+            if valid_mirage_timeseries:
+                try:
+                    if len(use_timeseries) < settings.MIN_TOLERABLE_LENGTH:
+                        valid_mirage_timeseries = False
+                        logger.info('warning :: timeseries length of %s too short after preprocessing, valid_mirage_timeseries: %s, %s' % (
+                            str(len(use_timeseries)), str(valid_mirage_timeseries), metric))
+                except Exception as err:
+                    logger.error('error :: failed to check len(use_timeseries) for %s, err: %s' % (
+                        metric, err))
+
             try:
                 if valid_mirage_timeseries:
 
@@ -1937,6 +2006,20 @@ class Mirage(Thread):
                     # @modified 20231005 - Task #5096: Incorporate irregular_unstable into Mirage
                     # logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
                     logger.info('analyzing :: %s at %s seconds' % (metric, use_second_order_resolution_seconds))
+
+                    # @added 20250326 - Feature #5611: custom_algorithm_only
+                    # Added derivative_metrics for custom_algorithm_only
+                    use_derivative_metrics = []
+
+                    # @added 20250324 - Feature #5611: custom_algorithm_only
+                    # Added custom_algorithm_only
+                    if custom_algorithm_only == 'custom_algorithm_only':
+                        logger.info('analyzing :: %s for a custom_algorithm_only check' % metric)
+                        # @added 20250326 - Feature #5611: custom_algorithm_only
+                        # Added derivative_metrics for custom_algorithm_only
+                        if derivative_metrics:
+                            use_derivative_metrics = list(derivative_metrics)
+
                     # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                     # Added run_negatives_present and negatives_found
                     # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
@@ -1963,7 +2046,11 @@ class Mirage(Thread):
                     # @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
                     #                   Feature #4576: mirage - process multiple metrics
                     # Added mirage_busy
-                    anomalous, ensemble, datapoint, negatives_found, algorithms_run, custom_algorithm_results = run_selected_algorithm(use_timeseries, metric, use_second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func='mirage', mirage_busy=mirage_busy)
+                    # @modified 20250324 - Feature #5611: custom_algorithm_only
+                    # Added custom_algorithm_only
+                    # @modified 20250326 - Feature #5611: custom_algorithm_only
+                    # Added derivative_metrics for custom_algorithm_only
+                    anomalous, ensemble, datapoint, negatives_found, algorithms_run, custom_algorithm_results = run_selected_algorithm(use_timeseries, metric, use_second_order_resolution_seconds, run_negatives_present, triggered_algorithms, custom_algorithm_only, derivative_metrics, current_func='mirage', mirage_busy=mirage_busy)
                     # Set the datapoint to that of the original timeseries
                     datapoint = timeseries[-1][1]
 
@@ -2539,7 +2626,9 @@ class Mirage(Thread):
                 #                      Branch #3068: SNAB
                 # Added second_order_resolution_seconds, triggered_algorithms and algorithms_run
                 # anomalous_metric = [datapoint, base_name, metric_timestamp]
-                anomalous_metric = [datapoint, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run]
+                # @modified 20250324 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                anomalous_metric = [datapoint, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run, custom_algorithm_only]
 
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # self.anomalous_metrics.append(anomalous_metric)
@@ -2547,6 +2636,7 @@ class Mirage(Thread):
                 data = str(anomalous_metric)
                 try:
                     self.redis_conn.sadd(redis_set, data)
+                    logger.info('added anomaly to %s, data: %s' % (redis_set, str(data)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to add %s to mirage.anomalous_metrics Redis set' % (
@@ -2605,6 +2695,40 @@ class Mirage(Thread):
                         except Exception as err:
                             logger.error('error :: failed to copy metric_json_file: %s, to training_metric_json_file:%s, err: %s' % (
                                 metric_json_file, training_metric_json_file, err))
+                    # @added 20250324 - Feature #5611: custom_algorithm_only
+                    # Added custom_algorithm_only
+                    if custom_algorithm_only == 'custom_algorithm_only':
+                        data = """metric = '%s'
+value = '%s'
+from_timestamp = '%s'
+metric_timestamp = '%s'
+triggered_algorithms = %s
+anomaly_dir = '%s'
+graphite_metric = True
+run_crucible_tests = False
+added_by = 'mirage'
+added_at = '%s'
+full_duration = '%s'
+algorithms_run = %s
+""" % (
+                            metric, str(datapoint), str(int(timeseries[0][0])),
+                            str(metric_timestamp), str(triggered_algorithms), training_dir, str(int(time())),
+                            str(second_order_resolution_seconds), str(algorithms_run)
+                        )
+                        training_check_file = '%s/%s.txt' % (training_dir, metric)
+                        with open(training_check_file, 'w') as fh:
+                            fh.write(data)
+
+                        # @added 20250328 - Feature #5611: custom_algorithm_only
+                        # Added do_not_train
+                        do_not_train = False
+                        for ca in NO_TRAINING_CUSTOM_ALGORITHMS:
+                            if ca in triggered_algorithms:
+                                do_not_train = False
+                        if do_not_train:
+                            do_not_train_file = '%s/do_not_train' % training_dir
+                            with open(do_not_train_file, 'a'):
+                                pass
 
                 # @added 20220504 - Feature #2580: illuminance
                 # @modified 20230419 - Feature #2580: illuminance
@@ -2716,6 +2840,11 @@ class Mirage(Thread):
                     timeseries_dir = base_name.replace('.', '/')
 
                 cache_key = 'mirage.last_alert.smtp.%s' % (base_name)
+                # @added 20250324 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                if custom_algorithm_only == 'custom_algorithm_only':
+                    cache_key = cache_key + '.custom_algorithm_only'
+
                 last_alert = False
                 try:
                     # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
@@ -2845,6 +2974,11 @@ class Mirage(Thread):
                 if redis_metric_name in ionosphere_unique_metrics:
                     send_to_panorama = False
 
+                # @added 20250327 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                if custom_algorithm_only == 'custom_algorithm_only':
+                    send_to_panorama = True
+
                 # @added 20220315 - Feature #4482: Test alerts
                 # Allow for full testing with the injection of an anomaly on a
                 # metric
@@ -2884,12 +3018,16 @@ class Mirage(Thread):
                                             'source = \'%s\'\n' \
                                             'added_by = \'%s\'\n' \
                                             'added_at = \'%s\'\n' \
+                                            'custom_algorithm_only = \'%s\'\n' \
                         % (base_name, str(datapoint), from_timestamp,
                            # @modified 20200607 - Feature #3566: custom_algorithms
                            # str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
                            str(int_metric_timestamp), str(algorithms_run),
                            triggered_algorithms, skyline_app, source,
-                           this_host, added_at)
+                           this_host, added_at,
+                           # @modified 20250324 - Feature #5611: custom_algorithm_only
+                           # Added custom_algorithm_only
+                           str(custom_algorithm_only))
 
                     # Create an anomaly file with details about the anomaly
                     panoroma_anomaly_file = '%s/%s.%s.txt' % (
@@ -3040,6 +3178,11 @@ class Mirage(Thread):
                         logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
                         logger.error(traceback.format_exc())
 
+                # @modified 20250324 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                if custom_algorithm_only == 'custom_algorithm_only':
+                    ionosphere_enabled = False
+
                 # @added 20230510 - Feature #4902: Prevent training on metrics newer than 7 days
                 new_metric_added_at = False
                 if ionosphere_enabled and not last_alert:
@@ -3102,6 +3245,20 @@ class Mirage(Thread):
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
+
+                        # @added 20250329 - Feature #5611: custom_algorithm_only
+                        # Maintain a Redis set also with do_not_train instances
+                        # to allow smoke to include training for do_not_train
+                        # instances
+                        redis_set = 'ionosphere.training_data_with_do_not_train'
+                        try:
+                            logger.info('adding to Redis set %s - %s' % (
+                                redis_set, str(data)))
+                            self.redis_conn.sadd(redis_set, str(data))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
+
                     else:
                         logger.info('alert expiry key exists not sending to Ionosphere :: %s' % base_name)
 
@@ -4656,11 +4813,22 @@ class Mirage(Thread):
                         # second_order_resolution_seconds = int(send_alert_for[4])
                         second_order_resolution_seconds = int(send_alert_for['full_duration'])
 
+                        # @added 20250324 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        custom_algorithm_only = None
+                        try:
+                            if send_alert_for['custom_algorithm_only']  == 'custom_algorithm_only':
+                                custom_algorithm_only = 'custom_algorithm_only'
+                        except:
+                            custom_algorithm_only = None
+
                         # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
                         #                      Branch #3068: SNAB
                         # Added triggered_algorithms and algorithms_run
                         # anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
-                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run]
+                        # @modified 20250324 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run, custom_algorithm_only]
 
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # self.anomalous_metrics.append(anomalous_metric)
@@ -5042,17 +5210,31 @@ class Mirage(Thread):
                         mirage_inflection_alerts.append(metric)
                         if metric_name in ionosphere_unique_metrics:
                             ionosphere_unique_metrics.remove(metric_name)
+                    if mirage_inflection_alert:
                         try:
                             mirage_inflection_anomaly_id = metric[6]
                         except:
                             mirage_inflection_anomaly_id = None
+
+                    # @added 20250324 - Feature #5611: custom_algorithm_only
+                    # Added custom_algorithm_only
+                    custom_algorithm_only = None
+                    try:
+                        if metric[6] == 'custom_algorithm_only':
+                            custom_algorithm_only = 'custom_algorithm_only'
+                    except:
+                        custom_algorithm_only = None
 
                     if not ionosphere_unique_metrics:
                         ionosphere_unique_metrics = []
 
                     # @modified 20200907 - Feature #3734: waterfall alerts
                     # if metric_name in ionosphere_unique_metrics:
-                    if metric_name in ionosphere_unique_metrics and waterfall_alert_check_string not in alerting_waterfall_alerts:
+                    # @modified 20250325 - Feature #5611: custom_algorithm_only
+                    # custom_algorithm_only not sent to Ionosphere
+                    #if metric_name in ionosphere_unique_metrics and waterfall_alert_check_string not in alerting_waterfall_alerts:
+                    if metric_name in ionosphere_unique_metrics and waterfall_alert_check_string not in alerting_waterfall_alerts and not custom_algorithm_only:
+
                         # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                         if not_alerting_for_ionosphere == metric_name:
                             continue
@@ -5159,6 +5341,11 @@ class Mirage(Thread):
                         if mirage_inflection_alert:
                             cache_key = 'mirage.inflection.%s' % cache_key
 
+                        # @added 20250324 - Feature #5611: custom_algorithm_only
+                        # Added custom_algorithm_only
+                        if custom_algorithm_only == 'custom_algorithm_only':
+                            cache_key = cache_key + '.custom_algorithm_only'
+
                         try:
                             # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
                             #                      Feature #3486: analyzer_batch
@@ -5255,6 +5442,13 @@ class Mirage(Thread):
                                 # @modified 20190524 - Branch #3002
                                 # Wrapped in try except
                                 try:
+
+                                    # @added 20250314 - Feature #5064: mirage.inflection
+                                    # Set the expiry to much longer for inflection
+                                    key_expiry = str(alert[2])
+                                    if mirage_inflection_alert:
+                                        key_expiry = str(14400)
+
                                     # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
                                     #                      Feature #3486: analyzer_batch
                                     #                      Feature #3480: batch_processing
@@ -5276,7 +5470,16 @@ class Mirage(Thread):
                                     use_cache_key = str(cache_key)
                                     if mirage_inflection_alert:
                                         use_cache_key = 'mirage.inflection.%s' % str(cache_key)
-                                    self.redis_conn.setex(use_cache_key, str(alert[2]), int(metric[2]))
+
+                                    # @added 20250324 - Feature #5611: custom_algorithm_only
+                                    # Added custom_algorithm_only
+                                    if custom_algorithm_only == 'custom_algorithm_only':
+                                        use_cache_key = cache_key + '.custom_algorithm_only'
+
+                                    # @modified 20250314 - Feature #5064: mirage.inflection
+                                    # Set the expiry to much longer for inflection
+                                    #self.redis_conn.setex(use_cache_key, str(alert[2]), int(metric[2]))
+                                    self.redis_conn.setex(use_cache_key, key_expiry, int(metric[2]))
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to set Redis key %s for %s' % (
@@ -5332,6 +5535,11 @@ class Mirage(Thread):
                                         # @added 20241119 - Feature #5064: mirage.inflection
                                         # Do not send mirage.inflection to snab
                                         if mirage_inflection_alert:
+                                            snab_check_metric = False
+
+                                        # @added 20250324 - Feature #5611: custom_algorithm_only
+                                        # Added custom_algorithm_only
+                                        if custom_algorithm_only == 'custom_algorithm_only':
                                             snab_check_metric = False
 
                                         if snab_check_metric:
@@ -5504,6 +5712,12 @@ class Mirage(Thread):
                                             anomaly_id = None
                                             anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
                                                 str(int(metric[2])), base_name)
+
+                                            # @added 20250324 - Feature #5611: custom_algorithm_only
+                                            # Added custom_algorithm_only
+                                            if custom_algorithm_only == 'custom_algorithm_only':
+                                                anomaly_id_redis_key = anomaly_id_redis_key + '.custom_algorithm_only'
+
                                             try_get_anomaly_id_redis_key_count = 0
                                             while try_get_anomaly_id_redis_key_count < 20:
                                                 try_get_anomaly_id_redis_key_count += 1
@@ -5519,8 +5733,29 @@ class Mirage(Thread):
                                                     break
                                                 except:
                                                     sleep(1)
+
+                                            # @added 20250403 - Feature #5611: custom_algorithm_only
+                                            # Certain custom_algorithm_only custom_algorithms can
+                                            # have a trigger_for parameter that can make them
+                                            # check for multiple periods, if they fire multiple
+                                            # times they will still only have one anomaly_id for
+                                            # period.  It can be expected that these may not
+                                            # have an anomaly_id as Panorama will not add another
+                                            # in the PANORAMA_EXPIRY_TIME
+                                            non_anomaly = False
+                                            if custom_algorithm_only == 'custom_algorithm_only' and not anomaly_id:
+                                                for ca in NO_TRAINING_CUSTOM_ALGORITHMS:
+                                                    if ca in triggered_algorithms:
+                                                        non_anomaly = True
+                                                        break
+
                                             if not anomaly_id:
-                                                logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                                                # @modified 20250403 - Feature #5611: custom_algorithm_only
+                                                # Do not log an error on non_anomaly
+                                                if not non_anomaly:
+                                                    logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                                                else:
+                                                    logger.info('NO_TRAINING_CUSTOM_ALGORITHMS no anomaly_id determined from Redis key - %s OK' % anomaly_id_redis_key)
                                             else:
                                                 logger.info('determined anomaly_id as %s, appending to alert' % str(anomaly_id))
                                             # Do not modify the alert list object, create a new one
@@ -5781,6 +6016,11 @@ class Mirage(Thread):
                                                                     }
                                                                     add_snab_check = True
 
+                                                                    # @added 20250324 - Feature #5611: custom_algorithm_only
+                                                                    # Added custom_algorithm_only
+                                                                    if custom_algorithm_only == 'custom_algorithm_only':
+                                                                        add_snab_check = False
+
                                                                     # @modified 20231013 - Feature #5100: snab - allow for multiple checks
                                                                     # Allow for multiple snab checks, do not break
                                                                     # if base_name in snab_checks_sent:
@@ -5975,6 +6215,13 @@ class Mirage(Thread):
                                                             if metric in snab_only_checks_sent:
                                                                 add_snab_check = False
                                                                 break
+
+                                                            # @added 20250324 - Feature #5611: custom_algorithm_only
+                                                            # Added custom_algorithm_only
+                                                            if custom_algorithm_only == 'custom_algorithm_only':
+                                                                add_snab_check = False
+                                                                break
+
                                                             if add_snab_check:
                                                                 self.redis_conn.sadd('snab.work', str(snab_check_details))
                                                                 logger.info('added snab_only check for %s with algorithm %s for alerter %s' % (

@@ -59,7 +59,11 @@ def mirage_irregular_unstable(base_name, timeseries):
         np_timestamps = np.array(timestamps)
         ts_diffs = np.diff(np_timestamps)
         resolution_counts = np.unique(ts_diffs, return_counts=True)
-        resolution = resolution_counts[0][np.argmax(resolution_counts[1])]
+        # @modified 20251019 - Feature #5519: functions.skyline.coerce_to_valid_json
+        #                      Bug #5518: custom_algorithms_results - invalid JSON
+        # Wrapped in float to coerce np.float64
+        resolution = float(resolution_counts[0][np.argmax(resolution_counts[1])])
+
         results['resolution_7d'] = resolution
         if resolution > 900:
             # Not suited to low resolution data
