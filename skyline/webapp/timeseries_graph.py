@@ -10,7 +10,7 @@ from flask import request
 
 import settings
 
-from skyline_functions import filesafe_metricname
+from skyline_functions import filesafe_metricname, nonNegativeDerivative
 from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
 from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 from functions.graphite.get_metrics_timeseries import get_metrics_timeseries
@@ -19,6 +19,9 @@ from functions.redis.get_metric_timeseries import get_metric_timeseries
 from functions.plots.plot_timeseries import plot_timeseries
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.timeseries.downsample import downsample_timeseries
+# @added 20250121 - Feature #5588: snab.process_algorithm
+# And add nonNegativeDerivative
+from functions.timeseries.strictly_increasing_monotonicity import strictly_increasing_monotonicity
 
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
@@ -164,12 +167,39 @@ def timeseries_graph():
             timeseries = metrics_timeseries[metric]['timeseries']
             # Truncate the first and last timestamp, just in case they are not
             # filled buckets
-            timeseries = timeseries[1:-1]
+            # @modified 20250125 - Feature #5588: snab.process_algorithm
+            # Only truncate if current data                
+            #timeseries = timeseries[1:-1]
+            if timeseries:
+                now = int(time.time())
+                if int(timeseries[-1][0]) > int(now - 600):
+                    timeseries = timeseries[1:-1]
+
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: %s :: failed retrieve timeseries from Graphite for %s - %s' % (
                 function_str, metric, err))
             raise
+
+        # @added 20250125 - Feature #5588: snab.process_algorithm
+        # If a metric is older than a day check monotonicity as the metric may
+        # no longer exist and will not have had nonNegativeDerivate applied
+        if timeseries:
+            if int(timeseries[-1][0]) < int(now - 86400):
+                is_strictly_increasing_monotonically = False
+                try:
+                    is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+                except Exception as err:
+                    logger.error('error :: %s :: is_strictly_increasing_monotonically failed on time series metric: %s, from_timestamp: %s, until_timestamp: %s, err: %s' % (
+                        function_str, metric, str(from_timestamp), str(until_timestamp),
+                        str(err)))
+                if is_strictly_increasing_monotonically:
+                    try:
+                        timeseries = nonNegativeDerivative(timeseries)
+                    except Exception as err:
+                        logger.error('error :: %s :: nonNegativeDerivative failed on time series metric: %s, from_timestamp: %s, until_timestamp: %s, err: %s' % (
+                            function_str, metric, str(from_timestamp), str(until_timestamp),
+                            str(err)))
 
     if data_source == 'victoriametrics':
         try:
