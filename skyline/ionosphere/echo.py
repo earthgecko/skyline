@@ -106,18 +106,31 @@ def echo_get_metric_from_metrics(base_name, engine):
         return False
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == use_base_name)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.metric == use_base_name)
+        stmt = select(metrics_table).where(metrics_table.c.metric == use_base_name)
         # @added 20220729 - Task #2732: Prometheus to Skyline
         #                   Branch #4300: prometheus
         # Handle labelled_metrics
         if labelled_metric_base_name:
-            stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
-        result = connection.execute(stmt)
-        row = result.fetchone()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table]).where(metrics_table.c.metric == labelled_metric_base_name)
+            stmt = select(metrics_table).where(metrics_table.c.metric == labelled_metric_base_name)
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         metric_db_object = row
         metrics_id = row['id']
-        connection.close()
+        #connection.close()
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: echo :: could not determine id from metrics table for - %s' % base_name)
@@ -269,11 +282,23 @@ def ionosphere_echo(base_name, mirage_full_duration):
     # Determine the fp_ids that exist for the metric
     echo_fp_ids_result = []
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
-        echo_fp_ids = connection.execute(stmt)
-        echo_fp_ids_result = [{column: value for column, value in rowproxy.items()} for rowproxy in echo_fp_ids]
-        connection.close()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
+        stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #echo_fp_ids = connection.execute(stmt)
+        #echo_fp_ids_result = [{column: value for column, value in rowproxy.items()} for rowproxy in echo_fp_ids]
+        #connection.close()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        echo_fp_ids_result = [{column: value for column, value in row.items()} for row in results]
+
+        # @added 20250812 - Feature #2484: FULL_DURATION feature profiles
+        #queried_database = True
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: ionosphere_echo :: could not determine fp ids from DB for %s' % base_name)
@@ -283,7 +308,10 @@ def ionosphere_echo(base_name, mirage_full_duration):
         echo_engine_disposal(engine)
 
     if not echo_fp_ids_result:
-        logger.error('error :: ionosphere_echo :: no echo_fp_ids_result - could not determine fp ids from DB for %s' % base_name)
+        # @modified 20250812 - Feature #2484: FULL_DURATION feature profiles
+        # Do not log an error if there are no echo fps for a metric
+        #logger.error('error :: ionosphere_echo :: no echo_fp_ids_result - could not determine fp ids from DB for %s' % base_name)
+        logger.info('ionosphere_echo :: no echo_fp_ids_result - could not determine fp ids from DB for %s' % base_name)
     else:
         logger.info('ionosphere_echo :: echo_fp_ids_result - determined fp ids from DB for %s' % base_name)
 
@@ -525,10 +553,10 @@ def ionosphere_echo(base_name, mirage_full_duration):
         # Create the new settings.FULL_DURATION features profile
         ionosphere_job = 'learn_fp_human'
 
-        # @added 20240424 - Feature #5318: motif_annihilation
+        # @added 20240424 - Feature #5318: common_motifs
         # Add echo fp creation
-        if row['label'] == 'LEARNT - motif_annihilation':
-            ionosphere_job = 'echo_motif_annihilation'
+        if row['label'] == 'LEARNT - common_motifs':
+            ionosphere_job = 'echo_common_motifs'
 
         # @added 20190503 - Branch #2646: slack
         # Added slack_ionosphere_job
