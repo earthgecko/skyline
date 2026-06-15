@@ -32,6 +32,11 @@ def snab_results_algorithms(results):
     snab_id = results['snab_id']
     anomaly_id = results['anomaly_id']
 
+    # @added 20250112 - Feature #5588: snab.process_algorithm
+    snab_process_algorithm = False
+    if 'snab_process_algorithm' in results:
+        snab_process_algorithm = results['snab_process_algorithm']
+
     snab_result = {}
     try:
         snab_result = get_snab_result(skyline_app, anomaly_id)
@@ -77,16 +82,26 @@ def snab_results_algorithms(results):
             function_str, str(err)))
 
     unknown_algorithms = []
+    known_algos = list(known_algorithms.keys())
     for algo in algorithms_with_results:
-        if algo not in list(known_algorithms.keys()):
-            unknown_algorithms.append(algo)
+        unknown_algo = False
+        use_algo = str(algo)
+        if algo.startswith('skyline_'):
+            use_algo = algo.lstrip('skyline_')
+        #if algo not in list(known_algorithms.keys()):
+        #    unknown_algorithms.append(algo)
+        if algo not in known_algos or use_algo not in known_algos:
+            unknown_algorithms.append(use_algo)
 
     inserted_new_algorithms = {}
     if unknown_algorithms:
         for algo in unknown_algorithms:
             new_algorithm_id = None
+            new_algorithm_group_id = None
             try:
-                new_algorithm_id = insert_new_algorithm(skyline_app, algo)
+                # @modified 20250112 - Feature #5588: snab.process_algorithm
+                #new_algorithm_id = insert_new_algorithm(skyline_app, algo)
+                new_algorithm_id, new_algorithm_group_id = insert_new_algorithm(skyline_app, algo)
             except Exception as err:
                 logger.error('error :: %s :: insert_new_algorithm failed - %s' % (
                     function_str, str(err)))
@@ -108,13 +123,19 @@ def snab_results_algorithms(results):
     try:
         consensus_reached = results['consensus_reached']
     except Exception as err:
-        logger.error('error :: %s :: failed to determine consensus_reached from the results - %s' % (
+        logger.info('warning :: %s :: failed to determine consensus_reached from the results, err: %s' % (
             function_str, str(err)))
         consensus_reached = []
 
     consensus_achieved_list = []
     for algo in consensus_reached:
         algo_id = None
+
+        # @added 20251108 - Feature #5655: custom_algorithm - skyline_tsb_uad_pca
+        #                   Feature #5656: custom_algorithm - skyline_tsb_uad_ocsvm
+        if algo.startswith('skyline_tsb_uad'):
+            algo = algo.replace('skyline_tsb_uad', 'tsb_uad')
+
         try:
             algo_id = known_algorithms[algo]
         except:
@@ -133,8 +154,16 @@ def snab_results_algorithms(results):
 
     for algo in algorithms_with_results:
         algo_id = None
+
+        # @added 20251108 - Feature #5655: custom_algorithm - skyline_tsb_uad_pca
+        #                   Feature #5656: custom_algorithm - skyline_tsb_uad_ocsvm
+        try_algo = str(algo)
+        if algo.startswith('skyline_tsb_uad'):
+            try_algo = algo.replace('skyline_tsb_uad', 'tsb_uad')
+
         try:
-            algo_id = known_algorithms[algo]
+            # algo_id = known_algorithms[algo]
+            algo_id = known_algorithms[try_algo]
         except:
             logger.error('error :: %s :: cannot update snab_results_algorithms for %s as no algorithm_id is known' % (
                 function_str, str(algo)))
@@ -145,7 +174,7 @@ def snab_results_algorithms(results):
             if anomalous:
                 anomalyScore = 1
         except:
-            logger.error('error :: %s :: cannot update snab_results_algorithms for %s as anomalous is not known' % (
+            logger.info('warning :: %s :: cannot update snab_results_algorithms for %s as anomalous is not known' % (
                 function_str, str(algo)))
             continue
         runtime = 0.0
