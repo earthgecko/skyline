@@ -231,6 +231,14 @@ def get_timeseries_from_training_data():
         with open(training_data_json, 'r') as f:
             raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: %s :: failed to replace nan with None, err: %s' % (
+                        function_str, err))
+
             timeseries = literal_eval(timeseries_array_str)
         logger.info('%s :: loaded time series from - %s' % (function_str, training_data_json))
     except Exception as err:
@@ -470,6 +478,12 @@ def vortex_request():
             if key == 'reference':
                 if request.form[key] != 'none':
                     metric_data[key] = request.form[key]
+            # @added 20250110 - Feature #4734: mirage_vortex
+            # Allow mirage_vortex to pass downsample parameter
+            if key == 'no_downsample':
+                if request.form[key] == 'true':
+                    metric_data['downsample'] = False 
+
         except:
             pass
 
