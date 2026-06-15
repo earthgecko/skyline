@@ -117,7 +117,10 @@ def api_skip_analysis(current_skyline_app, cluster_data=False):
         slack_enabled = False
     if skip_analysis_on and slack_enabled:
         expiry_timestamp = int(expiry_timestamp_str)
-        until = datetime.datetime.utcfromtimestamp(expiry_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        # @modified 20260218 - Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #until = datetime.datetime.utcfromtimestamp(expiry_timestamp).strftime('%Y-%m-%d %H:%M:%S')
+        until = datetime.datetime.fromtimestamp(int(expiry_timestamp), tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+
         try:
             alert_slack_channel = None
             slack_message = '*Skyline - NOTICE* - skipping analysis on %s metrics for %s seconds until %s (%s).  For metric_patterns: %s' % (
