@@ -3,7 +3,11 @@ import sys
 import os
 from os import getpid
 from os.path import isdir
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
+
 from time import sleep
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
@@ -18,6 +22,9 @@ if True:
     from validate_settings import validate_settings_variables
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
 
 python_version = int(sys.version_info[0])
 
@@ -127,6 +134,9 @@ def run():
         logger.info('starting skyline crucible via daemon')
         daemon_runner = runner.DaemonRunner(crucible)
         daemon_runner.daemon_context.files_preserve = [handler.stream]
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#        daemon_runner.open()
         daemon_runner.do_action()
 
 
