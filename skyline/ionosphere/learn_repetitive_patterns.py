@@ -53,6 +53,14 @@ try:
 except:
     learn_full_duration = 86400 * 30  # 2592000
 
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
 verify_ssl = True
 try:
     running_on_docker = settings.DOCKER
@@ -209,7 +217,7 @@ def get_metrics_to_evaluate(training_data_dict, last_evaluation_timestamp):
 
 def get_features_to_compare(training_to_evaluate):
     """
-    Return a dictionary offeatures_to_compare.
+    Return a dictionary of features_to_compare.
 
     :param training_to_evaluate: the dictionary of training data to evaluate
     :type training_to_evaluate: dict
@@ -390,6 +398,12 @@ def ionosphere_learn_repetitive_patterns(timestamp):
     training_data_dict = {}
     try:
         training_data_dict = get_training_data(skyline_app, metrics=None, namespaces=None, key_by='timestamp')
+        # @added 20250401 - Feature #5617: IONOSPHERE_REPETITIVE_PATTERNS_EXCLUDE_ALGORITHMS
+        # The get_training_data function is calling the api?training_data which
+        # is already excluding training_data that has the do_not_train flag/file
+        # therefore no training_data has to be excluded here as it already has
+        # been exclude in api?training_data unless the do_not_train parameter is
+        # passed which it is not here.
     except Exception as err:
         logger.error(traceback.format_exc())
         logger.error('error :: %s :: get_training_data failed - %s' % (function_str, err))
@@ -397,6 +411,20 @@ def ionosphere_learn_repetitive_patterns(timestamp):
     if not training_data_dict:
         logger.info('%s :: no training_data_dict to evaluate, nothing to do' % function_str)
         return
+
+    # @added 20260221 - Feature #5712: skyline.dawn
+    #                   Task #5628: Build v5.0.0 and test
+    dawn_expiry_timestamp = None
+    if SKYLINE_DAWN_ENABLED:
+        try:
+            dawn_expiry_timestamp = redis_conn_decoded.get('skyline.dawn.ionosphere.learn_repetitive_patterns')
+        except Exception as err:
+            logger.error('error :: %s :: failed on get skyline.dawn.ionosphere.learn_repetitive_patterns, err: %s' % (
+                function_str, err))
+        if dawn_expiry_timestamp:
+            logger.info('%s :: NOTICE - skyline.dawn.ionosphere.learn_repetitive_patterns key exists, not learning until %s' % (
+                function_str, str(dawn_expiry_timestamp)))
+            return
 
     metrics_to_evaluate = {}
     try:
