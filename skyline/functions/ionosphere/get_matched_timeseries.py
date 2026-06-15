@@ -200,6 +200,14 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
                 with open((timeseries_json_file), 'r') as f:
                     raw_timeseries = f.read()
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                if 'nan' in timeseries_array_str:
+                    try:
+                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                    except Exception as err:
+                        current_logger.error('error :: %s :: failed to replace nan with None, err: %s' % (
+                            function_str, err))
+
                 del raw_timeseries
                 match_timeseries = literal_eval(timeseries_array_str)
                 del timeseries_array_str
@@ -277,8 +285,23 @@ def get_matched_timeseries(current_skyline_app, match_id, layers_match_id):
             resample_ts = list(fp_motif['fp_motif_timeseries'])
         df = timeseries_to_datetime_indexed_df(current_skyline_app, resample_ts, False)
         T = '%sT' % str(int(match_resolution / 60))
+        # @added 20260227 - Task #5628: Build v5.0.0 and test
+        # changed T to min as per warning in pandas 2.2.3
+        T = '%smin' % str(int(match_resolution / 60))
+
         resample_df = df.resample(T).mean()
-        fp_motif_timeseries = list(zip(resample_df.index.astype(np.int64) // 10**9, resample_df['value'].to_list()))
+        # @modified 20260224 - Task #5628: Build v5.0.0 and test
+        #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+        #                      Task #5526: Build v5.0.0 and upgrade deps
+        #                      Task #5627: v5.0.0 update dependencies
+        # Handle pandas deprecation which results in all timestamps being
+        # returned as 1.  From pandas changelog:
+        # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+        # Disallow passing a pandas type to Index.view() (GH 55709)
+        # https://github.com/pandas-dev/pandas/issues/55709
+        #fp_motif_timeseries = list(zip(resample_df.index.astype(np.int64) // 10**9, resample_df['value'].to_list()))
+        timestamps = [int(ts.value // 10**9) for ts in resample_df.index]
+        fp_motif_timeseries = list(zip(timestamps, resample_df['value'].to_list()))
 
     if motifs_matched_id:
         if scale_to:
