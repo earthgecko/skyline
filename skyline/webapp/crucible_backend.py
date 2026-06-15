@@ -188,14 +188,36 @@ def submit_crucible_job(
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
 
-        metrics_like_query = text("""SELECT metric FROM metrics WHERE metric LIKE :like_string""")
+        # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #metrics_like_query = text("""SELECT metric FROM metrics WHERE metric LIKE :like_string""")
+
         for namespace in namespaces_list:
             try:
-                connection = engine.connect()
-                results = connection.execute(metrics_like_query, like_string=str(namespace))
-                connection.close()
+
+                # @added 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                metrics_like_text = f"SELECT metric FROM metrics WHERE metric LIKE '{namespace}'"
+                metrics_like_query = text(metrics_like_text)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #results = connection.execute(metrics_like_query, like_string=str(namespace))
+                #connection.close()
+                with engine.connect() as connection:
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(metrics_like_query, like_string=str(namespace))
+                    result = connection.execute(metrics_like_query)
+
+                    results = [dict(row._mapping) for row in result.fetchall()]
                 for row in results:
-                    metric_name = str(row[0])
+                    # @modified 20260423 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #metric_name = str(row[0])
+                    metric_name = str(row['metric'])
+
                     metric_names.append(metric_name)
             except:
                 trace = traceback.format_exc()
