@@ -86,9 +86,16 @@ def tornado_laoccfdlpnc(postData):
     for key in list(postData.keys()):
         if key == 'timeseries':
             continue
+        # @added 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
+        # Remove any api keys from the log if any are sent in the
+        # request
+        if 'api_key' in key:
+            continue
         postItems[key] = postData[key]
-    logger.info('%s :: postData (excl. timeseries): %s' % (
-        func_name, str(postItems)))
+    # @modified 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
+    # Added api keys to the excl message
+    logger.info('%s :: %s - postData (excl. timeseries and api_keys): %s' % (
+        func_name, custom_algorithm, str(postItems)))
     try:
         requesting_skyline_app = postData['skyline_app']
     except Exception as err:
