@@ -42,6 +42,16 @@ from custom_algorithms.irregular_unstable import irregular_unstable
 # @added 20230801 - Feature #5038: snab_results_algorithms
 from snab_results_algorithms import snab_results_algorithms
 
+# @added 20250107 - Feature #5588: snab.process_algorithm
+from process_algorithm import (
+    get_process_algorithm_work, 
+    # @added 20250111 - Feature #5588: snab.process_algorithm
+    add_algorithm_work, get_snab_process_algorithm_data,
+    # @added 20250112 - Feature #5588: snab.process_algorithm
+    update_snab_result)
+# @added 20250112 - Feature #5588: snab.process_algorithm
+from functions.database.queries.insert_new_algorithm import insert_new_algorithm
+
 try:
     from custom_algorithms import run_custom_algorithm_on_timeseries
 except:
@@ -163,6 +173,7 @@ class SNAB(Thread):
             'metric': '<base_name>'|str,
             'labelled_metric_name': '<labelled_metric_name>'|str,
             'timestamp': anomaly_timestamp|int,
+            'original_anomaly_timestamp': anomaly_timestamp|int,
             'value': datapoint|float,
             'full_duration': full_duration|int,
             'anomaly_data': '<absolute_path/filename>'|str,
@@ -181,6 +192,11 @@ class SNAB(Thread):
             'anomalyScore': 0.0|float,
             'alert_slack_channel': '<channel_name>|None'|str or boolean,
             'snab_only': False|boolean,
+            # OPTIONAL
+            'snab_process_algorithm': False|boolean,
+            'metric_id': metric_id|int,
+            'anomaly_id': anomaly_id|int,
+            'data_only': False|boolean,
         }
 
         # @added 20201001 - food for thought
@@ -232,7 +248,14 @@ class SNAB(Thread):
         # @added 20230706 - Feature #4988: Allow snab to return and save results
         # Allow results to be returned and saved
         results = {}
+
+        # @added 20230801 - Feature #5038: snab_results_algorithms
+        #                   Feature #4988: Allow snab to return and save results
+        # Add default variables
         snab_id = None
+        anomaly_id = None
+        algorithm_group = None
+        send_to_slack = False
 
         spin_start = time()
         spin_snab_process_pid = os.getpid()
@@ -261,6 +284,105 @@ class SNAB(Thread):
             logger.error('error - spin_snab_process - %s, failed to parse check_details dict' % (
                 str(spin_snab_process_pid)))
             return anomalous
+
+        # @added 20250110 - Feature #5588: snab.process_algorithm
+        timeseries = []
+        downsample = True
+        snab_process_algorithm = False
+        try:
+            snab_process_algorithm = check_details['snab_process_algorithm']
+        except KeyError:
+            snab_process_algorithm = False
+        # @added 20250128 - Feature #5588: snab.process_algorithm
+        data_only = False
+        try:
+            data_only = check_details['data_only']
+        except KeyError:
+            data_only = False
+        snab_dataset_id = None
+        try:
+            snab_dataset_id = check_details['snab_dataset_id']
+        except KeyError:
+            snab_dataset_id = None
+
+        metric_id = 0
+        try:
+            metric_id = check_details['metric_id']
+        except KeyError:
+            metric_id = 0
+        anomaly_id = 0
+        try:
+            anomaly_id = check_details['anomaly_id']
+        except KeyError:
+            anomaly_id = 0
+        full_duration = 0
+        try:
+            full_duration = check_details['full_duration']
+        except KeyError:
+            full_duration = 0
+        original_snab_result = {}
+        try:
+            if snab_process_algorithm:
+                original_snab_result = check_details['original_snab_result']
+        except Exception as err:
+            logger.error('error :: spin_snab_process :: original_snab_result not found in check_details for snab_process_algorithm, err: %s' % (
+                err))
+            original_snab_result = {}
+
+        algorithm_id = 0
+        algorithm_group_id = 0
+        data_relabelled = None
+        if snab_process_algorithm:
+            try:
+                algorithm_id, algorithm_group_id = insert_new_algorithm(skyline_app, algorithm)
+            except Exception as err:
+                logger.error('error :: spin_snab_process :: insert_new_algorithm failed on algorithm: %s, err: %s' % (
+                    algorithm, err))
+            snab_metric = '%s.%s.%s' % (
+                str(metric_id), str(anomaly_id), str(original_anomaly_timestamp))
+            # Determine the anomaly_data
+            anomaly_data_dir = '%s/evaluated_datasets/%s/%s/%s' % (
+                settings.SNAB_DATA_DIR, str(metric_id), str(anomaly_id),
+                str(original_anomaly_timestamp))
+            anomaly_data = '%s/%s.csv.gz' % (anomaly_data_dir, snab_metric)
+            # Data pulled retrospectively and saved can be a different
+            # resolution from the original data.  In the evaluated_datasets
+            # dir label files are present and after manual re-evaluation of
+            # data these label files can be replaced as appropriate.
+            # There can also be a file original_data.txt in the dir which exists
+            # if the csv data is based on the actual data that was saved into
+            # ionosphere/features_profiles or ionosphere/data_saved.
+            normal_relabel = '%s/normal.txt' % anomaly_data_dir
+            if os.path.isfile(normal_relabel):
+                data_relabelled = 'normal'
+            anomaly_relabel = '%s/anomaly.txt' % anomaly_data_dir
+            if os.path.isfile(anomaly_relabel):
+                data_relabelled = 'anomaly'
+
+            if not os.path.isfile(anomaly_data):
+                mkdir_p(anomaly_data_dir)
+            if snab_dataset_id:
+                snab_dataset_anomaly_data_dir = '%s/snab_datasets/%s/%s/%s/%s' % (
+                    settings.SNAB_DATA_DIR, str(snab_dataset_id),
+                    str(metric_id), str(anomaly_id),
+                    str(original_anomaly_timestamp))
+                if not os.path.isdir(snab_dataset_anomaly_data_dir):
+                    mkdir_p(snab_dataset_anomaly_data_dir)
+
+            # Create snab_process_algorithm data
+            try:
+                anomaly_data_file, timeseries = get_snab_process_algorithm_data(anomaly_data, check_details)
+                downsample = False
+            except Exception as err:
+                logger.error('error :: spin_snab_process :: get_snab_process_algorithm_data failed for %s, err:  %s' % (
+                    str(check_details), err))
+                update_check_details(check_details, 'remove')
+                return anomalous
+            if not timeseries:
+                logger.error('error - spin_snab_process - %s, get_snab_process_algorithm_data failed to return timeseries for %s' % (
+                    str(spin_snab_process_pid), str(metric_name)))
+                update_check_details(check_details, 'remove')
+                return anomalous
 
         # @added 20230706 - Feature #4988: Allow snab to return and save results
         return_results = False
@@ -297,6 +419,11 @@ class SNAB(Thread):
                     str(spin_snab_process_pid), str(anomaly_data)))
                 update_check_details(original_updated_check_details, 'remove')
                 return anomalous
+
+        # @added 20250128 - Feature #5588: snab.process_algorithm
+        if data_only:
+            update_check_details(original_updated_check_details, 'remove')
+            return anomalous
 
         snab_do_not_recheck_key = 'snab.do.not.recheck.%s' % metric_name
 
@@ -336,8 +463,19 @@ class SNAB(Thread):
             with open((anomaly_data), 'r') as f:
                 raw_timeseries = f.read()
             timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+            if 'nan' in timeseries_array_str:
+                try:
+                    timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                except Exception as err:
+                    logger.error('error :: failed to replace nan with None, err: %s' % (
+                        err))
+
             timeseries = literal_eval(timeseries_array_str)
-        if anomaly_data.endswith('.csv'):
+        # @modified 20250110 - Feature #5588: snab.process_algorithm
+        # Added if not timeseries
+        # if anomaly_data.endswith('.csv'):
+        if anomaly_data.endswith('.csv') and not timeseries:
             logger.info('warning :: spin_snab_process - anomaly_data file is csv format which is not currently handled, skipping %s' % (
                 str(anomaly_data)))
             update_check_details(original_updated_check_details, 'remove')
@@ -371,6 +509,16 @@ class SNAB(Thread):
                 # @added 20230706 - Feature #4988: Allow snab to return and save results
                 if return_results:
                     algorithm_parameters['return_anomalies'] = True
+
+                # @added 20250111 - Feature #5588: snab.process_algorithm
+                if not downsample and snab_process_algorithm:
+                    algorithm_parameters['downsample'] = False
+                    # TODO
+                    # After analysis do evaluation and do not save training data
+                    # needs to be added as a snab_panorama_details for panorama
+                    # to insert results into the DB so a snab_id can be
+                    # generated for which the result will be evaluate based on
+                    # the result of the previously evaluated SNAB result.
 
                 custom_algorithm_dict = {
                     'namespaces': [metric_name],
@@ -422,15 +570,15 @@ class SNAB(Thread):
         # @added 20201001 - Branch #3068: SNAB
         #                   Task #3748: POC SNAB
         # Add timings
-        analysis_run_time = time() - analysis_start_time
+        analysis_runtime = time() - analysis_start_time
         logger.info('%s analysis completed in %.2f seconds' % (
-            algorithm, analysis_run_time))
-        redis_key = 'snab.analysis_run_time.%s.%s.%s' % (algorithm, base_name, str(metric_timestamp))
+            algorithm, analysis_runtime))
+        redis_key = 'snab.analysis_runtime.%s.%s.%s' % (algorithm, base_name, str(metric_timestamp))
         try:
-            self.redis_conn.setex(redis_key, 120, str(analysis_run_time))
+            self.redis_conn.setex(redis_key, 120, str(analysis_runtime))
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: failed to add snab analysis_run_time Redis key - %s' % (
+            logger.error('error :: failed to add snab analysis_runtime Redis key - %s' % (
                 redis_key))
 
         updated_check_details['analysed'] = int(time())
@@ -462,246 +610,282 @@ class SNAB(Thread):
         slack_post = None
         slack_thread_ts = 0
 
-        # @added 20230801 - Feature #5038: snab_results_algorithms
-        #                   Feature #4988: Allow snab to return and save results
-        # Add default variables
-        snab_id = None
-        anomaly_id = None
-        algorithm_group = None
-
         try:
             if original_check_details['alert_slack_channel']:
                 send_to_slack = True
                 if snab_only and not anomalous:
                     send_to_slack = False
-                if send_to_slack:
 
-                    # @added 20200928 - Task #3748: POC SNAB
-                    #                   Branch #3068: SNAB
-                    # When a slack alert goes out a Panorama snab entry must be
-                    # created
-                    algorithm_group = None
-                    if algorithm == 'skyline_matrixprofile':
-                        algorithm_group = 'matrixprofile'
+            # @modified 20250112 - Feature #5588: snab.process_algorithm
+            # if send_to_slack:
+            if send_to_slack or snab_process_algorithm:
 
-                    # @added 20230417 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
-                    if not algorithm_group:
-                        algorithm_group = str(algorithm)
+                # @added 20200928 - Task #3748: POC SNAB
+                #                   Branch #3068: SNAB
+                # When a slack alert goes out a Panorama snab entry must be
+                # created
+                algorithm_group = None
+                if algorithm == 'skyline_matrixprofile':
+                    algorithm_group = 'matrixprofile'
 
-                    # @added 20201001 - Branch #3068: SNAB
-                    #                   Task #3748: POC SNAB
-                    # Added analysis_run_time
-                    analysis_run_time = 0
-                    redis_key = 'snab.analysis_run_time.%s.%s.%s' % (algorithm, base_name, str(metric_timestamp))
-                    try:
-                        analysis_run_time = float(self.redis_conn_decoded.get(redis_key))
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to determine analysis_run_time from Redis key - %s' % (
-                            redis_key))
+                # @added 20230417 - Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                if not algorithm_group:
+                    algorithm_group = str(algorithm)
 
-                    if snab_only:
-                        use_timestamp = original_anomaly_timestamp
-                    else:
-                        use_timestamp = metric_timestamp
+                # @added 20250112 - Feature #5588: snab.process_algorithm
+                if algorithm_group.startswith('skyline_'):
+                    algorithm_group = algorithm_group.lstrip('skyline_')
 
-                    snab_panorama_details = {
-                        'metric': metric_name,
-                        'timestamp': use_timestamp,
-                        'anomalyScore': anomalyScore,
-                        'analysis_run_time': analysis_run_time,
-                        'source': skyline_app,
-                        'algorithm_group': algorithm_group,
-                        'algorithm': algorithm,
-                        'added_at': panorama_added_at,
-                    }
-                    self.redis_conn.sadd('snab.panorama', str(snab_panorama_details))
-                    logger.info('added snab.panorama item - %s' % (
-                        str(snab_panorama_details)))
+                # @added 20201001 - Branch #3068: SNAB
+                #                   Task #3748: POC SNAB
+                # Added analysis_runtime
+                analysis_runtime = 0
+                redis_key = 'snab.analysis_runtime.%s.%s.%s' % (algorithm, base_name, str(metric_timestamp))
+                try:
+                    analysis_runtime = float(self.redis_conn_decoded.get(redis_key))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine analysis_runtime from Redis key - %s' % (
+                        redis_key))
 
-                    # @added 20200929 - Task #3748: POC SNAB
-                    #                   Branch #3068: SNAB
-                    # Determine the anomaly_id so that the tP, fP, tN, fN links
-                    # can be applied to the slack message.
-                    snab_slack_comment = None
-                    anomaly_id = None
+                if snab_only:
+                    use_timestamp = original_anomaly_timestamp
+                else:
+                    use_timestamp = metric_timestamp
+
+                snab_panorama_details = {
+                    'metric': metric_name,
+                    'timestamp': use_timestamp,
+                    'anomalyScore': anomalyScore,
+                    'analysis_run_time': analysis_runtime,
+                    'source': skyline_app,
+                    'algorithm_group': algorithm_group,
+                    'algorithm': algorithm,
+                    'added_at': panorama_added_at,
+                }
+
+                # @added 20250112 - Feature #5588: snab.process_algorithm
+                if snab_process_algorithm:
+                    snab_panorama_details['anomaly_id'] = anomaly_id
+                    snab_panorama_details['metric_id'] = metric_id
+                    snab_panorama_details['snab_process_algorithm'] = True
+                    if algorithm_id:
+                        snab_panorama_details['algorithm_id'] = algorithm_id
+                    if algorithm_group_id:
+                        snab_panorama_details['algorithm_group_id'] = algorithm_group_id
+
+                self.redis_conn.sadd('snab.panorama', str(snab_panorama_details))
+                logger.info('added snab.panorama item - %s' % (
+                    str(snab_panorama_details)))
+
+            if send_to_slack:
+                # @added 20200929 - Task #3748: POC SNAB
+                #                   Branch #3068: SNAB
+                # Determine the anomaly_id so that the tP, fP, tN, fN links
+                # can be applied to the slack message.
+                snab_slack_comment = None
+                anomaly_id = None
+                anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                    str(original_anomaly_timestamp), metric_name)
+                # @added 20230420 - Feature #4892: SNAB - labelled_metrics
+                #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                if labelled_metric_name:
                     anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
-                        str(original_anomaly_timestamp), metric_name)
-                    # @added 20230420 - Feature #4892: SNAB - labelled_metrics
-                    #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
-                    if labelled_metric_name:
-                        anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
-                            str(original_anomaly_timestamp), labelled_metric_name)
+                        str(original_anomaly_timestamp), labelled_metric_name)
 
-                    try_get_anomaly_id_redis_key_count = 0
-                    while try_get_anomaly_id_redis_key_count < 30:
-                        try_get_anomaly_id_redis_key_count += 1
+                try_get_anomaly_id_redis_key_count = 0
+                while try_get_anomaly_id_redis_key_count < 30:
+                    try_get_anomaly_id_redis_key_count += 1
+                    try:
+                        anomaly_id = int(self.redis_conn_decoded.get(anomaly_id_redis_key))
+                        break
+                    except:
+                        sleep(1)
+                if not anomaly_id:
+                    logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                    snab_slack_comment = '\nThe anomaly id was not determined to generate snab results links'
+
+            logger.info('determining snab_id for anomaly_id: %s' % str(anomaly_id))
+            if anomaly_id:
+                snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (str(algorithm_group), str(use_timestamp), base_name, panorama_added_at)
+                logger.info('determining snab_id from Redis key - %s' % snab_id_redis_key)
+                # @added 20230420 - Feature #4892: SNAB - labelled_metrics
+                #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
+                if labelled_metric_name:
+                    snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (str(algorithm_group), str(use_timestamp), labelled_metric_name, panorama_added_at)
+
+                try_get_snab_id_redis_key_count = 0
+                # @modified 20250112 - Feature #5588: snab.process_algorithm
+                # while try_get_snab_id_redis_key_count < 30:
+                check_count = 60
+                if snab_process_algorithm:
+                    check_count = 120
+                while try_get_snab_id_redis_key_count < check_count:
+                    try_get_snab_id_redis_key_count += 1
+                    try:
+                        snab_id = int(self.redis_conn_decoded.get(snab_id_redis_key))
+                        if snab_id:
+                            logger.info('determined snab_id: %s for anomaly_id: %s' % (
+                                str(snab_id), str(anomaly_id)))
+                        break
+                    except:
+                        # @modified 20251006 - Feature #5588: snab.process_algorithm
+# THIS CHANGE DID NOT HAVE THE DESIRED RESULTS the things were processed but
+# the process_algorithm function is a reprocess and update results process at the
+# moment not a process a new algorithm
+                        #sleep(1)
                         try:
-                            anomaly_id = int(self.redis_conn_decoded.get(anomaly_id_redis_key))
+                            snab_id = original_check_details['original_snab_result']['id']
+                            if snab_id:
+                                logger.info('determined snab_id: %s for anomaly_id: %s' % (
+                                    str(snab_id), str(anomaly_id)))
                             break
                         except:
                             sleep(1)
-                    if not anomaly_id:
-                        logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                if not snab_id:
+                    logger.error('error :: failed to determine snab_id from Redis key - %s' % snab_id_redis_key)
+                    if send_to_slack:
                         snab_slack_comment = '\nThe anomaly id was not determined to generate snab results links'
-                    snab_id = None
-                    if anomaly_id:
-                        snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (str(algorithm_group), str(use_timestamp), base_name, panorama_added_at)
-                        # @added 20230420 - Feature #4892: SNAB - labelled_metrics
-                        #                   Feature #4848: mirage - analyse.irregular.unstable.timeseries.at.30days
-                        if labelled_metric_name:
-                            snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (str(algorithm_group), str(use_timestamp), labelled_metric_name, panorama_added_at)
 
-                        try_get_snab_id_redis_key_count = 0
-                        while try_get_snab_id_redis_key_count < 30:
-                            try_get_snab_id_redis_key_count += 1
-                            try:
-                                snab_id = int(self.redis_conn_decoded.get(snab_id_redis_key))
-                                break
-                            except:
-                                sleep(1)
-                        if not snab_id:
-                            logger.error('error :: failed to determine snab_id from Redis key - %s' % snab_id_redis_key)
-                            snab_slack_comment = '\nThe anomaly id was not determined to generate snab results links'
+            if send_to_slack:
+                # @modified 20231012 - Feature #4988: Allow snab to return and save results
+                # Moved determining anomaly_status to before slack msg so
+                # that is an error is report snab links are not added
+                anomaly_status = 'NOT ANOMALOUS'
+                if anomalous:
+                    anomaly_status = 'ANOMALOUS'
+                # @added 20231012 - Feature #4988: Allow snab to return and save results
+                # Handle if an error is reported
+                if anomalous is None:
+                    anomaly_status = 'UNKNOWN'
+                    if results:
+                        if 'error' in list(results.keys()):
+                            if results['error']:
+                                anomaly_status = 'UNKNOWN - error reported'
 
+                if anomaly_id and snab_id:
+                    snab_link = '%s/api?snab=true&snab_id=%s&anomaly_id=%s' % (
+                        settings.SKYLINE_URL, str(snab_id), str(anomaly_id))
+                    tP_link = '%s&result=tP' % snab_link
+                    fP_link = '%s&result=fP' % snab_link
+                    tN_link = '%s&result=tN' % snab_link
+                    fN_link = '%s&result=fN' % snab_link
+                    unsure_link = '%s&result=unsure' % snab_link
+                    null_link = '%s&result=NULL' % snab_link
+                    # @added 2023082 - Feature #5042: Add save_training_data link options to SNAB slack results message
+                    fP_link_save_training_data = '%s&result=fP&save_training_data=true' % snab_link
+                    fN_link_save_training_data = '%s&result=fN&save_training_data=true' % snab_link
+                    unsure_link_save_training_data = '%s&result=unsure&save_training_data=true' % snab_link
+                    # @modified 2023082 - Add save_training_data link options to SNAB slack results message
+                    # snab_slack_comment = '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>   ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>   ::  <' + fN_link + '|fN - false negative>  :: <' + unsure_link + '|unsure>'
                     # @modified 20231012 - Feature #4988: Allow snab to return and save results
-                    # Moved determining anomaly_status to before slack msg so
-                    # that is an error is report snab links are not added
-                    anomaly_status = 'NOT ANOMALOUS'
-                    if anomalous:
-                        anomaly_status = 'ANOMALOUS'
-                    # @added 20231012 - Feature #4988: Allow snab to return and save results
-                    # Handle if an error is reported
-                    if anomalous is None:
-                        anomaly_status = 'UNKNOWN'
-                        if results:
-                            if 'error' in list(results.keys()):
-                                if results['error']:
-                                    anomaly_status = 'UNKNOWN - error reported'
+                    # Only add a the snab links if the anomaly_status is not
+                    # UNKNOWN
+                    if 'UNKNOWN' not in anomaly_status:
+                        snab_slack_comment = '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>   ::  <' + fP_link_save_training_data + '|fP - false positive (save_training_data)>   ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>   ::  <' + fN_link + '|fN - false negative>  ::  <' + fN_link_save_training_data + '|fN - false negative (save_training_data)>   :: <' + unsure_link + '|unsure>   :: <' + unsure_link_save_training_data + '|unsure (save_training_data)>'
 
-                    if anomaly_id and snab_id:
-                        snab_link = '%s/api?snab=true&snab_id=%s&anomaly_id=%s' % (
-                            settings.SKYLINE_URL, str(snab_id), str(anomaly_id))
-                        tP_link = '%s&result=tP' % snab_link
-                        fP_link = '%s&result=fP' % snab_link
-                        tN_link = '%s&result=tN' % snab_link
-                        fN_link = '%s&result=fN' % snab_link
-                        unsure_link = '%s&result=unsure' % snab_link
-                        null_link = '%s&result=NULL' % snab_link
-                        # @added 2023082 - Feature #5042: Add save_training_data link options to SNAB slack results message
-                        fP_link_save_training_data = '%s&result=fP&save_training_data=true' % snab_link
-                        fN_link_save_training_data = '%s&result=fN&save_training_data=true' % snab_link
-                        unsure_link_save_training_data = '%s&result=unsure&save_training_data=true' % snab_link
-                        # @modified 2023082 - Add save_training_data link options to SNAB slack results message
-                        # snab_slack_comment = '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>   ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>   ::  <' + fN_link + '|fN - false negative>  :: <' + unsure_link + '|unsure>'
-                        # @modified 20231012 - Feature #4988: Allow snab to return and save results
-                        # Only add a the snab links if the anomaly_status is not
-                        # UNKNOWN
-                        if not 'UNKOWN' in anomaly_status:
-                            snab_slack_comment = '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>   ::  <' + fP_link_save_training_data + '|fP - false positive (save_training_data)>   ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>   ::  <' + fN_link + '|fN - false negative>  ::  <' + fN_link_save_training_data + '|fN - false negative (save_training_data)>   :: <' + unsure_link + '|unsure>   :: <' + unsure_link_save_training_data + '|unsure (save_training_data)>'
-
-                    if anomalous:
-                        # anomaly_status = 'ANOMALOUS'
-                        if snab_only:
-                            if algorithm == 'skyline_matrixprofile':
+                if anomalous:
+                    # anomaly_status = 'ANOMALOUS'
+                    if snab_only:
+                        if algorithm == 'skyline_matrixprofile':
+                            subsequent_minutes = 0
+                            subsequent_units = 'MINUTES'
+                            try:
+                                subsequent_minutes = int(subsequent_seconds / 60)
+                            except:
                                 subsequent_minutes = 0
-                                subsequent_units = 'MINUTES'
-                                try:
-                                    subsequent_minutes = int(subsequent_seconds / 60)
-                                except:
-                                    subsequent_minutes = 0
-                                if subsequent_seconds < 60:
-                                    subsequent_minutes = int(subsequent_seconds)
-                                    subsequent_units = 'SECONDS'
-                                anomaly_status = 'ANOMALOUS - %s %s AFTER three-sigma anomaly' % (str(subsequent_minutes), subsequent_units)
-                                # Remove recheck key
-                                snab_recheck_key = 'snab.recheck.%s' % base_name
-                                try:
-                                    self.redis_conn.delete(snab_recheck_key)
-                                except:
-                                    pass
-                                snab_recheck_original_anomaly_timestamp_key = 'snab.recheck.anomaly_timestamp.%s' % base_name
-                                try:
-                                    self.redis_conn.delete(snab_recheck_original_anomaly_timestamp_key)
-                                except:
-                                    pass
-                                snab_do_not_recheck_key = 'snab.do.not.recheck.%s' % base_name
-                                try:
-                                    self.redis_conn.setex(snab_do_not_recheck_key, 120, metric_timestamp)
-                                except:
-                                    pass
+                            if subsequent_seconds < 60:
+                                subsequent_minutes = int(subsequent_seconds)
+                                subsequent_units = 'SECONDS'
+                            anomaly_status = 'ANOMALOUS - %s %s AFTER three-sigma anomaly' % (str(subsequent_minutes), subsequent_units)
+                            # Remove recheck key
+                            snab_recheck_key = 'snab.recheck.%s' % base_name
+                            try:
+                                self.redis_conn.delete(snab_recheck_key)
+                            except:
+                                pass
+                            snab_recheck_original_anomaly_timestamp_key = 'snab.recheck.anomaly_timestamp.%s' % base_name
+                            try:
+                                self.redis_conn.delete(snab_recheck_original_anomaly_timestamp_key)
+                            except:
+                                pass
+                            snab_do_not_recheck_key = 'snab.do.not.recheck.%s' % base_name
+                            try:
+                                self.redis_conn.setex(snab_do_not_recheck_key, 120, metric_timestamp)
+                            except:
+                                pass
 
-                    timezone = strftime("%Z", gmtime())
-                    human_anomaly_time = dt.datetime.fromtimestamp(int(timeseries[-1][0])).strftime('%c')
-                    slack_time_string = '%s %s' % (human_anomaly_time, timezone)
+                timezone = strftime("%Z", gmtime())
+                human_anomaly_time = dt.datetime.fromtimestamp(int(timeseries[-1][0])).strftime('%c')
+                slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
-                    snab_slack_verbose = False
-                    if snab_slack_verbose:
-                        # @modified 20230713 - Feature #4988: Allow snab to return and save results
-                        # Added runtime
-                        slack_message = '*Skyline SNAB - %s* check for *%s* with *%s* on %s\n*%s* at %s, anomalyScore: %s, runtime: %s\n%s' % (
-                            anomaly_status, source, algorithm, metric_name, str(metric_value),
-                            slack_time_string, str(anomalyScore), str(analysis_run_time),
-                            str(updated_check_details))
-                    else:
-                        # @modified 20230713 - Feature #4988: Allow snab to return and save results
-                        # Added runtime
-                        slack_message = '*Skyline SNAB - %s* check for *%s* with *%s* on %s\n*%s* at %s, anomalyScore: %s, runtime: %s' % (
-                            anomaly_status, source, algorithm, metric_name, str(metric_value),
-                            slack_time_string, str(anomalyScore),
-                            str(analysis_run_time))
-                        if labelled_metric_name:
-                            slack_message = '*Skyline SNAB - %s* check for *%s* with *%s* on %s - `%s`\n*%s* at %s, anomalyScore: %s, runtime: %s' % (
-                                anomaly_status, source, algorithm, labelled_metric_name,
-                                str(metric_name), str(metric_value), slack_time_string,
-                                str(anomalyScore), str(analysis_run_time))
+                snab_slack_verbose = False
+                if snab_slack_verbose:
+                    # @modified 20230713 - Feature #4988: Allow snab to return and save results
+                    # Added runtime
+                    slack_message = '*Skyline SNAB - %s* check for *%s* with *%s* on %s\n*%s* at %s, anomalyScore: %s, runtime: %s\n%s' % (
+                        anomaly_status, source, algorithm, metric_name, str(metric_value),
+                        slack_time_string, str(anomalyScore), str(analysis_runtime),
+                        str(updated_check_details))
+                else:
+                    # @modified 20230713 - Feature #4988: Allow snab to return and save results
+                    # Added runtime
+                    slack_message = '*Skyline SNAB - %s* check for *%s* with *%s* on %s\n*%s* at %s, anomalyScore: %s, runtime: %s' % (
+                        anomaly_status, source, algorithm, metric_name, str(metric_value),
+                        slack_time_string, str(anomalyScore),
+                        str(analysis_runtime))
+                    if labelled_metric_name:
+                        slack_message = '*Skyline SNAB - %s* check for *%s* with *%s* on %s - `%s`\n*%s* at %s, anomalyScore: %s, runtime: %s' % (
+                            anomaly_status, source, algorithm, labelled_metric_name,
+                            str(metric_name), str(metric_value), slack_time_string,
+                            str(anomalyScore), str(analysis_runtime))
 
-                    # @added 20200929 - Task #3748: POC SNAB
-                    #                   Branch #3068: SNAB
-                    # Determine the anomaly_id so that the tP, fP, tN, fN links
-                    # can be applied to the slack message.
-                    if snab_slack_comment:
-                        slack_message = slack_message + snab_slack_comment
-                    alert_slack_channel = str(original_check_details['alert_slack_channel'])
-                    slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
-                    logger.info('posted results to slack - %s' % slack_message)
-                    if slack_post:
-                        try:
-                            slack_thread_ts = slack_post['ts']
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to determine slack_ts[\'ts\'] from slack_post - %s' % (
-                                str(slack_post)))
+                # @added 20200929 - Task #3748: POC SNAB
+                #                   Branch #3068: SNAB
+                # Determine the anomaly_id so that the tP, fP, tN, fN links
+                # can be applied to the slack message.
+                if snab_slack_comment:
+                    slack_message = slack_message + snab_slack_comment
+                alert_slack_channel = str(original_check_details['alert_slack_channel'])
+                slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
+                logger.info('posted results to slack - %s' % slack_message)
+                if slack_post:
+                    try:
+                        slack_thread_ts = slack_post['ts']
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine slack_ts[\'ts\'] from slack_post - %s' % (
+                            str(slack_post)))
 
-                    # @added 20201002 - Task #3748: POC SNAB
-                    #                   Branch #3068: SNAB
-                    # Add a Redis key for snab to also update the original anomaly
-                    # id slack_thread_ts
-                    anomaly_slack_thread_ts = None
-                    if anomaly_id:
-                        anomaly_id_slack_thread_ts_redis_key = 'panorama.anomaly.id.%s.slack_thread_ts' % (str(anomaly_id))
-                        try:
-                            anomaly_slack_thread_ts = self.redis_conn_decoded.get(anomaly_id_slack_thread_ts_redis_key)
-                            logger.info('determined original anomaly id %s slack_thread_ts - %s' % (
-                                str(anomaly_id), str(anomaly_slack_thread_ts)))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to determine anomaly_slack_thread_ts from Redis key - %s' % (
-                                anomaly_id_slack_thread_ts_redis_key))
-                            anomaly_slack_thread_ts = None
-                    # Disable for now
-                    anomaly_slack_thread_ts = None
-                    if anomaly_slack_thread_ts:
-                        anomaly_slack_post = None
-                        try:
-                            anomaly_slack_post = slack_post_message(skyline_app, original_check_details['alert_slack_channel'], str(anomaly_slack_thread_ts), slack_message)
-                            logger.info('posted results to slack anomaly thread as well')
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to determine post update to slack anomaly thread - %s' % (
-                                str(anomaly_slack_thread_ts)))
-                        if anomaly_slack_post:
-                            logger.info('posted results to slack anomaly thread with result - %s' % str(anomaly_slack_post))
+                # @added 20201002 - Task #3748: POC SNAB
+                #                   Branch #3068: SNAB
+                # Add a Redis key for snab to also update the original anomaly
+                # id slack_thread_ts
+                anomaly_slack_thread_ts = None
+                if anomaly_id:
+                    anomaly_id_slack_thread_ts_redis_key = 'panorama.anomaly.id.%s.slack_thread_ts' % (str(anomaly_id))
+                    try:
+                        anomaly_slack_thread_ts = self.redis_conn_decoded.get(anomaly_id_slack_thread_ts_redis_key)
+                        logger.info('determined original anomaly id %s slack_thread_ts - %s' % (
+                            str(anomaly_id), str(anomaly_slack_thread_ts)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine anomaly_slack_thread_ts from Redis key - %s' % (
+                            anomaly_id_slack_thread_ts_redis_key))
+                        anomaly_slack_thread_ts = None
+                # Disable for now
+                anomaly_slack_thread_ts = None
+                if anomaly_slack_thread_ts:
+                    anomaly_slack_post = None
+                    try:
+                        anomaly_slack_post = slack_post_message(skyline_app, original_check_details['alert_slack_channel'], str(anomaly_slack_thread_ts), slack_message)
+                        logger.info('posted results to slack anomaly thread as well')
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine post update to slack anomaly thread - %s' % (
+                            str(anomaly_slack_thread_ts)))
+                    if anomaly_slack_post:
+                        logger.info('posted results to slack anomaly thread with result - %s' % str(anomaly_slack_post))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to run %s on %s' % (
@@ -745,7 +929,7 @@ class SNAB(Thread):
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error(
-                    'error :: alert_slack :: failed to %s - %s to %s Redis hash - %s' %
+                    'error :: alert_slack :: failed to set %s to %s Redis hash - %s' %
                     (hash_key_key, str(hash_key_value), err))
 
         # @added 20230706 - Feature #4988: Allow snab to return and save results
@@ -759,6 +943,24 @@ class SNAB(Thread):
             if labelled_metric_name:
                 use_metric_name = str(labelled_metric_name)
 
+            # @added 20250112 - Feature #5588: snab.process_algorithm
+            if 'analysis_runtime' not in results:
+                results['analysis_runtime'] = analysis_runtime
+            if snab_process_algorithm:
+                results['snab_process_algorithm'] = True
+                results['analysis_runtime'] = analysis_runtime
+                if anomalous:
+                    results['consensus_reached'] = [algorithm]
+                if algorithm_id:
+                    results['algorithm_id'] = algorithm_id
+                if algorithm_group_id:
+                    results['algorithm_group_id'] = algorithm_group_id
+                algo_results = copy.deepcopy(results)
+                if 'algorithms' not in results:
+                    results['algorithms'] = {}
+                if algorithm not in results['algorithms']:
+                    results['algorithms'][algorithm] = algo_results
+                
             if snab_id:
                 results['snab_id'] = snab_id
 
@@ -773,7 +975,6 @@ class SNAB(Thread):
                 if not algorithm_group:
                     algorithm_group = str(algorithm)
             results['algorithm_group'] = algorithm_group
-
 
             if 'timeseries' in list(results.keys()):
                 timeseries = results['timeseries']
@@ -819,8 +1020,8 @@ class SNAB(Thread):
                     logger.error('error :: results: %s' % (
                         str(results)))
             else:
-                logger.info('warning :: no training_dir: %s, to save results json to %s' % (
-                    training_dir, results_json))
+                logger.info('warning :: no training_dir: %s, to save results json' % (
+                    training_dir))
 
         # @added 20230729 - Feature #5038: snab_results_algorithms
         #                   Feature #4988: Allow snab to return and save results
@@ -830,6 +1031,9 @@ class SNAB(Thread):
             logger.info('adding results for %s algorithms' % (
                 str(len(results['algorithms']))))
             i_algorithms = list(results['algorithms'].keys())
+        else:
+            logger.info('not adding results for %s' % metric_name)
+
         if i_algorithms:
             inserted_results = {}
             try:
@@ -841,12 +1045,49 @@ class SNAB(Thread):
                 logger.info('adding algorithm results for %s algorithms' % (
                     str(len(inserted_results))))
 
-        if settings.SNAB_DATA_DIR in anomaly_data:
+        # @modified 20250112 - Feature #5588: snab.process_algorithm
+        # if settings.SNAB_DATA_DIR in anomaly_data:
+        if settings.SNAB_DATA_DIR in anomaly_data and not snab_process_algorithm:
             if os.path.isfile(anomaly_data):
                 os.remove(anomaly_data)
                 logger.info('removed check file - %s' % (anomaly_data))
             else:
                 logger.info('could not remove check file - %s' % (anomaly_data))
+
+        # @added 20250112 - Feature #5588: snab.process_algorithm
+        # Automatically evaluate the algorithm result.
+        if snab_process_algorithm and snab_id and anomaly_id and original_snab_result:
+            snab_result_updated = None
+            try:
+                snab_result_updated = update_snab_result(snab_id, anomaly_id, anomalous, original_snab_result, data_relabelled)
+                logger.info('snab_result_updated retruned: %s' % str(snab_result_updated))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_snab_result failed, err: %s' % err)
+        if snab_process_algorithm:
+            remaining_snab_process_algorithm_work_count = None
+            try:
+                remaining_snab_process_algorithm_work_count = self.redis_conn_decoded.scard('snab.process_algorithm_work')
+            except Exception as err:
+                logger.error('error :: scard failed on snab.process_algorithm_work, err: %s' % (
+                    err))
+            if isinstance(remaining_snab_process_algorithm_work_count, int):
+                if remaining_snab_process_algorithm_work_count == 0:
+                    try:
+                        slack_enabled = len(settings.SLACK_OPTS['bot_user_oauth_access_token'])
+                    except:
+                        slack_enabled = False
+                    if slack_enabled:
+                        try:
+                            alert_slack_channel = None
+                            slack_message = '*Skyline - NOTICE* - snab_process_algorithm has completed evaluations with %s' % (
+                                str(algorithm))
+                            slack_post = slack_post_message(skyline_app, alert_slack_channel, None, slack_message)
+                            logger.info('posted notice to slack - %s' % (
+                                slack_message))
+                        except Exception as err:
+                            logger.error('error :: slack_post_message failed - %s' % (
+                                err))
 
         logger.info('removing check_details from %s Redis set' % snab_work_redis_set)
         update_check_details(updated_check_details, 'remove')
@@ -863,8 +1104,13 @@ class SNAB(Thread):
         add_recheck_key = False
         if not anomalous:
             if not snab_only:
-                if algorithm == 'skyline_matrixprofile':
+                if algorithm == 'skyline_matrixprofile' or algorithm == 'matrixprofile':
                     add_recheck_key = True
+
+        # @added 20250112 - Feature #5588: snab.process_algorithm
+        if snab_process_algorithm:
+            add_recheck_key = False
+
         if add_recheck_key:
             snab_recheck_key = 'snab.recheck.%s' % metric_name
             snab_recheck_key_exists = False
@@ -1141,6 +1387,29 @@ class SNAB(Thread):
                     if unsorted_snab_work:
                         sorted_snab_work = sorted(unsorted_snab_work, key=lambda i: i['timestamp'])
                     sorted_snab_work_count = len(sorted_snab_work)
+
+                    # @added 20250107 - Feature #5588: snab.process_algorithm
+                    try:
+                        SNAB_PROCESSES = int(settings.SNAB_PROCESSES)
+                    except:
+                        SNAB_PROCESSES = 1
+                    if sorted_snab_work_count == 0:
+                        try:
+                            sorted_snab_work = get_process_algorithm_work(SNAB_PROCESSES)
+                            sorted_snab_work_count = len(sorted_snab_work)
+                            total_snab_work_item_count = int(sorted_snab_work_count)
+                        except Exception as err:
+                            logger.error('error :: process_algorithm_work failed, err: %s' % err)
+                        # @added 20250111 - Feature #5588: snab.process_algorithm
+                        if len(sorted_snab_work) == 0:
+                            try:
+                                process_algorithm_work = add_algorithm_work()
+                                if len(process_algorithm_work):
+                                    logger.info('%s checks have been added to process_algorithm_work' % (
+                                        str(len(process_algorithm_work))))
+                            except Exception as err:
+                                logger.error('error :: process_algorithm_work failed, err: %s' % err)
+
                     if sorted_snab_work_count > 0:
                         logger.info('there are %s metric checks to process in the %s Redis set' % (
                             str(sorted_snab_work_count), snab_work_redis_set))
