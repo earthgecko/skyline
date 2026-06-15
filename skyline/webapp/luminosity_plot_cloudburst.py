@@ -148,16 +148,26 @@ def get_cloudburst_plot(cloudburst_id, base_name, shift, all_in_period=False):
                 engine_disposal(engine)
             raise
         try:
-            connection = engine.connect()
-            stmt = select([cloudburst_table]).\
+            #connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([cloudburst_table]).\
+            stmt = select(cloudburst_table).\
                 where(cloudburst_table.c.metric_id == cloudburst_dict['metric_id']).\
                 where(cloudburst_table.c.timestamp >= from_timestamp).\
                 where(cloudburst_table.c.timestamp <= until_timestamp).\
                 where(cloudburst_table.c.id != cloudburst_id)
-            result = connection.execute(stmt)
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            result = results
+
             for row in result:
                 anomalies_in_period.append([row['timestamp'], row['end']])
-            connection.close()
+            #connection.close()
         except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: %s :: could not get cloudburst row for cloudburst id %s - %s' % (
