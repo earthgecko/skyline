@@ -43,7 +43,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
 )
 
@@ -177,6 +177,20 @@ except:
     MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS = 0
 MIRAGE_CHECK_REPETITIVE_DAILY_PEAKS = 3
 
+# @added 20250403 - Feature #5611: custom_algorithm_only
+# Do not allow training on specific custom_algorithms
+NO_TRAINING_CUSTOM_ALGORITHMS = [
+    'decreased_percent_with_increasing_pair',
+]
+
+# @added 20260221 - Feature #5712: skyline.dawn
+#                   Task #5628: Build v5.0.0 and test
+SKYLINE_DAWN_ENABLED = True
+try:
+    SKYLINE_DAWN_ENABLED = settings.SKYLINE_DAWN_ENABLED
+except:
+    SKYLINE_DAWN_ENABLED = True
+
 # @added 20230424 - Feature #4724: custom_algorithms - anomalous_daily_peak
 # Added expiry to record metrics identified as normal by anomalous_daily_peaks
 # to allow Mirage to set a key in a hash and to allow Analyzer labelled_metrics
@@ -296,7 +310,11 @@ class MirageLabelledMetrics(Thread):
                 logger.error('metric_vars not loaded with literal_eval')
                 metric_vars = []
 
-        string_keys = ['metric']
+        # @modified 20250403 - Feature #5611: custom_algorithm_only
+        # Added custom_algorithm_only
+        #string_keys = ['metric']
+        string_keys = ['metric', 'custom_algorithm_only']
+
         float_keys = ['value']
         # @modified 20241120 - Feature #5064: mirage.inflection
         # Added anomaly_id
@@ -835,6 +853,15 @@ class MirageLabelledMetrics(Thread):
             except:
                 triggered_algorithms = []
 
+            # @modified 20250403 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            try:
+                key = 'custom_algorithm_only'
+                value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+                custom_algorithm_only = value_list[0]
+            except:
+                custom_algorithm_only = None
+
             metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric))
 
             # @added 20240229 - Feature #5292: mirage - skip analysis if smtp alert key
@@ -851,6 +878,25 @@ class MirageLabelledMetrics(Thread):
             # or not.
             mirage_alert_key_ttl = 0
             mirage_smtp_alert_key = 'mirage.last_alert.smtp.%s' % metric
+
+            # @modified 20250403 - Feature #5611: custom_algorithm_only
+            # Added custom_algorithm_only
+            if custom_algorithm_only == 'custom_algorithm_only':
+                mirage_smtp_alert_key = mirage_smtp_alert_key + '.custom_algorithm_only'
+
+            # @added 20260221 - Feature #5712: skyline.dawn
+            #                   Task #5628: Build v5.0.0 and test
+            dawn_expiry_timestamp = None
+            if SKYLINE_DAWN_ENABLED:
+                try:
+                    dawn_expiry_timestamp = self.redis_conn_decoded.get('skyline.dawn.mirage')
+                except Exception as err:
+                    logger.error('error :: mirage_labelled_metrics :: failed on get skyline.dawn.mirage, err: %s' % (
+                        err))
+                if dawn_expiry_timestamp:
+                    logger.info('mirage_labelled_metrics :: NOTICE - skyline.dawn.mirage key exists, not analyzing metrics until %s' % (
+                        str(dawn_expiry_timestamp)))
+
             try:
                 mirage_alert_key_ttl = self.redis_conn_decoded.ttl(mirage_smtp_alert_key)
             except Exception as err:
@@ -859,6 +905,12 @@ class MirageLabelledMetrics(Thread):
             if mirage_alert_key_ttl > 59:
                 logger.info('mirage_labelled_metrics :: skipping analysis - smtp alert key exists %s with TTL: %s seconds, removing check' % (
                     mirage_smtp_alert_key, str(mirage_alert_key_ttl)))
+
+            # @modified 20260221 - Feature #5712: skyline.dawn
+            #                      Task #5628: Build v5.0.0 and test
+            # Made the conditional based on mirage_alert_key_ttl or dawn_expiry_timestamp
+            #if mirage_alert_key_ttl > 59:
+            if mirage_alert_key_ttl > 59 or dawn_expiry_timestamp:
                 # Remove metric check file
                 if os.path.isfile(metric_check_file):
                     os.remove(metric_check_file)
@@ -1231,7 +1283,10 @@ class MirageLabelledMetrics(Thread):
                     # Added custom_algorithms_results
                     # @added 20240228 - Feature #5292: mirage - skip analysis if smtp alert key
                     # Added mirage_busy
-                    anomalous, ensemble, datapoint, negatives_found, algorithms_run, custom_algorithm_results = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, current_func='mirage_labelled_metrics', mirage_busy=analyzer_labelled_metrics_busy)
+                    # @modified 20250403 - Feature #5611: custom_algorithm_only
+                    # Added derivative_metrics and custom_algorithm_only
+                    derivative_metrics = []
+                    anomalous, ensemble, datapoint, negatives_found, algorithms_run, custom_algorithm_results = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present, triggered_algorithms, custom_algorithm_only, derivative_metrics, current_func='mirage_labelled_metrics', mirage_busy=analyzer_labelled_metrics_busy)
 
                     # @added 20241120 - Task #5526: Build v5.0.0 and upgrade deps
                     #                   Branch #5532: v5.0.0-alpha
@@ -1755,6 +1810,10 @@ class MirageLabelledMetrics(Thread):
                 #     if irregular_unstable_timeseries:
                 #         snab_algorithms_to_run = ['irregular_unstable']
 
+                # @modified 20250403 - Feature #5611: custom_algorithm_only
+                # Should add custom_algorithm_only?  This is different from
+                # mirage in that this has a snab_algorithms_to_run item and
+                # mirage does not.  Need to verify
                 anomalous_metric = [datapoint, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run, snab_algorithms_to_run]
 
                 # @added 20231224 - Feature #5190: Add custom_algorithm results to Mirage and plots
@@ -1882,6 +1941,12 @@ class MirageLabelledMetrics(Thread):
                     timeseries_dir = base_name.replace('.', '/')
 
                 cache_key = 'mirage.last_alert.smtp.%s' % (base_name)
+
+                # @added 20250403 - Feature #5611: custom_algorithm_only
+                # Added custom_algorithm_only
+                if custom_algorithm_only == 'custom_algorithm_only':
+                    cache_key = cache_key + '.custom_algorithm_only'
+
                 last_alert = False
                 try:
                     # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
