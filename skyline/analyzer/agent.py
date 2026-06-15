@@ -3,7 +3,11 @@ import sys
 import traceback
 from os import getpid
 from os.path import isdir
-from daemon import runner
+# @modified 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+#                      Task #5627: v5.0.0 update dependencies
+#from daemon import runner
+import daemon
+
 from time import sleep, time
 # @added 20191024 - Branch #3262: py3
 from sys import version_info
@@ -27,6 +31,9 @@ if True:
     from validate_settings import validate_settings_variables
     # @added 20220328 - Feature #4018: thunder - skyline.errors
     from functions.redis.RedisErrorLogHandler import RedisErrorLogHandler
+    # @added 20250612 - Support #4860: python-daemon-3.0.0 - runner deprecated
+    #                   Task #5627: v5.0.0 update dependencies
+    import service_runner as runner
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
