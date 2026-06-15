@@ -43,12 +43,23 @@ def related_to_metric_groups(current_skyline_app, base_name, metric_id):
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: related_to_metric_groups :: metric_group_table_meta - %s' % str(err))
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if metric_id:
-                stmt = select([metric_group_table]).where(metric_group_table.c.related_metric_id == metric_id).order_by(metric_group_table.c.avg_coefficient.desc())
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metric_group_table]).where(metric_group_table.c.related_metric_id == metric_id).order_by(metric_group_table.c.avg_coefficient.desc())
+                stmt = select(metric_group_table).where(metric_group_table.c.related_metric_id == metric_id).order_by(metric_group_table.c.avg_coefficient.desc())
             else:
-                stmt = select([metric_group_table])
-            results = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([metric_group_table])
+                stmt = select(metric_group_table)
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
             for row in results:
                 group_metric_id = row['metric_id']
                 group_base_name = None
@@ -59,7 +70,7 @@ def related_to_metric_groups(current_skyline_app, base_name, metric_id):
                         str(group_metric_id), str(err)))
                 if group_base_name:
                     related_to_metric_groups_dict['related_to_metrics'][group_base_name] = dict(row)
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: related_to_metric_groups :: failed to build metric_groups dict - %s' % str(err))
