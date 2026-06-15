@@ -1093,7 +1093,9 @@ class Crucible(Thread):
                     logger.info('gzipping - %s' % anomaly_json)
                 try:
                     f_in = open(anomaly_json)
-                    f_out = gzip.open(anomaly_json_gz, 'wb')
+                    # @modified 20250112 - Feature #5588: snab.process_algorithm
+                    #f_out = gzip.open(anomaly_json_gz, 'wb')
+                    f_out = gzip.open(anomaly_json_gz, 'wt')
                     f_out.writelines(f_in)
                     f_out.close()
                     f_in.close()
@@ -1179,6 +1181,14 @@ class Crucible(Thread):
                     timeseries = json.loads(f.read())
                     raw_timeseries = f.read()
                     timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                    # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                    if 'nan' in timeseries_array_str:
+                        try:
+                            timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                        except Exception as err:
+                            logger.error('error :: failed to replace nan with None, err: %s' % (
+                                err))
+
                     timeseries = literal_eval(timeseries_array_str)
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('loaded time series from - %s' % anomaly_json)
@@ -1194,6 +1204,14 @@ class Crucible(Thread):
                     with open(anomaly_json, 'r') as f:
                         raw_timeseries = f.read()
                         timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                        if 'nan' in timeseries_array_str:
+                            try:
+                                timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                            except Exception as err:
+                                logger.error('error :: failed to replace nan with None, err: %s' % (
+                                    err))
+
                         timeseries = literal_eval(timeseries_array_str)
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('loaded time series with literal_eval from - %s' % anomaly_json)
@@ -1376,7 +1394,9 @@ class Crucible(Thread):
                 remove_json = False
                 try:
                     f_in = open(anomaly_json)
-                    f_out = gzip.open(anomaly_json_gz, 'wb')
+                    # @modified 20250112 - Feature #5588: snab.process_algorithm
+                    #f_out = gzip.open(anomaly_json_gz, 'wb')
+                    f_out = gzip.open(anomaly_json_gz, 'wt')
                     f_out.writelines(f_in)
                     f_out.close()
                     f_in.close()
