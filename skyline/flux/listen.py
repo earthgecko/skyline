@@ -410,6 +410,14 @@ for namespace in list(aggregate_namespaces_dict.keys()):
 #                   Task #5088: Change membership of the list checks to sets
 aggregate_namespaces_list = set(aggregate_namespaces_list)
 
+
+# @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+LONGTERM_FULL_DURATION_NAMESPACES = []
+try:
+    LONGTERM_FULL_DURATION_NAMESPACES = settings.LONGTERM_FULL_DURATION_NAMESPACES
+except:
+    LONGTERM_FULL_DURATION_NAMESPACES = []
+
 # @added 20220117 - Feature #4324: flux - reload external_settings
 #                   Feature #4376: webapp - update_external_settings
 def check_validate_key_update(caller):
@@ -1287,7 +1295,11 @@ class MetricData(object):
         # @added 20220128 - Feature #4400: flux - quota
         namespace_quota = 0
         current_namespace_metric_count = 0
+
+        # @modified 20250225 - Task #5602: flux - namespace_metrics use set not list
+        # Changed from using a list to a set, every little helps.
         namespace_metrics = []
+
         namespace_metrics_count = 0
         rejected_metric_over_quota = None
         check_namespace_quota = None
@@ -1628,7 +1640,7 @@ class MetricDataPost(object):
             request_id = '%s.%s' % (str(post_req_start), str(uuid.uuid4()))
             timings_dict['request_id'] = request_id
             if TIMINGS:
-                logger.debug('debug :: listen :: request_id: %s - handling POST metric_data_post request' % request_id)
+                logger.info('listen :: request_id: %s - handling POST metric_data_post request' % request_id)
 
             # @added 20220210 - Feature #4284: flux - telegraf
             start_request_timer = timer()
@@ -2285,6 +2297,13 @@ class MetricDataPost(object):
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: could not determine metrics in post - %s' % err)
             received_namespaces = list(set(received_namespaces))
+            # @added 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+            # Added additional logging
+            if FLUX_VERBOSE_LOGGING:
+                try:
+                    logger.info('listen :: received_namespaces: %s' % str(received_namespaces))
+                except Exception as err:
+                    logger.error('error :: listen :: could not log received_namespaces, err: %s' % err)
 
             # @added 20231031 - Support #5114: debug.flux.request_times
             timings_dict['received_namespaces'] = '%.6f' % round((timer() - start_received_namespaces), 6)
@@ -2396,16 +2415,24 @@ class MetricDataPost(object):
 
             try:
                 if metric_namespace_prefix:
-                    logger.info('listen :: data for metric_namespace_prefix: %s' % str(metric_namespace_prefix))
+                    # @modified 20260506 - Feature #4284: flux - telegraf
+                    # Wrapped in if FLUX_VERBOSE_LOGGING
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: data for metric_namespace_prefix: %s' % str(metric_namespace_prefix))
                     check_namespace_quota = str(metric_namespace_prefix)
                 else:
                     if len(received_namespaces) == 1:
                         check_namespace_quota = received_namespaces[0]
                 if check_namespace_quota in namespaces_with_quotas:
                     namespace_quota = get_namespace_quota(check_namespace_quota)
-
-                logger.info('listen :: %s, namespace_quota: %s' % (
-                    str(metric_namespace_prefix), str(namespace_quota)))
+                # @modified 20260506 - Feature #4284: flux - telegraf
+                # Wrapped in if FLUX_VERBOSE_LOGGING
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: %s, namespace_quota: %s' % (
+                        # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+                        # Handle a single namespace in logging
+                        #str(metric_namespace_prefix), str(namespace_quota)))
+                        str(check_namespace_quota), str(namespace_quota)))
 
                 # @added 20230223 - Feature #4840: flux - prometheus - x-test-only header
                 # Do not check namespace_quota for test metrics
@@ -2417,8 +2444,14 @@ class MetricDataPost(object):
                     check_namespace_quota, str(namespace_quota_key_reference_timestamp))
 
                 if namespace_quota:
-                    logger.info('listen :: %s quota: %s' % (
-                        str(metric_namespace_prefix), str(namespace_quota)))
+                    # @modified 20260506 - Feature #4284: flux - telegraf
+                    # Wrapped in if FLUX_VERBOSE_LOGGING
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: %s quota: %s' % (
+                            # @modified 20251027 - Feature #5662: flux prometheus - prevent prometheus breaching initial quota
+                            # Handle a single namespace in logging
+                            #str(metric_namespace_prefix), str(namespace_quota)))
+                            str(check_namespace_quota), str(namespace_quota)))
                     current_namespace_metric_count = 0
                     try:
                         current_namespace_metric_count = redis_conn_decoded.scard(namespace_quota_redis_key)
@@ -2443,7 +2476,10 @@ class MetricDataPost(object):
                                 namespace_metrics = []
 
                     namespace_metrics_count = len(namespace_metrics)
-                    logger.info('listen :: %s metrics from %s' % (str(len(namespace_metrics)), quota_namespace_metrics_redis_key))
+                    # @modified 20260506 - Feature #4284: flux - telegraf
+                    # Wrapped in if FLUX_VERBOSE_LOGGING
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: %s metrics from %s' % (str(len(namespace_metrics)), quota_namespace_metrics_redis_key))
 
                     # @added 20220202 - Feature #4412: flux - quota - thunder alert
                     try:
@@ -2500,8 +2536,11 @@ class MetricDataPost(object):
                         else:
                             not_found_in_not_skipped.append(base_name)
                     if TIMINGS:
-                        logger.debug('debug :: listen :: metrics_found_in_redis count after not_skipped_metrics: %s' % str(len(metrics_found_in_redis)))
-                        logger.debug('debug :: listen :: not_found_in_not_skipped count after not_skipped_metrics: %s' % str(len(not_found_in_not_skipped)))
+                        # @modified 20260506 - Feature #4284: flux - telegraf
+                        # Wrapped in if FLUX_VERBOSE_LOGGING
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.debug('debug :: listen :: metrics_found_in_redis count after not_skipped_metrics: %s' % str(len(metrics_found_in_redis)))
+                            logger.debug('debug :: listen :: not_found_in_not_skipped count after not_skipped_metrics: %s' % str(len(not_found_in_not_skipped)))
 
                     # @added 20231106 - Support #5114: debug.flux.request_times
                     timings_dict['skip_metrics_redis_resources'] = '%.6f' % round((timer() - start_skip_metrics_redis_resources_timer), 6)
@@ -2548,13 +2587,16 @@ class MetricDataPost(object):
 
                             if TIMINGS:
                                 end_skipped_metrics_dict_redis_resources_timer = timer()
-                                if skipped_metrics_dict:
-                                    logger.debug('debug :: listen :: skipped_metrics_dict with %s metrics from Redis hash %s took %.6f seconds' % (
-                                        str(len(skipped_metrics_dict)), flux_skipped_metrics_key,
-                                        (end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer)))
-                                else:
-                                    logger.debug('debug :: listen :: no skipped_metrics_dict from Redis took %.6f seconds' % (
-                                        (end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer)))
+                                # @modified 20260506 - Feature #4284: flux - telegraf
+                                # Wrapped in if FLUX_VERBOSE_LOGGING
+                                if FLUX_VERBOSE_LOGGING:    
+                                    if skipped_metrics_dict:
+                                        logger.debug('debug :: listen :: skipped_metrics_dict with %s metrics from Redis hash %s took %.6f seconds' % (
+                                            str(len(skipped_metrics_dict)), flux_skipped_metrics_key,
+                                            (end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer)))
+                                    else:
+                                        logger.debug('debug :: listen :: no skipped_metrics_dict from Redis took %.6f seconds' % (
+                                            (end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer)))
                                 # @added 20231106 - Support #5114: debug.flux.request_times
                                 start_get_namespace_quota = timer()
                                 timings_dict['skipped_metrics_dict_redis_resources'] = '%.6f' % round((end_skipped_metrics_dict_redis_resources_timer - start_skipped_metrics_dict_redis_resources_timer), 6)
@@ -2614,8 +2656,12 @@ class MetricDataPost(object):
                                     skipped_metrics.append(base_name)
                     if TIMINGS:
                         end_skip_metrics_redis_resources_timer = timer()
-                        logger.debug('debug :: listen :: skip_metrics_redis_resources took %.6f seconds' % (end_skip_metrics_redis_resources_timer - start_skip_metrics_redis_resources_timer))
-                        logger.debug('debug :: listen :: metrics_found_in_redis count after skipped_metrics: %s' % str(len(metrics_found_in_redis)))
+                        # @modified 20260506 - Feature #4284: flux - telegraf
+                        # Wrapped in if FLUX_VERBOSE_LOGGING
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.debug('debug :: listen :: skip_metrics_redis_resources took %.6f seconds' % (end_skip_metrics_redis_resources_timer - start_skip_metrics_redis_resources_timer))
+                            logger.debug('debug :: listen :: metrics_found_in_redis count after skipped_metrics: %s' % str(len(metrics_found_in_redis)))
+
                         # @added 20231106 - Support #5114: debug.flux.request_times
                         timings_dict['skip_metrics_redis_resources - all'] = '%.6f' % round((end_skip_metrics_redis_resources_timer - start_skip_metrics_redis_resources_timer), 6)
                         
@@ -2702,12 +2748,15 @@ class MetricDataPost(object):
                         logger.error('error :: listen :: could not determine metrics to skip - %s' % err)
                     if TIMINGS:
                         end_skip_metrics_lists_timer = timer()
-                        logger.debug('debug :: listen :: skip_metrics_lists took %.6f seconds' % (end_skip_metrics_lists_timer - start_skip_metrics_lists_timer))
-                        logger.debug('debug :: listen :: skip_metrics_lists total unique metrics in post: %s, found_in_redis: %s, skip_checked: %s, not_skipped_metrics: %s' % (
-                            str(metrics_in_post_count),
-                            str(metrics_found_in_redis_count),
-                            str(metrics_not_found_in_redis_count),
-                            str(len(not_skipped_metrics))))
+                        # @modified 20260506 - Feature #4284: flux - telegraf
+                        # Wrapped in if FLUX_VERBOSE_LOGGING
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.debug('debug :: listen :: skip_metrics_lists took %.6f seconds' % (end_skip_metrics_lists_timer - start_skip_metrics_lists_timer))
+                            logger.debug('debug :: listen :: skip_metrics_lists total unique metrics in post: %s, found_in_redis: %s, skip_checked: %s, not_skipped_metrics: %s' % (
+                                str(metrics_in_post_count),
+                                str(metrics_found_in_redis_count),
+                                str(metrics_not_found_in_redis_count),
+                                str(len(not_skipped_metrics))))
                         # @added 20231106 - Support #5114: debug.flux.request_times
                         timings_dict['skip_metrics_lists'] = '%.6f' % round((end_skip_metrics_lists_timer - start_skip_metrics_lists_timer), 6)
 
@@ -2760,7 +2809,10 @@ class MetricDataPost(object):
 
                     if TIMINGS:
                         end_namespace_quota_timer = timer()
-                        logger.debug('debug :: listen :: namespace_quota checks per metric took %.6f seconds' % (end_namespace_quota_timer - start_namespace_quota_timer))
+                        # @modified 20260506 - Feature #4284: flux - telegraf
+                        # Wrapped in if FLUX_VERBOSE_LOGGING
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.debug('debug :: listen :: namespace_quota checks per metric took %.6f seconds' % (end_namespace_quota_timer - start_namespace_quota_timer))
 
                         # @added 20231106 - Support #5114: debug.flux.request_times
                         timings_dict['namespace_quota'] = namespace_quota
@@ -2780,6 +2832,9 @@ class MetricDataPost(object):
                 namespace_quota_metrics_timings = []
                 add_to_namespace_quota_set = []
                 update_namespace_quota_set_once = True
+
+                # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+                long_full_duration_metrics_data = []
 
                 for metric_data in metrics:
 
@@ -2806,6 +2861,18 @@ class MetricDataPost(object):
                         # Redis
                         if '..' in metric:
                             new_metric = metric.replace('..', '.')
+                            metric = new_metric
+                            metric_data['metric'] = new_metric
+                        # @added 20260402 - Feature #5086: flux.listen - automatically replace space with underscores in metric names
+                        # Also replace * in name with underscore
+                        if '*' in metric:
+                            new_metric = metric.replace('*', '_')
+                            metric = new_metric
+                            metric_data['metric'] = new_metric
+                        # @added 20260402 - Feature #5086: flux.listen - automatically replace space with underscores in metric names
+                        # And ' as in JIT's from PNG :)
+                        if "'" in metric:
+                            new_metric = metric.replace("'", '_')
                             metric = new_metric
                             metric_data['metric'] = new_metric
 
@@ -3245,6 +3312,29 @@ class MetricDataPost(object):
 
                         processed_metrics.append(original_base_name)
 
+                        # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+                        if LONGTERM_FULL_DURATION_NAMESPACES:
+                            # This is a reduced version of matched_or_regexed_in_list
+                            # just based on the namespace elements.  This is
+                            # super fast, checking 5609 metrics takes
+                            # 0.035369873046875 seconds.
+                            errs = []
+                            try:
+                                base_name_namespace_elements = metric.split('.')
+                                matched = False
+                                for match_namespace in LONGTERM_FULL_DURATION_NAMESPACES:
+                                    match_namespace_namespace_elements = match_namespace.split('.')
+                                    elements_matched = set(base_name_namespace_elements) & set(match_namespace_namespace_elements)
+                                    if len(elements_matched) == len(match_namespace_namespace_elements):
+                                        matched = True
+                                        break
+                                if matched:
+                                    metric_data_csv = ','.join(map(str, metric_data[0:3]))
+                                    long_full_duration_metrics_data.append(metric_data_csv)
+                            except Exception as err:
+                                errs.append(err)
+                            del errs
+
                         # @added 20231106 - Support #5114: debug.flux.request_times
                         if TIMINGS:
                             queue_put_timings.append(timer() - start_queue_put_timer)
@@ -3297,11 +3387,28 @@ class MetricDataPost(object):
                         timings_dict['update_namespace_quota_set_metric_count'] = len(add_to_namespace_quota_set_set)
                         timings_dict['update_namespace_quota_set_timing'] = '%.6f' % round((timer() - start_namespace_quota_set_update), 6)
 
+                # @added 20250331 - Feature #5614: VictoriaMetrics - LONGTERM_FULL_DURATION_NAMESPACES
+                if long_full_duration_metrics_data:
+                    current_aligned_ts = int(int(time()) // 60 * 60)
+                    long_full_duration_metrics_data_redis_key = 'skyline.long_full_duration_metrics.%s' % str(current_aligned_ts)
+                    try:
+                        redis_conn.sadd(long_full_duration_metrics_data_redis_key, *set(long_full_duration_metrics_data))
+                        logger.info('listen :: added %s metrics to %s' % (
+                            str(len(set(long_full_duration_metrics_data))),
+                            long_full_duration_metrics_data_redis_key))
+                        redis_conn.expire(long_full_duration_metrics_data_redis_key, 125)
+                    except Exception as err:
+                        logger.error('error :: listen :: failed to add %s metrics to Redis set %s, %s' % (
+                            str(len(long_full_duration_metrics_data)), long_full_duration_metrics_data_redis_key, err))
+
                 # @added 20220210 - Feature #4284: flux - telegraf
                 # Added TIMINGS
                 if TIMINGS:
                     end_metrics_processing_timer = timer()
-                    logger.debug('debug :: listen :: metrics_processing took %.6f seconds' % (end_metrics_processing_timer - start_metrics_processing_timer))
+                    # @modified 20260506 - Feature #4284: flux - telegraf
+                    # Wrapped in if FLUX_VERBOSE_LOGGING
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.debug('debug :: listen :: metrics_processing took %.6f seconds' % (end_metrics_processing_timer - start_metrics_processing_timer))
 
                     # @added 20231106 - Support #5114: debug.flux.request_times
                     timings_dict['metrics_processing'] = round((end_metrics_processing_timer - start_metrics_processing_timer), 6)
@@ -3333,9 +3440,12 @@ class MetricDataPost(object):
 
             # @added 20231031 - Support #5114: debug.flux.request_times
             # Added checked_if_aggregate
-            logger.debug('debug :: listen :: checked_if_aggregate: %s metrics, checked_not_skipped_metrics: %s, metrics_processed: %s' % (
-                str(checked_if_aggregate), str(checked_not_skipped_metrics),
-                str(len(processed_metrics))))
+            # @modified 20260506 - Feature #4284: flux - telegraf
+            # Wrapped in if FLUX_VERBOSE_LOGGING
+            if FLUX_VERBOSE_LOGGING:
+                logger.debug('debug :: listen :: checked_if_aggregate: %s metrics, checked_not_skipped_metrics: %s, metrics_processed: %s' % (
+                    str(checked_if_aggregate), str(checked_not_skipped_metrics),
+                    str(len(processed_metrics))))
 
             # @added 20231031 - Support #5114: debug.flux.request_times
             # Use a single incrby call instead of a redis conn and incr per metric
@@ -3445,7 +3555,7 @@ class MetricDataPost(object):
                         except Exception as err:
                             logger.error('error :: worker :: failed to set memcache flux.listen.over_quota.rejected_metrics - %s' % (str(err)))
                         if success:
-                            logger.info('worker :: set memcache flux.listen.over_quota.rejected_metrics key - %s')
+                            logger.info('worker :: set memcache flux.listen.over_quota.rejected_metrics key')
 
                     data = []
                     for metric in rejected_metrics_over_quota:
@@ -3618,14 +3728,17 @@ class MetricDataPost(object):
                     try:
                         if TIMINGS:
                             start_flux_not_skipped_metrics_timer = timer()
-                            logger.debug('debug :: listen :: checking %s not_skipped_metrics to update flux.not_skipped_metrics keys for %s received_namespaces, checking %s' % (
-                                str(len(not_skipped_metrics)),
-                                str(len(received_namespaces)),
-                                received_namespace))
-                            logger.debug('debug :: listen :: not_skipped_metrics sample: %s' % (
-                                str(not_skipped_metrics[0:3])))
-                            logger.debug('debug :: listen :: not_skipped_metrics_dict count: %s' % (
-                                str(len(not_skipped_metrics_dict))))
+                            # @modified 20260506 - Feature #4284: flux - telegraf
+                            # Wrapped in if FLUX_VERBOSE_LOGGING
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.debug('debug :: listen :: checking %s not_skipped_metrics to update flux.not_skipped_metrics keys for %s received_namespaces, checking %s' % (
+                                    str(len(not_skipped_metrics)),
+                                    str(len(received_namespaces)),
+                                    received_namespace))
+                                logger.debug('debug :: listen :: not_skipped_metrics sample: %s' % (
+                                    str(not_skipped_metrics[0:3])))
+                                logger.debug('debug :: listen :: not_skipped_metrics_dict count: %s' % (
+                                    str(len(not_skipped_metrics_dict))))
                         update_not_skipped_metrics = {}
                         for metric in list(set(not_skipped_metrics)):
                             if metric.startswith(received_namespace):
@@ -3659,14 +3772,17 @@ class MetricDataPost(object):
                                     flux_not_skipped_metrics_key, err))
                         if TIMINGS:
                             end_flux_not_skipped_metrics_timer = timer()
-                            if update_not_skipped_metrics:
-                                logger.debug('debug :: listen :: updating %s took %.6f seconds to update with %s metrics' % (
-                                    flux_not_skipped_metrics_key,
-                                    (end_flux_not_skipped_metrics_timer - start_flux_not_skipped_metrics_timer),
-                                    str(len(update_not_skipped_metrics))))
-                            else:
-                                logger.debug('debug :: listen :: no metrics to update in %s check took %.6f seconds' % (
-                                    flux_not_skipped_metrics_key, (end_flux_not_skipped_metrics_timer - start_flux_not_skipped_metrics_timer)))
+                            # @modified 20260506 - Feature #4284: flux - telegraf
+                            # Wrapped in if FLUX_VERBOSE_LOGGING
+                            if FLUX_VERBOSE_LOGGING:
+                                if update_not_skipped_metrics:
+                                    logger.debug('debug :: listen :: updating %s took %.6f seconds to update with %s metrics' % (
+                                        flux_not_skipped_metrics_key,
+                                        (end_flux_not_skipped_metrics_timer - start_flux_not_skipped_metrics_timer),
+                                        str(len(update_not_skipped_metrics))))
+                                else:
+                                    logger.debug('debug :: listen :: no metrics to update in %s check took %.6f seconds' % (
+                                        flux_not_skipped_metrics_key, (end_flux_not_skipped_metrics_timer - start_flux_not_skipped_metrics_timer)))
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: listen :: an error occurred check flux.not_skipped_metrics to update - %s' % (
@@ -3686,8 +3802,11 @@ class MetricDataPost(object):
                         if TIMINGS:
                             start_flux_skipped_metrics_timer = timer()
                             skipped_metrics_count = len(list(set(skipped_metrics)))
-                            logger.debug('debug :: listen :: checking which of the %s skipped metrics need updating in %s' % (
-                                str(skipped_metrics_count), flux_skipped_metrics_key))
+                            # @modified 20260506 - Feature #4284: flux - telegraf
+                            # Wrapped in if FLUX_VERBOSE_LOGGING
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.debug('debug :: listen :: checking which of the %s skipped metrics need updating in %s' % (
+                                    str(skipped_metrics_count), flux_skipped_metrics_key))
                         update_skipped_metrics = {}
                         for metric in list(set(skipped_metrics)):
                             if metric.startswith(received_namespace):
@@ -3711,8 +3830,11 @@ class MetricDataPost(object):
                                     update_skipped_metrics[metric] = post_req_start
                         if update_skipped_metrics:
                             if TIMINGS:
-                                logger.debug('debug :: listen :: %s skipped metrics need updating in %s' % (
-                                    str(len(update_skipped_metrics)), flux_skipped_metrics_key))
+                                # @modified 20260506 - Feature #4284: flux - telegraf
+                                # Wrapped in if FLUX_VERBOSE_LOGGING
+                                if FLUX_VERBOSE_LOGGING:
+                                    logger.debug('debug :: listen :: %s skipped metrics need updating in %s' % (
+                                        str(len(update_skipped_metrics)), flux_skipped_metrics_key))
                             try:
                                 redis_conn_decoded.hset(flux_skipped_metrics_key, mapping=update_skipped_metrics)
                             except Exception as err:
@@ -3721,13 +3843,19 @@ class MetricDataPost(object):
                                     flux_skipped_metrics_key, err))
                         else:
                             if TIMINGS:
-                                logger.debug('debug :: listen :: no skipped metrics need updating in %s' % flux_skipped_metrics_key)
+                                # @modified 20260506 - Feature #4284: flux - telegraf
+                                # Wrapped in if FLUX_VERBOSE_LOGGING
+                                if FLUX_VERBOSE_LOGGING:
+                                    logger.debug('debug :: listen :: no skipped metrics need updating in %s' % flux_skipped_metrics_key)
                         if TIMINGS:
                             end_flux_skipped_metrics_timer = timer()
-                            logger.debug('debug :: listen :: updating %s took %.6f seconds to update with %s metrics' % (
-                                flux_skipped_metrics_key,
-                                (end_flux_skipped_metrics_timer - start_flux_skipped_metrics_timer),
-                                str(len(update_skipped_metrics))))
+                            # @modified 20260506 - Feature #4284: flux - telegraf
+                            # Wrapped in if FLUX_VERBOSE_LOGGING
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.debug('debug :: listen :: updating %s took %.6f seconds to update with %s metrics' % (
+                                    flux_skipped_metrics_key,
+                                    (end_flux_skipped_metrics_timer - start_flux_skipped_metrics_timer),
+                                    str(len(update_skipped_metrics))))
                     except Exception as err:
                         logger.error(traceback.format_exc())
                         logger.error('error :: listen :: an error occurred check flux.skipped_metrics to update - %s' % (
@@ -3849,24 +3977,38 @@ class MetricDataPost(object):
 
                 # @modified 20231024 - Feature #3394: flux health check
                 # Add some debugging for 499s, added timing
-                logger.info('listen :: metric_data_post return 204 - metrics: %s, processed: %s (to aggregate %s), skipped: %s, dropped non-numeric: %s, metric_namespace_prefix: %s - took %s seconds' % (
-                    str(len(metrics)), str(len(processed_metrics)),
-                    str(len(metrics_added_to_aggregation)),
-                    str(len(list(set(skipped_metrics)))),
-                    str(len(dropped_telegraf_non_numeric_value_metrics)),
-                    str(metric_namespace_prefix),
-                    # @added 20231024 - Feature #3394: flux health check
-                    # Add some debugging for 499s, added timing
-                    str(round((timer() - start_request_timer), 6))))
+                # @modified 20260506 - Feature #4284: flux - telegraf
+                # Wrapped in if FLUX_VERBOSE_LOGGING
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: metric_data_post return 204 - metrics: %s, processed: %s (to aggregate %s), skipped: %s, dropped non-numeric: %s, metric_namespace_prefix: %s - took %s seconds' % (
+                        str(len(metrics)), str(len(processed_metrics)),
+                        str(len(metrics_added_to_aggregation)),
+                        str(len(list(set(skipped_metrics)))),
+                        str(len(dropped_telegraf_non_numeric_value_metrics)),
+                        str(metric_namespace_prefix),
+                        # @added 20231024 - Feature #3394: flux health check
+                        # Add some debugging for 499s, added timing
+                        str(round((timer() - start_request_timer), 6))))
 
             # @added 20231106 - Support #5114: debug.flux.request_times
             timings_dict['namespace'] = metric_namespace_prefix
             timings_dict['processed_metrics'] = len(processed_metrics)
             timings_dict['request_time'] = round((timer() - start_request_timer), 6)
             if TIMINGS:
-                logger.info('listen :: request_id: %s, timings_dict: %s' % (
+                # @modified 20260506 - Feature #4284: flux - telegraf
+                # Wrapped in if FLUX_VERBOSE_LOGGING
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: request_id: %s, timings_dict: %s' % (
+                        request_id,
+                        str(timings_dict)))
+
+            # @added 20260506 - Feature #4284: flux - telegraf
+            # Wrapped in if FLUX_VERBOSE_LOGGING
+            if not FLUX_VERBOSE_LOGGING:
+                logger.info('listen :: request_id: %s, for namespace: %s (with quota: %s), took: %s seconds' % (
                     request_id,
-                    str(timings_dict)))
+                    str(check_namespace_quota), str(namespace_quota),
+                    str(timings_dict['request_time'])))
 
             return
         except Exception as err:
@@ -3977,6 +4119,18 @@ class OTLPTracePost(object):
                 logger.info('warning :: listen :: OTLPTracePost :: %s, returning 400' % message)
                 resp.status = falcon.HTTP_400
                 return
+
+            # @added 20241212
+            # Save traces to transient Redis keys
+            trace_debug = False
+            if trace and trace_debug:
+                trace_key = 'flux.otel_trace.%s' % (str(time()))
+                try:
+                    redis_conn.setex(trace_key, 120, str(trace))
+                except Exception as err:
+                    logger.error('error :: listen :: OTLPTracePost :: could not save %s to Redis, err: %s' % (
+                        trace_key, str(err)))
+
             resourceSpans = []
             try:
                 resourceSpans = trace['resourceSpans']
@@ -4635,6 +4789,21 @@ class VortexDataPost(object):
                         del postData['timeseries']
                     except:
                         pass
+                    # @added 20260423 - Feature #5665: custom_algorithm - mirage_nirvana
+                    # Remove any api keys from the log if any are sent in the
+                    # request
+                    for key in list(postData.keys()):
+                        if 'api_key' in key:
+                            try:
+                                del postData[key]
+                            except:
+                                pass
+
+                    try:
+                        del postData['timeseries']
+                    except:
+                        pass
+
                     logger.info('warning :: listen :: vortex :: unauthorized shard request made - postData (excl. timeseries):  %s' % str(postData))
                     resp.status = falcon.HTTP_403
                     return
@@ -5269,6 +5438,8 @@ class VortexResults(object):
                 status_code = results['status_code']
             except:
                 status_code = 200
+            logger.info('listen :: vortex_results :: request_id: %s, results["status_code"]: %s' % (
+                request_id, str(status_code)))
 
             resp.text = json.dumps(results)
             end_request_timer = timer()
@@ -5281,6 +5452,10 @@ class VortexResults(object):
             if status_code == 200:
                 resp.status = falcon.HTTP_200
             elif status_code == 400:
+
+                logger.info('listen :: vortex_results :: request_id: %s, results["status_code"]: %s, results: %s' % (
+                    request_id, str(status_code), str(results)))
+
                 resp.status = falcon.HTTP_400
             else:
                 resp.status = falcon.HTTP_500
