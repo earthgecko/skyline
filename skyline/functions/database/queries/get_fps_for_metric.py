@@ -48,22 +48,34 @@ def get_fps_for_metric(current_skyline_app, metric_id):
         return fps_dict
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
+        stmt = select(ionosphere_table).where(ionosphere_table.c.metric_id == int(metric_id))
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         if results:
             for row in results:
                 fp_id = row['id']
                 fps_dict[fp_id] = dict(row)
-        connection.close()
+        #connection.close()
     except Exception as e:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        try:
-            connection.close()
-        except Exception as err:
-            current_logger.error('error :: %s :: failed to close connection - %s' % (
-                function_str, err))
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #try:
+        #    connection.close()
+        #except Exception as err:
+        #    current_logger.error('error :: %s :: failed to close connection - %s' % (
+        #        function_str, err))
         fail_msg = 'error :: %s :: could not convert db ionosphere rows to dict - %s' % (
             function_str, e)
         current_logger.error('%s' % fail_msg)

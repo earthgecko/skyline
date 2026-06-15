@@ -1,32 +1,25 @@
 """
-set_metric_ids_as_active.py
+update_metric_tenant_id.py
 """
 import logging
 import traceback
-from time import time
 
-#from sqlalchemy.sql import select
+# @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+#import settings
 
 from database import get_engine, engine_disposal, metrics_table_meta
 
 
-# @added 20230123 - Task #2732: Prometheus to Skyline
-#                   Branch #4300: prometheus
-#                   Feature #4444: webapp - inactive_metrics
-# Set the passed metric ids to active again
-def set_metric_ids_as_active(current_skyline_app, metric_ids):
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+def update_metric_tenant_id(current_skyline_app, metric, tenant_id):
     """
-    Set all the passed metric ids as active
+    Update the metric tenant_id in the metrics table
     """
-
-    function_str = 'database.queries.set_metric_ids_as_active'
-    set_metrics_as_active_count = 0
+    function_str = 'database.queries.update_metric_tenant_id'
 
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
-
-    current_logger.info('%s :: attempting to set %s metrics as active' % (
-        function_str, str(len(metric_ids))))
+    set_tenant_id = None
 
     try:
         engine, fail_msg, trace = get_engine(current_skyline_app)
@@ -35,46 +28,15 @@ def set_metric_ids_as_active(current_skyline_app, metric_ids):
         current_logger.error(trace)
         fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, err)
         current_logger.error('%s' % fail_msg)
-        return set_metrics_as_active_count
+        return set_tenant_id
 
     try:
         metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
         current_logger.info(fail_msg)
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
         current_logger.error('%s' % trace)
         fail_msg = 'error :: %s :: failed to get metrics_table meta - %s' % (
-            function_str, e)
-        current_logger.error('%s' % fail_msg)
-        if engine:
-            engine_disposal(current_skyline_app, engine)
-        if current_skyline_app == 'webapp':
-            # Raise to webapp
-            raise
-        return set_metrics_as_active_count
-
-    try:
-        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
-        #                      Task #5628: Build v5.0.0 and test
-        #connection = engine.connect()
-        #ins = metrics_table.update().values(
-        #    inactive=0, inactive_at=int(time())).\
-        #    where(metrics_table.c.id.in_(metric_ids))
-        #connection.execute(stmt)
-        #result = connection.execute(stmt)
-        #set_metrics_as_active_count = int(result.rowcount)
-        #connection.close()
-        ins = metrics_table.update().\
-            where(metrics_table.c.id.in_(metric_ids)).values(
-            inactive=0, inactive_at=int(time()))
-        with engine.begin() as connection:
-            result = connection.execute(ins)
-            set_metrics_as_active_count = int(result.rowcount)
-
-    except Exception as err:
-        trace = traceback.format_exc()
-        current_logger.error(trace)
-        fail_msg = 'error :: %s :: could not set inactive to 0 in DB - %s' % (
             function_str, err)
         current_logger.error('%s' % fail_msg)
         if engine:
@@ -82,11 +44,37 @@ def set_metric_ids_as_active(current_skyline_app, metric_ids):
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
-        return set_metrics_as_active_count
+        return set_tenant_id
+
+    try:
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #ins = metrics_table.update().values(
+        #    tenant_id=tenant_id).\
+        #    where(metrics_table.c.metric == metric)
+        #result = connection.execute(ins)
+        #connection.close()
+        ins = metrics_table.update().\
+            where(metrics_table.c.metric == metric).values(
+            tenant_id=tenant_id)
+        with engine.begin() as connection:
+            connection.execute(ins)
+
+        set_tenant_id = tenant_id
+    except Exception as err:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: %s :: could not update metric: %s into DB - %s' % (
+            function_str, str(metric), err)
+        current_logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(current_skyline_app, engine)
+        if current_skyline_app == 'webapp':
+            # Raise to webapp
+            raise
+        return 0, fail_msg, trace
     if engine:
         engine_disposal(current_skyline_app, engine)
 
-    current_logger.info('%s :: set %s metrics as active' % (
-        function_str, str(set_metrics_as_active_count)))
-
-    return set_metrics_as_active_count
+    return set_tenant_id

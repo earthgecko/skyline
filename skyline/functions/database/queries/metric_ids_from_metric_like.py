@@ -44,12 +44,22 @@ def metric_ids_from_metric_like(current_skyline_app, metrics_like_str):
             raise
         return False, fail_msg, trace
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table.c.id]).where(metrics_table.c.metric.ilike(metrics_like_str))
-        result = connection.execute(stmt)
-        for row in result:
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table.c.id]).where(metrics_table.c.metric.ilike(metrics_like_str))
+        stmt = select(metrics_table.c.id).where(metrics_table.c.metric.ilike(metrics_like_str))
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             metric_ids.append(int(row['id']))
-        connection.close()
+        #connection.close()
         current_logger.info('%s :: determined %s metric_ids for metric_like_str: %s' % (
             function_str, str(len(metric_ids)), metrics_like_str))
     except Exception as e:

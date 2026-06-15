@@ -51,17 +51,26 @@ def get_ionosphere_echo_fps(current_skyline_app, last_id=0):
 
     errors = []
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table.c.id,ionosphere_table.c.metric_id]).\
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table.c.id,ionosphere_table.c.metric_id]).\
+        stmt = select(ionosphere_table.c.id,ionosphere_table.c.metric_id).\
             where(ionosphere_table.c.id > int(last_id)).\
             where(ionosphere_table.c.echo_fp == 1)
-        results = connection.execute(stmt)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         for row in results:
             try:
                 echo_fps[row['id']] = row['metric_id']
             except Exception as err:
                 errors.append(['err adding to echo_fps', err])
-        connection.close()
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not get echo fps, err: %s' % (

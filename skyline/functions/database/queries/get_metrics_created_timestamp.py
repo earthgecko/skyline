@@ -44,17 +44,31 @@ def get_metrics_created_timestamp(current_skyline_app, metric_ids):
         return metrics_created_timestamp, fail_msg, trace
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         if metric_ids:
-            stmt = select([metrics_table.c.id, metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table.c.id, metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
+            stmt = select(metrics_table.c.id, metrics_table.c.created_timestamp).\
+                    where(metrics_table.c.id.in_(metric_ids))
         else:
-            stmt = select([metrics_table.c.id, metrics_table.c.created_timestamp])
-        result = connection.execute(stmt)
-        for row in result:
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table.c.id, metrics_table.c.created_timestamp])
+            stmt = select(metrics_table.c.id, metrics_table.c.created_timestamp)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             metric_id = row['id']
             created_timestamp_datetime = row['created_timestamp']
             metrics_created_timestamp[metric_id] = int(time.mktime(created_timestamp_datetime.timetuple()))
-        connection.close()
+        #connection.close()
         current_logger.info('%s :: determined %s created_timestamps from the db' % (
             function_str, str(len(metrics_created_timestamp))))
     except Exception as err:

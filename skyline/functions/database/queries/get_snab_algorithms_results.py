@@ -56,10 +56,17 @@ def get_snab_algorithms_results(current_skyline_app, snab_id=0, snab_ids=[]):
         try:
             algorithms_results['snab_id'] = snab_id
             algorithms_results['algorithms_results'] = {}
-            connection = engine.connect()
+            #connection = engine.connect()
             stmt = select(snab_results_algorithms_table).where(snab_results_algorithms_table.c.snab_id == snab_id)
-            result = connection.execute(stmt)
-            for row in result:
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 algorithms_results_id = row['id']
                 algorithm_id = row['algorithm_id']
                 if row['consensus_achieved']:
@@ -73,7 +80,7 @@ def get_snab_algorithms_results(current_skyline_app, snab_id=0, snab_ids=[]):
                     'runtime': float(row['runtime']),
                     'consensus_achieved': consensus_achieved,
                 }
-            connection.close()
+            #connection.close()
             if consensus_achieved:
                 consensus_achieved_str = consensus_achieved
                 consensus_achieved_ids = consensus_achieved_str.split(',')
@@ -92,21 +99,34 @@ def get_snab_algorithms_results(current_skyline_app, snab_id=0, snab_ids=[]):
         try:
             current_logger.info('get_snab_algorithms_results :: querying snab_algorithms_results for %s snab_ids' % (
                 str(len(snab_ids))))
-            connection = engine.connect()
+            #connection = engine.connect()
             # @modified 20230922 - 
             # Improve query performance because the WHERE IN query is inefficient
-            # stmt = select([snab_results_algorithms_table], snab_results_algorithms_table.c.snab_id.in_(snab_ids))
-            stmt = select([snab_results_algorithms_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ## stmt = select([snab_results_algorithms_table], snab_results_algorithms_table.c.snab_id.in_(snab_ids))
+            # stmt = select(snab_results_algorithms_table, snab_results_algorithms_table.c.snab_id.in_(snab_ids))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([snab_results_algorithms_table]).\
+            stmt = select(snab_results_algorithms_table).\
                 where(snab_results_algorithms_table.c.snab_id >= min(snab_ids)).\
                 where(snab_results_algorithms_table.c.snab_id <= max(snab_ids))
-            result = connection.execute(stmt)
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            #result = connection.execute(stmt)
             current_logger.info('get_snab_algorithms_results :: queried snab_algorithms_results')
-            done_count = 0
-            for row in result:
+            #done_count = 0
+            for row in results:
                 # @modified 20230922 - 
                 # Improve query performance because the WHERE IN query is inefficient
                 all_sql_results[row['id']] = dict(row)
-            connection.close()
+            #connection.close()
 
             # @added 20230922 - 
             # Improve query performance because the WHERE IN query is inefficient
@@ -116,7 +136,7 @@ def get_snab_algorithms_results(current_skyline_app, snab_id=0, snab_ids=[]):
             for key, value in all_sql_results.items():
                 # membership of the list is slower than membership of a set
                 # if all_sql_results[key]['anomaly_id'] in anomaly_ids:
-                if not value['snab_id'] in snab_ids_set:
+                if value['snab_id'] not in snab_ids_set:
                     continue
                 row = value
 

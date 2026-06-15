@@ -59,13 +59,31 @@ def get_fp_minmax_scaled_data(current_skyline_app, fp_id):
         return fp_minmax_scaled_dict
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_minmax_table]).where(ionosphere_minmax_table.c.fp_id == fp_id)
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_minmax_table]).where(ionosphere_minmax_table.c.fp_id == fp_id)
+        stmt = select(ionosphere_minmax_table).where(ionosphere_minmax_table.c.fp_id == fp_id)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         if row:
             fp_minmax_scaled_dict = dict(row)
-        connection.close()
+            # @added 20250829 - Feature #4708: ionosphere - store and cache fp minmax data
+            # Coerce types
+            for key, item in fp_minmax_scaled_dict.items():
+                if 'decimal.Decimal' in str(type(fp_minmax_scaled_dict[key])):
+                    fp_minmax_scaled_dict[key] = float(row[key])
+                if 'datetime.datetime' in str(type(fp_minmax_scaled_dict[key])):
+                    fp_minmax_scaled_dict[key] = str(row[key])
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not get ionosphere_minmax row for fp id %s - %s' % (

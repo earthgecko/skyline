@@ -70,18 +70,33 @@ def get_matches(current_skyline_app, metric_id, from_timestamp, until_timestamp)
             current_logger.error('error :: %s :: ionosphere_matched_table_meta - %s' % (
                 function_str, str(err)))
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if from_timestamp and until_timestamp:
-                stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
+                stmt = select(ionosphere_matched_table).\
+                    where(ionosphere_matched_table.c.fp_id.in_(fp_ids)).\
                     where(ionosphere_matched_table.c.metric_timestamp >= from_timestamp).\
                     where(ionosphere_matched_table.c.metric_timestamp <= until_timestamp)
             else:
-                stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids))
-            results = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids))
+                stmt = select(ionosphere_matched_table).\
+                        where(ionosphere_matched_table.c.fp_id.in_(fp_ids))
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 match_id = row['id']
                 matches[match_id] = dict(row)
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s :: failed to build matches dict - %s' % (
@@ -102,18 +117,32 @@ def get_matches(current_skyline_app, metric_id, from_timestamp, until_timestamp)
             current_logger.error('error :: %s :: ionosphere_layers_matched_table_meta - %s' % (
                 function_str, str(err)))
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if from_timestamp and until_timestamp:
-                stmt = select([ionosphere_layers_matched_table], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_layers_matched_table], ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
+                stmt = select(ionosphere_layers_matched_table).\
+                    where(ionosphere_layers_matched_table.c.fp_id.in_(fp_ids)).\
                     where(ionosphere_layers_matched_table.c.anomaly_timestamp >= from_timestamp).\
                     where(ionosphere_layers_matched_table.c.anomaly_timestamp <= until_timestamp)
             else:
-                stmt = select([ionosphere_layers_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids))
-            results = connection.execute(stmt)
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_layers_matched_table], ionosphere_matched_table.c.fp_id.in_(fp_ids))
+                stmt = select(ionosphere_layers_matched_table).\
+                        where(ionosphere_matched_table.c.fp_id.in_(fp_ids))
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #results = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
             for row in results:
                 match_id = row['id']
                 matches[match_id] = dict(row)
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s :: failed to build matches dict - %s' % (

@@ -43,10 +43,10 @@ def create_alias_fps_for_metrics(current_skyline_app, alias_fps_to_create):
 
     try:
         engine, fail_msg, trace = get_engine(current_skyline_app)
-    except Exception as e:
+    except Exception as err:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, e)
+        fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, err)
         current_logger.error('%s' % fail_msg)
         if engine:
             engine_disposal(current_skyline_app, engine)
@@ -79,23 +79,31 @@ def create_alias_fps_for_metrics(current_skyline_app, alias_fps_to_create):
         except KeyError:
             continue
         try:
-            connection = engine.connect()
-            stmt = select([alias_features_profile_table]).\
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            #stmt = select([alias_features_profile_table]).\
+            stmt = select(alias_features_profile_table).\
                 where(alias_features_profile_table.c.metric_id == metric_id).\
                 where(alias_features_profile_table.c.fp_id == int(fp_id))
-            result = connection.execute(stmt)
-            for row in result:
+            #result = connection.execute(stmt)
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 alias_id = row['id']
                 break
-            connection.close()
+            #connection.close()
         except Exception as err:
             trace = traceback.format_exc()
             current_logger.error(trace)
-            try:
-                connection.close()
-            except Exception as err2:
-                current_logger.error('error :: %s :: failed to close connection, err: %s' % (
-                    function_str, err2))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #try:
+            #    connection.close()
+            #except Exception as err2:
+            #    current_logger.error('error :: %s :: failed to close connection, err: %s' % (
+            #        function_str, err2))
             fail_msg = 'error :: %s :: could not select rows, err: %s' % (
                 function_str, err)
             current_logger.error('%s' % fail_msg)
@@ -109,23 +117,30 @@ def create_alias_fps_for_metrics(current_skyline_app, alias_fps_to_create):
             existing_alias_fp_count += 1
             continue
         try:
-            connection = engine.connect()
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
             ins = alias_features_profile_table.insert().values(
                 metric_id=int(metric_id), original_metric_id=int(original_metric_id),
                 fp_id=int(fp_id), label=str(label), user_id=user_id)
-            result = connection.execute(ins)
-            new_alias_fp_id = result.inserted_primary_key[0]
-            connection.close()
+            #result = connection.execute(ins)
+            #new_alias_fp_id = result.inserted_primary_key[0]
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                new_alias_fp_id = result.inserted_primary_key[0]
+            #connection.close()
             alias_fps_created[fp_id] = copy.deepcopy(alias_fps_to_create[fp_id])
             alias_fps_created[fp_id]['alias_id'] = new_alias_fp_id
         except Exception as err:
             trace = traceback.format_exc()
             current_logger.error(trace)
-            try:
-                connection.close()
-            except Exception as err2:
-                current_logger.error('error :: %s :: failed to close connection, err: %s' % (
-                    function_str, err2))
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #try:
+            #    connection.close()
+            #except Exception as err2:
+            #    current_logger.error('error :: %s :: failed to close connection, err: %s' % (
+            #        function_str, err2))
             fail_msg = 'error :: %s :: could not insert alias fp record, err: %s' % (
                 function_str, err)
             current_logger.error('%s' % fail_msg)
@@ -136,11 +151,13 @@ def create_alias_fps_for_metrics(current_skyline_app, alias_fps_to_create):
                 raise
             return alias_fps_created, fps_copied
 
-    try:
-        connection.close()
-    except Exception as err:
-        current_logger.error('error :: %s :: failed to close connection after inserts, err: %s' % (
-            function_str, err))
+    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #try:
+    #    connection.close()
+    #except Exception as err:
+    #    current_logger.error('error :: %s :: failed to close connection after inserts, err: %s' % (
+    #        function_str, err))
 
     # @added 20241011 - Feature #5481: ionosphere.copy_features_profile
     #                   Feature #5479: ionosphere.alias_features_profile

@@ -30,7 +30,7 @@ def get_snab_result(current_skyline_app, anomaly_id):
 
     try:
         use_table_meta = MetaData()
-        use_table = Table('snab', use_table_meta, autoload=True, autoload_with=engine)
+        use_table = Table('snab', use_table_meta, autoload_with=engine)
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_snab_result :: use_table Table failed on snab table - %s' % (
@@ -38,33 +38,50 @@ def get_snab_result(current_skyline_app, anomaly_id):
 
     try:
         use_table_meta = MetaData()
-        apps_table = Table('apps', use_table_meta, autoload=True, autoload_with=engine)
+        apps_table = Table('apps', use_table_meta, autoload_with=engine)
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_snab_result :: use_table Table failed on apps table - %s' % (
             err))
     apps = {}
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         stmt = select(apps_table)
-        result = connection.execute(stmt)
-        for row in result:
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             app_id = row['id']
             apps[app_id] = row['app']
-        connection.close()
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_snab_result :: failed to build apps - %s' % str(err))
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         stmt = select(use_table).where(use_table.c.anomaly_id == int(anomaly_id))
-        result = connection.execute(stmt)
-        for row in result:
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             snab_id = row['id']
             snab_app_id = row['app_id']
             # Coerce Decimal to float for json
-            anomalyScore = float(row['anomalyScore'])
+            # @modified 20250121 - Feature #5588: snab.process_algorithm
+            # Handle None
+            try:
+                anomalyScore = float(row['anomalyScore'])
+            except:
+                anomalyScore = None
             runtime = float(row['runtime'])
             slack_thread_ts = float(row['slack_thread_ts'])
             snab_app = None
@@ -77,7 +94,7 @@ def get_snab_result(current_skyline_app, anomaly_id):
             snab_result[snab_id]['anomalyScore'] = anomalyScore
             snab_result[snab_id]['runtime'] = runtime
             snab_result[snab_id]['slack_thread_ts'] = slack_thread_ts
-        connection.close()
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: get_snab_result :: failed to build snab_result - %s' % str(err))

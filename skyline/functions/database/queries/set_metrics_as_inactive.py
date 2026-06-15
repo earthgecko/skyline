@@ -173,9 +173,20 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
     valid_metric_ids_to_set_as_inactive = []
     new_metric_ids = []
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table], metrics_table.c.id.in_(metric_ids))
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table], metrics_table.c.id.in_(metric_ids))
+        stmt = select(metrics_table).\
+                where(metrics_table.c.id.in_(metric_ids))
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             metric_id = row['id']
             created_timestamp_datetime = row['created_timestamp']
@@ -184,7 +195,7 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
                 new_metric_ids.append(metric_id)
             else:
                 valid_metric_ids_to_set_as_inactive.append(metric_id)
-        connection.close()
+        #connection.close()
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: failed to get data from metric_table to determine created_timestamp for metric_ids: %s - %s' % (
@@ -201,18 +212,26 @@ def set_metrics_as_inactive(current_skyline_app, metric_ids, metrics, dry_run):
 
     if not dry_run:
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             # @modified 20220811 - Task #2732: Prometheus to Skyline
             #                      Branch #4300: prometheus
             # Handle new labelled_metrics
             # stmt = metrics_table.update().values(
             #     inactive=1, inactive_at=int(time())).\
             #     where(metrics_table.c.id.in_(metric_ids))
-            stmt = metrics_table.update().values(
-                inactive=1, inactive_at=int(time.time())).\
-                where(metrics_table.c.id.in_(valid_metric_ids_to_set_as_inactive))
-            connection.execute(stmt)
-            connection.close()
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = metrics_table.update().values(
+            #    inactive=1, inactive_at=int(time.time())).\
+            #    where(metrics_table.c.id.in_(valid_metric_ids_to_set_as_inactive))
+            #connection.execute(stmt)
+            #connection.close()
+            stmt = metrics_table.update().\
+                where(metrics_table.c.id.in_(valid_metric_ids_to_set_as_inactive)).values(
+                inactive=1, inactive_at=int(time.time()))   
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+
             metrics_set_as_inactive = list(metrics_to_set_as_inactive)
         except Exception as err:
             current_logger.error(traceback.format_exc())

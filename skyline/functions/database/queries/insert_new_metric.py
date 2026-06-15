@@ -8,6 +8,10 @@ import settings
 from database import get_engine, engine_disposal, metrics_table_meta
 from ionosphere_functions import get_ionosphere_learn_details
 
+# @added 20250122 - Feature #5592: tenant_id column in DB tables
+from functions.metrics.get_tenant_id import get_tenant_id
+from skyline_functions import get_redis_conn_decoded
+
 
 # @added 20221130 - Feature #4734: mirage_vortex
 def insert_new_metric(current_skyline_app, metric):
@@ -19,6 +23,8 @@ def insert_new_metric(current_skyline_app, metric):
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    new_metric_id = 0
+
     try:
         engine, fail_msg, trace = get_engine(current_skyline_app)
     except Exception as err:
@@ -29,7 +35,7 @@ def insert_new_metric(current_skyline_app, metric):
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
-        return 0, fail_msg, trace
+        return new_metric_id
 
     try:
         metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
@@ -45,7 +51,7 @@ def insert_new_metric(current_skyline_app, metric):
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
-        return 0, fail_msg, trace
+        return new_metric_id
 
     # Set defaults
     learn_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
@@ -59,18 +65,35 @@ def insert_new_metric(current_skyline_app, metric):
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: failed to get_ionosphere_learn_details for %s' % metric)
 
-    new_metric_id = 0
+    # @added 20250122 - Feature #5592: tenant_id column in DB tables
+    tenant_id = 0
     try:
-        connection = engine.connect()
+        tenant_id = get_tenant_id(current_skyline_app, metric_id=0, base_name=metric, new_metric=True, log=False)
+    except Exception as err:
+        current_logger.error('error :: %s :: get_tenant_id failed, err: %s' % (
+            function_str, err))
+        tenant_id = 0
+
+    try:
+        #connection = engine.connect()
         ins = metrics_table.insert().values(
             metric=metric,
+            # @added 20250122 - Feature #5592: tenant_id column in DB tables
+            tenant_id=tenant_id,
             learn_full_duration_days=int(learn_full_duration_days),
             learn_valid_ts_older_than=int(valid_learning_duration),
             max_generations=int(max_generations),
             max_percent_diff_from_origin=float(max_percent_diff_from_origin))
-        result = connection.execute(ins)
-        connection.close()
-        new_metric_id = result.inserted_primary_key[0]
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(ins)
+        #connection.close()
+        #new_metric_id = result.inserted_primary_key[0]
+        with engine.begin() as connection:
+            result = connection.execute(ins)
+            new_metric_id = result.inserted_primary_key[0]
+
     except Exception as err:
         trace = traceback.format_exc()
         current_logger.error(trace)
@@ -82,7 +105,18 @@ def insert_new_metric(current_skyline_app, metric):
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
-        return 0, fail_msg, trace
+        return new_metric_id
+
+    # @added 20251023 - Feature #5592: tenant_id column in DB tables
+    if new_metric_id and tenant_id:
+        try:
+            redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+            redis_conn_decoded.hset('panorama.metric_ids_with_tenant_id', new_metric_id, tenant_id)
+        except Exception as err:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: hset on panorama.metric_ids_with_tenant_id failed, err: %s' % (
+                function_str, err))
+
     if engine:
         engine_disposal(current_skyline_app, engine)
     if new_metric_id:

@@ -9,6 +9,11 @@ from database import get_engine, engine_disposal, metrics_table_meta
 #                   Branch #4300: prometheus
 from functions.metrics.get_base_name_from_labelled_metrics_name import get_base_name_from_labelled_metrics_name
 
+# @modified 20251008 - Bug #5522: Handle duplicate metric names
+# Added literal to handle utf8_general_ci collation being case-insensitive on
+# comparisons but case sensitive on insert
+from sqlalchemy import literal
+
 
 # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
 # Add a global method to query the DB for a metric id from a base_name
@@ -29,7 +34,10 @@ def metric_id_from_base_name(current_skyline_app, base_name):
         current_logger.error(trace)
         fail_msg = 'error :: %s :: could not get a MySQL engine - %s' % (function_str, e)
         current_logger.error('%s' % fail_msg)
-        return False, fail_msg, trace
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #return False, fail_msg, trace
+        return None
 
     try:
         metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
@@ -45,7 +53,10 @@ def metric_id_from_base_name(current_skyline_app, base_name):
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
-        return False, fail_msg, trace
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #return False, fail_msg, trace
+        return None
 
     # @added 20220727 - Task #2732: Prometheus to Skyline
     #                   Branch #4300: prometheus
@@ -59,13 +70,29 @@ def metric_id_from_base_name(current_skyline_app, base_name):
                 function_str, base_name, err))
 
     try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-        result = connection.execute(stmt)
-        for row in result:
+        #connection = engine.connect()
+        # @modified 20251008 - Bug #5522: Handle duplicate metric names
+        # Handle utf8_general_ci collation being case-insensitive on
+        # comparisons but case sensitive on insert
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        ## stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+        # stmt = select(metrics_table).where(metrics_table.c.metric == base_name)
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([metrics_table]).where(metrics_table.c.metric == literal(base_name).collate('utf8mb4_bin'))
+        stmt = select(metrics_table).where(metrics_table.c.metric == literal(base_name).collate('utf8mb4_bin'))
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             metric_id = int(row['id'])
             break
-        connection.close()
+        #connection.close()
         current_logger.info('%s :: determined db metric id: %s' % (
             function_str, str(metric_id)))
     except Exception as e:
@@ -79,7 +106,10 @@ def metric_id_from_base_name(current_skyline_app, base_name):
         if current_skyline_app == 'webapp':
             # Raise to webapp
             raise
-        return False, fail_msg, trace
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #return False, fail_msg, trace
+        return None
     if engine:
         engine_disposal(current_skyline_app, engine)
 

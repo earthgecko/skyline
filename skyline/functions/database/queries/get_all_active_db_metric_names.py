@@ -52,18 +52,33 @@ def get_all_active_db_metric_names(current_skyline_app, with_ids=False):
     duplicate_metrics_errors = []
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         if with_ids:
-            stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 0)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 0)
+            stmt = select(metrics_table.c.id, metrics_table.c.metric).where(metrics_table.c.inactive == 0)
         else:
             # @modified 20241111 - Bug #5522: Handle duplicate metric names
             # The id column is now required to deduplicate metrics so actually
             # the with_ids conditional is no longer required but it makes no
             # different the to the iteration of rows
-            # stmt = select([metrics_table.c.metric]).where(metrics_table.c.inactive == 0)
-            stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 0)
-        result = connection.execute(stmt)
-        for row in result:
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            ## stmt = select([metrics_table.c.metric]).where(metrics_table.c.inactive == 0)
+            # stmt = select(metrics_table.c.metric).where(metrics_table.c.inactive == 0)
+            # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = select([metrics_table.c.id, metrics_table.c.metric]).where(metrics_table.c.inactive == 0)
+            stmt = select(metrics_table.c.id, metrics_table.c.metric).where(metrics_table.c.inactive == 0)
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #for row in result:
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+        for row in results:
             base_name = row['metric']
 
             # @added 20241026 - Bug #5522: Handle duplicate metric names
@@ -86,7 +101,7 @@ def get_all_active_db_metric_names(current_skyline_app, with_ids=False):
             metric_names.append(base_name)
             if with_ids:
                 metric_names_with_ids[base_name] = row['id']
-        connection.close()
+        #connection.close()
 
         # @added 20241111 - Bug #5522: Handle duplicate metric names
         if duplicate_metrics_errors:

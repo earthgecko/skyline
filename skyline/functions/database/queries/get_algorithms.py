@@ -6,7 +6,9 @@ import traceback
 
 # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
-from sqlalchemy import select, Table, MetaData
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import select, Table, MetaData, text
 
 from database import get_engine, engine_disposal
 
@@ -40,17 +42,24 @@ def get_algorithms(current_skyline_app, return_all_algorithms_by_id=False):
     algorithms_list = []
     if engine:
         try:
-            connection = engine.connect()
-            stmt = 'SELECT DISTINCT(algorithm) FROM algorithms'
-            result = connection.execute(stmt)
-            for row in result:
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            stmt = text('SELECT DISTINCT(algorithm) FROM algorithms')
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+
+            for row in results:
                 # @added 20220920 - Task #2732: Prometheus to Skyline
                 #                   Branch #4300: prometheus
                 # Strip override string
                 if ' (override - ' in row['algorithm']:
                     continue
                 algorithms_list.append(row['algorithm'])
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_algorithms :: failed to build algorithms_list - %s' % str(err))
@@ -62,38 +71,45 @@ def get_algorithms(current_skyline_app, return_all_algorithms_by_id=False):
             # Use the MetaData autoload rather than string-based query construction
             try:
                 use_table_meta = MetaData()
-                use_table = Table('algorithms', use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table('algorithms', use_table_meta, autoload_with=engine)
             except Exception as err:
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: get_algorithms :: use_table Table failed algorithms table - %s' % (
                     err))
 
-            connection = engine.connect()
-            for algorithm in algorithms_list:
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            with engine.connect() as connection:
+                for algorithm in algorithms_list:
 
-                # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
-                #                      Task #4778: v4.0.0 - update dependencies
-                # stmt = 'SELECT id FROM algorithms WHERE algorithm=\'%s\'' % algorithm
-                stmt = select(use_table.c.id).where(use_table.c.algorithm == algorithm)
+                    # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
+                    #                      Task #4778: v4.0.0 - update dependencies
+                    # stmt = 'SELECT id FROM algorithms WHERE algorithm=\'%s\'' % algorithm
+                    stmt = select(use_table.c.id).where(use_table.c.algorithm == algorithm)
 
-                result = connection.execute(stmt)
+                    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
 
-                # @added 20230722 - Feature #5008: webapp - snab report page
-                # Added return_all_algorithms_by_id
-                first_id = None
-
-                for row in result:
-                    # @modified 20230722 - Feature #5008: webapp - snab report page
+                    # @added 20230722 - Feature #5008: webapp - snab report page
                     # Added return_all_algorithms_by_id
-                    # algorithms[algorithm] = row['id']
-                    # break
-                    c_id = row['id']
-                    if not first_id:
-                        algorithms[algorithm] = int(c_id)
-                        first_id = int(c_id)
-                    all_algorithms_by_id[c_id] = algorithm
+                    first_id = None
 
-            connection.close()
+                    for row in results:
+                        # @modified 20230722 - Feature #5008: webapp - snab report page
+                        # Added return_all_algorithms_by_id
+                        # algorithms[algorithm] = row['id']
+                        # break
+                        c_id = row['id']
+                        if not first_id:
+                            algorithms[algorithm] = int(c_id)
+                            first_id = int(c_id)
+                        all_algorithms_by_id[c_id] = algorithm
+
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_algorithms :: failed to build algorithms - %s' % str(err))

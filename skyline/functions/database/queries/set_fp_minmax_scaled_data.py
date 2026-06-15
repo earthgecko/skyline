@@ -75,31 +75,43 @@ def set_fp_minmax_scaled_data(current_skyline_app, fp_minmax_scaled_dict):
             engine_disposal(current_skyline_app, engine)
         return success
 
-    connection = None
-    try:
-        connection = engine.connect()
-    except Exception as err:
-        current_logger.error(traceback.format_exc())
-        current_logger.error('error :: %s :: could not connect to DB - %s' % (
-            function_str, err))
-        if engine:
-            engine_disposal(engine)
-        return success
+    # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+    #                      Task #5628: Build v5.0.0 and test
+    #connection = None
+    #try:
+    #    connection = engine.connect()
+    #except Exception as err:
+    #    current_logger.error(traceback.format_exc())
+    #    current_logger.error('error :: %s :: could not connect to DB - %s' % (
+    #        function_str, err))
+    #    if engine:
+    #        engine_disposal(engine)
+    #    return success
 
     update_row = False
     db_fp_minmax_scaled_dict = {}
     try:
-        stmt = select([ionosphere_minmax_table]).where(ionosphere_minmax_table.c.fp_id == fp_id)
-        result = connection.execute(stmt)
-        row = result.fetchone()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_minmax_table]).where(ionosphere_minmax_table.c.fp_id == fp_id)
+        stmt = select(ionosphere_minmax_table).where(ionosphere_minmax_table.c.fp_id == fp_id)
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        #row = result.fetchone()
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            _row = result.fetchone()
+            row = dict(_row._mapping) if _row is not None else None
+
         if row:
             db_fp_minmax_scaled_dict = dict(row)
     except Exception as err:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: %s :: could not get ionosphere_minmax row for fp id %s - %s' % (
             function_str, str(fp_id), err))
-        if connection:
-            connection.close()
+        #if connection:
+        #    connection.close()
         if engine:
             engine_disposal(engine)
         return success
@@ -113,24 +125,44 @@ def set_fp_minmax_scaled_data(current_skyline_app, fp_minmax_scaled_dict):
         if update_row:
             current_logger.info('%s :: updating with new values, existing DB row data: %s' % (
                 function_str, str(db_fp_minmax_scaled_dict)))
-            stmt = ionosphere_minmax_table.update().values(
+
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #stmt = ionosphere_minmax_table.update().values(
+            #    minmax_min=min_fp_value,
+            #    minmax_max=max_fp_value,
+            #    values_count=values_count,
+            #    features_count=features_count,
+            #    features_sum=features_sum,
+            #    tsfresh_version=tsfresh_version,
+            #    calc_time=calc_time).\
+            #    where(ionosphere_minmax_table.c.fp_id == fp_id)
+            stmt = ionosphere_minmax_table.update().\
+                where(ionosphere_minmax_table.c.fp_id == fp_id).values(
                 minmax_min=min_fp_value,
                 minmax_max=max_fp_value,
                 values_count=values_count,
                 features_count=features_count,
                 features_sum=features_sum,
                 tsfresh_version=tsfresh_version,
-                calc_time=calc_time).\
-                where(ionosphere_minmax_table.c.fp_id == fp_id)
-            result = connection.execute(stmt)
-            if result.rowcount == 1:
-                success = True
-            connection.close()
+                calc_time=calc_time)
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #if result.rowcount == 1:
+            #    success = True
+            #connection.close()
+            with engine.begin() as connection:
+                result = connection.execute(stmt)
+                if result.rowcount == 1:
+                    success = True
+
         else:
             current_logger.info('%s :: %s fp %s values into the DB' % (
                 function_str, db_method, str(fp_id)))
             inserted_fp_id = None
-            connection = engine.connect()
+            #connection = engine.connect()
             ins = ionosphere_minmax_table.insert().values(
                 fp_id=int(fp_id),
                 minmax_min=min_fp_value,
@@ -140,9 +172,15 @@ def set_fp_minmax_scaled_data(current_skyline_app, fp_minmax_scaled_dict):
                 features_sum=features_sum,
                 tsfresh_version=tsfresh_version,
                 calc_time=calc_time)
-            result = connection.execute(ins)
-            inserted_fp_id = result.inserted_primary_key[0]
-            connection.close()
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(ins)
+            #inserted_fp_id = result.inserted_primary_key[0]
+            #connection.close()
+            with engine.begin() as connection:
+                result = connection.execute(ins)
+                inserted_fp_id = result.inserted_primary_key[0]
+
             if inserted_fp_id:
                 success = True
     except Exception as err:

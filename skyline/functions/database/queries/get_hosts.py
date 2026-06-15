@@ -6,7 +6,9 @@ import traceback
 
 # @added 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                   Task #4778: v4.0.0 - update dependencies
-from sqlalchemy import select, Table, MetaData
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import select, Table, MetaData, text
 
 from database import get_engine, engine_disposal
 
@@ -35,12 +37,19 @@ def get_hosts(current_skyline_app):
     hosts_list = []
     if engine:
         try:
-            connection = engine.connect()
-            stmt = 'SELECT DISTINCT(host) FROM hosts'
-            result = connection.execute(stmt)
-            for row in result:
+            #connection = engine.connect()
+            stmt = text('SELECT DISTINCT(host) FROM hosts')
+
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 hosts_list.append(row['host'])
-            connection.close()
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_hosts :: failed to build hosts_list - %s' % str(err))
@@ -48,19 +57,23 @@ def get_hosts(current_skyline_app):
         try:
             try:
                 use_table_meta = MetaData()
-                use_table = Table('hosts', use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table('hosts', use_table_meta, autoload_with=engine)
             except Exception as err:
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: get_hosts :: use_table Table failed hosts table - %s' % (
                     err))
-            connection = engine.connect()
-            for host in hosts_list:
-                stmt = select(use_table.c.id).where(use_table.c.host == host)
-                result = connection.execute(stmt)
-                for row in result:
-                    hosts[host] = row['id']
-                    break
-            connection.close()
+            # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #connection = engine.connect()
+            with engine.connect() as connection:
+                for host in hosts_list:
+                    stmt = select(use_table.c.id).where(use_table.c.host == host)
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
+                        hosts[host] = row['id']
+                        break
+            #connection.close()
         except Exception as err:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: get_hosts :: failed to build hosts - %s' % str(err))

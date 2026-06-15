@@ -47,18 +47,32 @@ def latest_anomalies(current_skyline_app):
         return anomalies
 
     try:
-        connection = engine.connect()
+        #connection = engine.connect()
         # Replacing panorama query
         # query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies ORDER BY id DESC LIMIT 10'
-        stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id,
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id,
+        #               anomalies_table.c.anomalous_datapoint,
+        #               anomalies_table.c.anomaly_timestamp,
+        #               anomalies_table.c.full_duration,
+        #               anomalies_table.c.created_timestamp,
+        #               anomalies_table.c.anomaly_end_timestamp]).\
+        stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id,
                        anomalies_table.c.anomalous_datapoint,
                        anomalies_table.c.anomaly_timestamp,
                        anomalies_table.c.full_duration,
                        anomalies_table.c.created_timestamp,
-                       anomalies_table.c.anomaly_end_timestamp]).\
+                       anomalies_table.c.anomaly_end_timestamp).\
             where(anomalies_table.c.id > 0).order_by(anomalies_table.c.id.desc()).\
             limit(10)
-        results = connection.execute(stmt)
+
+        # @modified 20260226 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #result = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
         anomalies = []
         if results is not None:
             for row in results:
@@ -66,7 +80,7 @@ def latest_anomalies(current_skyline_app):
                     anomalies.append(row)
         if not anomalies:
             anomalies = []
-        connection.close()
+        #connection.close()
         current_logger.info('%s :: determined %s latest anomalies' % (
             function_str, str(len(anomalies))))
     except Exception as e:

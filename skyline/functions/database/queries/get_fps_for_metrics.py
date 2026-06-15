@@ -56,9 +56,20 @@ def get_fps_for_metrics(current_skyline_app, metric_ids):
         return metric_ids_fps_dict
 
     try:
-        connection = engine.connect()
-        stmt = select([ionosphere_table], ionosphere_table.c.metric_id.in_(metric_ids))
-        results = connection.execute(stmt)
+        #connection = engine.connect()
+        # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #stmt = select([ionosphere_table], ionosphere_table.c.metric_id.in_(metric_ids))
+        stmt = select(ionosphere_table).\
+                where(ionosphere_table.c.metric_id.in_(metric_ids))
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         if results:
             for row in results:
                 fp_id = row['id']
@@ -66,15 +77,15 @@ def get_fps_for_metrics(current_skyline_app, metric_ids):
                 if metric_id not in metric_ids_fps_dict.keys():
                     metric_ids_fps_dict[metric_id] = {}
                 metric_ids_fps_dict[metric_id][fp_id] = dict(row)
-        connection.close()
+        #connection.close()
     except Exception as err:
         trace = traceback.format_exc()
         current_logger.error(trace)
-        try:
-            connection.close()
-        except Exception as err2:
-            current_logger.error('error :: %s :: failed to close connection - %s' % (
-                function_str, err2))
+        #try:
+        #    connection.close()
+        #except Exception as err2:
+        #    current_logger.error('error :: %s :: failed to close connection - %s' % (
+        #        function_str, err2))
         fail_msg = 'error :: %s :: could not convert db ionosphere rows to dict - %s' % (
             function_str, err)
         current_logger.error('%s' % fail_msg)
