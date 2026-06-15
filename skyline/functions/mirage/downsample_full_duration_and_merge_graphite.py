@@ -1,14 +1,24 @@
 """
-downsample_full_duration_and_merge_graphite
+downsample_full_duration_and_merge_graphite.py
 """
 import logging
 
+# @added 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+import requests
+
 from msgpack import Unpacker
 
-from settings import FULL_NAMESPACE
+# @modified 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+# Added HORIZON_SHARDS and SKYLINE_URL
+from settings import FULL_NAMESPACE, HORIZON_SHARDS, SKYLINE_URL
+
 from skyline_functions import nonNegativeDerivative, sort_timeseries
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.timeseries.downsample import downsample_timeseries
+# @added 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+from functions.cluster.is_shard_metric import is_shard_metric
+# @added 20250328 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+from functions.cluster.shard_host import shard_host
 
 # @added 20240125 - Task #5178: Build and test skyline v4.1.0
 try:
@@ -45,16 +55,19 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
     """
     Return the aligned, downsampled timeseries.
 
-    :param current_skyline_app: the app calling the function
-    :param external_settings: the external_settings dict
-    :param unique_base_names: the unique_base_names list
-    :type current_skyline_app: str
-    :type external_settings: dict
-    :type unique_base_names: list
-    :return: do_not_alert_on_stale_metrics_list
+    :param self: self object
+    :param metric: the metric base_name
+    :param timeseries: the timeseries list
+    :param known_derivative_metric: whether known_derivative_metric
+    :type self: object or None
+    :type metric: str
+    :type timeseries: list
+    :type known_derivative_metric: boolean
+    :return: downsampled_timeseries
     :rtype: list
 
     """
+
     metric_resolution = 0
     full_duration_resolution = 60  # default to 60
     resampled_aligned_timeseries = []
@@ -73,24 +86,90 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
     logger.info('Graphite data last data points for %s: %s' % (
         metric, str(timeseries[-3:])))
 
+    # @added 20250328 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+    # Determine the shard host to request the Redis data from instead
+    # of calling the cluster_data call on all nodes
+    use_url = str(SKYLINE_URL)
+
+    # @added 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+    # Added HORIZON_SHARDS
+    shard_metric = True
+    if HORIZON_SHARDS:
+        shard_metric = is_shard_metric(metric)
+        # @added 20250328 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+        # Determine the shard host to request the Redis data from instead
+        # of calling the cluster_data call on all nodes
+        if not shard_metric:
+            try:
+                use_url = shard_host(metric, return_fqdn=True)
+            except Exception as err:
+                logger.error('error :: shard_host failed with %s, err: %s' % (
+                    metric, err))
+
     if metric_resolution != full_duration_resolution:
-        # Get the Redis FULL_DURATION timeseries data for the metric
-        logger.info('downsampling Redis FULL_DURATION data to %s seconds and aligning to replace Graphite FULL_DURATION period for %s' % (
-            str(metric_resolution), metric))
-        try:
-            raw_series = self.redis_conn.get(redis_metric_name)
-            unpacker = Unpacker(use_list=False)
-            unpacker.feed(raw_series)
-            full_duration_timeseries = list(unpacker)
-            if full_duration_timeseries:
-                full_duration_timeseries = sort_timeseries(full_duration_timeseries)
-            logger.info('got %s data points from Redis FULL_DURATION data for %s to downsample' % (
-                str(len(full_duration_timeseries)), metric))
-            logger.info('Redis FULL_DURATION data last data points for %s: %s' % (
-                metric, str(full_duration_timeseries[-6:])))
-        except Exception as err:
-            logger.error('error :: failed to get full duration timeseries data from Redis for %s - %s' % (
-                metric, err))
+
+        # @added 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+        # Added HORIZON_SHARDS
+        if HORIZON_SHARDS:
+            if not shard_metric:
+                try:
+                    # @modified 20250328 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+                    # Just query the shard host not the whole cluster
+                    #url = '%s/api?metric=%s&cluster_data=true' % (SKYLINE_URL, redis_metric_name)
+                    logger.info('getting Redis data for %s from %s' % (
+                        metric, use_url))
+                    url = '%s/api?metric=%s&cluster_data=false' % (use_url, redis_metric_name)
+                    connect_timeout = 5
+                    read_timeout = 5
+                    use_timeout = (int(connect_timeout), int(read_timeout))
+                    r = requests.get(url, timeout=use_timeout)
+                    response = r.json()
+                    full_duration_timeseries = response['results']
+                except Exception as err:
+                    url = '%s/api?metric=%s&cluster_data=false' % (use_url, redis_metric_name)
+                    logger.error('error :: failed to get full duration timeseries data from Redis via cluster node for %s from %s, err: %s' % (
+                        metric, url, err))
+
+                # @modified 20250328 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+                # While testing if the Redis time series data is not fetched
+                # from the shard_host, make a cluster call
+                if not full_duration_timeseries:
+                    logger.info('warning :: no Redis data for %s from %s' % (
+                        metric, use_url))
+                    try:
+                        url = '%s/api?metric=%s&cluster_data=true' % (SKYLINE_URL, redis_metric_name)
+                        connect_timeout = 5
+                        read_timeout = 5
+                        use_timeout = (int(connect_timeout), int(read_timeout))
+                        r = requests.get(url, timeout=use_timeout)
+                        response = r.json()
+                        full_duration_timeseries = response['results']
+                    except Exception as err:
+                        url = '%s/api?metric=%s&cluster_data=true' % (SKYLINE_URL, redis_metric_name)
+                        logger.error('error :: failed to get full duration timeseries data from Redis via the cluster_data for %s from %s, err: %s' % (
+                        metric, url, err))
+
+        # @modified 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+        # Only try Redis if full_duration_timeseries has not been fetched from
+        # another cluster node
+        if not full_duration_timeseries and self is not None:
+            # Get the Redis FULL_DURATION timeseries data for the metric
+            logger.info('downsampling Redis FULL_DURATION data to %s seconds and aligning to replace Graphite FULL_DURATION period for %s' % (
+                str(metric_resolution), metric))
+            try:
+                raw_series = self.redis_conn.get(redis_metric_name)
+                unpacker = Unpacker(use_list=False)
+                unpacker.feed(raw_series)
+                full_duration_timeseries = list(unpacker)
+                if full_duration_timeseries:
+                    full_duration_timeseries = sort_timeseries(full_duration_timeseries)
+                logger.info('got %s data points from Redis FULL_DURATION data for %s to downsample' % (
+                    str(len(full_duration_timeseries)), metric))
+                logger.info('Redis FULL_DURATION data last data points for %s: %s' % (
+                    metric, str(full_duration_timeseries[-6:])))
+            except Exception as err:
+                logger.error('error :: failed to get full duration timeseries data from Redis for %s - %s' % (
+                    metric, err))
     else:
         logger.info('not preprocessing data because metric_resolution is %s seconds for %s' % (
             str(metric_resolution), metric))
@@ -109,7 +188,7 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
             resampled_graphite_timeseries = downsample_timeseries(skyline_app, timeseries, metric_resolution, use_resolution, method, origin='end')
         except Exception as err:
             logger.error('error :: downsample_timeseries failed on timeseries - %s' % err)
-        # Remove all nan because they break histogram_bins
+        # Remove all nan because they break things
         removed_nans = 0
         if resampled_graphite_timeseries:
             resampled_graphite_timeseries_no_nans = []
@@ -131,13 +210,51 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
             timeseries = list(resampled_graphite_timeseries)
             del resampled_graphite_timeseries
 
-    try:
-        full_duration_resolution_str = self.redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', metric)
-        if full_duration_resolution_str:
-            full_duration_resolution = int(float(full_duration_resolution_str))
-    except Exception as err:
-        logger.error('error :: failed to determine current_resolution from analyzer.metrics_manager.resolutions Redis hash for %s - %s' % (
-            metric, err))
+    # @added 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+    # Added HORIZON_SHARDS
+    determined_full_duration_resolution = None
+    if HORIZON_SHARDS and self is None:
+        if not shard_metric:
+            try:
+                namespace = metric.split('.')[0]
+                # @modified 20250328 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+                # Just query the shard host not the whole cluster.
+                # And actually in this instance this cluster node and all
+                # cluster nodes should have the metrics_resolutions for each
+                # parent namespace.  An external request is not required as each
+                # cluster node will have metrics for each parent namespace and
+                # their resolutions in Redis so the node can can itself rather
+                # than calling the shard_host node as done above.  Further this
+                # request must pass cluster_call=true to override a cluster_data
+                # call as this metrics_resolutions is one of the methods that
+                # forces a cluster_data call, unless cluster_call is set to
+                # True.
+                #url = '%s/api?metrics_resolutions&namespace=%s&cluster_data=true' % (SKYLINE_URL, namespace)
+                url = '%s/api?metrics_resolutions&namespace=%s&cluster_data=false&cluster_call=true' % (use_url, namespace)
+                connect_timeout = 5
+                read_timeout = 5
+                use_timeout = (int(connect_timeout), int(read_timeout))
+                r = requests.get(url, timeout=use_timeout)
+                response = r.json()
+                full_duration_resolution = int(response['data']['resolutions'][metric])
+                determined_full_duration_resolution = int(full_duration_resolution)
+            except Exception as err:
+                url = '%s/api?metrics_resolutions&namespace=%s&cluster_data=false&cluster_call=true' % (use_url, namespace)
+                logger.error('error :: failed to get full_duration_resolution from cluster node for %s from %s, err: %s' % (
+                    metric, url, err))
+                full_duration_resolution = 60
+
+    # @modified 20250327 - Feature #5612: downsample_full_duration_and_merge_graphite - cluster aware
+    # Only get if not fetched from the cluster
+    if determined_full_duration_resolution is None and self is not None:
+        try:
+            full_duration_resolution_str = self.redis_conn_decoded.hget('analyzer.metrics_manager.resolutions', metric)
+            if full_duration_resolution_str:
+                full_duration_resolution = int(float(full_duration_resolution_str))
+        except Exception as err:
+            logger.error('error :: failed to determine current_resolution from analyzer.metrics_manager.resolutions Redis hash for %s - %s' % (
+                metric, err))
+
     logger.info('Redis FULL_DURATION data resolution is %s seconds for %s' % (
         str(full_duration_resolution), metric))
 
@@ -145,7 +262,12 @@ def downsample_full_duration_and_merge_graphite(self, metric, timeseries, known_
         method = 'mean'
         # if known_derivative_metric:
         #    method = 'sum'
+
+        full_duration_timeseries = [[int(t), v] for t, v in full_duration_timeseries]
         try:
+            logger.info('downsampling FULL_DURATION data with full_duration_resolution: %s, use_resolution: %s' % (
+                str(full_duration_resolution), str(use_resolution)))
+
             # @modified 20240125 - Task #5178: Build and test skyline v4.1.0
             # resampled_aligned_timeseries = downsample_timeseries(skyline_app, full_duration_timeseries, full_duration_resolution, metric_resolution, method, origin='end')
             resampled_aligned_timeseries = downsample_timeseries(skyline_app, full_duration_timeseries, full_duration_resolution, use_resolution, method, origin='end')
