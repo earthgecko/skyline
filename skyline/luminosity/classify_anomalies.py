@@ -186,6 +186,14 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 with open((anomaly_json), 'r') as f:
                     raw_timeseries = f.read()
                 timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                # @added 20250403 - Task #5591: get_victoriametrics_metric - switch from query_range to export
+                if 'nan' in timeseries_array_str:
+                    try:
+                        timeseries_array_str = str(timeseries_array_str).replace('nan', 'None').replace('NaN', 'None')
+                    except Exception as err:
+                        logger.error('error :: classify_anomalies :: failed to replace nan with None, err: %s' % (
+                            err))
+
                 del raw_timeseries
                 timeseries = literal_eval(timeseries_array_str)
                 del timeseries_array_str
@@ -368,7 +376,7 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
             # Use the MetaData autoload rather than string-based query construction
             try:
                 use_table_meta = MetaData()
-                use_table = Table('metrics', use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table('metrics', use_table_meta, autoload_with=engine)
             except Exception as err:
                 logger.error(traceback.format_exc())
                 logger.error('error :: classify_anomalies :: use_table Table failed on metrics table - %s' % (
@@ -383,13 +391,22 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 #                      Task #4778: v4.0.0 - update dependencies
                 # results = mysql_select(skyline_app, query)
                 stmt = select(use_table.c.id).where(use_table.c.metric == base_name)
-                connection = engine.connect()
-                results = connection.execute(stmt)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #results = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
 
                 for item in results:
-                    metric_id = item[0]
+                    # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #metric_id = item[0]
+                    metric_id = item['id']
                     break
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: classify_anomalies :: querying metrics table for id for %s' % base_name)
@@ -412,7 +429,7 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
             # Use the MetaData autoload rather than string-based query construction
             try:
                 use_table_meta = MetaData()
-                use_table = Table('anomalies_type', use_table_meta, autoload=True, autoload_with=engine)
+                use_table = Table('anomalies_type', use_table_meta, autoload_with=engine)
                 anomalies_type_meta_loaded = True
             except Exception as err:
                 logger.error(traceback.format_exc())
@@ -429,13 +446,23 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 #                      Task #4778: v4.0.0 - update dependencies
                 # results = mysql_select(skyline_app, query)
                 stmt = select(use_table.c.metric_id).where(use_table.c.id == anomaly_id)
-                connection = engine.connect()
-                results = connection.execute(stmt)
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #results = connection.execute(stmt)
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
 
                 for item in results:
-                    classification_exists = item[0]
+                    # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #classification_exists = item[0]
+                    classification_exists = item['metric_id']
+
                     break
-                connection.close()
+                #connection.close()
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: classify_anomalies :: querying anomalies_type table for metric_id for id %s' % str(anomaly_id))
@@ -465,7 +492,7 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
             if not anomalies_type_meta_loaded:
                 try:
                     use_table_meta = MetaData()
-                    use_table = Table('anomalies_type', use_table_meta, autoload=True, autoload_with=engine)
+                    use_table = Table('anomalies_type', use_table_meta, autoload_with=engine)
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: classify_anomalies :: use_table Table on anomalies_type failed - %s' % (
@@ -481,13 +508,29 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                 # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # results_recorded = mysql_insert(values_string)
-                connection = engine.connect()
+                #connection = engine.connect()
                 ins = use_table.insert().values(
                     id=int(anomaly_id),
                     metric_id=int(metric_id),
                     type=type_data_str)
-                result = connection.execute(ins)
-                connection.close()
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #connection = engine.connect()
+                #result = connection.execute(ins)
+                #connection.close()
+                with engine.begin() as connection:
+                    result = connection.execute(ins)
+                    # @modified 20260422 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    # Not an auto-incremnt table so no primary key and now v2 is
+                    # stricter
+                    #results_recorded = result.inserted_primary_key[0]
+                    if result.rowcount == 1:
+                        results_recorded = True
+                    else:
+                        results_recorded = True
+ 
                 # @modified 20230106 - Task #4022: Move mysql_select calls to SQLAlchemy
                 #                      Task #4778: v4.0.0 - update dependencies
                 # logger.debug('debug :: classify_anomalies :: INSERT: %s' % (

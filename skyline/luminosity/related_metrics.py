@@ -14,6 +14,8 @@ from functions.metrics.get_metric_latest_anomaly import get_metric_latest_anomal
 from functions.database.queries.get_metric_group_info import get_metric_group_info
 from functions.luminosity.get_cross_correlation_relationships import get_cross_correlation_relationships
 from functions.luminosity.update_metric_group import update_metric_group
+# @added 20251112 - Task #5668: Optimise luminosity related_metrics DB queries
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
 
 skyline_app = 'luminosity'
 skyline_app_logger = '%sLog' % skyline_app
@@ -180,6 +182,22 @@ class RelatedMetrics(Thread):
         metrics_skipped_recent_anomaly = []
         metrics_skipped_no_anomaly = []
 
+        # @added 20251112 - Task #5668: Optimise luminosity related_metrics DB queries
+        # Make a single DB query for all the metrics and pass them to
+        # get_metric_group_info
+        logger.info('related_metrics :: find_related :: determining metric names and ids with get_all_db_metric_names')
+        metric_names_with_ids = {}
+        metric_ids_with_names = {}
+        with_ids = True
+        try:
+            metric_names, metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
+        except Exception as err:
+            logger.error('error :: related_metrics :: get_all_db_metric_names failed, err: %s' % (
+                err))
+        if metric_names_with_ids:
+            metric_ids_with_names = {mid: metricname for metricname, mid in metric_names_with_ids.items()}
+        logger.info('related_metrics :: find_related :: determined %s metric names and ids' % str(len(metric_ids_with_names)))
+
         # Determine which metrics have new anomalies and may require their
         # metric_group updated
         for base_name in metrics_to_process:
@@ -233,7 +251,11 @@ class RelatedMetrics(Thread):
                 logger.info('debug :: related_metrics :: find_related :: %s last_updated timestamp not found in Redis hash luminosity.metric_group.last_updated querying DB' % (
                     base_name))
                 try:
-                    metric_group_info = get_metric_group_info(skyline_app, metric_id)
+                    # @modified 20251112 - Task #5668: Optimise luminosity related_metrics DB queries
+                    # Make a single DB query for all the metrics and pass them to
+                    # get_metric_group_info
+                    #metric_group_info = get_metric_group_info(skyline_app, metric_id)
+                    metric_group_info = get_metric_group_info(skyline_app, metric_id, metric_ids_with_names)
                 except Exception as err:
                     logger.error(traceback.format_exc())
                     logger.error('error :: related_metrics :: find_related :: get_metric_group_info failed - %s' % str(err))
@@ -345,7 +367,7 @@ class RelatedMetrics(Thread):
                 updated_metric_group = update_metric_group(base_name, metric_id, cross_correlation_relationships, ids_with_metric_names)
                 if updated_metric_group:
                     logger.info('related_metrics :: find_related :: updated metric group for %s, updated_metric_group: %s' % (
-                        base_name, str(update_metric_group)))
+                        base_name, str(updated_metric_group)))
                     metric_groups_updated.append(base_name)
                 # metrics_skipped_recently_checked.append(base_name)
 

@@ -39,7 +39,7 @@ from skyline_functions import (
     # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
+    # encoding='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200506 - Feature #3532: Sort all time series
     sort_timeseries,
@@ -73,7 +73,9 @@ from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_ba
 # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
 #                      Task #4778: v4.0.0 - update dependencies
 # Use sqlalchemy rather than string-based query construction
-from sqlalchemy import select
+# @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+# Added text
+from sqlalchemy import select, text
 from database import (
     get_engine, engine_disposal, anomalies_table_meta, metrics_table_meta)
 
@@ -154,7 +156,7 @@ logger = logging.getLogger(skyline_app_logger)
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
 # Added a single functions to deal with Redis connection and the
-# charset='utf-8', decode_responses=True arguments required in py3
+# encoding='utf-8', decode_responses=True arguments required in py3
 redis_conn = get_redis_conn(skyline_app)
 redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
@@ -217,7 +219,10 @@ def get_anomaly(request_type):
         logger.error('error :: get_anomaly :: anomalies_table_meta - %s' % str(err))
 
     if latest:
-        query = 'SELECT * FROM anomalies ORDER BY id DESC LIMIT 1'
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #query = 'SELECT * FROM anomalies ORDER BY id DESC LIMIT 1'
+        query = text('SELECT * FROM anomalies ORDER BY id DESC LIMIT 1')
     else:
         # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
@@ -226,24 +231,31 @@ def get_anomaly(request_type):
         try:
             query = select(anomalies_table).where(anomalies_table.c.id == request_type)
         except Exception as err:
-            logger.error('error :: get_anomaly :: failed to build anomaly query - %s')
+            logger.error('error :: get_anomaly :: failed to build anomaly query - %s, err: %s' % err)
 
     try:
         # @modified 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
         #                      Task #4778: v4.0.0 - update dependencies
         # Use sqlalchemy rather than string-based query construction
         # results = mysql_select(skyline_app, query)
-        connection = engine.connect()
-        results = connection.execute(query)
+
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #results = connection.execute(query)
+        with engine.connect() as connection:
+            result = connection.execute(query)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             anomaly_id = int(row['id'])
             metric_id = int(row['metric_id'])
             anomaly_timestamp = int(row['anomaly_timestamp'])
             break
-        connection.close()
+        #connection.close()
     except Exception as err:
         logger.error(traceback.format_exc())
-        logger.error('error :: get_anomaly :: failed to determine anomaly details from the database - %s')
+        logger.error('error :: get_anomaly :: failed to determine anomaly details from the database - %s, err: %s' % err)
         return (False, False, False, False)
 
     # @added 20230107 - Task #4022: Move mysql_select calls to SQLAlchemy
@@ -271,12 +283,18 @@ def get_anomaly(request_type):
         # results = mysql_select(skyline_app, query)
         # base_name = str(results[0][0])
         stmt = select(metrics_table.c.metric).where(metrics_table.c.id == metric_id)
-        connection = engine.connect()
-        results = connection.execute(stmt)
+        # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+        #                      Task #5628: Build v5.0.0 and test
+        #connection = engine.connect()
+        #results = connection.execute(stmt)
+        with engine.connect() as connection:
+            result = connection.execute(stmt)
+            results = [dict(row._mapping) for row in result.fetchall()]
+
         for row in results:
             base_name = row['metric']
             break
-        connection.close()
+        #connection.close()
     except Exception as err:
         logger.error(traceback.format_exc())
         logger.error('error :: get_anomaly :: failed to determine base_name from database - %s' % err)
@@ -348,7 +366,10 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
                 smtp_alerter_metrics.append(base_name)
 
         if base_name not in smtp_alerter_metrics:
-            logger.error('%s has no alerter setting, not correlating' % base_name)
+            # @modified 20250331 - Feature #5611: custom_algorithm_only
+            # Change from error as can be expected if there is no alerter
+            #logger.error('%s has no alerter setting, not correlating' % base_name)
+            logger.info('get_anomalous_ts :: %s has no alerter setting, not correlating' % base_name)
             # @modified 20230316 - Task #4872: Optimise luminosity for labelled_metrics
             # Added resolution to the return
             return [], resolution
@@ -663,7 +684,7 @@ def get_assigned_metrics(i, base_name, anomaly_timestamp, resolution):
         logger.debug('debug :: get_assigned_metrics :: external_settings correlation_maps: %s' % (
             str(correlation_maps)))
 
-    number_of_labelled_metrics_iterated = 0
+    #number_of_labelled_metrics_iterated = 0
 
     # @modified 20220225 - Feature #4000: EXTERNAL_SETTINGS
     # Use correlation related settings from external settings if they exist
@@ -1000,7 +1021,7 @@ def get_remote_assigned(anomaly_timestamp, resolution, namespace=None):
                 logger.info('get_remote_assigned :: time series data retrieved from %s' % remote_url)
                 response_ok = True
             else:
-                logger.error('get_remote_assigned :: time series data not retrieved from %s, status code %s returned' % (remote_url, str(r.status_code)))
+                logger.error('error :: get_remote_assigned :: time series data not retrieved from %s, status code %s returned' % (remote_url, str(r.status_code)))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: get_remote_assigned :: failed to get time series data from %s' % str(url))
@@ -1408,6 +1429,12 @@ def get_correlations(
                 continue
             if int(ts) <= anomaly_timestamp:
                 correlate_ts.append((int(ts), value))
+
+            # @added 20250103 - Feature #3860: luminosity - handle low frequency data
+            # Handle no resolution calculation
+            if not resolution:
+                continue
+
             # @modified 20180720 - Feature #2464: luminosity_remote_data
             # Added note here - if you modify the value of 61 here, it must be
             # modified in the luminosity_remote_data function in
@@ -1521,6 +1548,13 @@ def process_correlations(i, anomaly_id):
     try:
         if (int(anomaly_timestamp) + 900) < processing_start:
             logger.info('process_correlations :: the anomaly_timestamp %s is too old not correlating' % str(anomaly_timestamp))
+
+            # @added 20251111 - Feature #5667: Reset anomaly_id in luminosity if too old
+            try:
+                redis_conn_decoded.set('luminosity.process_correlations.reset.anomaly_id', int(time()))
+            except Exception as err:
+                logger.error('error :: failed to set Redis key luminosity.process_correlations.reset.anomaly_id, err: %s' % err)
+
             return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
     except Exception as err:
         logger.error('error :: process_correlations :: failed to determine age of the anomaly - %s' % str(err))
@@ -1535,6 +1569,13 @@ def process_correlations(i, anomaly_id):
         logger.info('process_correlations :: the anomaly_timestamp %s is too old not correlating' % str(anomaly_timestamp))
         metrics_checked_for_correlation = 0
         runtime = 0
+
+        # @added 20251111 - Feature #5667: Reset anomaly_id in luminosity if too old
+        try:
+            redis_conn_decoded.set('luminosity.process_correlations.reset.anomaly_id', int(time()))
+        except Exception as err:
+            logger.error('error :: failed to set Redis key luminosity.process_correlations.reset.anomaly_id, err: %s' % err)
+
         # @added 20210124 - Feature #3956: luminosity - motifs
         # Added motifs
         return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
@@ -1617,7 +1658,7 @@ def process_correlations(i, anomaly_id):
 
     # @added 20230315 - Task #4872: Optimise luminosity for labelled_metrics
     processing_start = int(time())
-    get_correlations_start = int(time())
+    #get_correlations_start = int(time())
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # correlated_metrics, correlations = get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metrics, raw_assigned, anomalies)
     # @modified 20230315 - Task #4872: Optimise luminosity for labelled_metrics

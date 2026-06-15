@@ -135,17 +135,33 @@ class Cloudbursts(Thread):
         new_cloudbursts = {}
         one_hour_ago = int(time()) - 3600
         try:
-            connection = engine.connect()
+            #connection = engine.connect()
             if last_processed_cloudburst_id:
-                stmt = select([cloudburst_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table]).\
+                stmt = select(cloudburst_table).\
                     where(cloudburst_table.c.id > int(last_processed_cloudburst_id))
             else:
-                # stmt = select([cloudburst_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ## stmt = select([cloudburst_table]).\
+                # stmt = select(cloudburst_table).\
                 #     where(cloudburst_table.c.timestamp >= one_hour_ago)
-                stmt = select([cloudburst_table]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table]).\
+                stmt = select(cloudburst_table).\
                     where(cloudburst_table.c.added_at >= one_hour_ago)
-            result = connection.execute(stmt)
-            for row in result:
+
+            # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+            #                      Task #5628: Build v5.0.0 and test
+            #result = connection.execute(stmt)
+            #for row in result:
+            with engine.connect() as connection:
+                result = connection.execute(stmt)
+                results = [dict(row._mapping) for row in result.fetchall()]
+            for row in results:
                 cloudburst_id = row['id']
                 new_cloudbursts[cloudburst_id] = {}
                 new_cloudbursts[cloudburst_id]['id'] = cloudburst_id
@@ -156,7 +172,7 @@ class Cloudbursts(Thread):
                 new_cloudbursts[cloudburst_id]['duration'] = row['duration']
                 new_cloudbursts[cloudburst_id]['resolution'] = row['resolution']
                 new_cloudbursts[cloudburst_id]['added_at'] = row['added_at']
-            connection.close()
+            #connection.close()
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: cloudbursts :: find_related :: could not determine new cloudbursts from cloudburst table - %s' % e)

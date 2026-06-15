@@ -1087,15 +1087,25 @@ class Cloudburst(Thread):
             first_cloudburst_id_in_period = None
             logger.info('cloudburst :: find_cloudbursts :: determining first cloudburst id in period')
             try:
-                connection = engine.connect()
-                stmt = select([cloudburst_table.c.id]).\
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([cloudburst_table.c.id]).\
+                stmt = select(cloudburst_table.c.id).\
                     where(cloudburst_table.c.timestamp >= check_period).\
                     order_by(cloudburst_table.c.id.asc()).limit(1)
-                result = connection.execute(stmt)
-                for row in result:
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
                     first_cloudburst_id_in_period = row['id']
                     break
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: cloudburst :: find_cloudbursts :: could not determine first cloudburst id - %s' % e)
@@ -1109,19 +1119,36 @@ class Cloudburst(Thread):
             # one_day_ago = now_timestamp - 86400
             if first_cloudburst_id_in_period:
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     # @modified 20210819 - Feature #4164: luminosity - cloudbursts
                     # Added end so that the period can be compared
-                    # stmt = select([cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end]).\
+                    # stmt = select(cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end).\
                     # @modified 20210819 - Feature #4164: luminosity - cloudbursts
                     # Reduce the mysql.handler_read_next count from doing
                     # index scans and use primary key
-                    # stmt = select([cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end]).\
+                    # stmt = select(cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end).\
                     #     where(cloudburst_table.c.timestamp >= one_day_ago)
-                    stmt = select([cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end]).\
+                    stmt = select(cloudburst_table.c.metric_id, cloudburst_table.c.timestamp, cloudburst_table.c.end).\
                         where(cloudburst_table.c.id >= first_cloudburst_id_in_period)
-                    result = connection.execute(stmt)
-                    for row in result:
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
+
                         metric_id = row['metric_id']
                         if metric_id not in list(known_cloudbursts.keys()):
                             known_cloudbursts[metric_id] = {}
@@ -1132,7 +1159,7 @@ class Cloudburst(Thread):
                         known_cloudbursts[metric_id][known_timestamp][metric_id] = metric_id
                         known_cloudbursts[metric_id][known_timestamp]['end'] = row['end']
                         period_cloudbursts += 1
-                    connection.close()
+                    #connection.close()
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cloudburst :: find_cloudbursts :: could not get a MySQL engine to update cloudburst table - %s' % e)
@@ -1285,15 +1312,25 @@ class Cloudburst(Thread):
             first_matched_id_in_period = None
             logger.info('cloudburst :: find_cloudbursts :: determining first ionosphere match id in period')
             try:
-                connection = engine.connect()
-                stmt = select([ionosphere_matched_table.c.id]).\
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_matched_table.c.id]).\
+                stmt = select(ionosphere_matched_table.c.id).\
                     where(ionosphere_matched_table.c.metric_timestamp >= newer_than_timestamp).\
                     order_by(ionosphere_matched_table.c.id.asc()).limit(1)
-                result = connection.execute(stmt)
-                for row in result:
+
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
                     first_matched_id_in_period = row['id']
                     break
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: cloudburst :: find_cloudbursts :: could not determine ionosphere matches - %s' % e)
@@ -1303,21 +1340,34 @@ class Cloudburst(Thread):
             if first_matched_id_in_period:
                 logger.info('cloudburst :: find_cloudbursts :: determining ionosphere matches in period')
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     # @modified 20210819 - Feature #4164: luminosity - cloudbursts
                     # Reduce the mysql.handler_read_next count from doing
                     # index scans and use primary key
-                    # stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+                    # stmt = select(ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp).\
                     #    where(ionosphere_matched_table.c.metric_timestamp >= newer_than_timestamp)
-                    stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp]).\
+                    stmt = select(ionosphere_matched_table.c.id, ionosphere_matched_table.c.fp_id, ionosphere_matched_table.c.metric_timestamp).\
                         where(ionosphere_matched_table.c.id >= first_matched_id_in_period)
-                    result = connection.execute(stmt)
-                    for row in result:
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         match_id = row['id']
                         matches_in_period['fp'][match_id] = {}
                         matches_in_period['fp'][match_id]['fp_id'] = row['fp_id']
                         matches_in_period['fp'][match_id]['timestamp'] = match_id = row['metric_timestamp']
-                    connection.close()
+                    #connection.close()
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cloudburst :: find_cloudbursts :: could not determine ionosphere matches - %s' % e)
@@ -1340,15 +1390,24 @@ class Cloudburst(Thread):
             first_layers_matched_id_in_period = None
             logger.info('cloudburst :: find_cloudbursts :: determining first ionosphere layers match id in period')
             try:
-                connection = engine.connect()
-                stmt = select([ionosphere_layers_matched_table.c.id]).\
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([ionosphere_layers_matched_table.c.id]).\
+                stmt = select(ionosphere_layers_matched_table.c.id).\
                     where(ionosphere_layers_matched_table.c.anomaly_timestamp >= newer_than_timestamp).\
                     order_by(ionosphere_layers_matched_table.c.id.asc()).limit(1)
-                result = connection.execute(stmt)
-                for row in result:
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
                     first_layers_matched_id_in_period = row['id']
                     break
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: cloudburst :: find_cloudbursts :: could not determine first ionosphere match id - %s' % e)
@@ -1357,16 +1416,28 @@ class Cloudburst(Thread):
 
             if first_layers_matched_id_in_period:
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     # @modified 20210819 - Feature #4164: luminosity - cloudbursts
                     # Reduce the mysql.handler_read_next count from doing
                     # index scans and use primary key
-                    # stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.layer_id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.metric_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.layer_id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.metric_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+                    # stmt = select(ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.layer_id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.metric_id, ionosphere_layers_matched_table.c.anomaly_timestamp).\
                     #     where(ionosphere_layers_matched_table.c.anomaly_timestamp >= newer_than_timestamp)
-                    stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.layer_id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.metric_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.layer_id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.metric_id, ionosphere_layers_matched_table.c.anomaly_timestamp]).\
+                    stmt = select(ionosphere_layers_matched_table.c.id, ionosphere_layers_matched_table.c.layer_id, ionosphere_layers_matched_table.c.fp_id, ionosphere_layers_matched_table.c.metric_id, ionosphere_layers_matched_table.c.anomaly_timestamp).\
                         where(ionosphere_layers_matched_table.c.id >= first_layers_matched_id_in_period)
-                    result = connection.execute(stmt)
-                    for row in result:
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         match_id = row['id']
                         matches_in_period['layer'][match_id] = {}
                         matches_in_period['layer'][match_id]['match_id'] = match_id
@@ -1374,7 +1445,7 @@ class Cloudburst(Thread):
                         matches_in_period['layer'][match_id]['fp_id'] = row['fp_id']
                         matches_in_period['layer'][match_id]['metric_id'] = row['metric_id']
                         matches_in_period['layer'][match_id]['timestamp'] = row['anomaly_timestamp']
-                    connection.close()
+                    #connection.close()
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cloudburst :: find_cloudbursts :: could not determine ionosphere layers matches - %s' % e)
@@ -1401,15 +1472,24 @@ class Cloudburst(Thread):
                 metric_id = None
                 fp_id = matches_in_period['fp'][match_id]['fp_id']
                 try:
-                    connection = engine.connect()
-                    stmt = select([ionosphere_table.c.metric_id]).\
+                    #connection = engine.connect()
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([ionosphere_table.c.metric_id]).\
+                    stmt = select(ionosphere_table.c.metric_id).\
                         where(ionosphere_table.c.id == fp_id)
-                    result = connection.execute(stmt)
-                    for row in result:
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         metric_id = row['metric_id']
                         matches_in_period['fp'][match_id]['metric_id'] = metric_id
                         fp_metric_ids_list.append(metric_id)
-                    connection.close()
+                    #connection.close()
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cloudburst :: find_cloudbursts :: could not determine metric_id from ionosphere - %s' % e)
@@ -1434,15 +1514,24 @@ class Cloudburst(Thread):
             first_anomaly_id_in_period = None
             logger.info('cloudburst :: find_cloudbursts :: determining first anomaly id in period')
             try:
-                connection = engine.connect()
-                stmt = select([anomalies_table.c.id]).\
+                #connection = engine.connect()
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #stmt = select([anomalies_table.c.id]).\
+                stmt = select(anomalies_table.c.id).\
                     where(anomalies_table.c.anomaly_timestamp >= newer_than_timestamp).\
                     order_by(anomalies_table.c.id.asc()).limit(1)
-                result = connection.execute(stmt)
-                for row in result:
+                # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                #result = connection.execute(stmt)
+                #for row in result:
+                with engine.connect() as connection:
+                    result = connection.execute(stmt)
+                    results = [dict(row._mapping) for row in result.fetchall()]
+                for row in results:
                     first_anomaly_id_in_period = row['id']
                     break
-                connection.close()
+                #connection.close()
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: cloudburst :: find_cloudbursts :: could not determine first anomaly id - %s' % e)
@@ -1453,16 +1542,28 @@ class Cloudburst(Thread):
             period_anomalies = {}
             if first_anomaly_id_in_period:
                 try:
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     # @modified 20210819 - Feature #4164: luminosity - cloudbursts
                     # Reduce the mysql.handler_read_next count from doing
                     # index scans and use primary key
-                    # stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp, ]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    ## stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp, ]).\
+                    # stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp, ).\
                     #     where(anomalies_table.c.anomaly_timestamp >= newer_than_timestamp)
-                    stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp, ]).\
+                    # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #stmt = select([anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp, ]).\
+                    stmt = select(anomalies_table.c.id, anomalies_table.c.metric_id, anomalies_table.c.anomaly_timestamp, ).\
                         where(anomalies_table.c.id >= first_anomaly_id_in_period)
-                    result = connection.execute(stmt)
-                    for row in result:
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    #result = connection.execute(stmt)
+                    #for row in result:
+                    with engine.connect() as connection:
+                        result = connection.execute(stmt)
+                        results = [dict(row._mapping) for row in result.fetchall()]
+                    for row in results:
                         metric_id = row['metric_id']
                         if metric_id not in list(period_anomalies.keys()):
                             period_anomalies[metric_id] = {}
@@ -1470,7 +1571,7 @@ class Cloudburst(Thread):
                         anomaly_timestamp = row['anomaly_timestamp']
                         period_anomalies[metric_id][anomaly_timestamp] = {}
                         period_anomalies[metric_id][anomaly_timestamp]['id'] = anomaly_id
-                    connection.close()
+                    #connection.close()
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cloudburst :: find_cloudbursts :: could not determine metric_id from ionosphere - %s' % e)
@@ -1544,7 +1645,10 @@ class Cloudburst(Thread):
                 # Skyline eating its own performance monitoring dog food.
                 # try:
                 #     connection = engine.connect()
-                #     stmt = select([anomalies_table.c.id]).\
+                # @modified 20260225 - Task #5176: Migrate to sqlalchemy v2 API
+                #                      Task #5628: Build v5.0.0 and test
+                ##     stmt = select([anomalies_table.c.id]).\
+                #     stmt = select(anomalies_table.c.id).\
                 #         where(anomalies_table.c.anomaly_timestamp == cloudburst_ts).\
                 #         where(anomalies_table.c.metric_id == metric_id)
                 #     result = connection.execute(stmt)
@@ -1649,7 +1753,7 @@ class Cloudburst(Thread):
                     fp_id = found_cloudbursts_to_add[base_name][cloudburst_ts]['fp_id']
                     layer_id = found_cloudbursts_to_add[base_name][cloudburst_ts]['layer_id']
                     anomaly_id = found_cloudbursts_to_add[base_name][cloudburst_ts]['anomaly_id']
-                    connection = engine.connect()
+                    #connection = engine.connect()
                     ins = cloudburst_table.insert().values(
                         metric_id=metric_id,
                         timestamp=cloudburst_ts, end=end_ts, duration=duration,
@@ -1657,10 +1761,15 @@ class Cloudburst(Thread):
                         full_duration=full_duration, match_id=match_id,
                         fp_id=fp_id, layer_id=layer_id,
                         anomaly_id=anomaly_id, added_at=db_added_at)
-                    result = connection.execute(ins)
-                    new_cloudburst_id = result.inserted_primary_key[0]
+
+                    # @modified 20260227 - Task #5176: Migrate to sqlalchemy v2 API
+                    #                      Task #5628: Build v5.0.0 and test
+                    with engine.begin() as connection:
+                        result = connection.execute(ins)
+                        new_cloudburst_id = result.inserted_primary_key[0]
+
                     new_cloudburst_ids.append(new_cloudburst_id)
-                    connection.close()
+                    #connection.close()
                 except Exception as e:
                     logger.error(traceback.format_exc())
                     logger.error('error :: cloudburst :: find_cloudbursts :: could not insert cloudburst record into DB for %s: %s - %s' % (
