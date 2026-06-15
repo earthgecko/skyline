@@ -134,14 +134,26 @@ def downsample_timeseries(
                     function_str, err))
 
         if len(resampled_df) > 0:
-            resampled_timeseries = list(zip(resampled_df.index.view(np.int64) // 10**9, resampled_df['value'].to_list()))
+            # @modified 20260224 - Task #5628: Build v5.0.0 and test
+            #                      Task #5710: utcfromtimestamp - deprecated datetime and pandas
+            #                      Task #5526: Build v5.0.0 and upgrade deps
+            #                      Task #5627: v5.0.0 update dependencies
+            # Handle pandas deprecation which results in all timestamps being
+            # returned as 1.  From pandas changelog:
+            # https://pandas.pydata.org/docs/whatsnew/v3.0.0.html#whatsnew-300-prior-deprecations
+            # Disallow passing a pandas type to Index.view() (GH 55709)
+            # https://github.com/pandas-dev/pandas/issues/55709
+            #resampled_timeseries = list(zip(resampled_df.index.view(np.int64) // 10**9, resampled_df['value'].to_list()))
+            timestamps = [int(ts.value // 10**9) for ts in resampled_df.index]
+            resampled_timeseries = list(zip(timestamps, resampled_df['value'].to_list()))
+
             # Align the periods to the resolution passed
             for ts, value in resampled_timeseries:
                 # aligned_timeseries.append([int(int(ts) // 600 * 600), value])
                 resampled_aligned_timeseries.append([int(int(ts) // required_resolution * required_resolution), value])
     except Exception as err:
         current_logger.error(traceback.format_exc())
-        current_logger.error('error :: %s :: failed to resample timeseries - %s' % (
-            function_str, err))
+        current_logger.error('error :: %s :: failed to resample timeseries, current_resolution: %s, required_resolution: %s, err: %s' % (
+            function_str, str(current_resolution), str(required_resolution), err))
 
     return resampled_aligned_timeseries
